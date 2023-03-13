@@ -17,8 +17,8 @@
             }
 
             // Calculate the latitude and longitude of the grid locator
-            var latitude = (gridLocator.charCodeAt(1) - 65) * 10 - 90 + parseInt(gridLocator.charAt(3)) + parseFloat(gridLocator.charAt(5)) / 24 + 1 / 48;
-            var longitude = (gridLocator.charCodeAt(0) - 65) * 20 - 180 + parseInt(gridLocator.charAt(2)) * 2 + parseFloat(gridLocator.charAt(4)) / 12 + 1 / 24;
+            var latitude = (gridLocator.charCodeAt(1) - 65) * 10 - 180 + parseInt(gridLocator.charAt(3)) * 2 + parseFloat(gridLocator.charAt(5)) / 24 + 1 / 48;
+            var longitude = (gridLocator.charCodeAt(0) - 65) * 20 - 360 + parseInt(gridLocator.charAt(2)) * 20 + parseFloat(gridLocator.charAt(4)) / 12 + 1 / 24;
 
             // Create a Google Maps object and center it on the grid locator
             var map = new google.maps.Map(document.getElementById("map"), {
@@ -42,4 +42,3 @@
     <div id="map" style="height: 500px;"></div>
 </body>
 </html>
-
