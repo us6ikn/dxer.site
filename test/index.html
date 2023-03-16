@@ -1,22 +1,55 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
+    <title>Ham Radio Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8">
-    <title>Map</title>
     <style>
-        #map {
-            height: 100%;
-        }
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
+      #map {
+        height: 100%;
+      }
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div id="map"></div>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs"></script>
-    <script src="script.js"></script>
-</body>
+    <script>
+      function initMap() {
+        const map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 4,
+          center: { lat: 37.0902, lng: -95.7129 }
+        });
+
+        const infowindow = new google.maps.InfoWindow();
+
+        fetch("output_filtered.txt")
+          .then(response => response.text())
+          .then(data => {
+            const regex = /Callsign: ([A-Z0-9]+), Grid locator: ([A-Z0-9]+), Coordinates: \(([-0-9.]+), ([-0-9.]+)\)/g;
+            let match;
+            while ((match = regex.exec(data)) !== null) {
+              const callsign = match[1];
+              const lat = parseFloat(match[3]);
+              const lng = parseFloat(match[4]);
+
+              const marker = new google.maps.Marker({
+                position: { lat, lng },
+                map: map,
+                title: callsign
+              });
+
+              marker.addListener("click", () => {
+                infowindow.setContent(callsign);
+                infowindow.open(map, marker);
+              });
+            }
+          });
+      }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
+  </body>
 </html>
