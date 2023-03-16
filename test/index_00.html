@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>GreenCube Observer</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+      #map {
+        height: 95%;
+      }
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      function initMap() {
+        const map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 2,
+          center: { lat: 0, lng: 0 }
+        });
+
+        const infowindow = new google.maps.InfoWindow();
+
+        fetch("output_filtered.txt")
+          .then(response => response.text())
+          .then(data => {
+            const regex = /Callsign: ([A-Z0-9\/]+), Grid locator: ([A-Z0-9]+), Coordinates: \(([-0-9.]+), ([-0-9.]+)\)/g;
+            const callsigns = {};
+            let match;
+            while ((match = regex.exec(data)) !== null) {
+              const callsign = match[1];
+              const lat = parseFloat(match[3]);
+              const lng = parseFloat(match[4]);
+              const key = `${lat},${lng}`;
+              if (!callsigns[key]) {
+                callsigns[key] = [];
+              }
+              callsigns[key].push(callsign);
+            }
+            for (const key in callsigns) {
+              const [lat, lng] = key.split(",");
+              const marker = new google.maps.Marker({
+                position: { lat: parseFloat(lat), lng: parseFloat(lng) },
+                map: map,
+                title: callsigns[key].join(", "),
+                icon: {
+                  url: "https://dxer.site/test/ac.png",
+                  scaledSize: new google.maps.Size(20, 20)
+                }
+              });
+              marker.addListener("click", () => {
+                infowindow.setContent(callsigns[key].join(", "));
+                infowindow.open(map, marker);
+              });
+            }
+          });
+      }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" async defer></script>
+    <p>Latest update: <span id="last-modified"></span></p>
+
+        <script>
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var lastModified = new Date(this.getResponseHeader("Last-Modified"));
+                    document.getElementById("last-modified").innerHTML = lastModified.toString();
+                }
+            };
+            xhttp.open("HEAD", "output_filtered.txt", true);
+            xhttp.send();
+        </script>
+  </body>
+</html>
