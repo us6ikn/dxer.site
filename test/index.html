@@ -47,7 +47,11 @@
               const marker = new google.maps.Marker({
                 position: { lat: parseFloat(lat), lng: parseFloat(lng) },
                 map: map,
-                title: callsigns[key].join(", ")
+                title: callsigns[key].join(", "),
+                icon: {
+                  url: "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png",
+                  scaledSize: new google.maps.Size(20, 20)
+                }
               });
               marker.addListener("click", () => {
                 infowindow.setContent(callsigns[key].join(", "));
