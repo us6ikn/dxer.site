@@ -29,7 +29,7 @@
         fetch("output_filtered.txt")
           .then(response => response.text())
           .then(data => {
-            const regex = /Callsign: ([A-Z0-9]+), Grid locator: ([A-Z0-9]+), Coordinates: \(([-0-9.]+), ([-0-9.]+)\)/g;
+            const regex = /Callsign: ([A-Z0-9]+(?:/[A-Z0-9]{1,2})?), Grid locator: ([A-Z0-9]+), Coordinates: \(([-0-9.]+), ([-0-9.]+)\)/g;
             const callsigns = {};
             let match;
             while ((match = regex.exec(data)) !== null) {
