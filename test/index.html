@@ -88,16 +88,16 @@
                 });
                 const circle = new google.maps.Circle({
                   strokeColor: "#FF0000",
-                  strokeOpacity: 0.8,
+                  strokeOpacity: 0.4,
                   strokeWeight: 2,
                   fillColor: "#FF0000",
                   fillOpacity: 0.35,
                   map,
                   center: { lat, lng },
-                  radius: 13000 // Fixed radius value
+                  radius: 13000000 // Fixed radius value
                 });
               } else {
-                alert("Geocode was not successful for the following reason: " + status);
+                
               }
             });
         }
