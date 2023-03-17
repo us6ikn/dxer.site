@@ -17,9 +17,9 @@
   </head>
   <body>
     <div>
-      <label for="grid-locator">Grid Locator:</label>
+      <label for="grid-locator">Your Grid Locator:</label>
       <input type="text" id="grid-locator">
-      <button onclick="initMap(document.getElementById('grid-locator').value)">Plot</button>
+      <button onclick="initMap(document.getElementById('grid-locator').value)">Plot Maximum Range</button>
     </div>
     <div id="map"></div>
     <script>
@@ -120,7 +120,7 @@
     </script>
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" async defer></script>
-    <p>Latest update: <span id="last-modified"></span></p>
+    <p>Latest database update: <span id="last-modified"></span></p>
 
         <script>
             var xhttp = new XMLHttpRequest();
