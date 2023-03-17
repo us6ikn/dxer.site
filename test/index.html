@@ -81,28 +81,27 @@
               if (gridLocator) {
                 const { lat, lng } = calculateCoordinates(gridLocator);
 
-                    const marker = new google.maps.Marker({
-                      position: { lat, lng },
-                      map: map,
-                      title: gridLocator
-                    });
-                    const circle = new google.maps.Circle({
-                      strokeColor: "#FF0000",
-                      strokeOpacity: 0.8,
-                      strokeWeight: 2,
-                      fillColor: "#FF0000",
-                      fillOpacity: 0.35,
-                      map,
-                      center: { lat, lng },
-                      radius: 13000 // Fixed radius value
-                    });
-                  } else {
-                    alert("Geocode was not successful for the following reason: " + status);
-                  }
+                const marker = new google.maps.Marker({
+                  position: { lat, lng },
+                  map: map,
+                  title: gridLocator
                 });
+                const circle = new google.maps.Circle({
+                  strokeColor: "#FF0000",
+                  strokeOpacity: 0.8,
+                  strokeWeight: 2,
+                  fillColor: "#FF0000",
+                  fillOpacity: 0.35,
+                  map,
+                  center: { lat, lng },
+                  radius: 13000 // Fixed radius value
+                });
+              } else {
+                alert("Geocode was not successful for the following reason: " + status);
               }
             });
         }
+
 
     </script>
 
