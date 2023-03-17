@@ -82,8 +82,10 @@
                       fillOpacity: 0.35,
                       map,
                       center: { lat, lng },
-                      radius: 13000000 // Fixed radius value in meters (13000 km)
+                      radius: 13000 // Fixed radius value
                     });
+                  } else {
+                    alert("Geocode was not successful for the following reason: " + status);
                   }
                 });
               }
