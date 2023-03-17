@@ -35,7 +35,8 @@
             var lon3 = ((gridLocator.charCodeAt(4) - 97) / 12) + (1/24);
             var longitude = lon1 + lon2 + lon3 - 180;
 
-            return { lat: latitude, lng: longitude };
+            return { lat: longitude, lng: latitude };
+
         }
 
         function initMap(gridLocator) {
@@ -101,14 +102,7 @@
               }
             });
         }
-
-
     </script>
-
-
-
-
-
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" async defer></script>
     <p>Latest update: <span id="last-modified"></span></p>
