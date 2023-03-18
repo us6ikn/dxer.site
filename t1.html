@@ -124,7 +124,7 @@
           });
           const infowindow = new google.maps.InfoWindow();
 
-          fetch("output_combined_unique.txt")
+          fetch("output_c.txt")
             .then(response => response.text())
             .then(data => {
               const regex = /Callsign: ([A-Z0-9\/]+), Grid locator: ([A-Z0-9]+), Coordinates: \(([-0-9.]+), ([-0-9.]+)\)/g;
@@ -194,7 +194,7 @@
                     document.getElementById("last-modified").innerHTML = lastModified.toString();
                 }
             };
-            xhttp.open("HEAD", "output_combined_unique.txt", true);
+            xhttp.open("HEAD", "output_c.txt", true);
             xhttp.send();
         </script>
     
