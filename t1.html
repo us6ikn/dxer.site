@@ -124,7 +124,7 @@
           });
           const infowindow = new google.maps.InfoWindow();
 
-          fetch("output_filtered.txt")
+          fetch("output_combined_unique.txt")
             .then(response => response.text())
             .then(data => {
               const regex = /Callsign: ([A-Z0-9\/]+), Grid locator: ([A-Z0-9]+), Coordinates: \(([-0-9.]+), ([-0-9.]+)\)/g;
