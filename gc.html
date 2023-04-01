@@ -191,16 +191,19 @@
                 });
 
                 // Add legend
-                const legend = new google.maps.Legend({
+                const legend = new google.maps.Marker({
+                  position: { lat: 0, lng: 0 },
+                  icon: {
+                    url: "img/legend.png",
+                    scaledSize: new google.maps.Size(200, 40)
+                  },
                   map: map,
-                  position: "bottomright"
+                  zIndex: 1
                 });
-                legend.add("BC Marker", "img/bc.png");
-                legend.add("AC Marker", "img/ac.png");
-                legend.draw();
               }
             });
         }
+
 
     </script>
 
