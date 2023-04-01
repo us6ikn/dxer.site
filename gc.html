@@ -143,17 +143,17 @@
                 if (Date.now() - earliestTime <= 7 * 24 * 60 * 60 * 1000) {
                   callsigns[key].push({
                     callsign: callsign,
-                    markerIcon: "img/bc.png"
+                    markerIcon: "img/m_new.png"
                   });
                 } else if (Date.now() - earliestTime > 7 * 24 * 60 * 60 * 1000 && Date.now() - latestTime <= 30 * 24 * 60 * 60 * 1000) {
                   callsigns[key].push({
                     callsign: callsign,
-                    markerIcon: "img/cc.png"
+                    markerIcon: "img/m_30.png"
                   });
                 } else {
                   callsigns[key].push({
                     callsign: callsign,
-                    markerIcon: "img/ac.png"
+                    markerIcon: "img/m_m30.png"
                   });
                 }
               }
