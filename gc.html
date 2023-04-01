@@ -131,43 +131,41 @@
               const callsigns = {};
               let match;
               while ((match = regex.exec(data)) !== null) {
-                const earliestTime = new Date(match[1]);
-                const now = new Date();
-                const timeDifferenceInMs = now.getTime() - earliestTime.getTime();
-                const timeDifferenceInDays = timeDifferenceInMs / (1000 * 60 * 60 * 24);
-                
-                if (timeDifferenceInDays <= 7) {
-                  const callsign = match[3];
-                  const lat = parseFloat(match[5]);
-                  const lng = parseFloat(match[6]);
-                  const key = `${lat},${lng}`;
-                  
-                  if (!callsigns[key]) {
-                    callsigns[key] = [];
-                  }
-                  
-                  callsigns[key].push(callsign);
+                const callsign = match[3];
+                const earliestTime = Date.parse(match[1]);
+                const lat = parseFloat(match[5]);
+                const lng = parseFloat(match[6]);
+                const key = `${lat},${lng}`;
+                if (!callsigns[key]) {
+                  callsigns[key] = [];
+                }
+                if (Date.now() - earliestTime <= 7 * 24 * 60 * 60 * 1000) {
+                  callsigns[key].push({
+                    callsign: callsign,
+                    markerIcon: "img/bc.png"
+                  });
+                } else {
+                  callsigns[key].push({
+                    callsign: callsign,
+                    markerIcon: "img/ac.png"
+                  });
                 }
               }
               for (const key in callsigns) {
                 const [lat, lng] = key.split(",");
+                const markers = callsigns[key];
+                const markerIcon = markers[0].markerIcon;
                 const marker = new google.maps.Marker({
                   position: { lat: parseFloat(lat), lng: parseFloat(lng) },
                   map: map,
-                  title: callsigns[key].join(", "),
+                  title: markers.map(m => m.callsign).join(", "),
                   icon: {
-                    url: "img/ac.png",
+                    url: markerIcon,
                     scaledSize: new google.maps.Size(20, 20)
                   }
                 });
-                if (callsigns[key].length == 1) {
-                  marker.setIcon({
-                    url: "img/bc.png",
-                    scaledSize: new google.maps.Size(20, 20)
-                  });
-                }
                 marker.addListener("click", () => {
-                  infowindow.setContent(callsigns[key].join(", "));
+                  infowindow.setContent(markers.map(m => m.callsign).join(", "));
                   infowindow.open(map, marker);
                 });
               }
@@ -196,8 +194,6 @@
               }
             });
         }
-
-
 
 
     </script>
