@@ -189,17 +189,8 @@
                   center: { lat, lng },
                   radius: 13000000 // Fixed radius value
                 });
-
-                // Add legend
-                const legend = new google.maps.Marker({
-                  position: { lat: 0, lng: 0 },
-                  icon: {
-                    url: "img/legend.png",
-                    scaledSize: new google.maps.Size(200, 40)
-                  },
-                  map: map,
-                  zIndex: 1
-                });
+              } else {
+                
               }
             });
         }
