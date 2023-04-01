@@ -132,35 +132,27 @@
               let match;
               while ((match = regex.exec(data)) !== null) {
                 const callsign = match[3];
-                const earliest = new Date(match[1]).getTime();
-                const now = new Date().getTime();
-                const diffDays = Math.round(Math.abs(now - earliest) / (1000 * 60 * 60 * 24));
                 const lat = parseFloat(match[5]);
                 const lng = parseFloat(match[6]);
                 const key = `${lat},${lng}`;
                 if (!callsigns[key]) {
                   callsigns[key] = [];
                 }
-                callsigns[key].push({
-                  callsign,
-                  markerIcon: diffDays <= 7 ? "img/ac.png" : "img/bc.png"
-                });
+                callsigns[key].push(callsign);
               }
               for (const key in callsigns) {
                 const [lat, lng] = key.split(",");
-                const callsignData = callsigns[key];
-                const markerIcon = callsignData[0].markerIcon;
                 const marker = new google.maps.Marker({
                   position: { lat: parseFloat(lat), lng: parseFloat(lng) },
                   map: map,
-                  title: callsignData.map(data => data.callsign).join(", "),
+                  title: callsigns[key].join(", "),
                   icon: {
-                    url: markerIcon,
+                    url: "img/ac.png",
                     scaledSize: new google.maps.Size(20, 20)
                   }
                 });
                 marker.addListener("click", () => {
-                  infowindow.setContent(callsignData.map(data => data.callsign).join(", "));
+                  infowindow.setContent(callsigns[key].join(", "));
                   infowindow.open(map, marker);
                 });
               }
@@ -184,10 +176,11 @@
                   center: { lat, lng },
                   radius: 13000000 // Fixed radius value
                 });
+              } else {
+                
               }
             });
         }
-
 
     </script>
 
