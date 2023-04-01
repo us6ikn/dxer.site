@@ -120,28 +120,13 @@
         function initMap(gridLocator) {
           const map = new google.maps.Map(document.getElementById("map"), {
             zoom: 2,
-            center: { lat: 0, lng: 0 },
+            center: { lat: 0, lng: 0 }
           });
           const infowindow = new google.maps.InfoWindow();
 
-          // Create a legend div and add it to the map container
-          const legend = document.createElement("div");
-          legend.className = "legend";
-          legend.innerHTML = `
-            <div>
-              <img src="img/ac.png" alt="Marker for heard stations more than a week ago" />
-              Heard over a week ago
-            </div>
-            <div>
-              <img src="img/bc.png" alt="Marker for heard stations less than a week ago" />
-              Heard within the last week
-            </div>
-          `;
-          map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(legend);
-
           fetch("test.txt")
-            .then((response) => response.text())
-            .then((data) => {
+            .then(response => response.text())
+            .then(data => {
               const regex = /Earliest: ([^,]+), Latest: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
               const callsigns = {};
               let match;
@@ -157,12 +142,12 @@
                 if (Date.now() - earliestTime <= 7 * 24 * 60 * 60 * 1000) {
                   callsigns[key].push({
                     callsign: callsign,
-                    markerIcon: "img/bc.png",
+                    markerIcon: "img/bc.png"
                   });
                 } else {
                   callsigns[key].push({
                     callsign: callsign,
-                    markerIcon: "img/ac.png",
+                    markerIcon: "img/ac.png"
                   });
                 }
               }
@@ -173,14 +158,14 @@
                 const marker = new google.maps.Marker({
                   position: { lat: parseFloat(lat), lng: parseFloat(lng) },
                   map: map,
-                  title: markers.map((m) => m.callsign).join(", "),
+                  title: markers.map(m => m.callsign).join(", "),
                   icon: {
                     url: markerIcon,
-                    scaledSize: new google.maps.Size(20, 20),
-                  },
+                    scaledSize: new google.maps.Size(20, 20)
+                  }
                 });
                 marker.addListener("click", () => {
-                  infowindow.setContent(markers.map((m) => m.callsign).join(", "));
+                  infowindow.setContent(markers.map(m => m.callsign).join(", "));
                   infowindow.open(map, marker);
                 });
               }
@@ -192,14 +177,30 @@
                 const marker = new google.maps.Marker({
                   position: { lat, lng },
                   map: map,
-                  title: gridLocator,
+                  title: gridLocator
                 });
                 const circle = new google.maps.Circle({
                   strokeColor: "#FF0000",
                   strokeOpacity: 0.4,
                   strokeWeight: 2,
                   fillColor: "#FF0000",
-                  fillOpacity: 0
+                  fillOpacity: 0.15,
+                  map,
+                  center: { lat, lng },
+                  radius: 13000000 // Fixed radius value
+                });
+
+                // Add legend
+                const legend = new google.maps.Legend({
+                  map: map,
+                  position: "bottomright"
+                });
+                legend.add("BC Marker", "img/bc.png");
+                legend.add("AC Marker", "img/ac.png");
+                legend.draw();
+              }
+            });
+        }
 
     </script>
 
