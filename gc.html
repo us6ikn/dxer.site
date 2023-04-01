@@ -123,6 +123,7 @@
             center: { lat: 0, lng: 0 }
           });
           const infowindow = new google.maps.InfoWindow();
+          const now = new Date();
 
           fetch("test.txt")
             .then(response => response.text())
@@ -132,42 +133,39 @@
               let match;
               while ((match = regex.exec(data)) !== null) {
                 const callsign = match[3];
-                const earliestTime = Date.parse(match[1]);
+                const earliestTime = new Date(match[1]);
                 const lat = parseFloat(match[5]);
                 const lng = parseFloat(match[6]);
                 const key = `${lat},${lng}`;
                 if (!callsigns[key]) {
                   callsigns[key] = [];
                 }
-                if (Date.now() - earliestTime <= 7 * 24 * 60 * 60 * 1000) {
-                  callsigns[key].push({
-                    callsign: callsign,
-                    markerIcon: "img/bc.png"
-                  });
-                } else {
-                  callsigns[key].push({
-                    callsign: callsign,
-                    markerIcon: "img/ac.png"
-                  });
+                if (now.getTime() - earliestTime.getTime() < 7 * 24 * 60 * 60 * 1000) {
+                  callsigns[key].push({ callsign, earliestTime });
                 }
               }
               for (const key in callsigns) {
                 const [lat, lng] = key.split(",");
-                const markers = callsigns[key];
-                const markerIcon = markers[0].markerIcon;
-                const marker = new google.maps.Marker({
-                  position: { lat: parseFloat(lat), lng: parseFloat(lng) },
-                  map: map,
-                  title: markers.map(m => m.callsign).join(", "),
-                  icon: {
-                    url: markerIcon,
+                const markers = callsigns[key].map(({ callsign, earliestTime }) => {
+                  const marker = new google.maps.Marker({
+                    position: { lat: parseFloat(lat), lng: parseFloat(lng) },
+                    map: map,
+                    title: callsign,
+                    zIndex: 100 // default zIndex
+                  });
+                  const icon = now.getTime() - earliestTime.getTime() < 2 * 60 * 60 * 1000 ? 'bc.png' : 'ac.png';
+                  marker.setIcon({
+                    url: `img/${icon}`,
                     scaledSize: new google.maps.Size(20, 20)
-                  }
+                  });
+                  marker.addListener("click", () => {
+                    infowindow.setContent(callsign);
+                    infowindow.open(map, marker);
+                  });
+                  return marker;
                 });
-                marker.addListener("click", () => {
-                  infowindow.setContent(markers.map(m => m.callsign).join(", "));
-                  infowindow.open(map, marker);
-                });
+                markers.sort((a, b) => b.getIcon().url.localeCompare(a.getIcon().url));
+                markers.forEach((marker, index) => marker.setZIndex(200 + index));
               }
 
               // Plot the marker with a 13000 km radius circle around it if gridLocator is provided
@@ -189,12 +187,9 @@
                   center: { lat, lng },
                   radius: 13000000 // Fixed radius value
                 });
-              } else {
-                
               }
             });
         }
-
 
     </script>
 
