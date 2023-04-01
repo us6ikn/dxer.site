@@ -123,9 +123,7 @@
             center: { lat: 0, lng: 0 }
           });
           const infowindow = new google.maps.InfoWindow();
-          const oneWeekAgo = new Date();
-          oneWeekAgo.setDate(oneWeekAgo.getDate() - 7); // Set the date to one week ago
-          
+
           fetch("test.txt")
             .then(response => response.text())
             .then(data => {
@@ -133,15 +131,21 @@
               const callsigns = {};
               let match;
               while ((match = regex.exec(data)) !== null) {
-                const earliestDate = new Date(match[1]);
-                if (earliestDate >= oneWeekAgo) { // Check if the earliest date is not older than one week ago
+                const earliestTime = new Date(match[1]);
+                const now = new Date();
+                const timeDifferenceInMs = now.getTime() - earliestTime.getTime();
+                const timeDifferenceInDays = timeDifferenceInMs / (1000 * 60 * 60 * 24);
+                
+                if (timeDifferenceInDays <= 7) {
                   const callsign = match[3];
                   const lat = parseFloat(match[5]);
                   const lng = parseFloat(match[6]);
                   const key = `${lat},${lng}`;
+                  
                   if (!callsigns[key]) {
                     callsigns[key] = [];
                   }
+                  
                   callsigns[key].push(callsign);
                 }
               }
@@ -156,8 +160,7 @@
                     scaledSize: new google.maps.Size(20, 20)
                   }
                 });
-                const earliestDate = new Date(match[1]);
-                if (earliestDate >= oneWeekAgo) { // Check if the earliest date is not older than one week ago
+                if (callsigns[key].length == 1) {
                   marker.setIcon({
                     url: "img/bc.png",
                     scaledSize: new google.maps.Size(20, 20)
@@ -193,6 +196,7 @@
               }
             });
         }
+
 
 
 
