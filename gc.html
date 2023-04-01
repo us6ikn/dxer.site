@@ -133,21 +133,27 @@
               while ((match = regex.exec(data)) !== null) {
                 const callsign = match[3];
                 const earliestTime = Date.parse(match[1]);
+                const latestTime = Date.parse(match[2]);
                 const lat = parseFloat(match[5]);
                 const lng = parseFloat(match[6]);
                 const key = `${lat},${lng}`;
                 if (!callsigns[key]) {
                   callsigns[key] = [];
                 }
-                if (Date.now() - earliestTime >= 7 * 24 * 60 * 60 * 1000) {
+                if (Date.now() - earliestTime <= 7 * 24 * 60 * 60 * 1000) {
                   callsigns[key].push({
                     callsign: callsign,
-                    markerIcon: "img/ac.png"
+                    markerIcon: "img/bc.png"
+                  });
+                } else if (Date.now() - earliestTime > 7 * 24 * 60 * 60 * 1000 && Date.now() - latestTime <= 30 * 24 * 60 * 60 * 1000) {
+                  callsigns[key].push({
+                    callsign: callsign,
+                    markerIcon: "img/cc.png"
                   });
                 } else {
                   callsigns[key].push({
                     callsign: callsign,
-                    markerIcon: "img/bc.png"
+                    markerIcon: "img/ac.png"
                   });
                 }
               }
