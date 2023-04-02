@@ -163,7 +163,7 @@
                   if (Notification.permission === "granted") {
                     new Notification("New callsign found!", {
                       body: callsign,
-                      icon: "img/icon.png"
+                      icon: "img/m_new.png"
                     });
                   }
                 } else if (Date.now() - earliestTime > 7 * 24 * 60 * 60 * 1000 && Date.now() - latestTime <= 30 * 24 * 60 * 60 * 1000) {
