@@ -31,29 +31,15 @@
     <script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
     <style>
-        #map {
-            height: 75%;
-        }
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
+      #map {
+        height: 75%;
+      }
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
     </style>
-    <style>
-          #legend {
-            font-family: Arial, sans-serif;
-            background: #fff;
-            padding: 10px;
-            margin: 10px;
-            border: 1px solid #000;
-          }
-
-          #legend img {
-            vertical-align: middle;
-            margin-right: 5px;
-          }
-        </style>
 </head>
 <body>
     
@@ -92,11 +78,7 @@
 	<!-- end header -->
 
         
-        <div id="legend">
-              <img src="img/m_new.png" height="20" width="20"> New stations<br>
-              <img src="img/m_30.png" height="20" width="20"> Heard within 30 days<br>
-              <img src="img/m_m30.png" height="20" width="20"> Heard more than 30 days ago
-            </div>
+
 	
     <div>
       <label for="grid-locator">&nbsp;Enter your Grid Locator:</label>
@@ -194,33 +176,6 @@
                 });
               }
 
-              var markers = [
-                        {
-                          position: {lat: 37.7749, lng: -122.4194},
-                          icon: 'img/m_new.png',
-                          title: 'New Station'
-                        },
-                        {
-                          position: {lat: 37.7799, lng: -122.4144},
-                          icon: 'img/m_30.png',
-                          title: 'Heard within 30 days'
-                        },
-                        {
-                          position: {lat: 37.7699, lng: -122.4244},
-                          icon: 'img/m_m30.png',
-                          title: 'Heard more than 30 days ago'
-                        }
-                      ];
-
-                      markers.forEach(function(marker) {
-                        var newMarker = new google.maps.Marker({
-                          position: marker.position,
-                          map: map,
-                          icon: marker.icon,
-                          title: marker.title
-                        });
-                      });
-              
               // Plot the marker with a 13000 km radius circle around it if gridLocator is provided
               if (gridLocator) {
                 const { lat, lng } = calculateCoordinates(gridLocator);
@@ -251,6 +206,12 @@
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" async defer></script>
     <p>&nbsp;Latest database update: <span id="last-modified"></span></p>
+    
+    <div>
+      <img src="img/m_new.png" alt="New stations"> New stations
+      <img src="img/m_30.png" alt="Heard within 30 days"> Heard within 30 days
+      <img src="img/m_m30.png" alt="Heard more than 30 days ago"> Heard more than 30 days ago
+    </div>
 
     <script>
         var xhttp = new XMLHttpRequest();
