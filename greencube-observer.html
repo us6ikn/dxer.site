@@ -124,7 +124,7 @@
           });
           const infowindow = new google.maps.InfoWindow();
 
-          fetch("test.txt")
+          fetch("output_filtered.txt")
             .then(response => response.text())
             .then(data => {
               const regex = /Earliest: ([^,]+), Latest: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
@@ -219,7 +219,7 @@
                 document.getElementById("last-modified").innerHTML = lastModified.toUTCString();
             }
         };
-        xhttp.open("HEAD", "test.txt", true);
+        xhttp.open("HEAD", "output_filtered.txt", true);
         xhttp.send();
     </script>
 
