@@ -207,18 +207,17 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" async defer></script>
     <p>&nbsp;Latest database update: <span id="last-modified"></span></p>
 
-    <script>
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                var lastModified = new Date(this.getResponseHeader("Last-Modified"));
-                document.getElementById("last-modified").innerHTML = lastModified.toUTCString();
-            }
-        };
-        xhttp.open("HEAD", "test.txt", true);
-        xhttp.send();
-    </script>
-
+        <script>
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var lastModified = new Date(this.getResponseHeader("Last-Modified"));
+                    document.getElementById("last-modified").innerHTML = lastModified.toString();
+                }
+            };
+            xhttp.open("HEAD", "test.txt", true);
+            xhttp.send();
+        </script>
     
     
     <div class="sharethis-inline-share-buttons"></div>
