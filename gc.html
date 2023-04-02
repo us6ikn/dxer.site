@@ -86,43 +86,37 @@
       <button onclick="initMap(document.getElementById('grid-locator').value)">Plot Maximum Range</button>
     </div>
     <div id="map"></div>
-    
     <script>
-      function calculateCoordinates() {
-        // Get the grid locator from user input and convert to uppercase
-        var gridLocator = document.getElementById("grid-locator").value.toUpperCase();
+        function calculateCoordinates(gridLocator) {
+            // Get the grid locator from user input and convert to uppercase
+            var gridLocator = document.getElementById("grid-locator").value.toUpperCase();
 
-        // Force the first two characters to be uppercase
-        gridLocator = gridLocator.substr(0, 2).toUpperCase() + gridLocator.substr(2);
+            // Force the first two characters to be uppercase
+            gridLocator = gridLocator.substr(0,2).toUpperCase() + gridLocator.substr(2);
 
-        // Force the last two characters to be lowercase
-        gridLocator = gridLocator.substr(0, 4) + gridLocator.substr(4).toLowerCase();
+            // Force the last two characters to be lowercase
+            gridLocator = gridLocator.substr(0,4) + gridLocator.substr(4).toLowerCase();
 
-        // Use regular expression to validate the grid locator format
-        var gridLocatorPattern = /^([A-R]{2}\d{2}[a-z]{2})([0-9]*[a-z]*)?$/;
-        if (!gridLocatorPattern.test(gridLocator)) {
-          alert("Invalid grid locator format. Please enter a valid 6-character grid locator.");
-          return;
+            // Use regular expression to validate the grid locator format
+            var gridLocatorPattern = /^([A-R]{2}\d{2}[a-z]{2})([0-9]*[a-z]*)?$/;
+            if (!gridLocatorPattern.test(gridLocator)) {
+                alert("Invalid grid locator format. Please enter a valid 6-character grid locator.");
+                return;
+            }
+            // Calculate the latitude and longitude of the grid locator
+            var lat1 = (gridLocator.charCodeAt(1) - 65) * 10;
+            var lat2 = ((gridLocator.charCodeAt(5) - 97)/24) +  (1 / 48) - 90;
+            var lat3 = parseInt(gridLocator.charAt(3));
+            var latitude = lat1 + lat3 + lat2;
+
+            var lon1 = ((gridLocator.charCodeAt(0) - 65) * 20);
+            var lon2 = parseInt(gridLocator.charAt(2)) * 2;
+            var lon3 = ((gridLocator.charCodeAt(4) - 97) / 12) + (1/24);
+            var longitude = lon1 + lon2 + lon3 - 180;
+
+            return { lat: latitude, lng: longitude };
         }
-        // Calculate the latitude and longitude of the grid locator
-        var lat1 = (gridLocator.charCodeAt(1) - 65) * 10;
-        var lat2 = ((gridLocator.charCodeAt(5) - 97) / 24) + (1 / 48) - 90;
-        var lat3 = parseInt(gridLocator.charAt(3));
-        var latitude = lat1 + lat3 + lat2;
 
-        var lon1 = ((gridLocator.charCodeAt(0) - 65) * 20);
-        var lon2 = parseInt(gridLocator.charAt(2)) * 2;
-        var lon3 = ((gridLocator.charCodeAt(4) - 97) / 12) + (1 / 24);
-        var longitude = lon1 + lon2 + lon3 - 180;
-
-        return { lat: latitude, lng: longitude };
-      }
-
-      
-      
-      if (!("Notification" in window)) {
-        // Notifications not supported
-        // Display an alternative message or provide alternative functionality
         function initMap(gridLocator) {
           const map = new google.maps.Map(document.getElementById("map"), {
             zoom: 2,
@@ -206,119 +200,6 @@
               }
             });
         }
-      } else {
-        // Notifications supported
-        // Request permission to show notifications, if needed
-        // Use the Notification API to show notifications
-        function initMap(gridLocator) {
-          if (!("Notification" in window)) {
-            alert("This browser does not support desktop notification");
-          }
-
-          if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-            Notification.requestPermission().then((permission) => {
-              if (permission === "granted") {
-                new Notification("Notifications Enabled!");
-              }
-              localStorage.setItem("notificationPermission", permission);
-            });
-          } else {
-            localStorage.setItem("notificationPermission", Notification.permission);
-          }
-
-          const map = new google.maps.Map(document.getElementById("map"), {
-            zoom: 2,
-              center: { lat: 0, lng: 0 }
-            });
-            const infowindow = new google.maps.InfoWindow();
-
-            fetch("test.txt")
-              .then(response => response.text())
-              .then(data => {
-                const regex = /Earliest: ([^,]+), Latest: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
-                const callsigns = {};
-                let match;
-                while ((match = regex.exec(data)) !== null) {
-                  const callsign = match[3];
-                  const earliestTime = Date.parse(match[1]);
-                  const latestTime = Date.parse(match[2]);
-                  const lat = parseFloat(match[5]);
-                  const lng = parseFloat(match[6]);
-                  const key = `${lat},${lng}`;
-                  if (!callsigns[key]) {
-                    callsigns[key] = [];
-                  }
-                  if (Date.now() - earliestTime <= 7 * 24 * 60 * 60 * 1000) {
-                    callsigns[key].push({
-                      callsign: callsign,
-                      markerIcon: "img/m_new.png"
-                    });
-                    if (Notification.permission === "granted") {
-                      new Notification("New callsign found!", {
-                        body: callsign,
-                        icon: "img/m_new.png"
-                      });
-                    }
-                  } else if (Date.now() - earliestTime > 7 * 24 * 60 * 60 * 1000 && Date.now() - latestTime <= 30 * 24 * 60 * 60 * 1000) {
-                    callsigns[key].push({
-                      callsign: callsign,
-                      markerIcon: "img/m_30.png"
-                    });
-                  } else {
-                    callsigns[key].push({
-                      callsign: callsign,
-                      markerIcon: "img/m_m30.png"
-                    });
-                  }
-                }
-
-                for (const key in callsigns) {
-                  const [lat, lng] = key.split(",");
-                  const markers = callsigns[key];
-                  const markerIcon = markers[0].markerIcon;
-                  const marker = new google.maps.Marker({
-                    position: { lat: parseFloat(lat), lng: parseFloat(lng) },
-                    map: map,
-                    title: markers.map(m => m.callsign).join(", "),
-                    icon: {
-                      url: markerIcon,
-                      scaledSize: new google.maps.Size(20, 20)
-                    }
-                  });
-                  marker.addListener("click", () => {
-                    infowindow.setContent(markers.map(m => m.callsign).join(", "));
-                    infowindow.open(map, marker);
-                  });
-                }
-
-                // Plot the marker with a 13000 km radius circle around it if gridLocator is provided
-                if (gridLocator) {
-                  const { lat, lng } = calculateCoordinates(gridLocator);
-
-                  const marker = new google.maps.Marker({
-                    position: { lat, lng },
-                    map: map,
-                    title: gridLocator
-                  });
-                  const circle = new google.maps.Circle({
-                    strokeColor: "#FF0000",
-                    strokeOpacity: 0.4,
-                    strokeWeight: 2,
-                    fillColor: "#FF0000",
-                    fillOpacity: 0.15,
-                    map,
-                    center: { lat, lng },
-                    radius: 13000000 // Fixed radius value
-                  });
-                } else {
-                  
-                }
-              });
-          }
-      }
-
-      
-      
 
 
     </script>
