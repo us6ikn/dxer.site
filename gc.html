@@ -117,7 +117,7 @@
         return { lat: latitude, lng: longitude };
       }
 
-      function initMap() {
+      function initMap(gridLocator) {
         if (!("Notification" in window)) {
           alert("This browser does not support desktop notification");
         }
