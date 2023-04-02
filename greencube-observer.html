@@ -124,35 +124,54 @@
           });
           const infowindow = new google.maps.InfoWindow();
 
-          fetch("output_filtered.txt")
+          fetch("test.txt")
             .then(response => response.text())
             .then(data => {
-              const regex = /Callsign: ([A-Z0-9\/]+), Grid locator: ([A-Z0-9]+), Coordinates: \(([-0-9.]+), ([-0-9.]+)\)/g;
+              const regex = /Earliest: ([^,]+), Latest: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
               const callsigns = {};
               let match;
               while ((match = regex.exec(data)) !== null) {
-                const callsign = match[1];
-                const lat = parseFloat(match[3]);
-                const lng = parseFloat(match[4]);
+                const callsign = match[3];
+                const earliestTime = Date.parse(match[1]);
+                const latestTime = Date.parse(match[2]);
+                const lat = parseFloat(match[5]);
+                const lng = parseFloat(match[6]);
                 const key = `${lat},${lng}`;
                 if (!callsigns[key]) {
                   callsigns[key] = [];
                 }
-                callsigns[key].push(callsign);
+                if (Date.now() - earliestTime <= 7 * 24 * 60 * 60 * 1000) {
+                  callsigns[key].push({
+                    callsign: callsign,
+                    markerIcon: "img/m_new.png"
+                  });
+                } else if (Date.now() - earliestTime > 7 * 24 * 60 * 60 * 1000 && Date.now() - latestTime <= 30 * 24 * 60 * 60 * 1000) {
+                  callsigns[key].push({
+                    callsign: callsign,
+                    markerIcon: "img/m_30.png"
+                  });
+                } else {
+                  callsigns[key].push({
+                    callsign: callsign,
+                    markerIcon: "img/m_m30.png"
+                  });
+                }
               }
               for (const key in callsigns) {
                 const [lat, lng] = key.split(",");
+                const markers = callsigns[key];
+                const markerIcon = markers[0].markerIcon;
                 const marker = new google.maps.Marker({
                   position: { lat: parseFloat(lat), lng: parseFloat(lng) },
                   map: map,
-                  title: callsigns[key].join(", "),
+                  title: markers.map(m => m.callsign).join(", "),
                   icon: {
-                    url: "img/ac.png",
+                    url: markerIcon,
                     scaledSize: new google.maps.Size(20, 20)
                   }
                 });
                 marker.addListener("click", () => {
-                  infowindow.setContent(callsigns[key].join(", "));
+                  infowindow.setContent(markers.map(m => m.callsign).join(", "));
                   infowindow.open(map, marker);
                 });
               }
@@ -181,24 +200,29 @@
               }
             });
         }
+
+
     </script>
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" async defer></script>
+    <div>
+      <img src="img/m_new.png" alt="New stations" style="width:15px;height:15px;"> New. First heard within 7 days&nbsp;&nbsp;&nbsp;
+      <img src="img/m_30.png" alt="Heard within 30 days" style="width:15px;height:15px;"> Last heard within 30 days&nbsp;&nbsp;&nbsp;
+      <img src="img/m_m30.png" alt="Heard more than 30 days ago" style="width:15px;height:15px;"> Last heard more than 30 days ago
+    </div>
     <p>&nbsp;Latest database update: <span id="last-modified"></span></p>
+    <script>
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var lastModified = new Date(this.getResponseHeader("Last-Modified"));
+                document.getElementById("last-modified").innerHTML = lastModified.toUTCString();
+            }
+        };
+        xhttp.open("HEAD", "test.txt", true);
+        xhttp.send();
+    </script>
 
-        <script>
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    var lastModified = new Date(this.getResponseHeader("Last-Modified"));
-                    document.getElementById("last-modified").innerHTML = lastModified.toString();
-                }
-            };
-            xhttp.open("HEAD", "output_filtered.txt", true);
-            xhttp.send();
-        </script>
-    
-    
     <div class="sharethis-inline-share-buttons"></div>
 
 
