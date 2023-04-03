@@ -18,15 +18,20 @@
             const cells = html.querySelectorAll('td');
             let callsign = null;
             let time = null;
+            let callsignsAndTimes = [];
             cells.forEach(cell => {
               if (cell.textContent.match(/^[A-Za-z0-9]+$/)) {
                 callsign = cell.textContent;
               } else if (cell.textContent.match(/^\d{4}-\d{2}-\d{2}\n\d{2}:\d{2}:\d{2} &ndash; \d{2}:\d{2}:\d{2}$/)) {
                 time = cell.textContent;
+                callsignsAndTimes.push({callsign: callsign, time: time});
               }
             });
             const output = document.getElementById('output');
-            output.innerHTML = `Callsign: ${callsign}<br>Time: ${time}`;
+            output.innerHTML = "";
+            callsignsAndTimes.forEach(obj => {
+                output.innerHTML += `Callsign: ${obj.callsign}<br>Time: ${obj.time}<br><br>`;
+            });
           })
           .catch(error => {
             console.error(error);
