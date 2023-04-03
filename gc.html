@@ -118,11 +118,6 @@
         }
 
         function initMap(gridLocator) {
-          if (!gridLocator) {
-            alert("Please enter your grid locator before selecting a callsign.");
-            return;
-          }
-
           const map = new google.maps.Map(document.getElementById("map"), {
             zoom: 2,
             center: { lat: 0, lng: 0 }
@@ -147,6 +142,10 @@
                   callsigns[key] = [];
                 }
                 if (Date.now() - earliestTime <= 7 * 24 * 60 * 60 * 1000) {
+                    if (!gridLocator) {
+                      alert("Please enter your grid locator before selecting a callsign.");
+                      return;
+                    }
                     callsigns[key].push({
                       callsign: callsign,
                       dxgridlocator: dxgridlocator,
