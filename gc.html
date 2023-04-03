@@ -1,37 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Ham Radio Zones on Google Maps</title>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" async defer></script>
-    function initMap() {
-      var map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 3,
-        center: {lat: 0, lng: 0}
-      });
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <title>Ham Radio Zones Map</title>
+    <style>
+        /* Set the height of the map container */
+        #map {
+            height: 100%;
+        }
+    </style>
+    <!-- Include the Google Maps JavaScript API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs"></script>
+    <script>
+        function initMap() {
+            // Create a new map centered on a specific location
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: {lat: 37.7749, lng: -122.4194},
+                zoom: 8
+            });
 
-      // Add markers for ham radio zones
-      var hamRadioZones = [
-        {lat: 50, lng: -130, zone: "Zone 1"},
-        {lat: 35, lng: -100, zone: "Zone 2"},
-        {lat: 40, lng: -75, zone: "Zone 3"},
-        {lat: 25, lng: -80, zone: "Zone 4"},
-        {lat: 35, lng: -60, zone: "Zone 5"},
-        {lat: 50, lng: -60, zone: "Zone 6"},
-        {lat: 65, lng: -100, zone: "Zone 7"},
-        {lat: 55, lng: -130, zone: "Zone 8"},
-        {lat: 65, lng: -140, zone: "Zone 9"},
-        {lat: 70, lng: -140, zone: "Zone 0"},
-        {lat: -20, lng: 135, zone: "Zone 11"},
-        {lat: -30, lng: 140, zone: "Zone 12"},
-        {lat: -40, lng: 170, zone: "Zone 13"},
-        {lat: -50, lng: 150, zone: "Zone 14"},
-        {lat: -60, lng: -20, zone: "Zone 15"},
-        {lat: 0, lng: -10, zone: "Zone 16"},
-        {lat: 0, lng: 20, zone: "Zone 17"},
-        {lat: -20, lng: -50, zone: "Zone 18"},
-        {lat: -30, lng: -60, zone: "Zone 19"},
-        {lat: -30, lng: -40, zone: "Zone 20"},
-        {lat: -60, lng: -60, zone: "Zone 21"},
-        {lat: -10, lng: -60, zone: "Zone 22"},
-        {lat: -10, lng: -40, zone: "Zone 23"},
-        {lat: 0
+            // Load the KML layer for the ham radio zones
+            var kmlLayer = new google.maps.KmlLayer({
+                url: 'https://example.com/ham-radio-zones.kml',
+                suppressInfoWindows: true,
+                map: map
+            });
+        }
+    </script>
+</head>
+<body onload="initMap()">
+    <div id="map"></div>
+</body>
+</html>
