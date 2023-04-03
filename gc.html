@@ -33,7 +33,7 @@
 
         kmlLayer = new google.maps.KmlLayer('https://dxer.site/doc.kml', {
           suppressInfoWindows: true,
-          preserveViewport: false,
+          preserveViewport: true,
           map: map
         });
         kmlLayer.addListener('click', function(event) {
