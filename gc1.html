@@ -10,7 +10,7 @@
     <div id="output"></div>
     <script>
       function fetchData() {
-        fetch('https://hams.at/alerts')
+        fetch('https://dxer.site/proxy.php?url=https://hams.at/alerts')
           .then(response => response.text())
           .then(data => {
             const parser = new DOMParser();
