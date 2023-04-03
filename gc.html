@@ -29,12 +29,11 @@
                 zoom: 8
             });
 
-            // Load the KML layer for the ham radio zones
-            var kmlLayer = new google.maps.KmlLayer({
-                url: 'WAZ.kmz',
-                suppressInfoWindows: true,
-                map: map
-            });
+            // Load the KMZ layer for the ham radio zones
+                        var kmzLayer = new google.maps.KmlLayer({
+                            url: 'WAZ.kmz',
+                            map: map
+                        });
         }
     </script>
 
