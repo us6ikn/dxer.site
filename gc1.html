@@ -18,19 +18,22 @@
             const cells = html.querySelectorAll('td');
             let callsign = null;
             let time = null;
-            let callsignsAndTimes = [];
+            let gridSquare = null;
+            let callsignsAndTimesAndGridSquares = [];
             cells.forEach(cell => {
               if (cell.textContent.match(/^[A-Za-z0-9]+$/)) {
                 callsign = cell.textContent;
               } else if (cell.textContent.match(/^\d{4}-\d{2}-\d{2}\n\d{2}:\d{2}:\d{2} &ndash; \d{2}:\d{2}:\d{2}$/)) {
                 time = cell.textContent;
-                callsignsAndTimes.push({callsign: callsign, time: time});
+              } else if (cell.textContent.match(/^[A-Z]{2}\d{2}$/)) {
+                gridSquare = cell.textContent;
+                callsignsAndTimesAndGridSquares.push({callsign: callsign, time: time, gridSquare: gridSquare});
               }
             });
             const output = document.getElementById('output');
             output.innerHTML = "";
-            callsignsAndTimes.forEach(obj => {
-                output.innerHTML += `Callsign: ${obj.callsign}<br>Time: ${obj.time}<br><br>`;
+            callsignsAndTimesAndGridSquares.forEach(obj => {
+                output.innerHTML += `Callsign: ${obj.callsign}<br>Time: ${obj.time}<br>Grid Square: ${obj.gridSquare}<br><br>`;
             });
           })
           .catch(error => {
