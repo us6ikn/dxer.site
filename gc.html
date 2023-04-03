@@ -11,8 +11,8 @@
         margin: 0;
         }
       #map {
-       height: 360px;
-       width: 300px;
+       height: 100%;
+       width: 100%;
        overflow: hidden;
        float: left;
        border: thin solid #333;
@@ -36,11 +36,6 @@
           suppressInfoWindows: true,
           preserveViewport: false,
           map: map
-        });
-        kmlLayer.addListener('click', function(event) {
-          var content = event.featureData.infoWindowHtml;
-          var testimonial = document.getElementById('map');
-          testimonial.innerHTML = content;
         });
       }
     </script>
