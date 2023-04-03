@@ -33,7 +33,7 @@
           map: map
         });
         kmlLayer.addListener('click', function(event) {
-          var zoneNumber = event.featureData.name;
+          var zoneNumber = event.featureData.infoWindowHtml;
           var infowindow = new google.maps.InfoWindow({
             content: 'Zone ' + zoneNumber,
           });
