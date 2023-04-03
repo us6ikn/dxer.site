@@ -19,7 +19,6 @@
     <div id="map"></div>
     <script>
       var map;
-      var src = 'https://dxer.site/doc.kml';
 
       function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
@@ -28,7 +27,7 @@
           mapTypeId: 'terrain'
         });
 
-        var kmlLayer = new google.maps.KmlLayer(src, {
+        var kmlLayer = new google.maps.KmlLayer('https://dxer.site/doc.kml', {
           suppressInfoWindows: true,
           preserveViewport: false,
           map: map
