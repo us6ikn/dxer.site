@@ -1,43 +1,61 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta name="viewport" content="initial-scale=1.0">
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
-    <title>Ham Radio Zones Map</title>
+    <title>KML Click Capture Sample</title>
     <style>
-        /* Set the height of the map container */
-        #map {
-            height: 100%;
+      html, body {
+        height: 370px;
+        padding: 0;
+        margin: 0;
         }
-        
-        /* Set the height of the html and body elements */
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
+      #map {
+       height: 360px;
+       width: 300px;
+       overflow: hidden;
+       float: left;
+       border: thin solid #333;
+       }
+      #capture {
+       height: 360px;
+       width: 480px;
+       overflow: hidden;
+       float: left;
+       background-color: #ECECFB;
+       border: thin solid #333;
+       border-left: none;
+       }
     </style>
-</head>
-<body onload="initMap()">
+  </head>
+  <body>
     <div id="map"></div>
-
+    <div id="capture"></div>
     <script>
-        function initMap() {
-            // Create a new map centered on a specific location
-            var map = new google.maps.Map(document.getElementById('map'), {
-                center: {lat: 37.7749, lng: -122.4194},
-                zoom: 8
-            });
+      var map;
+      var src = 'https://dxer.site/doc.kml';
 
-            // Load the KMZ layer for the ham radio zones
-                        var kmzLayer = new google.maps.KmzLayer({
-                            url: './WAZ.kmz',
-                            map: map
-                        });
-        }
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: new google.maps.LatLng(-19.257753, 146.823688),
+          zoom: 2,
+          mapTypeId: 'terrain'
+        });
+
+        var kmlLayer = new google.maps.KmlLayer(src, {
+          suppressInfoWindows: true,
+          preserveViewport: false,
+          map: map
+        });
+        kmlLayer.addListener('click', function(event) {
+          var content = event.featureData.infoWindowHtml;
+          var testimonial = document.getElementById('capture');
+          testimonial.innerHTML = content;
+        });
+      }
     </script>
-
-    <!-- Include the Google Maps JavaScript API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap&libraries=visualization"></script>
-</body>
+    <script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
+    </script>
+  </body>
 </html>
