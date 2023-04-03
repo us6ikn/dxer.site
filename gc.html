@@ -33,9 +33,14 @@
           map: map
         });
         kmlLayer.addListener('click', function(event) {
-                  var content = event.featureData.infoWindow;
-                  
-                });
+          var zoneNumber = event.featureData.name;
+          var infowindow = new google.maps.InfoWindow({
+            content: 'Zone ' + zoneNumber,
+          });
+          infowindow.setPosition(event.latLng);
+          infowindow.open(map);
+        });
+
       }
     </script>
     <script async
