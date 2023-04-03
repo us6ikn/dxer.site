@@ -171,7 +171,7 @@
                     scaledSize: new google.maps.Size(20, 20)
                   }
                 });
-                let content = markers.map(m => `<a href="https://www.satmatch.com/satellite/IO-117/obs1/${gridLocator}/${m.callsign}/${m.dxgridlocator}?duration_hrs=96">${m.callsign}</a>`).join(", ");
+                let content = markers.map(m => `<a href="https://www.satmatch.com/satellite/IO-117/obs1/${gridLocator}/${m.dxgridlocator}?duration_hrs=96">${m.callsign}</a>`).join(", ");
                 content = `<div>${content}</div>`;
                 marker.addListener("click", () => {
                   infowindow.setContent(content);
