@@ -118,6 +118,11 @@
         }
 
         function initMap(gridLocator) {
+          if (!gridLocator) {
+            alert("Please enter your grid locator before selecting a callsign.");
+            return;
+          }
+
           const map = new google.maps.Map(document.getElementById("map"), {
             zoom: 2,
             center: { lat: 0, lng: 0 }
