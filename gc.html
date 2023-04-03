@@ -32,6 +32,10 @@
           preserveViewport: false,
           map: map
         });
+        kmlLayer.addListener('click', function(event) {
+                  var content = event.featureData.infoWindow;
+                  
+                });
       }
     </script>
     <script async
