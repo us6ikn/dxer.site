@@ -9,9 +9,16 @@
         #map {
             height: 100%;
         }
+        
+        /* Set the height of the html and body elements */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
     </style>
 </head>
-<body>
+<body onload="initMap()">
     <div id="map"></div>
 
     <script>
@@ -35,5 +42,3 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
 </body>
 </html>
-
-
