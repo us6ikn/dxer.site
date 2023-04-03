@@ -3,7 +3,7 @@
   <head>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
-    <title>KML Click Capture Sample</title>
+    <title>Plot CQ Zones over Google Map</title>
     <style>
       html, body {
         height: 100%;
@@ -31,7 +31,7 @@
             center: { lat: 0, lng: 0 }
           });
 
-        kmlLayer = new google.maps.KmlLayer('https://dxer.site/doc.kml', {
+        kmlLayer = new google.maps.KmlLayer('https://dxer.site/WAZ.kml', {
           suppressInfoWindows: true,
           preserveViewport: true,
           map: null // set map to null initially
