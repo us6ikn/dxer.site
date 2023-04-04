@@ -31,12 +31,25 @@
       font-weight: bold;
       text-decoration: none;
     }
+        .floating {
+          position: absolute;
+          top: 20px;
+          left: 20px;
+          z-index: 1000;
+          background-color: white;
+          padding: 10px;
+          border-radius: 5px;
+          box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+        }
+
     </style>
   </head>
   <body>
-      <input type="checkbox" id="kml-layer-toggle">
-      <label for="kml-layer-toggle">Show CQ Zones (WAZ)</label>
-    </div>
+      <div class="floating">
+        <input type="checkbox" id="kml-layer-toggle">
+        <label for="kml-layer-toggle">Show CQ Zones (WAZ)</label>
+      </div>
+
     <div id="map"></div>
     <script>
       var map;
