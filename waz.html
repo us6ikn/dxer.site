@@ -14,12 +14,26 @@
        height: 100%;
        }
     </style>
+    <style>
+    .twitter-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
+
+    .twitter-follow-button {
+      display: inline-block;
+      background-color: #1da1f2;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    </style>
   </head>
   <body>
-      <div style="pointer-events:none;">
-        <a href="https://twitter.com/m0skn_sa5ikn?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @m0skn_sa5ikn</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-      </div>
-
       <input type="checkbox" id="kml-layer-toggle">
       <label for="kml-layer-toggle">Show CQ Zones (WAZ)</label>
     </div>
@@ -71,6 +85,11 @@
         'floating-chat.donateButton.text-color': '#fff'
       });
     </script>
+    <div class="twitter-container">
+      <a href="https://twitter.com/m0skn_sa5ikn?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow @m0skn_sa5ikn</a>
+      <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+
   </body>
 </html>
 
