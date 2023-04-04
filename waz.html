@@ -63,32 +63,7 @@
     <script>
       var map;
       var kmlLayer;
-      // Create the search box and link it to the UI element.
-      const input = document.getElementById("search-input");
-      const searchBox = new google.maps.places.Autocomplete(input);
 
-      // Set the bounds of the search box to the map's viewport.
-      searchBox.bindTo("bounds", map);
-
-      // Listen for the event fired when the user selects a prediction and retrieve
-      // more details for that place.
-      searchBox.addListener("place_changed", () => {
-        const place = searchBox.getPlace();
-        if (!place.geometry || !place.geometry.location) {
-          console.log("No details available for input: " + place.name);
-          return;
-        }
-
-        // Center the map on the selected location.
-        map.setCenter(place.geometry.location);
-      });
-
-      <div class="search-container">
-         <input type="text" id="map-search" placeholder="Search for a location">
-         <button onclick="searchMap()">Search</button>
-       </div>
-      
-      
       function initMap() {
           map = new google.maps.Map(document.getElementById("map"), {
             zoom: 2,
@@ -98,24 +73,14 @@
             fullscreenControl: false
           });
 
-          function searchMap() {
-            const searchQuery = document.getElementById('map-search').value;
-            const geocoder = new google.maps.Geocoder();
-
-            geocoder.geocode({ address: searchQuery }, function(results, status) {
-              if (status === 'OK' && results.length > 0) {
-                map.setCenter(results[0].geometry.location);
-                map.setZoom(10); // adjust zoom level as needed
-              } else {
-                alert('Could not find the requested location.');
-              }
-            });
-          }
 
         kmlLayer = new google.maps.KmlLayer('https://dxer.site/WAZ.kml', {
           suppressInfoWindows: true,
           preserveViewport: true,
-          map: null // set map to null initially
+          map: null, // set map to null initially
+          options: {
+                      strokeWeight: 1,
+                      strokeColor: "#000000"
         });
         kmlLayer.addListener('click', function(event) {
           var zoneNumber = event.featureData.infoWindowHtml;
@@ -136,7 +101,6 @@
         });
       }
     </script>
-    
     <script async
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
     </script>
