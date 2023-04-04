@@ -36,7 +36,7 @@
           top: 20px;
           left: 20px;
           z-index: 1000;
-          background-color: rgba(255, 255, 255, 0.6);
+          background-color: rgba(255, 255, 255, 0.8);
           padding: 10px;
           border-radius: 5px;
           box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
@@ -77,8 +77,8 @@
         kmlLayer = new google.maps.KmlLayer('https://dxer.site/WAZ.kml', {
           suppressInfoWindows: true,
           preserveViewport: true,
-          strokeWeight: 1, // set the stroke weight to 1 (or adjust as needed)
-          map: null // set map to null initially 
+          strokeWeight: 0.1, // set the stroke weight to 1 (or adjust as needed)
+          map: null // set map to null initially
         });
         kmlLayer.addListener('click', function(event) {
           var zoneNumber = event.featureData.infoWindowHtml;
