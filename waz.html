@@ -122,7 +122,14 @@
             infowindow.open(map);
           });
 
-          
+          var kmlLayerToggle = document.getElementById('kml-layer-toggle');
+          kmlLayerToggle.addEventListener('change', function() {
+            if (kmlLayerToggle.checked) {
+              kmlLayer.setMap(map);
+            } else {
+              kmlLayer.setMap(null);
+            }
+          });
 
           fetch("output_filtered.txt")
             .then(response => response.text())
@@ -215,15 +222,6 @@
               } else {
                 
               }
-              
-              var kmlLayerToggle = document.getElementById('kml-layer-toggle');
-              kmlLayerToggle.addEventListener('change', function() {
-                if (kmlLayerToggle.checked) {
-                  kmlLayer.setMap(map);
-                } else {
-                  kmlLayer.setMap(null);
-                }
-              });
             });
 
         
