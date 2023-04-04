@@ -42,16 +42,21 @@
           box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
           opacity: 1.0;
         }
-
+        .checkbox-container {
+            display: flex;
+            flex-direction: column;
+          }
     </style>
   </head>
   <body>
       <div class="floating">
-          <label for="grid-locator">&nbsp;Enter your Grid Locator:</label>
-          <input type="text" id="grid-locator" placeholder="e.g. JO89tt" maxlength="6">
-          <button onclick="initMap(document.getElementById('grid-locator').value)">Plot Maximum Range</button>
-        <input type="checkbox" id="kml-layer-toggle">
-        <label for="kml-layer-toggle">CQ Zones</label>
+        <label for="grid-locator">&nbsp;Enter your Grid Locator:</label>
+        <input type="text" id="grid-locator" placeholder="e.g. JO89tt" maxlength="6">
+        <button onclick="initMap(document.getElementById('grid-locator').value)">Plot Maximum Range</button>
+        <div class="checkbox-container">
+          <input type="checkbox" id="kml-layer-toggle">
+          <label for="kml-layer-toggle">CQ Zones</label>
+        </div>
       </div>
 
     <div id="map"></div>
