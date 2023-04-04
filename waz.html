@@ -63,7 +63,31 @@
     <script>
       var map;
       var kmlLayer;
+      kmlLayer = new google.maps.KmlLayer('https://dxer.site/WAZ.kml?v=1.3', {
+        suppressInfoWindows: true,
+        preserveViewport: true,
+        map: null // set map to null initially
+      });
+      kmlLayer.set('strokeColor', '#000000'); // set line color to red
+                  kmlLayer.set('strokeWeight', 2); // set line width to 2 pixels
+                  kmlLayer.set('fillOpacity', 0); // set fill opacity to 0 (transparent)
+      kmlLayer.addListener('click', function(event) {
+        var zoneNumber = event.featureData.infoWindowHtml;
+        var infowindow = new google.maps.InfoWindow({
+          content: zoneNumber,
+        });
+        infowindow.setPosition(event.latLng);
+        infowindow.open(map);
+      });
 
+      var kmlLayerToggle = document.getElementById('kml-layer-toggle');
+      kmlLayerToggle.addEventListener('change', function() {
+        if (kmlLayerToggle.checked) {
+          kmlLayer.setMap(map);
+        } else {
+          kmlLayer.setMap(null);
+        }
+      });
       function calculateCoordinates(gridLocator) {
           // Get the grid locator from user input and convert to uppercase
           var gridLocator = document.getElementById("grid-locator").value.toUpperCase();
@@ -196,31 +220,7 @@
               }
             });
 
-        kmlLayer = new google.maps.KmlLayer('https://dxer.site/WAZ.kml?v=1.3', {
-          suppressInfoWindows: true,
-          preserveViewport: true,
-          map: null // set map to null initially
-        });
-        kmlLayer.set('strokeColor', '#000000'); // set line color to red
-                    kmlLayer.set('strokeWeight', 2); // set line width to 2 pixels
-                    kmlLayer.set('fillOpacity', 0); // set fill opacity to 0 (transparent)
-        kmlLayer.addListener('click', function(event) {
-          var zoneNumber = event.featureData.infoWindowHtml;
-          var infowindow = new google.maps.InfoWindow({
-            content: zoneNumber,
-          });
-          infowindow.setPosition(event.latLng);
-          infowindow.open(map);
-        });
-
-        var kmlLayerToggle = document.getElementById('kml-layer-toggle');
-        kmlLayerToggle.addEventListener('change', function() {
-          if (kmlLayerToggle.checked) {
-            kmlLayer.setMap(map);
-          } else {
-            kmlLayer.setMap(null);
-          }
-        });
+        
       }
     </script>
     <script async
