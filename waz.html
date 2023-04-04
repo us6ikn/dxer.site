@@ -61,7 +61,7 @@
 
         .toggle-button {
           position: absolute;
-          top: 20;
+          top: 20px;
           right: 0;
           width: 20px;
           height: 20px;
@@ -70,11 +70,27 @@
           text-align: center;
           color: white;
           background-color: black;
-          opacity: 0.0;
           border: none;
           border-radius: 50%;
           cursor: pointer;
+          opacity: 0;
         }
+
+        .arrow-button {
+          position: absolute;
+          top: 20px;
+          left: 0;
+          width: 20px;
+          height: 20px;
+          font-size: 20px;
+          font-weight: bold;
+          text-align: center;
+          color: white;
+          border: none;
+          cursor: pointer;
+          opacity: 1;
+        }
+
 
         .content {
           position: absolute;
@@ -107,13 +123,15 @@
       </div>
 
       <div class="floating-window">
-        <button class="toggle-button" onclick="toggleFloatingWindow()">&larr;</button>
+        <button class="toggle-button"></button>
+        <button class="arrow-button" onclick="toggleFloatingWindow()">&larr;</button>
         <div class="content">
-          <div><img src="img/m_new.png" alt="New stations" style="width:15px;height:15px;"> New in 7 days</div>
-          <div><img src="img/m_30.png" alt="Heard within 30 days" style="width:15px;height:15px;"> Heard within 30 days</div>
-          <div><img src="img/m_m30.png" alt="Heard more than 30 days ago" style="width:15px;height:15px;"> Heard more than 30 days ago</div>
+          <img src="img/m_new.png" alt="New stations" style="width:15px;height:15px;"> New in 7 days&nbsp;&nbsp;&nbsp;
+          <img src="img/m_30.png" alt="Heard within 30 days" style="width:15px;height:15px;"> Last heard within 30 days&nbsp;&nbsp;&nbsp;
+          <img src="img/m_m30.png" alt="Heard more than 30 days ago" style="width:15px;height:15px;"> Last heard more than 30 days ago
         </div>
       </div>
+
 
 
 
