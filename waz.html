@@ -52,12 +52,18 @@
       <div class="floating">
         <label for="grid-locator">&nbsp;Enter your Grid:</label>
         <input type="text" id="grid-locator" placeholder="e.g. JO89tt" maxlength="6" style="width: 64px;">
-            <button onclick="initMap(document.getElementById('grid-locator').value); document.getElementById('kml-layer-toggle').checked = false;">Plot Maximum Range</button>
+        <button onclick="initMap(document.getElementById('grid-locator').value); document.getElementById('kml-layer-toggle').checked = false;">Plot Maximum Range</button>
         <div class="checkbox-container">
           <input type="checkbox" id="kml-layer-toggle">
           <label for="kml-layer-toggle">CQ Zones</label>
+          <span>
+            <img src="img/m_new.png" alt="New stations" style="width:15px;height:15px;"> New in 7 days&nbsp;&nbsp;&nbsp;
+            <img src="img/m_30.png" alt="Heard within 30 days" style="width:15px;height:15px;"> Last heard within 30 days&nbsp;&nbsp;&nbsp;
+            <img src="img/m_m30.png" alt="Heard more than 30 days ago" style="width:15px;height:15px;"> Last heard more than 30 days ago
+          </span>
         </div>
       </div>
+
 
     <div id="map"></div>
     <script>
