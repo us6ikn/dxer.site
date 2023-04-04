@@ -46,6 +46,52 @@
             display: flex;
             flex-direction: row;
           }
+        
+        
+        
+        
+        
+        
+        .floating-window {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          z-index: 9999;
+        }
+
+        .toggle-button {
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: 30px;
+          height: 30px;
+          font-size: 20px;
+          font-weight: bold;
+          text-align: center;
+          color: white;
+          background-color: black;
+          border: none;
+          border-radius: 50%;
+          cursor: pointer;
+        }
+
+        .content {
+          position: absolute;
+          top: 0;
+          right: -120px;
+          width: 150px;
+          padding: 10px;
+          background-color: white;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+          transition: right 0.5s;
+          z-index: -1;
+        }
+
+        .show {
+          right: 0;
+          z-index: 9999;
+        }
+
     </style>
   </head>
   <body>
@@ -56,11 +102,15 @@
         <div class="checkbox-container">
           <input type="checkbox" id="kml-layer-toggle">
           <label for="kml-layer-toggle">CQ Zones</label>
-          <span>
-            <img src="img/m_new.png" alt="New stations" style="width:15px;height:15px;"> New in 7 days&nbsp;&nbsp;&nbsp;
-            <img src="img/m_30.png" alt="Heard within 30 days" style="width:15px;height:15px;"> Last heard within 30 days&nbsp;&nbsp;&nbsp;
-            <img src="img/m_m30.png" alt="Heard more than 30 days ago" style="width:15px;height:15px;"> Last heard more than 30 days ago
-          </span>
+        </div>
+      </div>
+
+      <div class="floating-window">
+        <button class="toggle-button" onclick="toggleFloatingWindow()">+</button>
+        <div class="content">
+          <img src="img/m_new.png" alt="New stations" style="width:15px;height:15px;"> New in 7 days&nbsp;&nbsp;&nbsp;
+          <img src="img/m_30.png" alt="Heard within 30 days" style="width:15px;height:15px;"> Last heard within 30 days&nbsp;&nbsp;&nbsp;
+          <img src="img/m_m30.png" alt="Heard more than 30 days ago" style="width:15px;height:15px;"> Last heard more than 30 days ago
         </div>
       </div>
 
@@ -99,6 +149,12 @@
 
           return { lat: latitude, lng: longitude };
       }
+      
+      function toggleFloatingWindow() {
+        var content = document.querySelector('.floating-window .content');
+        content.classList.toggle('show');
+      }
+
       
       function initMap(gridLocator) {
           map = new google.maps.Map(document.getElementById("map"), {
