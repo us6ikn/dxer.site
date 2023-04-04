@@ -47,6 +47,9 @@
   </head>
   <body>
       <div class="floating">
+          <label for="grid-locator">&nbsp;Enter your Grid Locator:</label>
+          <input type="text" id="grid-locator" placeholder="e.g. JO89tt" maxlength="6">
+          <button onclick="initMap(document.getElementById('grid-locator').value)">Plot Maximum Range</button>
         <input type="checkbox" id="kml-layer-toggle">
         <label for="kml-layer-toggle">CQ Zones</label>
       </div>
