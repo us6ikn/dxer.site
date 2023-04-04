@@ -63,6 +63,25 @@
     <script>
       var map;
       var kmlLayer;
+      // Create the search box and link it to the UI element.
+      const input = document.getElementById("search-input");
+      const searchBox = new google.maps.places.Autocomplete(input);
+
+      // Set the bounds of the search box to the map's viewport.
+      searchBox.bindTo("bounds", map);
+
+      // Listen for the event fired when the user selects a prediction and retrieve
+      // more details for that place.
+      searchBox.addListener("place_changed", () => {
+        const place = searchBox.getPlace();
+        if (!place.geometry || !place.geometry.location) {
+          console.log("No details available for input: " + place.name);
+          return;
+        }
+
+        // Center the map on the selected location.
+        map.setCenter(place.geometry.location);
+      });
 
       <div class="search-container">
          <input type="text" id="map-search" placeholder="Search for a location">
