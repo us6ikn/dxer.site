@@ -77,10 +77,7 @@
         kmlLayer = new google.maps.KmlLayer('https://dxer.site/WAZ.kml', {
           suppressInfoWindows: true,
           preserveViewport: true,
-          map: null, // set map to null initially
-          options: {
-                      strokeWeight: 1,
-                      strokeColor: "#000000"
+          map: null // set map to null initially
         });
         kmlLayer.addListener('click', function(event) {
           var zoneNumber = event.featureData.infoWindowHtml;
