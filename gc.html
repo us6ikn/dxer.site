@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Blinking Markers on Google Maps</title>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
+  <style>
+    #map {
+      height: 100%;
+    }
+    .blinking-marker {
+      /* Set the marker icon to the URL of your blinking gif */
+      background-image: url(img/rover.gif);
+      /* Set the width and height of the marker */
+      width: 32px;
+      height: 32px;
+      /* Set the background position to display the first frame of the gif */
+      background-position: 0 0;
+      /* Set the animation to cycle through the frames of the gif */
+      animation: blink 1s steps(2) infinite;
+    }
+    /* Define the animation */
+    @keyframes blink {
+      50% {
+        background-position: -32px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+    // Define the URL of your blinking gif
+    const BLINKING_GIF_URL = 'img/rover.gif';
+
+    // Define the callback function that initializes the Google Map
+    function initMap() {
+      // Load the announcements data from the file
+      fetch('announcements_filtered.txt')
+        .then(response => response.text())
+        .then(data => {
+          // Split the data into individual announcements
+          const announcements = data.trim().split('\n');
+
+          // Create a new Google Map
+          const map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 7,
+            center: { lat: 38.0, lng: -82.0 },
+          });
+
+          // Loop through the announcements and create markers for each one
+          for (let i = 0; i < announcements.length; i++) {
+            const announcement = announcements[i];
+
+            // Extract the coordinates from the announcement
+            const coordinates = announcement.match(/Coordinates: \((.*), (.*)\)/);
+            if (!coordinates) {
+              continue;
+            }
+            const lat = parseFloat(coordinates[1]);
+            const lng = parseFloat(coordinates[2]);
+
+            // Create a new marker with the blinking icon
+            const marker = new google.maps.Marker({
+              position: { lat, lng },
+              map,
+              icon: BLINKING_GIF_URL,
+              optimized: false, // disable marker animation optimization
+            });
+          }
+        });
+    }
+  </script>
+</body>
+</html>
