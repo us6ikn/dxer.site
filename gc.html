@@ -136,14 +136,17 @@
   </head>
   <body>
       <div class="floating">
-        <label for="grid-locator">&nbsp;Enter your Grid:</label>
-        <input type="text" id="grid-locator" placeholder="e.g. JO89tt" maxlength="6" style="width: 64px;">
-        <button onclick="initMap(document.getElementById('grid-locator').value); document.getElementById('kml-layer-toggle').checked = false;">Plot Maximum Range</button>
-        <div class="checkbox-container">
-          <input type="checkbox" id="kml-layer-toggle">
-          <label for="kml-layer-toggle">CQ Zones</label>
-        </div>
+          <label for="grid-locator">&nbsp;Enter your Grid:</label>
+          <input type="text" id="grid-locator" placeholder="e.g. JO89tt" maxlength="6" style="width: 64px;">
+          <button onclick="initMap(document.getElementById('grid-locator').value); document.getElementById('kml-layer-toggle').checked = false;">Plot Maximum Range</button>
+          <div class="checkbox-container">
+              <input type="checkbox" id="kml-layer-toggle">
+              <label for="kml-layer-toggle">CQ Zones</label>
+              <img src="img/m_new.png" alt="GreenCube Observer logo" style="vertical-align: middle; margin-left: 5px;">
+              <span style="color: blue; font-weight: bold; margin-left: 5px;">GreenCube Observer</span>
+          </div>
       </div>
+
 
       <div class="floating-window">
         <button class="toggle-button"></button>
