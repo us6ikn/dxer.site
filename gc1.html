@@ -10,7 +10,7 @@
     </style>
 </head>
 <body>
-    <input id="searchInput" type="text" placeholder="Enter a location">
+    <input id="searchInput" type="text" placeholder="Enter a location" autocomplete="on">
         <div id="map"></div>
         
         <script>
@@ -79,6 +79,6 @@
             }
         </script>
         
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&libraries=places&callback=initMap"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&libraries=places&callback=initMap" async defer></script>
 </body>
 </html>
