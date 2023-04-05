@@ -31,14 +31,13 @@
           .then(function(geoJsonData) {
             // Set the property name to use for the prefecture name
             map.data.addGeoJson(geoJsonData, { idPropertyName: 'prefecture' });
+            // Set the stroke color for prefecture outlines and fill opacity to 0.
+            map.data.setStyle({
+              strokeWeight: 1,
+              strokeColor: 'black',
+              fillOpacity: 0
+            });
           });
-
-        // Set the stroke color for prefecture outlines and fill opacity to 0.
-        map.data.setStyle({
-          strokeWeight: 1,
-          strokeColor: 'black',
-          fillOpacity: 0
-        });
 
         // Add event listener to checkbox
         var showPrefecturesCheckbox = document.getElementById('showPrefectures');
@@ -57,7 +56,6 @@
           }
         });
       }
-
   </script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" async defer></script>
 </body>
