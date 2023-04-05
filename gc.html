@@ -78,7 +78,7 @@
             });
 
             // Add a listener to the marker
-            marker.addListener('rover', () => {
+            marker.addListener('click', () => {
               // Create an info window with the callsign and hyperlink to https://hams.at/alerts
               const infoWindow = new google.maps.InfoWindow({
                 content: `<div><a href="https://hams.at/alerts" target="_blank">${callsign}</a></div>`,
