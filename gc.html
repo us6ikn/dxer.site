@@ -55,7 +55,7 @@
         .floating-window {
           position: fixed;
           bottom: 200px;
-          right: 50px;
+          right: 40px;
           z-index: 9999;
         }
 
@@ -238,9 +238,7 @@
             infowindow.setPosition(event.latLng);
             infowindow.open(map);
           });
-          kmlLayer.setOptions({
-            zIndex: 10000
-          });
+
           var kmlLayerToggle = document.getElementById('kml-layer-toggle');
           kmlLayerToggle.addEventListener('change', function() {
             if (kmlLayerToggle.checked) {
@@ -249,8 +247,6 @@
               kmlLayer.setMap(null);
             }
           });
-          
-          
 
           fetch("output_filtered.txt")
             .then(response => response.text())
