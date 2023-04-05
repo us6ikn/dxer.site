@@ -11,33 +11,29 @@
 </head>
 <body>
   <div>
-    <input type="checkbox" id="showStates">
+    <input type="checkbox" id="showStates" checked>
     <label for="showStates">US States</label>
   </div>
   <div id="map"></div>
   <script>
       function initMap() {
         var map = new google.maps.Map(document.getElementById('map'), {
-          zoom: 4,
-          center: {lat: 39.8283, lng: -98.5795}
+          zoom: 7,
+          center: {lat: 36.2048, lng: 138.2529}
         });
 
         // Load GeoJSON data from an external file.
-        var geoJsonUrl = 'https://storage.googleapis.com/mapsdevsite/json/states.js';
+        var geoJsonUrl = 'https://datahub.io/core/japan-prefecture-boundaries/r/japan-prefecture-boundaries.geojson';
         fetch(geoJsonUrl)
           .then(function(response) {
             return response.json();
           })
           .then(function(geoJsonData) {
-            // Remove Puerto Rico feature from the GeoJSON data
-            geoJsonData.features = geoJsonData.features.filter(function(feature) {
-              return feature.properties.NAME !== 'Puerto Rico';
-            });
-            // Add the filtered GeoJSON data to the map
+            // Add the GeoJSON data to the map
             map.data.addGeoJson(geoJsonData);
           });
 
-        // Set the stroke color for state outlines and fill opacity to 0.
+        // Set the stroke color for prefecture outlines and fill opacity to 0.
         map.data.setStyle({
           strokeWeight: 1,
           strokeColor: 'black',
@@ -61,6 +57,7 @@
           }
         });
       }
+
 
   </script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" async defer></script>
