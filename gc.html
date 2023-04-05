@@ -152,10 +152,20 @@
             <div><img src="img/m_new.png" alt="New stations" style="width:15px;height:15px;"> New in 7 days</div>
             <div><img src="img/m_30.png" alt="Heard within 30 days" style="width:15px;height:15px;"> Heard within 30 days</div>
             <div><img src="img/m_m30.png" alt="Heard more than 30 days ago" style="width:15px;height:15px;"> Heard more than 30 days ago</div>
+            <p>&nbsp;Latest database update: <span id="last-modified"></span></p>
+            <script>
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        var lastModified = new Date(this.getResponseHeader("Last-Modified"));
+                        document.getElementById("last-modified").innerHTML = lastModified.toUTCString();
+                    }
+                };
+                xhttp.open("HEAD", "output_filtered.txt", true);
+                xhttp.send();
+            </script>
           </div>
       </div>
-
-
 
 
     <div id="map"></div>
