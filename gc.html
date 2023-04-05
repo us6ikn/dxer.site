@@ -230,7 +230,6 @@
           kmlLayer.set('strokeColor', '#000000'); // set line color to red
                       kmlLayer.set('strokeWeight', 2); // set line width to 2 pixels
                       kmlLayer.set('fillOpacity', 0); // set fill opacity to 0 (transparent)
-                      zIndex: 100 // set the z-index to a high value
           kmlLayer.addListener('click', function(event) {
             var zoneNumber = event.featureData.infoWindowHtml;
             var infowindow = new google.maps.InfoWindow({
@@ -352,12 +351,7 @@
                   zIndex: 10000 // set the z-index to a high value
                 });
 
-                // Add a listener to the marker
-                marker.addListener('click', () => {
-                  // Close the currently open info window
-                  if (openInfoWindow) {
-                    openInfoWindow.close();
-                  }
+                
 
                   // Create an info window with the callsign and hyperlink to https://hams.at/alerts
                   const infoWindow = new google.maps.InfoWindow({
@@ -370,7 +364,12 @@
                 });
               }
             });
-              
+            // Add a listener to the marker
+            marker.addListener('click', () => {
+              // Close the currently open info window
+              if (openInfoWindow) {
+                openInfoWindow.close();
+              }
               // Plot the marker with a 13000 km radius circle around it if gridLocator is provided
               if (gridLocator) {
                 const { lat, lng } = calculateCoordinates(gridLocator);
@@ -388,8 +387,7 @@
                   fillOpacity: 0.15,
                   map,
                   center: { lat, lng },
-                  radius: 13000000, // Fixed radius value
-                  zIndex: 100 // set the z-index to a high value
+                  radius: 13000000 // Fixed radius value
                 });
               } else {
                 
