@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>US State Outlines Example</title>
+  <title>Show Japan prefectures</title>
   <style>
     #map {
       height: 500px;
@@ -11,8 +11,8 @@
 </head>
 <body>
   <div>
-    <input type="checkbox" id="showStates" checked>
-    <label for="showStates">US States</label>
+    <input type="checkbox" id="showPrefectures" checked>
+    <label for="showPrefectures">Show Japan Prefectures</label>
   </div>
   <div id="map"></div>
   <script>
@@ -29,8 +29,8 @@
             return response.json();
           })
           .then(function(geoJsonData) {
-            // Add the GeoJSON data to the map
-            map.data.addGeoJson(geoJsonData);
+            // Set the property name to use for the prefecture name
+            map.data.addGeoJson(geoJsonData, { idPropertyName: 'prefecture' });
           });
 
         // Set the stroke color for prefecture outlines and fill opacity to 0.
@@ -41,9 +41,9 @@
         });
 
         // Add event listener to checkbox
-        var showStatesCheckbox = document.getElementById('showStates');
-        showStatesCheckbox.addEventListener('change', function() {
-          if (showStatesCheckbox.checked) {
+        var showPrefecturesCheckbox = document.getElementById('showPrefectures');
+        showPrefecturesCheckbox.addEventListener('change', function() {
+          if (showPrefecturesCheckbox.checked) {
             map.data.setStyle({
               strokeWeight: 1,
               strokeColor: 'black',
@@ -57,7 +57,6 @@
           }
         });
       }
-
 
   </script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" async defer></script>
