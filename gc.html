@@ -241,6 +241,10 @@
 
           var kmlLayerToggle = document.getElementById('kml-layer-toggle');
           kmlLayerToggle.addEventListener('change', function() {
+              // Close the currently open info window
+              if (openInfoWindow) {
+                openInfoWindow.close();
+              }
             if (kmlLayerToggle.checked) {
               kmlLayer.setMap(map);
             } else {
@@ -318,8 +322,7 @@
                   infowindow.open(map, marker);
                 });
               }
-              
-              let openInfoWindow = null; // keep track of the currently open info window
+
               // Loop through the announcements and create markers for each one
               for (let i = 0; i < announcements.length; i++) {
                 const announcement = announcements[i];
