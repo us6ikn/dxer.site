@@ -241,15 +241,15 @@
 
           var kmlLayerToggle = document.getElementById('kml-layer-toggle');
           kmlLayerToggle.addEventListener('change', function() {
-              // Close the currently open info window
-              if (openInfoWindow) {
-                openInfoWindow.close();
-              }
             if (kmlLayerToggle.checked) {
               kmlLayer.setMap(map);
             } else {
               kmlLayer.setMap(null);
             }
+          });
+          
+          kmlLayer.setOptions({
+            zIndex: 1100
           });
 
           fetch("output_filtered.txt")
