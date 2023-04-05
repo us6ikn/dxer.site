@@ -318,7 +318,8 @@
                   infowindow.open(map, marker);
                 });
               }
-
+              
+              let openInfoWindow = null; // keep track of the currently open info window
               // Loop through the announcements and create markers for each one
               for (let i = 0; i < announcements.length; i++) {
                 const announcement = announcements[i];
