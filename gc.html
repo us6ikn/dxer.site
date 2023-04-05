@@ -66,12 +66,26 @@
             const lat = parseFloat(coordinates[1]);
             const lng = parseFloat(coordinates[2]);
 
+            // Extract the callsign from the announcement
+            const callsign = announcement.match(/Callsign: (.*)/)[1];
+
             // Create a new marker with the blinking icon
             const marker = new google.maps.Marker({
               position: { lat, lng },
               map,
               icon: BLINKING_GIF_URL,
               optimized: false, // disable marker animation optimization
+            });
+
+            // Add a listener to the marker
+            marker.addListener('rover', () => {
+              // Create an info window with the callsign and hyperlink to https://hams.at/alerts
+              const infoWindow = new google.maps.InfoWindow({
+                content: `<div><a href="https://hams.at/alerts" target="_blank">${callsign}</a></div>`,
+              });
+
+              // Open the info window on the marker
+              infoWindow.open(map, marker);
             });
           }
         });
