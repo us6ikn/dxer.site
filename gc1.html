@@ -31,7 +31,7 @@
           .then(function(geoJsonData) {
             // Remove Puerto Rico feature from the GeoJSON data
             geoJsonData.features = geoJsonData.features.filter(function(feature) {
-              return feature.properties.STATE !== 'PR';
+              return feature.properties.NAME !== 'Puerto Rico';
             });
             // Add the filtered GeoJSON data to the map
             map.data.addGeoJson(geoJsonData);
