@@ -67,7 +67,7 @@
             const lng = parseFloat(coordinates[2]);
 
             // Extract the callsign from the announcement
-            const callsign = announcement.match(/Callsign: (.*),/)[1];
+            const callsign = announcement.match(/Callsign: ([^,]*)/)[1];
 
             // Create a new marker with the blinking icon
             const marker = new google.maps.Marker({
