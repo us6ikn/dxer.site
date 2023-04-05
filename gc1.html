@@ -22,8 +22,14 @@
         center: {lat: 39.8283, lng: -98.5795}
       });
 
-      // Load GeoJSON data from an external file.
-      map.data.loadGeoJson('https://storage.googleapis.com/mapsdevsite/json/states.js');
+      // Load GeoJSON data from an external file and filter out Puerto Rico.
+      map.data.loadGeoJson('https://storage.googleapis.com/mapsdevsite/json/states.js', {}, function(features) {
+        map.data.forEach(function(feature) {
+          if (feature.getProperty('STUSPS') === 'PR') {
+            map.data.remove(feature);
+          }
+        });
+      });
 
       // Set the stroke color for state outlines and fill opacity to 0.
       map.data.setStyle({
@@ -50,6 +56,7 @@
       });
     }
   </script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" async defer></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"
+  async defer></script>
 </body>
 </html>
