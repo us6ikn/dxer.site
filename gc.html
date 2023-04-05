@@ -60,11 +60,22 @@
           for (let i = 0; i < announcements.length; i++) {
             const announcement = announcements[i];
 
-            // Extract the coordinates from the announcement
-            const coordinates = announcement.match(/Coordinates: \((.*), (.*)\)/);
-            if (!coordinates) {
-              continue;
-            }
+            // Extract the coordinates and time from the announcement
+                        const coordinates = announcement.match(/Coordinates: \((.*), (.*)\)/);
+                        const timeString = announcement.match(/Time: (.*)/)[1];
+
+                        if (!coordinates || !timeString) {
+                          continue;
+                        }
+
+                        const lat = parseFloat(coordinates[1]);
+                        const lng = parseFloat(coordinates[2]);
+                        const time = new Date(timeString);
+
+                        // Check if the time is in the future
+                        if (time <= new Date()) {
+                          continue;
+                        }
             const lat = parseFloat(coordinates[1]);
             const lng = parseFloat(coordinates[2]);
 
