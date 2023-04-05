@@ -84,7 +84,10 @@
             const marker = new google.maps.Marker({
               position: { lat, lng },
               map,
-              icon: BLINKING_GIF_URL,
+              icon: {
+                  BLINKING_GIF_URL,
+                  scaledSize: new google.maps.Size(20, 20)
+                }
               optimized: false, // disable marker animation optimization
             });
 
