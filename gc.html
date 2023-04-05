@@ -238,7 +238,9 @@
             infowindow.setPosition(event.latLng);
             infowindow.open(map);
           });
-
+          kmlLayer.setOptions({
+            zIndex: 10000
+          });
           var kmlLayerToggle = document.getElementById('kml-layer-toggle');
           kmlLayerToggle.addEventListener('change', function() {
             if (kmlLayerToggle.checked) {
@@ -248,9 +250,7 @@
             }
           });
           
-          kmlLayer.setOptions({
-            zIndex: 1100
-          });
+          
 
           fetch("output_filtered.txt")
             .then(response => response.text())
