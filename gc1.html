@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Google Maps GeoJSON Example</title>
+    <title>Google Maps Search Example</title>
     <style>
         #map {
             height: 400px;
@@ -10,58 +10,75 @@
     </style>
 </head>
 <body>
-    <div id="map"></div>
-    
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script>
-        var map;
+    <input id="searchInput" type="text" placeholder="Enter a location" autocomplete="on">
+        <div id="map"></div>
         
-        function initMap() {
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: {lat: 37.7749, lng: -122.4194},
-                zoom: 5
-            });
+        <script>
+            var map;
+            var service;
+            var infowindow;
+            var markers = [];
             
-            // Load the GeoJSON data for the US states
-            axios.get('https://eric.clst.org/assets/wiki/uploads/Stuff/gz_2010_us_040_00_20m.json')
-                .then(function(response) {
-                    var features = response.data.features;
-                    var bounds = new google.maps.LatLngBounds();
+            function initMap() {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: {lat: 37.7749, lng: -122.4194},
+                    zoom: 13
+                });
+                
+                infowindow = new google.maps.InfoWindow();
+                service = new google.maps.places.PlacesService(map);
+                
+                var searchInput = document.getElementById('searchInput');
+                var searchBox = new google.maps.places.SearchBox(searchInput);
+                
+                searchBox.addListener('places_changed', function() {
+                    var places = searchBox.getPlaces();
                     
-                    for (var i = 0; i < features.length; i++) {
-                        var state = features[i];
-                        
-                        // Create a new polygon for the state
-                        var polygon = new google.maps.Polygon({
-                            paths: state.geometry.coordinates,
-                            strokeColor: '#FF0000',
-                            strokeOpacity: 0.8,
-                            strokeWeight: 2,
-                            fillColor: '#FF0000',
-                            fillOpacity: 0.35
-                        });
-                        
-                        // Add the polygon to the map
-                        polygon.setMap(map);
-                        
-                        // Extend the bounds to include the polygon
-                        var stateBounds = new google.maps.LatLngBounds();
-                        polygon.getPath().forEach(function(coord) {
-                            stateBounds.extend(coord);
-                        });
-                        bounds.union(stateBounds);
+                    if (places.length == 0) {
+                        return;
                     }
                     
-                    // Fit the map to the bounds of the US states
+                    // Clear out the old markers.
+                    markers.forEach(function(marker) {
+                        marker.setMap(null);
+                    });
+                    markers = [];
+                    
+                    // For each place, get the icon, name and location.
+                    var bounds = new google.maps.LatLngBounds();
+                    places.forEach(function(place) {
+                        if (!place.geometry) {
+                            console.log("Returned place contains no geometry");
+                            return;
+                        }
+                        var icon = {
+                            url: place.icon,
+                            size: new google.maps.Size(71, 71),
+                            origin: new google.maps.Point(0, 0),
+                            anchor: new google.maps.Point(17, 34),
+                            scaledSize: new google.maps.Size(25, 25)
+                        };
+                        
+                        // Create a marker for each place.
+                        markers.push(new google.maps.Marker({
+                            map: map,
+                            icon: icon,
+                            title: place.name,
+                            position: place.geometry.location
+                        }));
+                        
+                        if (place.geometry.viewport) {
+                            // Only geocodes have viewport.
+                            bounds.union(place.geometry.viewport);
+                        } else {
+                            bounds.extend(place.geometry.location);
+                        }
+                    });
                     map.fitBounds(bounds);
-                })
-                .catch(function(error) {
-                    console.log(error);
                 });
-        }
-    </script>
-    
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
+            }
+        </script>
+        
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&libraries=places&callback=initMap" async defer></script>
 </body>
 </html>
