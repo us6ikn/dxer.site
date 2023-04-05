@@ -230,6 +230,7 @@
           kmlLayer.set('strokeColor', '#000000'); // set line color to red
                       kmlLayer.set('strokeWeight', 2); // set line width to 2 pixels
                       kmlLayer.set('fillOpacity', 0); // set fill opacity to 0 (transparent)
+                      zIndex: 100 // set the z-index to a high value
           kmlLayer.addListener('click', function(event) {
             var zoneNumber = event.featureData.infoWindowHtml;
             var infowindow = new google.maps.InfoWindow({
