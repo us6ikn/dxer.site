@@ -76,8 +76,6 @@
                         if (time <= new Date()) {
                           continue;
                         }
-            const lat = parseFloat(coordinates[1]);
-            const lng = parseFloat(coordinates[2]);
 
             // Extract the callsign from the announcement
             const callsign = announcement.match(/Callsign: ([^,]*)/)[1];
