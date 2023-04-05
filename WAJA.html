@@ -39,22 +39,22 @@
             });
           });
 
-        // Add event listener to checkbox
-        var showPrefecturesCheckbox = document.getElementById('showPrefectures');
-        showPrefecturesCheckbox.addEventListener('change', function() {
-          if (showPrefecturesCheckbox.checked) {
-            map.data.setStyle({
-              strokeWeight: 1,
-              strokeColor: 'black',
-              fillOpacity: 0
-            });
-          } else {
-            map.data.setStyle({
-              strokeWeight: 0,
-              fillOpacity: 0
-            });
-          }
-        });
+          showPrefecturesCheckbox.addEventListener('change', function() {
+            if (showPrefecturesCheckbox.checked) {
+              map.data.setStyle({
+                strokeWeight: 1,
+                strokeColor: 'black',
+                fillOpacity: 0
+              });
+            } else {
+              map.data.setStyle({
+                strokeWeight: 0,
+                strokeColor: null, // Set strokeColor to null to use the default color
+                fillOpacity: 0
+              });
+            }
+          });
+
       }
   </script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" async defer></script>
