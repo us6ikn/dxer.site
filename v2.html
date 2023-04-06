@@ -54,7 +54,7 @@
         
         .floating-button {
           position: fixed;
-          bottom: 400px;
+          bottom: 350px;
           right: 0;
           z-index: 999;
         }
@@ -69,12 +69,6 @@
 
         /* Add hover effects or additional styles as desired */
 
-        .floating-window-button {
-          position: fixed;
-          bottom: 250px;
-          left: -22;
-          z-index: 999;
-        }
         
         .floating-window {
           position: fixed;
@@ -175,7 +169,7 @@
       </div>
 
       <a href="https://dxer.site" target="_blank" class="floating-button">
-        <i class="fas fa-home"></i>
+        <i class="fas fa-home floating-button-icon"></i>
       </a>
 
 
@@ -183,9 +177,8 @@
 
 
       <div class="floating-window">
-          <a href="https://dxer.site" target="_blank" class="floating-window-button" onclick="toggleFloatingWindow()">
-              <i class="fa-solid fa-clipboard floating-button-icon"></i>
-            </a>
+        <button class="toggle-button"></button>
+        <button class="arrow-button" onclick="toggleFloatingWindow()">&#x25b6;</button>
         <div class="content">
             <div><img src="img/m_new.png" alt="New stations" style="width:15px;height:15px;"> New in 7 days</div>
             <div><img src="img/m_30.png" alt="Heard within 30 days" style="width:15px;height:15px;"> Heard within 30 days</div>
@@ -204,6 +197,7 @@
             </script>
             <div class="sharethis-inline-share-buttons"></div>
           </div>
+        
       </div>
 
 
