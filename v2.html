@@ -69,6 +69,12 @@
 
         /* Add hover effects or additional styles as desired */
 
+        .floating-window-button {
+          position: fixed;
+          bottom: 250px;
+          left: -22;
+          z-index: 999;
+        }
         
         .floating-window {
           position: fixed;
@@ -177,7 +183,7 @@
 
 
       <div class="floating-window">
-          <a href="https://dxer.site" target="_blank" class="floating-button" onclick="toggleFloatingWindow()">
+          <a href="https://dxer.site" target="_blank" class="floating-window-button" onclick="toggleFloatingWindow()">
               <i class="fa-solid fa-clipboard floating-button-icon"></i>
             </a>
         <div class="content">
