@@ -471,7 +471,7 @@
                   fillOpacity: 0.15,
                   map,
                   center: { lat, lng },
-                  radius: 8000000 // 8000 km
+                  radius: 7942000 // RS-44 range
                 });
 
                 // Add custom markers with labels along the circumference of the circles
@@ -479,7 +479,7 @@
                   position: google.maps.geometry.spherical.computeOffset(circle1.getCenter(), circle1.getRadius(), 45), // Position the marker along the circumference
                   map: map,
                   label: {
-                    text: "5000 km", // Label text for circle1
+                    text: "SO-50", // Label text for circle1
                     color: "black", // Label text color
                     fontSize: "12px", // Label font size
                     fontWeight: "bold" // Label font weight
@@ -490,7 +490,7 @@
                   position: google.maps.geometry.spherical.computeOffset(circle2.getCenter(), circle2.getRadius(), 135), // Position the marker along the circumference
                   map: map,
                   label: {
-                    text: "7000 km", // Label text for circle2
+                    text: "FO-29", // Label text for circle2
                     color: "black", // Label text color
                     fontSize: "12px", // Label font size
                     fontWeight: "bold" // Label font weight
@@ -501,7 +501,7 @@
                   position: google.maps.geometry.spherical.computeOffset(circle3.getCenter(), circle3.getRadius(), 225), // Position the marker along the circumference
                   map: map,
                   label: {
-                    text: "8000 km", // Label text for circle3
+                    text: "RS-44", // Label text for circle3
                     color: "black", // Label text color
                     fontSize: "12px", // Label font size
                     fontWeight: "bold" // Label font weight
@@ -509,8 +509,6 @@
                 });
 
               } else {
-                // Handle
-
                 // Handle case when gridLocator is not provided
               }
 
