@@ -452,10 +452,10 @@
 
                 // Create a circle with 7000 km radius around the gridLocator
                 const circle2 = new google.maps.Circle({
-                  strokeColor: "#FF0000", // Green
+                  strokeColor: "#FF0000",
                   strokeOpacity: 0.4,
                   strokeWeight: 2,
-                  fillColor: "#FF0000", // Green
+                  fillColor: "#FF0000",
                   fillOpacity: 0.05,
                   map,
                   center: { lat, lng },
@@ -464,10 +464,10 @@
 
                 // Create a circle with 8000 km radius around the gridLocator
                 const circle3 = new google.maps.Circle({
-                  strokeColor: "#FF0000", // Blue
+                  strokeColor: "#FF0000",
                   strokeOpacity: 0.4,
                   strokeWeight: 2,
-                  fillColor: "#FF0000", // Blue
+                  fillColor: "#FF0000",
                   fillOpacity: 0.05,
                   map,
                   center: { lat, lng },
@@ -476,10 +476,10 @@
                 
                 // Create a circle with 8000 km radius around the gridLocator
                 const circle4 = new google.maps.Circle({
-                  strokeColor: "#FF0000", // Blue
+                  strokeColor: "#FF0000",
                   strokeOpacity: 0.4,
                   strokeWeight: 2,
-                  fillColor: "#FF0000", // Blue
+                  fillColor: "#FF0000",
                   fillOpacity: 0.05,
                   map,
                   center: { lat, lng },
@@ -488,19 +488,32 @@
                 
                 // Create a circle with 8000 km radius around the gridLocator
                 const circle5 = new google.maps.Circle({
-                  strokeColor: "#FF0000", // Blue
+                  strokeColor: "#FF0000",
                   strokeOpacity: 0.4,
                   strokeWeight: 2,
-                  fillColor: "#FF0000", // Blue
+                  fillColor: "#FF0000",
                   fillOpacity: 0.05,
                   map,
                   center: { lat, lng },
                   radius: 7907000 // AO-07 range
                 });
+                
+                // Create a circle with 8000 km radius around the gridLocator
+                const circle6 = new google.maps.Circle({
+                  strokeColor: "#FF0000",
+                  strokeOpacity: 0.4,
+                  strokeWeight: 2,
+                  fillColor: "#FF0000",
+                  fillOpacity: 0.05,
+                  map,
+                  center: { lat, lng },
+                  radius: 5712000 // AO-91 range
+                });
+
 
                 // Add custom markers with labels along the circumference of the circles
                 const label1 = new google.maps.Marker({
-                  position: google.maps.geometry.spherical.computeOffset(circle1.getCenter(), circle1.getRadius(), 255), // Position the marker along the circumference
+                  position: google.maps.geometry.spherical.computeOffset(circle1.getCenter(), circle1.getRadius(), 265), // Position the marker along the circumference
                   map: map,
                   label: {
                     text: "SO-50", // Label text for circle1
@@ -533,7 +546,7 @@
                 });
                 
                 const label4 = new google.maps.Marker({
-                  position: google.maps.geometry.spherical.computeOffset(circle4.getCenter(), circle4.getRadius(), 265), // Position the marker along the circumference
+                  position: google.maps.geometry.spherical.computeOffset(circle4.getCenter(), circle4.getRadius(), 275), // Position the marker along the circumference
                   map: map,
                   label: {
                     text: "ISS", // Label text for circle3
@@ -548,6 +561,17 @@
                   map: map,
                   label: {
                     text: "AO-07", // Label text for circle3
+                    color: "black", // Label text color
+                    fontSize: "12px", // Label font size
+                    fontWeight: "bold" // Label font weight
+                  }
+                });
+                
+                const label6 = new google.maps.Marker({
+                  position: google.maps.geometry.spherical.computeOffset(circle6.getCenter(), circle6.getRadius(), 255), // Position the marker along the circumference
+                  map: map,
+                  label: {
+                    text: "AO-91", // Label text for circle3
                     color: "black", // Label text color
                     fontSize: "12px", // Label font size
                     fontWeight: "bold" // Label font weight
