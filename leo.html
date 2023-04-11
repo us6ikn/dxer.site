@@ -427,56 +427,8 @@
               }
             });
               
-              // Plot the markers with different radius circles around them if gridLocator is provided
-              if (gridLocator) {
-                const { lat, lng } = calculateCoordinates(gridLocator);
-
-                // Create a marker for the gridLocator
-                const marker = new google.maps.Marker({
-                  position: { lat, lng },
-                  map: map,
-                  title: gridLocator
-                });
-
-                // Create a circle with 5000 km radius around the gridLocator
-                const circle1 = new google.maps.Circle({
-                  strokeColor: "#FF0000", // Red
-                  strokeOpacity: 0.4,
-                  strokeWeight: 2,
-                  fillColor: "#FF0000", // Red
-                  fillOpacity: 0.15,
-                  map,
-                  center: { lat, lng },
-                  radius: 5000000 // 5000 km
-                });
-
-                // Create a circle with 7000 km radius around the gridLocator
-                const circle2 = new google.maps.Circle({
-                  strokeColor: "#00FF00", // Green
-                  strokeOpacity: 0.4,
-                  strokeWeight: 2,
-                  fillColor: "#00FF00", // Green
-                  fillOpacity: 0.15,
-                  map,
-                  center: { lat, lng },
-                  radius: 7000000 // 7000 km
-                });
-
-                // Create a circle with 8000 km radius around the gridLocator
-                const circle3 = new google.maps.Circle({
-                  strokeColor: "#0000FF", // Blue
-                  strokeOpacity: 0.4,
-                  strokeWeight: 2,
-                  fillColor: "#0000FF", // Blue
-                  fillOpacity: 0.15,
-                  map,
-                  center: { lat, lng },
-                  radius: 8000000 // 8000 km
-                });
-
-              } else {
-                // Handle case when gridLocator is not provided
-              }
+              https://dxer.site/leo
+            });
 
         
       }
