@@ -474,9 +474,29 @@
                   radius: 8000000 // 8000 km
                 });
 
+                // Add labels to the circles
+                const label1 = new google.maps.InfoWindow({
+                  content: "5000 km", // Label text for circle1
+                });
+                label1.setPosition(circle1.center);
+                label1.open(map);
+
+                const label2 = new google.maps.InfoWindow({
+                  content: "7000 km", // Label text for circle2
+                });
+                label2.setPosition(circle2.center);
+                label2.open(map);
+
+                const label3 = new google.maps.InfoWindow({
+                  content: "8000 km", // Label text for circle3
+                });
+                label3.setPosition(circle3.center);
+                label3.open(map);
+
               } else {
                 // Handle case when gridLocator is not provided
               }
+
 
             });
 
