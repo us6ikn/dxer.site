@@ -474,29 +474,45 @@
                   radius: 8000000 // 8000 km
                 });
 
-                // Add labels to the circles
-                const label1 = new google.maps.InfoWindow({
-                  content: "5000 km", // Label text for circle1
+                // Add custom markers with labels along the circumference of the circles
+                const label1 = new google.maps.Marker({
+                  position: google.maps.geometry.spherical.computeOffset(circle1.getCenter(), circle1.getRadius(), 45), // Position the marker along the circumference
+                  map: map,
+                  label: {
+                    text: "5000 km", // Label text for circle1
+                    color: "black", // Label text color
+                    fontSize: "12px", // Label font size
+                    fontWeight: "bold" // Label font weight
+                  }
                 });
-                label1.setPosition(circle1.center);
-                label1.open(map);
 
-                const label2 = new google.maps.InfoWindow({
-                  content: "7000 km", // Label text for circle2
+                const label2 = new google.maps.Marker({
+                  position: google.maps.geometry.spherical.computeOffset(circle2.getCenter(), circle2.getRadius(), 135), // Position the marker along the circumference
+                  map: map,
+                  label: {
+                    text: "7000 km", // Label text for circle2
+                    color: "black", // Label text color
+                    fontSize: "12px", // Label font size
+                    fontWeight: "bold" // Label font weight
+                  }
                 });
-                label2.setPosition(circle2.center);
-                label2.open(map);
 
-                const label3 = new google.maps.InfoWindow({
-                  content: "8000 km", // Label text for circle3
+                const label3 = new google.maps.Marker({
+                  position: google.maps.geometry.spherical.computeOffset(circle3.getCenter(), circle3.getRadius(), 225), // Position the marker along the circumference
+                  map: map,
+                  label: {
+                    text: "8000 km", // Label text for circle3
+                    color: "black", // Label text color
+                    fontSize: "12px", // Label font size
+                    fontWeight: "bold" // Label font weight
+                  }
                 });
-                label3.setPosition(circle3.center);
-                label3.open(map);
 
               } else {
+                // Handle
+
                 // Handle case when gridLocator is not provided
               }
-
 
             });
 
