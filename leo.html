@@ -459,7 +459,7 @@
                   fillOpacity: 0.15,
                   map,
                   center: { lat, lng },
-                  radius: 7402000 // FO-29 range
+                  radius: 7502000 // FO-29 range
                 });
 
                 // Create a circle with 8000 km radius around the gridLocator
@@ -471,7 +471,19 @@
                   fillOpacity: 0.15,
                   map,
                   center: { lat, lng },
-                  radius: 7942000 // RS-44 range
+                  radius: 8042000 // RS-44 range
+                });
+                
+                // Create a circle with 8000 km radius around the gridLocator
+                const circle4 = new google.maps.Circle({
+                  strokeColor: "#0000FF", // Blue
+                  strokeOpacity: 0.4,
+                  strokeWeight: 2,
+                  fillColor: "#0000FF", // Blue
+                  fillOpacity: 0.15,
+                  map,
+                  center: { lat, lng },
+                  radius: 3940000 // ISS range
                 });
 
                 // Add custom markers with labels along the circumference of the circles
@@ -502,6 +514,17 @@
                   map: map,
                   label: {
                     text: "RS-44", // Label text for circle3
+                    color: "black", // Label text color
+                    fontSize: "12px", // Label font size
+                    fontWeight: "bold" // Label font weight
+                  }
+                });
+                
+                const label4 = new google.maps.Marker({
+                  position: google.maps.geometry.spherical.computeOffset(circle4.getCenter(), circle3.getRadius(), 225), // Position the marker along the circumference
+                  map: map,
+                  label: {
+                    text: "ISS", // Label text for circle3
                     color: "black", // Label text color
                     fontSize: "12px", // Label font size
                     fontWeight: "bold" // Label font weight
