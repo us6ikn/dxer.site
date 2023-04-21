@@ -265,7 +265,7 @@
           });
           
           // Load the announcements data from the file
-          fetch('out_leosat_fm_step07.txt')
+          fetch('announcements_filtered.txt')
             .then(response => response.text())
             .then(data => {
               // Split the data into individual announcements
@@ -301,7 +301,7 @@
             }
           });
 
-          fetch("output_filtered.txt")
+          fetch("out_leosat_fm_step07.txt")
             .then(response => response.text())
             .then(data => {
               const regex = /Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
@@ -378,7 +378,7 @@
 
                 // Extract the coordinates and time from the announcement
                             const coordinates = announcement.match(/Coordinates: \((.*), (.*)\)/);
-                            const timeString = announcement.match(/Date: ([^,]*)/)[1];
+                            const timeString = announcement.match(/Time: ([^,]*)/)[1];
 
                             if (!coordinates || !timeString) {
                               continue;
