@@ -378,7 +378,7 @@
 
                 // Extract the coordinates and time from the announcement
                             const coordinates = announcement.match(/Coordinates: \((.*), (.*)\)/);
-                            const timeString = announcement.match(/Time: ([^,]*)/)[1];
+                            const timeString = announcement.match(/Date: ([^,]*)/)[1];
 
                             if (!coordinates || !timeString) {
                               continue;
