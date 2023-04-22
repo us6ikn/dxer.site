@@ -314,7 +314,7 @@
           fetch("out_leosat_fm_step07.txt")
             .then(response => response.text())
             .then(data => {
-              const regex = /Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
+              const regex = /Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\), TRP: ([^,]+)/g;
               const callsigns = {};
               let match;
               while ((match = regex.exec(data)) !== null) {
@@ -324,6 +324,7 @@
                 const latestTime = Date.parse(match[1]);
                 const lat = parseFloat(match[4]);
                 const lng = parseFloat(match[5]);
+                const TRP = parseFloat(match[6]);
                 const key = `${lat},${lng}`;
                 if (!callsigns[key]) {
                   callsigns[key] = [];
