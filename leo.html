@@ -525,6 +525,17 @@
                   radius: 5712000 // AO-91 range
                 });
 
+                // Create a circle with 8000 km radius around the gridLocator
+                const circle7 = new google.maps.Circle({
+                  strokeColor: "#808080",
+                  strokeOpacity: 0.4,
+                  strokeWeight: 2,
+                  fillColor: "#808080",
+                  fillOpacity: 0.0,
+                  map,
+                  center: { lat, lng },
+                  radius: 13000000 // IO-117 range
+                });
 
                 // Add custom markers with labels along the circumference of the circles
                 const label1 = new google.maps.Marker({
@@ -589,6 +600,17 @@
                     text: "AO-91", // Label text for circle3
                     color: "black", // Label text color
                     fontSize: "12px", // Label font size
+                    fontWeight: "bold" // Label font weight
+                  }
+                });
+                
+                const label7 = new google.maps.Marker({
+                  position: google.maps.geometry.spherical.computeOffset(circle7.getCenter(), circle7.getRadius(), 215), // Position the marker along the circumference
+                  map: map,
+                  label: {
+                    text: "IO-117", // Label text for circle3
+                    color: "gray", // Label text color
+                    fontSize: "8px", // Label font size
                     fontWeight: "bold" // Label font weight
                   }
                 });
