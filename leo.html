@@ -329,26 +329,19 @@
                 if (!callsigns[key]) {
                   callsigns[key] = [];
                 }
-                if (Date.now() - latestTime <= 90 * 24 * 60 * 60 * 1000 && TRP === 'F') {
-                  callsigns[key].push({
-                    callsign: callsign,
-                    dxgridlocator: dxgridlocator,
+                if (Date.now() - latestTime <= 90 * 24 * 60 * 60 * 1000) {
+                    callsigns[key].push({
+                      callsign: callsign,
+                      dxgridlocator: dxgridlocator,
                     markerIcon: "img/fmicon_90.png"
                   });
-                } else if (Date.now() - latestTime > 90 * 24 * 60 * 60 * 1000 && TRP === 'F') {
-                  callsigns[key].push({
-                    callsign: callsign,
-                    dxgridlocator: dxgridlocator,
+                } else {
+                    callsigns[key].push({
+                      callsign: callsign,
+                      dxgridlocator: dxgridlocator,
                     markerIcon: "img/fmicon_m90.png"
                   });
-                } else if (Date.now() - latestTime <= 90 * 24 * 60 * 60 * 1000 && TRP === 'L') {
-                  callsigns[key].push({
-                    callsign: callsign,
-                    dxgridlocator: dxgridlocator,
-                    markerIcon: "img/m_30.png"
-                  });
                 }
-
               }
               
               
