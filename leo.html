@@ -324,7 +324,7 @@
                 const latestTime = Date.parse(match[1]);
                 const lat = parseFloat(match[4]);
                 const lng = parseFloat(match[5]);
-                const TRP = parseFloat(match[6]);
+                const TRP = match[6];
                 const key = `${lat},${lng}`;
                 if (!callsigns[key]) {
                   callsigns[key] = [];
@@ -342,7 +342,12 @@
                     dxgridlocator: dxgridlocator,
                     markerIcon: "img/fmicon_m90.png"
                   });
-             
+                } else if (Date.now() - latestTime <= 90 * 24 * 60 * 60 * 1000 && TRP === 'L') {
+                  callsigns[key].push({
+                    callsign: callsign,
+                    dxgridlocator: dxgridlocator,
+                    markerIcon: "img/m_30.png"
+                  });
                 }
 
               }
