@@ -318,14 +318,7 @@
                 if (!callsigns[key]) {
                   callsigns[key] = [];
                 }
-                if (Date.now() - earliestTime <= 7 * 24 * 60 * 60 * 1000) {
-                    callsigns[key].push({
-                      callsign: callsign,
-                      dxgridlocator: dxgridlocator,
-                      markerIcon: "img/m_new.png"
-                    });
-
-                } else if (Date.now() - earliestTime > 7 * 24 * 60 * 60 * 1000 && Date.now() - latestTime <= 90 * 24 * 60 * 60 * 1000) {
+                if (Date.now() - earliestTime > 7 * 24 * 60 * 60 * 1000 && Date.now() - latestTime <= 90 * 24 * 60 * 60 * 1000) {
                     callsigns[key].push({
                       callsign: callsign,
                       dxgridlocator: dxgridlocator,
@@ -335,7 +328,7 @@
                     callsigns[key].push({
                       callsign: callsign,
                       dxgridlocator: dxgridlocator,
-                    markerIcon: "img/fmicon_90.png"
+                    markerIcon: "img/fmicon_m90.png"
                   });
                 }
               }
