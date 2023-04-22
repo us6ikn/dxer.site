@@ -338,7 +338,7 @@
                 if (!callsigns[key]) {
                   callsigns[key] = [];
                 }
-                if (Date.now() - earliestTime > 7 * 24 * 60 * 60 * 1000 && Date.now() - latestTime <= 90 * 24 * 60 * 60 * 1000) {
+                if (Date.now() - latestTime <= 90 * 24 * 60 * 60 * 1000) {
                     callsigns[key].push({
                       callsign: callsign,
                       dxgridlocator: dxgridlocator,
@@ -353,37 +353,6 @@
                 }
               }
               
-              fetch("out_leosat_fm_step07_1.txt")
-                .then(response => response.text())
-                .then(data => {
-                  const regex = /Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
-                  const callsigns1 = {};
-                  let match;
-                  while ((match = regex.exec(data)) !== null) {
-                    const callsign = match[2];
-                    const dxgridlocator = match[3];
-                    const earliestTime = Date.parse(match[1]);
-                    const latestTime = Date.parse(match[1]);
-                    const lat = parseFloat(match[4]);
-                    const lng = parseFloat(match[5]);
-                    const key = `${lat},${lng}`;
-                    if (!callsigns1[key]) {
-                      callsigns1[key] = [];
-                    }
-                    if (Date.now() - earliestTime > 7 * 24 * 60 * 60 * 1000 && Date.now() - latestTime <= 90 * 24 * 60 * 60 * 1000) {
-                        callsigns1[key].push({
-                          callsign: callsign,
-                          dxgridlocator: dxgridlocator,
-                        markerIcon: "img/m_30.png"
-                      });
-                    } else {
-                        callsigns1[key].push({
-                          callsign: callsign,
-                          dxgridlocator: dxgridlocator,
-                        markerIcon: "img/m_m30.png"
-                      });
-                    }
-                  }
               
               
               for (const key in callsigns) {
@@ -399,20 +368,6 @@
                     scaledSize: new google.maps.Size(20, 20)
                   }
                 });
-                
-                for (const key in callsigns1) {
-                  const [lat, lng] = key.split(",");
-                  const markers = callsigns1[key];
-                  const markerIcon = markers[0].markerIcon;
-                  const marker = new google.maps.Marker({
-                    position: { lat: parseFloat(lat), lng: parseFloat(lng) },
-                    map: map,
-                    title: markers.map(m => m.callsign).join(", "),
-                    icon: {
-                      url: markerIcon,
-                      scaledSize: new google.maps.Size(20, 20)
-                    }
-                  });
                 
                 let content = markers.map(m => {
                   if (!gridLocator) {
