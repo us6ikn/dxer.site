@@ -328,7 +328,7 @@
                 if (!callsigns[key]) {
                   callsigns[key] = [];
                 }
-                if (Date.now() - latestTime <= 90 * 24 * 60 * 60 * 1000) {
+                if (Date.now() - latestTime <= 90 * 24 * 60 * 60 * 1000 && trp === 'F') {
                     callsigns[key].push({
                       callsign: callsign,
                       dxgridlocator: dxgridlocator,
