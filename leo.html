@@ -325,7 +325,7 @@
                 const latestTime = Date.parse(match[1]);
                 const lat = parseFloat(match[4]);
                 const lng = parseFloat(match[5]);
-                const TRP = match[6];
+                const trp = match[6];
                 console.log(`TRP value is ${trp}`);
                 const key = `${lat},${lng}`;
                 if (!callsigns[key]) {
