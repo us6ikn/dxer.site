@@ -311,11 +311,10 @@
             }
           });
 
-          fetch("combined.txt")
+          fetch("out_leosat_fm_step07.txt")
             .then(response => response.text())
             .then(data => {
-            const regex = /^Date: (\d{4}-\d{2}-\d{2}), Callsign: (\w+), Grid locator: (\w+), Coordinates: \((\d+\.\d+), (-?\d+\.\d+)\), TRP: ([A-Z])$/;
-
+              const regex = /Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
               const callsigns = {};
               let match;
               while ((match = regex.exec(data)) !== null) {
@@ -325,8 +324,6 @@
                 const latestTime = Date.parse(match[1]);
                 const lat = parseFloat(match[4]);
                 const lng = parseFloat(match[5]);
-                const trp = match[6];
-                console.log(`TRP value is ${trp}`);
                 const key = `${lat},${lng}`;
                 if (!callsigns[key]) {
                   callsigns[key] = [];
@@ -345,8 +342,6 @@
                   });
                 }
               }
-              
-              
               
               for (const key in callsigns) {
                 const [lat, lng] = key.split(",");
