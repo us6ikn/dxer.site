@@ -346,12 +346,12 @@
                           dxgridlocator: dxgridlocator,
                         markerIcon: "img/m_30.png"
                       });
-                } else {
-                    callsigns[key].push({
-                      callsign: callsign,
-                      dxgridlocator: dxgridlocator,
-                    markerIcon: "img/m_m30.png"
-                  });
+                } else if (Date.now() - latestTime > 90 * 24 * 60 * 60 * 1000 && trp === 'L') {
+                        callsigns[key].push({
+                          callsign: callsign,
+                          dxgridlocator: dxgridlocator,
+                        markerIcon: "img/m_m30.png"
+                      });
                 }
               }
               
