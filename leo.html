@@ -314,7 +314,7 @@
           fetch("combined.txt")
             .then(response => response.text())
             .then(data => {
-                const regex = /Date: ([^|]+)\| Callsign: ([^|]+)\| Grid locator: ([^|]+)\| Coordinates: \(([^,]+), ([^)]+)\)\| TRP: ([^|\n]+)/g;
+            const regex = /^Date: (\d{4}-\d{2}-\d{2}), Callsign: (\w+), Grid locator: (\w+), Coordinates: \((\d+\.\d+), (-?\d+\.\d+)\), TRP: ([A-Z])$/;
 
               const callsigns = {};
               let match;
