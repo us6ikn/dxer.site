@@ -311,7 +311,7 @@
             }
           });
 
-          fetch("combined.txt")
+          fetch("output_filtered1.txt")
             .then(response => response.text())
             .then(data => {
               const regex = /TRP: ([^,]+), Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
