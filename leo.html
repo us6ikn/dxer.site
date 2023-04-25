@@ -311,10 +311,10 @@
             }
           });
 
-          fetch("out_leosat_combined_step03.txt")
+          fetch("out_leosat_combined_step04.txt")
             .then(response => response.text())
             .then(data => {
-              const regex = /TRP: ([^,]+), Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
+              const regex = /TRP: ([^,]+), Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coord: \(([^,]+), ([^)]+)\)/g;
               const callsigns = {};
               let match;
               while ((match = regex.exec(data)) !== null) {
