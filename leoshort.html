@@ -1,176 +1,65 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-    <meta name="description" content="LEO SAT Observer" />
-    <meta charset="utf-8">
-    <title>LEO SAT Observer</title>
-    <style>
-      html, body {
-        height: 100%;
-        padding: 0;
-        margin: 0;
-        }
-      #map {
-       height: 100%;
-       }
-    </style>
-    <style>
-        * {
-          outline: none !important;
-        }
-    </style>
-  </head>
-  <body>
-      <div class="floating">
-        <label for="grid-locator">Enter your Grid:</label>
-        <input type="text" id="grid-locator" placeholder="e.g. JO89tt" maxlength="6" style="width: 68px;">
-        <button onclick="initMap(document.getElementById('grid-locator').value); document.getElementById('kml-layer-toggle').checked = false;">Plot your Range</button>
-          <img src="img/AO07logo.png" alt="LEO SAT Observer logo" style="vertical-align: middle; margin-left: 5px; width: 20px;">
-              <span style="position: relative; display: inline-block; font-family: Arial, sans-serif; font-weight: bold; letter-spacing: 1px; margin-left: 5px; margin-top: 10px;">
-                LEO SAT Observer
-                <sup style="position: absolute; top: -7px; right: 0; font-size: 9px; font-family: Arial, sans-serif; font-weight: normal; letter-spacing: 0px;">by SA5IKN</sup>
-              </span>
-        </div>
-      </div>
-
-
-    <div id="map"></div>
-    <script>
-      var map;
-
-      function calculateCoordinates(gridLocator) {
-          // Get the grid locator from user input and convert to uppercase
-          var gridLocator = document.getElementById("grid-locator").value.toUpperCase();
-
-          // Force the first two characters to be uppercase
-          gridLocator = gridLocator.substr(0,2).toUpperCase() + gridLocator.substr(2);
-
-          // Force the last two characters to be lowercase
-          gridLocator = gridLocator.substr(0,4) + gridLocator.substr(4).toLowerCase();
-
-          // Use regular expression to validate the grid locator format
-          var gridLocatorPattern = /^([A-R]{2}\d{2}[a-z]{2})([0-9]*[a-z]*)?$/;
-          if (!gridLocatorPattern.test(gridLocator)) {
-              alert("Invalid grid locator format. Please enter a valid 6-character grid locator.");
-              return;
+<head>
+  <title>Google Map Example</title>
+  <script>
+    function initMap() {
+      // Create a new map centered on a specific location
+      var map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: 0, lng: 0},
+        zoom: 2
+      });
+      
+      // Read data from out_leosat_fm_step07.txt and plot markers on the map
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', 'out_leosat_fm_step07.txt');
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          var data = xhr.responseText.split('\n');
+          for (var i = 0; i < data.length; i++) {
+            var line = data[i].split(', ');
+            var date = new Date(line[0]);
+            var callsign = line[1];
+            var gridLocator = line[2];
+            var latLng = {lat: parseFloat(line[3].substring(1, line[3].indexOf(','))), lng: parseFloat(line[3].substring(line[3].indexOf(',') + 2, line[3].length - 1))};
+            var marker = new google.maps.Marker({
+              position: latLng,
+              map: map,
+              icon: (Date.now() - date.getTime() <= 90 * 24 * 60 * 60 * 1000) ? 'img/fmicon_90.png' : 'img/fmicon_m90.png'
+            });
           }
-          // Calculate the latitude and longitude of the grid locator
-          var lat1 = (gridLocator.charCodeAt(1) - 65) * 10;
-          var lat2 = ((gridLocator.charCodeAt(5) - 97)/24) +  (1 / 48) - 90;
-          var lat3 = parseInt(gridLocator.charAt(3));
-          var latitude = lat1 + lat3 + lat2;
-
-          var lon1 = ((gridLocator.charCodeAt(0) - 65) * 20);
-          var lon2 = parseInt(gridLocator.charAt(2)) * 2;
-          var lon3 = ((gridLocator.charCodeAt(4) - 97) / 12) + (1/24);
-          var longitude = lon1 + lon2 + lon3 - 180;
-
-          return { lat: latitude, lng: longitude };
-      }
+        }
+      };
+      xhr.send();
       
-      function toggleFloatingWindow() {
-        var content = document.querySelector('.floating-window .content');
-        content.classList.toggle('show');
-      }
-
-      
-      function initMap(gridLocator) {
-          map = new google.maps.Map(document.getElementById("map"), {
-            zoom: 2,
-            center: { lat: 0, lng: 0 },
-            mapTypeControl: false,
-            streetViewControl: false,
-            fullscreenControl: false
-          });
-              
-        let openInfoWindow = null; // keep track of the currently open info window
-
-          const infowindow = new google.maps.InfoWindow();
-
-          fetch("combined.txt")
-            .then(response => response.text())
-            .then(data => {
-              const regex = /TRP: ([^,]+), Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
-              const callsigns = {};
-              let match;
-              while ((match = regex.exec(data)) !== null) {
-                const callsign = match[3];
-                const dxgridlocator = match[4];
-                const trp = match[1];
-                const latestTime = Date.parse(match[2]);
-                const lat = parseFloat(match[5]);
-                const lng = parseFloat(match[6]);
-                const key = `${lat},${lng}`;
-                if (!callsigns[key]) {
-                  callsigns[key] = [];
-                }
-                if (Date.now() - latestTime <= 90 * 24 * 60 * 60 * 1000 && trp == 'F') {
-                    callsigns[key].push({
-                      callsign: callsign,
-                      dxgridlocator: dxgridlocator,
-                    markerIcon: "img/fmicon_90.png"
-                  });
-                } else if (Date.now() - latestTime > 90 * 24 * 60 * 60 * 1000 && trp == 'F') {
-                        callsigns[key].push({
-                          callsign: callsign,
-                          dxgridlocator: dxgridlocator,
-                        markerIcon: "img/fmicon_90.png"
-                      });
-                } else if (Date.now() - latestTime <= 90 * 24 * 60 * 60 * 1000 && trp == 'L') {
-                        callsigns[key].push({
-                          callsign: callsign,
-                          dxgridlocator: dxgridlocator,
-                        markerIcon: "img/m_30.png"
-                      });
-                } else if (Date.now() - latestTime > 90 * 24 * 60 * 60 * 1000 && trp == 'L') {
-                        callsigns[key].push({
-                          callsign: callsign,
-                          dxgridlocator: dxgridlocator,
-                        markerIcon: "img/m_m30.png"
-                      });
-                }
-              }
-              
-              for (const key in callsigns) {
-                const [lat, lng] = key.split(",");
-                const markers = callsigns[key];
-                const markerIcon = markers[0].markerIcon;
-                const marker = new google.maps.Marker({
-                  position: { lat: parseFloat(lat), lng: parseFloat(lng) },
-                  map: map,
-                  title: markers.map(m => m.callsign).join(", "),
-                  icon: {
-                    url: markerIcon,
-                    scaledSize: new google.maps.Size(20, 20)
-                  }
-                });
-                
-                let content = markers.map(m => {
-                  if (!gridLocator) {
-                    return `<a href="#" onclick="alert('Enter your Grid Locator and click Plot your Range first'); return false;">${m.callsign}</a>`;
-                  }
-                  return `<a href="https://www.satmatch.com/satellite/IO-117/obs1/${gridLocator}/obs2/${m.dxgridlocator}?duration_hrs=48">${m.callsign}</a>`;
-                }).join(", ");
-                
-                content = `<div>${content}</div>`;
-                marker.addListener("click", () => {
-                    // Close the currently open info window
-                    if (openInfoWindow) {
-                      openInfoWindow.close();
-                    }
-                  infowindow.setContent(content);
-                  infowindow.open(map, marker);
-                });
-              }
-        
-      }
-    </script>
-    
-    <script async
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap&libraries=geometry">
-    </script>
-
-  </body>
+      // Read data from out_leosat_fm_step07_1.txt and plot markers on the map
+      var xhr2 = new XMLHttpRequest();
+      xhr2.open('GET', 'out_leosat_fm_step07_1.txt');
+      xhr2.onload = function() {
+        if (xhr2.status === 200) {
+          var data = xhr2.responseText.split('\n');
+          for (var i = 0; i < data.length; i++) {
+            var line = data[i].split(', ');
+            var date = new Date(line[0]);
+            var callsign = line[1];
+            var gridLocator = line[2];
+            var latLng = {lat: parseFloat(line[3].substring(1, line[3].indexOf(','))), lng: parseFloat(line[3].substring(line[3].indexOf(',') + 2, line[3].length - 1))};
+            var marker = new google.maps.Marker({
+              position: latLng,
+              map: map,
+              icon: (Date.now() - date.getTime() <= 90 * 24 * 60 * 60 * 1000) ? 'img/m_30.png' : 'img/m_m30.png'
+            });
+          }
+        }
+      };
+      xhr2.send();
+    }
+  </script>
+</head>
+<body onload="initMap()">
+  <div id="map" style="height: 400px;"></div>
+  <script async
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap&libraries=geometry">
+  </script>
+</body>
 </html>
-
