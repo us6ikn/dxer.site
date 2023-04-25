@@ -311,7 +311,7 @@
             }
           });
 
-          fetch("out_leosat_combined_step04.txt")
+          fetch("output_prefiltered_leo.txt")
             .then(response => response.text())
             .then(data => {
               const regex = /TRP: ([^,]+), Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coord: \(([^,]+), ([^)]+)\)/g;
