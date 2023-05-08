@@ -166,7 +166,7 @@
       <div class="floating">
         <label for="grid-locator">Enter your Grid:</label>
         <input type="text" id="grid-locator" placeholder="e.g. JO89tt" maxlength="6" style="width: 68px;">
-        <button onclick="initMap(document.getElementById('grid-locator').value); document.getElementById('kml-layer-toggle').checked = false;">Plot your Range</button>
+        <button onclick="initMap(document.getElementById('grid-locator').value); document.getElementById('kml-layer-toggle').checked = false;">Plot your LEO+MEO Range</button>
         <div class="checkbox-container" style="display: flex; align-items: center;">
           <input type="checkbox" style="margin-top: 10px;" id="kml-layer-toggle">
           <label for="kml-layer-toggle" style="margin-top: 10px;">CQ Zones</label>
@@ -536,7 +536,17 @@
               }
 
             });
-
+            // Create a circle with 5000 km radius around the gridLocator
+            const circle10 = new google.maps.Circle({
+              strokeColor: "#FF0000", // Red
+              strokeOpacity: 0.4,
+              strokeWeight: 2,
+              fillColor: "#FF0000", // Red
+              fillOpacity: 0.05,
+              map,
+              center: { 0, 0 },
+              radius: 4970000 // SO-50 range
+            });
         
       }
     </script>
