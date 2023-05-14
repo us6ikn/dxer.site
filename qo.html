@@ -204,9 +204,6 @@
     <script>
       var map;
       var kmlLayer;
-      
-      // Define the URL of your blinking gif
-      const BLINKING_GIF_URL = 'img/rover1.gif?v=1';
 
       function calculateCoordinates(gridLocator) {
           // Get the grid locator from user input and convert to uppercase
@@ -306,6 +303,12 @@
                       dxgridlocator: dxgridlocator,
                     markerIcon: "img/FT8.png"
                   });
+                    else if (trp == 'S') {
+                        callsigns[key].push({
+                          callsign: callsign,
+                          dxgridlocator: dxgridlocator,
+                        markerIcon: "img/ssb.png"
+                      });
                 } else if (Date.now() - latestTime <= 90 * 24 * 60 * 60 * 1000 && trp == 'C') {
                         callsigns[key].push({
                           callsign: callsign,
