@@ -164,7 +164,7 @@
   </head>
   <body>
       <div class="floating">
-        <label for="grid-locator">Enter Grid:</label>
+        <label style="font-size: 9px;" for="grid-locator">Enter Grid:</label>
         <input type="text" id="grid-locator" placeholder="e.g. JO89tt" maxlength="6" style="width: 68px;">
         <button onclick="initMap(document.getElementById('grid-locator').value); document.getElementById('kml-layer-toggle').checked = false;">Plot LEO+MEO Range</button>
         <div class="checkbox-container" style="display: flex; align-items: center;">
@@ -189,10 +189,10 @@
         <button class="toggle-button"></button>
         <button class="arrow-button" onclick="toggleFloatingWindow()">&#x25b6;</button>
         <div class="content">
-            <div><img src="img/cw_30.png" alt="" style="width:15px;height:15px;"> CW</div>
-            <div><img src="img/ssb.png" alt="" style="width:15px;height:15px;"> SSB</div>
-            <div><img src="img/FT8.png" alt="" style="width:15px;height:15px;"> FT8</div>
-            <div><p style="font-size: smaller;">&nbsp;&nbsp;&nbsp;&nbsp;Data sources (with permission): <br> &nbsp;&nbsp;&nbsp;&nbsp;SSB - DX Cluster <br> &nbsp;&nbsp;&nbsp;&nbsp;CW - <a href="http://aar29.free.fr/sat/indexlogin.html">DF2ET CW Skimmer</a><br> &nbsp;&nbsp;&nbsp;&nbsp;FT8 - <a href="http://ft8-dash.ike.net.br">PU3IKE FT8 Skimmer</a><br> &nbsp;&nbsp;&nbsp;&nbsp;Location data: <a href="http://hamqth.com">HamQTH.com</a></p></div>
+            <div><img src="img/cw_30.png" alt="" style="width:15px;height:15px;"> CW station</div>
+            <div><img src="img/ssb.png" alt="" style="width:15px;height:15px;"> SSB station</div>
+            <div><img src="img/FT8.png" alt="" style="width:15px;height:15px;"> FT8 station</div>
+            <div><p style="font-size: smaller;">&nbsp;&nbsp;&nbsp;&nbsp;Data sources (with permission): <br> &nbsp;&nbsp;&nbsp;&nbsp;CW - <a href="http://aar29.free.fr/sat/indexlogin.html">DF2ET CW Skimmer</a><br> &nbsp;&nbsp;&nbsp;&nbsp;FT8 - <a href="http://ft8-dash.ike.net.br">PU3IKE FT8 Skimmer</a><br> &nbsp;&nbsp;&nbsp;&nbsp;SSB - DX Cluster <br> &nbsp;&nbsp;&nbsp;&nbsp;Location data: <a href="http://hamqth.com">HamQTH.com</a></p></div>
             <div class="sharethis-inline-share-buttons"></div>
           </div>
         
