@@ -306,20 +306,11 @@
                     markerIcon: "img/ssb.png"
                   });
                 } else if (trp === 'C') {
-                  const timeDifference = Date.now() - latestTime;
-                  if (timeDifference <= 90 * 24 * 60 * 60 * 1000) {
                     callsigns[key].push({
                       callsign: callsign,
                       markerIcon: "img/cw_30.png"
                     });
-                  } else {
-                    callsigns[key].push({
-                      callsign: callsign,
-                      markerIcon: "img/cw_m30.png"
-                    });
-                  }
                 }
-
               }
               
               for (const key in callsigns) {
