@@ -444,6 +444,9 @@
                   center: { lat, lng },
                   radius: 13000000 // Fixed radius value
                 });
+                
+                circle.setMap(map); // Set the circle on the map
+                circle.setOptions({ clickable: false }); // Make the circle transparent to mouse events
               } else {
                 
               }
