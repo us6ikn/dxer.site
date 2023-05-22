@@ -254,7 +254,7 @@
           const infowindow = new google.maps.InfoWindow();
           
           kmlLayer = new google.maps.KmlLayer('https://dxer.site/WAZ.kml?v=1.3', {
-            suppressInfoWindows: true,
+            suppressInfoWindows: false,
             preserveViewport: true,
             map: null // set map to null initially
           });
@@ -341,7 +341,6 @@
                     }
                   infowindow.setContent(content);
                   infowindow.open(map, marker);
-                  infowindow.setZIndex(9999); // Set a higher zIndex value
                 });
               }
               
