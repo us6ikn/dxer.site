@@ -381,6 +381,9 @@
                   center: { lat, lng },
                   radius: 4970000 // SO-50 range
                 });
+                
+                circle1.setMap(map); // Set the circle on the map
+                circle1.setOptions({ clickable: false }); // Make the circle transparent to mouse events
 
                 // Create a circle with 7000 km radius around the gridLocator
                 const circle2 = new google.maps.Circle({
@@ -393,6 +396,9 @@
                   center: { lat, lng },
                   radius: 7502000 // FO-29 range
                 });
+                
+                circle2.setMap(map); // Set the circle on the map
+                circle2.setOptions({ clickable: false }); // Make the circle transparent to mouse events
 
                 // Create a circle with 8000 km radius around the gridLocator
                 const circle3 = new google.maps.Circle({
@@ -406,6 +412,9 @@
                   radius: 8042000 // RS-44 range
                 });
                 
+                circle3.setMap(map); // Set the circle on the map
+                circle3.setOptions({ clickable: false }); // Make the circle transparent to mouse events
+                
                 // Create a circle with 8000 km radius around the gridLocator
                 const circle4 = new google.maps.Circle({
                   strokeColor: "#FF0000",
@@ -417,6 +426,9 @@
                   center: { lat, lng },
                   radius: 3940000 // ISS range
                 });
+                
+                circle4.setMap(map); // Set the circle on the map
+                circle4.setOptions({ clickable: false }); // Make the circle transparent to mouse events
                 
                 // Create a circle with 8000 km radius around the gridLocator
                 const circle5 = new google.maps.Circle({
@@ -430,6 +442,9 @@
                   radius: 7907000 // AO-07 range
                 });
                 
+                circle5.setMap(map); // Set the circle on the map
+                circle5.setOptions({ clickable: false }); // Make the circle transparent to mouse events
+                
                 // Create a circle with 8000 km radius around the gridLocator
                 const circle6 = new google.maps.Circle({
                   strokeColor: "#FF0000",
@@ -441,6 +456,9 @@
                   center: { lat, lng },
                   radius: 5712000 // AO-91 range
                 });
+                
+                circle6.setMap(map); // Set the circle on the map
+                circle6.setOptions({ clickable: false }); // Make the circle transparent to mouse events
 
                 // Create a circle with 8000 km radius around the gridLocator
                 const circle7 = new google.maps.Circle({
@@ -453,6 +471,9 @@
                   center: { lat, lng },
                   radius: 13000000 // IO-117 range
                 });
+                
+                circle7.setMap(map); // Set the circle on the map
+                circle7.setOptions({ clickable: false }); // Make the circle transparent to mouse events
 
                 // Add custom markers with labels along the circumference of the circles
                 const label1 = new google.maps.Marker({
