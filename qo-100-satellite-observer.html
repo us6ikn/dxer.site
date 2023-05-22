@@ -273,25 +273,12 @@
           kmlLayer.set('strokeColor', '#000000'); // set line color to red
                       kmlLayer.set('strokeWeight', 2); // set line width to 2 pixels
                       kmlLayer.set('fillOpacity', 0); // set fill opacity to 0 (transparent)
-          kmlLayer.addListener('click', function(event) {
-            var zoneNumber = event.featureData.infoWindowHtml;
-            var infowindow = new google.maps.InfoWindow({
-              content: zoneNumber,
-            });
-            infowindow.setPosition(event.latLng);
-            infowindow.open(map);
-          });
+          
 
           var kmlLayerToggle = document.getElementById('kml-layer-toggle');
           kmlLayerToggle.addEventListener('change', function() {
             if (kmlLayerToggle.checked) {
               kmlLayer.setMap(map);
-              var zoneNumber = event.featureData.infoWindowHtml;
-              var infowindow = new google.maps.InfoWindow({
-                content: zoneNumber,
-              });
-              infowindow.setPosition(event.latLng);
-              infowindow.open(map);
             } else {
               kmlLayer.setMap(null);
             }
@@ -359,6 +346,14 @@
                     }
                   infowindow.setContent(content);
                   infowindow.open(map, marker);
+                });
+                kmlLayer.addListener('click', function(event) {
+                  var zoneNumber = event.featureData.infoWindowHtml;
+                  var infowindow = new google.maps.InfoWindow({
+                    content: zoneNumber,
+                  });
+                  infowindow.setPosition(event.latLng);
+                  infowindow.open(map);
                 });
               }
               
