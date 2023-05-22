@@ -261,8 +261,10 @@
             radius: 9050000 // QO-100 range
           });
           
-          // Set the zIndex property of the circle
-            circle10.setOptions({ zIndex: -1 });
+          // Adjust the stacking order of elements using CSS
+            const mapDiv = map.getDiv();
+            const mapOverlay = mapDiv.querySelector("div:first-child");
+            mapOverlay.style.zIndex = -1;
               
         let openInfoWindow = null; // keep track of the currently open info window
 
