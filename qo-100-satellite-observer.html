@@ -260,11 +260,6 @@
             center: {lat: 0.0, lng: 25.8110},
             radius: 9050000 // QO-100 range
           });
-          
-          // Adjust the stacking order of elements using CSS
-            const mapDiv = map.getDiv();
-            const mapOverlay = mapDiv.querySelector("div:first-child");
-            mapOverlay.style.zIndex = 1;
               
         let openInfoWindow = null; // keep track of the currently open info window
 
@@ -291,6 +286,12 @@
           kmlLayerToggle.addEventListener('change', function() {
             if (kmlLayerToggle.checked) {
               kmlLayer.setMap(map);
+              var zoneNumber = event.featureData.infoWindowHtml;
+              var infowindow = new google.maps.InfoWindow({
+                content: zoneNumber,
+              });
+              infowindow.setPosition(event.latLng);
+              infowindow.open(map);
             } else {
               kmlLayer.setMap(null);
             }
