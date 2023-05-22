@@ -192,7 +192,7 @@
             <div><img src="img/cw_30.png" alt="" style="width:15px;height:15px;"> CW station</div>
             <div><img src="img/ssb.png" alt="" style="width:15px;height:15px;"> SSB station</div>
             <div><img src="img/FT8.png" alt="" style="width:15px;height:15px;"> FT8 station</div>
-            <div><p style="font-size: smaller;">&nbsp;&nbsp;&nbsp;&nbsp;Data sources (with permission): <br> &nbsp;&nbsp;&nbsp;&nbsp;CW - <a href="https://t.me/joinchat/UezUG1NgC9F8H_1i">DF2ET CW Skimmer</a><br> &nbsp;&nbsp;&nbsp;&nbsp;FT8 - <a href="http://ft8-dash.ike.net.br">PU3IKE FT8 Skimmer</a><br> &nbsp;&nbsp;&nbsp;&nbsp;SSB - DX Cluster <br> &nbsp;&nbsp;&nbsp;&nbsp;Location data: <a href="http://hamqth.com">HamQTH.com</a></p></div>
+            <div><p style="font-size: smaller;">&nbsp;&nbsp;&nbsp;&nbsp;Data sources (with permission): <br> &nbsp;&nbsp;&nbsp;&nbsp;CW - <a href="https://twitter.com/flo_0_">DF2ET CW Skimmer</a><br> &nbsp;&nbsp;&nbsp;&nbsp;FT8 - <a href="http://ft8-dash.ike.net.br">PU3IKE FT8 Skimmer</a><br> &nbsp;&nbsp;&nbsp;&nbsp;SSB - DX Cluster <br> &nbsp;&nbsp;&nbsp;&nbsp;Location data: <a href="http://hamqth.com">HamQTH.com</a></p></div>
             <div class="sharethis-inline-share-buttons"></div>
           </div>
         
@@ -531,7 +531,12 @@
               center: {lat: 0.0, lng: 25.8110},
               radius: 9050000 // QO-100 range
             });
-
+            // Add a listener to the marker
+            marker.addListener('click', () => {
+              // Close the currently open info window
+              if (openInfoWindow) {
+                openInfoWindow.close();
+              }
         
       }
     </script>
