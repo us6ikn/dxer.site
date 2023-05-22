@@ -279,12 +279,7 @@
             }
           });
           
-          // Add a listener to the marker
-          marker.addListener('click', () => {
-            // Close the currently open info window
-            if (openInfoWindow) {
-              openInfoWindow.close();
-            }
+          
 
           fetch("output_filtered_qo100_h.txt")
             .then(response => response.text())
