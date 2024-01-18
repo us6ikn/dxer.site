@@ -498,17 +498,18 @@
                         },
                     });
 
+                    markers.push(marker);
                     // Add click event listener to show info window
                     marker.addListener('click', function () {
                         const infoWindow = new google.maps.InfoWindow({
-                            content: gridSquare,
+                            content: 'Maidenhead Grid Square: ' + gridSquare,
                         });
                         infoWindow.open(map, marker);
                     });
                 }
             }
         }
-        
+
         function removeMarkers() {
             // Remove all markers from the map and clear the array
             for (let i = 0; i < markers.length; i++) {
@@ -516,6 +517,7 @@
             }
             markers = [];
         }
+        
 
         function calculateGridSquare(latitude, longitude) {
             var field = String.fromCharCode(Math.floor((longitude + 180) / 20) + 65);
