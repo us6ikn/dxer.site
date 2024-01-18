@@ -497,7 +497,7 @@
                             scaledSize: new google.maps.Size(12, 14), // Adjust size as needed
                         },
                     });
-
+                    markers_g.push(marker);
                     // Add click event listener to show info window
                     marker.addListener('click', function () {
                         const infoWindow = new google.maps.InfoWindow({
@@ -507,6 +507,14 @@
                     });
                 }
             }
+        }
+        
+        function removeMarkers() {
+            // Remove all markers from the map and clear the array
+            for (let i = 0; i < markers_g.length; i++) {
+                markers_g[i].setMap(null);
+            }
+            markers_g = [];
         }
         
 
