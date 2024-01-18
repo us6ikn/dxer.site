@@ -32,12 +32,12 @@
 
         function addMarkers(map) {
             // Loop through Maidenhead Grids and add markers
-            // Adjust the range of latitude and longitude as per your requirement
+            // Adjust the range of latitude and longitude
             for (let lat = -90; lat < 90; lat += 1) {
                 for (let lng = -180; lng < 180; lng += 2) {
                     const gridSquare = calculateGridSquare(lat, lng);
                     const marker = new google.maps.Marker({
-                        position: { lat: lat+0.5, lng: lng+0.5 },
+                        position: { lat: lat+0.5, lng: lng+2 },
                         map: map,
                         title: gridSquare,
                         icon: {
