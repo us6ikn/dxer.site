@@ -12,15 +12,11 @@
                 zoom: 2,
             });
 
-            // Make the KML layer thinner
             const kmlLayer = new google.maps.KmlLayer({
-                url: 'https://dxer.site/maidenhead_gridsquares.kmz',
+                url: 'https://dxer.site/maidenhead_gridsquares.kmz', // Replace with the direct link to your KMZ file
                 map: map,
                 suppressInfoWindows: true,
                 preserveViewport: true,
-                options: {
-                    strokeWeight: 1, // Adjust the thickness as needed
-                },
             });
 
             // Event listener for KML layer status
@@ -41,7 +37,7 @@
                 for (let lng = -180; lng < 180; lng += 2) {
                     const gridSquare = calculateGridSquare(lat, lng);
                     const marker = new google.maps.Marker({
-                        position: { lat: lat + 0.5, lng: lng + 1 },
+                        position: { lat: lat+0.5, lng: lng+1 },
                         map: map,
                         title: gridSquare,
                         icon: {
