@@ -302,8 +302,6 @@
             }
           });
           
-          
-          
           // Make the KML layer thinner
           const kmlLayer1 = new google.maps.KmlLayer({
               url: 'https://dxer.site/maidenhead_gridsquares.kmz?v=1.0',
@@ -315,8 +313,7 @@
               },
           });
 
-          // Add markers for all Maidenhead Grids
-          addMarkers(map);
+          
           
           var kmlLayerToggle1 = document.getElementById('kml-layer-toggle_g');
           kmlLayerToggle1.addEventListener('change', function() {
@@ -324,6 +321,8 @@
               kmlLayer1.setMap(map);
             } else {
               kmlLayer1.setMap(null);
+              // Add markers for all Maidenhead Grids
+              addMarkers(map);
             }
           });
 
