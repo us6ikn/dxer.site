@@ -37,7 +37,7 @@
                 for (let lng = -180; lng < 180; lng += 2) {
                     const gridSquare = calculateGridSquare(lat, lng);
                     const marker = new google.maps.Marker({
-                        position: { lat: lat+0.5, lng: lng+2 },
+                        position: { lat: lat+0.5, lng: lng+1 },
                         map: map,
                         title: gridSquare,
                         icon: {
