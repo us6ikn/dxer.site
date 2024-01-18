@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,7 +13,7 @@
             });
 
             const kmlLayer = new google.maps.KmlLayer({
-                url: 'https://dxer.site/maidenhead_gridsquares.kmz', // Replace with the direct link to your KMZ file
+                url: 'https://dxer.site/maidenhead_gridsquares.kmz',
                 map: map,
                 suppressInfoWindows: true,
                 preserveViewport: true,
@@ -24,31 +23,40 @@
             google.maps.event.addListener(kmlLayer, 'status_changed', function () {
                 if (kmlLayer.getStatus() !== 'OK') {
                     console.error('KML Layer failed to load:', kmlLayer.getStatus());
+                } else {
+                    // Iterate over placemarks and add a label/marker at the midpoint
+                    const placemarks = kmlLayer.getDefaultViewport().data.Document.Placemark;
+                    for (const placemark of placemarks) {
+                        addLabelAtMidpoint(map, placemark);
+                    }
                 }
             });
 
-            // Event listener for click on the map
-            google.maps.event.addListener(map, 'click', function (event) {
-                displayGridName(event.latLng);
-            });
+            function addLabelAtMidpoint(map, placemark) {
+                const coordinates = placemark.LineString.coordinates.split(' ').map(coord => {
+                    const [lng, lat] = coord.split(',').map(parseFloat);
+                    return new google.maps.LatLng(lat, lng);
+                });
 
-            function displayGridName(latLng) {
-                // Convert latitude and longitude to Maidenhead grid name
-                const gridName = convertCoordinatesToGridName(latLng.lat(), latLng.lng());
+                // Calculate the midpoint
+                const midpoint = new google.maps.LatLngBounds(...coordinates).getCenter();
 
-                // Display the grid name (you can customize this part based on your needs)
-                alert('Maidenhead Grid Name: ' + gridName);
-            }
+                // Create a label with the name
+                const label = new google.maps.InfoWindow({
+                    content: placemark.name,
+                });
 
-            function convertCoordinatesToGridName(latitude, longitude) {
-                // Implement your logic to convert coordinates to Maidenhead grid name
-                // ...
+                // Create a marker at the midpoint
+                const marker = new google.maps.Marker({
+                    position: midpoint,
+                    map: map,
+                    title: placemark.name,
+                });
 
-                // For demonstration purposes, let's assume a simple conversion
-                const latIndex = Math.floor((latitude + 90) / 10) + 1;
-                const lonIndex = Math.floor((longitude + 180) / 20) + 1;
-
-                return String.fromCharCode(65 + lonIndex) + String.fromCharCode(65 + latIndex);
+                // Show the label when the marker is clicked
+                marker.addListener('click', function () {
+                    label.open(map, marker);
+                });
             }
         }
     </script>
@@ -62,5 +70,3 @@
     <div id="map"></div>
 </body>
 </html>
-
-
