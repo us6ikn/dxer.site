@@ -18,6 +18,13 @@
                 url: 'https://dxer.site/test.kml', // Replace with the path to your KML file
                 map: map,
             });
+            
+            google.maps.event.addListener(kmlLayer, 'status_changed', function () {
+                        if (kmlLayer.getStatus() !== 'OK') {
+                            console.error('KML Layer failed to load:', kmlLayer.getStatus());
+                        }
+                    });
+            
         }
     </script>
     <style>
