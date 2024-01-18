@@ -24,15 +24,15 @@
                 if (kmlLayer.getStatus() !== 'OK') {
                     console.error('KML Layer failed to load:', kmlLayer.getStatus());
                 } else {
-                    // Iterate over placemarks and add a label/marker at the midpoint
+                    // Iterate over placemarks and add a label at the midpoint
                     const placemarks = kmlLayer.getDefaultViewport().data.Document.Placemark;
                     for (const placemark of placemarks) {
-                        addLabelAtMidpoint(map, placemark);
+                        addTextLabelAtMidpoint(map, placemark);
                     }
                 }
             });
 
-            function addLabelAtMidpoint(map, placemark) {
+            function addTextLabelAtMidpoint(map, placemark) {
                 const coordinates = placemark.LineString.coordinates.split(' ').map(coord => {
                     const [lng, lat] = coord.split(',').map(parseFloat);
                     return new google.maps.LatLng(lat, lng);
@@ -41,28 +41,58 @@
                 // Calculate the midpoint
                 const midpoint = new google.maps.LatLngBounds(...coordinates).getCenter();
 
-                // Create a label with the name
-                const label = new google.maps.InfoWindow({
-                    content: placemark.name,
-                });
+                // Create a text label with the name
+                const textLabel = new TxtOverlay(midpoint, placemark.name, 'label', map);
 
-                // Create a marker at the midpoint
-                const marker = new google.maps.Marker({
-                    position: midpoint,
-                    map: map,
-                    title: placemark.name,
-                });
-
-                // Show the label when the marker is clicked
-                marker.addListener('click', function () {
-                    label.open(map, marker);
-                });
+                // Show the text label
+                textLabel.setMap(map);
             }
+
+            // Custom TxtOverlay for displaying text at a specific location
+            function TxtOverlay(pos, txt, cls, map) {
+                this.pos = pos;
+                this.txt_ = txt;
+                this.cls_ = cls;
+                this.map_ = map;
+
+                this.div_ = null;
+                this.setMap(map);
+            }
+
+            TxtOverlay.prototype = new google.maps.OverlayView();
+
+            TxtOverlay.prototype.onAdd = function () {
+                var div = document.createElement('div');
+                div.className = this.cls_;
+                div.innerHTML = this.txt_;
+
+                this.div_ = div;
+                var panes = this.getPanes();
+                panes.overlayLayer.appendChild(div);
+            };
+
+            TxtOverlay.prototype.draw = function () {
+                var overlayProjection = this.getProjection();
+                var pixel = overlayProjection.fromLatLngToDivPixel(this.pos);
+
+                var div = this.div_;
+                div.style.left = pixel.x + 'px';
+                div.style.top = pixel.y + 'px';
+            };
+
+            TxtOverlay.prototype.onRemove = function () {
+                this.div_.parentNode.removeChild(this.div_);
+                this.div_ = null;
+            };
         }
     </script>
     <style>
-        #map {
-            height: 500px;
+        .label {
+            position: absolute;
+            font-size: 14px;
+            background-color: white;
+            padding: 5px;
+            border: 1px solid #ccc;
         }
     </style>
 </head>
