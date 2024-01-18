@@ -13,7 +13,7 @@
             });
 
             const kmlLayer = new google.maps.KmlLayer({
-                url: 'https://dxer.site/maidenhead_gridsquares.kmz',
+                url: 'https://dxer.site/maidenhead_gridsquares.kmz', // Replace with the direct link to your KMZ file
                 map: map,
                 suppressInfoWindows: true,
                 preserveViewport: true,
@@ -23,102 +23,13 @@
             google.maps.event.addListener(kmlLayer, 'status_changed', function () {
                 if (kmlLayer.getStatus() !== 'OK') {
                     console.error('KML Layer failed to load:', kmlLayer.getStatus());
-                } else {
-                    // Extract placemarks and display labels
-                    const placemarks = extractPlacemarks(kmlLayer);
-                    placemarks.forEach(placemark => {
-                        addTextLabelAtMidpoint(map, placemark);
-                    });
                 }
             });
-
-            function extractPlacemarks(kmlLayer) {
-                const placemarks = [];
-                const data = kmlLayer.getDefaultViewport()?.data;
-                
-                if (data && data.Document && data.Document.Placemark) {
-                    if (Array.isArray(data.Document.Placemark)) {
-                        placemarks.push(...data.Document.Placemark);
-                    } else {
-                        placemarks.push(data.Document.Placemark);
-                    }
-                }
-
-                return placemarks;
-            }
-
-            function addTextLabelAtMidpoint(map, placemark) {
-                if (!placemark.LineString || !placemark.LineString.coordinates) {
-                    console.error('Invalid placemark structure.');
-                    return;
-                }
-
-                const coordinates = placemark.LineString.coordinates.trim().split(' ')
-                    .map(coord => {
-                        const [lng, lat] = coord.split(',').map(parseFloat);
-                        return new google.maps.LatLng(lat, lng);
-                    });
-
-                if (coordinates.length === 0) {
-                    console.error('No coordinates found in placemark.');
-                    return;
-                }
-
-                // Calculate the midpoint
-                const midpoint = new google.maps.LatLngBounds(...coordinates).getCenter();
-
-                // Create a text label with the name
-                const textLabel = new TxtOverlay(midpoint, placemark.name, 'label', map);
-
-                // Show the text label
-                textLabel.setMap(map);
-            }
-
-            // Custom TxtOverlay for displaying text at a specific location
-            function TxtOverlay(pos, txt, cls, map) {
-                this.pos = pos;
-                this.txt_ = txt;
-                this.cls_ = cls;
-                this.map_ = map;
-
-                this.div_ = null;
-                this.setMap(map);
-            }
-
-            TxtOverlay.prototype = new google.maps.OverlayView();
-
-            TxtOverlay.prototype.onAdd = function () {
-                var div = document.createElement('div');
-                div.className = this.cls_;
-                div.innerHTML = this.txt_;
-
-                this.div_ = div;
-                var panes = this.getPanes();
-                panes.overlayLayer.appendChild(div);
-            };
-
-            TxtOverlay.prototype.draw = function () {
-                var overlayProjection = this.getProjection();
-                var pixel = overlayProjection.fromLatLngToDivPixel(this.pos);
-
-                var div = this.div_;
-                div.style.left = pixel.x + 'px';
-                div.style.top = pixel.y + 'px';
-            };
-
-            TxtOverlay.prototype.onRemove = function () {
-                this.div_.parentNode.removeChild(this.div_);
-                this.div_ = null;
-            };
         }
     </script>
     <style>
-        .label {
-            position: absolute;
-            font-size: 14px;
-            background-color: white;
-            padding: 5px;
-            border: 1px solid #ccc;
+        #map {
+            height: 500px;
         }
     </style>
 </head>
@@ -126,3 +37,6 @@
     <div id="map"></div>
 </body>
 </html>
+
+
+
