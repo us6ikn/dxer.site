@@ -7,29 +7,20 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" defer></script>
     <script>
         function initMap() {
-            // Create a new Google Map centered at a specific location
             const map = new google.maps.Map(document.getElementById('map'), {
                 center: { lat: 0, lng: 0 },
-                zoom: 2, // Adjust the initial zoom level as needed
+                zoom: 2,
             });
 
-            // Load the KML file containing Maidenhead Grids
             const kmlLayer = new google.maps.KmlLayer({
-                url: 'https://dxer.site/test.kml', // Replace with the path to your KML file
+                url: 'https://dxer.site/test.kml', // Replace with the direct link to your KML file
                 map: map,
             });
-            
-            google.maps.event.addListener(kmlLayer, 'status_changed', function () {
-                        if (kmlLayer.getStatus() !== 'OK') {
-                            console.error('KML Layer failed to load:', kmlLayer.getStatus());
-                        }
-                    });
-            
         }
     </script>
     <style>
         #map {
-            height: 500px; /* Adjust the height of the map container as needed */
+            height: 500px;
         }
     </style>
 </head>
