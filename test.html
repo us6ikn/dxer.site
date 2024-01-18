@@ -302,14 +302,7 @@
             }
           });
           
-          var kmlLayerToggle1 = document.getElementById('kml-layer-toggle_g');
-          kmlLayerToggle1.addEventListener('change', function() {
-            if (kmlLayerToggle1.checked) {
-              kmlLayer1.setMap(map);
-            } else {
-              kmlLayer1.setMap(null);
-            }
-          });
+          
           
           // Make the KML layer thinner
           const kmlLayer1 = new google.maps.KmlLayer({
@@ -324,6 +317,15 @@
 
           // Add markers for all Maidenhead Grids
           addMarkers(map);
+          
+          var kmlLayerToggle1 = document.getElementById('kml-layer-toggle_g');
+          kmlLayerToggle1.addEventListener('change', function() {
+            if (kmlLayerToggle1.checked) {
+              kmlLayer1.setMap(map);
+            } else {
+              kmlLayer1.setMap(null);
+            }
+          });
 
           fetch("output_filtered.txt")
             .then(response => response.text())
