@@ -28,26 +28,40 @@
 
             // Event listener for click on the map
             google.maps.event.addListener(map, 'click', function (event) {
-                displayGridName(event.latLng);
+                displayGridName(event.latLng, kmlLayer);
             });
 
-            function displayGridName(latLng) {
+            function displayGridName(latLng, kmlLayer) {
                 // Convert latitude and longitude to Maidenhead grid name
-                const gridName = convertCoordinatesToGridName(latLng.lat(), latLng.lng());
+                const gridName = convertCoordinatesToGridName(latLng.lat(), latLng.lng(), kmlLayer);
 
                 // Display the grid name (you can customize this part based on your needs)
                 alert('Maidenhead Grid Name: ' + gridName);
             }
 
-            function convertCoordinatesToGridName(latitude, longitude) {
-                // Implement your logic to convert coordinates to Maidenhead grid name
-                // ...
+            function convertCoordinatesToGridName(latitude, longitude, kmlLayer) {
+                // Find the grid name from the KML layer at the clicked coordinates
+                const placemarks = kmlLayer.getDefaultViewport().data.Document.Placemark;
 
-                // For demonstration purposes, let's assume a simple conversion
-                const latIndex = Math.floor((latitude + 90) / 10) + 1;
-                const lonIndex = Math.floor((longitude + 180) / 20) + 1;
+                for (const placemark of placemarks) {
+                    const coordinates = placemark.LineString.coordinates;
+                    const coordsArray = coordinates.split(' ');
+                    const firstCoords = coordsArray[0].split(',');
 
-                return String.fromCharCode(65 + lonIndex) + String.fromCharCode(65 + latIndex);
+                    // Check if the clicked coordinates are within the bounding box of the placemark
+                    if (
+                        latitude >= parseFloat(firstCoords[1]) &&
+                        latitude <= parseFloat(coordsArray[1].split(',')[1]) &&
+                        longitude >= parseFloat(firstCoords[0]) &&
+                        longitude <= parseFloat(coordsArray[3].split(',')[0])
+                    ) {
+                        // Return the grid name from the placemark
+                        return placemark.name;
+                    }
+                }
+
+                // Return a default value or handle if the grid name is not found
+                return 'Grid Name Not Found';
             }
         }
     </script>
@@ -61,5 +75,3 @@
     <div id="map"></div>
 </body>
 </html>
-
-
