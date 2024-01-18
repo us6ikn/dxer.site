@@ -25,6 +25,30 @@
                     console.error('KML Layer failed to load:', kmlLayer.getStatus());
                 }
             });
+
+            // Event listener for click on the map
+            google.maps.event.addListener(map, 'click', function (event) {
+                displayGridName(event.latLng);
+            });
+
+            function displayGridName(latLng) {
+                // Convert latitude and longitude to Maidenhead grid name
+                const gridName = convertCoordinatesToGridName(latLng.lat(), latLng.lng());
+
+                // Display the grid name (you can customize this part based on your needs)
+                alert('Maidenhead Grid Name: ' + gridName);
+            }
+
+            function convertCoordinatesToGridName(latitude, longitude) {
+                // Implement your logic to convert coordinates to Maidenhead grid name
+                // ...
+
+                // For demonstration purposes, let's assume a simple conversion
+                const latIndex = Math.floor((latitude + 90) / 10) + 1;
+                const lonIndex = Math.floor((longitude + 180) / 20) + 1;
+
+                return String.fromCharCode(65 + lonIndex) + String.fromCharCode(65 + latIndex);
+            }
         }
     </script>
     <style>
@@ -37,4 +61,5 @@
     <div id="map"></div>
 </body>
 </html>
+
 
