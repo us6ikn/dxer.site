@@ -26,11 +26,22 @@
                 }
             });
 
+            // Create an info window
+            const infoWindow = new google.maps.InfoWindow();
+
             // Event listener for mousemove
             google.maps.event.addListener(map, 'mousemove', function (event) {
                 var mouseLatLng = event.latLng;
                 var gridSquare = calculateGridSquare(mouseLatLng.lat(), mouseLatLng.lng());
-                console.log('Maidenhead Grid Square:', gridSquare);
+
+                // Set content for the info window
+                infoWindow.setContent('Maidenhead Grid Square: ' + gridSquare);
+
+                // Set position for the info window
+                infoWindow.setPosition(mouseLatLng);
+
+                // Open the info window on the map
+                infoWindow.open(map);
             });
         }
 
