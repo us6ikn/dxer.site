@@ -24,13 +24,28 @@
                 if (kmlLayer.getStatus() !== 'OK') {
                     console.error('KML Layer failed to load:', kmlLayer.getStatus());
                 } else {
-                    // Iterate over placemarks and add a label at the midpoint
-                    const placemarks = Array.from(kmlLayer.getDefaultViewport().data.Document.Placemark);
+                    // Extract placemarks and display labels
+                    const placemarks = extractPlacemarks(kmlLayer);
                     placemarks.forEach(placemark => {
                         addTextLabelAtMidpoint(map, placemark);
                     });
                 }
             });
+
+            function extractPlacemarks(kmlLayer) {
+                const placemarks = [];
+                const data = kmlLayer.getDefaultViewport()?.data;
+                
+                if (data && data.Document && data.Document.Placemark) {
+                    if (Array.isArray(data.Document.Placemark)) {
+                        placemarks.push(...data.Document.Placemark);
+                    } else {
+                        placemarks.push(data.Document.Placemark);
+                    }
+                }
+
+                return placemarks;
+            }
 
             function addTextLabelAtMidpoint(map, placemark) {
                 if (!placemark.LineString || !placemark.LineString.coordinates) {
