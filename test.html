@@ -322,6 +322,7 @@
               addMarkers(map);
             } else {
               kmlLayer1.setMap(null);
+              removeMarkers();
             }
           });
 
@@ -496,7 +497,7 @@
                             scaledSize: new google.maps.Size(12, 14), // Adjust size as needed
                         },
                     });
-                    markers_g.push(marker);
+
                     // Add click event listener to show info window
                     marker.addListener('click', function () {
                         const infoWindow = new google.maps.InfoWindow({
@@ -507,8 +508,6 @@
                 }
             }
         }
-        
-
         
 
         function calculateGridSquare(latitude, longitude) {
