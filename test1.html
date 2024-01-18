@@ -13,8 +13,17 @@
             });
 
             const kmlLayer = new google.maps.KmlLayer({
-                url: 'https://dxer.site/GRID_4digit.kml', // Replace with the direct link to your KML file
+                url: 'https://dxer.site/maidenhead_gridsquares.kmz', // Replace with the direct link to your KMZ file
                 map: map,
+                suppressInfoWindows: true,
+                preserveViewport: true,
+            });
+
+            // Event listener for KML layer status
+            google.maps.event.addListener(kmlLayer, 'status_changed', function () {
+                if (kmlLayer.getStatus() !== 'OK') {
+                    console.error('KML Layer failed to load:', kmlLayer.getStatus());
+                }
             });
         }
     </script>
@@ -28,3 +37,4 @@
     <div id="map"></div>
 </body>
 </html>
+
