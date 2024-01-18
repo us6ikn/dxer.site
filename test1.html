@@ -23,7 +23,29 @@
             google.maps.event.addListener(kmlLayer, 'status_changed', function () {
                 if (kmlLayer.getStatus() !== 'OK') {
                     console.error('KML Layer failed to load:', kmlLayer.getStatus());
+                } else {
+                    addGridLabels(map);
                 }
+            });
+        }
+
+        function addGridLabels(map) {
+            // Iterate through KML features and add markers for each grid center
+            const placemarks = document.querySelectorAll('Placemark');
+            placemarks.forEach(placemark => {
+                const name = placemark.querySelector('name').textContent;
+                const coordinates = placemark.querySelector('coordinates').textContent.trim().split(' ');
+
+                // Calculate the center of the grid
+                const centerLat = (parseFloat(coordinates[0].split(',')[1]) + parseFloat(coordinates[2].split(',')[1])) / 2;
+                const centerLng = (parseFloat(coordinates[0].split(',')[0]) + parseFloat(coordinates[2].split(',')[0])) / 2;
+
+                // Create a marker for the grid center with the grid name as the label
+                const marker = new google.maps.Marker({
+                    position: { lat: centerLat, lng: centerLng },
+                    map: map,
+                    label: name,
+                });
             });
         }
     </script>
@@ -37,6 +59,3 @@
     <div id="map"></div>
 </body>
 </html>
-
-
-
