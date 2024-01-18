@@ -26,23 +26,31 @@
                 }
             });
 
-            // Create an info window
-            const infoWindow = new google.maps.InfoWindow();
+            // Add markers for all Maidenhead Grids
+            addMarkers(map);
+        }
 
-            // Event listener for mousemove
-            google.maps.event.addListener(map, 'mousemove', function (event) {
-                var mouseLatLng = event.latLng;
-                var gridSquare = calculateGridSquare(mouseLatLng.lat(), mouseLatLng.lng());
+        function addMarkers(map) {
+            // Loop through Maidenhead Grids and add markers
+            // Adjust the range of latitude and longitude as per your requirement
+            for (let lat = -90; lat < 90; lat += 10) {
+                for (let lng = -180; lng < 180; lng += 20) {
+                    const gridSquare = calculateGridSquare(lat, lng);
+                    const marker = new google.maps.Marker({
+                        position: { lat: lat, lng: lng },
+                        map: map,
+                        title: gridSquare,
+                    });
 
-                // Set content for the info window
-                infoWindow.setContent('Maidenhead Grid Square: ' + gridSquare);
-
-                // Set position for the info window
-                infoWindow.setPosition(mouseLatLng);
-
-                // Open the info window on the map
-                infoWindow.open(map);
-            });
+                    // Add click event listener to show info window
+                    marker.addListener('click', function () {
+                        const infoWindow = new google.maps.InfoWindow({
+                            content: 'Maidenhead Grid Square: ' + gridSquare,
+                        });
+                        infoWindow.open(map, marker);
+                    });
+                }
+            }
         }
 
         function calculateGridSquare(latitude, longitude) {
