@@ -33,8 +33,8 @@
         function addMarkers(map) {
             // Loop through Maidenhead Grids and add markers
             // Adjust the range of latitude and longitude as per your requirement
-            for (let lat = -90; lat < 90; lat += 10) {
-                for (let lng = -180; lng < 180; lng += 20) {
+            for (let lat = -90; lat < 90; lat += 1) {
+                for (let lng = -180; lng < 180; lng += 2) {
                     const gridSquare = calculateGridSquare(lat, lng);
                     const marker = new google.maps.Marker({
                         position: { lat: lat, lng: lng },
