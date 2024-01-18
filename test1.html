@@ -14,20 +14,13 @@
 
             // Make the KML layer thinner
             const kmlLayer = new google.maps.KmlLayer({
-                url: 'https://dxer.site/maidenhead_gridsquares.kmz?v=0.2',
+                url: 'https://dxer.site/maidenhead_gridsquares.kmz?v=1.0',
                 map: map,
                 suppressInfoWindows: true,
                 preserveViewport: true,
                 options: {
-                    strokeWeight: 2, // Adjust the thickness
+                    strokeWeight: 0.5, // Adjust the thickness
                 },
-            });
-
-            // Event listener for KML layer status
-            google.maps.event.addListener(kmlLayer, 'status_changed', function () {
-                if (kmlLayer.getStatus() !== 'OK') {
-                    console.error('KML Layer failed to load:', kmlLayer.getStatus());
-                }
             });
 
             // Add markers for all Maidenhead Grids
@@ -53,7 +46,7 @@
                     // Add click event listener to show info window
                     marker.addListener('click', function () {
                         const infoWindow = new google.maps.InfoWindow({
-                            content: 'Maidenhead Grid Square: ' + gridSquare,
+                            content: gridSquare,
                         });
                         infoWindow.open(map, marker);
                     });
