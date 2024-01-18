@@ -25,18 +25,29 @@
                     console.error('KML Layer failed to load:', kmlLayer.getStatus());
                 } else {
                     // Iterate over placemarks and add a label at the midpoint
-                    const placemarks = kmlLayer.getDefaultViewport().data.Document.Placemark;
-                    for (const placemark of placemarks) {
+                    const placemarks = Array.from(kmlLayer.getDefaultViewport().data.Document.Placemark);
+                    placemarks.forEach(placemark => {
                         addTextLabelAtMidpoint(map, placemark);
-                    }
+                    });
                 }
             });
 
             function addTextLabelAtMidpoint(map, placemark) {
-                const coordinates = placemark.LineString.coordinates.split(' ').map(coord => {
-                    const [lng, lat] = coord.split(',').map(parseFloat);
-                    return new google.maps.LatLng(lat, lng);
-                });
+                if (!placemark.LineString || !placemark.LineString.coordinates) {
+                    console.error('Invalid placemark structure.');
+                    return;
+                }
+
+                const coordinates = placemark.LineString.coordinates.trim().split(' ')
+                    .map(coord => {
+                        const [lng, lat] = coord.split(',').map(parseFloat);
+                        return new google.maps.LatLng(lat, lng);
+                    });
+
+                if (coordinates.length === 0) {
+                    console.error('No coordinates found in placemark.');
+                    return;
+                }
 
                 // Calculate the midpoint
                 const midpoint = new google.maps.LatLngBounds(...coordinates).getCenter();
