@@ -15,7 +15,7 @@
             // Add event listener for zoom changes
             google.maps.event.addListener(map, 'zoom_changed', function () {
                 const zoomLevel = map.getZoom();
-                const kmlUrl = (zoomLevel > 3) ? 'https://dxer.site/maidenhead_gridsquares.kmz?v=1.0' : 'https://dxer.site/GRID.kml';
+                const kmlUrl = (zoomLevel > 3) ? 'https://dxer.site/maidenhead_gridsquares.kmz?v=1.0' : 'https://dxer.site/GRID.kml?v=1.4';
 
                 // Remove the existing KML layer
                 if (kmlLayer) {
@@ -37,7 +37,7 @@
 
             // Initial KML layer
             let kmlLayer = new google.maps.KmlLayer({
-                url: 'https://dxer.site/GRID.kml?v=1.3',
+                url: 'https://dxer.site/GRID.kml?v=1.4',
                 map: map,
                 suppressInfoWindows: true,
                 preserveViewport: true,
