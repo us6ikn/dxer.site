@@ -33,11 +33,6 @@
                         strokeColor: '#0000FF', // Blue color
                     },
                 });
-
-                // Add markers only when zoom level is greater than 4
-                if (zoomLevel > 4) {
-                    addMarkers(map);
-                }
             });
 
             // Initial KML layer
@@ -52,7 +47,7 @@
                 },
             });
 
-            // Add markers for all Maidenhead Grids initially
+            // Add markers for all Maidenhead Grids
             addMarkers(map);
         }
 
