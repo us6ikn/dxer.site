@@ -7,6 +7,7 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" defer></script>
     <script>
         let kmlLayer; // Declare kmlLayer outside the initMap function
+        let markers = []; // Array to store markers
 
         function initMap() {
             const map = new google.maps.Map(document.getElementById('map'), {
@@ -23,6 +24,9 @@
                 if (kmlLayer) {
                     kmlLayer.setMap(null);
                 }
+
+                // Remove existing markers
+                removeMarkers();
 
                 // Load the appropriate KML layer
                 kmlLayer = new google.maps.KmlLayer({
@@ -83,9 +87,21 @@
                             });
                             infoWindow.open(map, marker);
                         });
+
+                        // Store the marker in the array
+                        markers.push(marker);
                     }
                 }
             }
+        }
+
+        function removeMarkers() {
+            // Loop through markers and set the map to null to remove them
+            for (let i = 0; i < markers.length; i++) {
+                markers[i].setMap(null);
+            }
+            // Clear the array
+            markers = [];
         }
 
         function calculateGridSquare(latitude, longitude) {
