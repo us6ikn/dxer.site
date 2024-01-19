@@ -9,13 +9,13 @@
         function initMap() {
             const map = new google.maps.Map(document.getElementById('map'), {
                 center: { lat: 0, lng: 0 },
-                zoom: 2,
+                zoom: 3,
             });
 
             // Add event listener for zoom changes
             google.maps.event.addListener(map, 'zoom_changed', function () {
                 const zoomLevel = map.getZoom();
-                const kmlUrl = (zoomLevel > 3) ? 'https://dxer.site/maidenhead.kmz?v=1.0' : 'https://dxer.site/GRID.kml?v=1.4';
+                const kmlUrl = (zoomLevel > 3) ? 'https://dxer.site/maidenhead_gridsquares.kmz?v=1.0' : 'https://dxer.site/GRID.kml?v=1.4';
 
                 // Remove the existing KML layer
                 if (kmlLayer) {
