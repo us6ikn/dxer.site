@@ -12,16 +12,39 @@
                 zoom: 2,
             });
 
-            // Make the KML layer thinner
-            const kmlLayer1 = new google.maps.KmlLayer({
-                url: 'https://dxer.site/maidenhead_gridsquares.kmz?v=1.1',
+            // Add event listener for zoom changes
+            google.maps.event.addListener(map, 'zoom_changed', function () {
+                const zoomLevel = map.getZoom();
+                const kmlUrl = (zoomLevel > 10) ? 'https://dxer.site/maidenhead_gridsquares.kmz?v=1.0' : 'https://dxer.site/GRID.kml';
+
+                // Remove the existing KML layer
+                if (kmlLayer) {
+                    kmlLayer.setMap(null);
+                }
+
+                // Load the appropriate KML layer
+                kmlLayer = new google.maps.KmlLayer({
+                    url: kmlUrl,
+                    map: map,
+                    suppressInfoWindows: true,
+                    preserveViewport: true,
+                    options: {
+                        strokeWeight: 0.5, // Adjust the thickness
+                    },
+                });
+            });
+
+            // Initial KML layer
+            let kmlLayer = new google.maps.KmlLayer({
+                url: 'https://dxer.site/maidenhead_gridsquares.kmz?v=1.0',
                 map: map,
                 suppressInfoWindows: true,
                 preserveViewport: true,
+                options: {
+                    strokeWeight: 0.5, // Adjust the thickness
+                },
             });
-            kmlLayer1.set('strokeColor', '#000000'); // set line color to red
-                        kmlLayer1.set('strokeWeight', 2); // set line width to 2 pixels
-                        kmlLayer1.set('fillOpacity', 0); // set fill opacity to 0 (transparent)
+
             // Add markers for all Maidenhead Grids
             addMarkers(map);
         }
