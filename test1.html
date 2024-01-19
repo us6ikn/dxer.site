@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Google Map with Maidenhead Grids</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" defer></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/geocodezip/geoxml3/master/polys/geoxml3.js"></script>
     <script>
         function initMap() {
             const map = new google.maps.Map(document.getElementById('map'), {
@@ -12,17 +13,19 @@
                 zoom: 2,
             });
 
-            // Make the KML layer thinner
-            const kmlLayer1 = new google.maps.KmlLayer({
-                url: 'https://dxer.site/maidenhead_gridsquares.kmz?v=1.0',
+            // Use GeoXML3 to parse KML and customize styles
+            const geoXml = new geoXML3.parser({
                 map: map,
-                suppressInfoWindows: true,
-                preserveViewport: true,
-                strokeWeight: 0.5, // Adjust the thickness
+                singleInfoWindow: true,
+                zoom: false,
+                createMarker: addMarkers,
+                afterParse: function (doc) {
+                    // Customize styles here if needed
+                    // For example, you can access the parsed KML data using 'doc' and modify styles
+                },
             });
 
-            // Add markers for all Maidenhead Grids
-            addMarkers(map);
+            geoXml.parse('https://dxer.site/maidenhead_gridsquares.kmz?v=1.0');
         }
 
         function addMarkers(map) {
