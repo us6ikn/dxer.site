@@ -67,8 +67,8 @@
             if (zoomLevel > 4) {
                 // Loop through Maidenhead Grids and add markers
                 // Adjust the range of latitude and longitude
-                for (let lat = -90; lat < 90; lat += 1) {
-                    for (let lng = -180; lng < 180; lng += 2) {
+                for (let lat = -90; lat < 90; lat += 10) {
+                    for (let lng = -180; lng < 180; lng += 20) {
                         const gridSquare = calculateGridSquare(lat, lng);
                         const marker = new google.maps.Marker({
                             position: { lat: lat + 0.5, lng: lng + 1 },

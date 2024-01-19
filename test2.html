@@ -317,38 +317,9 @@
           var kmlLayerToggle1 = document.getElementById('kml-layer-toggle_g');
           kmlLayerToggle1.addEventListener('change', function() {
             if (kmlLayerToggle1.checked) {
-              
-              // Add event listener for zoom changes
-              google.maps.event.addListener(map, 'zoom_changed', function () {
-                  const zoomLevel = map.getZoom();
-                  const kmlUrl = (zoomLevel > 4) ? 'https://dxer.site/maidenhead_gridsquares.kmz?v=1.0' : 'https://dxer.site/GRID.kml?v=1.4';
-
-                  // Remove the existing KML layer
-                  if (kmlLayer1) {
-                      kmlLayer1.setMap(null);
-                  }
-
-                  // Remove existing markers
-                  removeMarkers();
-
-                  // Load the appropriate KML layer
-                  kmlLayer1 = new google.maps.KmlLayer({
-                      url: kmlUrl,
-                      map: map,
-                      suppressInfoWindows: true,
-                      preserveViewport: true,
-                      options: {
-                          strokeWeight: 0.5, // Adjust the thickness
-                          strokeColor: '#0000FF', // Blue color
-                      },
-                  });
-
-                  // Add markers only when zoom level is greater than 4
-                  if (zoomLevel > 4) {
-                      addMarkers(map);
-                  }
-              });
-
+              kmlLayer1.setMap(map);
+              // Add markers for all Maidenhead Grids
+              addMarkers(map);
             } else {
               kmlLayer1.setMap(null);
               removeMarkers();
