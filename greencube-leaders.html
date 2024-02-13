@@ -28,11 +28,9 @@
             const latitude = parseFloat(match[7]);
             const longitude = parseFloat(match[8]);
             const percentage = parseFloat(match[5]);
-            console.log('Percentage:', percentage);
 
             // Calculate marker scale based on percentage
-            const scale = Math.log(percentage*1000)*2; // Adjust the divisor for scaling
-            console.log('scale:', scale);
+            const scale = Math.log(percentage * 1000) * 2; // Adjust the divisor for scaling
 
             const marker = new google.maps.Marker({
               position: { lat: latitude, lng: longitude },
@@ -45,6 +43,24 @@
                 fillOpacity: 0.6,
                 strokeWeight: 0
               }
+            });
+
+            // Add click event listener to the marker
+            marker.addListener('click', function () {
+              // Display data when marker is clicked
+              const content = `
+                <div>
+                  <h3>${match[2]}</h3>
+                  <p>Continent: ${match[3]}</p>
+                  <p>Observations: ${match[4]}</p>
+                  <p>Percentage: ${match[5]}%</p>
+                  <p>Grid Locator: ${match[6]}</p>
+                </div>
+              `;
+              const infoWindow = new google.maps.InfoWindow({
+                content: content
+              });
+              infoWindow.open(map, marker);
             });
           }
         });
