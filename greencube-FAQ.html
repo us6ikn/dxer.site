@@ -1,31 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GreenCube FAQ</title>
   <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
     .faq-container {
       max-width: 800px;
-      margin: 0 auto;
+      margin: 50px auto;
       padding: 20px;
-      font-family: Arial, sans-serif;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+    }
+    .faq {
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 20px;
     }
     .faq-question {
       cursor: pointer;
-      margin-bottom: 10px;
+      font-size: 18px;
       font-weight: bold;
+      color: #333;
+      transition: color 0.3s ease;
     }
     .faq-answer {
       display: none;
-      margin-left: 20px;
+      margin-top: 10px;
+      font-size: 16px;
+      color: #666;
+      line-height: 1.5;
+      animation: fade-in 0.3s ease forwards;
+    }
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     .faq-answer.show {
       display: block;
+    }
+    .faq-question::after {
+      content: '\25BC';
+      display: inline-block;
+      margin-left: 5px;
+      transform: rotate(0deg);
+      transition: transform 0.3s ease;
+    }
+    .faq.open .faq-question::after {
+      transform: rotate(180deg);
+    }
+    .faq:hover .faq-question {
+      color: #007bff;
     }
   </style>
 </head>
 <body>
   <div class="faq-container">
-    <h1>Frequently Asked Questions</h1>
+    <h1 style="text-align: center; color: #333;">Frequently Asked Questions</h1>
     <div class="faq">
       <div class="faq-question">What is GreenCube?</div>
       <div class="faq-answer">
@@ -52,7 +96,9 @@
     const faqQuestions = document.querySelectorAll('.faq-question');
     faqQuestions.forEach(question => {
       question.addEventListener('click', () => {
+        const faq = question.parentElement;
         const answer = question.nextElementSibling;
+        faq.classList.toggle('open');
         answer.classList.toggle('show');
       });
     });
