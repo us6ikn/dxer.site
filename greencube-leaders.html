@@ -46,15 +46,17 @@
             });
 
             // Add click event listener to marker
-            marker.addListener('click', function() {
-              // Create info window
-              const infoWindow = new google.maps.InfoWindow({
-                content: `<div>Observer: ${match[2]}</div><div>Continent: ${match[3]}</div><div>Observations: ${match[4]}</div><div>Percentage: ${match[5]}%</div><div>Grid Locator: ${match[6]}</div>`
-              });
+            marker.addListener('click', (function(match) {
+              return function() {
+                // Create info window
+                const infoWindow = new google.maps.InfoWindow({
+                  content: `<div>Observer: ${match[2]}</div><div>Continent: ${match[3]}</div><div>Observations: ${match[4]}</div><div>Percentage: ${match[5]}%</div><div>Grid Locator: ${match[6]}</div>`
+                });
 
-              // Open info window when marker is clicked
-              infoWindow.open(map, marker);
-            });
+                // Open info window when marker is clicked
+                infoWindow.open(map, marker);
+              };
+            })(match));
           }
         });
     }
