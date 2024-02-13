@@ -30,7 +30,7 @@
             const percentage = parseFloat(match[5]);
 
             // Calculate marker scale based on percentage
-            const scale = Math.max(percentage / 500, 50); // Adjust the divisor for scaling
+            const scale = Math.max(percentage / 100, 1); // Adjust the divisor for scaling
 
             const marker = new google.maps.Marker({
               position: { lat: latitude, lng: longitude },
