@@ -47,22 +47,25 @@
     #leaderboard tbody tr:hover {
       background-color: #f0f0f0;
     }
-      #backButton {
-          position: absolute;
-          top: 10px;
-          left: 10px;
-          background-color: rgba(255, 255, 255, 0.5); /* Half-transparent white background */
-          border: 1px solid #ccc;
-          padding: 10px 20px; /* Increased padding for better appearance */
-          cursor: pointer;
-          z-index: 1000;
-          font-size: 24px; /* Larger font size */
-        }
+    #backButton {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: rgba(255, 255, 255, 0.5); /* Half-transparent white background */
+      border: 1px solid #ccc;
+      padding: 10px 20px; /* Increased padding for better appearance */
+      cursor: pointer;
+      z-index: 1000;
+      font-size: 20px; /* Larger font size */
+      text-decoration: none; /* Remove underline */
+      color: #333; /* Text color */
+      border-radius: 5px; /* Rounded corners */
+    }
   </style>
 </head>
 <body>
   <div id="map"></div>
-  <a href="https://dxer.site/greencube-observer" target="_blank" id="backButton">back to GreenCube Observer</a>
+  <a href="https://dxer.site/greencube-observer" target="_blank" id="backButton">&#9664; Back to GreenCube Observer</a>
   <div id="leaderboard">
     <h2>Open Data Contributors Leaderboard <span>(last 7 days)</span></h2>
     <table>
