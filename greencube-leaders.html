@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Observer Map</title>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs"></script>
+  <style>
+    #map {
+      height: 600px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+    function initMap() {
+      const map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 3,
+        center: { lat: 0, lng: 0 }
+      });
+
+      fetch("leaderboard.txt")
+        .then(response => response.text())
+        .then(data => {
+          const regex = /Rank: (\d+), Observer: ([^,]+), Cont: ([^,]+), Observations: (\d+), Percentage: ([^%]+)%, Grid Locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
+          let match;
+          while ((match = regex.exec(data)) !== null) {
+            const latitude = parseFloat(match[7]);
+            const longitude = parseFloat(match[8]);
+
+            const marker = new google.maps.Marker({
+              position: { lat: latitude, lng: longitude },
+              map: map,
+              title: `Observer: ${match[2]}\nContinent: ${match[3]}\nObservations: ${match[4]}\nPercentage: ${match[5]}%\nGrid Locator: ${match[6]}`,
+            });
+          }
+        });
+    }
+  </script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
+</body>
+</html>
