@@ -5,13 +5,6 @@
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" defer></script>
   <style>
     #map {
-      height: 600px;
-      width: 100%;
-    }
-  </style>
-  
-  <style>
-    #map {
       height: 400px;
       width: 100%;
     }
@@ -31,10 +24,25 @@
       background-color: #f2f2f2;
     }
   </style>
-  
 </head>
 <body>
   <div id="map"></div>
+  <div id="leaderboard">
+    <h2>Leaderboard</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Callsign</th>
+          <th>Continent</th>
+          <th>Percentage</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboardBody">
+        <!-- Leaderboard data will be dynamically added here -->
+      </tbody>
+    </table>
+  </div>
   <script>
     function initMap() {
       const map = new google.maps.Map(document.getElementById('map'), {
@@ -42,11 +50,15 @@
         center: { lat: 0, lng: 0 }
       });
 
+      const leaderboardBody = document.getElementById('leaderboardBody');
+
       fetch("leaderboard.txt")
         .then(response => response.text())
         .then(data => {
           const regex = /Rank: (\d+), Observer: ([^,]+), Cont: ([^,]+), Observations: (\d+), Percentage: ([^%]+)%, Grid Locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
           let match;
+          let leaderboardHTML = '';
+          let rank = 1;
           while ((match = regex.exec(data)) !== null) {
             const latitude = parseFloat(match[7]);
             const longitude = parseFloat(match[8]);
@@ -80,28 +92,19 @@
                 infoWindow.open(map, marker);
               };
             })(match));
+
+            // Add row to leaderboard
+            leaderboardHTML += `<tr>
+                                  <td>${rank}</td>
+                                  <td>${match[2]}</td>
+                                  <td>${match[3]}</td>
+                                  <td>${match[5]}%</td>
+                                </tr>`;
+            rank++;
           }
+          leaderboardBody.innerHTML = leaderboardHTML;
         });
     }
   </script>
-  
-  <div id="map"></div>
-    <div id="leaderboard">
-      <h2>Leaderboard</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Rank</th>
-            <th>Callsign</th>
-            <th>Continent</th>
-            <th>Percentage</th>
-          </tr>
-        </thead>
-        <tbody id="leaderboardBody">
-          <!-- Leaderboard data will be dynamically added here -->
-        </tbody>
-      </table>
-    </div>
-  
 </body>
 </html>
