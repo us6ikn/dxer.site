@@ -15,7 +15,7 @@
   <script>
     function initMap() {
       const map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 1,
+        zoom: 2,
         center: { lat: 0, lng: 0 }
       });
 
@@ -27,11 +27,22 @@
           while ((match = regex.exec(data)) !== null) {
             const latitude = parseFloat(match[7]);
             const longitude = parseFloat(match[8]);
+            const percentage = parseFloat(match[5]);
+
+            // Calculate marker scale based on percentage
+            const scale = Math.max(percentage / 10, 1); // Adjust the divisor for scaling
 
             const marker = new google.maps.Marker({
               position: { lat: latitude, lng: longitude },
               map: map,
               title: `Observer: ${match[2]}\nContinent: ${match[3]}\nObservations: ${match[4]}\nPercentage: ${match[5]}%\nGrid Locator: ${match[6]}`,
+              icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: scale, // Set marker scale
+                fillColor: 'red', // Change marker color if needed
+                fillOpacity: 0.7,
+                strokeWeight: 0
+              }
             });
           }
         });
