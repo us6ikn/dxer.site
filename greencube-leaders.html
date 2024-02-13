@@ -2,8 +2,7 @@
 <html>
 <head>
   <title>GreenCube Observer Leaderboard</title>
-  <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
-    <style>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" defer></script>
   <style>
     #map {
       height: 500px;
@@ -78,7 +77,7 @@
               document.getElementById("last-modified").innerHTML = lastModified.toUTCString();
           }
       };
-      xhttp.open("HEAD", "output_filtered.txt", true);
+      xhttp.open("HEAD", "leaderboard.txt", true);
       xhttp.send();
   </script>
   
@@ -111,7 +110,7 @@
             const marker = new google.maps.Marker({
               position: { lat: latitude, lng: longitude },
               map: map,
-              title: `Observer: ${match[2]}\nContinent: ${match[3]}\nObservations: ${match[4]}\nPercentage: ${match[5]}%\nGrid Locator: ${match[6]}`,
+              title: `Contributor: ${match[2]}\nContinent: ${match[3]}\nContribution: ${match[5]}%\nGrid Locator: ${match[6]}`,
               icon: {
                 path: google.maps.SymbolPath.CIRCLE,
                 scale: scale, // Set marker scale
@@ -126,7 +125,7 @@
               return function() {
                 // Create info window
                 const infoWindow = new google.maps.InfoWindow({
-                  content: `<div>Observer: ${match[2]}</div><div>Continent: ${match[3]}</div><div>Observations: ${match[4]}</div><div>Percentage: ${match[5]}%</div><div>Grid Locator: ${match[6]}</div>`
+                  content: `<div>Contributor: ${match[2]}</div><div>Continent: ${match[3]}</div><div>Contribution: ${match[5]}%</div><div>Grid Locator: ${match[6]}</div>`
                 });
 
                 // Open info window when marker is clicked
