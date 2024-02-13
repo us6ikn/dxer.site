@@ -28,6 +28,7 @@
             const latitude = parseFloat(match[7]);
             const longitude = parseFloat(match[8]);
             const percentage = parseFloat(match[5]);
+            console.log('Percentage:', percentage);
 
             // Calculate marker scale based on percentage
             const scale = Math.max(percentage / 100, 20); // Adjust the divisor for scaling
@@ -40,7 +41,7 @@
                 path: google.maps.SymbolPath.CIRCLE,
                 scale: scale, // Set marker scale
                 fillColor: 'red', // Change marker color if needed
-                fillOpacity: 0.7,
+                fillOpacity: 0.6,
                 strokeWeight: 0
               }
             });
