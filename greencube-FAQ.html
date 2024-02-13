@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GreenCube FAQ</title>
+  <style>
+    .faq-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+    .faq-question {
+      cursor: pointer;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    .faq-answer {
+      display: none;
+      margin-left: 20px;
+    }
+    .faq-answer.show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="faq-container">
+    <h1>Frequently Asked Questions</h1>
+    <div class="faq">
+      <div class="faq-question">What is GreenCube?</div>
+      <div class="faq-answer">
+        GreenCube is a project aimed at environmental monitoring using crowdsourced data.
+      </div>
+    </div>
+    <div class="faq">
+      <div class="faq-question">How can I participate in GreenCube?</div>
+      <div class="faq-answer">
+        You can participate in GreenCube by contributing your environmental observations through the GreenCube Observer platform.
+      </div>
+    </div>
+    <div class="faq">
+      <div class="faq-question">Is GreenCube Observer free to use?</div>
+      <div class="faq-answer">
+        Yes, GreenCube Observer is free for all users.
+      </div>
+    </div>
+    <!-- Add more FAQs as needed -->
+  </div>
+
+  <script>
+    // JavaScript to toggle answers when questions are clicked
+    const faqQuestions = document.querySelectorAll('.faq-question');
+    faqQuestions.forEach(question => {
+      question.addEventListener('click', () => {
+        const answer = question.nextElementSibling;
+        answer.classList.toggle('show');
+      });
+    });
+  </script>
+</body>
+</html>
