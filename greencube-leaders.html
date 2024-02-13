@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Observer Map</title>
+  <title>GreenCube Observer Leaderboard</title>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" defer></script>
   <style>
     #map {
@@ -68,7 +68,9 @@
     function initMap() {
       const map = new google.maps.Map(document.getElementById('map'), {
         zoom: 2,
-        center: { lat: 0, lng: 0 }
+        center: { lat: 0, lng: 0 },
+        streetViewControl: false, // Remove street view control
+        mapTypeControl: false // Remove map type control
       });
 
       const leaderboardBody = document.getElementById('leaderboardBody');
