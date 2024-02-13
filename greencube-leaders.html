@@ -32,6 +32,7 @@
 
             // Calculate marker scale based on percentage
             const scale = Math.max(percentage / 100, 20); // Adjust the divisor for scaling
+            console.log('scale:', scale);
 
             const marker = new google.maps.Marker({
               position: { lat: latitude, lng: longitude },
