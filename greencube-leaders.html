@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Observer Map</title>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" defer></script>
   <style>
     #map {
       height: 600px;
@@ -15,7 +15,7 @@
   <script>
     function initMap() {
       const map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 3,
+        zoom: 1,
         center: { lat: 0, lng: 0 }
       });
 
@@ -37,6 +37,5 @@
         });
     }
   </script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
 </body>
 </html>
