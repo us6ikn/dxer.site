@@ -30,42 +30,39 @@
        }
     </style>
     <style>
-        .central-bottom {
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            margin-top: auto;
-            margin-bottom: 20px;
-        }
+     
+     .leaderboard-widget {
+                 position: absolute;
+                 top: 20px; /* Adjust the top position as needed */
+                 left: 20px; /* Adjust the left position as needed */
+                 z-index: 1000; /* Ensure the leaderboard is above the map */
+                 background-color: rgba(255, 255, 255, 0.8); /* Half-transparent background */
+                 border: 1px solid #ccc;
+                 border-radius: 5px;
+                 padding: 5px; /* Reduce the padding */
+                 max-width: 300px; /* Reduce the max-width */
+                 box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+             }
 
-        .leaderboard-widget {
-            background-color: rgba(255, 255, 255, 0.8); /* Half-transparent background */
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 5px; /* Reduce the padding */
-            max-width: 300px; /* Reduce the max-width */
-            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
-        }
+             .leaderboard-widget h2 {
+                 font-size: 1em; /* Reduce the font size */
+                 margin-bottom: 5px; /* Reduce the margin */
+                 text-align: center;
+             }
 
-        .leaderboard-widget h2 {
-            font-size: 1em; /* Reduce the font size */
-            margin-bottom: 5px; /* Reduce the margin */
-            text-align: center;
-        }
+             .leaderboard-widget ol {
+                 list-style-type: none;
+                 padding: 0;
+                 margin: 0;
+             }
 
-        .leaderboard-widget ol {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .leaderboard-widget li {
-            margin-bottom: 2px; /* Reduce the margin */
-            padding: 5px; /* Reduce the padding */
-            background-color: #fff;
-            border-radius: 3px;
-            box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.1);
-        }
+             .leaderboard-widget li {
+                 margin-bottom: 2px; /* Reduce the margin */
+                 padding: 5px; /* Reduce the padding */
+                 background-color: #fff;
+                 border-radius: 3px;
+                 box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.1);
+             }
         
     .twitter-container {
       position: fixed;
@@ -248,6 +245,13 @@
 
 
     <div id="map"></div>
+    <div class="leaderboard-widget">
+            <h2>Open Data Contributors Leaderboard</h2>
+            <ol>
+                <!-- Leaderboard items will be dynamically added here -->
+            </ol>
+        </div>
+    
     <script>
       var map;
       var kmlLayer;
@@ -512,48 +516,37 @@
       <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
     </div>
     <script>
-        fetch("leaderboard.txt")
-            .then(response => response.text())
-            .then(data => {
-                const regex = /Rank: (\d+), Observer: ([^,]+), Cont: ([^,]+), Observations: (\d+), Percentage: ([^%]+)%, Grid Locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
-                let leaderboard = [];
-                let match;
+            fetch("leaderboard.txt")
+                .then(response => response.text())
+                .then(data => {
+                    const regex = /Rank: (\d+), Observer: ([^,]+), Cont: ([^,]+), Observations: (\d+), Percentage: ([^%]+)%, Grid Locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
+                    let leaderboard = [];
+                    let match;
 
-                // Extract leaderboard data
-                while ((match = regex.exec(data)) !== null) {
-                    const rank = parseInt(match[1]);
-                    const observer = match[2];
-                    const continent = match[3];
-                    const percentage = parseFloat(match[5]);
-                    leaderboard.push({ rank, observer, continent, percentage });
-                }
+                    // Extract leaderboard data
+                    while ((match = regex.exec(data)) !== null) {
+                        const rank = parseInt(match[1]);
+                        const observer = match[2];
+                        const continent = match[3];
+                        const percentage = parseFloat(match[5]);
+                        leaderboard.push({ rank, observer, continent, percentage });
+                    }
 
-                // Sort leaderboard by percentage in descending order
-                leaderboard.sort((a, b) => b.percentage - a.percentage);
+                    // Sort leaderboard by percentage in descending order
+                    leaderboard.sort((a, b) => b.percentage - a.percentage);
 
-                // Display top 5 ranked observers
-                const widgetContainer = document.createElement('div');
-                widgetContainer.className = 'leaderboard-widget';
-
-                const title = document.createElement('h2');
-                title.textContent = 'Open Data Contributors Leaderboard';
-                widgetContainer.appendChild(title);
-
-                const leaderboardList = document.createElement('ol');
-                for (let i = 0; i < Math.min(5, leaderboard.length); i++) {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = `${leaderboard[i].rank}. ${leaderboard[i].observer}, ${leaderboard[i].percentage}% - ${leaderboard[i].continent}`;
-                    leaderboardList.appendChild(listItem);
-                }
-                widgetContainer.appendChild(leaderboardList);
-
-                // Append widget to the bottom center of the page
-                document.body.appendChild(widgetContainer);
-            })
-            .catch(error => {
-                console.error('Error fetching leaderboard data:', error);
-            });
-    </script>
+                    // Display top 5 ranked observers
+                    const leaderboardList = document.querySelector('.leaderboard-widget ol');
+                    for (let i = 0; i < Math.min(5, leaderboard.length); i++) {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${leaderboard[i].rank}. ${leaderboard[i].observer}, ${leaderboard[i].percentage}% - ${leaderboard[i].continent}`;
+                        leaderboardList.appendChild(listItem);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching leaderboard data:', error);
+                });
+        </script>
   </body>
 </html>
 
