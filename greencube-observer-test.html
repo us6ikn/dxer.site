@@ -39,7 +39,7 @@
 
     .twitter-follow-button {
       display: inline-block;
-      background-color: #000000;
+      background-color: #1da1f2;
       color: #fff;
       padding: 4px 8px;
       border-radius: 16px;
@@ -84,13 +84,6 @@
           right: 60px;
           z-index: 9999;
         }
-        
-        .floating-window-bottom {
-          position: fixed;
-          bottom: 100px;
-          right: 600px;
-          z-index: 9999;
-        }
 
         .toggle-button {
           position: absolute;
@@ -110,39 +103,6 @@
         }
 
         .arrow-button {
-          position: absolute;
-          top: 47px;
-          left: -22;
-          width: 20px;
-          height: 20px;
-          font-size: 20px;
-          font-weight: bold;
-          text-align: center;
-          color: black;
-          background-color: transparent;
-          border: none;
-          cursor: pointer;
-          opacity: 1;
-        }
-        
-        .toggle-button-bottom {
-          position: absolute;
-          top: 45px;
-          right: 0;
-          width: 20px;
-          height: 20px;
-          font-size: 20px;
-          font-weight: bold;
-          text-align: center;
-          color: transparent;
-          background-color: transparent;
-          border: none;
-          border-radius: 50%;
-          cursor: pointer;
-          opacity: 0;
-        }
-
-        .arrow-button-bottom {
           position: absolute;
           top: 47px;
           left: -22;
@@ -247,9 +207,7 @@
             <div class="sharethis-inline-share-buttons"></div>
           </div>
         
-        
-        
-
+      </div>
 
 
     <div id="map"></div>
@@ -294,11 +252,6 @@
         var content = document.querySelector('.floating-window .content');
         content.classList.toggle('show');
       }
-        
-        function toggleFloatingWindowBottom() {
-          var content = document.querySelector('.floating-window-bottom .content');
-          content.classList.toggle('show');
-        }
 
       
       function initMap(gridLocator) {
@@ -512,7 +465,7 @@
     <script>
       kofiWidgetOverlay.draw('sa5ikn', {
         'type': 'floating-chat',
-        'floating-chat.donateButton.text': 'Support',
+        'floating-chat.donateButton.text': 'Like it?',
         'floating-chat.donateButton.background-color': '#00b9fe',
         'floating-chat.donateButton.text-color': '#fff'
       });
@@ -522,8 +475,6 @@
       <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
     </div>
 
-
-    
   </body>
 </html>
 
