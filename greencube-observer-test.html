@@ -32,6 +32,7 @@
     <style>
      
      .leaderboard-widget {
+                 display: block; /* Initially visible */
                  position: absolute;
                  bottom: 20px; /* Adjust the bottom position as needed */
                  left: 50%;
@@ -49,6 +50,19 @@
                  font-size: 0.9em; /* Reduce the font size */
                  margin-bottom: 3px; /* Reduce the margin */
                  text-align: center;
+                 display: flex;
+                 justify-content: space-between; /* Add space between title and "See all" link */
+                 align-items: center; /* Center vertically */
+             }
+
+             .leaderboard-widget a {
+                 font-size: 0.8em;
+                 color: #007bff; /* Blue color for the link */
+                 text-decoration: none;
+             }
+
+             .leaderboard-widget a:hover {
+                 text-decoration: underline; /* Underline on hover */
              }
 
              .leaderboard-widget ol {
@@ -64,6 +78,17 @@
                  border-radius: 2px;
                  box-shadow: none; /* Remove the box-shadow */
                  font-size: 0.8em; /* Reduce the font size */
+             }
+
+             .hide-button {
+                 position: absolute;
+                 top: 10px;
+                 right: 10px;
+                 background-color: transparent;
+                 color: #007bff;
+                 border: none;
+                 font-size: 0.8em;
+                 cursor: pointer;
              }
         
     .twitter-container {
@@ -249,15 +274,25 @@
     <div id="map"></div>
     <div class="leaderboard-widget">
         <h2>
-                    Open Data Leaderboard
+                    Open Data Leaders
                     <a href="https://dxer.site/greencube-leaderboard.html" target="_blank">see all</a>
                 </h2>
             <ol>
                 <!-- Leaderboard items will be dynamically added here -->
             </ol>
+            <button class="hide-button" onclick="toggleLeaderboard()">Hide</button>
         </div>
     
     <script>
+        function toggleLeaderboard() {
+                    var widget = document.querySelector('.leaderboard-widget');
+                    if (widget.style.display === 'none') {
+                        widget.style.display = 'block';
+                    } else {
+                        widget.style.display = 'none';
+                    }
+                }
+        
       var map;
       var kmlLayer;
       
