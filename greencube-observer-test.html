@@ -32,8 +32,9 @@
     <style>
      
      .leaderboard-widget {
+                 display: block; /* Initially visible */
                  position: absolute;
-                 bottom: 50px; /* Adjust the bottom position as needed to accommodate the button */
+                 bottom: 20px; /* Adjust the bottom position as needed */
                  left: 50%;
                  transform: translateX(-50%);
                  z-index: 1000; /* Ensure the leaderboard is above the map */
@@ -81,7 +82,19 @@
 
              .hide-button {
                  position: absolute;
-                 bottom: -15px; /* Adjust the bottom position */
+                 top: 10px;
+                 right: 10px;
+                 background-color: transparent;
+                 color: #007bff;
+                 border: none;
+                 font-size: 0.8em;
+                 cursor: pointer;
+             }
+
+             .show-button {
+                 display: none; /* Initially hidden */
+                 position: absolute;
+                 bottom: 10px;
                  left: 50%;
                  transform: translateX(-50%);
                  background-color: transparent;
@@ -133,7 +146,7 @@
 
         .floating-button-icon {
           font-size: 30px; /* Adjust the size of the icon as needed */
-          color: #808080; /* Adjust the color of the icon as needed */
+          color: #000000; /* Adjust the color of the icon as needed */
           padding: 10px; /* Add padding around the icon as needed */
           background-color: rgba(255, 255, 255, 0.0); /* Add background color to the icon as needed */
           border-radius: 50%; /* Apply border radius to create a circular button */
@@ -243,9 +256,9 @@
         <i class="fas fa-home floating-button-icon"></i>
       </a>
       
-      <a href="https://dxer.site/greencube-FAQ.html" style="position: fixed; bottom: 170px; left: 15px; color: gray; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">FAQ</a>
-      <a href="https://dxer.site/qo-100-satellite-observer.html" style="position: fixed; bottom: 135px; left: 15px; color: gray; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">GEO</a>
-      <a href="https://dxer.site/leo-satellite-observer.html" style="position: fixed; bottom: 100px; left: 15px; color: gray; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">LEO</a>
+      <a href="https://dxer.site/greencube-FAQ.html" style="position: fixed; bottom: 170px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">FAQ</a>
+      <a href="https://dxer.site/qo-100-satellite-observer.html" style="position: fixed; bottom: 135px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">GEO</a>
+      <a href="https://dxer.site/leo-satellite-observer.html" style="position: fixed; bottom: 100px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">LEO</a>
 
       <div class="floating-window">
         <button class="toggle-button"></button>
@@ -285,14 +298,19 @@
             </ol>
             <button class="hide-button" onclick="toggleLeaderboard()">Hide</button>
         </div>
+    <button class="show-button" onclick="toggleLeaderboard()">Show Leaders</button>
     
     <script>
         function toggleLeaderboard() {
                     var widget = document.querySelector('.leaderboard-widget');
+                    var showButton = document.querySelector('.show-button');
+
                     if (widget.style.display === 'none') {
                         widget.style.display = 'block';
+                        showButton.style.display = 'none';
                     } else {
                         widget.style.display = 'none';
+                        showButton.style.display = 'block';
                     }
                 }
         
