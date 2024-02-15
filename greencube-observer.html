@@ -30,6 +30,80 @@
        }
     </style>
     <style>
+     
+     .leaderboard-widget {
+                 display: block; /* Initially visible */
+                 position: absolute;
+                 bottom: 20px; /* Adjust the bottom position as needed */
+                 left: 50%;
+                 transform: translateX(-50%);
+                 z-index: 1000; /* Ensure the leaderboard is above the map */
+                 background-color: rgba(255, 255, 255, 0.5); /* More transparent background */
+                 border: 1px solid rgba(0, 0, 0, 0.1); /* Transparent border */
+                 border-radius: 3px;
+                 padding: 3px; /* Reduce the padding */
+                 max-width: 200px; /* Reduce the max-width */
+                 box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.1);
+             }
+
+             .leaderboard-widget h2 {
+                 font-size: 0.9em; /* Reduce the font size */
+                 margin-bottom: 3px; /* Reduce the margin */
+                 text-align: center;
+                 display: flex;
+                 justify-content: space-between; /* Add space between title and "See all" link */
+                 align-items: center; /* Center vertically */
+             }
+
+             .leaderboard-widget a {
+                 font-size: 0.8em;
+                 color: #007bff; /* Blue color for the link */
+                 text-decoration: none;
+             }
+
+             .leaderboard-widget a:hover {
+                 text-decoration: underline; /* Underline on hover */
+             }
+
+             .leaderboard-widget ol {
+                 list-style-type: none;
+                 padding: 0;
+                 margin: 0;
+             }
+
+             .leaderboard-widget li {
+                 margin-bottom: 1px; /* Reduce the margin */
+                 padding: 2px; /* Reduce the padding */
+                 background-color: rgba(255, 255, 255, 0.8); /* More transparent background */
+                 border-radius: 2px;
+                 box-shadow: none; /* Remove the box-shadow */
+                 font-size: 0.8em; /* Reduce the font size */
+             }
+
+             .hide-button {
+                 position: absolute;
+                 bottom: -15px;
+                 left: 40%;
+                 background-color: transparent;
+                 color: #007bff;
+                 border: none;
+                 font-size: 0.8em;
+                 cursor: pointer;
+             }
+
+             .show-button {
+                 display: none; /* Initially hidden */
+                 position: absolute;
+                 bottom: 10px;
+                 left: 50%;
+                 transform: translateX(-50%);
+                 background-color: transparent;
+                 color: #007bff;
+                 border: none;
+                 font-size: 0.8em;
+                 cursor: pointer;
+             }
+        
     .twitter-container {
       position: fixed;
       bottom: 60px;
@@ -39,7 +113,7 @@
 
     .twitter-follow-button {
       display: inline-block;
-      background-color: #1da1f2;
+      background-color: #000000;
       color: #fff;
       padding: 4px 8px;
       border-radius: 16px;
@@ -65,14 +139,14 @@
         
         .floating-button {
           position: absolute;
-          bottom: 160px;
+          bottom: 195px;
           left: 8px;
           z-index: 999;
         }
 
         .floating-button-icon {
           font-size: 30px; /* Adjust the size of the icon as needed */
-          color: #808080; /* Adjust the color of the icon as needed */
+          color: #000000; /* Adjust the color of the icon as needed */
           padding: 10px; /* Add padding around the icon as needed */
           background-color: rgba(255, 255, 255, 0.0); /* Add background color to the icon as needed */
           border-radius: 50%; /* Apply border radius to create a circular button */
@@ -166,12 +240,10 @@
       <div class="floating">
         <label for="grid-locator">Enter your Grid:</label>
         <input type="text" id="grid-locator" placeholder="e.g. JO89tt" maxlength="6" style="width: 68px;">
-        <button onclick="initMap(document.getElementById('grid-locator').value); document.getElementById('kml-layer-toggle').checked = false; document.getElementById('kml-layer-toggle_g').checked = false;">Plot your Range</button>
+        <button onclick="initMap(document.getElementById('grid-locator').value); document.getElementById('kml-layer-toggle').checked = false;">Plot your Range</button>
         <div class="checkbox-container" style="display: flex; align-items: center;">
-          <input type="checkbox" style="margin-top: 5px;" id="kml-layer-toggle">
-          <label for="kml-layer-toggle" style="margin-top: 5px;">CQ Zones</label>
-          <input type="checkbox" style="margin-top: 5px;" id="kml-layer-toggle_g">
-          <label for="kml-layer-toggle_g" style="margin-top: 5px;">GRIDs</label>
+          <input type="checkbox" style="margin-top: 10px;" id="kml-layer-toggle">
+          <label for="kml-layer-toggle" style="margin-top: 10px;">CQ Zones</label>
           <img src="img/gclogo.png" alt="GreenCube Observer logo" style="vertical-align: middle; margin-left: 5px; width: 20px; height: 20px;">
               <span style="position: relative; display: inline-block; font-family: Arial, sans-serif; font-weight: bold; letter-spacing: 1px; margin-left: 5px; margin-top: 10px;">
                 GreenCube Observer
@@ -183,9 +255,10 @@
       <a href="https://dxer.site" target="_blank" class="floating-button">
         <i class="fas fa-home floating-button-icon"></i>
       </a>
-
-      <a href="https://dxer.site/qo-100-satellite-observer.html" style="position: fixed; bottom: 135px; left: 15px; color: gray; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">GEO</a>
-      <a href="https://dxer.site/leo-satellite-observer.html" style="position: fixed; bottom: 100px; left: 15px; color: gray; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">LEO</a>
+      
+      <a href="https://dxer.site/greencube-FAQ.html" style="position: fixed; bottom: 170px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">FAQ</a>
+      <a href="https://dxer.site/qo-100-satellite-observer.html" style="position: fixed; bottom: 135px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">GEO</a>
+      <a href="https://dxer.site/leo-satellite-observer.html" style="position: fixed; bottom: 100px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">LEO</a>
 
       <div class="floating-window">
         <button class="toggle-button"></button>
@@ -194,6 +267,8 @@
             <div><img src="img/m_new.png" alt="New stations" style="width:15px;height:15px;"> New in 7 days</div>
             <div><img src="img/m_30.png" alt="Heard within 30 days" style="width:15px;height:15px;"> Heard within 30 days</div>
             <div><img src="img/m_m30.png" alt="Heard more than 30 days ago" style="width:15px;height:15px;"> Heard more than 30 days ago</div>
+            <div><p style="font-size: smaller;">&nbsp;&nbsp;&nbsp;&nbsp;Thanks for <a href="https://ko-fi.com/sa5ikn" target="_blank">support</a> to: <br>&nbsp;&nbsp;&nbsp;&nbsp;G0IIQ, F6FLQ,
+                IW5BMS, VK6PY</p></div>
             <div><p style="font-size: smaller;">&nbsp;&nbsp;&nbsp;&nbsp;Latest database update: <br>&nbsp;&nbsp;&nbsp;&nbsp;<span id="last-modified"></span></p></div>
             <script>
                 var xhttp = new XMLHttpRequest();
@@ -213,7 +288,32 @@
 
 
     <div id="map"></div>
+    <div class="leaderboard-widget">
+        <h2>
+                    Open Data Leaders
+                    <a href="https://dxer.site/greencube-leaderboard.html" target="_blank">&nbsp;see all</a>
+                </h2>
+            <ol>
+                <!-- Leaderboard items will be dynamically added here -->
+            </ol>
+            <button class="hide-button" onclick="toggleLeaderboard()">Hide</button>
+        </div>
+    <button class="show-button" onclick="toggleLeaderboard()">Show Leaders</button>
+    
     <script>
+        function toggleLeaderboard() {
+                    var widget = document.querySelector('.leaderboard-widget');
+                    var showButton = document.querySelector('.show-button');
+
+                    if (widget.style.display === 'none') {
+                        widget.style.display = 'block';
+                        showButton.style.display = 'none';
+                    } else {
+                        widget.style.display = 'none';
+                        showButton.style.display = 'block';
+                    }
+                }
+        
       var map;
       var kmlLayer;
       
@@ -276,7 +376,7 @@
 
           const infowindow = new google.maps.InfoWindow();
           
-          kmlLayer = new google.maps.KmlLayer('https://dxer.site/WAZ.kml?v=1.2', {
+          kmlLayer = new google.maps.KmlLayer('https://dxer.site/WAZ.kml?v=1.3', {
             suppressInfoWindows: true,
             preserveViewport: true,
             map: null // set map to null initially
@@ -299,30 +399,6 @@
               kmlLayer.setMap(map);
             } else {
               kmlLayer.setMap(null);
-            }
-          });
-          
-          // Make the KML layer thinner
-          const kmlLayer1 = new google.maps.KmlLayer({
-              url: 'https://dxer.site/maidenhead_gridsquares.kmz?v=1.0',
-              map: null,
-              suppressInfoWindows: true,
-              preserveViewport: true,
-              options: {
-                  strokeWeight: 0.5, // Adjust the thickness
-              },
-          });
-
-          
-          var kmlLayerToggle1 = document.getElementById('kml-layer-toggle_g');
-          kmlLayerToggle1.addEventListener('change', function() {
-            if (kmlLayerToggle1.checked) {
-              kmlLayer1.setMap(map);
-              // Add markers for all Maidenhead Grids
-              addMarkers(map);
-            } else {
-              kmlLayer1.setMap(null);
-              removeMarkers();
             }
           });
 
@@ -481,44 +557,6 @@
 
         
       }
-        
-        function addMarkers(map) {
-            // Loop through Maidenhead Grids and add markers
-            // Adjust the range of latitude and longitude
-            for (let lat = -90; lat < 90; lat += 1) {
-                for (let lng = -180; lng < 180; lng += 2) {
-                    const gridSquare = calculateGridSquare(lat, lng);
-                    const marker = new google.maps.Marker({
-                        position: { lat: lat + 0.5, lng: lng + 1 },
-                        map: map,
-                        title: gridSquare,
-                        icon: {
-                            url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png', // Blue marker icon
-                            scaledSize: new google.maps.Size(12, 14), // Adjust size as needed
-                        },
-                    });
-
-                    // Add click event listener to show info window
-                    marker.addListener('click', function () {
-                        const infoWindow = new google.maps.InfoWindow({
-                            content: gridSquare,
-                        });
-                        infoWindow.open(map, marker);
-                    });
-                }
-            }
-        }
-        
-
-        function calculateGridSquare(latitude, longitude) {
-            var field = String.fromCharCode(Math.floor((longitude + 180) / 20) + 65);
-            var square = String.fromCharCode(Math.floor((latitude + 90) / 10) + 65);
-            var subsquareX = Math.floor(((longitude + 180) % 20) / 2);
-            var subsquareY = Math.floor(((latitude + 90) % 10));
-
-            return field + square + subsquareX + subsquareY;
-        }
-        
     </script>
     
     <script async
@@ -529,7 +567,7 @@
     <script>
       kofiWidgetOverlay.draw('sa5ikn', {
         'type': 'floating-chat',
-        'floating-chat.donateButton.text': 'Like it?',
+        'floating-chat.donateButton.text': 'Support',
         'floating-chat.donateButton.background-color': '#00b9fe',
         'floating-chat.donateButton.text-color': '#fff'
       });
@@ -538,7 +576,38 @@
       <a href="https://twitter.com/m0skn_sa5ikn?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow</a>
       <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
     </div>
+    <script>
+            fetch("leaderboard.txt")
+                .then(response => response.text())
+                .then(data => {
+                    const regex = /Rank: (\d+), Observer: ([^,]+), Cont: ([^,]+), Observations: (\d+), Percentage: ([^%]+)%, Grid Locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
+                    let leaderboard = [];
+                    let match;
 
+                    // Extract leaderboard data
+                    while ((match = regex.exec(data)) !== null) {
+                        const rank = parseInt(match[1]);
+                        const observer = match[2];
+                        const continent = match[3];
+                        const percentage = parseFloat(match[5]);
+                        leaderboard.push({ rank, observer, continent, percentage });
+                    }
+
+                    // Sort leaderboard by percentage in descending order
+                    leaderboard.sort((a, b) => b.percentage - a.percentage);
+
+                    // Display top 5 ranked observers
+                    const leaderboardList = document.querySelector('.leaderboard-widget ol');
+                    for (let i = 0; i < Math.min(5, leaderboard.length); i++) {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${leaderboard[i].rank}. ${leaderboard[i].observer}, ${leaderboard[i].percentage}% - ${leaderboard[i].continent}`;
+                        leaderboardList.appendChild(listItem);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching leaderboard data:', error);
+                });
+        </script>
   </body>
 </html>
 
