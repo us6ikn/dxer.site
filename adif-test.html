@@ -49,6 +49,18 @@
             <input type="file" id="adifFile" accept=".adi,.adif">
             <label><input type="checkbox" id="redMarkerCheckbox" checked> Show Red Markers</label>
             <label><input type="checkbox" id="blueMarkerCheckbox" checked> Show Blue Markers</label>
+            <br>
+            <input type="text" id="gridLocatorInput" placeholder="Enter your Grid" style="margin-top: 10px; margin-bottom: 10px;">
+            <button onclick="plotGrid(); document.getElementById('kml-layer-toggle').checked = false;">Plot your Range</button>
+            <div class="checkbox-container" style="display: flex; align-items: center;">
+                <input type="checkbox" id="kml-layer-toggle">
+                <label for="kml-layer-toggle">CQ Zones</label>
+                <img src="img/gclogo.png" alt="GreenCube Observer logo" style="vertical-align: middle; margin-left: 5px; width: 20px; height: 20px;">
+                <span style="position: relative; display: inline-block; font-family: Arial, sans-serif; font-weight: bold; letter-spacing: 1px; margin-left: 5px;">
+                    GreenCube Observer
+                    <sup style="position: absolute; top: -7px; right: 0; font-size: 9px; font-family: Arial, sans-serif; font-weight: normal; letter-spacing: 0px;">by SA5IKN</sup>
+                </span>
+            </div>
         </div>
     </div>
 
@@ -137,22 +149,6 @@
             }
         }
 
-        // Function to extract coordinates from text using regex
-        function extractCoordinates(data) {
-            const regex = /Earliest: ([^,]+), Latest: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
-            const coordinates = {};
-            let match;
-            while ((match = regex.exec(data)) !== null) {
-                const callsign = match[3].trim(); // Trim the callsign
-                const lat = parseFloat(match[5]);
-                const lng = parseFloat(match[6]);
-                if (!isNaN(lat) && !isNaN(lng)) { // Checking if lat and lng are valid numbers
-                    coordinates[callsign] = { lat, lng };
-                }
-            }
-            return coordinates;
-        }
-
         // Function to extract stations from ADIF content
         function extractStationsFromADIF(adifContent) {
             const lines = adifContent.split('\n');
@@ -164,6 +160,22 @@
                 }
             });
             return stations;
+        }
+
+        // Function to plot all stations from txt file with blue markers
+        function plotAllStations(map) {
+            Object.keys(stationCoordinates).forEach(callsign => {
+                if (!isStationPlottedInRed(callsign)) {
+                    const marker = plotStationOnMap(map, { callsign }, stationCoordinates[callsign], 'https://dxer.site/img/m_m30.png');
+                    // Add the marker to the array of blue markers
+                    blueMarkers.push(marker);
+                }
+            });
+        }
+
+        // Function to check if a station is already plotted in red
+        function isStationPlottedInRed(callsign) {
+            return redPlottedStations.includes(callsign);
         }
 
         // Function to plot a station on the map with a specified marker color
@@ -178,22 +190,6 @@
                 }
             });
             return marker;
-        }
-
-        // Function to plot all other stations from txt file with blue markers
-        function plotAllStations(map) {
-            Object.keys(stationCoordinates).forEach(callsign => {
-                if (!isStationPlottedInRed(callsign)) {
-                    const marker = plotStationOnMap(map, { callsign }, stationCoordinates[callsign], 'https://dxer.site/img/m_m30.png');
-                    // Add the marker to the array of blue markers
-                    blueMarkers.push(marker);
-                }
-            });
-        }
-
-        // Function to check if a station is already plotted in red
-        function isStationPlottedInRed(callsign) {
-            return redPlottedStations.includes(callsign);
         }
 
         // Event listener for red marker checkbox
@@ -211,6 +207,48 @@
             markers.forEach(marker => {
                 marker.setVisible(visible);
             });
+        }
+
+        // Function to plot the grid on the map based on the user input
+        function plotGrid() {
+            var gridLocator = document.getElementById('gridLocatorInput').value;
+            if (gridLocator.trim() === "") {
+                alert("Please enter a grid locator.");
+                return;
+            }
+
+            var coordinates = calculateCoordinates(gridLocator);
+            if (coordinates) {
+                var marker = plotStationOnMap(map, { callsign: "Your Grid" }, coordinates, 'https://maps.google.com/mapfiles/kml/pal4/icon62.png');
+                map.setCenter(coordinates);
+                map.setZoom(6);
+            }
+        }
+
+        // Function to calculate coordinates from grid locator
+        function calculateCoordinates(gridLocator) {
+            // Get the grid locator from user input and convert to uppercase
+            gridLocator = gridLocator.toUpperCase();
+
+            // Validate grid locator format
+            var gridLocatorPattern = /^([A-R]{2}\d{2}[a-z]{2})([0-9]*[a-z]*)?$/;
+            if (!gridLocatorPattern.test(gridLocator)) {
+                alert("Invalid grid locator format. Please enter a valid 6-character grid locator.");
+                return null;
+            }
+
+            // Calculate latitude and longitude from grid locator
+            var lat1 = (gridLocator.charCodeAt(1) - 65) * 10;
+            var lat2 = ((gridLocator.charCodeAt(5) - 97)/24) +  (1 / 48) - 90;
+            var lat3 = parseInt(gridLocator.charAt(3));
+            var latitude = lat1 + lat3 + lat2;
+
+            var lon1 = ((gridLocator.charCodeAt(0) - 65) * 20);
+            var lon2 = parseInt(gridLocator.charAt(2)) * 2;
+            var lon3 = ((gridLocator.charCodeAt(4) - 97) / 12) + (1/24);
+            var longitude = lon1 + lon2 + lon3 - 180;
+
+            return { lat: latitude, lng: longitude };
         }
 
         // Initialize the map when the page is loaded
