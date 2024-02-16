@@ -270,7 +270,7 @@
         function plotAllStations(map) {
             Object.keys(stationCoordinates).forEach(callsign => {
                 if (!isStationPlottedInRed(callsign)) {
-                    const marker = plotStationOnMap(map, { callsign }, stationCoordinates[callsign], 'https://dxer.site/img/m_m30.png');
+                    const marker = plotStationOnMap(map, { callsign }, stationCoordinates[callsign], 'https://dxer.site/img/notworked.png');
                     // Add the marker to the array of blue markers
                     blueMarkers.push(marker);
                 }
