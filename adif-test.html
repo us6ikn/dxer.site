@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ADIF Stations Map</title>
     <!-- Include Google Maps API asynchronously -->
-    <script async
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
-    </script>
+    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
     <style>
         #map {
             height: 400px;
@@ -21,8 +19,12 @@
     <div id="map"></div>
 
     <script>
-        // Define initMap function in the global scope
+        // Global variable to track API loading status
+        var mapLoaded = false;
+
+        // Function to initialize map
         function initMap() {
+            mapLoaded = true;
             // Initialize Google Map
             var map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 2,
@@ -38,23 +40,37 @@
 
                     // Read user-provided ADIF file
                     document.getElementById('adifFile').addEventListener('change', function(event) {
-                        var file = event.target.files[0];
-                        var reader = new FileReader();
-                        reader.onload = function(e) {
-                            var adifContent = e.target.result;
-                            const adifStations = extractStationsFromADIF(adifContent);
+                        // Ensure map is loaded before processing the file
+                        checkMapLoaded(function() {
+                            var file = event.target.files[0];
+                            var reader = new FileReader();
+                            reader.onload = function(e) {
+                                var adifContent = e.target.result;
+                                const adifStations = extractStationsFromADIF(adifContent);
 
-                            // Compare stations from ADIF file with filtered stations
-                            adifStations.forEach(station => {
-                                if (filteredStations.has(station.callsign)) {
-                                    // Plot station on map
-                                    plotStationOnMap(map, station);
-                                }
-                            });
-                        };
-                        reader.readAsText(file);
+                                // Compare stations from ADIF file with filtered stations
+                                adifStations.forEach(station => {
+                                    if (filteredStations.has(station.callsign)) {
+                                        // Plot station on map
+                                        plotStationOnMap(map, station);
+                                    }
+                                });
+                            };
+                            reader.readAsText(file);
+                        });
                     });
                 });
+        }
+
+        // Function to check if the API is loaded before executing other functions
+        function checkMapLoaded(callback) {
+            if (mapLoaded) {
+                callback();
+            } else {
+                setTimeout(function() {
+                    checkMapLoaded(callback);
+                }, 100);
+            }
         }
 
         // Function to extract stations from text
