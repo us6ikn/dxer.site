@@ -86,7 +86,9 @@
             mapLoaded = true;
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 2,
-                center: {lat: 0, lng: 0}
+                center: {lat: 0, lng: 0},
+                mapTypeControl: false, // Remove terrain button
+                streetViewControl: false // Remove street view button
             });
 
             // Fetch content of output_filtered.txt from the server
@@ -206,17 +208,12 @@
                 }
             });
 
-            // Create info window content
-            var infoWindowContent = '<div><strong>Callsign:</strong> ' + station.callsign + '</div>';
-
-            // Create info window
-            var infoWindow = new google.maps.InfoWindow({
-                content: infoWindowContent
-            });
-
-            // Add click event listener to marker
+            // Add click event listener to show info window with callsign
             marker.addListener('click', function() {
-                infoWindow.open(map, marker);
+                var infowindow = new google.maps.InfoWindow({
+                    content: station.callsign
+                });
+                infowindow.open(map, marker);
             });
 
             return marker;
