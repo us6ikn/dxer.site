@@ -81,16 +81,19 @@
             const lines = data.trim().split('\n');
             const coordinates = {};
             lines.forEach(line => {
-                const parts = line.split(',');
-                if (parts.length === 3) {
-                    const callsign = parts[0].trim();
-                    const lat = parseFloat(parts[1]);
-                    const lng = parseFloat(parts[2]);
-                    coordinates[callsign] = { lat, lng };
+                const parts = line.trim().split(/[:,(]+/); // Splitting by colon or comma
+                if (parts.length >= 7) { // Checking if there are enough parts
+                    const callsign = parts[6].trim();
+                    const lat = parseFloat(parts[8]);
+                    const lng = parseFloat(parts[9]);
+                    if (!isNaN(lat) && !isNaN(lng)) { // Checking if lat and lng are valid numbers
+                        coordinates[callsign] = { lat, lng };
+                    }
                 }
             });
             return coordinates;
         }
+
 
         // Function to extract stations from ADIF content
         function extractStationsFromADIF(adifContent) {
