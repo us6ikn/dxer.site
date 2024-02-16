@@ -108,34 +108,32 @@
                                 console.log("ADIF Stations:");
                                 console.log(adifStations);
 
-                                // Log the keys of the stationCoordinates object
-                                console.log("Station Coordinates:");
-                                console.log(Object.keys(stationCoordinates));
-
-                                // Compare stations from ADIF file with filtered stations
-                                adifStations.forEach(station => {
-                                    const trimmedCallsign = station.callsign.trim(); // Trim the callsign
-                                    console.log("Checking station:", trimmedCallsign);
-                                    if (trimmedCallsign in stationCoordinates) {
-                                        console.log("Found matching station:", trimmedCallsign);
-                                        // Plot station on map with coordinates from txt file using red marker
-                                        const marker = plotStationOnMap(map, station, stationCoordinates[trimmedCallsign], 'https://dxer.site/img/m_new.png');
-                                        // Add the marker to the array of red markers
-                                        redMarkers.push(marker);
-                                        // Add the callsign to the array of red plotted stations
-                                        redPlottedStations.push(trimmedCallsign);
-                                    } else {
-                                        console.log("No matching station found for:", trimmedCallsign);
-                                    }
-                                });
-
-                                // Plot all other stations from txt file in blue
-                                plotAllStations(map);
+                                // Plot stations from ADIF file on the map
+                                plotADIFStations(adifStations);
                             };
                             reader.readAsText(file);
                         });
                     });
                 });
+        }
+
+        // Function to plot stations from ADIF file on the map
+        function plotADIFStations(adifStations) {
+            adifStations.forEach(station => {
+                const trimmedCallsign = station.callsign.trim(); // Trim the callsign
+                console.log("Checking station:", trimmedCallsign);
+                if (trimmedCallsign in stationCoordinates) {
+                    console.log("Found matching station:", trimmedCallsign);
+                    // Plot station on map with coordinates from txt file using red marker
+                    const marker = plotStationOnMap(map, station, stationCoordinates[trimmedCallsign], 'https://dxer.site/img/m_new.png');
+                    // Add the marker to the array of red markers
+                    redMarkers.push(marker);
+                    // Add the callsign to the array of red plotted stations
+                    redPlottedStations.push(trimmedCallsign);
+                } else {
+                    console.log("No matching station found for:", trimmedCallsign);
+                }
+            });
         }
 
         // Function to check if the API is loaded before executing other functions
@@ -147,6 +145,22 @@
                     checkMapLoaded(callback);
                 }, 100);
             }
+        }
+
+        // Function to extract coordinates from text using regex
+        function extractCoordinates(data) {
+            const regex = /Earliest: ([^,]+), Latest: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
+            const coordinates = {};
+            let match;
+            while ((match = regex.exec(data)) !== null) {
+                const callsign = match[3].trim(); // Trim the callsign
+                const lat = parseFloat(match[5]);
+                const lng = parseFloat(match[6]);
+                if (!isNaN(lat) && !isNaN(lng)) { // Checking if lat and lng are valid numbers
+                    coordinates[callsign] = { lat, lng };
+                }
+            }
+            return coordinates;
         }
 
         // Function to extract stations from ADIF content
