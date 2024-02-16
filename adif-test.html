@@ -22,6 +22,9 @@
         // Global variable to track API loading status
         var mapLoaded = false;
 
+        // Global variable to store coordinates from txt file
+        var stationCoordinates = {};
+
         // Function to initialize map
         function initMap() {
             mapLoaded = true;
@@ -36,7 +39,7 @@
                 .then(response => response.text())
                 .then(filteredData => {
                     // Process data from output_filtered.txt
-                    const filteredStations = extractStationsFromText(filteredData);
+                    stationCoordinates = extractCoordinates(filteredData);
 
                     // Read user-provided ADIF file
                     document.getElementById('adifFile').addEventListener('change', function(event) {
@@ -50,9 +53,9 @@
 
                                 // Compare stations from ADIF file with filtered stations
                                 adifStations.forEach(station => {
-                                    if (filteredStations.has(station.callsign)) {
-                                        // Plot station on map
-                                        plotStationOnMap(map, station);
+                                    if (station.callsign in stationCoordinates) {
+                                        // Plot station on map with coordinates from txt file
+                                        plotStationOnMap(map, station, stationCoordinates[station.callsign]);
                                     }
                                 });
                             };
@@ -73,36 +76,39 @@
             }
         }
 
-        // Function to extract stations from text
-        function extractStationsFromText(data) {
-            // Implement your logic to extract stations from text
-            // For simplicity, let's assume the text contains one callsign per line
-            const stations = new Set(data.trim().split('\n'));
-            return stations;
+        // Function to extract coordinates from text
+        function extractCoordinates(data) {
+            const lines = data.trim().split('\n');
+            const coordinates = {};
+            lines.forEach(line => {
+                const parts = line.split(',');
+                if (parts.length === 3) {
+                    const callsign = parts[0].trim();
+                    const lat = parseFloat(parts[1]);
+                    const lng = parseFloat(parts[2]);
+                    coordinates[callsign] = { lat, lng };
+                }
+            });
+            return coordinates;
         }
 
         // Function to extract stations from ADIF content
         function extractStationsFromADIF(adifContent) {
-            // Implement your logic to extract stations from ADIF content
-            // For simplicity, let's parse the content and extract callsigns
             const lines = adifContent.split('\n');
-            const stations = new Set();
+            const stations = [];
             lines.forEach(line => {
-                const match = line.match(/<call:(\d+)>([^<]+)/);
-                if (match && match[2]) {
-                    stations.add(match[2].trim());
+                const match = line.match(/<call:\d+>([^<]+)/);
+                if (match && match[1]) {
+                    stations.push({ callsign: match[1].trim() });
                 }
             });
             return stations;
         }
 
         // Function to plot a station on the map
-        function plotStationOnMap(map, station) {
-            // Implement your logic to plot a station on the map
-            // For simplicity, let's assume we have the latitude and longitude of the station
-            // Replace with actual coordinates
+        function plotStationOnMap(map, station, coordinates) {
             var marker = new google.maps.Marker({
-                position: {lat: 37.7749, lng: -122.4194}, // Example coordinates for San Francisco
+                position: coordinates,
                 map: map,
                 title: station.callsign
             });
