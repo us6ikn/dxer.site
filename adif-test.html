@@ -30,7 +30,7 @@
         #controlsContainer {
             position: absolute;
             top: 0;
-            right: 0;
+            left: 0;
             padding: 20px;
             background-color: rgba(255, 255, 255, 0.8);
             z-index: 2;
@@ -45,16 +45,12 @@
     <div id="mapContainer">
         <div id="map"></div>
         <div id="controlsContainer">
-            <h1>ADIF Stations Map</h1>
             <input type="file" id="adifFile" accept=".adi,.adif">
-            <label><input type="checkbox" id="redMarkerCheckbox" checked> Show Red Markers</label>
-            <label><input type="checkbox" id="blueMarkerCheckbox" checked> Show Blue Markers</label>
+            <label><input type="checkbox" id="redMarkerCheckbox" checked> Worked</label>
+            <label><input type="checkbox" id="blueMarkerCheckbox" checked> Not Worked</label>
             <br>
             <input type="text" id="gridLocatorInput" placeholder="Enter your Grid" style="margin-top: 10px; margin-bottom: 10px;">
             <button onclick="plotGrid(); document.getElementById('kml-layer-toggle').checked = false;">Plot your Range</button>
-            <div class="checkbox-container" style="display: flex; align-items: center;">
-                <input type="checkbox" id="kml-layer-toggle">
-                <label for="kml-layer-toggle">CQ Zones</label>
                 <img src="img/gclogo.png" alt="GreenCube Observer logo" style="vertical-align: middle; margin-left: 5px; width: 20px; height: 20px;">
                 <span style="position: relative; display: inline-block; font-family: Arial, sans-serif; font-weight: bold; letter-spacing: 1px; margin-left: 5px;">
                     GreenCube Observer
