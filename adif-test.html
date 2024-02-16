@@ -54,6 +54,8 @@
                                 console.log(adifStations);
 
                                 // Compare stations from ADIF file with filtered stations
+                                console.log("ADIF Stations:", adifStations);
+                                console.log("Station Coordinates:", stationCoordinates);
                                 adifStations.forEach(station => {
                                     console.log("Checking station:", station.callsign);
                                     if (station.callsign in stationCoordinates) {
@@ -64,6 +66,7 @@
                                         console.log("No matching station found for:", station.callsign);
                                     }
                                 });
+
                             };
                             reader.readAsText(file);
                         });
