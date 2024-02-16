@@ -17,8 +17,6 @@
     <div id="map"></div>
 
     <script>
-        // Your JavaScript code goes here...
-
         // Global variable to track API loading status
         var mapLoaded = false;
 
@@ -63,15 +61,12 @@
                                     console.log("Checking station:", trimmedCallsign);
                                     if (trimmedCallsign in stationCoordinates) {
                                         console.log("Found matching station:", trimmedCallsign);
-                                        // Plot station on map with coordinates from txt file
-                                        plotStationOnMap(map, station, stationCoordinates[trimmedCallsign]);
+                                        // Plot station on map with coordinates from txt file using red marker
+                                        plotStationOnMap(map, station, stationCoordinates[trimmedCallsign], 'red');
                                     } else {
                                         console.log("No matching station found for:", trimmedCallsign);
                                     }
                                 });
-
-
-
                             };
                             reader.readAsText(file);
                         });
@@ -106,8 +101,6 @@
             return coordinates;
         }
 
-
-
         // Function to extract stations from ADIF content
         function extractStationsFromADIF(adifContent) {
             const lines = adifContent.split('\n');
@@ -121,14 +114,19 @@
             return stations;
         }
 
-
-        
-        // Function to plot a station on the map
-        function plotStationOnMap(map, station, coordinates) {
+        // Function to plot a station on the map with a specified marker color
+        function plotStationOnMap(map, station, coordinates, markerColor) {
             var marker = new google.maps.Marker({
                 position: coordinates,
                 map: map,
-                title: station.callsign
+                title: station.callsign,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    fillColor: markerColor,
+                    fillOpacity: 1,
+                    strokeWeight: 0,
+                    scale: 8
+                }
             });
         }
 
