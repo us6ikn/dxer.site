@@ -53,9 +53,8 @@
 
                                 // Compare stations from ADIF file with filtered stations
                                 adifStations.forEach(station => {
-                                    console.log(station.callsign);
-                                    console.log(stationCoordinates);
                                     if (station.callsign in stationCoordinates) {
+                                        console.log(station.callsign);
                                         // Plot station on map with coordinates from txt file
                                         plotStationOnMap(map, station, stationCoordinates[station.callsign]);
                                     }
