@@ -61,12 +61,15 @@
                                     console.log("Checking station:", trimmedCallsign);
                                     if (trimmedCallsign in stationCoordinates) {
                                         console.log("Found matching station:", trimmedCallsign);
-                                        // Plot station on map with coordinates from txt file using red marker
+                                        // Plot station from ADIF file on map with coordinates from txt file using red marker
                                         plotStationOnMap(map, station, stationCoordinates[trimmedCallsign], 'red');
                                     } else {
                                         console.log("No matching station found for:", trimmedCallsign);
                                     }
                                 });
+
+                                // Plot all other stations from txt file with blue markers
+                                plotAllStations(map);
                             };
                             reader.readAsText(file);
                         });
@@ -106,14 +109,13 @@
             const lines = adifContent.split('\n');
             const stations = [];
             lines.forEach(line => {
-                const match = line.match(/<call:\d+>([^<]+).*?<gridsquare:\d+>([^<]+)/);
-                if (match && match[1] && match[2]) {
-                    stations.push({ callsign: match[1].trim(), gridsquare: match[2].trim() });
+                const match = line.match(/<call:\d+>([^<]+).*?<sat_name:\d+>([^<]+)/);
+                if (match && match[1] && match[2] && match[2].trim() === "IO-117") {
+                    stations.push({ callsign: match[1].trim() });
                 }
             });
             return stations;
         }
-
 
         // Function to plot a station on the map with a specified marker color
         function plotStationOnMap(map, station, coordinates, markerColor) {
@@ -129,6 +131,22 @@
                     scale: 8
                 }
             });
+        }
+
+        // Function to plot all other stations from txt file with blue markers
+        function plotAllStations(map) {
+            Object.keys(stationCoordinates).forEach(callsign => {
+                if (!isStationPlotted(callsign)) {
+                    plotStationOnMap(map, { callsign }, stationCoordinates[callsign], 'blue');
+                }
+            });
+        }
+
+        // Function to check if a station is already plotted
+        function isStationPlotted(callsign) {
+            // You can implement this function based on your specific requirements
+            // For simplicity, let's assume no station is plotted initially
+            return false;
         }
 
         // Initialize the map when the page is loaded
