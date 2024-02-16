@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADIF Stations Map</title>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>ADIF Stations Map</h1>
+    <input type="file" id="adifFile" accept=".adi,.adif">
+    <div id="map"></div>
+
+    <script>
+        // Your JavaScript code goes here...
+
+        // Global variable to track API loading status
+        var mapLoaded = false;
+
+        // Global variable to store coordinates from txt file
+        var stationCoordinates = {};
+
+        // Function to initialize map
+        function initMap() {
+            mapLoaded = true;
+            // Initialize Google Map
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 2,
+                center: {lat: 0, lng: 0}
+            });
+
+            // Fetch content of output_filtered.txt from the server
+            fetch("output_filtered.txt")
+                .then(response => response.text())
+                .then(filteredData => {
+                    // Process data from output_filtered.txt
+                    stationCoordinates = extractCoordinates(filteredData);
+
+                    // Read user-provided ADIF file
+                    document.getElementById('adifFile').addEventListener('change', function(event) {
+                        // Ensure map is loaded before processing the file
+                        checkMapLoaded(function() {
+                            var file = event.target.files[0];
+                            var reader = new FileReader();
+                            reader.onload = function(e) {
+                                var adifContent = e.target.result;
+                                const adifStations = extractStationsFromADIF(adifContent);
+                                console.log("ADIF Stations:");
+                                console.log(adifStations);
+
+                                // Log the keys of the stationCoordinates object
+                                console.log("Station Coordinates:");
+                                console.log(Object.keys(stationCoordinates));
+
+                                // Compare stations from ADIF file with filtered stations
+                                adifStations.forEach(station => {
+                                    const trimmedCallsign = station.callsign.trim(); // Trim the callsign
+                                    console.log("Checking station:", trimmedCallsign);
+                                    if (trimmedCallsign in stationCoordinates) {
+                                        console.log("Found matching station:", trimmedCallsign);
+                                        // Plot station on map with coordinates from txt file
+                                        plotStationOnMap(map, station, stationCoordinates[trimmedCallsign]);
+                                    } else {
+                                        console.log("No matching station found for:", trimmedCallsign);
+                                    }
+                                });
+
+
+
+                            };
+                            reader.readAsText(file);
+                        });
+                    });
+                });
+        }
+
+        // Function to check if the API is loaded before executing other functions
+        function checkMapLoaded(callback) {
+            if (mapLoaded) {
+                callback();
+            } else {
+                setTimeout(function() {
+                    checkMapLoaded(callback);
+                }, 100);
+            }
+        }
+
+        // Function to extract coordinates from text using regex
+        function extractCoordinates(data) {
+            const regex = /Earliest: ([^,]+), Latest: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
+            const coordinates = {};
+            let match;
+            while ((match = regex.exec(data)) !== null) {
+                const callsign = match[3].trim(); // Trim the callsign
+                const lat = parseFloat(match[5]);
+                const lng = parseFloat(match[6]);
+                if (!isNaN(lat) && !isNaN(lng)) { // Checking if lat and lng are valid numbers
+                    coordinates[callsign] = { lat, lng };
+                }
+            }
+            return coordinates;
+        }
+
+
+
+        // Function to extract stations from ADIF content
+        function extractStationsFromADIF(adifContent) {
+            const lines = adifContent.split('\n');
+            const stations = [];
+            lines.forEach(line => {
+                const match = line.match(/<call:\d+>([^<]+).*?<sat_name:\d+>([^<]+)/);
+                if (match && match[1] && match[2] && match[2].trim() === "IO-117") {
+                    stations.push({ callsign: match[1].trim() });
+                }
+            });
+            return stations;
+        }
+
+
+        
+        // Function to plot a station on the map
+        function plotStationOnMap(map, station, coordinates) {
+            var marker = new google.maps.Marker({
+                position: coordinates,
+                map: map,
+                title: station.callsign
+            });
+        }
+
+        // Initialize the map when the page is loaded
+        initMap();
+    </script>
+
+    <!-- Include Google Maps API asynchronously -->
+    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
+</body>
+</html>
