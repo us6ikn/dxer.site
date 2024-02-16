@@ -53,6 +53,10 @@
                                 console.log("ADIF Stations:");
                                 console.log(adifStations);
 
+                                // Log the keys of the stationCoordinates object
+                                console.log("Station Coordinates:");
+                                console.log(Object.keys(stationCoordinates));
+
                                 // Compare stations from ADIF file with filtered stations
                                 adifStations.forEach(station => {
                                     const trimmedCallsign = station.callsign.trim(); // Trim the callsign
@@ -65,6 +69,7 @@
                                         console.log("No matching station found for:", trimmedCallsign);
                                     }
                                 });
+
 
 
                             };
