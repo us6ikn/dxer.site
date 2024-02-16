@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html>
+    <script type="text/javascript" src="https://platform-api.sharethis.com/js/sharethis.js#property=6408717eb20f5f00192a0d72&product=inline-share-buttons&source=platform" async="async"></script>
+  <head>
+      <!-- Google tag (gtag.js) -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-7YST3WTEH3"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-7YST3WTEH3');
+      </script>
+      <!-- Include Font Awesome CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="GreenCube Observer IO-117" />
+    <meta name="author" content="https://dxer.site" />
+    <meta charset="utf-8">
+    <title>GreenCube Observer</title>
+    <style>
+      html, body {
+        height: 100%;
+        padding: 0;
+        margin: 0;
+        }
+      #map {
+       height: 100%;
+       }
+    </style>
+    <style>
+     
+     .leaderboard-widget {
+                 display: block; /* Initially visible */
+                 position: absolute;
+                 bottom: 20px; /* Adjust the bottom position as needed */
+                 left: 50%;
+                 transform: translateX(-50%);
+                 z-index: 1000; /* Ensure the leaderboard is above the map */
+                 background-color: rgba(255, 255, 255, 0.5); /* More transparent background */
+                 border: 1px solid rgba(0, 0, 0, 0.1); /* Transparent border */
+                 border-radius: 3px;
+                 padding: 3px; /* Reduce the padding */
+                 max-width: 200px; /* Reduce the max-width */
+                 box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.1);
+             }
+
+             .leaderboard-widget h2 {
+                 font-size: 0.9em; /* Reduce the font size */
+                 margin-bottom: 3px; /* Reduce the margin */
+                 text-align: center;
+                 display: flex;
+                 justify-content: space-between; /* Add space between title and "See all" link */
+                 align-items: center; /* Center vertically */
+             }
+
+             .leaderboard-widget a {
+                 font-size: 0.8em;
+                 color: #007bff; /* Blue color for the link */
+                 text-decoration: none;
+             }
+
+             .leaderboard-widget a:hover {
+                 text-decoration: underline; /* Underline on hover */
+             }
+
+             .leaderboard-widget ol {
+                 list-style-type: none;
+                 padding: 0;
+                 margin: 0;
+             }
+
+             .leaderboard-widget li {
+                 margin-bottom: 1px; /* Reduce the margin */
+                 padding: 2px; /* Reduce the padding */
+                 background-color: rgba(255, 255, 255, 0.8); /* More transparent background */
+                 border-radius: 2px;
+                 box-shadow: none; /* Remove the box-shadow */
+                 font-size: 0.8em; /* Reduce the font size */
+             }
+
+             .hide-button {
+                 position: absolute;
+                 bottom: -15px;
+                 left: 40%;
+                 background-color: transparent;
+                 color: #007bff;
+                 border: none;
+                 font-size: 0.8em;
+                 cursor: pointer;
+             }
+
+             .show-button {
+                 display: none; /* Initially hidden */
+                 position: absolute;
+                 bottom: 10px;
+                 left: 50%;
+                 transform: translateX(-50%);
+                 background-color: transparent;
+                 color: #007bff;
+                 border: none;
+                 font-size: 0.8em;
+                 cursor: pointer;
+             }
+        
+    .twitter-container {
+      position: fixed;
+      bottom: 60px;
+      left: 15px;
+      z-index: 9999;
+    }
+
+    .twitter-follow-button {
+      display: inline-block;
+      background-color: #000000;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 16px;
+      font-weight: bold;
+      text-decoration: none;
+    }
+        .floating {
+          position: absolute;
+          top: 20px;
+          left: 20px;
+          z-index: 1000;
+          background-color: rgba(255, 255, 255, 0.8);
+          padding: 10px;
+          border-radius: 5px;
+          box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+          opacity: 1.0;
+        }
+        .checkbox-container {
+            display: flex;
+            flex-direction: row;
+          }
+        
+        
+        .floating-button {
+          position: absolute;
+          bottom: 195px;
+          left: 8px;
+          z-index: 999;
+        }
+
+        .floating-button-icon {
+          font-size: 30px; /* Adjust the size of the icon as needed */
+          color: #000000; /* Adjust the color of the icon as needed */
+          padding: 10px; /* Add padding around the icon as needed */
+          background-color: rgba(255, 255, 255, 0.0); /* Add background color to the icon as needed */
+          border-radius: 50%; /* Apply border radius to create a circular button */
+        }
+        
+        .floating-window {
+          position: fixed;
+          bottom: 300px;
+          right: 60px;
+          z-index: 9999;
+        }
+
+        .toggle-button {
+          position: absolute;
+          top: 45px;
+          right: 0;
+          width: 20px;
+          height: 20px;
+          font-size: 20px;
+          font-weight: bold;
+          text-align: center;
+          color: transparent;
+          background-color: transparent;
+          border: none;
+          border-radius: 50%;
+          cursor: pointer;
+          opacity: 0;
+        }
+
+        .arrow-button {
+          position: absolute;
+          top: 47px;
+          left: -22;
+          width: 20px;
+          height: 20px;
+          font-size: 20px;
+          font-weight: bold;
+          text-align: center;
+          color: black;
+          background-color: transparent;
+          border: none;
+          cursor: pointer;
+          opacity: 1;
+        }
+        
+        .content {
+          position: absolute;
+          top: 0;
+          right: -295px;
+          width: 240px;
+          padding: 10px;
+          background-color: rgba(255, 255, 255, 0.8);
+          padding: 10px;
+          border-radius: 5px;
+          box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+          transition: right 0.5s;
+          z-index: -1;
+        }
+
+        .show {
+          right: 0;
+          z-index: 9999;
+        }
+
+        
+        .blinking-marker {
+          /* Set the marker icon to the URL of your blinking gif */
+          background-image: url(img/rover.gif);
+          /* Set the width and height of the marker */
+          width: 20px;
+          height: 20px;
+          /* Set the background position to display the first frame of the gif */
+          background-position: 0 0;
+          /* Set the animation to cycle through the frames of the gif */
+          animation: blink 1s steps(2) infinite;
+        }
+        /* Define the animation */
+        @keyframes blink {
+          50% {
+            background-position: -32px 0;
+          }
+        }
+    </style>
+    <style>
+        * {
+          outline: none !important;
+        }
+    </style>
+  </head>
+  <body>
+      <div class="floating">
+        <label for="grid-locator">Enter your Grid:</label>
+        <input type="text" id="grid-locator" placeholder="e.g. JO89tt" maxlength="6" style="width: 68px;">
+        <button onclick="initMap(document.getElementById('grid-locator').value); document.getElementById('kml-layer-toggle').checked = false;">Plot your Range</button>
+        <div class="checkbox-container" style="display: flex; align-items: center;">
+          <input type="checkbox" style="margin-top: 10px;" id="kml-layer-toggle">
+          <label for="kml-layer-toggle" style="margin-top: 10px;">CQ Zones</label>
+          <img src="img/gclogo.png" alt="GreenCube Observer logo" style="vertical-align: middle; margin-left: 5px; width: 20px; height: 20px;">
+              <span style="position: relative; display: inline-block; font-family: Arial, sans-serif; font-weight: bold; letter-spacing: 1px; margin-left: 5px; margin-top: 10px;">
+                GreenCube Observer
+                <sup style="position: absolute; top: -7px; right: 0; font-size: 9px; font-family: Arial, sans-serif; font-weight: normal; letter-spacing: 0px;">by SA5IKN</sup>
+              </span>
+        </div>
+      </div>
+
+      <a href="https://dxer.site" target="_blank" class="floating-button">
+        <i class="fas fa-home floating-button-icon"></i>
+      </a>
+      
+      <a href="https://dxer.site/greencube-log-check.html" style="position: fixed; bottom: 235px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">CHK LOG?</a>
+      
+      <a href="https://dxer.site/greencube-FAQ.html" style="position: fixed; bottom: 170px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">FAQ</a>
+      <a href="https://dxer.site/qo-100-satellite-observer.html" style="position: fixed; bottom: 135px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">GEO</a>
+      <a href="https://dxer.site/leo-satellite-observer.html" style="position: fixed; bottom: 100px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">LEO</a>
+
+      <div class="floating-window">
+        <button class="toggle-button"></button>
+        <button class="arrow-button" onclick="toggleFloatingWindow()">&#x25b6;</button>
+        <div class="content">
+            <div><img src="img/m_new.png" alt="New stations" style="width:15px;height:15px;"> New in 7 days</div>
+            <div><img src="img/m_30.png" alt="Heard within 30 days" style="width:15px;height:15px;"> Heard within 30 days</div>
+            <div><img src="img/m_m30.png" alt="Heard more than 30 days ago" style="width:15px;height:15px;"> Heard more than 30 days ago</div>
+            <div><p style="font-size: smaller;">&nbsp;&nbsp;&nbsp;&nbsp;Thanks for <a href="https://ko-fi.com/sa5ikn" target="_blank">support</a> to: <br>&nbsp;&nbsp;&nbsp;&nbsp;G0IIQ, F6FLQ,
+                IW5BMS, VK6PY</p></div>
+            <div><p style="font-size: smaller;">&nbsp;&nbsp;&nbsp;&nbsp;Latest database update: <br>&nbsp;&nbsp;&nbsp;&nbsp;<span id="last-modified"></span></p></div>
+            <script>
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        var lastModified = new Date(this.getResponseHeader("Last-Modified"));
+                        document.getElementById("last-modified").innerHTML = lastModified.toUTCString();
+                    }
+                };
+                xhttp.open("HEAD", "output_filtered.txt", true);
+                xhttp.send();
+            </script>
+            <div class="sharethis-inline-share-buttons"></div>
+          </div>
+        
+      </div>
+
+
+    <div id="map"></div>
+    <div class="leaderboard-widget">
+        <h2>
+                    Open Data Leaders
+                    <a href="https://dxer.site/greencube-leaderboard.html" target="_blank">&nbsp;see all</a>
+                </h2>
+            <ol>
+                <!-- Leaderboard items will be dynamically added here -->
+            </ol>
+            <button class="hide-button" onclick="toggleLeaderboard()">Hide</button>
+        </div>
+    <button class="show-button" onclick="toggleLeaderboard()">Show Leaders</button>
+    
+    <script>
+        function toggleLeaderboard() {
+                    var widget = document.querySelector('.leaderboard-widget');
+                    var showButton = document.querySelector('.show-button');
+
+                    if (widget.style.display === 'none') {
+                        widget.style.display = 'block';
+                        showButton.style.display = 'none';
+                    } else {
+                        widget.style.display = 'none';
+                        showButton.style.display = 'block';
+                    }
+                }
+        
+      var map;
+      var kmlLayer;
+      
+      // Define the URL of your blinking gif
+      const BLINKING_GIF_URL = 'img/rover1.gif?v=1';
+
+      function calculateCoordinates(gridLocator) {
+          // Get the grid locator from user input and convert to uppercase
+          var gridLocator = document.getElementById("grid-locator").value.toUpperCase();
+
+          // Force the first two characters to be uppercase
+          gridLocator = gridLocator.substr(0,2).toUpperCase() + gridLocator.substr(2);
+
+          // Force the last two characters to be lowercase
+          gridLocator = gridLocator.substr(0,4) + gridLocator.substr(4).toLowerCase();
+
+          // Use regular expression to validate the grid locator format
+          var gridLocatorPattern = /^([A-R]{2}\d{2}[a-z]{2})([0-9]*[a-z]*)?$/;
+          if (!gridLocatorPattern.test(gridLocator)) {
+              alert("Invalid grid locator format. Please enter a valid 6-character grid locator.");
+              return;
+          }
+          // Calculate the latitude and longitude of the grid locator
+          var lat1 = (gridLocator.charCodeAt(1) - 65) * 10;
+          var lat2 = ((gridLocator.charCodeAt(5) - 97)/24) +  (1 / 48) - 90;
+          var lat3 = parseInt(gridLocator.charAt(3));
+          var latitude = lat1 + lat3 + lat2;
+
+          var lon1 = ((gridLocator.charCodeAt(0) - 65) * 20);
+          var lon2 = parseInt(gridLocator.charAt(2)) * 2;
+          var lon3 = ((gridLocator.charCodeAt(4) - 97) / 12) + (1/24);
+          var longitude = lon1 + lon2 + lon3 - 180;
+
+          return { lat: latitude, lng: longitude };
+      }
+      
+      function toggleFloatingWindow() {
+        var content = document.querySelector('.floating-window .content');
+        content.classList.toggle('show');
+      }
+
+      
+      function initMap(gridLocator) {
+          map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 2,
+            center: { lat: 0, lng: 0 },
+            mapTypeControl: false,
+            streetViewControl: false,
+            fullscreenControl: false
+          });
+          
+          // Load the announcements data from the file
+          fetch('announcements_filtered.txt')
+            .then(response => response.text())
+            .then(data => {
+              // Split the data into individual announcements
+              const announcements = data.trim().split('\n');
+              
+        let openInfoWindow = null; // keep track of the currently open info window
+
+          const infowindow = new google.maps.InfoWindow();
+          
+          kmlLayer = new google.maps.KmlLayer('https://dxer.site/WAZ.kml?v=1.3', {
+            suppressInfoWindows: true,
+            preserveViewport: true,
+            map: null // set map to null initially
+          });
+          kmlLayer.set('strokeColor', '#000000'); // set line color to red
+                      kmlLayer.set('strokeWeight', 2); // set line width to 2 pixels
+                      kmlLayer.set('fillOpacity', 0); // set fill opacity to 0 (transparent)
+          kmlLayer.addListener('click', function(event) {
+            var zoneNumber = event.featureData.infoWindowHtml;
+            var infowindow = new google.maps.InfoWindow({
+              content: zoneNumber,
+            });
+            infowindow.setPosition(event.latLng);
+            infowindow.open(map);
+          });
+
+          var kmlLayerToggle = document.getElementById('kml-layer-toggle');
+          kmlLayerToggle.addEventListener('change', function() {
+            if (kmlLayerToggle.checked) {
+              kmlLayer.setMap(map);
+            } else {
+              kmlLayer.setMap(null);
+            }
+          });
+
+          fetch("output_filtered.txt")
+            .then(response => response.text())
+            .then(data => {
+              const regex = /Earliest: ([^,]+), Latest: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
+              const callsigns = {};
+              let match;
+              while ((match = regex.exec(data)) !== null) {
+                const callsign = match[3];
+                const dxgridlocator = match[4];
+                const earliestTime = Date.parse(match[1]);
+                const latestTime = Date.parse(match[2]);
+                const lat = parseFloat(match[5]);
+                const lng = parseFloat(match[6]);
+                const key = `${lat},${lng}`;
+                if (!callsigns[key]) {
+                  callsigns[key] = [];
+                }
+                if (Date.now() - earliestTime <= 7 * 24 * 60 * 60 * 1000) {
+                    callsigns[key].push({
+                      callsign: callsign,
+                      dxgridlocator: dxgridlocator,
+                      markerIcon: "img/m_new.png"
+                    });
+
+                } else if (Date.now() - earliestTime > 7 * 24 * 60 * 60 * 1000 && Date.now() - latestTime <= 30 * 24 * 60 * 60 * 1000) {
+                    callsigns[key].push({
+                      callsign: callsign,
+                      dxgridlocator: dxgridlocator,
+                    markerIcon: "img/m_30.png"
+                  });
+                } else {
+                    callsigns[key].push({
+                      callsign: callsign,
+                      dxgridlocator: dxgridlocator,
+                    markerIcon: "img/m_m30.png"
+                  });
+                }
+              }
+              
+              for (const key in callsigns) {
+                const [lat, lng] = key.split(",");
+                const markers = callsigns[key];
+                const markerIcon = markers[0].markerIcon;
+                const marker = new google.maps.Marker({
+                  position: { lat: parseFloat(lat), lng: parseFloat(lng) },
+                  map: map,
+                  title: markers.map(m => m.callsign).join(", "),
+                  icon: {
+                    url: markerIcon,
+                    scaledSize: new google.maps.Size(20, 20)
+                  }
+                });
+                
+                let content = markers.map(m => {
+                  if (!gridLocator) {
+                    return `<a href="#" onclick="alert('Enter your Grid Locator and click Plot your Range first'); return false;">${m.callsign}</a>`;
+                  }
+                  return `<a href="https://www.satmatch.com/satellite/IO-117/obs1/${gridLocator}/obs2/${m.dxgridlocator}?duration_hrs=48">${m.callsign}</a>`;
+                }).join(", ");
+                
+                content = `<div>${content}</div>`;
+                marker.addListener("click", () => {
+                    // Close the currently open info window
+                    if (openInfoWindow) {
+                      openInfoWindow.close();
+                    }
+                  infowindow.setContent(content);
+                  infowindow.open(map, marker);
+                });
+              }
+
+              // Loop through the announcements and create markers for each one
+              for (let i = 0; i < announcements.length; i++) {
+                const announcement = announcements[i];
+
+                // Extract the coordinates and time from the announcement
+                            const coordinates = announcement.match(/Coordinates: \((.*), (.*)\)/);
+                            const timeString = announcement.match(/Time: ([^,]*)/)[1];
+
+                            if (!coordinates || !timeString) {
+                              continue;
+                            }
+
+                            const lat = parseFloat(coordinates[1]);
+                            const lng = parseFloat(coordinates[2]);
+                            const time = new Date(timeString);
+
+                            // Check if the time is in the future
+                            if (time <= new Date()) {
+                              continue;
+                            }
+
+                // Extract the callsign from the announcement
+                const callsign = announcement.match(/Callsign: ([^,]*)/)[1];
+
+                // Create a new marker with the blinking icon
+                const marker = new google.maps.Marker({
+                  position: { lat, lng },
+                  map,
+                  icon: {
+                      url: BLINKING_GIF_URL,
+                      scaledSize: new google.maps.Size(20, 20)
+                    },
+                  optimized: false, // disable marker animation optimization
+                  zIndex: 10000 // set the z-index to a high value
+                });
+
+                // Add a listener to the marker
+                marker.addListener('click', () => {
+                  // Close the currently open info window
+                  if (openInfoWindow) {
+                    openInfoWindow.close();
+                  }
+
+                  // Create an info window with the callsign and hyperlink to https://hams.at/alerts
+                  const infoWindow = new google.maps.InfoWindow({
+                    content: `<div><a href="https://hams.at/alerts" target="_blank">${callsign}</a></div>`,
+                  });
+
+                  // Open the info window on the marker and update the currently open info window
+                  infoWindow.open(map, marker);
+                  openInfoWindow = infoWindow;
+                });
+              }
+            });
+              
+              // Plot the marker with a 13000 km radius circle around it if gridLocator is provided
+              if (gridLocator) {
+                const { lat, lng } = calculateCoordinates(gridLocator);
+
+                const marker = new google.maps.Marker({
+                  position: { lat, lng },
+                  map: map,
+                  title: gridLocator
+                });
+                const circle = new google.maps.Circle({
+                  strokeColor: "#FF0000",
+                  strokeOpacity: 0.4,
+                  strokeWeight: 2,
+                  fillColor: "#FF0000",
+                  fillOpacity: 0.15,
+                  map,
+                  center: { lat, lng },
+                  radius: 13000000 // Fixed radius value
+                });
+                
+                circle.setMap(map); // Set the circle on the map
+                circle.setOptions({ clickable: false }); // Make the circle transparent to mouse events
+              } else {
+                
+              }
+            });
+
+        
+      }
+    </script>
+    
+    <script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
+    </script>
+    
+    <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+    <script>
+      kofiWidgetOverlay.draw('sa5ikn', {
+        'type': 'floating-chat',
+        'floating-chat.donateButton.text': 'Support',
+        'floating-chat.donateButton.background-color': '#00b9fe',
+        'floating-chat.donateButton.text-color': '#fff'
+      });
+    </script>
+    <div class="twitter-container">
+      <a href="https://twitter.com/m0skn_sa5ikn?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow</a>
+      <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+    <script>
+            fetch("leaderboard.txt")
+                .then(response => response.text())
+                .then(data => {
+                    const regex = /Rank: (\d+), Observer: ([^,]+), Cont: ([^,]+), Observations: (\d+), Percentage: ([^%]+)%, Grid Locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
+                    let leaderboard = [];
+                    let match;
+
+                    // Extract leaderboard data
+                    while ((match = regex.exec(data)) !== null) {
+                        const rank = parseInt(match[1]);
+                        const observer = match[2];
+                        const continent = match[3];
+                        const percentage = parseFloat(match[5]);
+                        leaderboard.push({ rank, observer, continent, percentage });
+                    }
+
+                    // Sort leaderboard by percentage in descending order
+                    leaderboard.sort((a, b) => b.percentage - a.percentage);
+
+                    // Display top 5 ranked observers
+                    const leaderboardList = document.querySelector('.leaderboard-widget ol');
+                    for (let i = 0; i < Math.min(5, leaderboard.length); i++) {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${leaderboard[i].rank}. ${leaderboard[i].observer}, ${leaderboard[i].percentage}% - ${leaderboard[i].continent}`;
+                        leaderboardList.appendChild(listItem);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching leaderboard data:', error);
+                });
+        </script>
+  </body>
+</html>
+
