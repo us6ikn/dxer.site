@@ -237,9 +237,29 @@
 
             var coordinates = calculateCoordinates(gridLocator);
             if (coordinates) {
-                var marker = plotStationOnMap(map, { callsign: "Your Grid" }, coordinates, 'https://maps.google.com/mapfiles/kml/pal4/icon62.png');
-                map.setCenter(coordinates);
-                map.setZoom(6);
+                const { lat, lng } = coordinates;
+
+                // Plot the marker with a 13000 km radius circle around it if gridLocator is provided
+                if (gridLocator) {
+                    const marker = new google.maps.Marker({
+                        position: { lat, lng },
+                        map: map,
+                        title: gridLocator
+                    });
+                    const circle = new google.maps.Circle({
+                        strokeColor: "#FF0000",
+                        strokeOpacity: 0.4,
+                        strokeWeight: 2,
+                        fillColor: "#FF0000",
+                        fillOpacity: 0.15,
+                        map,
+                        center: { lat, lng },
+                        radius: 13000000 // Fixed radius value
+                    });
+                    
+                    circle.setMap(map); // Set the circle on the map
+                    circle.setOptions({ clickable: false }); // Make the circle transparent to mouse events
+                }
             }
         }
 
