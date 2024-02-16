@@ -89,7 +89,6 @@
                     coordinates[callsign] = { lat, lng };
                 }
             }
-            console.log(coordinates);
             return coordinates;
         }
 
@@ -104,6 +103,7 @@
                     stations.push({ callsign: match[1].trim() });
                 }
             });
+            console.log(coordinates);
             return stations;
         }
 
