@@ -52,10 +52,11 @@
             </span>
             <br><br>
             <div style="margin-bottom: 5px;"> <!-- Added container div to adjust margin -->
-                <input type="file" id="adifFile" accept=".adi,.adif" style="margin-right: 10px;">
+                <input type="file" id="adifFile" accept=".adi,.adif" style="margin-right: 5px;">
                 <label><input type="checkbox" id="redMarkerCheckbox" checked> Worked</label>
+                <label><input type="checkbox" id="blueMarkerCheckbox" checked> Not Worked</label>
             </div>
-            <label><input type="checkbox" id="blueMarkerCheckbox" checked> Not Worked</label>
+           
             <br>
             Enter your Grid: <input type="text" id="gridLocatorInput" placeholder="e.g. JO89tt" style="margin-top: 5px; margin-bottom: 5px;">
             <button onclick="plotGrid(); document.getElementById('kml-layer-toggle').checked = false;">Plot your Range</button>
