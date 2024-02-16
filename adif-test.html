@@ -50,13 +50,18 @@
                             reader.onload = function(e) {
                                 var adifContent = e.target.result;
                                 const adifStations = extractStationsFromADIF(adifContent);
+                                console.log("ADIF Stations:");
+                                console.log(adifStations);
 
                                 // Compare stations from ADIF file with filtered stations
                                 adifStations.forEach(station => {
+                                    console.log("Checking station:", station.callsign);
                                     if (station.callsign in stationCoordinates) {
-                                        console.log(station.callsign);
+                                        console.log("Found matching station:", station.callsign);
                                         // Plot station on map with coordinates from txt file
                                         plotStationOnMap(map, station, stationCoordinates[station.callsign]);
+                                    } else {
+                                        console.log("No matching station found for:", station.callsign);
                                     }
                                 });
                             };
@@ -116,6 +121,9 @@
                 title: station.callsign
             });
         }
+
+        // Initialize the map when the page is loaded
+        initMap();
     </script>
 </body>
 </html>
