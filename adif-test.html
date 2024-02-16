@@ -50,15 +50,17 @@
                 GreenCube Observer
                 <sup style="position: absolute; top: -7px; right: 0; font-size: 9px; font-family: Arial, sans-serif; font-weight: normal; letter-spacing: 0px;">by SA5IKN</sup>
             </span>
-            <br>
-            <br>
-            <input type="file" id="adifFile" accept=".adi,.adif" style="margin-bottom: 5px;">
-            <label><input type="checkbox" id="redMarkerCheckbox" checked> Worked</label>
+            <br><br>
+            <div style="margin-bottom: 5px;"> <!-- Added container div to adjust margin -->
+                <input type="file" id="adifFile" accept=".adi,.adif" style="margin-right: 10px;">
+                <label><input type="checkbox" id="redMarkerCheckbox" checked> Worked</label>
+            </div>
             <label><input type="checkbox" id="blueMarkerCheckbox" checked> Not Worked</label>
             <br>
             Enter your Grid: <input type="text" id="gridLocatorInput" placeholder="e.g. JO89tt" style="margin-top: 5px; margin-bottom: 5px;">
             <button onclick="plotGrid(); document.getElementById('kml-layer-toggle').checked = false;">Plot your Range</button>
         </div>
+
     </div>
 
 
