@@ -31,33 +31,55 @@
                 .then(response => response.text())
                 .then(data => {
                     const regex = /Earliest: ([^,]+), Latest: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
-                    // Process data using regex
                     let match;
+                    const stationsFromTxt = new Set();
                     while ((match = regex.exec(data)) !== null) {
-                        // Extract information from each match and plot on map
-                        var station = {
-                            callsign: match[3],
-                            latitude: parseFloat(match[5]),
-                            longitude: parseFloat(match[6])
-                        };
-                        var marker = new google.maps.Marker({
-                            position: {lat: station.latitude, lng: station.longitude},
-                            map: map,
-                            title: station.callsign
-                        });
+                        // Extract callsigns from output_filtered.txt and add to set
+                        stationsFromTxt.add(match[3]);
                     }
+
+                    // Read user-provided ADIF file
+                    document.getElementById('adifFile').addEventListener('change', function(event) {
+                        var file = event.target.files[0];
+                        var reader = new FileReader();
+                        reader.onload = function(e) {
+                            var adifContent = e.target.result;
+                            const adifCallsigns = extractCallsignsFromADIF(adifContent);
+                            
+                            // Compare callsigns from ADIF file with callsigns from output_filtered.txt
+                            adifCallsigns.forEach(callsign => {
+                                if (stationsFromTxt.has(callsign)) {
+                                    // Plot station on map
+                                    plotStationOnMap(map, callsign);
+                                }
+                            });
+                        };
+                        reader.readAsText(file);
+                    });
                 });
 
-            // Read user-provided ADIF file
-            document.getElementById('adifFile').addEventListener('change', function(event) {
-                var file = event.target.files[0];
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    var adifContent = e.target.result;
-                    // Process adifContent
+            // Function to extract callsigns from ADIF file
+            function extractCallsignsFromADIF(adifContent) {
+                // Implement your logic to extract callsigns from ADIF content
+                // For simplicity, let's assume the callsigns are separated by a newline character
+                return adifContent.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            }
+
+            // Function to plot a station on the map
+            function plotStationOnMap(map, callsign) {
+                // Implement your logic to plot a station on the map
+                // For simplicity, let's assume we have the latitude and longitude of the station
+                var station = {
+                    callsign: callsign,
+                    latitude: /* Provide latitude */,
+                    longitude: /* Provide longitude */
                 };
-                reader.readAsText(file);
-            });
+                var marker = new google.maps.Marker({
+                    position: {lat: station.latitude, lng: station.longitude},
+                    map: map,
+                    title: station.callsign
+                });
+            }
         }
     </script>
 </body>
