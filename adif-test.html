@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ADIF Stations Map</title>
-    <!-- Include Google Maps API -->
+    <!-- Include Google Maps API asynchronously -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" async defer></script>
     <style>
         #map {
@@ -19,6 +19,7 @@
     <div id="map"></div>
 
     <script>
+        // Define initMap function in the global scope
         function initMap() {
             // Initialize Google Map
             var map = new google.maps.Map(document.getElementById('map'), {
@@ -57,29 +58,29 @@
                         reader.readAsText(file);
                     });
                 });
+        }
 
-            // Function to extract callsigns from ADIF file
-            function extractCallsignsFromADIF(adifContent) {
-                // Implement your logic to extract callsigns from ADIF content
-                // For simplicity, let's assume the callsigns are separated by a newline character
-                return adifContent.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-            }
+        // Function to extract callsigns from ADIF file
+        function extractCallsignsFromADIF(adifContent) {
+            // Implement your logic to extract callsigns from ADIF content
+            // For simplicity, let's assume the callsigns are separated by a newline character
+            return adifContent.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+        }
 
-            // Function to plot a station on the map
-            function plotStationOnMap(map, callsign) {
-                // Implement your logic to plot a station on the map
-                // For simplicity, let's assume we have the latitude and longitude of the station
-                var station = {
-                    callsign: callsign,
-                    latitude: /* Provide latitude */,
-                    longitude: /* Provide longitude */
-                };
-                var marker = new google.maps.Marker({
-                    position: {lat: station.latitude, lng: station.longitude},
-                    map: map,
-                    title: station.callsign
-                });
-            }
+        // Function to plot a station on the map
+        function plotStationOnMap(map, callsign) {
+            // Implement your logic to plot a station on the map
+            // For simplicity, let's assume we have the latitude and longitude of the station
+            var station = {
+                callsign: callsign,
+                latitude: /* Provide latitude */,
+                longitude: /* Provide longitude */
+            };
+            var marker = new google.maps.Marker({
+                position: {lat: station.latitude, lng: station.longitude},
+                map: map,
+                title: station.callsign
+            });
         }
     </script>
 </body>
