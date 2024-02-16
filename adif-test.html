@@ -29,12 +29,15 @@
 
         #controlsContainer {
             position: absolute;
-            top: 0;
-            left: 0;
-            padding: 20px;
-            background-color: rgba(255, 255, 255, 0.8);
+            top: 5px; /* Move down by 5 pixels */
+            left: 5px; /* Move right by 5 pixels */
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.5);
             z-index: 2;
+            border-radius: 10px; /* Adjust the value to change the roundness of the corners */
         }
+
+
 
         #adifFile {
             margin-bottom: 10px;
@@ -50,18 +53,16 @@
                 GreenCube Observer
                 <sup style="position: absolute; top: -7px; right: 0; font-size: 9px; font-family: Arial, sans-serif; font-weight: normal; letter-spacing: 0px;">by SA5IKN</sup>
             </span>
-            <br><br>
-            <div style="margin-bottom: 5px;"> <!-- Added container div to adjust margin -->
-                <input type="file" id="adifFile" accept=".adi,.adif" style="margin-right: 5px;">
-                <label><input type="checkbox" id="redMarkerCheckbox" checked> Worked</label>
-                <label><input type="checkbox" id="blueMarkerCheckbox" checked> Not Worked</label>
-            </div>
-           
+            <br>
+            <br>
+            <input type="file" id="adifFile" accept=".adi,.adif" style="margin-bottom: 5px; width: 180px;">
+
+            <label><input type="checkbox" id="redMarkerCheckbox" checked> Worked</label>
+            <label><input type="checkbox" id="blueMarkerCheckbox" checked> Not Worked</label>
             <br>
             Enter your Grid: <input type="text" id="gridLocatorInput" placeholder="e.g. JO89tt" style="margin-top: 5px; margin-bottom: 5px;">
             <button onclick="plotGrid(); document.getElementById('kml-layer-toggle').checked = false;">Plot your Range</button>
         </div>
-
     </div>
 
 
