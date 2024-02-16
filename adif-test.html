@@ -54,18 +54,18 @@
                                 console.log(adifStations);
 
                                 // Compare stations from ADIF file with filtered stations
-                                console.log("ADIF Stations:", adifStations);
-                                console.log("Station Coordinates:", stationCoordinates);
                                 adifStations.forEach(station => {
-                                    console.log("Checking station:", station.callsign);
-                                    if (station.callsign in stationCoordinates) {
-                                        console.log("Found matching station:", station.callsign);
+                                    const trimmedCallsign = station.callsign.trim(); // Trim the callsign
+                                    console.log("Checking station:", trimmedCallsign);
+                                    if (trimmedCallsign in stationCoordinates) {
+                                        console.log("Found matching station:", trimmedCallsign);
                                         // Plot station on map with coordinates from txt file
-                                        plotStationOnMap(map, station, stationCoordinates[station.callsign]);
+                                        plotStationOnMap(map, station, stationCoordinates[trimmedCallsign]);
                                     } else {
-                                        console.log("No matching station found for:", station.callsign);
+                                        console.log("No matching station found for:", trimmedCallsign);
                                     }
                                 });
+
 
                             };
                             reader.readAsText(file);
