@@ -106,13 +106,14 @@
             const lines = adifContent.split('\n');
             const stations = [];
             lines.forEach(line => {
-                const match = line.match(/<call:\d+>([^<]+).*?<sat_name:\d+>([^<]+)/);
-                if (match && match[1] && match[2] && match[2].trim() === "IO-117") {
-                    stations.push({ callsign: match[1].trim() });
+                const match = line.match(/<call:\d+>([^<]+).*?<gridsquare:\d+>([^<]+)/);
+                if (match && match[1] && match[2]) {
+                    stations.push({ callsign: match[1].trim(), gridsquare: match[2].trim() });
                 }
             });
             return stations;
         }
+
 
         // Function to plot a station on the map with a specified marker color
         function plotStationOnMap(map, station, coordinates, markerColor) {
