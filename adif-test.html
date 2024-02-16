@@ -45,25 +45,21 @@
     <div id="mapContainer">
         <div id="map"></div>
         <div id="controlsContainer">
-            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <span>&#9664; Back</span>
-                <img src="img/gclogo.png" alt="GreenCube Observer logo" style="width: 20px; height: 20px; margin-left: auto;">
-                <span style="font-weight: bold; margin-left: 5px;">GreenCube Observer</span>
-                <sup style="font-size: 9px; font-weight: normal; margin-left: 5px;">by SA5IKN</sup>
-            </div>
-            <input type="file" id="adifFile" accept=".adi,.adif" style="margin-bottom: 10px;">
-            <div>
-                <label style="margin-right: 10px;"><input type="checkbox" id="redMarkerCheckbox" checked> Worked</label>
-                <label><input type="checkbox" id="blueMarkerCheckbox" checked> Not Worked</label>
-            </div>
-            <div style="margin-top: 10px;">
-                <span>Enter your Grid:</span>
-                <input type="text" id="gridLocatorInput" placeholder="e.g. JO89tt" style="margin-left: 5px;">
-            </div>
-            <button onclick="plotGrid(); document.getElementById('kml-layer-toggle').checked = false; margin-top: 10px;">Plot your Range</button>
+            &#9664; Back <img src="img/gclogo.png" alt="GreenCube Observer logo" style="vertical-align: middle; margin-left: 5px; width: 20px; height: 20px;">
+            <span style="position: relative; display: inline-block; font-family: Arial, sans-serif; font-weight: bold; letter-spacing: 1px; margin-left: 5px;">
+                GreenCube Observer
+                <sup style="position: absolute; top: -7px; right: 0; font-size: 9px; font-family: Arial, sans-serif; font-weight: normal; letter-spacing: 0px;">by SA5IKN</sup>
+            </span>
+            <br>
+            <br>
+            <input type="file" id="adifFile" accept=".adi,.adif" style="margin-bottom: 5px;">
+            <label><input type="checkbox" id="redMarkerCheckbox" checked> Worked</label>
+            <label><input type="checkbox" id="blueMarkerCheckbox" checked> Not Worked</label>
+            <br>
+            Enter your Grid: <input type="text" id="gridLocatorInput" placeholder="e.g. JO89tt" style="margin-top: 5px; margin-bottom: 5px;">
+            <button onclick="plotGrid(); document.getElementById('kml-layer-toggle').checked = false;">Plot your Range</button>
         </div>
     </div>
-
 
 
     <script>
