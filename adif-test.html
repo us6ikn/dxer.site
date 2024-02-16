@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADIF Stations Map</title>
+    <!-- Include Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" async defer></script>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>ADIF Stations Map</h1>
+    <input type="file" id="adifFile" accept=".adi,.adif">
+    <div id="map"></div>
+
+    <script>
+        function initMap() {
+            // Initialize Google Map
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 2,
+                center: {lat: 0, lng: 0}
+            });
+
+            // Fetch content of output_filtered.txt from the server
+            fetch("output_filtered.txt")
+                .then(response => response.text())
+                .then(data => {
+                    const regex = /Earliest: ([^,]+), Latest: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
+                    // Process data using regex
+                    let match;
+                    while ((match = regex.exec(data)) !== null) {
+                        // Extract information from each match and plot on map
+                        var station = {
+                            callsign: match[3],
+                            latitude: parseFloat(match[5]),
+                            longitude: parseFloat(match[6])
+                        };
+                        var marker = new google.maps.Marker({
+                            position: {lat: station.latitude, lng: station.longitude},
+                            map: map,
+                            title: station.callsign
+                        });
+                    }
+                });
+
+            // Read user-provided ADIF file
+            document.getElementById('adifFile').addEventListener('change', function(event) {
+                var file = event.target.files[0];
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var adifContent = e.target.result;
+                    // Process adifContent
+                };
+                reader.readAsText(file);
+            });
+        }
+    </script>
+</body>
+</html>
