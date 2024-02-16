@@ -23,6 +23,9 @@
         // Global variable to store coordinates from txt file
         var stationCoordinates = {};
 
+        // Array to store callsigns of stations plotted in red
+        var redPlottedStations = [];
+
         // Function to initialize map
         function initMap() {
             mapLoaded = true;
@@ -61,14 +64,16 @@
                                     console.log("Checking station:", trimmedCallsign);
                                     if (trimmedCallsign in stationCoordinates) {
                                         console.log("Found matching station:", trimmedCallsign);
-                                        // Plot station from ADIF file on map with coordinates from txt file using red marker
+                                        // Plot station on map with coordinates from txt file using red marker
                                         plotStationOnMap(map, station, stationCoordinates[trimmedCallsign], 'red');
+                                        // Add the callsign to the array of red plotted stations
+                                        redPlottedStations.push(trimmedCallsign);
                                     } else {
                                         console.log("No matching station found for:", trimmedCallsign);
                                     }
                                 });
 
-                                // Plot all other stations from txt file with blue markers
+                                // Plot all other stations from txt file in blue
                                 plotAllStations(map);
                             };
                             reader.readAsText(file);
@@ -136,17 +141,15 @@
         // Function to plot all other stations from txt file with blue markers
         function plotAllStations(map) {
             Object.keys(stationCoordinates).forEach(callsign => {
-                if (!isStationPlotted(callsign)) {
+                if (!isStationPlottedInRed(callsign)) {
                     plotStationOnMap(map, { callsign }, stationCoordinates[callsign], 'blue');
                 }
             });
         }
 
-        // Function to check if a station is already plotted
-        function isStationPlotted(callsign) {
-            // You can implement this function based on your specific requirements
-            // For simplicity, let's assume no station is plotted initially
-            return false;
+        // Function to check if a station is already plotted in red
+        function isStationPlottedInRed(callsign) {
+            return redPlottedStations.includes(callsign);
         }
 
         // Initialize the map when the page is loaded
