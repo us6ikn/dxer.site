@@ -5,20 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ADIF Stations Map</title>
     <style>
-        #map {
-            height: 400px;
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent scrollbars */
+        }
+
+        #mapContainer {
+            position: relative;
+            height: 100%;
             width: 100%;
+            display: flex;
+        }
+
+        #map {
+            flex: 1;
+            height: 100%;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        #controlsContainer {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 2;
+        }
+
+        #adifFile {
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <h1>ADIF Stations Map</h1>
-    <input type="file" id="adifFile" accept=".adi,.adif">
-    <div>
-        <label><input type="checkbox" id="redMarkerCheckbox" checked> Show Red Markers</label>
-        <label><input type="checkbox" id="blueMarkerCheckbox" checked> Show Blue Markers</label>
+    <div id="mapContainer">
+        <div id="map"></div>
+        <div id="controlsContainer">
+            <h1>ADIF Stations Map</h1>
+            <input type="file" id="adifFile" accept=".adi,.adif">
+            <label><input type="checkbox" id="redMarkerCheckbox" checked> Show Red Markers</label>
+            <label><input type="checkbox" id="blueMarkerCheckbox" checked> Show Blue Markers</label>
+        </div>
     </div>
-    <div id="map"></div>
 
     <script>
         // Global variable to track API loading status
