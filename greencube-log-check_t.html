@@ -267,30 +267,28 @@
 
         // Function to extract stations from ADIF content
         function extractStationsFromADIF(adifContent) {
-            const lines = adifContent.split(/\r?\n/); // Split by line breaks
             const stations = [];
-            let currentStation = {}; // Object to store the current station's fields
-            lines.forEach(line => {
-                // If the line is not empty
-                if (line.trim() !== "") {
+            const records = adifContent.split(/<eor>/); // Split by end of record tag
+            records.forEach(record => {
+                const lines = record.split(/\r?\n/); // Split by line breaks
+                const station = {};
+                lines.forEach(line => {
                     // Extract field name and value using regex
                     const match = line.match(/<(\w+):(\d+)>([^<]+)/);
                     if (match) {
                         const fieldName = match[1];
                         const fieldValue = match[3];
-                        // Store field in current station object
-                        currentStation[fieldName] = fieldValue;
+                        // Store field in station object
+                        station[fieldName] = fieldValue;
                     }
-                } else {
-                    // If the line is empty, it indicates the end of a station
-                    // Push the current station object to the stations array
-                    stations.push(currentStation);
-                    // Reset current station object for the next station
-                    currentStation = {};
+                });
+                if (Object.keys(station).length > 0) {
+                    stations.push(station);
                 }
             });
             return stations;
         }
+
 
 
 
