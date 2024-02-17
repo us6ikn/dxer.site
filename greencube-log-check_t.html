@@ -273,6 +273,7 @@
             lines.forEach(line => {
                 if (line.trim() === '<EOH>') {
                     format = 2; // Switch to format 2
+                    console.log(format);
                     return; // Skip processing the <EOH> line
                 }
 
