@@ -277,7 +277,7 @@
                 concatenatedRecord += line.trim();
 
                 // Check if the concatenated record ends with <EOR>
-                if (concatenatedRecord.endsWith('<EOR>')) {
+                if (concatenatedRecord.toLowerCase().endsWith('<eor>')) {
                     // Modify the regex pattern to be case-insensitive by adding the 'i' flag
                     const match = concatenatedRecord.match(/<call:\d+>([^<]+).*?<sat_name:\d+>([^<]+)/i);
                     console.log(match);
