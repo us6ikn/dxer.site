@@ -267,41 +267,29 @@
 
         // Function to extract stations from ADIF content
         function extractStationsFromADIF(adifContent) {
-            const records = adifContent.split('<eor>');
+            const lines = adifContent.split('\n');
             const stations = [];
 
-            records.forEach(record => {
-                // Split the record into lines
-                const lines = record.split('\n');
-                let station = {};
+            let concatenatedRecord = '';
 
-                // Iterate through each line in the record
-                lines.forEach(line => {
-                    // Trim leading and trailing whitespace
-                    line = line.trim();
+            lines.forEach(line => {
+                // Join lines until a complete record is found
+                concatenatedRecord += line.trim();
 
-                    // Skip empty lines
-                    if (line === '') return;
-
-                    // Extract field name and value using regex
-                    const match = line.match(/<([^:]+):(\d+)>([^<]+)/);
-                    if (match) {
-                        const fieldName = match[1].toLowerCase(); // Convert field name to lowercase
-                        const fieldValue = match[3].trim(); // Trim leading and trailing whitespace from field value
-                        station[fieldName] = fieldValue;
+                // Check if the concatenated record ends with <EOR>
+                if (concatenatedRecord.endsWith('<EOR>')) {
+                    // Modify the regex pattern to be case-insensitive by adding the 'i' flag
+                    const match = concatenatedRecord.match(/<call:\d+>([^<]+).*?<sat_name:\d+>([^<]+)/i);
+                    console.log(match);
+                    if (match && match[1] && match[2] && match[2].trim().toLowerCase() === "io-117") {
+                        stations.push({ callsign: match[1].trim() });
                     }
-                });
-
-                // Check if the station has the required SAT_NAME field and its value is "IO-117"
-                if (station['sat_name'] && station['sat_name'].toLowerCase() === 'io-117') {
-                    stations.push({ callsign: station['call'] }); // Push the callsign to the stations array
+                    concatenatedRecord = ''; // Reset concatenated record
                 }
             });
 
             return stations;
         }
-
-
 
 
 
