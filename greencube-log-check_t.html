@@ -273,7 +273,7 @@
             lines.forEach(line => {
                 if (line.trim() === '<EOH>') {
                     format = 2; // Switch to format 2
-                    console.log(format);
+                    
                     return; // Skip processing the <EOH> line
                 }
 
@@ -289,6 +289,7 @@
                 } else if (format === 2) {
                     match = line.match(/<CALL:\d+>([\s\S]*?)<SAT_NAME:\d+>([\s\S]*?)(?:<|$)/i);
                 }
+                console.log(match);
 
                 if (match && match[1] && match[2] && match[2].trim() === "IO-117") {
                     stations.push({ callsign: match[1].trim() });
