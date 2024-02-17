@@ -270,6 +270,7 @@
             records.forEach(record => {
                 const lines = record.split(/\r?\n/); // Split by line breaks
                 const station = {};
+                console.log(record);
                 lines.forEach(line => {
                     // Extract field name and value using regex
                     const match = line.match(/<(\w+):(\d+)>([^<]+)/);
