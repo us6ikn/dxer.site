@@ -267,34 +267,40 @@
 
         // Function to extract stations from ADIF content
         function extractStationsFromADIF(adifContent) {
-            const lines = adifContent.split('\n');
+            const records = adifContent.split('<eor>');
             const stations = [];
 
-            let concatenatedRecord = '';
+            records.forEach(record => {
+                // Split the record into lines
+                const lines = record.split('\n');
+                let station = {};
 
-            lines.forEach(line => {
-                // Trim leading and trailing whitespace from each line
-                line = line.trim();
+                // Iterate through each line in the record
+                lines.forEach(line => {
+                    // Trim leading and trailing whitespace
+                    line = line.trim();
 
-                // Skip empty lines
-                if (line === '') return;
+                    // Skip empty lines
+                    if (line === '') return;
 
-                // Join lines until a complete record is found
-                concatenatedRecord += line;
-
-                // Check if the concatenated record ends with <EOR>
-                if (concatenatedRecord.endsWith('<EOR>')) {
-                    // Modify the regex pattern to be case-insensitive and handle variations in spacing
-                    const match = concatenatedRecord.match(/<call:\d+>\s*([^<]+).*?<sat_name:\d+>\s*([^<]+)/i);
-                    if (match && match[1] && match[2] && match[2].trim().toLowerCase() === "io-117") {
-                        stations.push({ callsign: match[1].trim() });
+                    // Extract field name and value using regex
+                    const match = line.match(/<([^:]+):(\d+)>([^<]+)/);
+                    if (match) {
+                        const fieldName = match[1].toLowerCase(); // Convert field name to lowercase
+                        const fieldValue = match[3].trim(); // Trim leading and trailing whitespace from field value
+                        station[fieldName] = fieldValue;
                     }
-                    concatenatedRecord = ''; // Reset concatenated record
+                });
+
+                // Check if the station has the required SAT_NAME field and its value is "IO-117"
+                if (station['sat_name'] && station['sat_name'].toLowerCase() === 'io-117') {
+                    stations.push({ callsign: station['call'] }); // Push the callsign to the stations array
                 }
             });
 
             return stations;
         }
+
 
 
 
