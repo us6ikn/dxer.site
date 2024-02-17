@@ -287,7 +287,7 @@
                 if (format === 1) {
                     match = line.match(/<CALL:\d+>([^<]+).*?<SAT_NAME:\d+>([^<]+)/i);
                 } else if (format === 2) {
-                    match = line.match(/<CALL:\d+>([^<]+).*?<SAT_NAME:\d+>([^<]+)/i);
+                    match = line.match(/<CALL:\d+>([\s\S]*?)<SAT_NAME:\d+>([\s\S]*?)(?:<|$)/i);
                 }
 
                 if (match && match[1] && match[2] && match[2].trim() === "IO-117") {
