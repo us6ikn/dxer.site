@@ -147,7 +147,7 @@
           <div><img src="img/worked.png" alt="Worked" style="width:15px;height:15px;"> Worked</div>
           <div><img src="img/notworked.png" alt="Not worked" style="width:15px;height:15px;"> Not worked</div>
           <div><p style="font-size: smaller;">&nbsp;&nbsp;&nbsp;&nbsp;Thanks for <a href="https://ko-fi.com/sa5ikn" target="_blank">support</a> to: <br>&nbsp;&nbsp;&nbsp;&nbsp;G0IIQ, F6FLQ,
-              IW5BMS, VK6PY, W2LPL</p></div>
+              IW5BMS, VK6PY</p></div>
           <div><p style="font-size: smaller;">&nbsp;&nbsp;&nbsp;&nbsp;Latest database update: <br>&nbsp;&nbsp;&nbsp;&nbsp;<span id="last-modified"></span></p></div>
           <script>
               var xhttp = new XMLHttpRequest();
@@ -269,15 +269,29 @@
         function extractStationsFromADIF(adifContent) {
             const lines = adifContent.split('\n');
             const stations = [];
+
+            let concatenatedRecord = '';
+
             lines.forEach(line => {
-                // Modify the regex pattern to be case-insensitive and trim whitespace
-                const match = line.match(/<call:\d+>([^<]+).*?<sat_name:\d+>([^<]+)/i);
-                if (match && match[1] && match[2] && match[2].trim() === "IO-117") {
-                    stations.push({ callsign: match[1].trim() });
+                // Join lines until a complete record is found
+                concatenatedRecord += line.trim();
+
+                // Check if the concatenated record ends with <EOR>
+                if (concatenatedRecord.toLowerCase().endsWith('<eor>')) {
+                    // Modify the regex pattern to be case-insensitive by adding the 'i' flag
+                    const match = concatenatedRecord.match(/<call:\d+>([^<]+).*?<sat_name:\d+>([^<]+)/i);
+                    console.log(match);
+                    if (match && match[1] && match[2] && match[2].trim().toLowerCase() === "io-117") {
+                        stations.push({ callsign: match[1].trim() });
+                    }
+                    concatenatedRecord = ''; // Reset concatenated record
                 }
             });
+
             return stations;
         }
+
+
 
 
         // Function to plot all stations from txt file with blue markers
