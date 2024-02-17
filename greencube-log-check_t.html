@@ -269,6 +269,7 @@
         function extractStationsFromADIF(adifContent) {
             const records = adifContent.split('<EOR>');
             const stations = [];
+            console.log(records);
 
             records.forEach(record => {
                 // Join lines until a complete record is found
