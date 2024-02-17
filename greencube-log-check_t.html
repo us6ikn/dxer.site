@@ -273,13 +273,19 @@
             let concatenatedRecord = '';
 
             lines.forEach(line => {
+                // Trim leading and trailing whitespace from each line
+                line = line.trim();
+
+                // Skip empty lines
+                if (line === '') return;
+
                 // Join lines until a complete record is found
-                concatenatedRecord += line.trim();
+                concatenatedRecord += line;
 
                 // Check if the concatenated record ends with <EOR>
                 if (concatenatedRecord.endsWith('<EOR>')) {
-                    // Modify the regex pattern to be case-insensitive by adding the 'i' flag
-                    const match = concatenatedRecord.match(/<call:\d+>([^<]+).*?<sat_name:\d+>([^<]+)/i);
+                    // Modify the regex pattern to be case-insensitive and handle variations in spacing
+                    const match = concatenatedRecord.match(/<call:\d+>\s*([^<]+).*?<sat_name:\d+>\s*([^<]+)/i);
                     if (match && match[1] && match[2] && match[2].trim().toLowerCase() === "io-117") {
                         stations.push({ callsign: match[1].trim() });
                     }
@@ -289,6 +295,7 @@
 
             return stations;
         }
+
 
 
 
