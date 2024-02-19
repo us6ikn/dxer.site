@@ -5,21 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AIS Vessels on Google Map</title>
     <!-- Include Google Maps API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" async defer></script>
 </head>
 <body>
     <div id="map" style="height: 600px;"></div>
 
     <script>
-        const WebSocket = require('ws');
-        const socket = new WebSocket("wss://stream.aisstream.io/v0/stream");
-
         // Google Map Initialization
         function initMap() {
             const map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 4,
                 center: { lat: 0, lng: 0 } // Default center
             });
+
+            const socket = new WebSocket("wss://stream.aisstream.io/v0/stream");
 
             socket.onopen = function (_) {
                 let subscriptionMessage = {
@@ -42,7 +41,5 @@
             };
         }
     </script>
-    <!-- Load the map after the page is fully loaded -->
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
 </body>
 </html>
