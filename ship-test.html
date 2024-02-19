@@ -20,6 +20,11 @@
 
             const socket = new WebSocket("wss://stream.aisstream.io/v0/stream");
 
+            // WebSocket error event handler
+            socket.onerror = function(event) {
+                console.error('WebSocket error:', event);
+            };
+
             socket.onopen = function (_) {
                 let subscriptionMessage = {
                     Apikey: "9b88d5cdedcefe619e1e51e09ffe0ef52e29f114",
