@@ -46,19 +46,27 @@
                 const lines = data.split('\n');
                 const months = {};
 
+                // Keep track of DXCC entities seen so far
+                const seenDXCC = new Set();
+
                 lines.forEach(line => {
                     const match = line.match(/Earliest: (\d{4}-\d{2})-\d{2}.*DXCC: ([\w\s]+)/);
                     if (match) {
                         console.log('Match:', match); // Log match results for debugging
                         const month = match[1];
                         const dxcc = match[2];
-                        months[month] = months[month] || new Set();
-                        months[month].add(dxcc);
+                        if (!seenDXCC.has(dxcc)) {
+                            // If the DXCC entity is not seen before, count it
+                            months[month] = months[month] || 0;
+                            months[month]++;
+                            // Add the DXCC entity to seenDXCC
+                            seenDXCC.add(dxcc);
+                        }
                     }
                 });
 
                 const labels = Object.keys(months).sort();
-                const values = labels.map(month => months[month].size);
+                const values = labels.map(month => months[month]);
 
                 // Create the bar chart for new DXCC entities per month
                 const ctx = document.getElementById('newDXCCChart').getContext('2d');
