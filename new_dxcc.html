@@ -106,10 +106,13 @@
                             if (elements.length > 0) {
                                 var index = elements[0]._index;
                                 var month = this.data.labels[index];
+                                console.log('Month:', month);
+                                console.log('Months object:', months[month]);
                                 var entities = Array.from(months[month].entities);
                                 alert(`New DXCC Entities for ${month}: ${entities.join(', ')}`);
                             }
                         }
+
                     }
                 });
             } catch (error) {
