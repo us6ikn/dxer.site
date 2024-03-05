@@ -44,23 +44,33 @@
                 }
             });
 
-            // Create histogram data
-            const histogramData = {};
+            // Define ranges for aggregation
+            const ranges = [1, 3, 7, 14, 30, 60, 90, 180, 365];
+            const aggregatedData = new Array(ranges.length + 1).fill(0);
+
+            // Aggregate durations into ranges
             durations.forEach(duration => {
-                histogramData[duration] = (histogramData[duration] || 0) + 1;
+                let index = ranges.findIndex(range => duration <= range);
+                if (index === -1) index = ranges.length;
+                aggregatedData[index]++;
             });
 
-            const labels = Object.keys(histogramData).sort((a, b) => a - b);
-            const values = labels.map(label => histogramData[label]);
+            // Create labels for the chart
+            const labels = ranges.map((range, index) => {
+                if (index === 0) return `<= ${range} day`;
+                if (index === ranges.length - 1) return `> ${range} days`;
+                return `${ranges[index - 1]}-${range} days`;
+            });
+            labels.push(`> ${ranges[ranges.length - 1]} days`);
 
             // Create the duration pie chart
             const ctx = document.getElementById('durationChart').getContext('2d');
             const durationChart = new Chart(ctx, {
                 type: 'pie',
                 data: {
-                    labels: labels.map(label => label + ' day' + (label > 1 ? 's' : '')),
+                    labels: labels,
                     datasets: [{
-                        data: values,
+                        data: aggregatedData,
                         backgroundColor: [
                             'rgba(255, 99, 132, 0.6)',
                             'rgba(54, 162, 235, 0.6)',
