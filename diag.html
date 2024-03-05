@@ -39,7 +39,7 @@
                 if (earliestMatch && latestMatch) {
                     const earliest = new Date(earliestMatch[1]);
                     const latest = new Date(latestMatch[1]);
-                    const durationInDays = Math.round((latest - earliest) / (1000 * 60 * 60 * 24));
+                    const durationInDays = Math.max(1, Math.round((latest - earliest) / (1000 * 60 * 60 * 24)) + 1);
                     durations.push(durationInDays);
                 }
             });
@@ -53,39 +53,67 @@
             const labels = Object.keys(histogramData).sort((a, b) => a - b);
             const values = labels.map(label => histogramData[label]);
 
-            // Create the duration histogram chart
+            // Create the duration pie chart
             const ctx = document.getElementById('durationChart').getContext('2d');
             const durationChart = new Chart(ctx, {
-                type: 'bar',
+                type: 'pie',
                 data: {
-                    labels: labels,
+                    labels: labels.map(label => label + ' day' + (label > 1 ? 's' : '')),
                     datasets: [{
-                        label: 'Station Operation Duration (Days)',
                         data: values,
-                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(153, 102, 255, 0.6)',
+                            'rgba(255, 159, 64, 0.6)',
+                            'rgba(94, 208, 117, 0.6)',
+                            'rgba(205, 133, 63, 0.6)',
+                            'rgba(85, 105, 160, 0.6)',
+                            'rgba(162, 75, 169, 0.6)',
+                            'rgba(160, 122, 71, 0.6)',
+                            'rgba(65, 105, 85, 0.6)',
+                            'rgba(204, 47, 75, 0.6)',
+                            'rgba(81, 178, 226, 0.6)',
+                            'rgba(134, 178, 223, 0.6)',
+                            'rgba(108, 108, 108, 0.6)',
+                            'rgba(141, 107, 59, 0.6)',
+                            'rgba(186, 113, 141, 0.6)',
+                            'rgba(183, 162, 74, 0.6)',
+                            'rgba(68, 68, 68, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(94, 208, 117, 1)',
+                            'rgba(205, 133, 63, 1)',
+                            'rgba(85, 105, 160, 1)',
+                            'rgba(162, 75, 169, 1)',
+                            'rgba(160, 122, 71, 1)',
+                            'rgba(65, 105, 85, 1)',
+                            'rgba(204, 47, 75, 1)',
+                            'rgba(81, 178, 226, 1)',
+                            'rgba(134, 178, 223, 1)',
+                            'rgba(108, 108, 108, 1)',
+                            'rgba(141, 107, 59, 1)',
+                            'rgba(186, 113, 141, 1)',
+                            'rgba(183, 162, 74, 1)',
+                            'rgba(68, 68, 68, 1)'
+                        ],
                         borderWidth: 1
                     }]
                 },
                 options: {
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: true,
-                                fontColor: '#333'
-                            },
-                            gridLines: {
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            }
-                        }],
-                        xAxes: [{
-                            ticks: {
-                                fontColor: '#333'
-                            },
-                            gridLines: {
-                                color: 'rgba(0, 0, 0, 0)'
-                            }
-                        }]
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            fontColor: '#333'
+                        }
                     }
                 }
             });
