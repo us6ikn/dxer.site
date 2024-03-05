@@ -6,16 +6,24 @@
     <title>Station Operation Duration</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        #chartContainer {
+            width: 80%;
+            height: 400px; /* Adjust height as needed */
+            overflow-x: auto;
+            margin: 20px auto;
+        }
+
         canvas {
             width: 100%;
             height: auto;
-            margin: 20px auto;
             display: block;
         }
     </style>
 </head>
 <body>
-    <canvas id="durationChart" width="800" height="400"></canvas>
+    <div id="chartContainer">
+        <canvas id="durationChart" width="800" height="400"></canvas>
+    </div>
 
     <script>
         // Function to fetch data from file
@@ -66,7 +74,7 @@
 
             // Create labels for the chart
             const labels = ranges.map((range, index) => {
-                if (index === ranges.length - 1) return range;
+                if (index === ranges.length - 1) return `${range} day${range > 1 ? 's' : ''}+`;
                 return `${range} day${range > 1 ? 's' : ''}`;
             });
 
