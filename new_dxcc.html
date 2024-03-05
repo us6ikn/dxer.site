@@ -26,6 +26,7 @@
                     throw new Error('Failed to fetch data');
                 }
                 const text = await response.text();
+                console.log('Fetched data:', text); // Log fetched data
                 return text;
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -48,7 +49,7 @@
                 lines.forEach(line => {
                     const match = line.match(/Earliest: (\d{4}-\d{2})-\d{2}.*DXCC: ([\w\s]+)/);
                     if (match) {
-                        console.log(match[2]); // Add this line for debugging
+                        console.log('Match:', match); // Log match results for debugging
                         const month = match[1];
                         const dxcc = match[2];
                         months[month] = months[month] || new Set();
