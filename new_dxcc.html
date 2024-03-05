@@ -64,19 +64,60 @@
                     }
                 });
 
-                // Display DXCC entities for each month in the console
-                Object.keys(months).forEach(month => {
-                    const entities = Array.from(months[month].entities);
-                    console.log(`Month: ${month}, Entities: ${entities.join(', ')}`);
+                const labels = Object.keys(months).sort();
+                const values = labels.map(month => months[month].count);
+
+                // Create the bar chart for new DXCC entities per month
+                const ctx = document.getElementById('newDXCCChart').getContext('2d');
+                const newDXCCChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'New DXCC Entities per Month',
+                            data: values,
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }],
+                            xAxes: [{
+                                ticks: {
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0)'
+                                }
+                            }]
+                        },
+                        tooltips: {
+                            mode: 'label', // Set the tooltip mode to label
+                            enabled: true, // Enable tooltips
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    const month = data.labels[tooltipItem.index];
+                                    const entities = Array.from(months[month].entities);
+                                    return `New DXCC Entities: ${months[month].count}\n${entities.join(', ')}`;
+                                }
+                            }
+
+                        }
+
+                    }
                 });
-
-                // Rest of the plotting code remains unchanged...
-
             } catch (error) {
                 console.error('Error plotting chart:', error);
             }
         }
-
 
         // Plot the new DXCC chart when the page is loaded
         plotNewDXCCChart();
