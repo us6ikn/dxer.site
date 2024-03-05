@@ -32,14 +32,16 @@
                 }
             });
 
-            const labels = Object.keys(months);
-            const values = Object.values(months);
+            // Sort labels chronologically
+            const sortedLabels = Object.keys(months).sort();
+
+            const values = sortedLabels.map(month => months[month]);
 
             const ctx = document.getElementById('newStationsChart').getContext('2d');
             const newStationsChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: sortedLabels,
                     datasets: [{
                         label: 'New Stations per Month',
                         data: values,
