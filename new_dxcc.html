@@ -33,7 +33,8 @@
             const months = {};
 
             lines.forEach(line => {
-                const match = line.match(/Earliest: (\d{4}-\d{2})-\d{2}.*DXCC: (.*)$/);
+                const match = line.match(/Earliest: (\d{4}-\d{2})-\d{2}.*DXCC: ([\w\s]+)/);
+
                 if (match) {
                     const month = match[1];
                     const dxcc = match[2];
