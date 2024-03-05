@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New DXCC Entities per Month</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        canvas {
+            width: 100%;
+            height: auto;
+            margin: 20px auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="newDXCCChart" width="800" height="400"></canvas>
+
+    <script>
+        // Function to fetch data from file
+        async function fetchData() {
+            const response = await fetch('output_filtered.txt');
+            const text = await response.text();
+            return text;
+        }
+
+        // Function to parse data and plot chart for new DXCC entities per month
+        async function plotNewDXCCChart() {
+            const data = await fetchData();
+
+            const lines = data.split('\n');
+            const months = {};
+
+            lines.forEach(line => {
+                const match = line.match(/Earliest: (\d{4}-\d{2})-\d{2}.*DXCC: (.*)$/);
+                if (match) {
+                    const month = match[1];
+                    const dxcc = match[2];
+                    months[month] = months[month] || new Set();
+                    months[month].add(dxcc);
+                }
+            });
+
+            const labels = Object.keys(months).sort();
+            const values = labels.map(month => months[month].size);
+
+            // Create the bar chart for new DXCC entities per month
+            const ctx = document.getElementById('newDXCCChart').getContext('2d');
+            const newDXCCChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'New DXCC Entities per Month',
+                        data: values,
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                fontColor: '#333'
+                            },
+                            gridLines: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        }],
+                        xAxes: [{
+                            ticks: {
+                                fontColor: '#333'
+                            },
+                            gridLines: {
+                                color: 'rgba(0, 0, 0, 0)'
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+
+        // Plot the new DXCC chart when the page is loaded
+        plotNewDXCCChart();
+    </script>
+</body>
+</html>
