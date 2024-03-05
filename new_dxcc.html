@@ -100,8 +100,8 @@
                             }]
                         },
                         tooltips: {
-                            mode: 'label', // Set the tooltip mode to label
-                            enabled: true, // Enable tooltips
+                            mode: 'index', // or 'nearest'
+                            enabled: true,
                             callbacks: {
                                 label: function(tooltipItem, data) {
                                     const month = data.labels[tooltipItem.index];
@@ -109,8 +109,8 @@
                                     return `New DXCC Entities: ${months[month].count}\n${entities.join(', ')}`;
                                 }
                             }
-
                         }
+
 
                     }
                 });
