@@ -12,10 +12,20 @@
             margin: 20px auto;
             display: block;
         }
+        #chartjs-tooltip {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 3px;
+            padding: 5px;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            position: absolute;
+        }
     </style>
 </head>
 <body>
     <canvas id="newDXCCChart" width="800" height="400"></canvas>
+    <div id="chartjs-tooltip"></div>
 
     <script>
         // Function to fetch data from file
@@ -100,18 +110,45 @@
                             }]
                         },
                         tooltips: {
-                            mode: 'nearest', // or 'nearest'
-                            enabled: true,
-                            callbacks: {
-                                label: function(tooltipItem, data) {
-                                    const month = data.labels[tooltipItem.index];
-                                    const entities = Array.from(months[month].entities);
-                                    return `New DXCC Entities: ${months[month].count}\n${entities.join(', ')}`;
+                            enabled: false,
+                            custom: function(tooltipModel) {
+                                // Tooltip Element
+                                var tooltipEl = document.getElementById('chartjs-tooltip');
+
+                                // Create element on first render
+                                if (!tooltipEl) {
+                                    tooltipEl = document.createElement('div');
+                                    tooltipEl.id = 'chartjs-tooltip';
+                                    tooltipEl.classList.add('tooltip');
+                                    this._chart.canvas.parentNode.appendChild(tooltipEl);
                                 }
+
+                                // Hide if no tooltip
+                                if (tooltipModel.opacity === 0) {
+                                    tooltipEl.style.opacity = 0;
+                                    return;
+                                }
+
+                                // Set Text
+                                if (tooltipModel.body) {
+                                    var month = data.labels[tooltipModel.dataPoints[0].index];
+                                    var entities = Array.from(months[month].entities);
+                                    var innerHtml = '';
+                                    innerHtml += '<div>New DXCC Entities: ' + months[month].count + '</div>';
+                                    innerHtml += '<div>' + entities.join(', ') + '</div>';
+                                    tooltipEl.innerHTML = innerHtml;
+                                }
+
+                                // Display
+                                tooltipEl.style.opacity = 1;
+                                tooltipEl.style.left = tooltipModel.caretX + 'px';
+                                tooltipEl.style.top = tooltipModel.caretY + 'px';
+                                tooltipEl.style.fontFamily = tooltipModel._bodyFontFamily;
+                                tooltipEl.style.fontSize = tooltipModel.bodyFontSize + 'px';
+                                tooltipEl.style.fontStyle = tooltipModel._bodyFontStyle;
+                                tooltipEl.style.padding = tooltipModel.yPadding + 'px ' + tooltipModel.xPadding + 'px';
                             }
                         }
-
-
                     }
                 });
             } catch (error) {
