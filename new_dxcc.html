@@ -20,66 +20,82 @@
     <script>
         // Function to fetch data from file
         async function fetchData() {
-            const response = await fetch('output_filtered.txt');
-            const text = await response.text();
-            return text;
+            try {
+                const response = await fetch('output_filtered.txt');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                const text = await response.text();
+                return text;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                return null;
+            }
         }
 
         // Function to parse data and plot chart for new DXCC entities per month
         async function plotNewDXCCChart() {
-            const data = await fetchData();
-
-            const lines = data.split('\n');
-            const months = {};
-
-            lines.forEach(line => {
-                const match = line.match(/Earliest: (\d{4}-\d{2})-\d{2}.*DXCC: ([\w\s]+)/);
-                if (match) {
-                    console.log(match[2]); // Add this line for debugging
-                    const month = match[1];
-                    const dxcc = match[2];
-                    months[month] = months[month] || new Set();
-                    months[month].add(dxcc);
+            try {
+                const data = await fetchData();
+                if (!data) {
+                    console.error('No data available');
+                    return;
                 }
-            });
 
-            const labels = Object.keys(months).sort();
-            const values = labels.map(month => months[month].size);
+                const lines = data.split('\n');
+                const months = {};
 
-            // Create the bar chart for new DXCC entities per month
-            const ctx = document.getElementById('newDXCCChart').getContext('2d');
-            const newDXCCChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'New DXCC Entities per Month',
-                        data: values,
-                        backgroundColor: 'rgba(75, 192, 192, 0.6)'
-                    }]
-                },
-                options: {
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: true,
-                                fontColor: '#333'
-                            },
-                            gridLines: {
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            }
-                        }],
-                        xAxes: [{
-                            ticks: {
-                                fontColor: '#333'
-                            },
-                            gridLines: {
-                                color: 'rgba(0, 0, 0, 0)'
-                            }
-                        }]
+                lines.forEach(line => {
+                    const match = line.match(/Earliest: (\d{4}-\d{2})-\d{2}.*DXCC: ([\w\s]+)/);
+                    if (match) {
+                        console.log(match[2]); // Add this line for debugging
+                        const month = match[1];
+                        const dxcc = match[2];
+                        months[month] = months[month] || new Set();
+                        months[month].add(dxcc);
                     }
-                }
-            });
+                });
+
+                const labels = Object.keys(months).sort();
+                const values = labels.map(month => months[month].size);
+
+                // Create the bar chart for new DXCC entities per month
+                const ctx = document.getElementById('newDXCCChart').getContext('2d');
+                const newDXCCChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'New DXCC Entities per Month',
+                            data: values,
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }],
+                            xAxes: [{
+                                ticks: {
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0)'
+                                }
+                            }]
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error plotting chart:', error);
+            }
         }
 
         // Plot the new DXCC chart when the page is loaded
