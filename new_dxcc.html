@@ -26,7 +26,6 @@
                     throw new Error('Failed to fetch data');
                 }
                 const text = await response.text();
-                console.log('Fetched data:', text); // Log fetched data
                 return text;
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -60,6 +59,7 @@
                             months[month].add(dxcc);
                             // Add the DXCC entity to seenDXCC
                             seenDXCC.add(dxcc);
+                            console.log(seenDXCC); // Log fetched data
                         }
                     }
                 });
