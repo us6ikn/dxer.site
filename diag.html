@@ -66,8 +66,8 @@
 
             // Create labels for the chart
             const labels = ranges.map((range, index) => {
-                if (index === ranges.length - 1) return `${range}+ days`;
-                return `${range}-${ranges[index + 1]} days`;
+                if (index === ranges.length - 1) return range;
+                return `${range} day${range > 1 ? 's' : ''}`;
             });
 
             // Create the duration pie chart
