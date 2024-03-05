@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Stations per Month</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <canvas id="newStationsChart"></canvas>
+
+    <script>
+        // Function to fetch data from file
+        async function fetchData() {
+            const response = await fetch('output_filtered.txt');
+            const text = await response.text();
+            return text;
+        }
+
+        // Function to parse data and plot chart
+        async function plotChart() {
+            const data = await fetchData();
+
+            const lines = data.split('\n');
+            const months = {};
+
+            lines.forEach(line => {
+                const match = line.match(/Earliest: (\d{4}-\d{2})-\d{2}/);
+                if (match) {
+                    const month = match[1];
+                    months[month] = (months[month] || 0) + 1;
+                }
+            });
+
+            const labels = Object.keys(months);
+            const values = Object.values(months);
+
+            const ctx = document.getElementById('newStationsChart').getContext('2d');
+            const newStationsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'New Stations per Month',
+                        data: values,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+
+        // Plot the chart when the page is loaded
+        plotChart();
+    </script>
+</body>
+</html>
