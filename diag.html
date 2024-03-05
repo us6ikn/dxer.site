@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Station Operation Duration</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        canvas {
+            width: 100%;
+            height: auto;
+            margin: 20px auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="durationChart" width="800" height="400"></canvas>
+
+    <script>
+        // Function to fetch data from file
+        async function fetchData() {
+            const response = await fetch('output_filtered.txt');
+            const text = await response.text();
+            return text;
+        }
+
+        // Function to parse data and plot chart
+        async function plotDurationChart() {
+            const data = await fetchData();
+
+            const lines = data.split('\n');
+            const durations = [];
+
+            lines.forEach(line => {
+                const earliestMatch = line.match(/Earliest: (\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})Z/);
+                const latestMatch = line.match(/Latest: (\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})Z/);
+                
+                if (earliestMatch && latestMatch) {
+                    const earliest = new Date(earliestMatch[1]);
+                    const latest = new Date(latestMatch[1]);
+                    const durationInDays = Math.round((latest - earliest) / (1000 * 60 * 60 * 24));
+                    durations.push(durationInDays);
+                }
+            });
+
+            // Create histogram data
+            const histogramData = {};
+            durations.forEach(duration => {
+                histogramData[duration] = (histogramData[duration] || 0) + 1;
+            });
+
+            const labels = Object.keys(histogramData).sort((a, b) => a - b);
+            const values = labels.map(label => histogramData[label]);
+
+            // Create the duration histogram chart
+            const ctx = document.getElementById('durationChart').getContext('2d');
+            const durationChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Station Operation Duration (Days)',
+                        data: values,
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                fontColor: '#333'
+                            },
+                            gridLines: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        }],
+                        xAxes: [{
+                            ticks: {
+                                fontColor: '#333'
+                            },
+                            gridLines: {
+                                color: 'rgba(0, 0, 0, 0)'
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+
+        // Plot the duration chart when the page is loaded
+        plotDurationChart();
+    </script>
+</body>
+</html>
