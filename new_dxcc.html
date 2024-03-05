@@ -55,8 +55,9 @@
                         const dxcc = match[2];
                         if (!seenDXCC.has(dxcc)) {
                             // If the DXCC entity is not seen before, count it
-                            months[month] = months[month] || new Set();
-                            months[month].add(dxcc);
+                            months[month] = months[month] || { count: 0, entities: new Set() };
+                            months[month].entities.add(dxcc);
+                            months[month].count++;
                             // Add the DXCC entity to seenDXCC
                             seenDXCC.add(dxcc);
                             console.log(seenDXCC); // Log fetched data
@@ -65,7 +66,7 @@
                 });
 
                 const labels = Object.keys(months).sort();
-                const values = labels.map(month => months[month].size);
+                const values = labels.map(month => months[month].count);
 
                 // Create the bar chart for new DXCC entities per month
                 const ctx = document.getElementById('newDXCCChart').getContext('2d');
@@ -104,11 +105,8 @@
                             callbacks: {
                                 label: function(tooltipItem, data) {
                                     const month = data.labels[tooltipItem.index];
-                                    if (months[month]) {
-                                        return Array.from(months[month]).join(', ');
-                                    } else {
-                                        return '';
-                                    }
+                                    const entities = Array.from(months[month].entities);
+                                    return `New DXCC Entities: ${months[month].count}\n${entities.join(', ')}`;
                                 }
                             }
 
