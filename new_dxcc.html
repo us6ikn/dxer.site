@@ -57,8 +57,8 @@
                         const dxcc = match[2];
                         if (!seenDXCC.has(dxcc)) {
                             // If the DXCC entity is not seen before, count it
-                            months[month] = months[month] || 0;
-                            months[month]++;
+                            months[month] = months[month] || new Set();
+                            months[month].add(dxcc);
                             // Add the DXCC entity to seenDXCC
                             seenDXCC.add(dxcc);
                         }
@@ -66,7 +66,7 @@
                 });
 
                 const labels = Object.keys(months).sort();
-                const values = labels.map(month => months[month]);
+                const values = labels.map(month => months[month].size);
 
                 // Create the bar chart for new DXCC entities per month
                 const ctx = document.getElementById('newDXCCChart').getContext('2d');
@@ -99,6 +99,14 @@
                                     color: 'rgba(0, 0, 0, 0)'
                                 }
                             }]
+                        },
+                        tooltips: {
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    const month = data.labels[tooltipItem.index];
+                                    return Array.from(months[month]).join(', ');
+                                }
+                            }
                         }
                     }
                 });
