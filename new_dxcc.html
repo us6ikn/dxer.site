@@ -105,13 +105,20 @@
                         onClick: function(evt, elements) {
                             if (elements.length > 0) {
                                 var index = elements[0]._index;
-                                var month = this.data.labels[index];
-                                console.log('Month:', month);
-                                console.log('Months object:', months[month]);
-                                var entities = Array.from(months[month].entities);
-                                alert(`New DXCC Entities for ${month}: ${entities.join(', ')}`);
+                                if (index >= 0 && index < this.data.labels.length) {
+                                    var month = this.data.labels[index];
+                                    if (months.hasOwnProperty(month)) {
+                                        var entities = Array.from(months[month].entities);
+                                        alert(`New DXCC Entities for ${month}: ${entities.join(', ')}`);
+                                    } else {
+                                        console.error('No data available for this month:', month);
+                                    }
+                                } else {
+                                    console.error('Invalid index:', index);
+                                }
                             }
                         }
+
 
                     }
                 });
