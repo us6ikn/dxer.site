@@ -104,10 +104,15 @@
                             callbacks: {
                                 label: function(tooltipItem, data) {
                                     const month = data.labels[tooltipItem.index];
-                                    return Array.from(months[month]).join(', ');
+                                    if (months[month]) {
+                                        return Array.from(months[month]).join(', ');
+                                    } else {
+                                        return '';
+                                    }
                                 }
                             }
                         }
+
                     }
                 });
             } catch (error) {
