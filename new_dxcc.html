@@ -58,14 +58,17 @@
                             // If the DXCC entity is not seen before, count it
                             months[month].entities.add(dxcc);
                             months[month].count++;
-                            cumulativeCount++;
+                            cumulativeCount += months[month].count; // Increment the cumulative count
                         }
                     }
                 });
 
                 const labels = Object.keys(months).sort();
                 const newValues = labels.map(month => months[month].count);
-                const cumulativeValues = labels.map(month => cumulativeCount -= months[month].count);
+                const cumulativeValues = newValues.reduce((acc, value) => {
+                    acc.push(acc.length > 0 ? acc[acc.length - 1] + value : value);
+                    return acc;
+                }, []);
 
                 // Create the bar chart for new DXCC entities per month
                 const ctx = document.getElementById('newDXCCChart').getContext('2d');
