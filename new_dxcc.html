@@ -16,7 +16,6 @@
 </head>
 <body>
     <canvas id="newDXCCChart" width="800" height="400"></canvas>
-    <canvas id="cumulativeDXCCChart" width="800" height="400"></canvas>
 
     <script>
         // Function to fetch data from file
@@ -45,8 +44,7 @@
 
                 const lines = data.split('\n');
                 const months = {};
-                let cumulativeCount = 0;
-                const cumulativeData = [];
+                let cumulativeCount = 0; // Initialize cumulative count
 
                 // Keep track of DXCC entities seen so far
                 const seenDXCC = new Set();
@@ -61,18 +59,16 @@
                             months[month] = months[month] || { count: 0, entities: new Set() };
                             months[month].entities.add(dxcc);
                             months[month].count++;
+                            cumulativeCount++; // Increment cumulative count
                             // Add the DXCC entity to seenDXCC
                             seenDXCC.add(dxcc);
-
-                            // Update cumulative count
-                            cumulativeCount++;
-                            cumulativeData.push(cumulativeCount);
                         }
                     }
                 });
 
                 const labels = Object.keys(months).sort();
-                const values = labels.map(month => months[month].count);
+                const newValues = labels.map(month => months[month].count);
+                const cumulativeValues = labels.map(month => cumulativeCount -= months[month].count);
 
                 // Create the bar chart for new DXCC entities per month
                 const ctx = document.getElementById('newDXCCChart').getContext('2d');
@@ -82,7 +78,7 @@
                         labels: labels,
                         datasets: [{
                             label: 'New DXCC Entities per Month',
-                            data: values,
+                            data: newValues,
                             backgroundColor: 'rgba(75, 192, 192, 0.6)'
                         }]
                     },
@@ -112,7 +108,7 @@
                         onClick: function(evt, elements) {
                             console.log('Elements array:', elements);
                             if (elements.length > 0) {
-                                var index = elements[0].index; // Adjusted here
+                                var index = elements[0].index;
                                 console.log('Index:', index);
                                 if (index >= 0 && index < this.data.labels.length) {
                                     var month = this.data.labels[index];
@@ -131,15 +127,15 @@
                 });
 
                 // Create the line chart for cumulative DXCC entities
-                const ctxCumulative = document.getElementById('cumulativeDXCCChart').getContext('2d');
-                const cumulativeDXCCChart = new Chart(ctxCumulative, {
+                const cumulativeDXCCChart = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: labels,
                         datasets: [{
                             label: 'Cumulative DXCC Entities',
-                            data: cumulativeData,
-                            borderColor: 'rgba(255, 99, 132, 0.6)',
+                            data: cumulativeValues,
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 2,
                             fill: false
                         }]
                     },
@@ -162,12 +158,10 @@
                                     color: 'rgba(0, 0, 0, 0)'
                                 }
                             }]
-                        },
-                        tooltips: {
-                            enabled: false
                         }
                     }
                 });
+
             } catch (error) {
                 console.error('Error plotting chart:', error);
             }
