@@ -65,6 +65,8 @@
 
                 const labels = Object.keys(months).sort();
                 const newValues = labels.map(month => months[month].count);
+                
+                // Calculate cumulative values after calculating new values
                 const cumulativeValues = newValues.map((value, index) => {
                     return index === 0 ? value : value + cumulativeValues[index - 1];
                 });
