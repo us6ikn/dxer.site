@@ -45,11 +45,11 @@
 
                 const lines = data.split('\n');
                 const months = {};
+                let cumulativeCount = 0;
+                const cumulativeData = [];
 
                 // Keep track of DXCC entities seen so far
                 const seenDXCC = new Set();
-                let cumulativeCount = 0;
-                let cumulativeData = [];
 
                 lines.forEach(line => {
                     const match = line.match(/Earliest: (\d{4}-\d{2})-\d{2}.*DXCC: ([\w\s]+)/);
@@ -64,7 +64,7 @@
                             // Add the DXCC entity to seenDXCC
                             seenDXCC.add(dxcc);
 
-                            // Calculate cumulative count
+                            // Update cumulative count
                             cumulativeCount++;
                             cumulativeData.push(cumulativeCount);
                         }
@@ -75,8 +75,8 @@
                 const values = labels.map(month => months[month].count);
 
                 // Create the bar chart for new DXCC entities per month
-                const ctxBar = document.getElementById('newDXCCChart').getContext('2d');
-                const newDXCCChart = new Chart(ctxBar, {
+                const ctx = document.getElementById('newDXCCChart').getContext('2d');
+                const newDXCCChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: labels,
@@ -112,9 +112,9 @@
                     }
                 });
 
-                // Create the line chart for cumulative new DXCC entities
-                const ctxLine = document.getElementById('cumulativeDXCCChart').getContext('2d');
-                const cumulativeDXCCChart = new Chart(ctxLine, {
+                // Create the line chart for cumulative DXCC entities
+                const ctxCumulative = document.getElementById('cumulativeDXCCChart').getContext('2d');
+                const cumulativeDXCCChart = new Chart(ctxCumulative, {
                     type: 'line',
                     data: {
                         labels: labels,
@@ -146,7 +146,7 @@
                             }]
                         },
                         tooltips: {
-                            enabled: false
+                            enabled: true
                         }
                     }
                 });
