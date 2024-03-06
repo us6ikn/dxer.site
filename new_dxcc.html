@@ -44,34 +44,28 @@
 
                 const lines = data.split('\n');
                 const months = {};
-                let cumulativeCount = 0; // Initialize cumulative count
-
-                // Keep track of DXCC entities seen so far
-                const seenDXCC = new Set();
+                let cumulativeCount = 0;
 
                 lines.forEach(line => {
                     const match = line.match(/Earliest: (\d{4}-\d{2})-\d{2}.*DXCC: ([\w\s]+)/);
                     if (match) {
                         const month = match[1];
                         const dxcc = match[2];
-                        if (!seenDXCC.has(dxcc)) {
+                        if (!months.hasOwnProperty(month)) {
+                            months[month] = { count: 0, entities: new Set() };
+                        }
+                        if (!months[month].entities.has(dxcc)) {
                             // If the DXCC entity is not seen before, count it
-                            months[month] = months[month] || { count: 0, entities: new Set() };
                             months[month].entities.add(dxcc);
                             months[month].count++;
-                            cumulativeCount += 1; // Increment cumulative count
-                            // Add the DXCC entity to seenDXCC
-                            seenDXCC.add(dxcc);
+                            cumulativeCount++;
                         }
                     }
                 });
 
                 const labels = Object.keys(months).sort();
                 const newValues = labels.map(month => months[month].count);
-                const cumulativeValues = labels.map(month => {
-                    const monthIndex = labels.indexOf(month);
-                    return Object.values(months).slice(0, monthIndex + 1).reduce((acc, curr) => acc + curr.count, 0);
-                });
+                const cumulativeValues = labels.map(month => cumulativeCount -= months[month].count);
 
                 // Create the bar chart for new DXCC entities per month
                 const ctx = document.getElementById('newDXCCChart').getContext('2d');
@@ -83,6 +77,11 @@
                             label: 'New DXCC Entities per Month',
                             data: newValues,
                             backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                        },
+                        {
+                            label: 'Cumulative DXCC Count',
+                            data: cumulativeValues,
+                            backgroundColor: 'rgba(255, 99, 132, 0.6)'
                         }]
                     },
                     options: {
@@ -128,43 +127,6 @@
                         }
                     }
                 });
-
-                // Create the line chart for cumulative DXCC entities
-                const cumulativeDXCCChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Cumulative DXCC Entities',
-                            data: cumulativeValues,
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            borderWidth: 2,
-                            fill: false
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            yAxes: [{
-                                ticks: {
-                                    beginAtZero: true,
-                                    fontColor: '#333'
-                                },
-                                gridLines: {
-                                    color: 'rgba(0, 0, 0, 0.1)'
-                                }
-                            }],
-                            xAxes: [{
-                                ticks: {
-                                    fontColor: '#333'
-                                },
-                                gridLines: {
-                                    color: 'rgba(0, 0, 0, 0)'
-                                }
-                            }]
-                        }
-                    }
-                });
-
             } catch (error) {
                 console.error('Error plotting chart:', error);
             }
