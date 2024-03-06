@@ -107,7 +107,14 @@
                             }]
                         },
                         tooltips: {
-                            enabled: false
+                            enabled: true,
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    const month = data.labels[tooltipItem.index];
+                                    const entities = Array.from(months[month].entities);
+                                    return `New DXCC Entities: ${months[month].count}\n${entities.join(', ')}`;
+                                }
+                            }
                         }
                     }
                 });
@@ -146,7 +153,7 @@
                             }]
                         },
                         tooltips: {
-                            enabled: true
+                            enabled: false
                         }
                     }
                 });
