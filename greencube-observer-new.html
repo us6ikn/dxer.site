@@ -154,7 +154,7 @@
         
         .floating-window {
           position: fixed;
-          bottom: 300px;
+          bottom: 400px;
           right: 60px;
           z-index: 9999;
         }
@@ -269,6 +269,8 @@
             <div><img src="img/m_new.png" alt="New stations" style="width:15px;height:15px;"> New in 7 days</div>
             <div><img src="img/m_30.png" alt="Heard within 30 days" style="width:15px;height:15px;"> Heard within 30 days</div>
             <div><img src="img/m_m30.png" alt="Heard more than 30 days ago" style="width:15px;height:15px;"> Heard more than 30 days ago</div>
+            <div><img src="img/ship.png" alt="Maritime mobile" style="width:15px;height:15px;"> Maritime mobile</div>
+            <div><img src="img/car.png" alt="Portable or Rover" style="width:15px;height:15px;"> Portable or Rover</div>
             <div><p style="font-size: smaller;">&nbsp;&nbsp;&nbsp;&nbsp;Thanks for <a href="https://ko-fi.com/sa5ikn" target="_blank">support</a> to: <br>&nbsp;&nbsp;&nbsp;&nbsp;G0IIQ F6FLQ IW5BMS VK6PY
                 <br>&nbsp;&nbsp;&nbsp;&nbsp;W2LPL</p></div>
             <div><p style="font-size: smaller;">&nbsp;&nbsp;&nbsp;&nbsp;Latest database update: <br>&nbsp;&nbsp;&nbsp;&nbsp;<span id="last-modified"></span></p></div>
@@ -440,8 +442,7 @@
                                   dxgridlocator: dxgridlocator,
                                   markerIcon: "img/car.png"
                               });
-                      }
-                      if (Date.now() - earliestTime <= 7 * 24 * 60 * 60 * 1000) {
+                      } else if (Date.now() - earliestTime <= 7 * 24 * 60 * 60 * 1000) {
                           callsigns[key].push({
                               callsign: callsign,
                               dxgridlocator: dxgridlocator,
