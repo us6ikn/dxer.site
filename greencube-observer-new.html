@@ -434,6 +434,12 @@
                                   dxgridlocator: dxgridlocator,
                                   markerIcon: "img/car.png"
                               });
+                      } else if (callsign.endsWith('/R')) {
+                              callsigns[key].push({
+                                  callsign: callsign,
+                                  dxgridlocator: dxgridlocator,
+                                  markerIcon: "img/car.png"
+                              });
                       } else if (Date.now() - earliestTime <= 7 * 24 * 60 * 60 * 1000) {
                           callsigns[key].push({
                               callsign: callsign,
