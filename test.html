@@ -469,11 +469,22 @@
                   const [lat, lng] = key.split(",");
                   const markers = callsigns[key];
 
+                  // Set initial offset values
+                  let offsetLat = 0;
+                  let offsetLng = 0;
+
                   // Iterate over each marker information and create a marker for each callsign
-                  markers.forEach(markerInfo => {
+                  markers.forEach((markerInfo, index) => {
                       const markerIcon = markerInfo.markerIcon;
+                      
+                      // Add offset to position for subsequent markers
+                      const markerPosition = {
+                          lat: parseFloat(lat) + (offsetLat / 10000), // Adjust offset by dividing by a factor
+                          lng: parseFloat(lng) + (offsetLng / 10000)  // Adjust offset by dividing by a factor
+                      };
+
                       const marker = new google.maps.Marker({
-                          position: { lat: parseFloat(lat), lng: parseFloat(lng) },
+                          position: markerPosition,
                           map: map,
                           title: markerInfo.callsign, // Set the callsign as the title of the marker
                           icon: {
@@ -481,6 +492,10 @@
                               scaledSize: new google.maps.Size(20, 20)
                           }
                       });
+
+                      // Update offset values for next marker (adjust as needed for your specific case)
+                      offsetLat += 100; // Increment latitude offset
+                      offsetLng += 100; // Increment longitude offset
 
                       // Construct content for info window for each marker
                       let content = '';
