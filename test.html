@@ -525,8 +525,6 @@
                       }
 
                       // Construct content for info window for each marker
-                      let content = '';
-                      // Parse earliestTime and latestTime timestamps
                       const earliestDate = new Date(markerInfo.earliestTime);
                       const latestDate = new Date(markerInfo.latestTime);
 
@@ -553,6 +551,8 @@
                       // Check if the thumbnail image exists
                       const thumbnailImageExists = await checkImageExists(thumbnailImage);
 
+                      // Construct content based on image existence
+                      let content = '';
                       if (!gridLocator) {
                           content = `<div><b>${markerInfo.callsign}</b></div>`;
                           content += `<div><a href="#" onclick="alert('Enter your Grid Locator and click Plot your Range first'); return false;">Match Passes</a></div>`;
