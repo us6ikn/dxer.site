@@ -527,7 +527,7 @@
 
                       const earliestTimeFormatted = formatTimestamp(earliestDate);
                       const latestTimeFormatted = formatTimestamp(latestDate);
-
+                      
                       // Trim the callsign to remove any leading or trailing whitespaces
                       const trimmedCallsign = markerInfo.callsign.trim();
 
@@ -535,8 +535,6 @@
                       const thumbnailImage = `https://dxer.site/img/works/${trimmedCallsign}_th.jpeg`;
                       const largeImage = `https://dxer.site/img/works/${trimmedCallsign}.jpeg`;
 
-                      // Check if the thumbnail image exists
-                      const thumbnailImageExists = await checkImageExists(thumbnailImage);
 
                       if (!gridLocator) {
                           content = `<div><b>${markerInfo.callsign}</b></div>`;
@@ -545,14 +543,9 @@
                           content += `<div>Last heard: ${latestTimeFormatted}</div>`;
                           content += `<div>GRID locator: ${markerInfo.dxgridlocator}</div>`;
                           content += `<div><a href="https://qrz.com/db/${markerInfo.callsign}">QRZ.com lookup</a></div>`;
-                          // Check if the thumbnail image exists
-                          if (thumbnailImageExists) {
-                              // Thumbnail image exists, display the image
-                              content += `<div style="width: 70px;"><a href="${largeImage}" target="_blank"><img src="${thumbnailImage}" alt="Small Image"></a></div>`;
-                          } else {
-                              // Thumbnail image doesn't exist, display a link to a page
-                              content += `<div>No image available. <a href="https://dxer.site" target="_blank">Add station photo</a></div>`;
-                          }
+                          // Use the dynamically generated image filenames
+                          content += `<div style="width: 70px;"><a href="${largeImage}" target="_blank"><img src="${thumbnailImage}" alt="Small Image"></a></div>`;
+
                       } else {
                           content = `<div><b>${markerInfo.callsign}</b></div>`;
                           content += `<div><a href="https://www.satmatch.com/satellite/IO-117/obs1/${gridLocator}/obs2/${markerInfo.dxgridlocator}?duration_hrs=48">Match Passes</a></div>`;
