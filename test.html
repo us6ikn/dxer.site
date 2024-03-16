@@ -515,9 +515,18 @@
                       const earliestDate = new Date(markerInfo.earliestTime);
                       const latestDate = new Date(markerInfo.latestTime);
 
-                      // Format timestamps to UTC string
-                      const earliestTimeFormatted = earliestDate.toISOString();
-                      const latestTimeFormatted = latestDate.toISOString();
+                      // Format timestamps manually to desired format
+                      const formatTimestamp = (date) => {
+                          const year = date.getUTCFullYear();
+                          const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+                          const day = String(date.getUTCDate()).padStart(2, '0');
+                          const hours = String(date.getUTCHours()).padStart(2, '0');
+                          const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+                          return `${year}-${month}-${day} ${hours}:${minutes} UTC`;
+                      };
+
+                      const earliestTimeFormatted = formatTimestamp(earliestDate);
+                      const latestTimeFormatted = formatTimestamp(latestDate);
 
                       if (!gridLocator) {
                           content = `<div><b>${markerInfo.callsign}</b></div>`;
@@ -530,8 +539,6 @@
                           content += `<div>Earliest Time: ${earliestTimeFormatted}</div>`;
                           content += `<div>Latest Time: ${latestTimeFormatted}</div>`;
                       }
-
-
 
 
                       // Add click listener to each marker to display info window
