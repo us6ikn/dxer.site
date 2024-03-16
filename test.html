@@ -527,14 +527,13 @@
 
                       const earliestTimeFormatted = formatTimestamp(earliestDate);
                       const latestTimeFormatted = formatTimestamp(latestDate);
-                      
+
                       // Trim the callsign to remove any leading or trailing whitespaces
                       const trimmedCallsign = markerInfo.callsign.trim();
 
                       // Define the image filenames based on the trimmed callsign
                       const thumbnailImage = `https://dxer.site/img/works/${trimmedCallsign}_th.jpeg`;
                       const largeImage = `https://dxer.site/img/works/${trimmedCallsign}.jpeg`;
-
 
                       if (!gridLocator) {
                           content = `<div><b>${markerInfo.callsign}</b></div>`;
@@ -551,7 +550,6 @@
                               // Thumbnail image doesn't exist, display "Add station photo" text with a hyperlink
                               content += `<div><a href="https://dxer.site" target="_blank">Add station photo</a></div>`;
                           }
-
                       } else {
                           content = `<div><b>${markerInfo.callsign}</b></div>`;
                           content += `<div><a href="https://www.satmatch.com/satellite/IO-117/obs1/${gridLocator}/obs2/${markerInfo.dxgridlocator}?duration_hrs=48">Match Passes</a></div>`;
@@ -560,6 +558,7 @@
                           content += `<div>GRID locator: ${markerInfo.dxgridlocator}</div>`;
                           content += `<div><a href="https://qrz.com/db/${markerInfo.callsign}">QRZ.com lookup</a></div>`;
                       }
+
 
 
                       // Add click listener to each marker to display info window
