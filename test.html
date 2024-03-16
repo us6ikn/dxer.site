@@ -544,7 +544,6 @@
                               // Check if the response status is in the 200 range
                               return response.ok; // Image exists if the response status is OK
                           } catch (error) {
-                              console.error('Error checking image existence:', error);
                               return false; // Assume image doesn't exist in case of error
                           }
                       }
@@ -576,9 +575,6 @@
                                   content += `<div><a href="https://qrz.com/db/${markerInfo.callsign}">QRZ.com lookup</a></div>`;
                               }
                           })
-                          .catch(error => {
-                              console.error('Error:', error);
-                          });
 
 
 
