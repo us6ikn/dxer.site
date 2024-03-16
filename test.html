@@ -514,14 +514,23 @@
                       if (!gridLocator) {
                           content = `<div><b>${markerInfo.callsign}</b></div>`;
                           content += `<div><a href="#" onclick="alert('Enter your Grid Locator and click Plot your Range first'); return false;">Match Passes</a></div>`;
-                          content += `<div>Earliest Time: ${markerInfo.earliestTime}</div>`;
-                          content += `<div>Latest Time: ${markerInfo.latestTime}</div>`;
+                          content += `<div>Earliest Time: ${earliestTimeFormatted}</div>`;
+                          content += `<div>Latest Time: ${latestTimeFormatted}</div>`;
                       } else {
+                          // Parse earliestTime and latestTime timestamps
+                          const earliestDate = new Date(markerInfo.earliestTime);
+                          const latestDate = new Date(markerInfo.latestTime);
+
+                          // Format timestamps
+                          const earliestTimeFormatted = earliestDate.toLocaleString();
+                          const latestTimeFormatted = latestDate.toLocaleString();
+
                           content = `<div><b><a href="https://www.satmatch.com/satellite/IO-117/obs1/${gridLocator}/obs2/${markerInfo.dxgridlocator}?duration_hrs=48">${markerInfo.callsign}</a></b></div>`;
                           content += `<div><a href="https://www.satmatch.com/satellite/IO-117/obs1/${gridLocator}/obs2/${markerInfo.dxgridlocator}?duration_hrs=48">Match Passes</a></div>`;
-                          content += `<div>Earliest Time: ${markerInfo.earliestTime}</div>`;
-                          content += `<div>Latest Time: ${markerInfo.latestTime}</div>`;
+                          content += `<div>Earliest Time: ${earliestTimeFormatted}</div>`;
+                          content += `<div>Latest Time: ${latestTimeFormatted}</div>`;
                       }
+
 
 
 
