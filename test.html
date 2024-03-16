@@ -527,7 +527,7 @@
 
                       const earliestTimeFormatted = formatTimestamp(earliestDate);
                       const latestTimeFormatted = formatTimestamp(latestDate);
-
+                      
                       // Trim the callsign to remove any leading or trailing whitespaces
                       const trimmedCallsign = markerInfo.callsign.trim();
 
@@ -535,58 +535,24 @@
                       const thumbnailImage = `https://dxer.site/img/works/${trimmedCallsign}_th.jpeg`;
                       const largeImage = `https://dxer.site/img/works/${trimmedCallsign}.jpeg`;
 
-                      // Function to check if an image exists
-                      async function checkImageExists(imageUrl) {
-                          try {
-                              // Fetch the image URL
-                              const response = await fetch(imageUrl, { method: 'HEAD' });
 
-                              // Check if the response status is in the 200 range
-                              if (response.ok) {
-                                  return true; // Image exists if the response status is OK
-                              } else if (response.status === 404) {
-                                  return false; // Image doesn't exist if the response status is 404
-                              } else {
-                                  throw new Error(`Unexpected response status: ${response.status}`); // Throw an error for unexpected response statuses
-                              }
-                          } catch (error) {
-                              // Suppress specific errors from being displayed in the console
-                              if (error.name !== 'AbortError') {
-                                  console.error(error); // Log unexpected errors to the console
-                              }
-                              return false; // Assume image doesn't exist in case of error
-                          }
+                      if (!gridLocator) {
+                          content = `<div><b>${markerInfo.callsign}</b></div>`;
+                          content += `<div><a href="#" onclick="alert('Enter your Grid Locator and click Plot your Range first'); return false;">Match Passes</a></div>`;
+                          content += `<div>First heard: ${earliestTimeFormatted}</div>`;
+                          content += `<div>Last heard: ${latestTimeFormatted}</div>`;
+                          content += `<div>GRID locator: ${markerInfo.dxgridlocator}</div>`;
+                          content += `<div><a href="https://qrz.com/db/${markerInfo.callsign}">QRZ.com lookup</a></div>`;
+                          // Use the dynamically generated image filenames
+                          content += `<div style="width: 70px;"><a href="${largeImage}" target="_blank"><img src="${thumbnailImage}" alt="Small Image"></a></div>`;
+                      } else {
+                          content = `<div><b>${markerInfo.callsign}</b></div>`;
+                          content += `<div><a href="https://www.satmatch.com/satellite/IO-117/obs1/${gridLocator}/obs2/${markerInfo.dxgridlocator}?duration_hrs=48">Match Passes</a></div>`;
+                          content += `<div>First heard: ${earliestTimeFormatted}</div>`;
+                          content += `<div>Last heard: ${latestTimeFormatted}</div>`;
+                          content += `<div>GRID locator: ${markerInfo.dxgridlocator}</div>`;
+                          content += `<div><a href="https://qrz.com/db/${markerInfo.callsign}">QRZ.com lookup</a></div>`;
                       }
-
-
-                      // Check if the thumbnail image exists
-                      checkImageExists(thumbnailImage)
-                          .then(thumbnailExists => {
-                              if (!gridLocator) {
-                                  content = `<div><b>${markerInfo.callsign}</b></div>`;
-                                  content += `<div><a href="#" onclick="alert('Enter your Grid Locator and click Plot your Range first'); return false;">Match Passes</a></div>`;
-                                  content += `<div>First heard: ${earliestTimeFormatted}</div>`;
-                                  content += `<div>Last heard: ${latestTimeFormatted}</div>`;
-                                  content += `<div>GRID locator: ${markerInfo.dxgridlocator}</div>`;
-                                  content += `<div><a href="https://qrz.com/db/${markerInfo.callsign}">QRZ.com lookup</a></div>`;
-                                  // Check if the thumbnail image exists
-                                  if (thumbnailExists) {
-                                      // Thumbnail image exists, display the image
-                                      content += `<div style="width: 70px;"><a href="${largeImage}" target="_blank"><img src="${thumbnailImage}" alt="Small Image"></a></div>`;
-                                  } else {
-                                      // Thumbnail image doesn't exist, display "Add station photo" text with a hyperlink
-                                      content += `<div><a href="https://dxer.site" target="_blank">Add station photo</a></div>`;
-                                  }
-                              } else {
-                                  content = `<div><b>${markerInfo.callsign}</b></div>`;
-                                  content += `<div><a href="https://www.satmatch.com/satellite/IO-117/obs1/${gridLocator}/obs2/${markerInfo.dxgridlocator}?duration_hrs=48">Match Passes</a></div>`;
-                                  content += `<div>First heard: ${earliestTimeFormatted}</div>`;
-                                  content += `<div>Last heard: ${latestTimeFormatted}</div>`;
-                                  content += `<div>GRID locator: ${markerInfo.dxgridlocator}</div>`;
-                                  content += `<div><a href="https://qrz.com/db/${markerInfo.callsign}">QRZ.com lookup</a></div>`;
-                              }
-                          })
-
 
 
                       // Add click listener to each marker to display info window
