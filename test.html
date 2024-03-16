@@ -516,8 +516,8 @@
                       const latestDate = new Date(markerInfo.latestTime);
 
                       // Format timestamps to UTC string
-                      const earliestTimeFormatted = earliestDate.toUTCString();
-                      const latestTimeFormatted = latestDate.toUTCString();
+                      const earliestTimeFormatted = earliestDate.toUTCString() + " UTC";
+                      const latestTimeFormatted = latestDate.toUTCString() + " UTC";
 
                       if (!gridLocator) {
                           content = `<div><b>${markerInfo.callsign}</b></div>`;
