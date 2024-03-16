@@ -530,9 +530,11 @@
                       
                       // Trim the callsign to remove any leading or trailing whitespaces
                       const trimmedCallsign = markerInfo.callsign.trim();
-                      // Define the image filenames based on the callsign
-                      const thumbnailImage = `https://dxer.site/img/works/${markerInfo.callsign}_th.jpeg`;
-                      const largeImage = `https://dxer.site/img/works/${markerInfo.callsign}.jpeg`;
+
+                      // Define the image filenames based on the trimmed callsign
+                      const thumbnailImage = `https://dxer.site/img/works/${trimmedCallsign}_th.jpeg`;
+                      const largeImage = `https://dxer.site/img/works/${trimmedCallsign}.jpeg`;
+
 
                       if (!gridLocator) {
                           content = `<div><b>${markerInfo.callsign}</b></div>`;
