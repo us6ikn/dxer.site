@@ -428,36 +428,48 @@
                           callsigns[key].push({
                               callsign: callsign,
                               dxgridlocator: dxgridlocator,
+                              earliestTime: earliestTime,
+                              latestTime: latestTime,
                               markerIcon: "img/ship_s.png"
                           });
                       } else if (callsign.endsWith('/P')) {
                               callsigns[key].push({
                                   callsign: callsign,
                                   dxgridlocator: dxgridlocator,
+                                  earliestTime: earliestTime,
+                                  latestTime: latestTime,
                                   markerIcon: "img/car.png"
                               });
                       } else if (callsign.endsWith('/R')) {
                               callsigns[key].push({
                                   callsign: callsign,
                                   dxgridlocator: dxgridlocator,
+                                  earliestTime: earliestTime,
+                                  latestTime: latestTime,
                                   markerIcon: "img/car.png"
                               });
                       } else if (Date.now() - earliestTime <= 7 * 24 * 60 * 60 * 1000) {
                           callsigns[key].push({
                               callsign: callsign,
                               dxgridlocator: dxgridlocator,
+                              earliestTime: earliestTime,
+                              latestTime: latestTime,
                               markerIcon: "img/m_new.png"
                           });
                       } else if (Date.now() - earliestTime > 7 * 24 * 60 * 60 * 1000 && Date.now() - latestTime <= 30 * 24 * 60 * 60 * 1000) {
                           callsigns[key].push({
                               callsign: callsign,
                               dxgridlocator: dxgridlocator,
+                              earliestTime: earliestTime,
+                              latestTime: latestTime,
                               markerIcon: "img/m_30.png"
                           });
                       } else {
                           callsigns[key].push({
                               callsign: callsign,
                               dxgridlocator: dxgridlocator,
+                              earliestTime: earliestTime,
+                              latestTime: latestTime,
                               markerIcon: "img/m_m30.png"
                           });
                       }
