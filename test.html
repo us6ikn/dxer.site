@@ -544,6 +544,7 @@
                               // Check if the response status is in the 200 range
                               return response.ok; // Image exists if the response status is OK
                           } catch (error) {
+                              // Suppress error from being displayed in the console
                               return false; // Assume image doesn't exist in case of error
                           }
                       }
