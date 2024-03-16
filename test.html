@@ -528,6 +528,8 @@
                       const earliestTimeFormatted = formatTimestamp(earliestDate);
                       const latestTimeFormatted = formatTimestamp(latestDate);
                       
+                      // Trim the callsign to remove any leading or trailing whitespaces
+                      const trimmedCallsign = markerInfo.callsign.trim();
                       // Define the image filenames based on the callsign
                       const thumbnailImage = `https://dxer.site/img/works/${markerInfo.callsign}_th.jpeg`;
                       const largeImage = `https://dxer.site/img/works/${markerInfo.callsign}.jpeg`;
