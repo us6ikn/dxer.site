@@ -535,29 +535,53 @@
                       const thumbnailImage = `https://dxer.site/img/works/${trimmedCallsign}_th.jpeg`;
                       const largeImage = `https://dxer.site/img/works/${trimmedCallsign}.jpeg`;
 
-                      if (!gridLocator) {
-                          content = `<div><b>${markerInfo.callsign}</b></div>`;
-                          content += `<div><a href="#" onclick="alert('Enter your Grid Locator and click Plot your Range first'); return false;">Match Passes</a></div>`;
-                          content += `<div>First heard: ${earliestTimeFormatted}</div>`;
-                          content += `<div>Last heard: ${latestTimeFormatted}</div>`;
-                          content += `<div>GRID locator: ${markerInfo.dxgridlocator}</div>`;
-                          content += `<div><a href="https://qrz.com/db/${markerInfo.callsign}">QRZ.com lookup</a></div>`;
-                          // Check if the thumbnail image exists
-                          if (thumbnailImageExists) {
-                              // Thumbnail image exists, display the image
-                              content += `<div style="width: 70px;"><a href="${largeImage}" target="_blank"><img src="${thumbnailImage}" alt="Small Image"></a></div>`;
-                          } else {
-                              // Thumbnail image doesn't exist, display "Add station photo" text with a hyperlink
-                              content += `<div><a href="https://dxer.site" target="_blank">Add station photo</a></div>`;
+                      // Function to check if an image exists
+                      async function checkImageExists(imageUrl) {
+                          try {
+                              // Fetch the image URL
+                              const response = await fetch(imageUrl, { method: 'HEAD' });
+
+                              // Check if the response status is in the 200 range
+                              return response.ok; // Image exists if the response status is OK
+                          } catch (error) {
+                              console.error('Error checking image existence:', error);
+                              return false; // Assume image doesn't exist in case of error
                           }
-                      } else {
-                          content = `<div><b>${markerInfo.callsign}</b></div>`;
-                          content += `<div><a href="https://www.satmatch.com/satellite/IO-117/obs1/${gridLocator}/obs2/${markerInfo.dxgridlocator}?duration_hrs=48">Match Passes</a></div>`;
-                          content += `<div>First heard: ${earliestTimeFormatted}</div>`;
-                          content += `<div>Last heard: ${latestTimeFormatted}</div>`;
-                          content += `<div>GRID locator: ${markerInfo.dxgridlocator}</div>`;
-                          content += `<div><a href="https://qrz.com/db/${markerInfo.callsign}">QRZ.com lookup</a></div>`;
                       }
+
+                      // Check if the thumbnail image exists
+                      checkImageExists(thumbnailImage)
+                          .then(thumbnailExists => {
+                              if (!gridLocator) {
+                                  content = `<div><b>${markerInfo.callsign}</b></div>`;
+                                  content += `<div><a href="#" onclick="alert('Enter your Grid Locator and click Plot your Range first'); return false;">Match Passes</a></div>`;
+                                  content += `<div>First heard: ${earliestTimeFormatted}</div>`;
+                                  content += `<div>Last heard: ${latestTimeFormatted}</div>`;
+                                  content += `<div>GRID locator: ${markerInfo.dxgridlocator}</div>`;
+                                  content += `<div><a href="https://qrz.com/db/${markerInfo.callsign}">QRZ.com lookup</a></div>`;
+                                  // Check if the thumbnail image exists
+                                  if (thumbnailExists) {
+                                      // Thumbnail image exists, display the image
+                                      content += `<div style="width: 70px;"><a href="${largeImage}" target="_blank"><img src="${thumbnailImage}" alt="Small Image"></a></div>`;
+                                  } else {
+                                      // Thumbnail image doesn't exist, display "Add station photo" text with a hyperlink
+                                      content += `<div><a href="https://dxer.site" target="_blank">Add station photo</a></div>`;
+                                  }
+                              } else {
+                                  content = `<div><b>${markerInfo.callsign}</b></div>`;
+                                  content += `<div><a href="https://www.satmatch.com/satellite/IO-117/obs1/${gridLocator}/obs2/${markerInfo.dxgridlocator}?duration_hrs=48">Match Passes</a></div>`;
+                                  content += `<div>First heard: ${earliestTimeFormatted}</div>`;
+                                  content += `<div>Last heard: ${latestTimeFormatted}</div>`;
+                                  content += `<div>GRID locator: ${markerInfo.dxgridlocator}</div>`;
+                                  content += `<div><a href="https://qrz.com/db/${markerInfo.callsign}">QRZ.com lookup</a></div>`;
+                              }
+
+                              // Display the content
+                              console.log(content); // You can replace this with how you want to display the content, such as adding it to an info window on a map
+                          })
+                          .catch(error => {
+                              console.error('Error:', error);
+                          });
 
 
 
