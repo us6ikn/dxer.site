@@ -407,7 +407,7 @@
             }
           });
 
-          fetch("output_filtered.txt")
+          fetch("output_filtered_all.txt")
               .then(response => response.text())
               .then(data => {
                   const regex = /Earliest: ([^,]+), Latest: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
