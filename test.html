@@ -154,7 +154,7 @@
       }
 
       
-      function initMap(gridLocator) {
+      function initMap(gridLocator, days) {
           map = new google.maps.Map(document.getElementById("map"), {
             zoom: 2,
             center: { lat: 0, lng: 0 },
@@ -200,7 +200,6 @@
             }
           });
           
-          function anotherFunction(days) {
           fetch("output_filtered_all.txt")
               .then(response => response.text())
               .then(data => {
@@ -267,7 +266,6 @@
                               latestTime: latestTime,
                               markerIcon: "img/m_m30.png"
                           });
-                      }
                       }
                   }
               }
