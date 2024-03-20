@@ -23,8 +23,10 @@
     <title>GreenCube Observer</title>
     <!-- Include external JavaScript file -->
         <script src="footprintPlotter.js"></script>
+        <script src="announcementMarkerCreator.js"></script>
   </head>
   <body>
+    
     <!-- Main panel -->
     <div class="floating">
         <label for="grid-locator">Enter your Grid:</label>
@@ -334,63 +336,11 @@
                   });
               }
 
-
-              // Loop through the announcements and create markers for each one
-              for (let i = 0; i < announcements.length; i++) {
-                const announcement = announcements[i];
-
-                // Extract the coordinates and time from the announcement
-                            const coordinates = announcement.match(/Coordinates: \((.*), (.*)\)/);
-                            const timeString = announcement.match(/Time: ([^,]*)/)[1];
-
-                            if (!coordinates || !timeString) {
-                              continue;
-                            }
-
-                            const lat = parseFloat(coordinates[1]);
-                            const lng = parseFloat(coordinates[2]);
-                            const time = new Date(timeString);
-
-                            // Check if the time is in the future
-                            if (time <= new Date()) {
-                              continue;
-                            }
-
-                // Extract the callsign from the announcement
-                const callsign = announcement.match(/Callsign: ([^,]*)/)[1];
-
-                // Create a new marker with the blinking icon
-                const marker = new google.maps.Marker({
-                  position: { lat, lng },
-                  map,
-                  icon: {
-                      url: BLINKING_GIF_URL,
-                      scaledSize: new google.maps.Size(20, 20)
-                    },
-                  optimized: false, // disable marker animation optimization
-                  zIndex: 10000 // set the z-index to a high value
-                });
-
-                // Add a listener to the marker
-                marker.addListener('click', () => {
-                  // Close the currently open info window
-                  if (openInfoWindow) {
-                    openInfoWindow.close();
-                  }
-
-                  // Create an info window with the callsign and hyperlink to https://hams.at/alerts
-                  const infoWindow = new google.maps.InfoWindow({
-                    content: `<div><a href="https://hams.at/alerts" target="_blank">${callsign}</a></div>`,
-                  });
-
-                  // Open the info window on the marker and update the currently open info window
-                  infoWindow.open(map, marker);
-                  openInfoWindow = infoWindow;
-                });
-              }
+            // Plot anouncements
+            createAnnouncementMarkers(announcements, map);
             });
               
-            // Plot the marker with a 13000 km radius circle around it if gridLocator is provided
+            // Plot the theoretical maximum footprint if gridLocator is provided
             plotMarkerWithCircle(gridLocator, map);
             });
       }
