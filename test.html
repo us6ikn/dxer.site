@@ -374,11 +374,14 @@
     <!-- Load leaderboard -->
     <script src="leaderboard.js"></script>
     <script>
-      // Call setDays function with 1 as the default value when the page loads
+      // Call setDays function with 1 as the default value after a delay
       window.addEventListener('DOMContentLoaded', (event) => {
-        setDays(1);
+        setTimeout(() => {
+          setDays(1);
+        }, 2000); // Adjust the delay time as needed (in milliseconds)
       });
     </script>
+
 
     
   </body>
