@@ -56,6 +56,17 @@
 
       <!-- Button to set the number of days to 7 -->
       <button onclick="setDays(7)">7 Days</button>
+      
+      <script>
+          // Your JavaScript code
+          var days = 1000; // Initial value
+
+          // Function to set the 'days' variable
+          function setDays(numDays) {
+              // Update the 'days' variable with the new value
+              days = numDays;
+          }
+      </script>
 
       <!-- Sliding window -->
       <div class="floating-window">
@@ -188,14 +199,6 @@
               kmlLayer.setMap(null);
             }
           });
-
-          var days = 1000; // Initial value
-
-              // Function to set the 'days' variable
-              function setDays(numDays) {
-                  // Update the 'days' variable with the new value
-                  days = numDays;
-              }
           
           fetch("output_filtered_all.txt")
               .then(response => response.text())
