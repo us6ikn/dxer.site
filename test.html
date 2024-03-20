@@ -27,6 +27,10 @@
   </head>
   <body>
     
+    <script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
+    </script>
+    
     <!-- Main panel -->
     <div class="floating">
         <label for="grid-locator">Enter your Grid:</label>
@@ -69,7 +73,13 @@
               }
       </script>
       
-
+      <script>
+        // Add event listener for DOMContentLoaded event
+        window.addEventListener('DOMContentLoaded', (event) => {
+          // Call initMap function to load all markers by default
+          initMap('', 999); // Pass a large number to load all markers
+        });
+      </script>
 
 
       <!-- Sliding window -->
@@ -365,14 +375,7 @@
       }
     </script>
     
-    <script async
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
-    // Add event listener for DOMContentLoaded event
-    window.addEventListener('DOMContentLoaded', (event) => {
-      // Call initMap function to load all markers by default
-      initMap('', 999); // Pass a large number to load all markers
-    });
-    </script>
+    
     <!-- Ko-Fi -->
     <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
     <script src="kofi.js"></script>
