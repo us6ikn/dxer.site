@@ -76,36 +76,37 @@
       <script>
           // Function to set the 'days' variable and update button images
           function setDays(numDays) {
-              // Update the 'days' variable with the new value
-              days = numDays;
+              // Function to set the 'days' variable and update button images
+              function setDays(numDays) {
+                  // Update the 'days' variable with the new value
+                  days = numDays;
 
-              // Update button images based on the selected number of days
-              if (numDays === 1) {
-                  document.getElementById('oneDayButton').src = './img/1d_pushed.png';
-                  document.getElementById('threeDayButton').src = './img/3d.png';
-                  document.getElementById('sevenDaysButton').src = './img/7d.png';
-                  document.getElementById('allDaysButton').src = './img/all.png';
-              } else if (numDays === 3) {
-                  document.getElementById('oneDayButton').src = './img/1d.png';
-                  document.getElementById('threeDayButton').src = './img/3d_pushed.png';
-                  document.getElementById('sevenDaysButton').src = './img/7d.png';
-                  document.getElementById('allDaysButton').src = './img/all.png';
-              } else if (numDays === 7) {
-                  document.getElementById('oneDayButton').src = './img/1d.png';
-                  document.getElementById('threeDayButton').src = './img/3d.png';
-                  document.getElementById('sevenDaysButton').src = './img/7d_pushed.png';
-                  document.getElementById('allDaysButton').src = './img/all.png';
-              } else if (numDays === 999) {
-                  document.getElementById('oneDayButton').src = './img/1d.png';
-                  document.getElementById('threeDayButton').src = './img/3d.png';
-                  document.getElementById('sevenDaysButton').src = './img/7d.png';
-                  document.getElementById('allDaysButton').src = './img/all_pushed.png';
+                  // Update button images based on the selected number of days
+                  if (numDays === 1) {
+                      document.getElementById('oneDayImage').src = 'https://dxer.site/img/1d_pushed.png';
+                      document.getElementById('threeDaysImage').src = 'https://dxer.site/img/3d.png';
+                      document.getElementById('sevenDaysImage').src = 'https://dxer.site/img/7d.png';
+                      document.getElementById('allDaysImage').src = 'https://dxer.site/img/all.png';
+                  } else if (numDays === 3) {
+                      document.getElementById('oneDayImage').src = 'https://dxer.site/img/1d.png';
+                      document.getElementById('threeDaysImage').src = 'https://dxer.site/img/3d_pushed.png';
+                      document.getElementById('sevenDaysImage').src = 'https://dxer.site/img/7d.png';
+                      document.getElementById('allDaysImage').src = 'https://dxer.site/img/all.png';
+                  } else if (numDays === 7) {
+                      document.getElementById('oneDayImage').src = 'https://dxer.site/img/1d.png';
+                      document.getElementById('threeDaysImage').src = 'https://dxer.site/img/3d.png';
+                      document.getElementById('sevenDaysImage').src = 'https://dxer.site/img/7d_pushed.png';
+                      document.getElementById('allDaysImage').src = 'https://dxer.site/img/all.png';
+                  } else if (numDays === 999) {
+                      document.getElementById('oneDayImage').src = 'https://dxer.site/img/1d.png';
+                      document.getElementById('threeDaysImage').src = 'https://dxer.site/img/3d.png';
+                      document.getElementById('sevenDaysImage').src = 'https://dxer.site/img/7d.png';
+                      document.getElementById('allDaysImage').src = 'https://dxer.site/img/all_pushed.png';
+                  }
+
+                  // Call the initMap function with the new number of days
+                  initMap(document.getElementById('grid-locator').value, days);
               }
-
-              // Call the initMap function with the new number of days
-              initMap(document.getElementById('grid-locator').value, days);
-          }
-
       </script>
 
       <!-- Sliding window -->
