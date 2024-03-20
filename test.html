@@ -72,7 +72,8 @@
       <script>
         // Add event listener for DOMContentLoaded event
         window.addEventListener('DOMContentLoaded', (event) => {
-          
+          // Call initMap function to load all markers by default
+          initMap('', 999); // Pass a large number to load all markers
         });
       </script>
 
@@ -370,7 +371,7 @@
       }
     </script>
     
-    <script async
+    <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
     </script>
     <!-- Ko-Fi -->
