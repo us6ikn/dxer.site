@@ -58,14 +58,14 @@
       <button onclick="setDays(7)">7 Days</button>
       
       <script>
-          // Your JavaScript code
-          var days = 1000; // Initial value
-
           // Function to set the 'days' variable
-          function setDays(numDays) {
-              // Update the 'days' variable with the new value
-              days = numDays;
-          }
+              function setDays(numDays) {
+                  // Update the 'days' variable with the new value
+                  days = numDays;
+
+                  // Call another function and use its output
+                  var result = anotherFunction(days);
+                  console.log(result); // Do something with the result
       </script>
 
       <!-- Sliding window -->
@@ -200,6 +200,7 @@
             }
           });
           
+          function anotherFunction(days) {
           fetch("output_filtered_all.txt")
               .then(response => response.text())
               .then(data => {
@@ -269,6 +270,7 @@
                       }
                       }
                   }
+              }
 
             // Add markers
               for (const key in callsigns) {
