@@ -1,5 +1,7 @@
 // markerCreator.js
 
+let openInfoWindow = null; // Define openInfoWindow globally
+
 function createMarkers(callsigns, gridLocator, map) {
     for (const key in callsigns) {
         const [lat, lng] = key.split(",");
@@ -65,6 +67,7 @@ function createMarkers(callsigns, gridLocator, map) {
                 if (openInfoWindow) {
                     openInfoWindow.close();
                 }
+                const infowindow = new google.maps.InfoWindow(); // Define infowindow locally
                 infowindow.setContent(content);
                 infowindow.open(map, marker);
                 openInfoWindow = infowindow;
