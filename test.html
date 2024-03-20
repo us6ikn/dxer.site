@@ -70,7 +70,10 @@
       </script>
       
       <script>
-        
+        // Add event listener for DOMContentLoaded event
+        window.addEventListener('DOMContentLoaded', (event) => {
+          
+        });
       </script>
 
 
@@ -117,12 +120,6 @@
                 showButton.style.display = 'block';
             }
         }
-        
-        // Add event listener for DOMContentLoaded event
-        window.addEventListener('DOMContentLoaded', (event) => {
-          // Call initMap function to load all markers by default
-          initMap('', 999); // Pass a large number to load all markers
-        });
         
       var map;
       var kmlLayer;
