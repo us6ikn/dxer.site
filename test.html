@@ -154,6 +154,9 @@
         content.classList.toggle('show');
       }
 
+        // Define global variables to hold the arguments for initMap
+            var gridLocator = ''; // Example value for gridLocator
+            var days = 999; // Example value for days
       function initMap(gridLocator, days) {
           map = new google.maps.Map(document.getElementById("map"), {
             zoom: 2,
@@ -373,16 +376,6 @@
     </div>
     <!-- Load leaderboard -->
     <script src="leaderboard.js"></script>
-    <script>
-      // Call setDays function with 1 as the default value after a delay
-      window.addEventListener('DOMContentLoaded', (event) => {
-        setTimeout(() => {
-          setDays(1);
-        }, 50); // Delay (in milliseconds)
-      });
-    </script>
-
-
     
   </body>
 </html>
