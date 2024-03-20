@@ -11,9 +11,6 @@
 
         gtag('config', 'G-7YST3WTEH3');
       </script>
-      <script async
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
-      </script>
       <!-- All styles CSS -->
       <link rel="stylesheet" type="text/css" href="styles.css">
       <!-- Include Font Awesome CSS -->
@@ -71,15 +68,6 @@
                   console.log(result); // Do something with the result
               }
       </script>
-      
-      <script>
-        // Add event listener for DOMContentLoaded event
-        window.addEventListener('DOMContentLoaded', (event) => {
-          // Call initMap function to load all markers by default
-          initMap('', 999); // Pass a large number to load all markers
-        });
-      </script>
-
 
       <!-- Sliding window -->
       <div class="floating-window">
@@ -166,7 +154,7 @@
         content.classList.toggle('show');
       }
 
-      
+      var days = 999;
       function initMap(gridLocator, days) {
           map = new google.maps.Map(document.getElementById("map"), {
             zoom: 2,
@@ -374,7 +362,9 @@
       }
     </script>
     
-    
+    <script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
+    </script>
     <!-- Ko-Fi -->
     <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
     <script src="kofi.js"></script>
