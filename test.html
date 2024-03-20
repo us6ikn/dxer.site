@@ -22,7 +22,8 @@
     <title>GreenCube Observer</title>
   </head>
   <body>
-      <div class="floating">
+    <!-- Main panel -->
+    <div class="floating">
         <label for="grid-locator">Enter your Grid:</label>
         <input type="text" id="grid-locator" placeholder="e.g. JO89tt" maxlength="6" style="width: 68px;">
         <button onclick="initMap(document.getElementById('grid-locator').value); document.getElementById('kml-layer-toggle').checked = false;">Plot your Range</button>
@@ -37,16 +38,16 @@
         </div>
       </div>
 
+    <!-- Buttons -->
       <a href="https://dxer.site" target="_blank" class="floating-button">
         <i class="fas fa-home floating-button-icon"></i>
       </a>
-      
-      <a href="https://dxer.site/greencube-log-check.html" style="position: fixed; bottom: 235px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">ADIF?</a>
-      
+      <a href="https://dxer.site/greencube-log-check.html" style="position: fixed; bottom: 235px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">ADIF</a>
       <a href="https://dxer.site/greencube-FAQ.html" style="position: fixed; bottom: 170px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">FAQ</a>
       <a href="https://dxer.site/qo-100-satellite-observer.html" style="position: fixed; bottom: 135px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">GEO</a>
       <a href="https://dxer.site/leo-satellite-observer.html" style="position: fixed; bottom: 100px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">LEO</a>
 
+      <!-- Sliding window -->
       <div class="floating-window">
         <button class="toggle-button"></button>
         <button class="arrow-button" onclick="toggleFloatingWindow()">&#x25b6;</button>
@@ -59,34 +60,21 @@
             <div><p style="font-size: smaller;">&nbsp;&nbsp;&nbsp;&nbsp;Thanks for <a href="https://ko-fi.com/sa5ikn" target="_blank">support</a> to: <br>&nbsp;&nbsp;&nbsp;&nbsp;G0IIQ F6FLQ IW5BMS VK6PY
                 <br>&nbsp;&nbsp;&nbsp;&nbsp;W2LPL</p></div>
             <div><p style="font-size: smaller;">&nbsp;&nbsp;&nbsp;&nbsp;Latest database update: <br>&nbsp;&nbsp;&nbsp;&nbsp;<span id="last-modified"></span></p></div>
-            <script>
-                var xhttp = new XMLHttpRequest();
-                xhttp.onreadystatechange = function() {
-                    if (this.readyState == 4 && this.status == 200) {
-                        var lastModified = new Date(this.getResponseHeader("Last-Modified"));
-                        document.getElementById("last-modified").innerHTML = lastModified.toUTCString();
-                    }
-                };
-                xhttp.open("HEAD", "output_filtered.txt", true);
-                xhttp.send();
-            </script>
+            <script src="lastmodified.js"></script>
             <div class="sharethis-inline-share-buttons"></div>
           </div>
-        
       </div>
 
-
     <div id="map"></div>
+    
+    <!-- Leaderboard -->
     <div class="leaderboard-widget">
-        <h2>
-                    Open Data Leaders
-                    <a href="https://dxer.site/greencube-leaderboard.html" target="_blank">&nbsp;see all</a>
-                </h2>
-            <ol>
-                <!-- Leaderboard items will be dynamically added here -->
-            </ol>
-            <button class="hide-button" onclick="toggleLeaderboard()">Hide</button>
-        </div>
+        <h2>Open Data Leaders <a href="https://dxer.site/greencube-leaderboard.html" target="_blank">&nbsp;SEE ALL</a></h2>
+        <ol>
+        <!-- Leaderboard items will be dynamically added here -->
+        </ol>
+        <button class="hide-button" onclick="toggleLeaderboard()">Hide</button>
+    </div>
     <button class="show-button" onclick="toggleLeaderboard()">Show Leaders</button>
     
     <script>
@@ -447,7 +435,7 @@
       <a href="https://twitter.com/m0skn_sa5ikn?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow</a>
       <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
     </div>
-    // Leaderboard loading
+    <!-- Load leaderboard -->
     <script src="leaderboard.js"></script>
   </body>
 </html>
