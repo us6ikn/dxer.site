@@ -51,10 +51,8 @@
       <a href="https://dxer.site/greencube-FAQ.html" style="position: fixed; bottom: 170px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">FAQ</a>
       <a href="https://dxer.site/qo-100-satellite-observer.html" style="position: fixed; bottom: 135px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">GEO</a>
       <a href="https://dxer.site/leo-satellite-observer.html" style="position: fixed; bottom: 100px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">LEO</a>
-      
- 
       <!-- Button to set the number of days to 1 -->
-      <button onclick="setDays(1)" checked>1 Day</button>
+      <button onclick="setDays(1)">1 Day</button>
 
       <!-- Button to set the number of days to 7 -->
       <button onclick="setDays(7)">7 Days</button>
@@ -375,6 +373,14 @@
     </div>
     <!-- Load leaderboard -->
     <script src="leaderboard.js"></script>
+    <script>
+      // Call setDays function with 1 as the default value when the page loads
+      window.addEventListener('DOMContentLoaded', (event) => {
+        setDays(1);
+      });
+    </script>
+
+    
   </body>
 </html>
 
