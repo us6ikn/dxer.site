@@ -52,15 +52,25 @@
       <a href="https://dxer.site/qo-100-satellite-observer.html" style="position: fixed; bottom: 135px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">GEO</a>
       <a href="https://dxer.site/leo-satellite-observer.html" style="position: fixed; bottom: 100px; left: 15px; color: black; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">LEO</a>
       
-      <!-- Container for the buttons -->
-          <div id="buttons-container">
-              <button class="map-button" onclick="setDays(1)">
-                  <img src="https://dxer.site/img/1d.png" alt="1 Day" id="oneDayImage">
-              </button>
-              <button class="map-button" onclick="setDays(7)">
-                  <img src="https://dxer.site/img/7d.png" alt="7 Days" id="sevenDaysImage">
-              </button>
-          </div>
+      <!-- Container for the buttons - First Row -->
+      <div id="buttons-container-row1">
+          <button class="map-button" onclick="setDays(1)">
+              <img src="https://dxer.site/img/1d.png" alt="1 Day" id="oneDayImage">
+          </button>
+          <button class="map-button" onclick="setDays(3)">
+              <img src="https://dxer.site/img/3d.png" alt="3 Days" id="threeDaysImage">
+          </button>
+      </div>
+
+      <!-- Container for the buttons - Second Row -->
+      <div id="buttons-container-row2">
+          <button class="map-button" onclick="setDays(7)">
+              <img src="https://dxer.site/img/7d.png" alt="7 Days" id="sevenDaysImage">
+          </button>
+          <button class="map-button" onclick="setDays(999)">
+              <img src="https://dxer.site/img/all.png" alt="All Days" id="allDaysImage">
+          </button>
+      </div>
 
       
       <script>
@@ -71,11 +81,25 @@
 
               // Update button images based on the selected number of days
               if (numDays === 1) {
-                  document.getElementById('oneDayImage').src = './img/1d_pushed.png';
-                  document.getElementById('sevenDaysImage').src = './img/7d.png';
+                  document.getElementById('oneDayButton').src = './img/1d_pushed.png';
+                  document.getElementById('threeDayButton').src = './img/3d.png';
+                  document.getElementById('sevenDaysButton').src = './img/7d.png';
+                  document.getElementById('allDaysButton').src = './img/all.png';
+              } else if (numDays === 3) {
+                  document.getElementById('oneDayButton').src = './img/1d.png';
+                  document.getElementById('threeDayButton').src = './img/3d_pushed.png';
+                  document.getElementById('sevenDaysButton').src = './img/7d.png';
+                  document.getElementById('allDaysButton').src = './img/all.png';
               } else if (numDays === 7) {
-                  document.getElementById('oneDayImage').src = './img/1d.png';
-                  document.getElementById('sevenDaysImage').src = './img/7d_pushed.png';
+                  document.getElementById('oneDayButton').src = './img/1d.png';
+                  document.getElementById('threeDayButton').src = './img/3d.png';
+                  document.getElementById('sevenDaysButton').src = './img/7d_pushed.png';
+                  document.getElementById('allDaysButton').src = './img/all.png';
+              } else if (numDays === 999) {
+                  document.getElementById('oneDayButton').src = './img/1d.png';
+                  document.getElementById('threeDayButton').src = './img/3d.png';
+                  document.getElementById('sevenDaysButton').src = './img/7d.png';
+                  document.getElementById('allDaysButton').src = './img/all_pushed.png';
               }
 
               // Call the initMap function with the new number of days
