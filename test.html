@@ -69,6 +69,9 @@
               }
       </script>
       
+
+
+
       <!-- Sliding window -->
       <div class="floating-window">
         <button class="toggle-button"></button>
@@ -364,13 +367,11 @@
     
     <script async
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
-    </script>
-    <script>
-      // Add event listener for DOMContentLoaded event
-      window.addEventListener('DOMContentLoaded', (event) => {
-        // Call initMap function to load all markers by default
-        initMap('', 999); // Pass a large number to load all markers
-      });
+    // Add event listener for DOMContentLoaded event
+    window.addEventListener('DOMContentLoaded', (event) => {
+      // Call initMap function to load all markers by default
+      initMap('', 999); // Pass a large number to load all markers
+    });
     </script>
     <!-- Ko-Fi -->
     <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
