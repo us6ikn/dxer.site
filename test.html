@@ -67,6 +67,11 @@
                   var result = initMap(gridLocator, days);
                   console.log(result); // Do something with the result
               }
+          // Add event listener for DOMContentLoaded event
+                window.addEventListener('DOMContentLoaded', (event) => {
+                  // Call setDaysAndInitMap function to load all markers by default
+                  setDaysAndInitMap(1000); // Change this to the number of days you want to load by default
+                });
       </script>
 
       <!-- Sliding window -->
