@@ -361,8 +361,15 @@
       }
     </script>
     
+    <script>
+        // Define a callback function that calls initMap with specific arguments
+        function initMapCallback() {
+            initMap('', 999);
+        }
+    </script>
+    
     <script async
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=function(){ initMap('', 999); }">
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMapCallback">
     </script>
     <!-- Ko-Fi -->
     <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
