@@ -24,7 +24,6 @@
     <!-- Include external JavaScript file -->
         <script src="footprintPlotter.js"></script>
         <script src="announcementMarkerCreator.js"></script>
-        <script src="toggleLeaderboard.js"></script>
   </head>
   <body>
     
@@ -84,8 +83,18 @@
     <button class="show-button" onclick="toggleLeaderboard()">Show Leaders</button>
     
     <script>
-        // Toggle Leaderboard
-        toggleLeaderboard();
+        function toggleLeaderboard() {
+            var widget = document.querySelector('.leaderboard-widget');
+            var showButton = document.querySelector('.show-button');
+
+            if (widget.style.display === 'none') {
+                widget.style.display = 'block';
+                showButton.style.display = 'none';
+            } else {
+                widget.style.display = 'none';
+                showButton.style.display = 'block';
+            }
+        }
         
       var map;
       var kmlLayer;
