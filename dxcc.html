@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New DXCC Entities per Month</title>
+  <!-- Include Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <canvas id="dxccChart" width="800" height="400"></canvas>
+
+  <script>
+    // Fetch data from output_filtered_all_DXCC.txt
+    fetch('output_filtered_all_DXCC.txt')
+      .then(response => response.text())
+      .then(text => {
+        const data = text.split('\n').map(line => {
+          const [_, earliest, _, _, dxcc] = line.split(', ');
+          return { earliest, dxcc };
+        });
+
+        // Function to extract month and year from date string
+        const getMonthYear = (dateString) => {
+          const date = new Date(dateString);
+          return `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
+        };
+
+        // Process data to count new DXCC entities per month
+        const counts = {};
+        data.forEach(entry => {
+          const monthYear = getMonthYear(entry.earliest);
+          counts[monthYear] = counts[monthYear] ? counts[monthYear] + 1 : 1;
+        });
+
+        // Convert counts object to arrays for Chart.js
+        const labels = Object.keys(counts);
+        const newData = Object.values(counts);
+
+        // Create the chart
+        const ctx = document.getElementById('dxccChart').getContext('2d');
+        const dxccChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'New DXCC Entities',
+              data: newData,
+              backgroundColor: 'rgba(54, 162, 235, 0.5)', // Adjust color as needed
+              borderColor: 'rgba(54, 162, 235, 1)', // Adjust color as needed
+              borderWidth: 1
+            }]
+          },
+          options: {
+            scales: {
+              yAxes: [{
+                ticks: {
+                  beginAtZero: true
+                }
+              }]
+            },
+            tooltips: {
+              callbacks: {
+                title: function(tooltipItem, data) {
+                  return getMonthYear(labels[tooltipItem[0].index]);
+                },
+                label: function(tooltipItem, data) {
+                  const count = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                  const dxccList = data.labels[tooltipItem.index];
+                  return `New DXCC: ${count}, DXCC List: ${dxccList}`;
+                }
+              }
+            }
+          }
+        });
+      })
+      .catch(error => console.error('Error fetching data:', error));
+  </script>
+</body>
+</html>
