@@ -16,9 +16,9 @@
       .then(response => response.text())
       .then(text => {
         const data = text.split('\n').map(line => {
-          const parts = line.split(', ');
-          const earliest = parts[1];
-          const dxcc = parts[3];
+          const parts = line.trim().split(', ');
+          const earliest = parts[0].split(': ')[1];
+          const dxcc = parts.find(part => part.startsWith('DXCC:')).split(': ')[1];
           return { earliest, dxcc };
         });
 
