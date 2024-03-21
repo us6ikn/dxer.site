@@ -16,6 +16,7 @@
 </head>
 <body>
     <canvas id="newDXCCChart" width="800" height="400"></canvas>
+    <canvas id="cumulativeDXCCChart" width="800" height="400"></canvas>
 
     <script>
         // Function to fetch data from file
@@ -47,6 +48,7 @@
 
                 // Keep track of DXCC entities seen so far
                 const seenDXCC = new Set();
+                let cumulativeCount = 0;
 
                 lines.forEach(line => {
                     const match = line.match(/Earliest: (\d{4}-\d{2})-\d{2}.*DXCC: ([\w\s]+)/);
@@ -57,7 +59,8 @@
                             // If the DXCC entity is not seen before, count it
                             months[month] = months[month] || { count: 0, entities: new Set() };
                             months[month].entities.add(dxcc);
-                            months[month].count++;
+                            cumulativeCount++;
+                            months[month].count = cumulativeCount;
                             // Add the DXCC entity to seenDXCC
                             seenDXCC.add(dxcc);
                         }
@@ -100,17 +103,73 @@
                             }]
                         },
                         tooltips: {
+                            enabled: false
+                        },
+                        onClick: function(evt, elements) {
+                            console.log('Elements array:', elements);
+                            if (elements.length > 0) {
+                                var index = elements[0].index; // Adjusted here
+                                console.log('Index:', index);
+                                if (index >= 0 && index < this.data.labels.length) {
+                                    var month = this.data.labels[index];
+                                    if (months.hasOwnProperty(month)) {
+                                        var entities = Array.from(months[month].entities);
+                                        alert(`New DXCC Entities for ${month}: ${entities.join(', ')}`);
+                                    } else {
+                                        console.error('No data available for this month:', month);
+                                    }
+                                } else {
+                                    console.error('Invalid index:', index);
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Plot the cumulative chart
+                const cumulativeValues = values.reduce((acc, val) => {
+                    acc.push(acc.length > 0 ? acc[acc.length - 1] + val : val);
+                    return acc;
+                }, []);
+
+                const cumulativeDXCCCtx = document.getElementById('cumulativeDXCCChart').getContext('2d');
+                const cumulativeDXCCChart = new Chart(cumulativeDXCCCtx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Cumulative New DXCC Entities',
+                            data: cumulativeValues,
+                            borderColor: 'rgba(255, 99, 132, 0.6)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)'
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }],
+                            xAxes: [{
+                                ticks: {
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0)'
+                                }
+                            }]
+                        },
+                        tooltips: {
                             enabled: true,
                             mode: 'index',
                             callbacks: {
-                                title: function(tooltipItem, data) {
-                                    const month = data.labels[tooltipItem[0].index];
-                                    return `New DXCC Entities for ${month}`;
-                                },
                                 label: function(tooltipItem, data) {
-                                    const month = data.labels[tooltipItem.index];
-                                    const entities = Array.from(months[month].entities);
-                                    return entities.join(', ');
+                                    return 'Cumulative: ' + tooltipItem.yLabel;
                                 }
                             }
                         }
