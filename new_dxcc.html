@@ -46,15 +46,23 @@
                 const lines = data.split('\n');
                 const months = {};
 
+                // Keep track of DXCC entities seen so far
+                const seenDXCC = new Set();
+                let cumulativeCount = 0;
+
                 lines.forEach(line => {
                     const match = line.match(/Earliest: (\d{4}-\d{2})-\d{2}.*DXCC: ([\w\s]+)/);
                     if (match) {
                         const month = match[1];
                         const dxcc = match[2];
-                        months[month] = months[month] || { count: 0, entities: new Set() };
-                        if (!months[month].entities.has(dxcc)) {
+                        if (!seenDXCC.has(dxcc)) {
+                            // If the DXCC entity is not seen before, count it
+                            months[month] = months[month] || { count: 0, entities: new Set() };
                             months[month].entities.add(dxcc);
-                            months[month].count++;
+                            cumulativeCount++;
+                            months[month].count = cumulativeCount;
+                            // Add the DXCC entity to seenDXCC
+                            seenDXCC.add(dxcc);
                         }
                     }
                 });
@@ -100,14 +108,12 @@
                     }
                 });
 
-                // Calculate cumulative count
-                let cumulativeCount = 0;
-                const cumulativeValues = values.map(value => {
-                    cumulativeCount += value;
-                    return cumulativeCount;
+                // Plot the cumulative chart
+                const cumulativeValues = labels.map((month, index) => {
+                    const prevCount = index > 0 ? values[index - 1] : 0;
+                    return prevCount + months[month].entities.size;
                 });
 
-                // Create the line chart for cumulative DXCC entities
                 const cumulativeDXCCCtx = document.getElementById('cumulativeDXCCChart').getContext('2d');
                 const cumulativeDXCCChart = new Chart(cumulativeDXCCCtx, {
                     type: 'line',
@@ -142,12 +148,7 @@
                         },
                         tooltips: {
                             enabled: true,
-                            mode: 'index',
-                            callbacks: {
-                                label: function(tooltipItem, data) {
-                                    return 'Cumulative: ' + tooltipItem.yLabel;
-                                }
-                            }
+                            mode: 'index'
                         }
                     }
                 });
