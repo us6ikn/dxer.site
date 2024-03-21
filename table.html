@@ -28,14 +28,14 @@ th:hover {
 }
 
 /* Indicate clickable headers */
-th:after {
+.sortable-header:after {
   content: ' ⇅'; /* Unicode for up-down arrow */
   font-size: 0.8em;
   margin-left: 5px;
 }
 
 /* Remove arrow content when not sorted */
-th[data-sorted="false"]:after {
+.sortable-header[data-sorted="false"]:after {
   content: none;
 }
 </style>
@@ -45,9 +45,9 @@ th[data-sorted="false"]:after {
 <table id="dxccTable">
   <thead>
     <tr>
-      <th data-column="0" onclick="sortTable(0)">DXCC</th>
-      <th data-column="1" onclick="sortTable(1)">Earliest</th>
-      <th data-column="2" onclick="sortTable(2)">Latest</th>
+      <th data-column="0" class="sortable-header" onclick="sortTable(0)">DXCC</th>
+      <th data-column="1" class="sortable-header" onclick="sortTable(1)">Earliest</th>
+      <th data-column="2" class="sortable-header" onclick="sortTable(2)">Latest</th>
     </tr>
   </thead>
   <tbody>
