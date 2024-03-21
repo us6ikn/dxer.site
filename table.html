@@ -5,23 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sortable DXCC Table</title>
 <style>
+/* Table Styles */
 table {
   border-collapse: collapse;
   width: 100%;
+  border: 1px solid #dddddd;
 }
 
 th, td {
   border: 1px solid #dddddd;
   text-align: left;
-  padding: 8px;
+  padding: 10px;
 }
 
 th {
   cursor: pointer;
+  background-color: #f2f2f2;
 }
 
 th:hover {
-  background-color: #f2f2f2;
+  background-color: #e0e0e0;
+}
+
+/* Indicate clickable headers */
+th:after {
+  content: ' ⇅'; /* Unicode for up-down arrow */
+  font-size: 0.8em;
+  margin-left: 5px;
+}
+
+/* Remove arrow content when not sorted */
+th[data-sorted="false"]:after {
+  content: none;
 }
 </style>
 </head>
@@ -30,9 +45,9 @@ th:hover {
 <table id="dxccTable">
   <thead>
     <tr>
-      <th onclick="sortTable(0)">DXCC</th>
-      <th onclick="sortTable(1)">Earliest</th>
-      <th onclick="sortTable(2)">Latest</th>
+      <th data-column="0">DXCC</th>
+      <th data-column="1">Earliest</th>
+      <th data-column="2">Latest</th>
     </tr>
   </thead>
   <tbody>
@@ -60,6 +75,12 @@ function sortTable(columnIndex) {
   }
   rows.forEach(row => {
     table.appendChild(row);
+  });
+
+  // Update data-sorted attribute for styling
+  const headers = table.querySelectorAll('th');
+  headers.forEach((header, index) => {
+    header.setAttribute('data-sorted', index === columnIndex ? sortingOrder[columnIndex] > 0 : false);
   });
 }
 </script>
