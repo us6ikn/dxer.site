@@ -46,8 +46,8 @@ th:hover {
   <thead>
     <tr>
       <th data-column="0" class="sortable-header" onclick="sortTable(0)">DXCC</th>
-      <th data-column="1" class="sortable-header" onclick="sortTable(1)">Earliest</th>
-      <th data-column="2" class="sortable-header" onclick="sortTable(2)">Latest</th>
+      <th data-column="1" class="sortable-header" onclick="sortTable(1)">First heard</th>
+      <th data-column="2" class="sortable-header" onclick="sortTable(2)">Last heard</th>
     </tr>
   </thead>
   <tbody>
@@ -57,13 +57,6 @@ th:hover {
 
 <script>
 let sortingOrder = [1, 1, 1]; // Initial sorting order for each column
-
-function formatDateTime(dateTimeString) {
-  const dateTime = new Date(dateTimeString);
-  const formattedDate = `${dateTime.getFullYear()}-${(dateTime.getMonth() + 1).toString().padStart(2, '0')}-${dateTime.getDate().toString().padStart(2, '0')}`;
-  const formattedTime = `${dateTime.getHours().toString().padStart(2, '0')}:${dateTime.getMinutes().toString().padStart(2, '0')}z`;
-  return `${formattedDate} ${formattedTime}`;
-}
 
 function sortTable(columnIndex) {
   const table = document.getElementById("dxccTable");
@@ -102,7 +95,7 @@ fetch('out_dxcc_stats.txt')
     lines.forEach(line => {
       const [_, dxcc, earliest, latest] = line.match(/DXCC: (.*), Earliest: (.*)\, Latest: (.*)/);
       const row = document.createElement('tr');
-      row.innerHTML = `<td>${dxcc}</td><td>${formatDateTime(earliest)}</td><td>${formatDateTime(latest)}</td>`;
+      row.innerHTML = `<td>${dxcc}</td><td>${earliest.replace('T', ' ')}</td><td>${latest.replace('T', ' ')}</td>`;
       tableBody.appendChild(row);
     });
   })
