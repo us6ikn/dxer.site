@@ -16,6 +16,7 @@
 </head>
 <body>
     <canvas id="newDXCCChart" width="800" height="400"></canvas>
+    <canvas id="cumulativeDXCCChart" width="800" height="400"></canvas>
 
     <script>
         // Function to fetch data from file
@@ -121,10 +122,48 @@
                                 }
                             }
                         }
+                    }
+                });
 
+                // Calculate cumulative values
+                const cumulativeValues = values.reduce((acc, val) => {
+                    acc.push((acc.length > 0 ? acc[acc.length - 1] : 0) + val);
+                    return acc;
+                }, []);
 
-
-
+                // Create the line chart for cumulative DXCC entities
+                const ctx2 = document.getElementById('cumulativeDXCCChart').getContext('2d');
+                const cumulativeDXCCChart = new Chart(ctx2, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Cumulative DXCC Entities',
+                            data: cumulativeValues,
+                            borderColor: 'rgba(255, 99, 132, 0.6)',
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }],
+                            xAxes: [{
+                                ticks: {
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0)'
+                                }
+                            }]
+                        }
                     }
                 });
             } catch (error) {
