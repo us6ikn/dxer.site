@@ -36,8 +36,13 @@ th:hover {
 
 /* Remove arrow content when not sorted */
 .sortable-header[data-sorted="false"]:after {
-  content: none;
+  content: ' ⇅'; /* Add arrow content when not sorted */
 }
+
+.sortable-header[data-sorted="true"]:after {
+  content: ' ⇅'; /* Keep arrow content when sorted */
+}
+
 </style>
 </head>
 <body>
