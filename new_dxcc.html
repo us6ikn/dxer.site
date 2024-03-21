@@ -22,7 +22,7 @@
         // Function to fetch data from file
         async function fetchData() {
             try {
-                const response = await fetch('output_filtered_all_DXCC.txt');
+                const response = await fetch('out_dxcc_stats.txt');
                 if (!response.ok) {
                     throw new Error('Failed to fetch data');
                 }
