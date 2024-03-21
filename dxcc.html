@@ -17,7 +17,8 @@
       .then(text => {
         const data = text.split('\n').map(line => {
           const parts = line.split(', ');
-          const [earliest, _, _, _, dxcc] = parts;
+          const earliest = parts[1];
+          const dxcc = parts[3];
           return { earliest, dxcc };
         });
 
