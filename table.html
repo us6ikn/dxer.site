@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sortable DXCC Table</title>
+<style>
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+th {
+  cursor: pointer;
+}
+
+th:hover {
+  background-color: #f2f2f2;
+}
+</style>
+</head>
+<body>
+
+<table id="dxccTable">
+  <thead>
+    <tr>
+      <th onclick="sortTable(0)">DXCC</th>
+      <th onclick="sortTable(1)">Earliest</th>
+      <th onclick="sortTable(2)">Latest</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Data will be loaded here -->
+  </tbody>
+</table>
+
+<script>
+function sortTable(columnIndex) {
+  const table = document.getElementById("dxccTable");
+  const rows = Array.from(table.rows).slice(1); // Exclude header row
+  const isDateColumn = columnIndex === 1 || columnIndex === 2;
+  rows.sort((a, b) => {
+    const aValue = isDateColumn ? new Date(a.cells[columnIndex].textContent) : a.cells[columnIndex].textContent.toLowerCase();
+    const bValue = isDateColumn ? new Date(b.cells[columnIndex].textContent) : b.cells[columnIndex].textContent.toLowerCase();
+    if (aValue < bValue) return -1;
+    if (aValue > bValue) return 1;
+    return 0;
+  });
+  while (table.rows.length > 1) {
+    table.deleteRow(1);
+  }
+  rows.forEach(row => {
+    table.appendChild(row);
+  });
+}
+</script>
+
+<script>
+// Fetch data from the file and populate the table
+fetch('out_dxcc_stats.txt')
+  .then(response => response.text())
+  .then(data => {
+    const tableBody = document.querySelector('#dxccTable tbody');
+    const lines = data.trim().split('\n');
+    lines.forEach(line => {
+      const [_, dxcc, earliest, latest] = line.match(/DXCC: (.*), Earliest: (.*)\, Latest: (.*)/);
+      const row = document.createElement('tr');
+      row.innerHTML = `<td>${dxcc}</td><td>${earliest}</td><td>${latest}</td>`;
+      tableBody.appendChild(row);
+    });
+  })
+  .catch(error => {
+    console.error('Error fetching data:', error);
+  });
+</script>
+
+</body>
+</html>
