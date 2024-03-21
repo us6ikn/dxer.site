@@ -41,15 +41,18 @@ th:hover {
 </table>
 
 <script>
+let sortingOrder = [1, 1, 1]; // Initial sorting order for each column
+
 function sortTable(columnIndex) {
   const table = document.getElementById("dxccTable");
   const rows = Array.from(table.rows).slice(1); // Exclude header row
   const isDateColumn = columnIndex === 1 || columnIndex === 2;
+  sortingOrder[columnIndex] *= -1; // Toggle sorting order
   rows.sort((a, b) => {
     const aValue = isDateColumn ? new Date(a.cells[columnIndex].textContent) : a.cells[columnIndex].textContent.toLowerCase();
     const bValue = isDateColumn ? new Date(b.cells[columnIndex].textContent) : b.cells[columnIndex].textContent.toLowerCase();
-    if (aValue < bValue) return -1;
-    if (aValue > bValue) return 1;
+    if (aValue < bValue) return -1 * sortingOrder[columnIndex];
+    if (aValue > bValue) return 1 * sortingOrder[columnIndex];
     return 0;
   });
   while (table.rows.length > 1) {
