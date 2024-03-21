@@ -100,30 +100,20 @@
                             }]
                         },
                         tooltips: {
-                            enabled: false
-                        },
-                        onClick: function(evt, elements) {
-                            console.log('Elements array:', elements);
-                            if (elements.length > 0) {
-                                var index = elements[0].index; // Adjusted here
-                                console.log('Index:', index);
-                                if (index >= 0 && index < this.data.labels.length) {
-                                    var month = this.data.labels[index];
-                                    if (months.hasOwnProperty(month)) {
-                                        var entities = Array.from(months[month].entities);
-                                        alert(`New DXCC Entities for ${month}: ${entities.join(', ')}`);
-                                    } else {
-                                        console.error('No data available for this month:', month);
-                                    }
-                                } else {
-                                    console.error('Invalid index:', index);
+                            enabled: true,
+                            mode: 'index',
+                            callbacks: {
+                                title: function(tooltipItem, data) {
+                                    const month = data.labels[tooltipItem[0].index];
+                                    return `New DXCC Entities for ${month}`;
+                                },
+                                label: function(tooltipItem, data) {
+                                    const month = data.labels[tooltipItem.index];
+                                    const entities = Array.from(months[month].entities);
+                                    return entities.join(', ');
                                 }
                             }
                         }
-
-
-
-
                     }
                 });
             } catch (error) {
