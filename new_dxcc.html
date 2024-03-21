@@ -50,10 +50,10 @@
                 const seenDXCC = new Set();
 
                 lines.forEach(line => {
-                    const match = line.match(/Earliest: (\d{4}-\d{2})-\d{2}.*DXCC: ([\w\s]+)/);
+                    const match = line.match(/DXCC: ([^,]+).*Earliest: (\d{4}-\d{2})-\d{2}T\d{2}:\d{2}:\d{2}Z/);
                     if (match) {
-                        const month = match[1];
-                        const dxcc = match[2];
+                        const dxcc = match[1].trim();
+                        const month = match[2];
                         if (!seenDXCC.has(dxcc)) {
                             // If the DXCC entity is not seen before, count it
                             months[month] = months[month] || { count: 0, entities: new Set() };
