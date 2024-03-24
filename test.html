@@ -22,16 +22,16 @@
     <!-- Include external JavaScript file -->
         <script src="footprintPlotter.js"></script>
         <script src="announcementMarkerCreator.js"></script>
-        <script>
-            // Function to run when the page loads
-            window.onload = function() {
-                // Set days to 999
-                var days = 999;
-            };
-        </script>
   </head>
   <body>
     
+    <script>
+        // Function to run when the page loads
+        window.onload = function() {
+            // Set days to 999 when the page loads
+            setDays(999);
+        };
+    </script>
     <!-- Main panel -->
     <div class="floating">
         <label for="grid-locator">Enter your Grid:</label>
