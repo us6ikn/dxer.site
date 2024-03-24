@@ -51,7 +51,7 @@
       <!-- Container for the buttons - First Row -->
       <div id="buttons-container-row1">
           <button class="map-button" onclick="setDays(0)">
-              <img src="https://dxer.site/img/1d.png" alt="1 Day" id="oneDayImage">
+              <img src="https://dxer.site/img/new.png" alt="New" id="NewImage">
           </button>
           <button class="map-button" onclick="setDays(3)">
               <img src="https://dxer.site/img/3d.png" alt="3 Days" id="threeDaysImage">
@@ -114,22 +114,22 @@
 
                   // Update button images based on the selected number of days
                   if (numDays === 0) {
-                      document.getElementById('oneDayImage').src = 'https://dxer.site/img/1d_pushed.png';
+                      document.getElementById('NewImage').src = 'https://dxer.site/img/new_p.png';
                       document.getElementById('threeDaysImage').src = 'https://dxer.site/img/3d.png';
                       document.getElementById('sevenDaysImage').src = 'https://dxer.site/img/7d.png';
                       document.getElementById('allDaysImage').src = 'https://dxer.site/img/all.png';
                   } else if (numDays === 3) {
-                      document.getElementById('oneDayImage').src = 'https://dxer.site/img/1d.png';
+                      document.getElementById('NewImage').src = 'https://dxer.site/img/new.png';
                       document.getElementById('threeDaysImage').src = 'https://dxer.site/img/3d_pushed.png';
                       document.getElementById('sevenDaysImage').src = 'https://dxer.site/img/7d.png';
                       document.getElementById('allDaysImage').src = 'https://dxer.site/img/all.png';
                   } else if (numDays === 7) {
-                      document.getElementById('oneDayImage').src = 'https://dxer.site/img/1d.png';
+                      document.getElementById('NewImage').src = 'https://dxer.site/img/new.png';
                       document.getElementById('threeDaysImage').src = 'https://dxer.site/img/3d.png';
                       document.getElementById('sevenDaysImage').src = 'https://dxer.site/img/7d_pushed.png';
                       document.getElementById('allDaysImage').src = 'https://dxer.site/img/all.png';
                   } else if (numDays === 999) {
-                      document.getElementById('oneDayImage').src = 'https://dxer.site/img/1d.png';
+                      document.getElementById('NewImage').src = 'https://dxer.site/img/new.png';
                       document.getElementById('threeDaysImage').src = 'https://dxer.site/img/3d.png';
                       document.getElementById('sevenDaysImage').src = 'https://dxer.site/img/7d.png';
                       document.getElementById('allDaysImage').src = 'https://dxer.site/img/all_pushed.png';
