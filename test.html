@@ -50,12 +50,16 @@
 
       <!-- Container for the buttons - First Row -->
       <div id="buttons-container-row1">
-          <button class="map-button" onclick="setDays(1)">
+          <button class="map-button" onclick="setDays(0)">
               <img src="https://dxer.site/img/1d.png" alt="1 Day" id="oneDayImage">
           </button>
           <button class="map-button" onclick="setDays(3)">
               <img src="https://dxer.site/img/3d.png" alt="3 Days" id="threeDaysImage">
           </button>
+      </div>
+
+      <!-- Container for the buttons - Second Row -->
+      <div id="buttons-container-row2">
           <button class="map-button" onclick="setDays(7)">
               <img src="https://dxer.site/img/7d.png" alt="7 Days" id="sevenDaysImage">
           </button>
@@ -63,7 +67,6 @@
               <img src="https://dxer.site/img/all_pushed.png" alt="All Days" id="allDaysImage">
           </button>
       </div>
-
 
       <!-- Container for the buttons - Third Row -->
       <div id="buttons-container-row3">
@@ -110,7 +113,7 @@
                   days = numDays;
 
                   // Update button images based on the selected number of days
-                  if (numDays === 1) {
+                  if (numDays === 0) {
                       document.getElementById('oneDayImage').src = 'https://dxer.site/img/1d_pushed.png';
                       document.getElementById('threeDaysImage').src = 'https://dxer.site/img/3d.png';
                       document.getElementById('sevenDaysImage').src = 'https://dxer.site/img/7d.png';
@@ -286,15 +289,15 @@
                           callsigns[key] = [];
                       }
                       if (Date.now() - latestTime <= days * 24 * 60 * 60 * 1000) {
-                      if (callsign.endsWith('/MM')) {
-                          callsigns[key].push({
-                              callsign: callsign,
-                              dxgridlocator: dxgridlocator,
-                              earliestTime: earliestTime,
-                              latestTime: latestTime,
-                              markerIcon: "img/ship_s.png"
-                          });
-                      } else if (callsign.endsWith('/P')) {
+                          if (callsign.endsWith('/MM')) {
+                              callsigns[key].push({
+                                  callsign: callsign,
+                                  dxgridlocator: dxgridlocator,
+                                  earliestTime: earliestTime,
+                                  latestTime: latestTime,
+                                  markerIcon: "img/ship_s.png"
+                              });
+                          } else if (callsign.endsWith('/P')) {
                               callsigns[key].push({
                                   callsign: callsign,
                                   dxgridlocator: dxgridlocator,
@@ -302,7 +305,7 @@
                                   latestTime: latestTime,
                                   markerIcon: "img/car.png"
                               });
-                      } else if (callsign.endsWith('/R')) {
+                          } else if (callsign.endsWith('/R')) {
                               callsigns[key].push({
                                   callsign: callsign,
                                   dxgridlocator: dxgridlocator,
@@ -310,32 +313,42 @@
                                   latestTime: latestTime,
                                   markerIcon: "img/car.png"
                               });
-                      } else if (Date.now() - earliestTime <= 7 * 24 * 60 * 60 * 1000) {
-                          callsigns[key].push({
-                              callsign: callsign,
-                              dxgridlocator: dxgridlocator,
-                              earliestTime: earliestTime,
-                              latestTime: latestTime,
-                              markerIcon: "img/m_new.png"
-                          });
-                      } else if (Date.now() - earliestTime > 7 * 24 * 60 * 60 * 1000 && Date.now() - latestTime <= 30 * 24 * 60 * 60 * 1000) {
-                          callsigns[key].push({
-                              callsign: callsign,
-                              dxgridlocator: dxgridlocator,
-                              earliestTime: earliestTime,
-                              latestTime: latestTime,
-                              markerIcon: "img/m_30.png"
-                          });
-                      } else {
-                          callsigns[key].push({
-                              callsign: callsign,
-                              dxgridlocator: dxgridlocator,
-                              earliestTime: earliestTime,
-                              latestTime: latestTime,
-                              markerIcon: "img/m_m30.png"
-                          });
+                          } else if (Date.now() - earliestTime <= 7 * 24 * 60 * 60 * 1000) {
+                              callsigns[key].push({
+                                  callsign: callsign,
+                                  dxgridlocator: dxgridlocator,
+                                  earliestTime: earliestTime,
+                                  latestTime: latestTime,
+                                  markerIcon: "img/m_new.png"
+                              });
+                          } else if (Date.now() - earliestTime > 7 * 24 * 60 * 60 * 1000 && Date.now() - latestTime <= 30 * 24 * 60 * 60 * 1000) {
+                              callsigns[key].push({
+                                  callsign: callsign,
+                                  dxgridlocator: dxgridlocator,
+                                  earliestTime: earliestTime,
+                                  latestTime: latestTime,
+                                  markerIcon: "img/m_30.png"
+                              });
+                          } else {
+                              callsigns[key].push({
+                                  callsign: callsign,
+                                  dxgridlocator: dxgridlocator,
+                                  earliestTime: earliestTime,
+                                  latestTime: latestTime,
+                                  markerIcon: "img/m_m30.png"
+                              });
+                          }
+                      } else if (days == 0) {
+                          if (Date.now() - earliestTime <= 7 * 24 * 60 * 60 * 1000) {
+                              callsigns[key].push({
+                                  callsign: callsign,
+                                  dxgridlocator: dxgridlocator,
+                                  earliestTime: earliestTime,
+                                  latestTime: latestTime,
+                                  markerIcon: "img/m_new.png"
+                              });
+                          }
                       }
-                  }
               }
 
             // Add markers
