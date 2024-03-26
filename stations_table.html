@@ -161,17 +161,17 @@
                 const ctx = document.getElementById('newDXCCChart').getContext('2d');
                 const newDXCCChart = new Chart(ctx, {
                     type: 'bar',
-                    datasets: [{
-                        label: {
-                            text: 'New Stations per Month',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'New Stations per Month',
                             font: {
-                                size: 16 // Set the font size to 16
-                            }
-                        },
-                        data: values,
-                        backgroundColor: 'rgba(75, 192, 192, 0.6)'
-                    }],
-
+                                        size: 16 // Set the font size to 16
+                                    }
+                            data: values,
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                        }]
+                    },
                     options: {
                         scales: {
                             yAxes: [{
