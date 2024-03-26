@@ -63,10 +63,12 @@
                         text-decoration: none;
                     }
 
-                    /* Adjust the position of the Chart.js-generated title */
-                    .chartjs-render-monitor .chartjs-title {
-                        margin-top: -200px; /* Adjust the margin-top as needed */
-                    }
+                /* Title Styles */
+                        .chart-title {
+                            text-align: center;
+                            font-size: 20px;
+                            margin-bottom: 20px;
+                        }
                 </style>
 </head>
 <body>
@@ -102,6 +104,11 @@
     <canvas id="cumulativeDXCCChart" width="800" height="400"></canvas>
     <canvas id="activityDaysPieChart" width="800" height="400"></canvas>
 
+    <!-- Title for the Pie Chart -->
+    <div class="chart-title">
+        Number of Days of Station Activity
+    </div>
+    
     <script>
         // Function to fetch data from file
         async function fetchData() {
@@ -186,11 +193,6 @@
                         },
                         options: {
                             plugins: {
-                                title: {
-                                    display: true,
-                                    text: 'Number of Days of Station Activity',
-                                    fontSize: 16,
-                                },
                                 legend: {
                                     display: true,
                                     position: 'right'
