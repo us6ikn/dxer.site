@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>New DXCC Entities per Month</title>
+            <title>GreenCube IO-117 Statistics - Stations</title>
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             <style>
                     canvas {
@@ -103,7 +103,10 @@
     </div>
 
     
-
+    <!-- Title for the Pie Chart -->
+    <div class="chart-title">
+        Stations Statistics
+    </div>
     
     <canvas id="newDXCCChart" width="800" height="400"></canvas>
     <canvas id="cumulativeDXCCChart" width="800" height="400"></canvas>
@@ -228,7 +231,7 @@
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'Cumulative Station count',
+                            label: 'Cumulative Station Count',
                             data: cumulativeValues,
                             borderColor: 'rgba(255, 99, 132, 0.6)',
                             fill: false
