@@ -72,3 +72,41 @@ margin-bottom: 0px;
 font-family: Arial, sans-serif; /* Set the desired font */
 color: #555; /* Set the desired text color */
 }
+
+/* Table Styles */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  border: 1px solid #dddddd;
+}
+
+th, td {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 10px;
+}
+
+th {
+  cursor: pointer;
+  background-color: #f2f2f2;
+}
+
+th:hover {
+  background-color: #e0e0e0;
+}
+
+/* Indicate clickable headers */
+.sortable-header:after {
+  content: ' ⇅'; /* Unicode for up-down arrow */
+  font-size: 0.8em;
+  margin-left: 5px;
+}
+
+/* Remove arrow content when not sorted */
+.sortable-header[data-sorted="false"]:after {
+  content: ' ⇅'; /* Add arrow content when not sorted */
+}
+
+.sortable-header[data-sorted="true"]:after {
+  content: ' ⇅'; /* Keep arrow content when sorted */
+}
