@@ -161,6 +161,9 @@
 
                 const activityLabels = Object.keys(activityDays);
                 const activityValues = Object.values(activityDays);
+                
+                const activityLabels = Object.keys(activityDays);
+                const activityValues = Object.values(activityDays);
 
                 // Create the pie chart
                 const ctx3 = document.getElementById('activityDaysPieChart').getContext('2d');
@@ -189,7 +192,7 @@
                         },
                         legend: {
                             display: true,
-                            position: 'right' // Position legend on the right side
+                            position: 'right'
                         },
                         tooltips: {
                             callbacks: {
@@ -206,6 +209,7 @@
                         }
                     }
                 });
+
 
             } catch (error) {
                 console.error('Error plotting chart:', error);
