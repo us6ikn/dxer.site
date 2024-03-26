@@ -274,8 +274,8 @@
                     if (match) {
                         const earliestDate = new Date(match[2]);
                         const latestDate = new Date(match[3]);
-                        const latestDate = new Date();
-                        const duration = (latestDate - earliestDate) / (1000 * 60 * 60 * 24); // Duration in days
+                        const nowDate = new Date();
+                        const duration = (nowDate - latestDate) / (1000 * 60 * 60 * 24); // Duration in days
 
                         if (duration <= 1) {
                             activityDays['1 day']++;
