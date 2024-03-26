@@ -108,6 +108,164 @@
     <canvas id="newDXCCChart" width="800" height="400"></canvas>
     <canvas id="cumulativeDXCCChart" width="800" height="400"></canvas>
     
+    <script>
+        // Function to fetch data from file
+        async function fetchData() {
+            try {
+                const response = await fetch('out_stations_stats.txt');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                const text = await response.text();
+                return text;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                return null;
+            }
+        }
+
+        // Function to parse data and plot chart for new DXCC entities per month
+        async function plotNewDXCCChart() {
+            try {
+                const data = await fetchData();
+                if (!data) {
+                    console.error('No data available');
+                    return;
+                }
+
+                const lines = data.split('\n');
+                const months = {};
+
+                // Keep track of DXCC entities seen so far
+                const seenDXCC = new Set();
+
+                lines.forEach(line => {
+                    const match = line.match(/Callsign: ([^,]+).*Earliest: (\d{4}-\d{2})-\d{2}T\d{2}:\d{2}:\d{2}Z/);
+                    if (match) {
+                        const dxcc = match[1].trim();
+                        const month = match[2];
+                        if (!seenDXCC.has(dxcc)) {
+                            // If the station is not seen before, count it
+                            months[month] = months[month] || { count: 0, entities: new Set() };
+                            months[month].entities.add(dxcc);
+                            months[month].count++;
+                            // Add the DXCC entity to seenDXCC
+                            seenDXCC.add(dxcc);
+                        }
+                    }
+                });
+
+                const labels = Object.keys(months).sort();
+                const values = labels.map(month => months[month].count);
+                console.log(values);
+
+                // Create the bar chart for new Stations per month
+                const ctx = document.getElementById('newDXCCChart').getContext('2d');
+                const newDXCCChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'New Stations per Month',
+                            data: values,
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }],
+                            xAxes: [{
+                                ticks: {
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0)'
+                                }
+                            }]
+                        },
+                        tooltips: {
+                            enabled: false
+                        },
+                        onClick: function(evt, elements) {
+                            console.log('Elements array:', elements);
+                            if (elements.length > 0) {
+                                var index = elements[0].index; // Adjusted here
+                                console.log('Index:', index);
+                                if (index >= 0 && index < this.data.labels.length) {
+                                    var month = this.data.labels[index];
+                                    if (months.hasOwnProperty(month)) {
+                                        var entities = Array.from(months[month].entities);
+                                        alert(`New Stations for ${month}: ${entities.join(', ')}`);
+                                    } else {
+                                        console.error('No data available for this month:', month);
+                                    }
+                                } else {
+                                    console.error('Invalid index:', index);
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Calculate cumulative values
+                const cumulativeValues = values.reduce((acc, val) => {
+                    acc.push((acc.length > 0 ? acc[acc.length - 1] : 0) + val);
+                    return acc;
+                }, []);
+
+                // Create the line chart for cumulative Stations entities
+                const ctx2 = document.getElementById('cumulativeDXCCChart').getContext('2d');
+                const cumulativeDXCCChart = new Chart(ctx2, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Cumulative Station count',
+                            data: cumulativeValues,
+                            borderColor: 'rgba(255, 99, 132, 0.6)',
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }],
+                            xAxes: [{
+                                ticks: {
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0)'
+                                }
+                            }]
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error plotting chart:', error);
+            }
+        }
+
+        // Plot the new stations chart when the page is loaded
+        plotNewDXCCChart();
+    </script>
+    
+    
     <!-- Title for the Pie Chart -->
     <div class="chart-title">
         Stations Activity Retention: Time Span Between First and Latest Activity
