@@ -193,6 +193,9 @@
                         }
                     }
                 });
+
+                // Call plotNewDXCCChart again to redraw the other two charts
+                plotNewDXCCChart();
             } catch (error) {
                 console.error('Error plotting chart:', error);
             }
@@ -201,6 +204,7 @@
         // Plot the new stations chart when the page is loaded
         plotNewDXCCChart();
     </script>
+
     
 </body>
 </html>
