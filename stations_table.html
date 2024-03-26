@@ -66,7 +66,7 @@
                 /* Title Styles */
                 .chart-title {
                     text-align: center;
-                    font-size: 16px;
+                    font-size: 14px;
                     margin-bottom: -100px;
                     font-family: Arial, sans-serif; /* Set the desired font */
                     color: #555; /* Set the desired text color */
@@ -110,7 +110,7 @@
     
     <!-- Title for the Pie Chart -->
     <div class="chart-title">
-        Stations Activity Distribution: Time Span Between First and Latest Activity
+        Stations Activity Retention: Time Span Between First and Latest Activity
     </div>
     <canvas id="activityDaysPieChart" width="800" height="400"></canvas>
     <script>
@@ -230,7 +230,7 @@
 
     <!-- Title for the Pie Chart -->
     <div class="chart-title">
-        Stations Activity Distribution: Time Span Between First and Latest Activity
+        Stations Activity Distribution: Number of Days Since Latest Activity
     </div>
     <canvas id="activityDaysPieChart1" width="800" height="400"></canvas>
     <script>
@@ -274,7 +274,9 @@
                     if (match) {
                         const earliestDate = new Date(match[2]);
                         const latestDate = new Date(match[3]);
+                        const latestDate = new Date();
                         const duration = (latestDate - earliestDate) / (1000 * 60 * 60 * 24); // Duration in days
+
                         if (duration <= 1) {
                             activityDays['1 day']++;
                         } else if (duration <= 7) {
