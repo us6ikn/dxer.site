@@ -2,68 +2,74 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New DXCC Entities per Month</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        canvas {
-            width: 100%;
-            height: auto;
-            margin: 20px auto;
-            display: block;
-        }
-
-        @media (min-width: 768px) {
-            canvas {
-                width: 80%;
-            }
-        }
-
-        @media (min-width: 1200px) {
-            canvas {
-                width: 50%;
-            }
-        }
-        
-        /* Table Styles */
-        table {
-          border-collapse: collapse;
-          width: 100%;
-          border: 1px solid #dddddd;
-        }
-
-        th, td {
-          border: 1px solid #dddddd;
-          text-align: left;
-          padding: 10px;
-        }
-
-        th {
-          cursor: pointer;
-          background-color: #f2f2f2;
-        }
-
-        th:hover {
-          background-color: #e0e0e0;
-        }
-
-        #backButton {
-          top: 10px;
-          left: 10px;
-          background-color: rgba(255, 255, 255, 0.5); /* Half-transparent white background */
-          border: 1px solid #ccc;
-          padding: 10px 20px; /* Increased padding for better appearance */
-          cursor: pointer;
-          text-decoration: none; /* Remove underline */
-          color: #333; /* Text color */
-          border-radius: 5px; /* Rounded corners */
-        }
-        /* Remove underline from hyperlinks */
-            a {
-                text-decoration: none;
-            }
-        
-    </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>New DXCC Entities per Month</title>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <style>
+                canvas {
+                    width: 100%;
+                    height: auto;
+                    margin: 20px auto;
+                    display: block;
+                }
+                
+                @media (min-width: 768px) {
+                    canvas {
+                        width: 80%;
+                    }
+                }
+                
+                @media (min-width: 1200px) {
+                    canvas {
+                        width: 50%;
+                    }
+                }
+                
+                /* Table Styles */
+                table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    border: 1px solid #dddddd;
+                }
+                
+                th, td {
+                    border: 1px solid #dddddd;
+                    text-align: left;
+                    padding: 10px;
+                }
+                
+                th {
+                    cursor: pointer;
+                    background-color: #f2f2f2;
+                }
+                
+                th:hover {
+                    background-color: #e0e0e0;
+                }
+                
+                #backButton {
+                    top: 10px;
+                    left: 10px;
+                    background-color: rgba(255, 255, 255, 0.5); /* Half-transparent white background */
+                    border: 1px solid #ccc;
+                    padding: 10px 20px; /* Increased padding for better appearance */
+                    cursor: pointer;
+                    text-decoration: none; /* Remove underline */
+                    color: #333; /* Text color */
+                    border-radius: 5px; /* Rounded corners */
+                }
+                /* Remove underline from hyperlinks */
+                a {
+                    text-decoration: none;
+                }
+                
+            </style>
+            <style>
+                /* Adjust the position of the chart title */
+                .chart-title {
+                    margin-top: -20px; /* Adjust the margin-top as needed */
+                }
+            </style>
 </head>
 <body>
     
@@ -162,53 +168,51 @@
                 const activityValues = Object.values(activityDays);
 
                 // Create the pie chart
-                Chart.defaults.plugins.title.padding = 0;
-                const ctx3 = document.getElementById('activityDaysPieChart').getContext('2d');
-                const activityDaysPieChart = new Chart(ctx3, {
-                    type: 'pie',
-                    data: {
-                        labels: activityLabels,
-                        datasets: [{
-                            data: activityValues,
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.6)',
-                                'rgba(54, 162, 235, 0.6)',
-                                'rgba(255, 206, 86, 0.6)',
-                                'rgba(75, 192, 192, 0.6)',
-                                'rgba(153, 102, 255, 0.6)',
-                                'rgba(255, 159, 64, 0.6)',
-                                'rgba(107, 191, 106, 0.6)'
-                            ]
-                        }]
-                    },
-                    options: {
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: 'Number of Days of Station Activity',
-                                fontSize: 16,
-                                padding: 0 // Adjust the padding as needed
-                            },
-                            legend: {
-                                display: true,
-                                position: 'right'
-                            },
-                            tooltips: {
-                                callbacks: {
-                                    label: function(tooltipItem, data) {
-                                        var dataset = data.datasets[tooltipItem.datasetIndex];
-                                        var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
-                                            return previousValue + currentValue;
-                                        });
-                                        var currentValue = dataset.data[tooltipItem.index];
-                                        var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
-                                        return currentValue + " (" + percentage + "%)";
+                    const ctx3 = document.getElementById('activityDaysPieChart').getContext('2d');
+                    const activityDaysPieChart = new Chart(ctx3, {
+                        type: 'pie',
+                        data: {
+                            labels: activityLabels,
+                            datasets: [{
+                                data: activityValues,
+                                backgroundColor: [
+                                    'rgba(255, 99, 132, 0.6)',
+                                    'rgba(54, 162, 235, 0.6)',
+                                    'rgba(255, 206, 86, 0.6)',
+                                    'rgba(75, 192, 192, 0.6)',
+                                    'rgba(153, 102, 255, 0.6)',
+                                    'rgba(255, 159, 64, 0.6)',
+                                    'rgba(107, 191, 106, 0.6)'
+                                ]
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Number of Days of Station Activity',
+                                    fontSize: 16,
+                                },
+                                legend: {
+                                    display: true,
+                                    position: 'right'
+                                },
+                                tooltips: {
+                                    callbacks: {
+                                        label: function(tooltipItem, data) {
+                                            var dataset = data.datasets[tooltipItem.datasetIndex];
+                                            var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                                                return previousValue + currentValue;
+                                            });
+                                            var currentValue = dataset.data[tooltipItem.index];
+                                            var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
+                                            return currentValue + " (" + percentage + "%)";
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                });
+                    });
 
 
             } catch (error) {
