@@ -1,87 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7YST3WTEH3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-7YST3WTEH3');
+    </script>
+    <!-- All styles CSS -->
+    <link rel="stylesheet" type="text/css" href="styles-stats.css">
     <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>GreenCube IO-117 Statistics - Stations</title>
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-            <style>
-                    canvas {
-                        width: 100%;
-                        height: auto;
-                        margin: 20px auto;
-                        display: block;
-                    }
-                    
-                    @media (min-width: 768px) {
-                        canvas {
-                            width: 80%;
-                        }
-                    }
-                    
-                    @media (min-width: 1200px) {
-                        canvas {
-                            width: 50%;
-                        }
-                    }
-                    
-                    /* Table Styles */
-                    table {
-                        border-collapse: collapse;
-                        width: 100%;
-                        border: 1px solid #dddddd;
-                    }
-                    
-                    th, td {
-                        border: 1px solid #dddddd;
-                        text-align: left;
-                        padding: 10px;
-                    }
-                    
-                    th {
-                        cursor: pointer;
-                        background-color: #f2f2f2;
-                    }
-                    
-                    th:hover {
-                        background-color: #e0e0e0;
-                    }
-                    
-                    #backButton {
-                        top: 10px;
-                        left: 10px;
-                        background-color: rgba(255, 255, 255, 0.5); /* Half-transparent white background */
-                        border: 1px solid #ccc;
-                        padding: 10px 20px; /* Increased padding for better appearance */
-                        cursor: pointer;
-                        text-decoration: none; /* Remove underline */
-                        color: #333; /* Text color */
-                        border-radius: 5px; /* Rounded corners */
-                    }
-                    /* Remove underline from hyperlinks */
-                    a {
-                        text-decoration: none;
-                    }
-
-                /* Title Styles */
-                .chart-title {
-                    text-align: center;
-                    font-size: 14px;
-                    margin-bottom: -100px;
-                    font-family: Arial, sans-serif; /* Set the desired font */
-                    color: #555; /* Set the desired text color */
-                }
-                
-                /* Title Styles-Main */
-                .chart-title-main {
-                    text-align: center;
-                    font-size: 14px;
-                    margin-bottom: 0px;
-                    font-family: Arial, sans-serif; /* Set the desired font */
-                    color: #555; /* Set the desired text color */
-                }
-
-                </style>
 </head>
 <body>
     
@@ -517,6 +451,8 @@
         // Plot the new stations chart when the page is loaded
         plotNewDXCCChart();
     </script>
-
+    <!-- Ko-Fi -->
+    <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+    <script src="kofi.js"></script>
 </body>
 </html>
