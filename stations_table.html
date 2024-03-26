@@ -232,7 +232,7 @@
     <div class="chart-title">
         Stations Activity Distribution: Time Span Between First and Latest Activity
     </div>
-    <canvas id="activityDaysPieChart" width="800" height="400"></canvas>
+    <canvas id="activityDaysPieChart1" width="800" height="400"></canvas>
     <script>
         // Function to fetch data from file
         async function fetchData() {
@@ -297,8 +297,8 @@
                 const activityValues = Object.values(activityDays);
 
                 // Create the pie chart
-                    const ctx3 = document.getElementById('activityDaysPieChart').getContext('2d');
-                    const activityDaysPieChart = new Chart(ctx3, {
+                    const ctx3 = document.getElementById('activityDaysPieChart1').getContext('2d');
+                    const activityDaysPieChart1 = new Chart(ctx3, {
                         type: 'pie',
                         data: {
                             labels: activityLabels,
