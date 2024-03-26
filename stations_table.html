@@ -124,7 +124,6 @@
                 }
 
                 const lines = data.split('\n');
-                const months = {};
                 const activityDays = {
                     '1 day': 0,
                     '2-7 days': 0,
@@ -182,31 +181,32 @@
                         }]
                     },
                     options: {
-                        title: {
-                            display: true,
-                            text: 'Number of Days of Station Activity',
-                            fontSize: 16
-                        },
-                        legend: {
-                            display: true,
-                            position: 'right'
-                        },
-                        tooltips: {
-                            callbacks: {
-                                label: function(tooltipItem, data) {
-                                    var dataset = data.datasets[tooltipItem.datasetIndex];
-                                    var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
-                                        return previousValue + currentValue;
-                                    });
-                                    var currentValue = dataset.data[tooltipItem.index];
-                                    var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
-                                    return percentage + "%";
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Number of Days of Station Activity',
+                                fontSize: 16
+                            },
+                            legend: {
+                                display: true,
+                                position: 'right'
+                            },
+                            tooltips: {
+                                callbacks: {
+                                    label: function(tooltipItem, data) {
+                                        var dataset = data.datasets[tooltipItem.datasetIndex];
+                                        var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                                            return previousValue + currentValue;
+                                        });
+                                        var currentValue = dataset.data[tooltipItem.index];
+                                        var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
+                                        return percentage + "%";
+                                    }
                                 }
                             }
                         }
                     }
                 });
-
 
             } catch (error) {
                 console.error('Error plotting chart:', error);
@@ -216,6 +216,7 @@
         // Plot the new stations chart when the page is loaded
         plotNewDXCCChart();
     </script>
+
 
 </body>
 </html>
