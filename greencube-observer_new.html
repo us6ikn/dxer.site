@@ -247,7 +247,6 @@
             .then(data => {
               // Split the data into individual announcements
               const announcements = data.trim().split('\n');
-              console.log(announcements);
               
         let openInfoWindow = null; // keep track of the currently open info window
 
@@ -441,12 +440,10 @@
               }
 
             // Plot anouncements
-            // announcementMarkerCreator.js
-
             function createAnnouncementMarkers(announcements, map) {
                 for (let i = 0; i < announcements.length; i++) {
                     const announcement = announcements[i];
-
+                    console.log(announcements);
                     const coordinates = announcement.match(/Coordinates: \((.*), (.*)\)/);
                     const timeString = announcement.match(/Time: ([^,]*)/)[1];
 
