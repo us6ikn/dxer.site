@@ -21,7 +21,6 @@
     <title>GreenCube Observer</title>
     <!-- Include external JavaScript file -->
         <script src="footprintPlotter.js"></script>
-        <script src="announcementMarkerCreator.js"></script>
   </head>
   <body>
     
@@ -247,7 +246,7 @@
             .then(response => response.text())
             .then(data => {
               // Split the data into individual announcements
-              const announcements = data.trim();
+              const announcements = data.trim().split('\n');
               console.log(announcements);
               
         let openInfoWindow = null; // keep track of the currently open info window
