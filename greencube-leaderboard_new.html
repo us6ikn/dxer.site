@@ -16,7 +16,7 @@
     <meta name="author" content="https://dxer.site" />
     <meta charset="utf-8">
   <title>GreenCube Observer Leaderboard</title>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" defer></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" defer></script>
   <style>
     #map {
       height: 500px;
@@ -80,10 +80,20 @@
       padding: 10px 20px; /* Increased padding for better appearance */
       cursor: pointer;
       z-index: 1000;
-      font-size: 14px; /* Larger font size */
+      font-size: 16px; /* Larger font size */
       text-decoration: none; /* Remove underline */
       color: #333; /* Text color */
       border-radius: 5px; /* Rounded corners */
+    }
+    .button-container {
+      position: absolute;
+      top: 50px; /* Adjust as needed */
+      left: 10px; /* Adjust as needed */
+      z-index: 1000;
+    }
+    .button-container a {
+      display: inline-block;
+      margin-right: 10px;
     }
   </style>
 </head>
@@ -94,6 +104,22 @@
           GreenCube Observer
           <sup style="position: absolute; top: -7px; right: 0; font-size: 9px; font-family: Arial, sans-serif; font-weight: normal; letter-spacing: 0px;">by SA5IKN</sup>
       </span></a>
+  
+  <div class="button-container">
+    <a href="https://dxer.site/greencube-io117-statistics-dxcc.html" target="_self">
+        <img src="https://dxer.site//img/dxcc.png" alt="DXCC Statistics" style="height: 30px;">
+    </a>
+    <a href="https://dxer.site/greencube-io117-statistics-grids.html" target="_self">
+        <img src="https://dxer.site//img/grid.png" alt="Grids Statistics" style="height: 30px;">
+    </a>
+    <a href="https://dxer.site/greencube-io117-statistics-stations.html" target="_self">
+        <img src="https://dxer.site//img/stations.png" alt="Stations Statistics" style="height: 30px;">
+    </a>
+    <a href="https://dxer.site/greencube-leaderboard.html" target="_self">
+        <img src="https://dxer.site//img/data.png" alt="SatNOGS Data Statistics" style="height: 30px;">
+    </a>
+  </div>
+
   <div id="leaderboard">
       <h2>Open Data Contributors Leaderboard <span>(last 7 days)</span> <a href="https://dxer.site/greencube-FAQ" target="_blank">FAQ</a></h2>
     <table>
