@@ -295,7 +295,9 @@
                       if (!callsigns[key]) {
                           callsigns[key] = [];
                       }
-                      if (Date.now() - earliestTime <= 7 * 24 * 60 * 60 * 1000) {
+                    var firstTime = new Date('2024-01-01').getTime();
+                    var secondTime = new Date('2024-02-01').getTime();
+                    if (earliestTime >= firstTime && earliestTime <= secondTime) {
                       if (Date.now() - latestTime <= days * 24 * 60 * 60 * 1000) {
                           if (callsign.endsWith('/MM')) {
                               callsigns[key].push({
@@ -441,50 +443,6 @@
                   });
               }
 
-            // Plot anouncements
-                for (let i = 0; i < announcements.length; i++) {
-                    const announcement = announcements[i];
-                    const coordinates = announcement.match(/Coordinates: \((.*), (.*)\)/);
-                    const timeString = announcement.match(/Time: ([^,]*)/)[1];
-
-                    if (!coordinates || !timeString) {
-                        continue;
-                    }
-
-                    const lat = parseFloat(coordinates[1]);
-                    const lng = parseFloat(coordinates[2]);
-                    const time = new Date(timeString);
-
-                    if (time <= new Date()) {
-                        continue;
-                    }
-
-                    const callsign = announcement.match(/Callsign: ([^,]*)/)[1];
-
-                    const marker = new google.maps.Marker({
-                        position: { lat, lng },
-                        map,
-                        icon: {
-                            url: BLINKING_GIF_URL,
-                            scaledSize: new google.maps.Size(20, 20)
-                        },
-                        optimized: false,
-                        zIndex: 10000
-                    });
-
-                    marker.addListener('click', () => {
-                        if (openInfoWindow) {
-                            openInfoWindow.close();
-                        }
-
-                        const infoWindow = new google.maps.InfoWindow({
-                            content: `<div><a href="https://hams.at/alerts" target="_blank">${callsign}</a></div>`,
-                        });
-
-                        infoWindow.open(map, marker);
-                        openInfoWindow = infoWindow;
-                    });
-                }
 
             });
               
