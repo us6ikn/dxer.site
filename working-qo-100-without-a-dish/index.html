@@ -85,6 +85,7 @@
                 right: 0;
                 border-radius: 3px 3px 3px 3px;
             }
+
     </style>
 </head>
 <body>
@@ -135,7 +136,21 @@
 
         <!-- ======= MAIN TEXT ======== -->
     <div class="container">
-        <p>Some text below the images...</p>
+        <p>Some text before the images...</p>
+
+        <div class="image-container">
+            <img src="https://dxer.site/img/works/GCequipment.jpeg" alt="Gallery Image 1" onclick="openGallery(0)">
+            <div class="title">Title of Image 1</div>
+        </div>
+
+        <p>More text...</p>
+
+        <div class="image-container">
+            <img src="https://dxer.site/img/works/DiamondAntenna2.jpeg" alt="Gallery Image 2" onclick="openGallery(1)">
+            <div class="title">Title of Image 2</div>
+        </div>
+
+        <p>Some text after the images...</p>
 
         <!-- Gallery Modal -->
         <div id="galleryModal" class="modal">
@@ -149,7 +164,7 @@
         // Array to hold image URLs
         var images = [
             "https://dxer.site/img/works/GCequipment.jpeg",
-            "https://dxer.site/img/works/GCequipment.jpeg"
+            "https://dxer.site/img/works/second-image.jpeg"
         ];
         var currentIndex = 0;
 
@@ -177,7 +192,6 @@
             document.getElementById('modalImage').src = images[currentIndex];
         }
         </script>
-
     
         <div class="sharethis-inline-share-buttons"></div>
     </div>
