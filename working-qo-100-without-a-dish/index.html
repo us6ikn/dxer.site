@@ -25,13 +25,18 @@
         .item-thumbs:hover {
             background-color: rgba(238, 238, 238, 0.6);
         }
-        
-        .title-container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
+        .image-container {
+                text-align: center;
+            }
+            .image-container img {
+                width: 300px; /* Adjust size as needed */
+                height: auto;
+                cursor: pointer;
+            }
+            .title {
+                margin-top: 20px;
+                font-size: 20px;
+            }
 
     </style>
 </head>
@@ -82,30 +87,30 @@
         <!-- end divider -->
 
         <!-- ======= MAIN TEXT ======== -->
-    
-    
-    
     <div class="container">
-        
-        
-                        
-                        <!-- Photo Item -->
-                        <li class="item-thumbs col-lg-5 design">
-                            <!-- Fancybox - Gallery Enabled - Title - Full Image -->
-                            <a class="hover-wrap fancybox" data-fancybox-group="gallery" title="My GreenCube setup" href="https://dxer.site/img/works/GCequipment.jpeg">
-                            </a>
-                            <div class="title-container">
-                                <p><b>My simplistic and portable GreenCube setup</b></p>
-                            </div>
-                            <!-- Thumb Image and Description -->
-                            <img src="https://dxer.site/img/works/GCequipment.jpeg" alt="">
-                        </li>
-                        <!-- End Photo Item -->
+        <div class="image-container">
+            <img src="https://dxer.site/img/works/GCequipment.jpeg" alt="Gallery Image" onclick="openGallery()">
+            <div class="title">Title of the Image</div>
+        </div>
 
-                       
-                        
-                   
-    
+        <!-- Gallery Modal -->
+        <div id="galleryModal" class="modal">
+          <span class="close" onclick="closeGallery()">&times;</span>
+          <img class="modal-content" id="modalImage">
+        </div>
+
+        <script>
+        // Open the gallery modal
+        function openGallery() {
+            document.getElementById('modalImage').src = "https://dxer.site/img/works/GCequipment.jpeg";
+            document.getElementById('galleryModal').style.display = "block";
+        }
+
+        // Close the gallery modal
+        function closeGallery() {
+            document.getElementById('galleryModal').style.display = "none";
+        }
+        </script>
     
         <div class="sharethis-inline-share-buttons"></div>
     </div>
