@@ -25,6 +25,14 @@
         .item-thumbs:hover {
             background-color: rgba(238, 238, 238, 0.6);
         }
+        
+        .title-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
     </style>
 </head>
 <body>
@@ -81,18 +89,19 @@
         
         
                         
-                        <!-- Item Project and Filter Name -->
+                        <!-- Photo Item -->
                         <li class="item-thumbs col-lg-5 design">
-                        <!-- Fancybox - Gallery Enabled - Title - Full Image -->
-                        <a class="hover-wrap fancybox" data-fancybox-group="gallery" title="My GreenCube setup" href="https://dxer.site/img/works/GCequipment.jpeg">
-                        </a>
-                        <p>
-                        <center><b>My simplistic and portable GreenCube setup</b></center>
-                        </p>
-                        <!-- Thumb Image and Description -->
-                        <img src="https://dxer.site/img/works/GCequipment.jpeg" alt="">
+                            <!-- Fancybox - Gallery Enabled - Title - Full Image -->
+                            <a class="hover-wrap fancybox" data-fancybox-group="gallery" title="My GreenCube setup" href="https://dxer.site/img/works/GCequipment.jpeg">
+                            </a>
+                            <div class="title-container">
+                                <p><b>My simplistic and portable GreenCube setup</b></p>
+                            </div>
+                            <!-- Thumb Image and Description -->
+                            <img src="https://dxer.site/img/works/GCequipment.jpeg" alt="">
                         </li>
-                        <!-- End Item Project -->
+                        <!-- End Photo Item -->
+
                        
                         
                    
