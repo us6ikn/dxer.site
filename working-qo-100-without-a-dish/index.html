@@ -29,7 +29,7 @@
                 text-align: center;
             }
             .image-container img {
-                width: 300px; /* Adjust size as needed */
+                width: 400px; /* Adjust size as needed */
                 height: auto;
                 cursor: pointer;
             }
@@ -88,6 +88,17 @@
 
         <!-- ======= MAIN TEXT ======== -->
     <div class="container">
+        <div class="image-container">
+            <img src="https://dxer.site/img/works/GCequipment.jpeg" alt="Gallery Image" onclick="openGallery()">
+            <div class="title">Title of the Image</div>
+        </div>
+
+        <!-- Gallery Modal -->
+        <div id="galleryModal" class="modal">
+          <span class="close" onclick="closeGallery()">&times;</span>
+          <img class="modal-content" id="modalImage">
+        </div>
+        
         <div class="image-container">
             <img src="https://dxer.site/img/works/GCequipment.jpeg" alt="Gallery Image" onclick="openGallery()">
             <div class="title">Title of the Image</div>
