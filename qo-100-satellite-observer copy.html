@@ -36,7 +36,16 @@
       left: 15px;
       z-index: 9999;
     }
-
+        /* Style for the buttons */
+        .map-button {
+            background: none;
+            height: 30px;
+            border: none;
+            padding: 0;
+            margin: 5px; /* Adjust margin as needed */
+            cursor: pointer;
+        }
+        
     .twitter-follow-button {
       display: inline-block;
       background-color: #1da1f2;
@@ -155,6 +164,23 @@
             background-position: -32px 0;
           }
         }
+        #buttons-container-row3 {
+            position: absolute;
+            bottom: 100px; /* Adjust the top position as needed */
+            left: 10px; /* Adjust the left position as needed */
+            display: flex;
+            flex-wrap: wrap;
+            z-index: 999; /* Ensure buttons appear above other elements */
+        }
+
+        #buttons-container-row5 {
+            position: absolute;
+            bottom: 60px; /* Adjust the top position as needed */
+            left: 10px; /* Adjust the left position as needed */
+            display: flex;
+            flex-wrap: wrap;
+            z-index: 999; /* Ensure buttons appear above other elements */
+        }
     </style>
     <style>
         * {
@@ -178,12 +204,30 @@
         </div>
       </div>
 
-      <a href="https://dxer.site" target="_blank" class="floating-button">
-        <i class="fas fa-home floating-button-icon"></i>
-      </a>
-      <a href="https://dxer.site/greencube-observer.html" style="position: fixed; bottom: 135px; left: 15px; color: gray; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">MEO</a>
-      <a href="https://dxer.site/leo-satellite-observer.html" style="position: fixed; bottom: 100px; left: 15px; color: gray; font-family: Arial; font-size: 28px; z-index: 9999; font-weight: bold;">LEO</a>
-
+      <!-- Container for the buttons - Third Row -->
+      <div id="buttons-container-row3">
+          <!-- LEO Button -->
+          <a href="https://dxer.site/leo-satellite-observer.html" target="_blank">
+              <img src="https://dxer.site/img/LEO.png" alt="LEO Satellite Observer" class="map-button">
+          </a>
+          
+          <!-- GEO Button -->
+          <a href="https://dxer.site/greencube-observer.html" target="_blank">
+              <img src="https://dxer.site/img/MEO.png" alt="GreenCube Observer" class="map-button">
+          </a>
+      </div>
+      <!-- Container for the buttons - Fifth Row -->
+      <div id="buttons-container-row5">
+          <!-- Home Button -->
+          <a href="https://dxer.site" target="_blank">
+              <img src="https://dxer.site/img/Home.png" alt="Homepage" class="map-button">
+          </a>
+          
+          <!-- Twitter Button -->
+          <a href="https://twitter.com/m0skn_sa5ikn?ref_src=twsrc%5Etfw" target="_blank">
+              <img src="https://dxer.site/img/x.png" alt="X Twitter" class="map-button">
+          </a>
+      </div>
 
       <div class="floating-window">
         <button class="toggle-button"></button>
@@ -296,7 +340,7 @@
           
           
 
-          fetch("output_filtered_qo100_h.txt")
+          fetch("output_filtered_qo100.txt")
             .then(response => response.text())
             .then(data => {
               const regex = /TRP: ([^,]+), Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coord: \(([^,]+), ([^)]+)\)/g;
@@ -572,15 +616,11 @@
     <script>
       kofiWidgetOverlay.draw('sa5ikn', {
         'type': 'floating-chat',
-        'floating-chat.donateButton.text': 'Like it?',
+        'floating-chat.donateButton.text': 'Support',
         'floating-chat.donateButton.background-color': '#00b9fe',
         'floating-chat.donateButton.text-color': '#fff'
       });
     </script>
-    <div class="twitter-container">
-      <a href="https://twitter.com/m0skn_sa5ikn?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-screen-name="false" data-show-count="false">Follow</a>
-      <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-    </div>
 
   </body>
 </html>
