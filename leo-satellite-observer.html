@@ -209,7 +209,7 @@
       <!-- Container for the buttons - Third Row -->
       <div id="buttons-container-row3">
           <!-- LEO Button -->
-          <a href="https://dxer.site/QO100-satellite-observer.html" target="_blank">
+          <a href="https://dxer.site/qo-100-satellite-observer.html" target="_blank">
               <img src="https://dxer.site/img/GEO.png" alt="QO+100 Satellite Observer" class="map-button">
           </a>
           
@@ -360,11 +360,17 @@
                       dxgridlocator: dxgridlocator,
                     markerIcon: "img/fmicon_90.png"
                   });
-                } else if (Date.now() - latestTime > 90 * 24 * 60 * 60 * 1000 && trp == 'F') {
+                } else if (Date.now() - latestTime > 90 * 24 * 60 * 60 * 1000 && Date.now() - latestTime < 365 * 2 * 24 * 60 * 60 * 1000 && trp == 'F') {
                         callsigns[key].push({
                           callsign: callsign,
                           dxgridlocator: dxgridlocator,
                         markerIcon: "img/fmicon_m90.png"
+                      });
+                } else if (Date.now() - latestTime > 365 * 2 * 24 * 60 * 60 * 1000 && trp == 'F') {
+                        callsigns[key].push({
+                          callsign: callsign,
+                          dxgridlocator: dxgridlocator,
+                        markerIcon: "img/fmicon_m2y.png"
                       });
                 } else if (Date.now() - latestTime <= 90 * 24 * 60 * 60 * 1000 && trp == 'L') {
                         callsigns[key].push({
