@@ -23,17 +23,16 @@
   <div id="map"></div>
 
   <script>
-    let map, marker;
+    const ASTRONOMY_API_ID = "aca88368-4eb4-4469-b58c-2e696f312d79"; // Replace with your actual API ID
+    const ASTRONOMY_API_SECRET = "75c899e32b553286fd4c920419f177ade807b48bde64039af564fee91575f4044184cafae2a37cd5d2d50b8b25e91908c45a9697f0c13e5a2cd91ad08ad7f5fdf9f7a11e5d8750b93c841f3df3cd8e01e97cff81c1b624d0398dcfed248d4f571e22e5316e05daf497bd34c866826edf"; // Replace with your actual API Secret
 
-    // ✅ Replace these with your actual AstronomyAPI credentials
-    const ASTRONOMY_API_ID = "aca88368-4eb4-4469-b58c-2e696f312d79";
-    const ASTRONOMY_API_SECRET = "75c899e32b553286fd4c920419f177ade807b48bde64039af564fee91575f4044184cafae2a37cd5d2d50b8b25e91908c45a9697f0c13e5a2cd91ad08ad7f5fdf9f7a11e5d8750b93c841f3df3cd8e01e97cff81c1b624d0398dcfed248d4f571e22e5316e05daf497bd34c866826edf";
+    let map, marker;
 
     async function getSubLunarPoint(offsetHours = 0) {
       const now = new Date();
       now.setHours(now.getHours() + offsetHours);
 
-      const isoTime = now.toISOString().split(".")[0]; // remove ms
+      const isoTime = now.toISOString().split(".")[0]; // remove milliseconds
       const date = isoTime.split("T")[0];
       const time = isoTime.split("T")[1];
 
@@ -47,15 +46,19 @@
         const response = await fetch(url, { headers });
         const data = await response.json();
 
-        const geo = data?.data?.table?.rows?.[0]?.cells?.[0]?.position?.geo;
-        if (!geo || typeof geo.latitude?.degrees === "undefined") {
+        const geo = data?.data?.table?.rows?.[0]?.cells?.[0]?.position?.horizontal;
+        if (!geo || typeof geo.altitude?.degrees === "undefined") {
           console.error("Invalid data received from AstronomyAPI:", data);
           return { lat: 0, lng: 0, time: now.toUTCString() };
         }
 
+        // Calculate sublunar point
+        const lat = geo.altitude.degrees;
+        const lng = geo.azimuth.degrees;
+
         return {
-          lat: geo.latitude.degrees,
-          lng: geo.longitude.degrees,
+          lat,
+          lng,
           time: now.toUTCString()
         };
       } catch (err) {
@@ -63,7 +66,6 @@
         return { lat: 0, lng: 0, time: now.toUTCString() };
       }
     }
-
 
     async function initMap() {
       const { lat, lng } = await getSubLunarPoint();
@@ -98,7 +100,6 @@
       slider.addEventListener("input", async () => {
         const offset = parseInt(slider.value);
         label.textContent = offset;
-
         const { lat, lng } = await getSubLunarPoint(offset);
         marker.setPosition({ lat, lng });
         map.panTo({ lat, lng });
@@ -107,7 +108,7 @@
   </script>
 
   <script
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"
+    src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap"
     async defer>
   </script>
 </body>
