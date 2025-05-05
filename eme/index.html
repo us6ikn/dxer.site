@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Moon Tracker (Accurate, No API)</title>
+  <title>Moon Tracker (No Libraries)</title>
   <style>
     #map {
       height: 90vh;
@@ -22,35 +22,56 @@
   </div>
   <div id="map"></div>
 
-  <!-- ✅ This file exposes window.moonposition -->
-  <script src="https://cdn.jsdelivr.net/gh/bmschmidt/astronomia-moonposition-umd@main/moonposition.umd.js"></script>
-
   <script>
-    let map, marker;
+    // === Moon position approximation (low-accuracy but in-browser) ===
+    function toJulian(date) {
+      return date / 86400000 + 2440587.5;
+    }
+
+    function getMoonCoords(jd) {
+      const T = (jd - 2451545.0) / 36525;
+      const L = (218.316 + 13.176396 * (jd - 2451545.0)) % 360;
+      const M = (134.963 + 13.064993 * (jd - 2451545.0)) % 360;
+      const F = (93.272 + 13.229350 * (jd - 2451545.0)) % 360;
+
+      const lon = L + 6.289 * Math.sin(M * Math.PI / 180);
+      const lat = 5.128 * Math.sin(F * Math.PI / 180);
+
+      return { lon, lat };
+    }
+
+    function getGMST(date) {
+      const jd = toJulian(date);
+      const D = jd - 2451545.0;
+      let GMST = 280.46061837 + 360.98564736629 * D;
+      GMST = GMST % 360;
+      if (GMST < 0) GMST += 360;
+      return GMST;
+    }
 
     function getSubLunarPoint(offsetHours = 0) {
       const now = new Date();
       now.setHours(now.getHours() + offsetHours);
+      const jd = toJulian(now);
 
-      const jd = moonposition.toJulianDate(now);
-      const moon = moonposition.moonposition(jd);
+      const moon = getMoonCoords(jd);
+      const gmst = getGMST(now);
+      const subLon = (moon.lon - gmst + 360) % 360 - 180;
+      const subLat = moon.lat;
 
-      const ra = moon.ra;    // Right Ascension in hours
-      const dec = moon.dec;  // Declination in degrees
-
-      const gst = moonposition.siderealTimeGreenwich(jd); // in hours
-      const subLunarLongitude = ((ra - gst) * 15 + 540) % 360 - 180;
-      const subLunarLatitude = dec;
-
-      return { lat: subLunarLatitude, lng: subLunarLongitude };
+      return { lat: subLat, lng: subLon, time: now.toUTCString() };
     }
+  </script>
+
+  <script>
+    let map, marker;
 
     function initMap() {
       const { lat, lng } = getSubLunarPoint();
 
       map = new google.maps.Map(document.getElementById("map"), {
         zoom: 2,
-        center: { lat, lng },
+        center: { lat: 0, lng: 0 },
         mapTypeControl: false,
         streetViewControl: false,
         fullscreenControl: false
@@ -78,7 +99,6 @@
       slider.addEventListener("input", () => {
         const offset = parseInt(slider.value);
         label.textContent = offset;
-
         const { lat, lng } = getSubLunarPoint(offset);
         marker.setPosition({ lat, lng });
         map.panTo({ lat, lng });
@@ -86,9 +106,9 @@
     }
   </script>
 
-  <!-- Load Google Maps -->
-  <script async
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"
+    async defer>
   </script>
 </body>
 </html>
