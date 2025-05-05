@@ -23,11 +23,12 @@
   <div id="map"></div>
 
   <script>
-    const ASTRONOMY_API_ID = "aca88368-4eb4-4469-b58c-2e696f312d79";        // replace this
-    const ASTRONOMY_API_SECRET = "75c899e32b553286fd4c920419f177ade807b48bde64039af564fee91575f4044184cafae2a37cd5d2d50b8b25e91908c45a9697f0c13e5a2cd91ad08ad7f5fdf9f7a11e5d8750b93c841f3df3cd8e01e97cff81c1b624d0398dcfed248d4f571e22e5316e05daf497bd34c866826edf"; // replace this
+    const ASTRONOMY_API_ID = "aca88368-4eb4-4469-b58c-2e696f312d79";  // replace with your actual ID
+    const ASTRONOMY_API_SECRET = "75c899e32b553286fd4c920419f177ade807b48bde64039af564fee91575f4044184cafae2a37cd5d2d50b8b25e91908c45a9697f0c13e5a2cd91ad08ad7f5fdf9f7a11e5d8750b93c841f3df3cd8e01e97cff81c1b624d0398dcfed248d4f571e22e5316e05daf497bd34c866826edf";  // replace with your actual API key
 
     let map, marker;
 
+    // Function to calculate the sub-lunar point (the point on Earth directly under the Moon)
     async function getSubLunarPoint(offsetHours = 0) {
       const now = new Date();
       now.setHours(now.getHours() + offsetHours);
@@ -44,47 +45,39 @@
       try {
         const response = await fetch(url, { headers });
         const data = await response.json();
-        console.log(data);
 
-        // Try to find the moon's position in the response
         const moonRow = data?.data?.table?.rows?.find(
           r => r?.entry?.name?.toLowerCase() === "moon"
         );
 
         if (!moonRow) {
-          console.warn("Moon row not found", { moonRow, data });
-          return { lat: 0, lng: 0 }; // Fallback to a default position
+          return { lat: 0, lng: 0 }; // Fallback if Moon position is not found
         }
 
         const geo = moonRow?.cells?.[0]?.position?.equatorial;
 
-        if (!geo || isNaN(parseFloat(geo.rightAscension?.hours)) || isNaN(parseFloat(geo.declination?.degrees))) {
-          console.warn("Moon coordinates not valid", { geo, moonRow, data });
-          return { lat: 0, lng: 0 }; // Fallback to default
+        if (!geo) {
+          return { lat: 0, lng: 0 }; // Fallback if geo data is unavailable
         }
 
-        const ra = parseFloat(geo.rightAscension.hours);  // Right Ascension in hours
-        const dec = parseFloat(geo.declination.degrees);  // Declination in degrees
+        // Extract RA (right ascension) and Dec (declination)
+        const ra = parseFloat(geo.rightAscension.hours);  // RA in hours
+        const dec = parseFloat(geo.declination.degrees);  // Dec in degrees
 
-        // Convert RA to longitude (1 hour = 15 degrees)
+        // Convert RA to Longitude (1 hour of RA = 15 degrees)
         const longitude = ra * 15;
+
+        // Latitude is directly the Moon's Declination
         const latitude = dec;
 
-        if (isNaN(latitude) || isNaN(longitude)) {
-          console.warn("Parsed coordinates are NaN", { latitude, longitude });
-          return { lat: 0, lng: 0 }; // Fallback if NaN
-        }
-
-        // Normalize longitude to [-180, 180]
-        const lng = (longitude + 180) % 360 - 180;
-
-        return { lat: latitude, lng };
+        return { lat: latitude, lng: longitude };
       } catch (err) {
-        console.error("Fetch or parsing error:", err);
-        return { lat: 0, lng: 0 }; // Fallback if API request fails
+        console.error("Error fetching Moon's position:", err);
+        return { lat: 0, lng: 0 };  // Fallback if error occurs
       }
     }
 
+    // Function to initialize the Google Map and display the Moon's position
     async function initMap() {
       const { lat, lng } = await getSubLunarPoint();
 
@@ -97,7 +90,7 @@
       });
 
       const moonIcon = {
-        url: "https://dxer.site/eme/moon-icon.png", // Example moon icon
+        url: "https://dxer.site/eme/moon-icon.png", // Example Moon icon
         scaledSize: new google.maps.Size(40, 40),
       };
 
@@ -111,6 +104,7 @@
       setupSlider();
     }
 
+    // Slider for time adjustments
     function setupSlider() {
       const slider = document.getElementById("timeSlider");
       const label = document.getElementById("timeLabel");
@@ -124,10 +118,11 @@
         map.panTo({ lat, lng });
       });
     }
+
   </script>
 
   <script
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"
+    src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap"
     async defer>
   </script>
 </body>
