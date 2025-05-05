@@ -1,98 +1,94 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moon Tracker</title>
-    <style>
-        #map {
-            height: 90vh;
-            width: 100%;
-        }
-        #controls {
-            padding: 10px;
-            text-align: center;
-            background: #f9f9f9;
-            font-family: sans-serif;
-        }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/astronomia@2.2.0/build/astronomia.min.js"></script>
-    <script src="https://unpkg.com/suncalc/suncalc.js"></script>
+  <title>Moon Tracker (Accurate)</title>
+  <style>
+    #map {
+      height: 90vh;
+      width: 100%;
+    }
+    #controls {
+      padding: 10px;
+      text-align: center;
+      background: #f9f9f9;
+      font-family: sans-serif;
+    }
+  </style>
 </head>
 <body>
-    <div id="controls">
-        <label for="timeSlider">Time Offset (hours): <span id="timeLabel">0</span></label>
-        <input type="range" id="timeSlider" min="-24" max="24" value="0" step="1">
-    </div>
-    <div id="map"></div>
+  <div id="controls">
+    <label for="timeSlider">Time Offset (hours): <span id="timeLabel">0</span></label>
+    <input type="range" id="timeSlider" min="-24" max="24" value="0" step="1">
+  </div>
+  <div id="map"></div>
 
-    <script>
-        let map, marker;
-        
-        async function getSubLunarPoint(offsetHours = 0) {
-            const now = new Date();
-            now.setHours(now.getHours() + offsetHours);
+  <!-- Load pre-bundled astronomia-moonposition module -->
+  <script src="https://cdn.jsdelivr.net/gh/silbinarywolf/astronomia-moonposition-umd/moonposition.umd.js"></script>
 
-            // Using Astronomia library for position calculation
-            const observer = new Astronomia.Observer(0, 0); // Default observer at the Equator
-            const moon = new Astronomia.Moon(now);
+  <script>
+    let map, marker;
 
-            const geo = moon.geocentric();
+    function getSubLunarPoint(offsetHours = 0) {
+      const now = new Date();
+      now.setHours(now.getHours() + offsetHours);
 
-            const lat = geo.latitude;
-            const lng = geo.longitude;
+      const jd = moonposition.toJulianDate(now);
+      const geocentric = moonposition.moonposition(jd);
 
-            if (isNaN(lat) || isNaN(lng)) {
-                console.warn("Moon coordinates not valid", { lat, lng });
-                return { lat: 0, lng: 0 }; // Fallback
-            }
+      // Longitude in degrees, positive eastward from Greenwich
+      const lng = (geocentric.ra - moonposition.siderealTimeGreenwich(jd)) * 15;
+      const lat = geocentric.dec;
 
-            return { lat, lng };
-        }
+      return {
+        lat: lat,
+        lng: ((lng + 540) % 360) - 180  // Normalize to [-180, 180]
+      };
+    }
 
-        function initMap() {
-            getSubLunarPoint(0).then(({ lat, lng }) => {
-                map = new google.maps.Map(document.getElementById("map"), {
-                    zoom: 2,
-                    center: { lat, lng },
-                    mapTypeControl: false,
-                    streetViewControl: false,
-                    fullscreenControl: false
-                });
+    function initMap() {
+      const { lat, lng } = getSubLunarPoint(0);
 
-                const moonIcon = {
-                    url: "https://dxer.site/eme/moon-icon.png",
-                    scaledSize: new google.maps.Size(40, 40),
-                };
+      map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 2,
+        center: { lat, lng },
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false
+      });
 
-                marker = new google.maps.Marker({
-                    position: { lat, lng },
-                    map,
-                    icon: moonIcon,
-                    title: "Moon Position",
-                });
+      const moonIcon = {
+        url: "https://dxer.site/eme/moon-icon.png",
+        scaledSize: new google.maps.Size(40, 40),
+      };
 
-                setupSlider();
-            });
-        }
+      marker = new google.maps.Marker({
+        position: { lat, lng },
+        map,
+        icon: moonIcon,
+        title: "Moon Position",
+      });
 
-        function setupSlider() {
-            const slider = document.getElementById("timeSlider");
-            const label = document.getElementById("timeLabel");
+      setupSlider();
+    }
 
-            slider.addEventListener("input", async () => {
-                const offset = parseInt(slider.value);
-                label.textContent = offset;
+    function setupSlider() {
+      const slider = document.getElementById("timeSlider");
+      const label = document.getElementById("timeLabel");
 
-                const { lat, lng } = await getSubLunarPoint(offset);
-                marker.setPosition({ lat, lng });
-                map.panTo({ lat, lng });
-            });
-        }
-    </script>
+      slider.addEventListener("input", () => {
+        const offset = parseInt(slider.value);
+        label.textContent = offset;
 
-    <script async
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
-    </script>
+        const { lat, lng } = getSubLunarPoint(offset);
+        marker.setPosition({ lat, lng });
+        map.panTo({ lat, lng });
+      });
+    }
+  </script>
+
+  <!-- Load Google Maps -->
+  <script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
+  </script>
 </body>
 </html>
