@@ -33,7 +33,7 @@
       now.setHours(now.getHours() + offsetHours);
 
       const isoDate = now.toISOString().split("T")[0];
-      const isoTime = now.toISOString().split("T")[1].split(".")[0]; // HH:MM:SS
+      const isoTime = now.toISOString().split("T")[1].split(".")[0];
 
       const url = `https://api.astronomyapi.com/api/v2/bodies/positions?latitude=0&longitude=0&elevation=0&from_date=${isoDate}&to_date=${isoDate}&time=${isoTime}`;
       const headers = {
@@ -44,24 +44,32 @@
         const response = await fetch(url, { headers });
         const data = await response.json();
 
-        const moonRow = data?.data?.table?.rows?.find(r => r.entry?.name?.toLowerCase() === "moon");
+        const moonRow = data?.data?.table?.rows?.find(
+          r => r?.entry?.name?.toLowerCase() === "moon"
+        );
+
         const geo = moonRow?.cells?.[0]?.position?.horizontal;
 
-        if (!geo) {
-          console.error("Moon position not found:", data);
+        if (!geo || typeof geo.altitude?.degrees !== "number" || typeof geo.azimuth?.degrees !== "number") {
+          console.warn("Moon coordinates not valid", { geo, moonRow, data });
           return { lat: 0, lng: 0 };
         }
 
-        // Approximate sub-lunar point:
-        const lat = geo.altitude.degrees;
-        const lng = (geo.azimuth.degrees + 180) % 360 - 180;
+        const lat = parseFloat(geo.altitude.degrees);
+        const lng = ((parseFloat(geo.azimuth.degrees) + 180) % 360) - 180;
+
+        if (isNaN(lat) || isNaN(lng)) {
+          console.warn("Parsed coordinates are NaN", { lat, lng });
+          return { lat: 0, lng: 0 };
+        }
 
         return { lat, lng };
       } catch (err) {
-        console.error("API error:", err);
+        console.error("Fetch or parsing error:", err);
         return { lat: 0, lng: 0 };
       }
     }
+
 
     async function initMap() {
       const { lat, lng } = await getSubLunarPoint();
