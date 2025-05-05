@@ -36,7 +36,7 @@
       const isoDate = now.toISOString().split("T")[0];
       const isoTime = now.toISOString().split("T")[1].split(".")[0];
 
-      const url = `https://api.astronomyapi.com/api/v2/bodies/positions?latitude=0&longitude=0&elevation=0&from_date=${isoDate}&to_date=${isoDate}&time=${isoTime}`;
+      const url = `https://api.astronomyapi.com/api/v2/bodies/positions:moon?latitude=0&longitude=0&elevation=0&from_date=${isoDate}&to_date=${isoDate}&time=${isoTime}`;
       const headers = {
         Authorization: "Basic " + btoa(`${ASTRONOMY_API_ID}:${ASTRONOMY_API_SECRET}`)
       };
