@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Moon Tracker (Accurate)</title>
+  <title>Moon Tracker (Accurate, No API)</title>
   <style>
     #map {
       height: 90vh;
@@ -22,8 +22,8 @@
   </div>
   <div id="map"></div>
 
-  <!-- Load pre-bundled astronomia-moonposition module -->
-  <script src="https://cdn.jsdelivr.net/gh/silbinarywolf/astronomia-moonposition-umd/moonposition.umd.js"></script>
+  <!-- ✅ This file exposes window.moonposition -->
+  <script src="https://cdn.jsdelivr.net/gh/bmschmidt/astronomia-moonposition-umd@main/moonposition.umd.js"></script>
 
   <script>
     let map, marker;
@@ -33,20 +33,20 @@
       now.setHours(now.getHours() + offsetHours);
 
       const jd = moonposition.toJulianDate(now);
-      const geocentric = moonposition.moonposition(jd);
+      const moon = moonposition.moonposition(jd);
 
-      // Longitude in degrees, positive eastward from Greenwich
-      const lng = (geocentric.ra - moonposition.siderealTimeGreenwich(jd)) * 15;
-      const lat = geocentric.dec;
+      const ra = moon.ra;    // Right Ascension in hours
+      const dec = moon.dec;  // Declination in degrees
 
-      return {
-        lat: lat,
-        lng: ((lng + 540) % 360) - 180  // Normalize to [-180, 180]
-      };
+      const gst = moonposition.siderealTimeGreenwich(jd); // in hours
+      const subLunarLongitude = ((ra - gst) * 15 + 540) % 360 - 180;
+      const subLunarLatitude = dec;
+
+      return { lat: subLunarLatitude, lng: subLunarLongitude };
     }
 
     function initMap() {
-      const { lat, lng } = getSubLunarPoint(0);
+      const { lat, lng } = getSubLunarPoint();
 
       map = new google.maps.Map(document.getElementById("map"), {
         zoom: 2,
