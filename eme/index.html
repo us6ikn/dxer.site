@@ -25,17 +25,12 @@
 
   <script>
     let map, marker;
-    const moonIcon = {
-      url: "https://dxer.site/eme/moon-icon.png",
-      scaledSize: new google.maps.Size(40, 40),
-    };
 
     function getSubLunarPoint(offsetHours = 0) {
       const now = new Date();
       now.setHours(now.getHours() + offsetHours);
       const moonPos = SunCalc.getMoonPosition(now, 0, 0);
 
-      // Approximate sub-lunar lat/lng
       const siderealTime = (now.getUTCHours() * 15 + now.getUTCMinutes() * 0.25);
       const lng = (moonPos.azimuth * 180 / Math.PI + 180 + siderealTime) % 360 - 180;
       const lat = moonPos.altitude * 180 / Math.PI;
@@ -51,6 +46,11 @@
         center: { lat, lng },
         mapTypeId: "terrain",
       });
+
+      const moonIcon = {
+        url: "https://dxer.site/eme/moon-icon.png",
+        scaledSize: new google.maps.Size(40, 40),
+      };
 
       marker = new google.maps.Marker({
         position: { lat, lng },
@@ -76,8 +76,9 @@
     }
   </script>
 
-  <script async
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"
+    async defer>
   </script>
 </body>
 </html>
