@@ -43,21 +43,27 @@
         Authorization: "Basic " + btoa(`${ASTRONOMY_API_ID}:${ASTRONOMY_API_SECRET}`)
       };
 
-      const response = await fetch(url, { headers });
-      if (!response.ok) {
-        console.error("Astronomy API error", await response.text());
-        return { lat: 0, lng: 0 };
+      try {
+        const response = await fetch(url, { headers });
+        const data = await response.json();
+
+        const geo = data?.data?.table?.rows?.[0]?.cells?.[0]?.position?.geo;
+        if (!geo || typeof geo.latitude?.degrees === "undefined") {
+          console.error("Invalid data received from AstronomyAPI:", data);
+          return { lat: 0, lng: 0, time: now.toUTCString() };
+        }
+
+        return {
+          lat: geo.latitude.degrees,
+          lng: geo.longitude.degrees,
+          time: now.toUTCString()
+        };
+      } catch (err) {
+        console.error("Failed to fetch Moon position:", err);
+        return { lat: 0, lng: 0, time: now.toUTCString() };
       }
-
-      const data = await response.json();
-      const geo = data.data.table.rows[0].cells[0].position.geo;
-
-      return {
-        lat: geo.latitude.degrees,
-        lng: geo.longitude.degrees,
-        time: now.toUTCString()
-      };
     }
+
 
     async function initMap() {
       const { lat, lng } = await getSubLunarPoint();
