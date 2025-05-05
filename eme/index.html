@@ -32,6 +32,7 @@
       const now = new Date();
       now.setHours(now.getHours() + offsetHours);
 
+      // Generate ISO date and time
       const isoDate = now.toISOString().split("T")[0];
       const isoTime = now.toISOString().split("T")[1].split(".")[0];
 
@@ -44,31 +45,39 @@
         const response = await fetch(url, { headers });
         const data = await response.json();
 
+        // Try to find the moon's position in the response
         const moonRow = data?.data?.table?.rows?.find(
           r => r?.entry?.name?.toLowerCase() === "moon"
         );
+
+        if (!moonRow) {
+          console.warn("Moon row not found", { moonRow, data });
+          return { lat: 0, lng: 0 }; // Fallback to a default position
+        }
 
         const geo = moonRow?.cells?.[0]?.position?.horizontal;
 
         if (!geo || typeof geo.altitude?.degrees !== "number" || typeof geo.azimuth?.degrees !== "number") {
           console.warn("Moon coordinates not valid", { geo, moonRow, data });
-          return { lat: 0, lng: 0 };
+          return { lat: 0, lng: 0 }; // Fallback to default
         }
 
+        // Parse the altitude and azimuth to calculate lat and lng
         const lat = parseFloat(geo.altitude.degrees);
         const lng = ((parseFloat(geo.azimuth.degrees) + 180) % 360) - 180;
 
         if (isNaN(lat) || isNaN(lng)) {
           console.warn("Parsed coordinates are NaN", { lat, lng });
-          return { lat: 0, lng: 0 };
+          return { lat: 0, lng: 0 }; // Fallback if NaN
         }
 
         return { lat, lng };
       } catch (err) {
         console.error("Fetch or parsing error:", err);
-        return { lat: 0, lng: 0 };
+        return { lat: 0, lng: 0 }; // Fallback if API request fails
       }
     }
+
 
 
     async function initMap() {
