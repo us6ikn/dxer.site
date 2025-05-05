@@ -55,6 +55,7 @@
         }
 
         const geo = moonRow?.cells?.[0]?.position?.equatorial;
+        console.log(geo);
 
         if (!geo) {
           return { lat: 0, lng: 0 }; // Fallback if geo data is unavailable
