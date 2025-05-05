@@ -1,61 +1,83 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Moon Position on Google Map</title>
-    <style>
-      #map {
-        height: 100vh;
-        width: 100%;
-      }
-    </style>
-    <!-- Load SunCalc -->
-    <script src="https://unpkg.com/suncalc/suncalc.js"></script>
-  </head>
-  <body>
-    <div id="map"></div>
+<head>
+  <title>Moon Tracker</title>
+  <style>
+    #map {
+      height: 90vh;
+      width: 100%;
+    }
+    #controls {
+      padding: 10px;
+      text-align: center;
+      background: #f9f9f9;
+      font-family: sans-serif;
+    }
+  </style>
+  <script src="https://unpkg.com/suncalc/suncalc.js"></script>
+</head>
+<body>
+  <div id="controls">
+    <label for="timeSlider">Time Offset (hours): <span id="timeLabel">0</span></label>
+    <input type="range" id="timeSlider" min="-24" max="24" value="0" step="1">
+  </div>
+  <div id="map"></div>
 
-    <script>
-      // Function to calculate sub-lunar point (simplified)
-      function getSubLunarPoint() {
-        const now = new Date();
-        const moonPos = SunCalc.getMoonPosition(now, 0, 0); // alt/az from lat=0, lon=0
+  <script>
+    let map, marker;
+    const moonIcon = {
+      url: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Full_Moon_Luc_Viatour.jpg/50px-Full_Moon_Luc_Viatour.jpg",
+      scaledSize: new google.maps.Size(40, 40),
+    };
 
-        // Earth's rotation since UTC midnight (in degrees)
-        const siderealTime = (now.getUTCHours() * 15 + now.getUTCMinutes() * 0.25);
-        
-        // Sub-lunar longitude = Right ascension (in radians) converted to degrees - sidereal time
-        const lng = (moonPos.azimuth * 180 / Math.PI + 180 + siderealTime) % 360 - 180;
-        const lat = moonPos.altitude * 180 / Math.PI;
+    function getSubLunarPoint(offsetHours = 0) {
+      const now = new Date();
+      now.setHours(now.getHours() + offsetHours);
+      const moonPos = SunCalc.getMoonPosition(now, 0, 0);
 
-        return { lat, lng };
-      }
+      // Approximate sub-lunar lat/lng
+      const siderealTime = (now.getUTCHours() * 15 + now.getUTCMinutes() * 0.25);
+      const lng = (moonPos.azimuth * 180 / Math.PI + 180 + siderealTime) % 360 - 180;
+      const lat = moonPos.altitude * 180 / Math.PI;
 
-      function initMap() {
-        const moon = getSubLunarPoint();
+      return { lat, lng, time: now.toUTCString() };
+    }
 
-        const map = new google.maps.Map(document.getElementById("map"), {
-          zoom: 2,
-          center: moon,
-          mapTypeId: "terrain",
-        });
+    function initMap() {
+      const { lat, lng } = getSubLunarPoint();
 
-        const moonIcon = {
-          url: "https://dxer.site/eme/moon-icon.png",
-          scaledSize: new google.maps.Size(40, 40),
-        };
+      map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 2,
+        center: { lat, lng },
+        mapTypeId: "terrain",
+      });
 
-        new google.maps.Marker({
-          position: moon,
-          map: map,
-          icon: moonIcon,
-          title: "Current Moon Position (Sub-lunar point)",
-        });
-      }
-    </script>
+      marker = new google.maps.Marker({
+        position: { lat, lng },
+        map,
+        icon: moonIcon,
+        title: "Moon Position",
+      });
 
-    <!-- Google Maps API -->
-    <script async
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
-    </script>
-  </body>
+      setupSlider();
+    }
+
+    function setupSlider() {
+      const slider = document.getElementById("timeSlider");
+      const label = document.getElementById("timeLabel");
+
+      slider.addEventListener("input", () => {
+        const offset = parseInt(slider.value);
+        label.textContent = offset;
+        const { lat, lng } = getSubLunarPoint(offset);
+        marker.setPosition({ lat, lng });
+        map.panTo({ lat, lng });
+      });
+    }
+  </script>
+
+  <script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
+  </script>
+</body>
 </html>
