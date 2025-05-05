@@ -14,8 +14,7 @@
       font-family: sans-serif;
     }
   </style>
-  <!-- Load Astronomia for accurate moon ephemeris -->
-  <script src="https://unpkg.com/astronomia@1.13.0/astronomia.min.js"></script>
+  <script src="https://unpkg.com/suncalc/suncalc.js"></script>
 </head>
 <body>
   <div id="controls">
@@ -30,21 +29,11 @@
     function getSubLunarPoint(offsetHours = 0) {
       const now = new Date();
       now.setHours(now.getHours() + offsetHours);
+      const moonPos = SunCalc.getMoonPosition(now, 0, 0);
 
-      // Convert to Julian Day
-      const jd = astronomia.julian.DateToJD(now);
-      const moon = astronomia.moonposition.position(jd);
-
-      // Sidereal Time at Greenwich
-      const gst = astronomia.sidereal.apparentInRa(jd); // in hours
-
-      // Sub-lunar latitude = Moon's declination (in radians to degrees)
-      const lat = moon.dec * 180 / Math.PI;
-
-      // Sub-lunar longitude = (GST - RA) * 15 degrees
-      let lng = (gst - moon.ra) * 15; // in degrees
-      if (lng > 180) lng -= 360;
-      if (lng < -180) lng += 360;
+      const siderealTime = (now.getUTCHours() * 15 + now.getUTCMinutes() * 0.25);
+      const lng = (moonPos.azimuth * 180 / Math.PI + 180 + siderealTime) % 360 - 180;
+      const lat = moonPos.altitude * 180 / Math.PI;
 
       return { lat, lng, time: now.toUTCString() };
     }
@@ -82,10 +71,8 @@
       slider.addEventListener("input", () => {
         const offset = parseInt(slider.value);
         label.textContent = offset;
-
         const { lat, lng } = getSubLunarPoint(offset);
         marker.setPosition({ lat, lng });
-        map.panTo({ lat, lng });
       });
     }
   </script>
