@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Moon Tracker (No Libraries)</title>
+  <title>Moon Tracker</title>
   <style>
     #map {
       height: 90vh;
@@ -23,51 +23,65 @@
   <div id="map"></div>
 
   <script>
-    // === Moon position approximation (low-accuracy but in-browser) ===
-    function toJulian(date) {
-      return date / 86400000 + 2440587.5;
-    }
+    const ASTRONOMY_API_ID = "aca88368-4eb4-4469-b58c-2e696f312d79";        // replace this
+    const ASTRONOMY_API_SECRET = "75c899e32b553286fd4c920419f177ade807b48bde64039af564fee91575f4044184cafae2a37cd5d2d50b8b25e91908c45a9697f0c13e5a2cd91ad08ad7f5fdf9f7a11e5d8750b93c841f3df3cd8e01e97cff81c1b624d0398dcfed248d4f571e22e5316e05daf497bd34c866826edf"; // replace this
 
-    function getMoonCoords(jd) {
-      const T = (jd - 2451545.0) / 36525;
-      const L = (218.316 + 13.176396 * (jd - 2451545.0)) % 360;
-      const M = (134.963 + 13.064993 * (jd - 2451545.0)) % 360;
-      const F = (93.272 + 13.229350 * (jd - 2451545.0)) % 360;
-
-      const lon = L + 6.289 * Math.sin(M * Math.PI / 180);
-      const lat = 5.128 * Math.sin(F * Math.PI / 180);
-
-      return { lon, lat };
-    }
-
-    function getGMST(date) {
-      const jd = toJulian(date);
-      const D = jd - 2451545.0;
-      let GMST = 280.46061837 + 360.98564736629 * D;
-      GMST = GMST % 360;
-      if (GMST < 0) GMST += 360;
-      return GMST;
-    }
-
-    function getSubLunarPoint(offsetHours = 0) {
-      const now = new Date();
-      now.setHours(now.getHours() + offsetHours);
-      const jd = toJulian(now);
-
-      const moon = getMoonCoords(jd);
-      const gmst = getGMST(now);
-      const subLon = (moon.lon - gmst + 360) % 360 - 180;
-      const subLat = moon.lat;
-
-      return { lat: subLat, lng: subLon, time: now.toUTCString() };
-    }
-  </script>
-
-  <script>
     let map, marker;
 
-    function initMap() {
-      const { lat, lng } = getSubLunarPoint();
+    async function getSubLunarPoint(offsetHours = 0) {
+      const now = new Date();
+      now.setHours(now.getHours() + offsetHours);
+
+      // Generate ISO date and time
+      const isoDate = now.toISOString().split("T")[0];
+      const isoTime = now.toISOString().split("T")[1].split(".")[0];
+
+      const url = `https://api.astronomyapi.com/api/v2/bodies/positions?latitude=0&longitude=0&elevation=0&from_date=${isoDate}&to_date=${isoDate}&time=${isoTime}`;
+      const headers = {
+        Authorization: "Basic " + btoa(`${ASTRONOMY_API_ID}:${ASTRONOMY_API_SECRET}`)
+      };
+
+      try {
+        const response = await fetch(url, { headers });
+        const data = await response.json();
+
+        // Try to find the moon's position in the response
+        const moonRow = data?.data?.table?.rows?.find(
+          r => r?.entry?.name?.toLowerCase() === "moon"
+        );
+
+        if (!moonRow) {
+          console.warn("Moon row not found", { moonRow, data });
+          return { lat: 0, lng: 0 }; // Fallback to a default position
+        }
+
+        const geo = moonRow?.cells?.[0]?.position?.horizontal;
+
+        if (!geo || typeof geo.altitude?.degrees !== "number" || typeof geo.azimuth?.degrees !== "number") {
+          console.warn("Moon coordinates not valid", { geo, moonRow, data });
+          return { lat: 0, lng: 0 }; // Fallback to default
+        }
+
+        // Parse the altitude and azimuth to calculate lat and lng
+        const lat = parseFloat(geo.altitude.degrees);
+        const lng = ((parseFloat(geo.azimuth.degrees) + 180) % 360) - 180;
+
+        if (isNaN(lat) || isNaN(lng)) {
+          console.warn("Parsed coordinates are NaN", { lat, lng });
+          return { lat: 0, lng: 0 }; // Fallback if NaN
+        }
+
+        return { lat, lng };
+      } catch (err) {
+        console.error("Fetch or parsing error:", err);
+        return { lat: 0, lng: 0 }; // Fallback if API request fails
+      }
+    }
+
+
+
+    async function initMap() {
+      const { lat, lng } = await getSubLunarPoint();
 
       map = new google.maps.Map(document.getElementById("map"), {
         zoom: 2,
@@ -96,10 +110,11 @@
       const slider = document.getElementById("timeSlider");
       const label = document.getElementById("timeLabel");
 
-      slider.addEventListener("input", () => {
+      slider.addEventListener("input", async () => {
         const offset = parseInt(slider.value);
         label.textContent = offset;
-        const { lat, lng } = getSubLunarPoint(offset);
+
+        const { lat, lng } = await getSubLunarPoint(offset);
         marker.setPosition({ lat, lng });
         map.panTo({ lat, lng });
       });
