@@ -58,7 +58,7 @@
 
         const geo = moonRow?.cells?.[0]?.position?.horizontal;
 
-        if (!geo || typeof geo.altitude?.degrees !== "number" || typeof geo.azimuth?.degrees !== "number") {
+        if (!geo || isNaN(parseFloat(geo.altitude?.degrees)) || isNaN(parseFloat(geo.azimuth?.degrees))) {
           console.warn("Moon coordinates not valid", { geo, moonRow, data });
           return { lat: 0, lng: 0 }; // Fallback to default
         }
@@ -78,6 +78,7 @@
         return { lat: 0, lng: 0 }; // Fallback if API request fails
       }
     }
+
 
 
 
