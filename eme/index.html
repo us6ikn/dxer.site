@@ -23,8 +23,8 @@
   <div id="map"></div>
 
   <script>
-    const ASTRONOMY_API_ID = "aca88368-4eb4-4469-b58c-2e696f312d79";        // replace this
-    const ASTRONOMY_API_SECRET = "75c899e32b553286fd4c920419f177ade807b48bde64039af564fee91575f4044184cafae2a37cd5d2d50b8b25e91908c45a9697f0c13e5a2cd91ad08ad7f5fdf9f7a11e5d8750b93c841f3df3cd8e01e97cff81c1b624d0398dcfed248d4f571e22e5316e05daf497bd34c866826edf"; // replace this
+    const ASTRONOMY_API_ID = "aca88368-4eb4-4469-b58c-2e696f312d79";        // replace with your API ID
+    const ASTRONOMY_API_SECRET = "75c899e32b553286fd4c920419f177ade807b48bde64039af564fee91575f4044184cafae2a37cd5d2d50b8b25e91908c45a9697f0c13e5a2cd91ad08ad7f5fdf9f7a11e5d8750b93c841f3df3cd8e01e97cff81c1b624d0398dcfed248d4f571e22e5316e05daf497bd34c866826edf"; // replace with your API Secret
 
     let map, marker;
 
@@ -56,31 +56,34 @@
           return { lat: 0, lng: 0 }; // Fallback to a default position
         }
 
-        const geo = moonRow?.cells?.[0]?.position?.horizontal;
+        const geo = moonRow?.cells?.[0]?.position?.equatorial;
 
-        if (!geo || isNaN(parseFloat(geo.altitude?.degrees)) || isNaN(parseFloat(geo.azimuth?.degrees))) {
+        if (!geo || isNaN(parseFloat(geo.rightAscension?.hours)) || isNaN(parseFloat(geo.declination?.degrees))) {
           console.warn("Moon coordinates not valid", { geo, moonRow, data });
           return { lat: 0, lng: 0 }; // Fallback to default
         }
 
-        // Parse the altitude and azimuth to calculate lat and lng
-        const lat = parseFloat(geo.altitude.degrees);
-        const lng = ((parseFloat(geo.azimuth.degrees) + 180) % 360) - 180;
+        const ra = parseFloat(geo.rightAscension.hours);  // Right Ascension in hours
+        const dec = parseFloat(geo.declination.degrees);  // Declination in degrees
 
-        if (isNaN(lat) || isNaN(lng)) {
-          console.warn("Parsed coordinates are NaN", { lat, lng });
+        // Convert RA to longitude (1 hour = 15 degrees)
+        const longitude = ra * 15;
+        const latitude = dec;
+
+        if (isNaN(latitude) || isNaN(longitude)) {
+          console.warn("Parsed coordinates are NaN", { latitude, longitude });
           return { lat: 0, lng: 0 }; // Fallback if NaN
         }
 
-        return { lat, lng };
+        // Normalize longitude to [-180, 180]
+        const lng = (longitude + 180) % 360 - 180;
+
+        return { lat: latitude, lng };
       } catch (err) {
         console.error("Fetch or parsing error:", err);
         return { lat: 0, lng: 0 }; // Fallback if API request fails
       }
     }
-
-
-
 
     async function initMap() {
       const { lat, lng } = await getSubLunarPoint();
@@ -94,7 +97,7 @@
       });
 
       const moonIcon = {
-        url: "https://dxer.site/eme/moon-icon.png",
+        url: "https://dxer.site/eme/moon-icon.png", // Example moon icon
         scaledSize: new google.maps.Size(40, 40),
       };
 
