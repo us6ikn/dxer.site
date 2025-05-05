@@ -14,8 +14,6 @@
       font-family: sans-serif;
     }
   </style>
-  <!-- Load Astronomia for accurate moon ephemeris -->
-  <script src="https://unpkg.com/astronomia@1.13.0/astronomia.min.js"></script>
 </head>
 <body>
   <div id="controls">
@@ -27,30 +25,42 @@
   <script>
     let map, marker;
 
-    function getSubLunarPoint(offsetHours = 0) {
+    // ✅ Replace these with your actual AstronomyAPI credentials
+    const ASTRONOMY_API_ID = "aca88368-4eb4-4469-b58c-2e696f312d79";
+    const ASTRONOMY_API_SECRET = "75c899e32b553286fd4c920419f177ade807b48bde64039af564fee91575f4044184cafae2a37cd5d2d50b8b25e91908c45a9697f0c13e5a2cd91ad08ad7f5fdf9f7a11e5d8750b93c841f3df3cd8e01e97cff81c1b624d0398dcfed248d4f571e22e5316e05daf497bd34c866826edf";
+
+    async function getSubLunarPoint(offsetHours = 0) {
       const now = new Date();
       now.setHours(now.getHours() + offsetHours);
 
-      // Convert to Julian Day
-      const jd = astronomia.julian.DateToJD(now);
-      const moon = astronomia.moonposition.position(jd);
+      const isoTime = now.toISOString().split(".")[0]; // remove ms
+      const date = isoTime.split("T")[0];
+      const time = isoTime.split("T")[1];
 
-      // Sidereal Time at Greenwich
-      const gst = astronomia.sidereal.apparentInRa(jd); // in hours
+      const url = `https://api.astronomyapi.com/api/v2/bodies/positions/moon?latitude=0&longitude=0&elevation=0&from_date=${date}&to_date=${date}&time=${time}`;
 
-      // Sub-lunar latitude = Moon's declination (in radians to degrees)
-      const lat = moon.dec * 180 / Math.PI;
+      const headers = {
+        Authorization: "Basic " + btoa(`${ASTRONOMY_API_ID}:${ASTRONOMY_API_SECRET}`)
+      };
 
-      // Sub-lunar longitude = (GST - RA) * 15 degrees
-      let lng = (gst - moon.ra) * 15; // in degrees
-      if (lng > 180) lng -= 360;
-      if (lng < -180) lng += 360;
+      const response = await fetch(url, { headers });
+      if (!response.ok) {
+        console.error("Astronomy API error", await response.text());
+        return { lat: 0, lng: 0 };
+      }
 
-      return { lat, lng, time: now.toUTCString() };
+      const data = await response.json();
+      const geo = data.data.table.rows[0].cells[0].position.geo;
+
+      return {
+        lat: geo.latitude.degrees,
+        lng: geo.longitude.degrees,
+        time: now.toUTCString()
+      };
     }
 
-    function initMap() {
-      const { lat, lng } = getSubLunarPoint();
+    async function initMap() {
+      const { lat, lng } = await getSubLunarPoint();
 
       map = new google.maps.Map(document.getElementById("map"), {
         zoom: 2,
@@ -79,11 +89,11 @@
       const slider = document.getElementById("timeSlider");
       const label = document.getElementById("timeLabel");
 
-      slider.addEventListener("input", () => {
+      slider.addEventListener("input", async () => {
         const offset = parseInt(slider.value);
         label.textContent = offset;
 
-        const { lat, lng } = getSubLunarPoint(offset);
+        const { lat, lng } = await getSubLunarPoint(offset);
         marker.setPosition({ lat, lng });
         map.panTo({ lat, lng });
       });
