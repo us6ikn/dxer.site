@@ -43,8 +43,10 @@
 
       map = new google.maps.Map(document.getElementById("map"), {
         zoom: 2,
-        center: { lat, lng },
-        mapTypeId: "terrain",
+        center: { lat: 0, lng: 0 },
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false
       });
 
       const moonIcon = {
