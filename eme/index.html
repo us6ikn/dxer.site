@@ -43,14 +43,13 @@
 
       try {
         const response = await fetch(url, { headers });
-        console.log(response);
         const data = await response.json();
 
         // Try to find the moon's position in the response
         const moonRow = data?.data?.table?.rows?.find(
           r => r?.entry?.name?.toLowerCase() === "moon"
         );
-
+        console.log(moonRow);
         if (!moonRow) {
           console.warn("Moon row not found", { moonRow, data });
           return { lat: 0, lng: 0 }; // Fallback to a default position
