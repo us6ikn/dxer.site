@@ -1,134 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sublunar Point on Google Maps</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" async defer></script>
-    <style>
-        /* Style for the map */
-        #map {
-            height: 500px;
-            width: 100%;
-        }
-
-        .slider-container {
-            margin: 20px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Maps Example</title>
+  <!-- Load the Google Maps API asynchronously with async and defer attributes -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" async defer></script>
 </head>
 <body>
 
-<h1>Sublunar Point on Google Maps</h1>
+  <div id="map" style="height: 500px;"></div>
+  <script>
+    let map;
 
-<div id="map"></div>
+    // Initialize the map
+    function initMap() {
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: -34.397, lng: 150.644 },
+        zoom: 8,
+      });
 
-<!-- Slider for moving within hours of the day -->
-<div class="slider-container">
-    <label for="timeSlider">Time of day: </label>
-    <input type="range" id="timeSlider" min="0" max="23" step="1" value="0">
-    <span id="timeLabel">0:00</span>
-</div>
-
-<!-- Slider for moving +/- 5 days from now -->
-<div class="slider-container">
-    <label for="daySlider">Move date: </label>
-    <input type="range" id="daySlider" min="-5" max="5" step="1" value="0">
-    <span id="dayLabel">Today</span>
-</div>
-
-<script>
-// Initialize global variables
-let map;
-let moonData = [];
-let marker;
-
-// Fetch the moon data from the file
-fetch('https://dxer.site/eme/moon_data.txt')
-    .then(response => response.text())
-    .then(data => {
-        moonData = parseMoonData(data);
-        initMap(); // Initialize the map once the data is loaded
-    })
-    .catch(error => console.error('Error loading moon data:', error));
-
-// Parse moon data from the file
-function parseMoonData(data) {
-    const lines = data.split("\n");
-    const parsedData = [];
-    
-    let currentTime = '';
-    let latitude = '';
-    let longitude = '';
-    
-    lines.forEach(line => {
-        if (line.startsWith('Time:')) {
-            currentTime = line.split('Time: ')[1].trim();
-        } else if (line.startsWith('Sublunar Point (accurate):')) {
-            const latLon = line.split('Latitude: ')[1].split('Longitude: ');
-            latitude = parseFloat(latLon[0].trim());
-            longitude = parseFloat(latLon[1].trim());
-            parsedData.push({ time: currentTime, latitude, longitude });
-        }
-    });
-
-    return parsedData;
-}
-
-// Initialize the Google Map
-function initMap() {
-    map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 2,
-        center: { lat: 0, lng: 0 }, // Center the map on the equator
-        mapTypeId: 'satellite'
-    });
-
-    marker = new google.maps.Marker({
+      // Use AdvancedMarkerElement instead of google.maps.Marker
+      const marker = new google.maps.marker.AdvancedMarkerElement({
+        position: { lat: -34.397, lng: 150.644 },
         map: map,
-        icon: 'https://dxer.site/eme/moon-icon.png', // Moon icon
-    });
-
-    updateMap(0, 0); // Initial update (0 hours, today)
-}
-
-// Update map based on selected time and date
-function updateMap(hoursOffset, dayOffset) {
-    const today = new Date();
-    today.setDate(today.getDate() + dayOffset); // Adjust the day
-    today.setHours(today.getHours() + hoursOffset); // Adjust the time
-
-    const dateString = today.toISOString().slice(0, 10); // "YYYY-MM-DD"
-    const hourString = today.getHours().toString().padStart(2, '0'); // "HH"
-
-    // Find moon data for this date and time
-    const moon = moonData.find(entry => entry.time.includes(dateString) && entry.time.includes(hourString));
-
-    if (moon) {
-        const { latitude, longitude } = moon;
-        marker.setPosition({ lat: latitude, lng: longitude });
-        map.setCenter({ lat: latitude, lng: longitude });
+      });
     }
-}
 
-// Event listener for the time slider
-document.getElementById('timeSlider').addEventListener('input', (event) => {
-    const time = event.target.value;
-    document.getElementById('timeLabel').textContent = `${time}:00`;
-    const dayOffset = parseInt(document.getElementById('daySlider').value);
-    updateMap(time, dayOffset);
-});
+    // Example of parsing moon data
+    function parseMoonData(moonData) {
+      if (moonData && typeof moonData === 'string') {
+        // Safe split of the string
+        const moonDetails = moonData.split(",");
+        console.log(moonDetails);
+      } else {
+        console.error("Invalid moon data:", moonData);
+      }
+    }
 
-// Event listener for the day slider
-document.getElementById('daySlider').addEventListener('input', (event) => {
-    const dayOffset = event.target.value;
-    const date = new Date();
-    date.setDate(date.getDate() + parseInt(dayOffset));
-    document.getElementById('dayLabel').textContent = date.toDateString();
-    const time = parseInt(document.getElementById('timeSlider').value);
-    updateMap(time, dayOffset);
-});
+    // Example function that uses Date correctly to avoid 'Invalid time value'
+    function updateMap(dateString) {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        console.error("Invalid date:", dateString);
+      } else {
+        console.log("Valid date:", date);
+        // Proceed with map updates based on date
+      }
+    }
 
-</script>
+    // Example moon data, replace with real data
+    const moonData = "2025-05-06, Waning Crescent, 0.5"; // Example string data
+    parseMoonData(moonData);
+
+    // Example call to updateMap with a valid date string
+    updateMap("2025-05-06T12:00:00Z");
+  </script>
 
 </body>
 </html>
