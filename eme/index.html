@@ -102,10 +102,14 @@ function initMap() {
 function updateMap(hoursOffset, dayOffset) {
     const today = new Date();
 
-    // Ensure the date is within the +/- 5 days range
-    today.setDate(today.getDate() + dayOffset); // Adjust the day
-    today.setHours(today.getHours() + hoursOffset); // Adjust the time
-
+    // Ensure the dayOffset is within the range of -5 to +5
+    const constrainedDayOffset = Math.min(Math.max(dayOffset, -5), 5);
+    
+    // Adjust the date by the given dayOffset and timeOffset (hours)
+    today.setDate(today.getDate() + constrainedDayOffset); // Adjust the date by days
+    today.setHours(0); // Reset hours to 00:00 first
+    today.setHours(today.getHours() + hoursOffset); // Adjust the hours
+    
     // Ensure we don't try to get a date that doesn't match the moon data
     const dateString = today.toISOString().slice(0, 10); // "YYYY-MM-DD"
     const hourString = today.getHours().toString().padStart(2, '0'); // "HH"
@@ -125,7 +129,7 @@ function updateMap(hoursOffset, dayOffset) {
 // Event listener for the time slider
 document.getElementById('timeSlider').addEventListener('input', (event) => {
     const time = event.target.value;
-    document.getElementById('timeLabel').textContent = `${time}:06`;
+    document.getElementById('timeLabel').textContent = `${time}:00`;
     const dayOffset = parseInt(document.getElementById('daySlider').value);
     updateMap(time, dayOffset);
 });
