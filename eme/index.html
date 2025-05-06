@@ -132,7 +132,7 @@
         }
 
         const lat = parseFloat(moonData.sublunar_lat);
-        const lon = parseFloat(-moonData.sublunar_lon);
+        const lon = parseFloat(moonData.sublunar_lon);
         const footprintRadiusKm = parseFloat(moonData.footprint_radius_km);
 
         const map = new google.maps.Map(document.getElementById('map'), {
