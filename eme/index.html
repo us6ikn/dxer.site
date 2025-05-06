@@ -97,13 +97,16 @@ function initMap() {
 // Update map based on selected time and date
 function updateMap(hoursOffset, dayOffset) {
     const today = new Date();
+
+    // Ensure the date is within the +/- 5 days range
     today.setDate(today.getDate() + dayOffset); // Adjust the day
     today.setHours(today.getHours() + hoursOffset); // Adjust the time
 
+    // Ensure we don't try to get a date that doesn't match the moon data
     const dateString = today.toISOString().slice(0, 10); // "YYYY-MM-DD"
     const hourString = today.getHours().toString().padStart(2, '0'); // "HH"
 
-    // Find moon data for this date and time
+    // Check if moon data exists for this date and time
     const moon = moonData.find(entry => entry.time.includes(dateString) && entry.time.includes(hourString));
 
     if (moon) {
@@ -111,7 +114,7 @@ function updateMap(hoursOffset, dayOffset) {
         marker.setPosition({ lat: latitude, lng: longitude });
         map.setCenter({ lat: latitude, lng: longitude });
     } else {
-        console.error('No moon data found for this time:', dateString, hourString);
+        console.error(`No moon data found for this time: ${dateString} ${hourString}:00`);
     }
 }
 
@@ -125,10 +128,15 @@ document.getElementById('timeSlider').addEventListener('input', (event) => {
 
 // Event listener for the day slider
 document.getElementById('daySlider').addEventListener('input', (event) => {
-    const dayOffset = event.target.value;
+    let dayOffset = parseInt(event.target.value);
+    
+    // Restrict the day offset to be within the range of -5 to +5
+    dayOffset = Math.min(Math.max(dayOffset, -5), 5);
+
     const date = new Date();
-    date.setDate(date.getDate() + parseInt(dayOffset));
+    date.setDate(date.getDate() + dayOffset);
     document.getElementById('dayLabel').textContent = date.toDateString();
+    
     const time = parseInt(document.getElementById('timeSlider').value);
     updateMap(time, dayOffset);
 });
