@@ -57,6 +57,7 @@
           .then(data => {
             window.moonData = data;  // Store moon data globally
             setDefaultTimeAndUpdateMap(); // Set default time (current date and hour) and update map
+            restrictDatePicker(); // Restrict date range (today ±5 days)
           })
           .catch(error => console.error('Error loading moon data:', error));
       }
@@ -78,6 +79,23 @@
         updateMap(); // Update the map with the default values
       }
 
+      // Restrict the date picker to only allow dates from -5 to +5 days around today
+      function restrictDatePicker() {
+        const now = new Date();
+        const minDate = new Date(now);
+        minDate.setDate(now.getDate() - 5); // 5 days before today
+        const maxDate = new Date(now);
+        maxDate.setDate(now.getDate() + 5); // 5 days after today
+
+        // Format dates as YYYY-MM-DD for the date picker
+        const minDateString = minDate.toISOString().split('T')[0];
+        const maxDateString = maxDate.toISOString().split('T')[0];
+
+        // Set the min and max attributes for the date input
+        const dateInput = document.getElementById('date');
+        dateInput.setAttribute('min', minDateString);
+        dateInput.setAttribute('max', maxDateString);
+      }
 
       // Update hour label when slider is changed
       document.getElementById('hour').addEventListener('input', function() {
@@ -115,6 +133,7 @@
 
         const lat = parseFloat(moonData.sublunar_lat);
         const lon = parseFloat(moonData.sublunar_lon);
+        const footprintRadiusKm = parseFloat(moonData.footprint_radius_km);
 
         const map = new google.maps.Map(document.getElementById('map'), {
           zoom: 2,
@@ -131,6 +150,18 @@
             scaledSize: new google.maps.Size(48, 48)
           },
           title: 'Moon Sublunar Point'
+        });
+
+        // Add footprint radius circle centered at the sublunar point
+        const footprintCircle = new google.maps.Circle({
+          map: map,
+          center: { lat: lat, lng: -lon },
+          radius: footprintRadiusKm * 1000, // Convert km to meters
+          fillColor: '#0088FF',
+          fillOpacity: 0.3,
+          strokeColor: '#0000FF',
+          strokeOpacity: 0.6,
+          strokeWeight: 2,
         });
       }
     </script>
