@@ -44,8 +44,18 @@
               return;
             }
 
+            // Ensure sub-lunar latitude and longitude are properly parsed as floats
             const lat = parseFloat(moonData.sublunar_lat);
-            const lon = parseFloat(moonData.sublunar_lon);
+            let lon = parseFloat(moonData.sublunar_lon);
+
+            // Debug output for lat/lon to see what's being retrieved
+            console.log(`Latitude: ${lat}, Longitude: ${lon}`);
+
+            // If longitude is in Western (W) as positive, convert it to standard negative notation
+            // Example: 50 for W should be -50
+            if (lon > 0) {
+              lon = -lon;  // Make longitude negative for Western locations
+            }
 
             // Add moon icon marker
             new google.maps.Marker({
@@ -62,6 +72,7 @@
             map.setCenter({ lat, lng: lon });
           })
           .catch(error => console.error('Error loading moon data:', error));
+
       }
     </script>
 
