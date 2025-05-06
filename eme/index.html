@@ -66,10 +66,14 @@ function parseMoonData(data) {
         if (line.startsWith('Time:')) {
             currentTime = line.split('Time: ')[1].trim();
         } else if (line.startsWith('Sublunar Point (accurate):')) {
-            const latLon = line.split('Latitude: ')[1].split('Longitude: ');
-            latitude = parseFloat(latLon[0].trim());
-            longitude = parseFloat(latLon[1].trim());
-            parsedData.push({ time: currentTime, latitude, longitude });
+            const latLon = line.split('Latitude: ')[1]?.split('Longitude: ');
+            if (latLon && latLon.length === 2) {
+                latitude = parseFloat(latLon[0].trim());
+                longitude = parseFloat(latLon[1].trim());
+                parsedData.push({ time: currentTime, latitude, longitude });
+            } else {
+                console.warn(`Skipping invalid line: ${line}`);
+            }
         }
     });
 
@@ -84,8 +88,8 @@ function initMap() {
         mapTypeId: 'satellite'
     });
 
-    // Use AdvancedMarkerElement instead of google.maps.Marker
-    marker = new google.maps.marker.AdvancedMarkerElement({
+    // Use google.maps.Marker instead of AdvancedMarkerElement
+    marker = new google.maps.Marker({
         map: map,
         position: { lat: 0, lng: 0 }, // Initial position
         icon: 'https://dxer.site/eme/moon-icon.png', // Moon icon
