@@ -125,7 +125,7 @@ function updateMap(hoursOffset, dayOffset) {
 // Event listener for the time slider
 document.getElementById('timeSlider').addEventListener('input', (event) => {
     const time = event.target.value;
-    document.getElementById('timeLabel').textContent = `${time}:00`;
+    document.getElementById('timeLabel').textContent = `${time}:06`;
     const dayOffset = parseInt(document.getElementById('daySlider').value);
     updateMap(time, dayOffset);
 });
