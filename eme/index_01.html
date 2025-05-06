@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Moon Sublunar Point</title>
+    <meta charset="utf-8" />
+    <style>
+      #map {
+        height: 100vh;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <script>
+      // Get current UTC time rounded to the hour
+      function getCurrentUTCHour() {
+        const now = new Date();
+        now.setUTCMinutes(0, 0, 0); // Round to the top of the hour
+        return now.toISOString().slice(0, 19).replace('T', ' ');
+      }
+
+
+      // Initialize the Google Map
+      function initMap() {
+        const map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 3,
+          center: { lat: 0, lng: 0 },
+          mapTypeId: 'terrain'
+        });
+
+        fetch('moon_data_cleaned.txt')
+          .then(response => response.json())
+          .then(data => {
+            const currentHourUTC = getCurrentUTCHour();
+            console.log(currentHourUTC);
+
+            // Find the entry that matches the current hour
+            const moonData = data.find(entry => entry.time === currentHourUTC);
+
+            if (!moonData) {
+              alert("No moon data available for current UTC hour.");
+              return;
+            }
+
+            const lat = parseFloat(moonData.sublunar_lat);
+            const lon = parseFloat(moonData.sublunar_lon);
+
+            // Add moon icon marker
+            new google.maps.Marker({
+              position: { lat, lng: -lon },
+              map: map,
+              icon: {
+                url: 'https://dxer.site/eme/moon-icon.png',
+                scaledSize: new google.maps.Size(48, 48)
+              },
+              title: 'Moon Sublunar Point'
+            });
+
+            // Re-center the map
+            map.setCenter({ lat, lng: lon });
+          })
+          .catch(error => console.error('Error loading moon data:', error));
+      }
+    </script>
+
+    <!-- Load Google Maps API -->
+    <script async
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
+    </script>
+  </body>
+</html>

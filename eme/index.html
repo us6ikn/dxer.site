@@ -8,20 +8,26 @@
         height: 100vh;
         width: 100%;
       }
+      #controls {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 1;
+        background-color: rgba(255, 255, 255, 0.7);
+        padding: 10px;
+        border-radius: 5px;
+      }
     </style>
   </head>
   <body>
     <div id="map"></div>
+    <div id="controls">
+      <label for="date">Select Date and Time (UTC):</label><br />
+      <input type="datetime-local" id="datetime" value="" />
+      <button onclick="updateMap()">Update Map</button>
+    </div>
 
     <script>
-      // Get current UTC time rounded to the hour
-      function getCurrentUTCHour() {
-        const now = new Date();
-        now.setUTCMinutes(0, 0, 0); // Round to the top of the hour
-        return now.toISOString().slice(0, 19).replace('T', ' ');
-      }
-
-
       // Initialize the Google Map
       function initMap() {
         const map = new google.maps.Map(document.getElementById('map'), {
@@ -30,39 +36,54 @@
           mapTypeId: 'terrain'
         });
 
+        // Load the moon data
         fetch('moon_data_cleaned.txt')
           .then(response => response.json())
           .then(data => {
-            const currentHourUTC = getCurrentUTCHour();
-            console.log(currentHourUTC);
-
-            // Find the entry that matches the current hour
-            const moonData = data.find(entry => entry.time === currentHourUTC);
-
-            if (!moonData) {
-              alert("No moon data available for current UTC hour.");
-              return;
-            }
-
-            const lat = parseFloat(moonData.sublunar_lat);
-            const lon = parseFloat(moonData.sublunar_lon);
-
-            // Add moon icon marker
-            new google.maps.Marker({
-              position: { lat, lng: -lon },
-              map: map,
-              icon: {
-                url: 'https://dxer.site/eme/moon-icon.png',
-                scaledSize: new google.maps.Size(48, 48)
-              },
-              title: 'Moon Sublunar Point'
-            });
-
-            // Re-center the map
-            map.setCenter({ lat, lng: lon });
+            window.moonData = data;  // Store moon data globally
           })
           .catch(error => console.error('Error loading moon data:', error));
       }
+
+      // Update map based on user-selected date and time
+      function updateMap() {
+        const dateTimeValue = document.getElementById('datetime').value;
+        if (!dateTimeValue) {
+          alert("Please select a date and time.");
+          return;
+        }
+
+        const selectedDate = new Date(dateTimeValue);
+        const selectedHourUTC = selectedDate.toISOString().slice(0, 19).replace('T', ' '); // Format as UTC
+
+        const moonData = window.moonData.find(entry => entry.time === selectedHourUTC);
+
+        if (!moonData) {
+          alert("No moon data available for the selected UTC time.");
+          return;
+        }
+
+        const lat = parseFloat(moonData.sublunar_lat);
+        const lon = parseFloat(moonData.sublunar_lon);
+
+        const map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 3,
+          center: { lat: lat, lng: lon },
+          mapTypeId: 'terrain'
+        });
+
+        // Add moon icon marker
+        new google.maps.Marker({
+          position: { lat, lng: -lon },
+          map: map,
+          icon: {
+            url: 'https://dxer.site/eme/moon-icon.png',
+            scaledSize: new google.maps.Size(48, 48)
+          },
+          title: 'Moon Sublunar Point'
+        });
+      }
+
     </script>
 
     <!-- Load Google Maps API -->
