@@ -18,8 +18,9 @@
       function getCurrentUTCHour() {
         const now = new Date();
         now.setUTCMinutes(0, 0, 0); // Round to the top of the hour
-        return now.toISOString().slice(0, 13) + ':00:00';
+        return now.toISOString().slice(0, 19).replace('T', ' ');
       }
+
 
       // Initialize the Google Map
       function initMap() {
@@ -34,7 +35,6 @@
           .then(data => {
             const currentHourUTC = getCurrentUTCHour();
             console.log(currentHourUTC);
-            console.log(getCurrentUTCHour);
 
             // Find the entry that matches the current hour
             const moonData = data.find(entry => entry.time === currentHourUTC);
