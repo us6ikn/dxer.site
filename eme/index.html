@@ -66,14 +66,18 @@
         const now = new Date();
         const currentDate = now.toISOString().split('T')[0]; // Get the current date (YYYY-MM-DD)
         const currentHour = now.getUTCHours(); // Get the current hour (0-23)
-        
+
+        // Convert currentHour to string and apply padStart
+        const currentHourStr = currentHour.toString().padStart(2, '0');
+
         // Set default values in the inputs
         document.getElementById('date').value = currentDate;
         document.getElementById('hour').value = currentHour;
-        document.getElementById('hour-value').textContent = `${currentHour.padStart(2, '0')}:00`;
-        
+        document.getElementById('hour-value').textContent = `${currentHourStr}:00`;
+
         updateMap(); // Update the map with the default values
       }
+
 
       // Update hour label when slider is changed
       document.getElementById('hour').addEventListener('input', function() {
@@ -113,8 +117,8 @@
         const lon = parseFloat(moonData.sublunar_lon);
 
         const map = new google.maps.Map(document.getElementById('map'), {
-          zoom: 3,
-          center: { lat: lat, lng: lon },
+          zoom: 2,
+          center: { lat: 0, lng: 0 },
           mapTypeId: 'terrain'
         });
 
