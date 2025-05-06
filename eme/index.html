@@ -102,27 +102,30 @@ function initMap() {
 function updateMap(hoursOffset, dayOffset) {
     const today = new Date();
 
-    // Ensure the dayOffset is within the range of -5 to +5
+    // Constrain dayOffset to -5 to +5
     const constrainedDayOffset = Math.min(Math.max(dayOffset, -5), 5);
     
-    // Adjust the date by the given dayOffset and timeOffset (hours)
-    today.setDate(today.getDate() + constrainedDayOffset); // Adjust the date by days
-    today.setHours(0); // Reset hours to 00:00 first
-    today.setHours(today.getHours() + hoursOffset); // Adjust the hours
-    
-    // Ensure we don't try to get a date that doesn't match the moon data
-    const dateString = today.toISOString().slice(0, 10); // "YYYY-MM-DD"
-    const hourString = today.getHours().toString().padStart(2, '0'); // "HH"
+    // Adjust date and time
+    today.setDate(today.getDate() + constrainedDayOffset);
+    today.setHours(0);
+    today.setHours(today.getHours() + hoursOffset);
+    today.setMinutes(0);
+    today.setSeconds(0);
+    today.setMilliseconds(0);
 
-    // Check if moon data exists for this date and time
-    const moon = moonData.find(entry => entry.time.includes(dateString) && entry.time.includes(hourString));
+    // Find closest moon data within ±30 minutes
+    const requestedTime = today.getTime();
+    const moon = moonData.find(entry => {
+        const entryTime = new Date(entry.time).getTime();
+        return Math.abs(entryTime - requestedTime) <= 30 * 60 * 1000; // 30 minutes tolerance
+    });
 
     if (moon) {
         const { latitude, longitude } = moon;
         marker.setPosition({ lat: latitude, lng: longitude });
         map.setCenter({ lat: latitude, lng: longitude });
     } else {
-        console.error(`No moon data found for this time: ${dateString} ${hourString}:00`);
+        console.error(`No moon data found near this time: ${today.toISOString()}`);
     }
 }
 
