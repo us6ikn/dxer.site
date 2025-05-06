@@ -40,6 +40,8 @@
       <label for="hour">Select Hour (UTC):</label><br />
       <input type="range" id="hour" min="0" max="23" value="0" step="1" />
       <span id="hour-value">00:00</span><br />
+      
+      <button onclick="updateMap()">Update Map</button>
     </div>
 
     <script>
@@ -56,35 +58,14 @@
           .then(response => response.json())
           .then(data => {
             window.moonData = data;  // Store moon data globally
-            setDefaultTimeAndUpdateMap(); // Set default time (current date and hour) and update map
           })
           .catch(error => console.error('Error loading moon data:', error));
-      }
-
-      // Set default date and hour to current time when page loads
-      function setDefaultTimeAndUpdateMap() {
-        const now = new Date();
-        const currentDate = now.toISOString().split('T')[0]; // Get the current date (YYYY-MM-DD)
-        const currentHour = now.getUTCHours(); // Get the current hour (0-23)
-        
-        // Set default values in the inputs
-        document.getElementById('date').value = currentDate;
-        document.getElementById('hour').value = currentHour;
-        document.getElementById('hour-value').textContent = `${currentHour.padStart(2, '0')}:00`;
-        
-        updateMap(); // Update the map with the default values
       }
 
       // Update hour label when slider is changed
       document.getElementById('hour').addEventListener('input', function() {
         const hour = this.value;
         document.getElementById('hour-value').textContent = `${hour.padStart(2, '0')}:00`;
-        updateMap(); // Update map immediately when hour changes
-      });
-
-      // Update map when date or hour changes
-      document.getElementById('date').addEventListener('change', function() {
-        updateMap(); // Update map immediately when date changes
       });
 
       // Update map based on user-selected date and hour
