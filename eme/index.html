@@ -17,13 +17,21 @@
         padding: 10px;
         border-radius: 5px;
       }
+      #hour-value {
+        margin-top: 10px;
+      }
     </style>
   </head>
   <body>
     <div id="map"></div>
     <div id="controls">
-      <label for="date">Select Date and Time (UTC):</label><br />
-      <input type="datetime-local" id="datetime" value="" />
+      <label for="date">Select Date (UTC):</label><br />
+      <input type="date" id="date" value="" /><br />
+      
+      <label for="hour">Select Hour (UTC):</label><br />
+      <input type="range" id="hour" min="0" max="23" value="0" step="1" />
+      <span id="hour-value">00:00</span><br />
+      
       <button onclick="updateMap()">Update Map</button>
     </div>
 
@@ -31,7 +39,7 @@
       // Initialize the Google Map
       function initMap() {
         const map = new google.maps.Map(document.getElementById('map'), {
-          zoom: 3,
+          zoom: 2,
           center: { lat: 0, lng: 0 },
           mapTypeId: 'terrain'
         });
@@ -45,16 +53,26 @@
           .catch(error => console.error('Error loading moon data:', error));
       }
 
-      // Update map based on user-selected date and time
+      // Update hour label when slider is changed
+      document.getElementById('hour').addEventListener('input', function() {
+        const hour = this.value;
+        document.getElementById('hour-value').textContent = `${hour.padStart(2, '0')}:00`;
+      });
+
+      // Update map based on user-selected date and hour
       function updateMap() {
-        const dateTimeValue = document.getElementById('datetime').value;
-        if (!dateTimeValue) {
-          alert("Please select a date and time.");
+        const selectedDate = document.getElementById('date').value;
+        const selectedHour = document.getElementById('hour').value;
+
+        if (!selectedDate) {
+          alert("Please select a date.");
           return;
         }
 
-        const selectedDate = new Date(dateTimeValue);
-        const selectedHourUTC = selectedDate.toISOString().slice(0, 19).replace('T', ' '); // Format as UTC
+        // Combine selected date and hour into a full UTC time string
+        const combinedDateTime = new Date(`${selectedDate}T${selectedHour.padStart(2, '0')}:00:00Z`);
+
+        const selectedHourUTC = combinedDateTime.toISOString().slice(0, 19).replace('T', ' '); // Format as UTC
 
         const moonData = window.moonData.find(entry => entry.time === selectedHourUTC);
 
@@ -83,7 +101,6 @@
           title: 'Moon Sublunar Point'
         });
       }
-
     </script>
 
     <!-- Load Google Maps API -->
