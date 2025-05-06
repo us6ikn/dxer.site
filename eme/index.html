@@ -46,7 +46,7 @@
       // Initialize the Google Map
       function initMap() {
         const map = new google.maps.Map(document.getElementById('map'), {
-          zoom: 3,
+          zoom: 2,
           center: { lat: 0, lng: 0 },
           mapTypeId: 'terrain'
         });
@@ -132,12 +132,12 @@
         }
 
         const lat = parseFloat(moonData.sublunar_lat);
-        const lon = parseFloat(moonData.sublunar_lon);
+        const lon = parseFloat(-moonData.sublunar_lon);
         const footprintRadiusKm = parseFloat(moonData.footprint_radius_km);
 
         const map = new google.maps.Map(document.getElementById('map'), {
           zoom: 2,
-          center: { lat: 0, lng: 02 },
+          center: { lat: 0, lng: 0 },
           mapTypeId: 'terrain'
         });
 
@@ -155,8 +155,8 @@
         // Add footprint radius circle centered at the sublunar point
         const footprintCircle = new google.maps.Circle({
           map: map,
-          center: { lat: lat, lng: lon }, // The footprint circle is centered at the sublunar point
-          radius: footprintRadiusKm * 1000, // Convert km to meters for Google Maps
+          center: { lat: lat, lng: lon },
+          radius: footprintRadiusKm * 1000, // Convert km to meters
           fillColor: '#0088FF',
           fillOpacity: 0.3,
           strokeColor: '#0000FF',
