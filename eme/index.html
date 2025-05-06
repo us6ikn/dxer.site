@@ -49,7 +49,7 @@
 
             // Add moon icon marker
             new google.maps.Marker({
-              position: { lat, lng: lon },
+              position: { lat, lng: -lon },
               map: map,
               icon: {
                 url: 'https://dxer.site/eme/moon-icon.png',
@@ -59,7 +59,7 @@
             });
 
             // Re-center the map
-            map.setCenter({ lat, lng: -lon });
+            map.setCenter({ lat, lng: lon });
           })
           .catch(error => console.error('Error loading moon data:', error));
       }
