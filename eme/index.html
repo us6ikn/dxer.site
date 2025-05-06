@@ -1,158 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sublunar Point on Google Maps</title>
-    <!-- Load the Google Maps API asynchronously -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap" async defer></script>
+<html>
+  <head>
+    <title>Moon Sublunar Point</title>
+    <meta charset="utf-8" />
     <style>
-        /* Style for the map */
-        #map {
-            height: 500px;
-            width: 100%;
-        }
-
-        .slider-container {
-            margin: 20px;
-        }
+      #map {
+        height: 100vh;
+        width: 100%;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
+    <div id="map"></div>
 
-<h1>Sublunar Point on Google Maps</h1>
+    <script>
+      // Get current UTC time rounded to the hour
+      function getCurrentUTCHour() {
+        const now = new Date();
+        now.setUTCMinutes(0, 0, 0); // Round to the top of the hour
+        return now.toISOString().slice(0, 13) + ':00:00';
+      }
 
-<div id="map"></div>
+      // Initialize the Google Map
+      function initMap() {
+        const map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 3,
+          center: { lat: 0, lng: 0 },
+          mapTypeId: 'terrain'
+        });
 
-<!-- Slider for moving within hours of the day -->
-<div class="slider-container">
-    <label for="timeSlider">Time of day: </label>
-    <input type="range" id="timeSlider" min="0" max="23" step="1" value="0">
-    <span id="timeLabel">0:00</span>
-</div>
+        fetch('moon_data_cleaned.txt')
+          .then(response => response.json())
+          .then(data => {
+            const currentHourUTC = getCurrentUTCHour();
 
-<!-- Slider for moving +/- 5 days from now -->
-<div class="slider-container">
-    <label for="daySlider">Move date: </label>
-    <input type="range" id="daySlider" min="-5" max="5" step="1" value="0">
-    <span id="dayLabel">Today</span>
-</div>
+            // Find the entry that matches the current hour
+            const moonData = data.find(entry => entry.time === currentHourUTC);
 
-<script>
-// Initialize global variables
-let map;
-let moonData = [];
-let marker;
-
-// Fetch the moon data from the file
-fetch('https://dxer.site/eme/moon_data.txt')
-    .then(response => response.text())
-    .then(data => {
-        moonData = parseMoonData(data);
-        initMap(); // Initialize the map once the data is loaded
-    })
-    .catch(error => console.error('Error loading moon data:', error));
-
-// Parse moon data from the file
-function parseMoonData(data) {
-    const lines = data.split("\n");
-    const parsedData = [];
-    
-    let currentTime = '';
-    let latitude = '';
-    let longitude = '';
-    
-    lines.forEach(line => {
-        if (line.startsWith('Time:')) {
-            currentTime = line.split('Time: ')[1].trim();
-        } else if (line.startsWith('Sublunar Point (accurate):')) {
-            const latLon = line.split('Latitude: ')[1]?.split('Longitude: ');
-            if (latLon && latLon.length === 2) {
-                latitude = parseFloat(latLon[0].trim());
-                longitude = parseFloat(latLon[1].trim());
-                parsedData.push({ time: currentTime, latitude, longitude });
-            } else {
-                console.warn(`Skipping invalid line: ${line}`);
+            if (!moonData) {
+              alert("No moon data available for current UTC hour.");
+              return;
             }
-        }
-    });
 
-    return parsedData;
-}
+            const lat = parseFloat(moonData.sublunar_lat);
+            const lon = parseFloat(moonData.sublunar_lon);
 
-// Initialize the Google Map
-function initMap() {
-    map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 2,
-        center: { lat: 0, lng: 0 }, // Center the map on the equator
-        mapTypeId: 'satellite'
-    });
+            // Add moon icon marker
+            new google.maps.Marker({
+              position: { lat, lng: lon },
+              map: map,
+              icon: {
+                url: 'https://dxer.site/eme/moon-icon.png',
+                scaledSize: new google.maps.Size(48, 48)
+              },
+              title: 'Moon Sublunar Point'
+            });
 
-    // Use google.maps.Marker instead of AdvancedMarkerElement
-    marker = new google.maps.Marker({
-        map: map,
-        position: { lat: 0, lng: 0 }, // Initial position
-        icon: 'https://dxer.site/eme/moon-icon.png', // Moon icon
-    });
+            // Re-center the map
+            map.setCenter({ lat, lng: lon });
+          })
+          .catch(error => console.error('Error loading moon data:', error));
+      }
+    </script>
 
-    updateMap(0, 0); // Initial update (0 hours, today)
-}
-
-// Update map based on selected time and date
-function updateMap(hoursOffset, dayOffset) {
-    const today = new Date();
-
-    // Constrain dayOffset to -5 to +5
-    const constrainedDayOffset = Math.min(Math.max(dayOffset, -5), 5);
-    
-    // Adjust date and time
-    today.setDate(today.getDate() + constrainedDayOffset);
-    today.setHours(0);
-    today.setHours(today.getHours() + hoursOffset);
-    today.setMinutes(0);
-    today.setSeconds(0);
-    today.setMilliseconds(0);
-
-    // Find closest moon data within ±30 minutes
-    const requestedTime = today.getTime();
-    const moon = moonData.find(entry => {
-        const entryTime = new Date(entry.time).getTime();
-        return Math.abs(entryTime - requestedTime) <= 30 * 60 * 1000; // 30 minutes tolerance
-    });
-
-    if (moon) {
-        const { latitude, longitude } = moon;
-        marker.setPosition({ lat: latitude, lng: longitude });
-        map.setCenter({ lat: latitude, lng: longitude });
-    } else {
-        console.error(`No moon data found near this time: ${today.toISOString()}`);
-    }
-}
-
-// Event listener for the time slider
-document.getElementById('timeSlider').addEventListener('input', (event) => {
-    const time = event.target.value;
-    document.getElementById('timeLabel').textContent = `${time}:00`;
-    const dayOffset = parseInt(document.getElementById('daySlider').value);
-    updateMap(time, dayOffset);
-});
-
-// Event listener for the day slider
-document.getElementById('daySlider').addEventListener('input', (event) => {
-    let dayOffset = parseInt(event.target.value);
-    
-    // Restrict the day offset to be within the range of -5 to +5
-    dayOffset = Math.min(Math.max(dayOffset, -5), 5);
-
-    const date = new Date();
-    date.setDate(date.getDate() + dayOffset);
-    document.getElementById('dayLabel').textContent = date.toDateString();
-    
-    const time = parseInt(document.getElementById('timeSlider').value);
-    updateMap(time, dayOffset);
-});
-
-</script>
-
-</body>
+    <!-- Load Google Maps API -->
+    <script async
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
+    </script>
+  </body>
 </html>
