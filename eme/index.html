@@ -33,6 +33,8 @@
           .then(response => response.json())
           .then(data => {
             const currentHourUTC = getCurrentUTCHour();
+            console.log(currentHourUTC);
+            console.log(getCurrentUTCHour);
 
             // Find the entry that matches the current hour
             const moonData = data.find(entry => entry.time === currentHourUTC);
