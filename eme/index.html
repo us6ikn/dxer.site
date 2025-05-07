@@ -145,13 +145,13 @@
         const lon = -parseFloat(moonData.sublunar_lon); // Negate if needed for direction
         const radius = parseFloat(moonData.footprint_radius_km) * 1000 * 1.02;
 
-        map.setCenter({ lat, lng: lon });
+        map.setCenter({ lat: 0, lng: 0 });
 
         if (moonMarker) moonMarker.setMap(null);
         if (footprintCircle) footprintCircle.setMap(null);
 
         moonMarker = new google.maps.Marker({
-          position: { lat, lng: lon },
+          position: { lat: 0, lng: 0 },
           map: map,
           icon: {
             url: 'https://dxer.site/eme/moon-icon.png',
