@@ -10,7 +10,6 @@
         padding: 0;
         height: 100%;
         overflow: hidden;
-        font-family: Arial, sans-serif;
       }
 
       #map {
@@ -23,9 +22,10 @@
         top: 10px;
         left: 10px;
         z-index: 10;
-        background-color: rgba(255, 255, 255, 0.9);
+        background-color: rgba(255, 255, 255, 0.8);
         padding: 15px;
         border-radius: 8px;
+        font-family: Arial, sans-serif;
         max-width: 90%;
         box-sizing: border-box;
       }
@@ -49,25 +49,8 @@
         width: 100%;
         margin-bottom: 10px;
       }
-
-      #declinationChart {
-        position: absolute;
-        left: 10px;
-        bottom: 10px;
-        width: calc(100% - 20px);
-        height: 150px;
-        background: white;
-        border-radius: 8px;
-        z-index: 10;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      }
     </style>
-
-    <!-- Chart.js and Annotation Plugin -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
   </head>
-
   <body>
     <div id="map"></div>
     <div id="controls">
@@ -79,13 +62,10 @@
       <span id="hour-value">00:00</span>
     </div>
 
-    <canvas id="declinationChart"></canvas>
-
     <script>
       let map;
       let moonMarker;
       let footprintCircle;
-      let declinationChart;
 
       function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
@@ -102,7 +82,6 @@
           .then(response => response.json())
           .then(data => {
             window.moonData = data;
-            initDeclinationChart(data);
             setDefaultTimeAndUpdateMap();
             restrictDatePicker();
           })
@@ -124,9 +103,9 @@
       function restrictDatePicker() {
         const now = new Date();
         const minDate = new Date(now);
+        minDate.setDate(now.getDate() - 5);
         const maxDate = new Date(now);
-        minDate.setDate(minDate.getDate() - 15);
-        maxDate.setDate(maxDate.getDate() + 15);
+        maxDate.setDate(now.getDate() + 5);
 
         const minDateString = minDate.toISOString().split('T')[0];
         const maxDateString = maxDate.toISOString().split('T')[0];
@@ -194,94 +173,6 @@
           strokeOpacity: 0.6,
           strokeWeight: 2
         });
-
-        updateDeclinationHighlight(selectedDate);
-      }
-
-      function initDeclinationChart(data) {
-        const now = new Date();
-        const from = new Date(now);
-        const to = new Date(now);
-        from.setDate(from.getDate() - 15);
-        to.setDate(to.getDate() + 15);
-
-        const filtered = data.filter(entry => {
-          const time = new Date(entry.time.replace(' ', 'T') + 'Z');
-          return time >= from && time <= to;
-        });
-
-        const dateMap = new Map();
-        filtered.forEach(entry => {
-          const dateStr = entry.time.split(' ')[0];
-          const dec = parseFloat(entry.dec);
-          if (!dateMap.has(dateStr)) dateMap.set(dateStr, []);
-          dateMap.get(dateStr).push(dec);
-        });
-
-        const labels = Array.from(dateMap.keys());
-        const declinations = labels.map(date => {
-          const decs = dateMap.get(date);
-          const avg = decs.reduce((sum, d) => sum + d, 0) / decs.length;
-          return parseFloat(avg.toFixed(2));
-        });
-
-        const ctx = document.getElementById('declinationChart').getContext('2d');
-
-        declinationChart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'Declination (°)',
-              data: declinations,
-              borderColor: 'blue',
-              fill: false,
-              pointRadius: 0,
-              tension: 0.2
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-              annotation: {
-                annotations: {
-                  todayLine: {
-                    type: 'line',
-                    xMin: '',
-                    xMax: '',
-                    borderColor: 'red',
-                    borderWidth: 2,
-                    label: {
-                      content: 'Selected',
-                      enabled: true,
-                      position: 'start'
-                    }
-                  }
-                }
-              }
-            },
-            scales: {
-              x: { display: true },
-              y: {
-                title: {
-                  display: true,
-                  text: 'Declination (°)'
-                }
-              }
-            }
-          },
-          plugins: [Chart.registry.getPlugin('annotation')]
-        });
-      }
-
-      function updateDeclinationHighlight(dateStr) {
-        if (!declinationChart) return;
-        const annotation = declinationChart.options.plugins.annotation.annotations.todayLine;
-        annotation.xMin = dateStr;
-        annotation.xMax = dateStr;
-        declinationChart.update();
       }
     </script>
 
