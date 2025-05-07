@@ -44,12 +44,6 @@
         width: 100%;
         margin-top: 5px;
       }
-        
-        <div id="moon-phase" style="margin-top: 10px;">
-          <canvas id="moonCanvas" width="40" height="40"></canvas>
-          <span id="phase-label" style="font-size: 12px;"></span>
-        </div>
-
 
       input[type="date"] {
         width: 100%;
@@ -66,6 +60,11 @@
       <label for="hour">Select Hour (UTC):</label><br />
       <input type="range" id="hour" min="0" max="23" value="0" step="1" />
       <span id="hour-value">00:00</span>
+      
+      <div id="moon-phase" style="margin-top: 10px;">
+        <canvas id="moonCanvas" width="40" height="40"></canvas>
+        <span id="phase-label" style="font-size: 12px;"></span>
+      </div>
     </div>
 
     <script>
