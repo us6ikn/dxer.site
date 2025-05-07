@@ -51,16 +51,14 @@
       }
 
         #declinationChart {
-          position: absolute;
-          top: 150px; /* just below the controls */
-          left: 10px;
-          width: 60px; /* match control panel width */
-          background-color: rgba(255, 255, 255, 0.8); /* semi-transparent */
-          border-radius: 8px;
-          z-index: 10;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-          pointer-events: none; /* chart won't block map interaction */
+          width: 100%;
+          height: 60px;
+          margin-top: 12px;
+          background-color: rgba(255, 255, 255, 0.85); /* semi-transparent */
+          border-radius: 6px;
+          box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
         }
+
 
 
     </style>
@@ -79,9 +77,11 @@
       <label for="hour">Select Hour (UTC):</label><br />
       <input type="range" id="hour" min="0" max="23" value="0" step="1" />
       <span id="hour-value">00:00</span>
+
+      <!-- Declination graph inside controls -->
+      <canvas id="declinationChart"></canvas>
     </div>
 
-    <canvas id="declinationChart"></canvas>
 
     <script>
       let map;
