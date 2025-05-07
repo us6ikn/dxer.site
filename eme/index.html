@@ -44,6 +44,12 @@
         width: 100%;
         margin-top: 5px;
       }
+        
+        <div id="moon-phase" style="margin-top: 10px;">
+          <canvas id="moonCanvas" width="40" height="40"></canvas>
+          <span id="phase-label" style="font-size: 12px;"></span>
+        </div>
+
 
       input[type="date"] {
         width: 100%;
@@ -88,6 +94,37 @@
           .catch(error => console.error('Error loading moon data:', error));
       }
 
+        
+        function drawMoonPhase(phaseFraction) {
+          const canvas = document.getElementById('moonCanvas');
+          const ctx = canvas.getContext('2d');
+          const r = canvas.width / 2;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // Draw full moon background
+          ctx.fillStyle = '#ddd';
+          ctx.beginPath();
+          ctx.arc(r, r, r, 0, 2 * Math.PI);
+          ctx.fill();
+
+          // Draw shadow depending on phase (0 = new moon, 1 = full moon)
+          ctx.fillStyle = '#222';
+          ctx.beginPath();
+
+          if (phaseFraction < 0.5) {
+            // Waxing or waning crescent/quarter
+            const offset = (0.5 - phaseFraction) * 2 * r;
+            ctx.ellipse(r + offset, r, r, r, 0, 0, 2 * Math.PI);
+          } else {
+            // Gibbous or full
+            const offset = (phaseFraction - 0.5) * 2 * r;
+            ctx.ellipse(r - offset, r, r, r, 0, 0, 2 * Math.PI);
+          }
+
+          ctx.fill();
+        }
+
+        
       function setDefaultTimeAndUpdateMap() {
         const now = new Date();
         const currentDate = now.toISOString().split('T')[0];
@@ -147,6 +184,10 @@
         const lat = parseFloat(moonData.sublunar_lat);
         const lon = -parseFloat(moonData.sublunar_lon); // Negate if needed for direction
         const radius = parseFloat(moonData.footprint_radius_km) * 1000 * 1.02;
+        
+        document.getElementById('phase-label').textContent = moonData.phase_name;
+        drawMoonPhase(parseFloat(moonData.phase_fraction));
+
 
         map.setCenter({ lat: 0, lng: 0 });
 
