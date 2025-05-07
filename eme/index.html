@@ -3,31 +3,51 @@
   <head>
     <title>Moon Sublunar Point</title>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+
       #map {
-        height: 100vh;
+        height: 100dvh;
         width: 100%;
       }
+
       #controls {
         position: absolute;
         top: 10px;
         left: 10px;
-        z-index: 1;
-        background-color: rgba(255, 255, 255, 0.7);
-        padding: 20px;
-        border-radius: 5px;
+        z-index: 10;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 15px;
+        border-radius: 8px;
         font-family: Arial, sans-serif;
+        max-width: 90%;
+        box-sizing: border-box;
       }
+
       label {
         font-weight: bold;
+        font-size: 14px;
       }
+
       #hour-value {
         margin-left: 10px;
         font-weight: normal;
       }
+
       #hour {
-        width: 200px;
-        margin-top: 10px;
+        width: 100%;
+        margin-top: 5px;
+      }
+
+      input[type="date"] {
+        width: 100%;
+        margin-bottom: 10px;
       }
     </style>
   </head>
@@ -35,96 +55,86 @@
     <div id="map"></div>
     <div id="controls">
       <label for="date">Select Date (UTC):</label><br />
-      <input type="date" id="date" value="" /><br />
-      
+      <input type="date" id="date" /><br />
+
       <label for="hour">Select Hour (UTC):</label><br />
       <input type="range" id="hour" min="0" max="23" value="0" step="1" />
-      <span id="hour-value">00:00</span><br />
+      <span id="hour-value">00:00</span>
     </div>
 
     <script>
-      // Initialize the Google Map
+      let map;
+      let moonMarker;
+      let footprintCircle;
+
       function initMap() {
-        const map = new google.maps.Map(document.getElementById('map'), {
+        map = new google.maps.Map(document.getElementById('map'), {
           zoom: 2,
           center: { lat: 0, lng: 0 },
-          mapTypeId: 'terrain'
+          mapTypeId: 'terrain',
+          gestureHandling: 'greedy'
         });
 
-        // Load the moon data
         fetch('moon_data_cleaned.txt')
           .then(response => response.json())
           .then(data => {
-            window.moonData = data;  // Store moon data globally
-            setDefaultTimeAndUpdateMap(); // Set default time (current date and hour) and update map
-            restrictDatePicker(); // Restrict date range (today ±5 days)
+            window.moonData = data;
+            setDefaultTimeAndUpdateMap();
+            restrictDatePicker();
           })
           .catch(error => console.error('Error loading moon data:', error));
       }
 
-      // Set default date and hour to current time when page loads
       function setDefaultTimeAndUpdateMap() {
         const now = new Date();
-        const currentDate = now.toISOString().split('T')[0]; // Get the current date (YYYY-MM-DD)
-        const currentHour = now.getUTCHours(); // Get the current hour (0-23)
+        const currentDate = now.toISOString().split('T')[0];
+        const currentHour = now.getUTCHours().toString().padStart(2, '0');
 
-        // Convert currentHour to string and apply padStart
-        const currentHourStr = currentHour.toString().padStart(2, '0');
-
-        // Set default values in the inputs
         document.getElementById('date').value = currentDate;
-        document.getElementById('hour').value = currentHour;
-        document.getElementById('hour-value').textContent = `${currentHourStr}:00`;
+        document.getElementById('hour').value = parseInt(currentHour);
+        document.getElementById('hour-value').textContent = `${currentHour}:00`;
 
-        updateMap(); // Update the map with the default values
+        updateMap();
       }
 
-      // Restrict the date picker to only allow dates from -5 to +5 days around today
       function restrictDatePicker() {
         const now = new Date();
         const minDate = new Date(now);
-        minDate.setDate(now.getDate() - 5); // 5 days before today
+        minDate.setDate(now.getDate() - 5);
         const maxDate = new Date(now);
-        maxDate.setDate(now.getDate() + 5); // 5 days after today
+        maxDate.setDate(now.getDate() + 5);
 
-        // Format dates as YYYY-MM-DD for the date picker
         const minDateString = minDate.toISOString().split('T')[0];
         const maxDateString = maxDate.toISOString().split('T')[0];
 
-        // Set the min and max attributes for the date input
         const dateInput = document.getElementById('date');
         dateInput.setAttribute('min', minDateString);
         dateInput.setAttribute('max', maxDateString);
       }
 
-      // Update hour label when slider is changed
-      document.getElementById('hour').addEventListener('input', function() {
-        const hour = this.value;
-        document.getElementById('hour-value').textContent = `${hour.padStart(2, '0')}:00`;
-        updateMap(); // Update map immediately when hour changes
+      document.getElementById('hour').addEventListener('input', function () {
+        const hourStr = this.value.toString().padStart(2, '0');
+        document.getElementById('hour-value').textContent = `${hourStr}:00`;
+        updateMap();
       });
 
-      // Update map when date or hour changes
-      document.getElementById('date').addEventListener('change', function() {
-        updateMap(); // Update map immediately when date changes
-      });
+      document.getElementById('date').addEventListener('change', updateMap);
 
-      // Update map based on user-selected date and hour
       function updateMap() {
         const selectedDate = document.getElementById('date').value;
-        const selectedHour = document.getElementById('hour').value;
+        const selectedHour = document.getElementById('hour').value.toString().padStart(2, '0');
 
         if (!selectedDate) {
           alert("Please select a date.");
           return;
         }
 
-        // Combine selected date and hour into a full UTC time string
-        const combinedDateTime = new Date(`${selectedDate}T${selectedHour.padStart(2, '0')}:00:00Z`);
+        const utcTimeString = new Date(`${selectedDate}T${selectedHour}:00:00Z`)
+          .toISOString()
+          .slice(0, 19)
+          .replace('T', ' ');
 
-        const selectedHourUTC = combinedDateTime.toISOString().slice(0, 19).replace('T', ' '); // Format as UTC
-
-        const moonData = window.moonData.find(entry => entry.time === selectedHourUTC);
+        const moonData = window.moonData.find(entry => entry.time === utcTimeString);
 
         if (!moonData) {
           alert("No moon data available for the selected UTC time.");
@@ -132,18 +142,16 @@
         }
 
         const lat = parseFloat(moonData.sublunar_lat);
-        const lon = parseFloat(moonData.sublunar_lon);
-        const footprintRadiusKm = parseFloat(moonData.footprint_radius_km);
+        const lon = -parseFloat(moonData.sublunar_lon); // Negate if needed for direction
+        const radius = parseFloat(moonData.footprint_radius_km) * 1000 * 1.02;
 
-        const map = new google.maps.Map(document.getElementById('map'), {
-          zoom: 2,
-          center: { lat: 0, lng: 0 },
-          mapTypeId: 'terrain'
-        });
+        map.setCenter({ lat, lng: lon });
 
-        // Add moon icon marker
-        new google.maps.Marker({
-          position: { lat, lng: -lon },
+        if (moonMarker) moonMarker.setMap(null);
+        if (footprintCircle) footprintCircle.setMap(null);
+
+        moonMarker = new google.maps.Marker({
+          position: { lat, lng: lon },
           map: map,
           icon: {
             url: 'https://dxer.site/eme/moon-icon.png',
@@ -152,21 +160,20 @@
           title: 'Moon Sublunar Point'
         });
 
-        // Add footprint radius circle centered at the sublunar point
-        const footprintCircle = new google.maps.Circle({
+        footprintCircle = new google.maps.Circle({
           map: map,
-          center: { lat: lat, lng: -lon },
-          radius: footprintRadiusKm * 1000 * 1.02, // Convert km to meters
+          center: { lat, lng: lon },
+          radius: radius,
           fillColor: '#0088FF',
           fillOpacity: 0.3,
           strokeColor: '#0000FF',
           strokeOpacity: 0.6,
-          strokeWeight: 2,
+          strokeWeight: 2
         });
       }
     </script>
 
-    <!-- Load Google Maps API -->
+    <!-- Google Maps API -->
     <script async
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
     </script>
