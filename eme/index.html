@@ -52,15 +52,17 @@
 
         #declinationChart {
           position: absolute;
+          top: 150px; /* just below the controls */
           left: 10px;
-          top: 110px; /* Right below the controls */
-          width: 300px;
-          height: 80px;
-          background: white;
+          width: 260px; /* match control panel width */
+          height: 70px;
+          background-color: rgba(255, 255, 255, 0.8); /* semi-transparent */
           border-radius: 8px;
           z-index: 10;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+          pointer-events: none; /* chart won't block map interaction */
         }
+
 
     </style>
 
