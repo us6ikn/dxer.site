@@ -305,12 +305,20 @@
                       enabled: true,
                       position: 'start',
                       content: function(ctx) {
-                        const index = ctx.chart.data.labels.indexOf(ctx.chart.options.plugins.annotation.annotations.todayLine.xMin);
-                        if (index === -1) return '';
-                        const dec = ctx.chart.data.datasets[0].data[index];
-                        const dist = ctx.chart.data.datasets[1].data[index];
+                        const chart = ctx.chart;
+                        const annotation = chart.options.plugins.annotation.annotations.todayLine;
+                        const labelIndex = chart.data.labels.indexOf(annotation.xMin);
+                        
+                        if (labelIndex === -1) return '';
+
+                        const dec = chart.data.datasets[0]?.data[labelIndex];
+                        const dist = chart.data.datasets[1]?.data[labelIndex];
+
+                        if (dec === undefined || dist === undefined) return '';
+
                         return `Dec: ${dec}°\nDist: ${Math.round(dist / 1000)}k`;
-                      },
+                      }
+
                       backgroundColor: 'rgba(255,255,255,0.9)',
                       font: {
                         size: 10,
