@@ -270,23 +270,24 @@
                 label: 'Declination (°)',
                 data: declinations,
                 borderColor: 'blue',
+                yAxisID: 'y',
                 fill: false,
                 pointRadius: 0,
-                tension: 0.2,
-                yAxisID: 'y'
+                tension: 0.2
               },
               {
                 label: 'Distance (km)',
                 data: distances,
                 borderColor: 'green',
+                yAxisID: 'y1',
                 fill: false,
                 pointRadius: 0,
-                tension: 0.2,
-                yAxisID: 'y1'
+                tension: 0.2
               }
             ]
-          }
 
+
+          },
           options: {
             responsive: true,
             maintainAspectRatio: false,
@@ -305,20 +306,12 @@
                       enabled: true,
                       position: 'start',
                       content: function(ctx) {
-                        const chart = ctx.chart;
-                        const annotation = chart.options.plugins.annotation.annotations.todayLine;
-                        const labelIndex = chart.data.labels.indexOf(annotation.xMin);
-                        
-                        if (labelIndex === -1) return '';
-
-                        const dec = chart.data.datasets[0]?.data[labelIndex];
-                        const dist = chart.data.datasets[1]?.data[labelIndex];
-
-                        if (dec === undefined || dist === undefined) return '';
-
+                        const index = ctx.chart.data.labels.indexOf(ctx.chart.options.plugins.annotation.annotations.todayLine.xMin);
+                        if (index === -1) return '';
+                        const dec = ctx.chart.data.datasets[0].data[index];
+                        const dist = ctx.chart.data.datasets[1].data[index];
                         return `Dec: ${dec}°\nDist: ${Math.round(dist / 1000)}k`;
-                      }
-
+                      },
                       backgroundColor: 'rgba(255,255,255,0.9)',
                       font: {
                         size: 10,
