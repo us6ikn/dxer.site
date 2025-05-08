@@ -302,28 +302,13 @@
                     borderColor: 'red',
                     borderWidth: 2,
                     label: {
-                      display: true,
+                      content: 'Selected',
                       enabled: true,
-                      position: 'start',
-                      content: function(ctx) {
-                        const index = ctx.chart.data.labels.indexOf(ctx.chart.options.plugins.annotation.annotations.todayLine.xMin);
-                        if (index === -1) return '';
-                        const dec = ctx.chart.data.datasets[0].data[index];
-                        const dist = ctx.chart.data.datasets[1].data[index];
-                        return `Dec: ${dec}°\nDist: ${Math.round(dist / 1000)}k`;
-                      },
-                      backgroundColor: 'rgba(255,255,255,0.9)',
-                      font: {
-                        size: 10,
-                        weight: 'normal'
-                      },
-                      color: 'black',
-                      padding: 4
+                      position: 'start'
                     }
                   }
                 }
               }
-
             },
             scales: {
               x: { display: true },
@@ -336,14 +321,11 @@
                 max: 30,
                 position: 'left'
               },
-              y11: {
-                  position: 'right',
-                  title: {
-                    display: true,
-                    text: 'Distance (km)'
-                  },
-                min: 356400,
-                max: 406700,
+              y1: {
+                title: {
+                  display: true,
+                  text: 'Distance (km)'
+                },
                 position: 'right',
                 grid: { drawOnChartArea: false }, // prevent overlapping grids
                 ticks: {
