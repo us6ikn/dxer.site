@@ -52,14 +52,20 @@
         margin-bottom: 10px;
       }
 
-        #declinationChart {
+        #chartWrapper {
           width: 100%;
-          height: 100px; /* fixed pixel height works well with Chart.js */
+          height: 100px; /* reasonable height across devices */
           margin-top: 12px;
           background-color: rgba(255, 255, 255, 0.85);
           border-radius: 6px;
           box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
         }
+
+        #declinationChart {
+          width: 100%;
+          height: 100%; /* fill wrapper */
+        }
+
 
 
         /* Optional: better mobile spacing */
@@ -92,7 +98,10 @@
       <span id="hour-value">00:00</span>
 
       <!-- Declination graph inside controls -->
-      <canvas id="declinationChart" width="100" height="30"></canvas>
+      <div id="chartWrapper">
+        <canvas id="declinationChart"></canvas>
+      </div>
+
 
     </div>
 
