@@ -293,21 +293,36 @@
                 title: {
                   display: true,
                   text: 'Declination (°)'
-                }
+                },
+                min: -30,
+                max: 30
               }
             }
+
           },
           plugins: [Chart.registry.getPlugin('annotation')]
         });
       }
 
-      function updateDeclinationHighlight(dateStr) {
-        if (!declinationChart) return;
-        const annotation = declinationChart.options.plugins.annotation.annotations.todayLine;
-        annotation.xMin = dateStr;
-        annotation.xMax = dateStr;
-        declinationChart.update();
-      }
+        function updateDeclinationHighlight(dateStr) {
+          if (!declinationChart) return;
+
+          const labels = declinationChart.data.labels;
+          const data = declinationChart.data.datasets[0].data;
+          const index = labels.indexOf(dateStr);
+
+          if (index === -1) return;
+
+          const value = data[index];
+
+          const annotation = declinationChart.options.plugins.annotation.annotations.todayLine;
+          annotation.xMin = dateStr;
+          annotation.xMax = dateStr;
+          annotation.label.content = `${value}°`; // show the actual value
+
+          declinationChart.update();
+        }
+
     </script>
 
     <!-- Google Maps API -->
