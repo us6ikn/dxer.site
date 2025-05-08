@@ -249,13 +249,6 @@
           const avg = decs.reduce((sum, d) => sum + d, 0) / decs.length;
           return parseFloat(avg.toFixed(2));
         });
-        
-        const distances = labels.map(date => {
-          const entries = dateMap.get(date);
-          const avgDist = entries.reduce((sum, entry) => sum + parseFloat(entry.distance_km), 0) / entries.length;
-          return Math.round(avgDist); // Rounded for clarity
-        });
-
 
         const ctx = document.getElementById('declinationChart').getContext('2d');
 
@@ -263,27 +256,14 @@
           type: 'line',
           data: {
             labels: labels,
-            datasets: [
-              {
-                label: 'Declination (°)',
-                data: declinations,
-                borderColor: 'blue',
-                yAxisID: 'y',
-                fill: false,
-                pointRadius: 0,
-                tension: 0.2
-              },
-              {
-                label: 'Distance (km)',
-                data: distances,
-                borderColor: 'green',
-                yAxisID: 'y1',
-                fill: false,
-                pointRadius: 0,
-                tension: 0.2
-              }
-            ]
-
+            datasets: [{
+              label: 'Declination (°)',
+              data: declinations,
+              borderColor: 'blue',
+              fill: false,
+              pointRadius: 0,
+              tension: 0.2
+            }]
           },
           options: {
             responsive: true,
@@ -315,24 +295,9 @@
                   text: 'Declination (°)'
                 },
                 min: -30,
-                max: 30,
-                position: 'left'
-              },
-              y1: {
-                title: {
-                  display: true,
-                  text: 'Distance (km)'
-                },
-                position: 'right',
-                grid: { drawOnChartArea: false }, // prevent overlapping grids
-                ticks: {
-                  callback: function(value) {
-                    return value.toLocaleString(); // e.g., 384,000
-                  }
-                }
+                max: 30
               }
             }
-
 
           },
           plugins: [Chart.registry.getPlugin('annotation')]
