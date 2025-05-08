@@ -223,161 +223,152 @@
         updateDeclinationHighlight(selectedDate);
       }
 
-      function initDeclinationChart(data) {
-        const now = new Date();
-        const from = new Date(now);
-        const to = new Date(now);
-        from.setDate(from.getDate() - 15);
-        to.setDate(to.getDate() + 15);
+        function initDeclinationChart(data) {
+          const now = new Date();
+          const from = new Date(now);
+          const to = new Date(now);
+          from.setDate(from.getDate() - 15);
+          to.setDate(to.getDate() + 15);
 
-        const filtered = data.filter(entry => {
-          const time = new Date(entry.time.replace(' ', 'T') + 'Z');
-          return time >= from && time <= to;
-        });
+          const filtered = data.filter(entry => {
+            const time = new Date(entry.time.replace(' ', 'T') + 'Z');
+            return time >= from && time <= to;
+          });
 
-        const dateMap = new Map();
-        filtered.forEach(entry => {
-          const dateStr = entry.time.split(' ')[0];
-          if (!dateMap.has(dateStr)) dateMap.set(dateStr, []);
-          dateMap.get(dateStr).push(entry); // Store full entry instead of just dec
-        });
+          const dateMap = new Map();
+          filtered.forEach(entry => {
+            const dateStr = entry.time.split(' ')[0];
+            if (!dateMap.has(dateStr)) dateMap.set(dateStr, []);
+            dateMap.get(dateStr).push(entry);
+          });
 
+          const labels = Array.from(dateMap.keys());
 
-        const labels = Array.from(dateMap.keys());
+          const declinations = labels.map(date => {
+            const entries = dateMap.get(date);
+            const avgDec = entries.reduce((sum, entry) => sum + parseFloat(entry.dec), 0) / entries.length;
+            return parseFloat(avgDec.toFixed(2));
+          });
 
-        const declinations = labels.map(date => {
-          const entries = dateMap.get(date);
-          const avgDec = entries.reduce((sum, entry) => sum + parseFloat(entry.dec), 0) / entries.length;
-          return parseFloat(avgDec.toFixed(2));
-        });
+          const distances = labels.map(date => {
+            const entries = dateMap.get(date);
+            const avgDist = entries.reduce((sum, entry) => sum + parseFloat(entry.distance_km), 0) / entries.length;
+            return Math.round(avgDist);
+          });
 
-        const distances = labels.map(date => {
-          const entries = dateMap.get(date);
-          const avgDist = entries.reduce((sum, entry) => sum + parseFloat(entry.distance_km), 0) / entries.length;
-          return Math.round(avgDist); // Rounded for clarity
-        });
+          const ctx = document.getElementById('declinationChart').getContext('2d');
 
-
-
-        const ctx = document.getElementById('declinationChart').getContext('2d');
-
-        declinationChart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [
-              {
-                label: 'Declination (°)',
-                data: declinations,
-                borderColor: 'blue',
-                yAxisID: 'y',
-                fill: false,
-                pointRadius: 0,
-                tension: 0.2
-              },
-              {
-                label: 'Distance (km)',
-                data: distances,
-                borderColor: 'green',
-                yAxisID: 'y1',
-                fill: false,
-                pointRadius: 0,
-                tension: 0.2
-              }
-            ]
-
-
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-              annotation: {
-                annotations: {
-                  todayLine: {
-                    type: 'line',
-                    xMin: '',
-                    xMax: '',
-                    borderColor: 'red',
-                    borderWidth: 2,
-                    label: {
-                      display: true,
-                      enabled: true,
-                      position: 'start',
-                      content: function(ctx) {
-                        const index = ctx.chart.data.labels.indexOf(ctx.chart.options.plugins.annotation.annotations.todayLine.xMin);
-                        if (index === -1) return '';
-                        const dec = ctx.chart.data.datasets[0].data[index];
-                        const dist = ctx.chart.data.datasets[1].data[index];
-                        return `Dec: ${dec}°\nDist: ${Math.round(dist / 1000)}k`;
-                      },
-                      backgroundColor: 'rgba(255,255,255,0.9)',
-                      font: {
-                        size: 10,
-                        weight: 'normal'
-                      },
-                      color: 'black',
-                      padding: 4
+          declinationChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  label: 'Declination (°)',
+                  data: declinations,
+                  borderColor: 'blue',
+                  yAxisID: 'y',
+                  fill: false,
+                  pointRadius: 0,
+                  tension: 0.2
+                },
+                {
+                  label: 'Distance (km)',
+                  data: distances,
+                  borderColor: 'green',
+                  yAxisID: 'y1',
+                  fill: false,
+                  pointRadius: 0,
+                  tension: 0.2
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                annotation: {
+                  annotations: {
+                    todayLine: {
+                      type: 'line',
+                      xMin: '',
+                      xMax: '',
+                      borderColor: 'red',
+                      borderWidth: 2,
+                      label: {
+                        display: true,
+                        enabled: true,
+                        position: 'start',
+                        content: function (ctx) {
+                          const chart = ctx.chart;
+                          const annotation = chart.options.plugins.annotation.annotations.todayLine;
+                          const index = chart.data.labels.indexOf(annotation.xMin);
+                          if (index === -1) return '';
+                          const dec = chart.data.datasets[0]?.data[index];
+                          const dist = chart.data.datasets[1]?.data[index];
+                          if (dec === undefined || dist === undefined) return '';
+                          return `Dec: ${dec}°\nDist: ${Math.round(dist / 1000)}k`;
+                        },
+                        backgroundColor: 'rgba(255,255,255,0.9)',
+                        font: {
+                          size: 10,
+                          weight: 'normal'
+                        },
+                        color: 'black',
+                        padding: 4
+                      }
                     }
                   }
                 }
-              }
-
-            },
-            scales: {
-              x: { display: true },
-              y: {
-                title: {
-                  display: true,
-                  text: 'Declination (°)'
-                },
-                min: -30,
-                max: 30,
-                position: 'left'
               },
-              y11: {
+              scales: {
+                x: { display: true },
+                y: {
+                  title: {
+                    display: true,
+                    text: 'Declination (°)'
+                  },
+                  min: -30,
+                  max: 30,
+                  position: 'left'
+                },
+                y1: {
                   position: 'right',
                   title: {
                     display: true,
                     text: 'Distance (km)'
                   },
-                min: 356400,
-                max: 406700,
-                position: 'right',
-                grid: { drawOnChartArea: false }, // prevent overlapping grids
-                ticks: {
-                  callback: function(value) {
-                    return value.toLocaleString(); // e.g., 384,000
+                  min: 356400,
+                  max: 406700,
+                  grid: { drawOnChartArea: false },
+                  ticks: {
+                    callback: function (value) {
+                      return value.toLocaleString();
+                    }
                   }
                 }
               }
-            }
+            },
+            plugins: [Chart.registry.getPlugin('annotation')]
+          });
+        }
 
-
-          },
-          plugins: [Chart.registry.getPlugin('annotation')]
-        });
-      }
 
         function updateDeclinationHighlight(dateStr) {
           if (!declinationChart) return;
 
           const labels = declinationChart.data.labels;
-          const data = declinationChart.data.datasets[0].data;
           const index = labels.indexOf(dateStr);
-
           if (index === -1) return;
-
-          const value = data[index];
 
           const annotation = declinationChart.options.plugins.annotation.annotations.todayLine;
           annotation.xMin = dateStr;
           annotation.xMax = dateStr;
-          annotation.label.content = `${value}°`; // show the actual value
 
           declinationChart.update();
         }
+
 
     </script>
 
