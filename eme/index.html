@@ -238,23 +238,25 @@
         const dateMap = new Map();
         filtered.forEach(entry => {
           const dateStr = entry.time.split(' ')[0];
-          const dec = parseFloat(entry.dec);
           if (!dateMap.has(dateStr)) dateMap.set(dateStr, []);
-          dateMap.get(dateStr).push(dec);
+          dateMap.get(dateStr).push(entry); // Store full entry instead of just dec
         });
 
+
         const labels = Array.from(dateMap.keys());
+
         const declinations = labels.map(date => {
-          const decs = dateMap.get(date);
-          const avg = decs.reduce((sum, d) => sum + d, 0) / decs.length;
-          return parseFloat(avg.toFixed(2));
+          const entries = dateMap.get(date);
+          const avgDec = entries.reduce((sum, entry) => sum + parseFloat(entry.dec), 0) / entries.length;
+          return parseFloat(avgDec.toFixed(2));
         });
-        
+
         const distances = labels.map(date => {
           const entries = dateMap.get(date);
           const avgDist = entries.reduce((sum, entry) => sum + parseFloat(entry.distance_km), 0) / entries.length;
           return Math.round(avgDist); // Rounded for clarity
         });
+
 
 
         const ctx = document.getElementById('declinationChart').getContext('2d');
@@ -283,6 +285,7 @@
                 tension: 0.2
               }
             ]
+
 
           },
           options: {
