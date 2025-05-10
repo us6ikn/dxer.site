@@ -394,20 +394,21 @@
 
               const annotations = degradData.map(d => {
                 const norm = (d.value - minVal) / (maxVal - minVal);
-                const color = `rgba(255, 0, 0, ${0.1 + norm * 0.3})`; // red tint, 0.1–0.4 alpha
+                const color = `rgba(255, 0, 0, ${0.1 + norm * 0.3})`;
 
                 return {
                   type: 'box',
                   xMin: d.date,
                   xMax: d.date,
-                  backgroundColor: 'rgba(255, 0, 0, 0.4)' // vivid red
-,
-                  borderWidth: 0,
+                  backgroundColor: color,
+                  borderColor: 'rgba(100,0,0,0.2)',
+                  borderWidth: 0.3,
                   yScaleID: 'y',
                   yMin: -30,
                   yMax: 30
                 };
               });
+
 
               const chartAnn = declinationChart.options.plugins.annotation.annotations;
               annotations.forEach((ann, i) => {
