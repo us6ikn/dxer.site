@@ -433,8 +433,7 @@
                         content: function (ctx) {
                           const chart = ctx.chart;
                           const annotation = chart.options.plugins.annotation.annotations.todayLine;
-                          const day = new Date(annotation.xMin).getUTCDate().toString();
-                          const index = chart.data.labels.indexOf(day);
+                          const index = chart.data.labels.indexOf(annotation.xMin);
                           if (index === -1) return '';
                           const dec = chart.data.datasets[0]?.data[index];
                           const dist = chart.data.datasets[1]?.data[index];
@@ -454,16 +453,9 @@
                 }
               },
               scales: {
-                  x: {
-                    type: 'category',
-                    display: true,
-                    ticks: {
-                      callback: function(label) {
-                        return parseInt(label.split('-')[2]); // Extract day from 'YYYY-MM-DD'
-                      }
-                    }
-                  },
-
+                x: {
+                    type: 'category', // Add this line
+                    display: true },
                 y: {
                   title: {
                     display: true,
