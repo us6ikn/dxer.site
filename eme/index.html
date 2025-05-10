@@ -351,7 +351,11 @@
             dateMap.get(dateStr).push(entry);
           });
 
-          const labels = Array.from(dateMap.keys());
+          // Extract only the day of the month from each date string
+          const labels = Array.from(dateMap.keys()).map(date => {
+            const day = new Date(date).getDate(); // Get the day of the month
+            return day.toString(); // Return as string to ensure it displays correctly
+          });
 
           const declinations = labels.map(date => {
             const entries = dateMap.get(date);
@@ -398,7 +402,7 @@
               plugins: {
                 legend: { display: false },
                 annotation: {
-                drawTime: 'beforeDatasetsDraw', // <-- This makes boxes draw behind lines
+                  drawTime: 'beforeDatasetsDraw', // <-- This makes boxes draw behind lines
                   annotations: {
                     todayLine: {
                       type: 'line',
@@ -434,8 +438,9 @@
               },
               scales: {
                 x: {
-                    type: 'category', // Add this line
-                    display: true },
+                  type: 'category', // Add this line
+                  display: true
+                },
                 y: {
                   title: {
                     display: true,
@@ -466,12 +471,12 @@
                     color: 'green' // Optional: make tick numbers green too
                   }
                 }
-
               }
             },
             plugins: [Chart.registry.getPlugin('annotation')]
           });
         }
+
 
 
         function updateDeclinationHighlight(dateStr) {
