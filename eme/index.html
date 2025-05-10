@@ -299,7 +299,7 @@
 
       document.getElementById('hour').addEventListener('input', function () {
         const hourStr = this.value.toString().padStart(2, '0');
-        document.getElementById('hour-value').textContent = `${hourStr}:00`;
+        document.getElementById('hour-value').textContent = `Time (UTC): ${hourStr}:00`;
         updateMap();
       });
 
