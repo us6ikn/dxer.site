@@ -531,6 +531,26 @@
             .catch(err => console.error('Error loading degradation data:', err));
         }
 
+        document.getElementById('prevDay').addEventListener('click', function() {
+          changeDateByDays(-1); // Decrease date by 1
+        });
+
+        document.getElementById('nextDay').addEventListener('click', function() {
+          changeDateByDays(1); // Increase date by 1
+        });
+
+        function changeDateByDays(delta) {
+          const dateInput = document.getElementById('date');
+          const selectedDate = new Date(dateInput.value);
+          selectedDate.setDate(selectedDate.getDate() + delta);
+
+          // Format the new date to YYYY-MM-DD for the input field
+          const formattedDate = selectedDate.toISOString().split('T')[0];
+          dateInput.value = formattedDate;
+
+          // Update the map and chart for the new date
+          updateMap();
+        }
 
 
     </script>
