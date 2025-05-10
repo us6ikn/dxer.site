@@ -153,30 +153,6 @@
           padding: 5px 0;
         }
 
-        #date-container {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-        }
-
-        #prevDay, #nextDay {
-          font-size: 16px;
-          padding: 5px 10px;
-          background-color: #f1f1f1;
-          border: 1px solid #ccc;
-          border-radius: 5px;
-          cursor: pointer;
-        }
-
-        #prevDay:hover, #nextDay:hover {
-          background-color: #e0e0e0;
-        }
-
-        input[type="date"] {
-          flex-grow: 1; /* Makes the input field take up remaining space */
-          padding: 5px;
-        }
-
 
     </style>
 
@@ -188,16 +164,12 @@
   <body>
     <div id="map"></div>
     <div id="controls">
-        <label for="date">Select Date (UTC):</label><br />
-          <div id="date-container">
-            <button id="prevDay" type="button">←</button>
-            <input type="date" id="date" />
-            <button id="nextDay" type="button">→</button>
-          </div>
+      <label for="date">Select Date (UTC):</label><br />
+      <input type="date" id="date" /><br />
 
-          <label for="hour">Select Hour (UTC):</label><br />
-          <input type="range" id="hour" min="0" max="23" value="0" step="1" />
-          <span id="hour-value">00:00</span>
+      <label for="hour">Select Hour (UTC):</label><br />
+      <input type="range" id="hour" min="0" max="23" value="0" step="1" />
+      <span id="hour-value">00:00</span>
 
       <!-- Declination graph inside controls -->
       <div id="chartWrapper">
@@ -531,26 +503,6 @@
             .catch(err => console.error('Error loading degradation data:', err));
         }
 
-        document.getElementById('prevDay').addEventListener('click', function() {
-          changeDateByDays(-1); // Decrease date by 1
-        });
-
-        document.getElementById('nextDay').addEventListener('click', function() {
-          changeDateByDays(1); // Increase date by 1
-        });
-
-        function changeDateByDays(delta) {
-          const dateInput = document.getElementById('date');
-          const selectedDate = new Date(dateInput.value);
-          selectedDate.setDate(selectedDate.getDate() + delta);
-
-          // Format the new date to YYYY-MM-DD for the input field
-          const formattedDate = selectedDate.toISOString().split('T')[0];
-          dateInput.value = formattedDate;
-
-          // Update the map and chart for the new date
-          updateMap();
-        }
 
 
     </script>
