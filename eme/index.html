@@ -65,8 +65,9 @@
         }
 
         #gradientLegend {
-          position: absolute;
-          bottom: 0;
+          position: relative; /* changed from absolute */
+          top: 0; /* remove bottom positioning */
+          margin-bottom: 6px; /* add spacing below legend */
           left: 0;
           width: 100%;
           display: flex;
@@ -76,9 +77,10 @@
           color: #333;
           padding: 5px 10px;
           background: rgba(255, 255, 255, 0.8);
-          border-radius: 0 0 6px 6px;
+          border-radius: 6px 6px 0 0; /* top-rounded corners instead of bottom */
           box-sizing: border-box;
         }
+
 
         .gradient-bar {
           flex-grow: 1;
@@ -221,8 +223,8 @@
 
       <!-- Declination graph inside controls -->
       <div id="chartWrapper">
+          <div id="gradientLegend">
         <canvas id="declinationChart"></canvas>
-        <div id="gradientLegend">
           <span>Low</span>
           <div class="gradient-bar"></div>
           <span>High</span>
