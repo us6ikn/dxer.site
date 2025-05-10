@@ -65,9 +65,8 @@
         }
 
         #gradientLegend {
-          position: relative; /* changed from absolute */
-          top: 0; /* remove bottom positioning */
-          margin-bottom: 6px; /* add spacing below legend */
+          position: absolute;
+          bottom: 0;
           left: 0;
           width: 100%;
           display: flex;
@@ -77,10 +76,9 @@
           color: #333;
           padding: 5px 10px;
           background: rgba(255, 255, 255, 0.8);
-          border-radius: 6px 6px 0 0; /* top-rounded corners instead of bottom */
+          border-radius: 0 0 6px 6px;
           box-sizing: border-box;
         }
-
 
         .gradient-bar {
           flex-grow: 1;
