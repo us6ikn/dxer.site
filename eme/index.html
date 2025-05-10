@@ -361,9 +361,16 @@
 
           const declinations = dayLabels.map(date => {
             const entries = dateMap.get(date);
+            
+            // Ensure entries is an array and contains valid data
+            if (!entries || entries.length === 0) {
+              return 0; // Or any other default value you'd like to return for missing data
+            }
+            
             const avgDec = entries.reduce((sum, entry) => sum + parseFloat(entry.dec), 0) / entries.length;
             return parseFloat(avgDec.toFixed(2));
           });
+
 
           const distances = dayLabels.map(date => {
             const entries = dateMap.get(date);
