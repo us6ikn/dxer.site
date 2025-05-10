@@ -158,6 +158,27 @@
           align-items: center;
           gap: 5px;
         }
+        
+        #date-container input[type="date"] {
+          flex-grow: 1;
+          padding: 5px;
+          margin: 0;
+          height: 32px; /* Explicit height for consistency */
+          box-sizing: border-box;
+          vertical-align: middle;
+          appearance: none; /* Reset default browser style */
+        }
+
+        #date-container button {
+          font-size: 16px;
+          padding: 5px 10px;
+          background-color: #f1f1f1;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          cursor: pointer;
+          height: 32px; /* Match the height of the date input */
+          box-sizing: border-box;
+        }
 
         #prevDay, #nextDay {
           font-size: 16px;
