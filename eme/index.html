@@ -453,9 +453,16 @@
                 }
               },
               scales: {
-                x: {
-                    type: 'category', // Add this line
-                    display: true },
+                  x: {
+                    type: 'category',
+                    display: true,
+                    ticks: {
+                      callback: function(label) {
+                        return parseInt(label.split('-')[2]); // Extract day from 'YYYY-MM-DD'
+                      }
+                    }
+                  },
+
                 y: {
                   title: {
                     display: true,
