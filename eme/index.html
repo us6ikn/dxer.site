@@ -346,33 +346,20 @@
 
           const dateMap = new Map();
           filtered.forEach(entry => {
-            const dateStr = entry.time.split(' ')[0];  // Get date as YYYY-MM-DD
+            const dateStr = entry.time.split(' ')[0];
             if (!dateMap.has(dateStr)) dateMap.set(dateStr, []);
             dateMap.get(dateStr).push(entry);
           });
 
           const labels = Array.from(dateMap.keys());
 
-          // Format the labels to only show the day part of the date
-          const dayLabels = labels.map(date => {
-            const day = new Date(date).getDate(); // Extract just the day from the date
-            return day.toString(); // Convert to string for labels
-          });
-
-          const declinations = dayLabels.map(date => {
+          const declinations = labels.map(date => {
             const entries = dateMap.get(date);
-            
-            // Ensure entries is an array and contains valid data
-            if (!entries || entries.length === 0) {
-              return 0; // Or any other default value you'd like to return for missing data
-            }
-            
             const avgDec = entries.reduce((sum, entry) => sum + parseFloat(entry.dec), 0) / entries.length;
             return parseFloat(avgDec.toFixed(2));
           });
 
-
-          const distances = dayLabels.map(date => {
+          const distances = labels.map(date => {
             const entries = dateMap.get(date);
             const avgDist = entries.reduce((sum, entry) => sum + parseFloat(entry.distance_km), 0) / entries.length;
             return Math.round(avgDist);
@@ -383,7 +370,7 @@
           declinationChart = new Chart(ctx, {
             type: 'line',
             data: {
-              labels: dayLabels, // Use day labels for x-axis
+              labels: labels,
               datasets: [
                 {
                   label: 'Declination (°)',
@@ -411,6 +398,7 @@
               plugins: {
                 legend: { display: false },
                 annotation: {
+                drawTime: 'beforeDatasetsDraw', // <-- This makes boxes draw behind lines
                   annotations: {
                     todayLine: {
                       type: 'line',
@@ -446,29 +434,19 @@
               },
               scales: {
                 x: {
-                  type: 'category',
-                  display: true,
-                  ticks: {
-                    autoSkip: true, // Automatically skip ticks if there are too many
-                    maxRotation: 0, // No rotation of labels (if needed)
-                    minRotation: 0, // No rotation of labels
-                    font: {
-                      size: 10, // Adjust font size for compactness
-                      weight: 'normal'
-                    }
-                  }
-                },
+                    type: 'category', // Add this line
+                    display: true },
                 y: {
                   title: {
                     display: true,
                     text: 'Declination (°)',
-                    color: 'blue'
+                    color: 'blue' // ← matches blue declination line
                   },
                   min: -30,
                   max: 30,
                   position: 'left',
                   ticks: {
-                    color: 'blue'
+                    color: 'blue' // Optional: make tick numbers blue too
                   }
                 },
                 y1: {
@@ -476,7 +454,7 @@
                   title: {
                     display: true,
                     text: 'Distance (km)',
-                    color: 'green'
+                    color: 'green' // ← matches green distance line
                   },
                   min: 356400,
                   max: 406700,
@@ -485,15 +463,15 @@
                     callback: function(value) {
                       return (value / 1000).toFixed(0) + 'k';
                     },
-                    color: 'green'
+                    color: 'green' // Optional: make tick numbers green too
                   }
                 }
+
               }
             },
             plugins: [Chart.registry.getPlugin('annotation')]
           });
         }
-
 
 
         function updateDeclinationHighlight(dateStr) {
