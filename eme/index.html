@@ -537,23 +537,25 @@
                 return { date, value: parseFloat(value) };
               });
 
-              const maxVal = Math.max(...degradData.map(d => d.value));
-              const minVal = Math.min(...degradData.map(d => d.value));
+              const chartLabels = declinationChart.data.labels;
+              const annotations = [];
 
-              const total = degradData.length;
-              const annotations = degradData.map((d, i) => {
-                const alpha = ((i + 1) / total).toFixed(2);  // Gradually increase opacity
-                return {
-                  type: 'box',
-                  xMin: i - 0.5,
-                  xMax: i + 0.5,
-                  backgroundColor: `rgba(255, 0, 0, ${alpha})`,
-                  borderColor: 'transparent',
-                  borderWidth: 0,
-                  yScaleID: 'y',
-                  yMin: -90,
-                  yMax: 90
-                };
+              degradData.forEach(d => {
+                const index = chartLabels.indexOf(d.date);
+                if (index !== -1) {
+                  const alpha = (d.value / 10).toFixed(2); // scale to 0–1 range as needed
+                  annotations.push({
+                    type: 'box',
+                    xMin: index - 0.5,
+                    xMax: index + 0.5,
+                    backgroundColor: `rgba(255, 0, 0, ${alpha})`,
+                    borderColor: 'transparent',
+                    borderWidth: 0,
+                    yScaleID: 'y',
+                    yMin: -90,
+                    yMax: 90
+                  });
+                }
               });
 
               const chartAnn = declinationChart.options.plugins.annotation.annotations;
@@ -565,6 +567,7 @@
             })
             .catch(err => console.error('Error loading degradation data:', err));
         }
+
 
         document.getElementById('prevDay').addEventListener('click', function() {
           changeDateByDays(-1); // Decrease date by 1
