@@ -54,19 +54,20 @@
 
         #chartWrapper {
           width: 100%;
-          height: 180px; /* Keep the height adjusted for both chart and legend */
+          height: 180px; /* Keep the height of both chart and legend together */
           margin-top: 12px;
           background-color: rgba(255, 255, 255, 0.85);
           border-radius: 6px;
           box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
           overflow: hidden; /* Prevent any horizontal overflow */
           position: relative;
-          box-sizing: border-box; /* Ensure padding doesn't increase the width */
+          box-sizing: border-box;
         }
 
+
         #gradientLegend {
-          position: absolute;
-          bottom: 0;
+          position: relative; /* Keep it relative */
+          margin-bottom: 8px; /* Spacing between the legend and chart */
           left: 0;
           width: 100%;
           display: flex;
@@ -76,9 +77,11 @@
           color: #333;
           padding: 5px 10px;
           background: rgba(255, 255, 255, 0.8);
-          border-radius: 0 0 6px 6px;
+          border-radius: 6px 6px 0 0; /* Rounded top corners */
           box-sizing: border-box;
         }
+
+
 
         .gradient-bar {
           flex-grow: 1;
@@ -92,9 +95,10 @@
 
         #declinationChart {
           width: 100%;
-          height: 100%;
-          box-sizing: border-box; /* Ensure chart doesn't exceed wrapper width */
+          height: calc(100% - 40px); /* Allow for space for the legend */
+          box-sizing: border-box; /* Ensure the chart doesn’t exceed the wrapper width */
         }
+
 
 
 
@@ -221,12 +225,14 @@
 
       <!-- Declination graph inside controls -->
       <div id="chartWrapper">
-          <div id="gradientLegend">
-        <canvas id="declinationChart"></canvas>
+        <div id="gradientLegend">
           <span>Low</span>
           <div class="gradient-bar"></div>
           <span>High</span>
         </div>
+        <canvas id="declinationChart"></canvas>
+      </div>
+
 
       </div>
 
