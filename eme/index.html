@@ -433,7 +433,8 @@
                         content: function (ctx) {
                           const chart = ctx.chart;
                           const annotation = chart.options.plugins.annotation.annotations.todayLine;
-                          const index = chart.data.labels.indexOf(annotation.xMin);
+                          const day = new Date(annotation.xMin).getUTCDate().toString();
+                          const index = chart.data.labels.indexOf(day);
                           if (index === -1) return '';
                           const dec = chart.data.datasets[0]?.data[index];
                           const dist = chart.data.datasets[1]?.data[index];
