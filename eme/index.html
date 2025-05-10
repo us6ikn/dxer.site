@@ -483,7 +483,8 @@
                   max: 30,
                   position: 'left',
                   ticks: {
-                    color: 'blue' // Optional: make tick numbers blue too
+                    color: 'blue', // Optional: make tick numbers blue too
+                    stepSize: 10 // Set step size to reduce the number of ticks
                   }
                 },
                 y1: {
@@ -554,10 +555,6 @@
                   yMax: 90
                 };
               });
-
-
-
-              console.log("Adding degradation annotations:", annotations);
 
               const chartAnn = declinationChart.options.plugins.annotation.annotations;
               annotations.forEach((ann, i) => {
