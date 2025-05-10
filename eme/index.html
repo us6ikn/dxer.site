@@ -79,6 +79,24 @@
             height: 80px;
           }
         }
+        
+        #gradientLegend {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-top: 6px;
+          font-size: 12px;
+          color: #333;
+        }
+
+        .gradient-bar {
+          flex-grow: 1;
+          height: 8px;
+          margin: 0 6px;
+          background: linear-gradient(to right, rgba(255, 0, 0, 0.05), rgba(255, 0, 0, 0.6));
+          border-radius: 4px;
+        }
+
 
     </style>
 
@@ -100,6 +118,12 @@
       <!-- Declination graph inside controls -->
       <div id="chartWrapper">
         <canvas id="declinationChart"></canvas>
+        <div id="gradientLegend">
+          <span>Low</span>
+          <div class="gradient-bar"></div>
+          <span>High</span>
+        </div>
+
       </div>
 
 
