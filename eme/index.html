@@ -397,36 +397,36 @@
 
           const ctx = document.getElementById('declinationChart').getContext('2d');
           
-          const newMoonDates = filtered
-            .filter(entry => entry.phase_name === 'New Moon')
-            .map(entry => entry.time.split(' ')[0]);
+          // Look for the transition between Waning Crescent and Waxing Crescent
+          const newMoonDates = [];
 
-            // Add new moon annotations to the chart options
-            const newMoonAnnotations = {};
-            newMoonDates.forEach((dateStr, i) => {
-              const index = labels.indexOf(dateStr);
-              if (index !== -1) {
-                newMoonAnnotations[`newMoon${i}`] = {
-                  type: 'line',
-                  xValue: dateStr, // corresponds to the label
-                  yValue: -20, // within the visible range of your y-axis (-30 to 30)
-                  borderColor: 'black',
-                  borderWidth: 2,
-                  label: {
-                    content: '🌑', // Use a Unicode for the New Moon symbol
-                    enabled: true,
-                    position: 'top',
-                    backgroundColor: 'white',
-                    font: {
-                      size: 14,
-                      weight: 'bold',
-                    },
-                    padding: 6,
-                  },
-                };
-                console.log(newMoonAnnotations);
-              }
-            });
+          for (let i = 1; i < filtered.length; i++) {
+            const previousPhase = filtered[i - 1].phase_name;
+            const currentPhase = filtered[i].phase_name;
+
+            // Check for transition from Waning Crescent to Waxing Crescent
+            if (previousPhase === 'Waning Crescent' && currentPhase === 'Waxing Crescent') {
+              const newMoonDate = filtered[i].time.split(' ')[0]; // Get the date of the transition
+              newMoonDates.push(newMoonDate);
+            }
+          }
+
+          // Now you can use newMoonDates to add annotations for New Moon
+          const newMoonAnnotations = {};
+          newMoonDates.forEach((dateStr, i) => {
+            const index = labels.indexOf(dateStr);
+            if (index !== -1) {
+              newMoonAnnotations[`newMoon${i}`] = {
+                type: 'point',
+                xValue: dateStr, // corresponds to the label
+                yValue: -28, // within the visible range of your y-axis (-30 to 30)
+                backgroundColor: 'black',
+                radius: 6,
+                borderWidth: 0,
+                pointStyle: 'circle',
+              };
+            }
+          });
             
 
 
