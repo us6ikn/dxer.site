@@ -453,9 +453,16 @@
                 }
               },
               scales: {
-                x: {
-                    type: 'category', // Add this line
-                    display: false },
+                  x: {
+                        type: 'category',
+                        ticks: {
+                          callback: function(value, index, ticks) {
+                            const label = this.getLabelForValue(value);
+                            const date = new Date(label);
+                            return date.getUTCDate(); // just the day number
+                          }
+                        }
+                      }
                 y: {
                   title: {
                     display: true,
