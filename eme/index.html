@@ -110,6 +110,48 @@
           }
         }
         
+        #hour {
+          width: 100%;
+          margin-top: 5px;
+          -webkit-appearance: none; /* For Webkit-based browsers like Chrome/Safari */
+          appearance: none; /* For Firefox */
+          height: 10px; /* Add height for better touch handling */
+          background: rgba(0, 0, 0, 0.1); /* Make background visible */
+          border-radius: 5px;
+          outline: none;
+          transition: background 0.3s ease;
+          padding: 0;
+        }
+
+        #hour::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 20px; /* Thumb width */
+          height: 20px; /* Thumb height */
+          background: #007bff;
+          border-radius: 50%;
+          cursor: pointer;
+        }
+
+        #hour::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+          background: #007bff;
+          border-radius: 50%;
+          cursor: pointer;
+        }
+
+        #hour:active {
+          background: rgba(0, 123, 255, 0.5); /* Active state background */
+        }
+
+        #hour-container {
+          position: relative;
+          width: 100%;
+          height: 40px;
+          margin-top: 10px;
+          padding: 5px 0;
+        }
 
 
     </style>
