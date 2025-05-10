@@ -351,40 +351,18 @@
             dateMap.get(dateStr).push(entry);
           });
 
-          // Extract only the day of the month from each date string
-          const labels = Array.from(dateMap.keys()).map(date => {
-            const day = new Date(date).getDate(); // Get the day of the month
-            return day.toString(); // Return as string
-          });
+          const labels = Array.from(dateMap.keys());
 
           const declinations = labels.map(date => {
             const entries = dateMap.get(date);
-            if (entries && entries.length > 0) { // Check if entries exist
-              const avgDec = entries.reduce((sum, entry) => {
-                const decValue = parseFloat(entry.dec);
-                if (!isNaN(decValue)) {
-                  return sum + decValue; // Only sum valid numbers
-                }
-                return sum; // If dec is invalid, skip it
-              }, 0) / entries.length;
-              return parseFloat(avgDec.toFixed(2));
-            }
-            return 0; // Return 0 if no valid data is found
+            const avgDec = entries.reduce((sum, entry) => sum + parseFloat(entry.dec), 0) / entries.length;
+            return parseFloat(avgDec.toFixed(2));
           });
 
           const distances = labels.map(date => {
             const entries = dateMap.get(date);
-            if (entries && entries.length > 0) { // Check if entries exist
-              const avgDist = entries.reduce((sum, entry) => {
-                const distValue = parseFloat(entry.distance_km);
-                if (!isNaN(distValue)) {
-                  return sum + distValue; // Only sum valid numbers
-                }
-                return sum; // If distance is invalid, skip it
-              }, 0) / entries.length;
-              return Math.round(avgDist);
-            }
-            return 0; // Return 0 if no valid data is found
+            const avgDist = entries.reduce((sum, entry) => sum + parseFloat(entry.distance_km), 0) / entries.length;
+            return Math.round(avgDist);
           });
 
           const ctx = document.getElementById('declinationChart').getContext('2d');
@@ -420,7 +398,7 @@
               plugins: {
                 legend: { display: false },
                 annotation: {
-                  drawTime: 'beforeDatasetsDraw', // <-- This makes boxes draw behind lines
+                drawTime: 'beforeDatasetsDraw', // <-- This makes boxes draw behind lines
                   annotations: {
                     todayLine: {
                       type: 'line',
@@ -456,20 +434,19 @@
               },
               scales: {
                 x: {
-                  type: 'category',
-                  display: true
-                },
+                    type: 'category', // Add this line
+                    display: true },
                 y: {
                   title: {
                     display: true,
                     text: 'Declination (°)',
-                    color: 'blue'
+                    color: 'blue' // ← matches blue declination line
                   },
                   min: -30,
                   max: 30,
                   position: 'left',
                   ticks: {
-                    color: 'blue'
+                    color: 'blue' // Optional: make tick numbers blue too
                   }
                 },
                 y1: {
@@ -477,7 +454,7 @@
                   title: {
                     display: true,
                     text: 'Distance (km)',
-                    color: 'green'
+                    color: 'green' // ← matches green distance line
                   },
                   min: 356400,
                   max: 406700,
@@ -486,15 +463,15 @@
                     callback: function(value) {
                       return (value / 1000).toFixed(0) + 'k';
                     },
-                    color: 'green'
+                    color: 'green' // Optional: make tick numbers green too
                   }
                 }
+
               }
             },
             plugins: [Chart.registry.getPlugin('annotation')]
           });
         }
-
 
 
         function updateDeclinationHighlight(dateStr) {
