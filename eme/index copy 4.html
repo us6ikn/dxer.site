@@ -396,27 +396,6 @@
           });
 
           const ctx = document.getElementById('declinationChart').getContext('2d');
-          
-          const newMoonDates = filtered
-            .filter(entry => entry.phase_name === 'New Moon')
-            .map(entry => entry.time.split(' ')[0]);
-
-          const newMoonAnnotations = {};
-          newMoonDates.forEach((dateStr, i) => {
-            const index = labels.indexOf(dateStr);
-            if (index !== -1) {
-              newMoonAnnotations[`newMoon${i}`] = {
-                type: 'point',
-                xValue: dateStr,
-                yValue: -32, // slightly below your min y (-30)
-                backgroundColor: 'black',
-                radius: 4,
-                borderWidth: 0,
-                pointStyle: 'circle'
-              };
-            }
-          });
-
 
           declinationChart = new Chart(ctx, {
             type: 'line',
@@ -486,7 +465,6 @@
                       }
                     }
                   }
-                  ...newMoonAnnotations // add this to include the new moons
                 }
               },
               scales: {
