@@ -397,11 +397,11 @@
                 const alpha = ((i + 1) / total).toFixed(2);  // Gradually increase opacity
                 return {
                   type: 'box',
-                  xMin: i - 0.4,
-                  xMax: i + 0.4,
+                  xMin: i - 0.5,
+                  xMax: i + 0.5,
                   backgroundColor: `rgba(255, 0, 0, ${alpha})`,
-                  borderColor: 'rgba(100, 0, 0, 0.3)',
-                  borderWidth: 0.3,
+                  borderColor: 'transparent',
+                  borderWidth: 0,
                   yScaleID: 'y',
                   yMin: -90,
                   yMax: 90
