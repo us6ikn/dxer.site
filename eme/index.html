@@ -218,19 +218,15 @@
           <label for="hour">Select Hour (UTC):</label><br />
           <input type="range" id="hour" min="0" max="23" value="0" step="1" />
           <span id="hour-value">00:00</span>
-          
-          <!-- Degradation Heatmap -->
-          <div id="degradationWrapper">
-            <div id="degradationTitle"><strong>Path Degradation</strong></div>
-            <canvas id="declinationChart"></canvas>
-            <div id="gradientLegend">
-              <span>Low</span>
-              <div class="gradient-bar"></div>
-              <span>High</span>
-            </div>
-          </div>
 
-
+      <!-- Declination graph inside controls -->
+      <div id="chartWrapper">
+        <canvas id="declinationChart"></canvas>
+        <div id="gradientLegend">
+          <span>Low</span>
+          <div class="gradient-bar"></div>
+          <span>High</span>
+        </div>
 
       </div>
 
