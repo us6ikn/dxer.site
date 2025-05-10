@@ -392,33 +392,32 @@
               const maxVal = Math.max(...degradData.map(d => d.value));
               const minVal = Math.min(...degradData.map(d => d.value));
 
-              const annotations = degradData.map(d => {
-                const norm = (d.value - minVal) / (maxVal - minVal);
-                const color = `rgba(255, 0, 0, ${0.1 + norm * 0.3})`;
-
+              const annotations = degradData.map((d, i) => {
                 return {
                   type: 'box',
                   xMin: d.date,
                   xMax: d.date,
-                  backgroundColor: color,
-                  borderColor: 'rgba(100,0,0,0.2)',
+                  backgroundColor: 'rgba(255, 0, 0, 0.5)', // bright red
+                  borderColor: 'rgba(100, 0, 0, 0.3)',
                   borderWidth: 0.3,
                   yScaleID: 'y',
-                  yMin: -30,
-                  yMax: 30
+                  yMin: -90,
+                  yMax: 90
                 };
               });
 
+              console.log("Adding degradation annotations:", annotations);
 
               const chartAnn = declinationChart.options.plugins.annotation.annotations;
               annotations.forEach((ann, i) => {
                 chartAnn[`degradBox${i}`] = ann;
               });
 
-              declinationChart.update();
+              declinationChart.update('none');
             })
             .catch(err => console.error('Error loading degradation data:', err));
         }
+
 
 
     </script>
