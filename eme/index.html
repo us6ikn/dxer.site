@@ -407,16 +407,26 @@
               const index = labels.indexOf(dateStr);
               if (index !== -1) {
                 newMoonAnnotations[`newMoon${i}`] = {
-                  type: 'point',
+                  type: 'line',
                   xValue: dateStr, // corresponds to the label
                   yValue: -28, // within the visible range of your y-axis (-30 to 30)
-                  backgroundColor: 'black',
-                  radius: 4,
-                  borderWidth: 0,
-                  pointStyle: 'circle',
+                  borderColor: 'black',
+                  borderWidth: 2,
+                  label: {
+                    content: '🌑', // Use a Unicode for the New Moon symbol
+                    enabled: true,
+                    position: 'top',
+                    backgroundColor: 'white',
+                    font: {
+                      size: 14,
+                      weight: 'bold',
+                    },
+                    padding: 6,
+                  },
                 };
               }
             });
+
 
             // Update the chart options to include new moon annotations
             declinationChart = new Chart(ctx, {
