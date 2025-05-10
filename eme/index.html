@@ -290,8 +290,8 @@
               plugins: {
                 legend: { display: false },
                 annotation: {
+                drawTime: 'beforeDatasetsDraw', // <-- This makes boxes draw behind lines
                   annotations: {
-                    drawTime: 'beforeDatasetsDraw', // <-- This makes boxes draw behind lines
                     todayLine: {
                       type: 'line',
                       xMin: '',
