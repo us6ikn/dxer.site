@@ -327,26 +327,34 @@
                 y: {
                   title: {
                     display: true,
-                    text: 'Declination (°)'
+                    text: 'Declination (°)',
+                    color: 'blue' // ← matches blue declination line
                   },
                   min: -30,
                   max: 30,
-                  position: 'left'
+                  position: 'left',
+                  ticks: {
+                    color: 'blue' // Optional: make tick numbers blue too
+                  }
                 },
                 y1: {
                   position: 'right',
                   title: {
                     display: true,
-                    text: 'Distance (km)'
+                    text: 'Distance (km)',
+                    color: 'green' // ← matches green distance line
                   },
                   min: 356400,
                   max: 406700,
                   grid: { drawOnChartArea: false },
                   ticks: {
-                    callback: function (value) {
-                      return value.toLocaleString();
-                    }
+                    callback: function(value) {
+                      return (value / 1000).toFixed(0) + 'k';
+                    },
+                    color: 'green' // Optional: make tick numbers green too
                   }
+                }
+
                 }
               }
             },
