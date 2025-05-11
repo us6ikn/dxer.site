@@ -637,14 +637,14 @@
 
             // Add marker
             new google.maps.Marker({
-              position: { lat: station.lat, lng: station.lng },
+              position: { lat: position.lat, lng: position.lng },  // Use position instead of station
               map: map,
             });
-
           });
         })
         .catch(error => console.error('Failed to load station data:', error));
     </script>
+
 
 
     <!-- Google Maps API -->
