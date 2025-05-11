@@ -419,11 +419,11 @@
                 newMoonAnnotations[`newMoon${i}`] = {
                   type: 'label',
                   xValue: dateStr,
-                  yValue: -30,
+                  yValue: 0,
                   content: ['🌑'], // Unicode new moon
                   backgroundColor: 'transparent',
                   font: {
-                    size: 16
+                    size: 14
                   },
                   color: 'black',
                   textAlign: 'center',
@@ -463,7 +463,6 @@
                 ],
               },
               options: {
-                  clip: false,
                 responsive: true,
                 maintainAspectRatio: false,
                 layout: {
