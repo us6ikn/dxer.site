@@ -682,7 +682,7 @@
               }
             });
 
-            // Create the InfoWindow content
+            // Create the InfoWindow content with a placeholder for the image
             const infoContent = `
               <div>
                 <div style="font-weight:bold; font-size: 16px;">${callsign}</div>
@@ -691,14 +691,15 @@
                 <div>Power: ${power}</div>
                 <div>Website: <a href="${website}" target="_blank">${website}</a></div>
                 <div><a href="https://www.qrz.com/db/${callsign}" target="_blank">QRZ.com lookup</a></div>
-            <div>
-                          Station Picture (clickable):<br>
-                          <a href="https://dxer.site/db/${callsign}.jpg" target="_blank">
-                            <img src="https://dxer.site/db/${callsign}_thumb.jpg"
-                                 alt="Station Picture"
-                                 style="max-width: 100px; height: auto; border: 1px solid #ccc;"/>
-                          </a>
-                        </div>
+                <div>
+                  Station Picture (clickable):<br>
+                  <a href="https://dxer.site/db/${callsign}.jpg" target="_blank">
+                    <img id="station-image-${callsign}"
+                         src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA" <!-- Small base64 transparent image -->
+                         alt="Station Picture"
+                         style="max-width: 100px; height: auto; border: 1px solid #ccc;"/>
+                  </a>
+                </div>
               </div>
             `;
 
@@ -708,12 +709,21 @@
 
             // Add click event to display InfoWindow
             marker.addListener('click', () => {
+              // Only load the image when the info window is opened
+              const imageElement = document.getElementById(`station-image-${callsign}`);
+
+              // Avoid the image loading if it's already loaded (to prevent unnecessary reload)
+              if (imageElement.src.includes('data:image')) {
+                imageElement.src = `https://dxer.site/db/${callsign}_thumb.jpg`;
+              }
+
               infoWindow.open(map, marker);
             });
           });
         })
         .catch(error => console.error('Failed to load station data:', error));
     </script>
+
 
 
 
