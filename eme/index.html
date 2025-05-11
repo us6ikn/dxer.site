@@ -237,6 +237,7 @@
       let moonMarker;
       let footprintCircle;
       let declinationChart;
+      let currentInfoWindow = null;
 
       function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
@@ -614,6 +615,12 @@
               const infoWindow = new google.maps.InfoWindow({
                 content: infoContent
               });
+              
+              marker.addListener('click', () => {
+                // Close previously open InfoWindow
+                if (currentInfoWindow) {
+                  currentInfoWindow.close();
+                }
 
               // Add click event to display InfoWindow
               marker.addListener('click', () => {
@@ -745,10 +752,6 @@
         });
 
 
-    </script>
-    
-    <script>
-      
     </script>
 
 
