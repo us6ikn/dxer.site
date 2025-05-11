@@ -176,6 +176,22 @@
 
 
     </style>
+    
+    <style>
+      .gm-style-iw {
+        padding: 5px !important;
+        max-width: 200px;
+      }
+
+      .gm-style-iw-d {
+        overflow: hidden !important;
+      }
+
+      .gm-ui-hover-effect {
+        display: none !important; /* hides the default close button */
+      }
+    </style>
+
 
     <!-- Chart.js and Annotation Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -646,7 +662,7 @@
 
             // Add click listener to open info window with bold callsign
             marker.addListener('click', () => {
-              infoWindow.setContent(`<strong>${call}</strong>`);
+                infoWindow.setContent(`<div style="font-weight:bold;">${call}</div>`);
               infoWindow.open(map, marker);
             });
           });
