@@ -621,9 +621,9 @@
             // Assuming these fields are in known column positions
             const callsign = columns[0];  // Adjust according to actual column
             const locator = columns[1];   // Adjust according to actual column
-            const antenna = columns[2];   // Adjust according to actual column
-            const power = columns[3];     // Adjust according to actual column
-            const website = columns[4];   // Adjust according to actual column
+            const antenna = columns[3];   // Adjust according to actual column
+            const power = columns[4];     // Adjust according to actual column
+            const website = columns[5];   // Adjust according to actual column
 
             // Find the last column (assumed to be the coordinate string)
             const coordStr = columns[columns.length - 1];
@@ -653,10 +653,10 @@
             const infoContent = `
               <div>
                 <div style="font-weight:bold; font-size: 16px;">${callsign}</div>
-                <div><strong>Locator:</strong> ${locator}</div>
-                <div><strong>Antenna:</strong> ${antenna}</div>
-                <div><strong>Power:</strong> ${power}</div>
-                <div><strong>Website:</strong> <a href="${website}" target="_blank">${website}</a></div>
+                <div>Locator: ${locator}</div>
+                <div>Antenna: ${antenna}</div>
+                <div>Power: ${power}</div>
+                <div>Website: <a href="${website}" target="_blank">${website}</a></div>
               </div>
             `;
 
