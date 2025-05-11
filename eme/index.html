@@ -606,60 +606,49 @@
     </script>
     
     <script>
-      // Function to convert grid locator to lat/lng
-      function gridToLatLng(gridLocator) {
-          if (!gridLocator || gridLocator.length < 6) return null;
+        const markerIcon = "https://dxer.site/img/m_30.png";  // Define the marker icon
 
-          const lat1 = (gridLocator.charCodeAt(1) - 65) * 10;  // Latitude major part (first letter)
-          const lat2 = ((gridLocator.charCodeAt(5) - 97) / 24);  // Latitude fractional part (second letter)
-          const lat3 = parseInt(gridLocator.charAt(3));  // Latitude minor part (third character)
-          const latitude = lat1 + lat3 + lat2 - 90;  // Adjust for southern hemisphere
+        // Load and process file
+        fetch('output_2_10GHz.txt')
+          .then(response => response.text())
+          .then(data => {
+            const lines = data.trim().split('\n');
+            lines.forEach((line, index) => {
+              if (index === 0) return; // skip header
 
-          const lon1 = (gridLocator.charCodeAt(0) - 65) * 20;  // Longitude major part (first letter)
-          const lon2 = parseInt(gridLocator.charAt(2)) * 2;  // Longitude second number (multiplied by 2)
-          const lon3 = ((gridLocator.charCodeAt(4) - 97) / 12);  // Longitude fractional part (third letter)
-          const longitude = lon1 + lon2 + lon3 - 180;  // Adjust for western hemisphere
+              const columns = line.split('\t');
+              if (columns.length < 7) return;
 
-          return { lat: latitude, lng: longitude };
-      }
+              const [call, locator, name, antenna, power, website, coordStr] = columns;
 
+              const [latStr, lngStr] = coordStr.split(',');
+              const lat = parseFloat(latStr);
+              const lng = parseFloat(lngStr);
+              if (isNaN(lat) || isNaN(lng)) return;
 
-      const markerIcon = "https://dxer.site/img/m_30.png";  // Define the marker icon
+              // Add offset to position for subsequent markers
+              const offsetLat = 0.1; // Example offset value for latitude
+              const offsetLng = 0.1; // Example offset value for longitude
 
-      // Load and process file (example using fetch, assuming hosted or local with server)
-      fetch('output_2_10GHz.txt')
-        .then(response => response.text())
-        .then(data => {
-          const lines = data.trim().split('\n');
-          lines.forEach((line, index) => {
-            if (index === 0) return; // skip header
+              const markerPosition = {
+                lat: lat + (offsetLat / 10000),
+                lng: lng + (offsetLng / 10000)
+              };
 
-            const [call, locator, name, antenna, power, website] = line.split('\t');
-            const position = gridToLatLng(locator);
-            if (!position) return;
-
-            // Add offset to position for subsequent markers
-            const offsetLat = 0.1; // Example offset value for latitude
-            const offsetLng = 0.1; // Example offset value for longitude
-
-            const markerPosition = {
-              lat: position.lat + (offsetLat / 10000),  // Adjust latitude by offset
-              lng: position.lng + (offsetLng / 10000)  // Adjust longitude by offset
-            };
-
-            // Add marker with adjusted position
-            new google.maps.Marker({
-              position: markerPosition,
-              map: map,
-              icon: {
-                url: markerIcon,
-                scaledSize: new google.maps.Size(20, 20)
-              }
+              // Add marker with adjusted position
+              new google.maps.Marker({
+                position: markerPosition,
+                map: map,
+                icon: {
+                  url: markerIcon,
+                  scaledSize: new google.maps.Size(20, 20)
+                }
+              });
             });
-          });
-        })
-        .catch(error => console.error('Failed to load station data:', error));
+          })
+          .catch(error => console.error('Failed to load station data:', error));
     </script>
+
 
 
 
