@@ -238,14 +238,6 @@
 
     </div>
 
-    <script>
-      document.getElementById('toggleChartBtn').addEventListener('click', function () {
-        const chartWrapper = document.getElementById('chartWrapper');
-        chartWrapper.classList.toggle('collapsed');
-
-        this.textContent = chartWrapper.classList.contains('collapsed') ? 'Show Chart' : 'Hide Chart';
-      });
-    </script>
 
     <script>
       let map;
@@ -768,6 +760,14 @@
 
 
 
+    <script>
+      document.getElementById('toggleChartBtn').addEventListener('click', function () {
+        const chartWrapper = document.getElementById('chartWrapper');
+        chartWrapper.classList.toggle('collapsed');
+
+        this.textContent = chartWrapper.classList.contains('collapsed') ? 'Show Chart' : 'Hide Chart';
+      });
+    </script>
 
 
 
