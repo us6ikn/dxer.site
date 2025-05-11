@@ -584,37 +584,35 @@
               });
 
               const chartLabels = declinationChart.data.labels;
+              const annotations = [];
 
-              const values = chartLabels.map(label => {
-                const match = degradData.find(d => d.date === label);
-                return match ? match.value : null;
+              degradData.forEach(d => {
+                const index = chartLabels.indexOf(d.date);
+                if (index !== -1) {
+                  const alpha = (d.value / 10).toFixed(2); // scale to 0–1 range as needed
+                  annotations.push({
+                    type: 'box',
+                    xMin: index - 0.5,
+                    xMax: index + 0.5,
+                    backgroundColor: `rgba(255, 0, 0, ${alpha})`,
+                    borderColor: 'transparent',
+                    borderWidth: 0,
+                    yScaleID: 'y',
+                    yMin: -90,
+                    yMax: 90
+                  });
+                }
               });
 
-              // Add degradation dataset
-              declinationChart.data.datasets.push({
-                label: 'Degradation',
-                data: values,
-                backgroundColor: 'rgba(255, 0, 0, 0.3)',
-                borderColor: 'rgba(255,0,0,0)',
-                yAxisID: 'y2',
-                type: 'line',
-                pointRadius: 0,
-                tension: 0.2,
-                fill: true,
+              const chartAnn = declinationChart.options.plugins.annotation.annotations;
+              annotations.forEach((ann, i) => {
+                chartAnn[`degradBox${i}`] = ann;
               });
 
-              // Add y2 axis with no ticks
-              declinationChart.options.scales['y2'] = {
-                display: false,
-                min: 1,
-                max: 16,
-              };
-
-              declinationChart.update();
+              declinationChart.update('none');
             })
             .catch(err => console.error('Error loading degradation data:', err));
         }
-
 
 
         document.getElementById('prevDay').addEventListener('click', function() {
