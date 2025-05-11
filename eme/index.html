@@ -622,6 +622,14 @@
 
         return { lat: latitude, lng: longitude };
       }
+        
+        markerIcon: "img/m_30.png"
+        
+        // Add offset to position for subsequent markers
+        const markerPosition = {
+            lat: parseFloat(lat) + (offsetLat / 10000), // Adjust offset by dividing by a factor
+            lng: parseFloat(lng) + (offsetLng / 10000)  // Adjust offset by dividing by a factor
+        };
 
       // Load and process file (example using fetch, assuming hosted or local with server)
       fetch('output_2_10GHz.txt')
@@ -637,8 +645,12 @@
 
             // Add marker
             new google.maps.Marker({
-              position: { lat: position.lat, lng: position.lng },  // Use position instead of station
+                position: markerPosition,
               map: map,
+              icon: {
+                  url: markerIcon,
+                  scaledSize: new google.maps.Size(20, 20)
+              }
             });
           });
         })
