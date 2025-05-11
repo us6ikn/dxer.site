@@ -617,25 +617,22 @@
               if (index === 0) return; // skip header
 
               const columns = line.split('\t');
-              if (columns.length < 7) return;
 
-              const [call, locator, name, antenna, power, website, coordStr] = columns;
+              // Find the last column (assumed to be the coordinate string)
+              const coordStr = columns[columns.length - 1];
 
               const [latStr, lngStr] = coordStr.split(',');
               const lat = parseFloat(latStr);
               const lng = parseFloat(lngStr);
               if (isNaN(lat) || isNaN(lng)) return;
 
-              // Add offset to position for subsequent markers
-              const offsetLat = 0.1; // Example offset value for latitude
-              const offsetLng = 0.1; // Example offset value for longitude
-
+              const offsetLat = 0.1;
+              const offsetLng = 0.1;
               const markerPosition = {
                 lat: lat + (offsetLat / 10000),
                 lng: lng + (offsetLng / 10000)
               };
 
-              // Add marker with adjusted position
               new google.maps.Marker({
                 position: markerPosition,
                 map: map,
@@ -646,6 +643,7 @@
               });
             });
           })
+
           .catch(error => console.error('Failed to load station data:', error));
     </script>
 
