@@ -616,14 +616,13 @@
                 content: infoContent
               });
               
-              marker.addListener('click', () => {
-                // Close previously open InfoWindow
-                if (currentInfoWindow) {
-                  currentInfoWindow.close();
-                }
+
 
               // Add click event to display InfoWindow
               marker.addListener('click', () => {
+                  if (currentInfoWindow) {
+                    currentInfoWindow.close();
+                  }
                 // Open the InfoWindow
                 infoWindow.open(map, marker);
                 
