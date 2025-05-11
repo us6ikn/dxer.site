@@ -608,20 +608,21 @@
     <script>
       // Function to convert grid locator to lat/lng
       function gridToLatLng(gridLocator) {
-        if (!gridLocator || gridLocator.length < 6) return null;
+          if (!gridLocator || gridLocator.length < 6) return null;
 
-        const lat1 = (gridLocator.charCodeAt(1) - 65) * 10;
-        const lat2 = ((gridLocator.charCodeAt(5) - 97) / 24) + (1 / 48) - 90;
-        const lat3 = parseInt(gridLocator.charAt(3));
-        const latitude = lat1 + lat3 + lat2;
+          const lat1 = (gridLocator.charCodeAt(1) - 65) * 10;  // Latitude major part (first letter)
+          const lat2 = ((gridLocator.charCodeAt(5) - 97) / 24);  // Latitude fractional part (second letter)
+          const lat3 = parseInt(gridLocator.charAt(3));  // Latitude minor part (third character)
+          const latitude = lat1 + lat3 + lat2 - 90;  // Adjust for southern hemisphere
 
-        const lon1 = (gridLocator.charCodeAt(0) - 65) * 20;
-        const lon2 = parseInt(gridLocator.charAt(2)) * 2;
-        const lon3 = ((gridLocator.charCodeAt(4) - 97) / 12) + (1 / 24);
-        const longitude = lon1 + lon2 + lon3 - 180;
+          const lon1 = (gridLocator.charCodeAt(0) - 65) * 20;  // Longitude major part (first letter)
+          const lon2 = parseInt(gridLocator.charAt(2)) * 2;  // Longitude second number (multiplied by 2)
+          const lon3 = ((gridLocator.charCodeAt(4) - 97) / 12);  // Longitude fractional part (third letter)
+          const longitude = lon1 + lon2 + lon3 - 180;  // Adjust for western hemisphere
 
-        return { lat: latitude, lng: longitude };
+          return { lat: latitude, lng: longitude };
       }
+
 
       const markerIcon = "https://dxer.site/img/m_30.png";  // Define the marker icon
 
