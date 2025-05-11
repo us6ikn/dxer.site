@@ -709,15 +709,18 @@
 
             // Add click event to display InfoWindow
             marker.addListener('click', () => {
-              // Only load the image when the info window is opened
-              const imageElement = document.getElementById(`station-image-${callsign}`);
-
-              // Avoid the image loading if it's already loaded (to prevent unnecessary reload)
-              if (imageElement.src.includes('data:image')) {
-                imageElement.src = `https://dxer.site/db/${callsign}_thumb.jpg`;
-              }
-
+              // Open the InfoWindow
               infoWindow.open(map, marker);
+
+              // Use setTimeout to ensure the InfoWindow content is fully rendered before accessing the image
+              setTimeout(() => {
+                const imageElement = document.getElementById(`station-image-${callsign}`);
+
+                // Ensure the element exists before updating the src
+                if (imageElement && imageElement.src.includes('data:image')) {
+                  imageElement.src = `https://dxer.site/db/${callsign}_thumb.jpg`;
+                }
+              }, 100); // Delay to ensure InfoWindow content is rendered
             });
           });
         })
