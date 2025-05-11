@@ -636,19 +636,11 @@
             if (!position) return;
 
             // Add marker
-            L.marker(position, {
-              icon: L.icon({
-                iconUrl: 'https://dxer.site/img/m_30.png',
-                iconSize: [30, 30],
-                iconAnchor: [15, 15]
-              })
-            }).addTo(map).bindPopup(`
-              <b>${call}</b><br>
-              Name: ${name}<br>
-              Locator: ${locator}<br>
-              Antenna: ${antenna}<br>
-              Power: ${power ? power + 'W' : 'N/A'}
-            `);
+            new google.maps.Marker({
+              position: { lat: station.lat, lng: station.lng },
+              map: map,
+            });
+
           });
         })
         .catch(error => console.error('Failed to load station data:', error));
