@@ -606,46 +606,54 @@
     </script>
     
     <script>
-        const markerIcon = "https://dxer.site/img/m_30.png";  // Define the marker icon
+      const markerIcon = "https://dxer.site/img/m_30.png";  // Define the marker icon
 
-        // Load and process file
-        fetch('output_2_10GHz.txt')
-          .then(response => response.text())
-          .then(data => {
-            const lines = data.trim().split('\n');
-            lines.forEach((line, index) => {
-              if (index === 0) return; // skip header
+      // Load and process file
+      fetch('output_2_10GHz.txt')
+        .then(response => response.text())
+        .then(data => {
+          const lines = data.trim().split('\n');
+          lines.forEach((line, index) => {
+            if (index === 0) return; // skip header
 
-              const columns = line.split('\t');
+            const columns = line.split('\t');
 
-              // Find the last column (assumed to be the coordinate string)
-              const coordStr = columns[columns.length - 1];
+            // Extract fields with fallback to empty strings
+            const call = columns[0] || '';
+            const locator = columns[1] || '';
+            const name = columns[2] || '';
+            const antenna = columns[3] || '';
+            const power = columns[4] || '';
+            const website = columns[5] || '';
+            const coordStr = columns[6] || '';
 
-              const [latStr, lngStr] = coordStr.split(',');
-              const lat = parseFloat(latStr);
-              const lng = parseFloat(lngStr);
-              if (isNaN(lat) || isNaN(lng)) return;
+            // Validate and parse coordinates
+            if (!coordStr.includes(',')) return;
+            const [latStr, lngStr] = coordStr.split(',');
+            const lat = parseFloat(latStr);
+            const lng = parseFloat(lngStr);
+            if (isNaN(lat) || isNaN(lng)) return;
 
-              const offsetLat = 0.1;
-              const offsetLng = 0.1;
-              const markerPosition = {
-                lat: lat + (offsetLat / 10000),
-                lng: lng + (offsetLng / 10000)
-              };
+            const offsetLat = 0.1;
+            const offsetLng = 0.1;
+            const markerPosition = {
+              lat: lat + (offsetLat / 10000),
+              lng: lng + (offsetLng / 10000)
+            };
 
-              new google.maps.Marker({
-                position: markerPosition,
-                map: map,
-                icon: {
-                  url: markerIcon,
-                  scaledSize: new google.maps.Size(20, 20)
-                }
-              });
+            new google.maps.Marker({
+              position: markerPosition,
+              map: map,
+              icon: {
+                url: markerIcon,
+                scaledSize: new google.maps.Size(20, 20)
+              }
             });
-          })
-
-          .catch(error => console.error('Failed to load station data:', error));
+          });
+        })
+        .catch(error => console.error('Failed to load station data:', error));
     </script>
+
 
 
 
