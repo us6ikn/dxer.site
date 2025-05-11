@@ -714,6 +714,12 @@
             marker.addListener('click', () => {
               // Open the InfoWindow
               infoWindow.open(map, marker);
+              
+              // Set a higher z-index to ensure the info window is always on top
+                        const infoWindowElement = document.querySelector('.gm-style-iw');
+                        if (infoWindowElement) {
+                          infoWindowElement.style.zIndex = 999999;  // A very high value
+                        }
 
               // Use setTimeout to ensure the InfoWindow content is fully rendered before accessing the image
               setTimeout(() => {
@@ -727,8 +733,9 @@
                 fetch(imageUrl, { method: 'HEAD' })  // Check if the image exists
                   .then(response => {
                     if (!response.ok) {
-                      // Image doesn't exist, show "Add Image" link
+                      // Image doesn't exist, remove the image element and show "Add Image" link
                       imageElement.style.display = 'none';
+                      imageElement.remove(); // This removes the image element from the DOM
                       placeholder.style.display = 'block';
                     } else {
                       // Image exists, show it
@@ -740,6 +747,7 @@
                   .catch(() => {
                     // In case the fetch fails, assume the image is missing
                     imageElement.style.display = 'none';
+                    imageElement.remove(); // This removes the image element from the DOM
                     placeholder.style.display = 'block';
                   });
               }, 100); // Delay to ensure InfoWindow content is rendered
