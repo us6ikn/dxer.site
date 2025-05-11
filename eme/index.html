@@ -616,15 +616,16 @@
                 content: infoContent
               });
               
-
-
               // Add click event to display InfoWindow
               marker.addListener('click', () => {
-                  if (currentInfoWindow) {
-                    currentInfoWindow.close();
-                  }
+                  
+                  // Close previously open InfoWindow
+                    if (currentInfoWindow) {
+                      currentInfoWindow.close();
+                    }
                 // Open the InfoWindow
                 infoWindow.open(map, marker);
+                currentInfoWindow = infoWindow;
                 
                 // Set a higher z-index to ensure the info window is always on top
                           const infoWindowElement = document.querySelector('.gm-style-iw');
