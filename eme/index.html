@@ -64,35 +64,6 @@
           box-sizing: border-box;
         }
 
-
-        #gradientLegend {
-          position: relative; /* Keep it relative */
-          margin-bottom: 0px; /* Spacing between the legend and chart */
-          left: 0;
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          font-size: 12px;
-          color: #333;
-          padding: 5px 10px;
-          background: rgba(255, 255, 255, 0.8);
-          border-radius: 6px 6px 0 0; /* Rounded top corners */
-          box-sizing: border-box;
-        }
-
-
-
-        .gradient-bar {
-          flex-grow: 1;
-          height: 8px;
-          margin: 0 6px;
-          background: linear-gradient(to right, rgba(255, 0, 0, 0.05), rgba(255, 0, 0, 0.6));
-          border-radius: 4px;
-        }
-
-
-
         #declinationChart {
           width: 100%;
           height: calc(100% - 40px); /* Adjust for space needed for the legend */
@@ -226,14 +197,7 @@
 
       <!-- Declination graph inside controls -->
       <div id="chartWrapper">
-          <span style="font-size: 12px; display: block; text-align: center;">Degradation</span>
-
-        <div id="gradientLegend">
-            
-          <span>Low</span>
-          <div class="gradient-bar"></div>
-          <span>High</span>
-        </div>
+          <span style="font-size: 12px; display: block; text-align: center; color: rgba(255, 0, 0, 0.6); font-weight: bold;">Degradation</span>
         <canvas id="declinationChart"></canvas>
       </div>
 
