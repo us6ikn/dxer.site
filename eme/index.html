@@ -176,22 +176,6 @@
 
 
     </style>
-    
-    <style>
-      .gm-style-iw {
-        padding: 5px !important;
-        max-width: 200px;
-      }
-
-      .gm-style-iw-d {
-        overflow: hidden !important;
-      }
-
-      .gm-ui-hover-effect {
-        display: none !important; /* hides the default close button */
-      }
-    </style>
-
 
     <!-- Chart.js and Annotation Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -624,21 +608,26 @@
     <script>
       const markerIcon = "https://dxer.site/img/m_30.png";  // Define the marker icon
 
+      // Load and process file
       fetch('output_2_10GHz.txt')
         .then(response => response.text())
         .then(data => {
           const lines = data.trim().split('\n');
-          const infoWindow = new google.maps.InfoWindow(); // Single InfoWindow instance
-
           lines.forEach((line, index) => {
             if (index === 0) return; // skip header
 
             const columns = line.split('\t');
 
-            const call = columns[0] || '';  // Callsign
-            const coordStr = columns[columns.length - 1] || '';
+            // Assuming these fields are in known column positions
+            const callsign = columns[0];  // Adjust according to actual column
+            const locator = columns[1];   // Adjust according to actual column
+            const antenna = columns[2];   // Adjust according to actual column
+            const power = columns[3];     // Adjust according to actual column
+            const website = columns[4];   // Adjust according to actual column
 
-            if (!coordStr.includes(',')) return;
+            // Find the last column (assumed to be the coordinate string)
+            const coordStr = columns[columns.length - 1];
+
             const [latStr, lngStr] = coordStr.split(',');
             const lat = parseFloat(latStr);
             const lng = parseFloat(lngStr);
@@ -660,9 +649,23 @@
               }
             });
 
-            // Add click listener to open info window with bold callsign
+            // Create the InfoWindow content
+            const infoContent = `
+              <div>
+                <div style="font-weight:bold; font-size: 16px;">${callsign}</div>
+                <div><strong>Locator:</strong> ${locator}</div>
+                <div><strong>Antenna:</strong> ${antenna}</div>
+                <div><strong>Power:</strong> ${power}</div>
+                <div><strong>Website:</strong> <a href="${website}" target="_blank">${website}</a></div>
+              </div>
+            `;
+
+            const infoWindow = new google.maps.InfoWindow({
+              content: infoContent
+            });
+
+            // Add click event to display InfoWindow
             marker.addListener('click', () => {
-                infoWindow.setContent(`<div style="font-weight:bold;">${call}</div>`);
               infoWindow.open(map, marker);
             });
           });
