@@ -762,11 +762,18 @@
     <script>
       document.getElementById('toggleChartBtn').addEventListener('click', function () {
         const chartWrapper = document.getElementById('chartWrapper');
-        chartWrapper.classList.toggle('collapsed');
+        const btn = this;
 
-        this.textContent = chartWrapper.classList.contains('collapsed') ? 'Show Chart' : 'Hide Chart';
+        if (chartWrapper.style.display === 'none') {
+          chartWrapper.style.display = 'block';
+          btn.textContent = 'Hide Chart';
+        } else {
+          chartWrapper.style.display = 'none';
+          btn.textContent = 'Show Chart';
+        }
       });
     </script>
+
 
 
 
