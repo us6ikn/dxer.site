@@ -639,12 +639,12 @@
             if (!position) return;
 
             // Add offset to position for subsequent markers
-            const offsetLat = 0.001; // Example offset value for latitude
-            const offsetLng = 0.001; // Example offset value for longitude
+            const offsetLat = 0.1; // Example offset value for latitude
+            const offsetLng = 0.1; // Example offset value for longitude
 
             const markerPosition = {
-              lat: position.lat,// + (offsetLat / 10000),  // Adjust latitude by offset
-              lng: position.lng// + (offsetLng / 10000)  // Adjust longitude by offset
+              lat: position.lat + (offsetLat / 10000),  // Adjust latitude by offset
+              lng: position.lng + (offsetLng / 10000)  // Adjust longitude by offset
             };
 
             // Add marker with adjusted position
