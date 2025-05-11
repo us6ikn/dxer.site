@@ -546,6 +546,120 @@
 
         }
 
+        const markerIcon = "https://dxer.site/img/m_30.png";  // Define the marker icon
+
+        // Load and process file
+        fetch('output_2_10GHz.txt')
+          .then(response => response.text())
+          .then(data => {
+            const lines = data.trim().split('\n');
+            lines.forEach((line, index) => {
+              if (index === 0) return; // skip header
+
+              const columns = line.split('\t');
+
+              // Assuming these fields are in known column positions
+              const callsign = columns[0];  // Adjust according to actual column
+              const locator = columns[1];   // Adjust according to actual column
+              const antenna = columns[3];   // Adjust according to actual column
+              const power = columns[4];     // Adjust according to actual column
+              const website = columns[5];   // Adjust according to actual column
+
+              // Find the last column (assumed to be the coordinate string)
+              const coordStr = columns[columns.length - 1];
+
+              const [latStr, lngStr] = coordStr.split(',');
+              const lat = parseFloat(latStr);
+              const lng = parseFloat(lngStr);
+              if (isNaN(lat) || isNaN(lng)) return;
+
+              const offsetLat = 0.1;
+              const offsetLng = 0.1;
+              const markerPosition = {
+                lat: lat + (offsetLat / 10000),
+                lng: lng + (offsetLng / 10000)
+              };
+
+              const marker = new google.maps.Marker({
+                position: markerPosition,
+                map: map,
+                icon: {
+                  url: markerIcon,
+                  scaledSize: new google.maps.Size(20, 20)
+                }
+              });
+
+              // Create the InfoWindow content with a placeholder for the image
+              const infoContent = `
+                <div>
+                  <div style="font-weight:bold; font-size: 16px;">${callsign}</div>
+                  <div>Locator: ${locator}</div>
+                  <div>Antenna: ${antenna}</div>
+                  <div>Power: ${power}</div>
+                  <div>Website: <a href="${website}" target="_blank">${website}</a></div>
+                  <div><a href="https://www.qrz.com/db/${callsign}" target="_blank">QRZ.com lookup</a></div>
+                  <div id="image-container-${callsign}">
+                    Station Picture (clickable):<br>
+                    <a href="https://dxer.site/db/${callsign}.jpg" target="_blank">
+                      <img id="station-image-${callsign}"
+                           src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"/>
+                    </a>
+                    <div id="image-placeholder-${callsign}" style="display:none;">
+                      <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
+                    </div>
+                  </div>
+                </div>
+              `;
+
+              const infoWindow = new google.maps.InfoWindow({
+                content: infoContent
+              });
+
+              // Add click event to display InfoWindow
+              marker.addListener('click', () => {
+                // Open the InfoWindow
+                infoWindow.open(map, marker);
+                
+                // Set a higher z-index to ensure the info window is always on top
+                          const infoWindowElement = document.querySelector('.gm-style-iw');
+                          if (infoWindowElement) {
+                            infoWindowElement.style.zIndex = 9999999;  // A very high value
+                          }
+
+                // Use setTimeout to ensure the InfoWindow content is fully rendered before accessing the image
+                setTimeout(() => {
+                  const imageElement = document.getElementById(`station-image-${callsign}`);
+                  const placeholder = document.getElementById(`image-placeholder-${callsign}`);
+                  const imageContainer = document.getElementById(`image-container-${callsign}`);
+
+                  // Check if the thumbnail image exists
+                  const imageUrl = `https://dxer.site/db/${callsign}_thumb.jpg`;
+
+                  fetch(imageUrl, { method: 'HEAD' })  // Check if the image exists
+                    .then(response => {
+                      if (!response.ok) {
+                        // Image doesn't exist, remove the image element and show "Add Image" link
+                        imageElement.style.display = 'none';
+                        imageElement.remove(); // This removes the image element from the DOM
+                        placeholder.style.display = 'block';
+                      } else {
+                        // Image exists, show it
+                        imageElement.style.display = 'block';
+                        placeholder.style.display = 'none';
+                        imageElement.src = imageUrl;
+                      }
+                    })
+                    .catch(() => {
+                      // In case the fetch fails, assume the image is missing
+                      imageElement.style.display = 'none';
+                      imageElement.remove(); // This removes the image element from the DOM
+                      placeholder.style.display = 'block';
+                    });
+                }, 100); // Delay to ensure InfoWindow content is rendered
+              });
+            });
+          })
+          .catch(error => console.error('Failed to load station data:', error));
 
         function updateDeclinationHighlight(dateStr) {
           if (!declinationChart) return;
@@ -630,120 +744,11 @@
           window.open('https://forms.gle/vLCqCySPEkH926AX8', '_blank');
         });
 
-      const markerIcon = "https://dxer.site/img/m_30.png";  // Define the marker icon
 
-      // Load and process file
-      fetch('output_2_10GHz.txt')
-        .then(response => response.text())
-        .then(data => {
-          const lines = data.trim().split('\n');
-          lines.forEach((line, index) => {
-            if (index === 0) return; // skip header
-
-            const columns = line.split('\t');
-
-            // Assuming these fields are in known column positions
-            const callsign = columns[0];  // Adjust according to actual column
-            const locator = columns[1];   // Adjust according to actual column
-            const antenna = columns[3];   // Adjust according to actual column
-            const power = columns[4];     // Adjust according to actual column
-            const website = columns[5];   // Adjust according to actual column
-
-            // Find the last column (assumed to be the coordinate string)
-            const coordStr = columns[columns.length - 1];
-
-            const [latStr, lngStr] = coordStr.split(',');
-            const lat = parseFloat(latStr);
-            const lng = parseFloat(lngStr);
-            if (isNaN(lat) || isNaN(lng)) return;
-
-            const offsetLat = 0.1;
-            const offsetLng = 0.1;
-            const markerPosition = {
-              lat: lat + (offsetLat / 10000),
-              lng: lng + (offsetLng / 10000)
-            };
-
-            const marker = new google.maps.Marker({
-              position: markerPosition,
-              map: map,
-              icon: {
-                url: markerIcon,
-                scaledSize: new google.maps.Size(20, 20)
-              }
-            });
-
-            // Create the InfoWindow content with a placeholder for the image
-            const infoContent = `
-              <div>
-                <div style="font-weight:bold; font-size: 16px;">${callsign}</div>
-                <div>Locator: ${locator}</div>
-                <div>Antenna: ${antenna}</div>
-                <div>Power: ${power}</div>
-                <div>Website: <a href="${website}" target="_blank">${website}</a></div>
-                <div><a href="https://www.qrz.com/db/${callsign}" target="_blank">QRZ.com lookup</a></div>
-                <div id="image-container-${callsign}">
-                  Station Picture (clickable):<br>
-                  <a href="https://dxer.site/db/${callsign}.jpg" target="_blank">
-                    <img id="station-image-${callsign}"
-                         src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"/>
-                  </a>
-                  <div id="image-placeholder-${callsign}" style="display:none;">
-                    <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
-                  </div>
-                </div>
-              </div>
-            `;
-
-            const infoWindow = new google.maps.InfoWindow({
-              content: infoContent
-            });
-
-            // Add click event to display InfoWindow
-            marker.addListener('click', () => {
-              // Open the InfoWindow
-              infoWindow.open(map, marker);
-              
-              // Set a higher z-index to ensure the info window is always on top
-                        const infoWindowElement = document.querySelector('.gm-style-iw');
-                        if (infoWindowElement) {
-                          infoWindowElement.style.zIndex = 9999999;  // A very high value
-                        }
-
-              // Use setTimeout to ensure the InfoWindow content is fully rendered before accessing the image
-              setTimeout(() => {
-                const imageElement = document.getElementById(`station-image-${callsign}`);
-                const placeholder = document.getElementById(`image-placeholder-${callsign}`);
-                const imageContainer = document.getElementById(`image-container-${callsign}`);
-
-                // Check if the thumbnail image exists
-                const imageUrl = `https://dxer.site/db/${callsign}_thumb.jpg`;
-
-                fetch(imageUrl, { method: 'HEAD' })  // Check if the image exists
-                  .then(response => {
-                    if (!response.ok) {
-                      // Image doesn't exist, remove the image element and show "Add Image" link
-                      imageElement.style.display = 'none';
-                      imageElement.remove(); // This removes the image element from the DOM
-                      placeholder.style.display = 'block';
-                    } else {
-                      // Image exists, show it
-                      imageElement.style.display = 'block';
-                      placeholder.style.display = 'none';
-                      imageElement.src = imageUrl;
-                    }
-                  })
-                  .catch(() => {
-                    // In case the fetch fails, assume the image is missing
-                    imageElement.style.display = 'none';
-                    imageElement.remove(); // This removes the image element from the DOM
-                    placeholder.style.display = 'block';
-                  });
-              }, 100); // Delay to ensure InfoWindow content is rendered
-            });
-          });
-        })
-        .catch(error => console.error('Failed to load station data:', error));
+    </script>
+    
+    <script>
+      
     </script>
 
 
