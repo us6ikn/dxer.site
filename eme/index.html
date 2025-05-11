@@ -699,6 +699,9 @@
                          alt="Station Picture"
                          style="max-width: 100px; height: auto; border: 1px solid #ccc;"/>
                   </a>
+                  <div id="image-placeholder-${callsign}" style="display:none;">
+                    <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
+                  </div>
                 </div>
               </div>
             `;
@@ -715,11 +718,29 @@
               // Use setTimeout to ensure the InfoWindow content is fully rendered before accessing the image
               setTimeout(() => {
                 const imageElement = document.getElementById(`station-image-${callsign}`);
+                const placeholder = document.getElementById(`image-placeholder-${callsign}`);
 
-                // Ensure the element exists before updating the src
-                if (imageElement && imageElement.src.includes('data:image')) {
-                  imageElement.src = `https://dxer.site/db/${callsign}_thumb.jpg`;
-                }
+                // Check if the thumbnail image exists
+                const imageUrl = `https://dxer.site/db/${callsign}_thumb.jpg`;
+
+                fetch(imageUrl, { method: 'HEAD' })  // Check if the image exists
+                  .then(response => {
+                    if (!response.ok) {
+                      // Image doesn't exist, show "Add Image" link
+                      imageElement.style.display = 'none';
+                      placeholder.style.display = 'block';
+                    } else {
+                      // Image exists, show it
+                      imageElement.style.display = 'block';
+                      placeholder.style.display = 'none';
+                      imageElement.src = imageUrl;
+                    }
+                  })
+                  .catch(() => {
+                    // In case the fetch fails, assume the image is missing
+                    imageElement.style.display = 'none';
+                    placeholder.style.display = 'block';
+                  });
               }, 100); // Delay to ensure InfoWindow content is rendered
             });
           });
