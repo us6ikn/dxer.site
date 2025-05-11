@@ -622,14 +622,8 @@
 
         return { lat: latitude, lng: longitude };
       }
-        
-        markerIcon: "img/m_30.png"
-        
-        // Add offset to position for subsequent markers
-        const markerPosition = {
-            lat: parseFloat(lat) + (offsetLat / 10000), // Adjust offset by dividing by a factor
-            lng: parseFloat(lng) + (offsetLng / 10000)  // Adjust offset by dividing by a factor
-        };
+
+      const markerIcon = "img/m_30.png";  // Define the marker icon
 
       // Load and process file (example using fetch, assuming hosted or local with server)
       fetch('output_2_10GHz.txt')
@@ -643,19 +637,29 @@
             const position = gridToLatLng(locator);
             if (!position) return;
 
-            // Add marker
+            // Add offset to position for subsequent markers
+            const offsetLat = 0.001; // Example offset value for latitude
+            const offsetLng = 0.001; // Example offset value for longitude
+
+            const markerPosition = {
+              lat: position.lat + (offsetLat / 10000),  // Adjust latitude by offset
+              lng: position.lng + (offsetLng / 10000)  // Adjust longitude by offset
+            };
+
+            // Add marker with adjusted position
             new google.maps.Marker({
-                position: markerPosition,
+              position: markerPosition,
               map: map,
               icon: {
-                  url: markerIcon,
-                  scaledSize: new google.maps.Size(20, 20)
+                url: markerIcon,
+                scaledSize: new google.maps.Size(20, 20)
               }
             });
           });
         })
         .catch(error => console.error('Failed to load station data:', error));
     </script>
+
 
 
 
