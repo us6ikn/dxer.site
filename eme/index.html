@@ -691,13 +691,13 @@
                 <div>Power: ${power}</div>
                 <div>Website: <a href="${website}" target="_blank">${website}</a></div>
                 <div><a href="https://www.qrz.com/db/${callsign}" target="_blank">QRZ.com lookup</a></div>
-                <div>
+                <div id="image-container-${callsign}">
                   Station Picture (clickable):<br>
                   <a href="https://dxer.site/db/${callsign}.jpg" target="_blank">
                     <img id="station-image-${callsign}"
                          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA" <!-- Small base64 transparent image -->
                          alt="Station Picture"
-                         style="max-width: 100px; height: auto; border: 1px solid #ccc;"/>
+                         style="max-width: 100px; height: auto; border: 1px solid #ccc; display: none;"/>
                   </a>
                   <div id="image-placeholder-${callsign}" style="display:none;">
                     <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
@@ -719,6 +719,7 @@
               setTimeout(() => {
                 const imageElement = document.getElementById(`station-image-${callsign}`);
                 const placeholder = document.getElementById(`image-placeholder-${callsign}`);
+                const imageContainer = document.getElementById(`image-container-${callsign}`);
 
                 // Check if the thumbnail image exists
                 const imageUrl = `https://dxer.site/db/${callsign}_thumb.jpg`;
