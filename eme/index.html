@@ -412,23 +412,27 @@
           }
 
           // Now you can use newMoonDates to add annotations for New Moon
-          newMoonAnnotations[`newMoon${i}`] = {
-            type: 'point',
-            xValue: dateStr,
-            yValue: -30, // Places it on X-axis
-            pointStyle: 'circle', // You can omit or style as desired
-            radius: 0, // Hide actual point
-            label: {
-              display: true,
-              content: '🌑', // Unicode character for new moon
-              color: 'black',
-              font: {
-                size: 16,
-              },
-              yAdjust: 8, // Move it downward if you want it to visually sit on the X-axis
-            },
-          };
+          const newMoonAnnotations = {};
+          newMoonDates.forEach((dateStr, i) => {
+            const index = labels.indexOf(dateStr);
+            if (index !== -1) {
+                newMoonAnnotations[`newMoon${i}`] = {
+                  type: 'label',
+                  xValue: dateStr,
+                  yValue: -28,
+                  content: ['🌑'], // Unicode new moon
+                  backgroundColor: 'transparent',
+                  font: {
+                    size: 16
+                  },
+                  color: 'black',
+                  textAlign: 'center',
+                  yAdjust: -8,
+                  xAdjust: 0
+                };
 
+            }
+          });
             
 
 
