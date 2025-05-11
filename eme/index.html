@@ -695,9 +695,7 @@
                   Station Picture (clickable):<br>
                   <a href="https://dxer.site/db/${callsign}.jpg" target="_blank">
                     <img id="station-image-${callsign}"
-                         src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA" <!-- Small base64 transparent image -->
-                         alt="Station Picture"
-                         style="max-width: 100px; height: auto; border: 1px solid #ccc; display: none;"/>
+                         src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"/>
                   </a>
                   <div id="image-placeholder-${callsign}" style="display:none;">
                     <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
@@ -718,7 +716,7 @@
               // Set a higher z-index to ensure the info window is always on top
                         const infoWindowElement = document.querySelector('.gm-style-iw');
                         if (infoWindowElement) {
-                          infoWindowElement.style.zIndex = 999999;  // A very high value
+                          infoWindowElement.style.zIndex = 9999999;  // A very high value
                         }
 
               // Use setTimeout to ensure the InfoWindow content is fully rendered before accessing the image
