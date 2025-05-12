@@ -227,25 +227,6 @@
         .info-button:hover {
           background-color: #eee;
         }
-        .header-container {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          padding: 10px;
-        }
-
-        .app-name {
-          font-size: 1.5rem;
-          font-weight: bold;
-          color: #2c3e50;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .date-picker {
-          width: 150px;
-          padding: 4px 8px;
-          font-size: 1rem;
-        }
 
 
     </style>
@@ -260,11 +241,7 @@
     <div id="controls">
           <div id="date-container">
             <button id="prevDay" type="button">←</button>
-            <div class="header-container">
-              <div class="app-name">EME Observer</div>
-              <input type="date" class="date-picker">
-            </div>
-
+            <input type="date" id="date" />
             <button id="nextDay" type="button">→</button>
           </div>
 
