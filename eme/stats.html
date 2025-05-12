@@ -68,6 +68,10 @@
             let antennaDistribution = computeBinnedDistribution(antennaSizes, 0.5);  // Binning by 0.5m
             let powerDistribution = computeBinnedDistribution(powerValues, 25);  // Binning by 25W
 
+            // Find minimum values for both distributions
+            let minAntennaSize = Math.min(...antennaSizes);
+            let minPowerValue = Math.min(...powerValues);
+
             // Prepare chart data (for shaded area, we'll use 'fill' in Chart.js)
             let antennaLabels = antennaDistribution.map(item => `${item.bin}m`);
             let antennaData = antennaDistribution.map(item => item.percentage);
@@ -92,7 +96,13 @@
                 options: {
                     responsive: true,
                     scales: {
-                        y: { beginAtZero: true, ticks: { stepSize: 10 } }
+                        x: {
+                            min: minAntennaSize,  // Set the minimum to the smallest antenna size
+                        },
+                        y: {
+                            beginAtZero: false,
+                            ticks: { stepSize: 10 }
+                        }
                     }
                 }
             });
@@ -114,7 +124,13 @@
                 options: {
                     responsive: true,
                     scales: {
-                        y: { beginAtZero: true, ticks: { stepSize: 10 } }
+                        x: {
+                            min: minPowerValue,  // Set the minimum to the smallest power value
+                        },
+                        y: {
+                            beginAtZero: false,
+                            ticks: { stepSize: 10 }
+                        }
                     }
                 }
             });
