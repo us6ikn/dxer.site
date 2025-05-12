@@ -136,6 +136,9 @@
 
     <h2>Effective Radiated Power</h2>
     <canvas id="erpChart"></canvas>
+    
+    <h2>Stations per Country</h2>
+    <canvas id="countryChart"></canvas>
   </div>
 
   <script>
@@ -221,6 +224,65 @@
 
       });
     }
+      
+      async function loadCountryData() {
+        try {
+          const urls = [
+            FILE_URL_BASE + 'output_2_10GHz_with_DXCC.json',
+            FILE_URL_BASE + 'output_2_10GHz_SK_with_DXCC.json'
+          ];
+
+          const [res1, res2] = await Promise.all(urls.map(url => fetch(url).then(r => r.json())));
+          const combined = [...res1, ...res2];
+
+          const countryCounts = {};
+          for (const station of combined) {
+            const dxcc = station.DXCC || "Unknown";
+            countryCounts[dxcc] = (countryCounts[dxcc] || 0) + 1;
+          }
+
+          const labels = Object.keys(countryCounts);
+          const data = Object.values(countryCounts);
+
+          const backgroundColors = labels.map((_, i) => `hsl(${i * 360 / labels.length}, 70%, 60%)`);
+
+          new Chart(document.getElementById('countryChart'), {
+            type: 'pie',
+            data: {
+              labels: labels,
+              datasets: [{
+                data: data,
+                backgroundColor: backgroundColors,
+                borderColor: '#fff',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      const value = context.raw;
+                      const label = context.label;
+                      return `${label}: ${value} stations`;
+                    }
+                  }
+                }
+              }
+            }
+          });
+        } catch (err) {
+          console.error('Error loading DXCC pie chart:', err);
+        }
+      }
+
+      // Call it after the others
+      loadCountryData();
+
 
     async function loadAndPlot(fileUrl, canvasId, title, xAxisTitle) {
       try {
