@@ -72,11 +72,14 @@
           },
           scales: {
             x: {
-              title: { display: true, text: xAxisTitle }, // Set dynamic x-axis title
+              title: { display: true, text: xAxisTitle }, // Custom x-axis title
               type: 'category', // Treat the x-axis as categorical
               labels: labels,   // Use the filtered labels
             },
-            y: { title: { display: true, text: 'Count' }, beginAtZero: true }
+            y: {
+              title: { display: true, text: 'Number of Stations' }, // Updated y-axis title
+              beginAtZero: true
+            }
           }
         }
       });
