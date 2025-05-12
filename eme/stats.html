@@ -35,7 +35,35 @@
 
         // Helper function to compute the distribution of values (binned into ranges)
         // Helper function to compute the distribution of values (binned into ranges)
-        function computeBinnedDistribution(values) {
+        // Helper function to compute the distribution of antenna sizes
+        function computeAntennaBinnedDistribution(values) {
+            let bins = {};
+            values.forEach(value => {
+                let bin;
+                if (value >= 0.3 && value < 0.8) {
+                    bin = Math.floor(value / 0.5) * 0.5;  // Bins from 0.3m to 0.8m
+                } else if (value >= 0.8 && value < 1.0) {
+                    bin = Math.floor(value / 0.5) * 0.5;  // Bins from 0.8m to 1m
+                } else if (value >= 1.0 && value < 1.5) {
+                    bin = Math.floor(value / 0.5) * 0.5;  // Bins from 1m to 1.5m
+                } else {
+                    bin = Math.floor(value / 1) * 1;  // Larger antennas beyond 1.5m
+                }
+
+                bins[bin] = (bins[bin] || 0) + 1;
+            });
+
+            let total = values.length;
+            let binnedDistribution = [];
+            for (let bin in bins) {
+                let percentage = (bins[bin] / total) * 100;
+                binnedDistribution.push({ bin: parseFloat(bin), percentage });
+            }
+
+            return binnedDistribution.sort((a, b) => a.bin - b.bin);
+        }
+        // Helper function to compute the distribution of power values (binned into ranges)
+        function computePowerBinnedDistribution(values) {
             let bins = {};
             values.forEach(value => {
                 let bin;
@@ -63,6 +91,7 @@
         }
 
 
+
         // Setup the charts
         async function setupCharts() {
             // Load the two JSON files
@@ -78,14 +107,17 @@
             console.log("Extracted Antenna Sizes (m):", antennaSizes);
             console.log("Extracted Power Values (W):", powerValues);
 
-            // Compute binned distributions (for example: bin size of 0.5m for antenna size)
-            let antennaDistribution = computeBinnedDistribution(antennaSizes, 0.5, 0.3);  // Binning by 0.5m, start from 0.3m
-            let powerDistribution = computeBinnedDistribution(powerValues, 25, 3);  // Binning by 25W, start from 3W
+            // Compute binned distributions (for antenna size binning)
+            let antennaDistribution = computeAntennaBinnedDistribution(antennaSizes);
 
-            // Prepare chart data (for shaded area, we'll use 'fill' in Chart.js)
+            // Compute binned distributions (for power size binning)
+            let powerDistribution = computePowerBinnedDistribution(powerValues);
+
+            // Prepare chart data for antenna size
             let antennaLabels = antennaDistribution.map(item => `${item.bin}m`);
             let antennaData = antennaDistribution.map(item => item.percentage);
 
+            // Prepare chart data for power distribution
             let powerLabels = powerDistribution.map(item => `${item.bin}W`);
             let powerData = powerDistribution.map(item => item.percentage);
 
@@ -107,8 +139,9 @@
                     responsive: true,
                     scales: {
                         x: {
-                            ticks: {
-                                min: 0.3, // Start the x-axis at 0.3 meters for antenna size
+                            title: {
+                                display: true,
+                                text: 'Antenna Size (m)'
                             }
                         },
                         y: {
@@ -137,8 +170,9 @@
                     responsive: true,
                     scales: {
                         x: {
-                            ticks: {
-                                min: 3, // Start the x-axis at 3W for power values
+                            title: {
+                                display: true,
+                                text: 'Power (W)'
                             }
                         },
                         y: {
@@ -149,6 +183,7 @@
                 }
             });
         }
+
 
         // Call setupCharts on page load
         window.onload = setupCharts;
