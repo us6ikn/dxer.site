@@ -5,81 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>10GHz EME Stations Statistics</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script> <!-- Annotation Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
     <script>
-        // Fetch data from JSON files
         async function fetchData(file) {
             const response = await fetch(file);
             return await response.json();
         }
 
-        // Function to extract antenna size (m) from antenna description
         function getAntennaSize(antennaStr) {
             let regex = /(\d+(\.\d+)?)(m|ft)/;
             let match = antennaStr.match(regex);
-            if (match) {
-                return parseFloat(match[1]);
-            }
-            return 0; // Default if no size is found
+            return match ? parseFloat(match[1]) : 0;
         }
 
-        // Function to extract power (in W) from power description
         function getPower(powerStr) {
             let regex = /(\d+)(W|w)/;
             let match = powerStr.match(regex);
-            if (match) {
-                return parseInt(match[1]);
-            }
-            return 0; // Default if no power is found
+            return match ? parseInt(match[1]) : 0;
         }
 
-        // Helper function to compute the distribution of values (binned into ranges)
         function computeBinnedDistribution(values, binSize) {
-            let bins = {};
+            const min = Math.floor(Math.min(...values) / binSize) * binSize;
+            const max = Math.ceil(Math.max(...values) / binSize) * binSize;
+            const bins = {};
+
+            // Prefill bins with 0
+            for (let i = min; i <= max; i += binSize) {
+                const roundedBin = parseFloat(i.toFixed(2));
+                bins[roundedBin] = 0;
+            }
+
+            // Count values
             values.forEach(value => {
-                let bin = Math.floor(value / binSize) * binSize;
+                let bin = Math.ceil(value / binSize) * binSize;
+                bin = parseFloat(bin.toFixed(2));
                 bins[bin] = (bins[bin] || 0) + 1;
             });
-            let total = values.length;
-            let binnedDistribution = [];
+
+            const total = values.length;
+            const binnedDistribution = [];
+
             for (let bin in bins) {
                 let percentage = (bins[bin] / total) * 100;
                 binnedDistribution.push({ bin: parseFloat(bin), percentage });
             }
+
             return binnedDistribution.sort((a, b) => a.bin - b.bin);
         }
 
-        // Setup the charts
         async function setupCharts() {
-            // Load the two JSON files
             let data1 = await fetchData('output_2_10GHz.json');
             let data2 = await fetchData('output_2_10GHz_SK.json');
             let allData = [...data1, ...data2];
 
-            // Get antenna sizes and power values
             let antennaSizes = allData.map(item => getAntennaSize(item.Antenna));
             let powerValues = allData.map(item => getPower(item.Power));
 
-            // Log the extracted values to the console
             console.log("Extracted Antenna Sizes (m):", antennaSizes);
             console.log("Extracted Power Values (W):", powerValues);
 
-            // Compute binned distributions (for example: bin size of 0.5m for antenna size)
-            let antennaDistribution = computeBinnedDistribution(antennaSizes, 0.5);  // Binning by 0.5m
-            let powerDistribution = computeBinnedDistribution(powerValues, 25);  // Binning by 25W
+            const antennaBinSize = 0.5;
+            const powerBinSize = 25;
 
-            // Find minimum values for both distributions
-            let minAntennaSize = Math.min(...antennaSizes);
-            let minPowerValue = Math.min(...powerValues);
+            let antennaDistribution = computeBinnedDistribution(antennaSizes, antennaBinSize);
+            let powerDistribution = computeBinnedDistribution(powerValues, powerBinSize);
 
-            // Prepare chart data (for shaded area, we'll use 'fill' in Chart.js)
-            let antennaLabels = antennaDistribution.map(item => `${item.bin}m`);
-            let antennaData = antennaDistribution.map(item => item.percentage);
+            const antennaLabels = antennaDistribution.map(item => `${item.bin.toFixed(1)}m`);
+            const antennaData = antennaDistribution.map(item => item.percentage);
 
-            let powerLabels = powerDistribution.map(item => `${item.bin}W`);
-            let powerData = powerDistribution.map(item => item.percentage);
+            const powerLabels = powerDistribution.map(item => `${item.bin}W`);
+            const powerData = powerDistribution.map(item => item.percentage);
 
-            // Antenna Size Distribution Chart
+            const minAntennaBin = Math.floor(Math.min(...antennaSizes) / antennaBinSize) * antennaBinSize;
+            const minPowerBin = Math.floor(Math.min(...powerValues) / powerBinSize) * powerBinSize;
+
             new Chart(document.getElementById('antennaChart'), {
                 type: 'line',
                 data: {
@@ -87,7 +86,7 @@
                     datasets: [{
                         label: 'Antenna Size Distribution (%)',
                         data: antennaData,
-                        fill: true, // Creates a shaded area under the line
+                        fill: true,
                         backgroundColor: 'rgba(255, 99, 132, 0.2)',
                         borderColor: 'rgba(255, 99, 132, 1)',
                         borderWidth: 2
@@ -97,19 +96,22 @@
                     responsive: true,
                     scales: {
                         x: {
+                            title: { display: true, text: 'Antenna Size (m)' },
                             ticks: {
-                                min: minAntennaSize, // Start the x-axis at the smallest value of antenna sizes
+                                min: minAntennaBin
                             }
                         },
                         y: {
-                            beginAtZero: false,
-                            ticks: { stepSize: 10 }
+                            beginAtZero: true,
+                            title: { display: true, text: 'Percentage (%)' },
+                            ticks: {
+                                stepSize: 10
+                            }
                         }
                     }
                 }
             });
 
-            // Power Distribution Chart
             new Chart(document.getElementById('powerChart'), {
                 type: 'line',
                 data: {
@@ -117,7 +119,7 @@
                     datasets: [{
                         label: 'Power Distribution (%)',
                         data: powerData,
-                        fill: true, // Creates a shaded area under the line
+                        fill: true,
                         backgroundColor: 'rgba(53, 162, 235, 0.2)',
                         borderColor: 'rgba(53, 162, 235, 1)',
                         borderWidth: 2
@@ -127,20 +129,23 @@
                     responsive: true,
                     scales: {
                         x: {
+                            title: { display: true, text: 'Power (W)' },
                             ticks: {
-                                min: minPowerValue, // Start the x-axis at the smallest value of power values
+                                min: minPowerBin
                             }
                         },
                         y: {
-                            beginAtZero: false,
-                            ticks: { stepSize: 10 }
+                            beginAtZero: true,
+                            title: { display: true, text: 'Percentage (%)' },
+                            ticks: {
+                                stepSize: 10
+                            }
                         }
                     }
                 }
             });
         }
 
-        // Call setupCharts on page load
         window.onload = setupCharts;
     </script>
 </head>
