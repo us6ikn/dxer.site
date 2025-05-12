@@ -49,19 +49,6 @@
             return binnedDistribution.sort((a, b) => a.bin - b.bin);
         }
 
-        // Helper function to compute median
-        function median(values) {
-            values.sort((a, b) => a - b);
-            const half = Math.floor(values.length / 2);
-            return values.length % 2 ? values[half] : (values[half - 1] + values[half]) / 2.0;
-        }
-
-        // Helper function to compute average
-        function average(values) {
-            const sum = values.reduce((acc, value) => acc + value, 0);
-            return sum / values.length;
-        }
-
         // Setup the charts
         async function setupCharts() {
             // Load the two JSON files
@@ -73,15 +60,13 @@
             let antennaSizes = allData.map(item => getAntennaSize(item.Antenna));
             let powerValues = allData.map(item => getPower(item.Power));
 
+            // Log the extracted values to the console
+            console.log("Extracted Antenna Sizes (m):", antennaSizes);
+            console.log("Extracted Power Values (W):", powerValues);
+
             // Compute binned distributions (for example: bin size of 0.5m for antenna size)
             let antennaDistribution = computeBinnedDistribution(antennaSizes, 0.5);  // Binning by 0.5m
             let powerDistribution = computeBinnedDistribution(powerValues, 25);  // Binning by 25W
-
-            // Calculate averages and medians
-            let antennaAvg = average(antennaSizes);
-            let antennaMedian = median(antennaSizes);
-            let powerAvg = average(powerValues);
-            let powerMedian = median(powerValues);
 
             // Prepare chart data (for shaded area, we'll use 'fill' in Chart.js)
             let antennaLabels = antennaDistribution.map(item => `${item.bin}m`);
@@ -108,38 +93,6 @@
                     responsive: true,
                     scales: {
                         y: { beginAtZero: true, ticks: { stepSize: 10 } }
-                    },
-                    plugins: {
-                        annotation: {
-                            annotations: [
-                                {
-                                    type: 'line',
-                                    mode: 'vertical',
-                                    scaleID: 'x',
-                                    value: antennaAvg,
-                                    borderColor: 'green',
-                                    borderWidth: 2,
-                                    label: {
-                                        content: `Avg: ${antennaAvg.toFixed(2)}m`,
-                                        enabled: true,
-                                        position: "top"
-                                    }
-                                },
-                                {
-                                    type: 'line',
-                                    mode: 'vertical',
-                                    scaleID: 'x',
-                                    value: antennaMedian,
-                                    borderColor: 'blue',
-                                    borderWidth: 2,
-                                    label: {
-                                        content: `Median: ${antennaMedian.toFixed(2)}m`,
-                                        enabled: true,
-                                        position: "top"
-                                    }
-                                }
-                            ]
-                        }
                     }
                 }
             });
@@ -162,38 +115,6 @@
                     responsive: true,
                     scales: {
                         y: { beginAtZero: true, ticks: { stepSize: 10 } }
-                    },
-                    plugins: {
-                        annotation: {
-                            annotations: [
-                                {
-                                    type: 'line',
-                                    mode: 'vertical',
-                                    scaleID: 'x',
-                                    value: powerAvg,
-                                    borderColor: 'green',
-                                    borderWidth: 2,
-                                    label: {
-                                        content: `Avg: ${powerAvg.toFixed(2)}W`,
-                                        enabled: true,
-                                        position: "top"
-                                    }
-                                },
-                                {
-                                    type: 'line',
-                                    mode: 'vertical',
-                                    scaleID: 'x',
-                                    value: powerMedian,
-                                    borderColor: 'blue',
-                                    borderWidth: 2,
-                                    label: {
-                                        content: `Median: ${powerMedian.toFixed(2)}W`,
-                                        enabled: true,
-                                        position: "top"
-                                    }
-                                }
-                            ]
-                        }
                     }
                 }
             });
