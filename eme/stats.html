@@ -34,21 +34,34 @@
         }
 
         // Helper function to compute the distribution of values (binned into ranges)
-        function computeBinnedDistribution(values, binSize, minValue) {
+        // Helper function to compute the distribution of values (binned into ranges)
+        function computeBinnedDistribution(values) {
             let bins = {};
             values.forEach(value => {
-                // Start binning from the minValue (e.g., 0.3m or 3W)
-                let bin = Math.max(minValue, Math.floor(value / binSize) * binSize);
+                let bin;
+                if (value >= 3 && value < 10) {
+                    bin = Math.floor(value / 5) * 5;  // Bins from 3W to 10W in 5W increments
+                } else if (value >= 10 && value < 25) {
+                    bin = Math.floor(value / 5) * 5;  // Bins from 10W to 25W in 5W increments
+                } else if (value >= 25 && value < 50) {
+                    bin = Math.floor(value / 25) * 25;  // Bins from 25W to 50W in 25W increments
+                } else {
+                    bin = Math.floor(value / 50) * 50;  // Bins from 50W and beyond
+                }
+
                 bins[bin] = (bins[bin] || 0) + 1;
             });
+
             let total = values.length;
             let binnedDistribution = [];
             for (let bin in bins) {
                 let percentage = (bins[bin] / total) * 100;
                 binnedDistribution.push({ bin: parseFloat(bin), percentage });
             }
+
             return binnedDistribution.sort((a, b) => a.bin - b.bin);
         }
+
 
         // Setup the charts
         async function setupCharts() {
