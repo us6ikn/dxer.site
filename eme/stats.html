@@ -35,22 +35,25 @@
       const originalLabels = [];
       const labels = [];
       const counts = [];
+      const percentages = [];
       for (const line of lines) {
         const parts = line.trim().split(/\t+/);
-        if (parts.length >= 2) {
+        if (parts.length >= 3) {
           const label = parts[0];
           const count = parseInt(parts[1], 10);
+          const percentage = parts[2];
           originalLabels.push(label);
           if (count > 0) {  // Only include bins where count > 0
             labels.push(label);
             counts.push(count);
+            percentages.push(percentage);
           }
         }
       }
-      return { labels, counts, originalLabels };
+      return { labels, counts, percentages, originalLabels };
     }
 
-    function plotChart(canvasId, labels, counts, title, xAxisTitle) {
+    function plotChart(canvasId, labels, counts, percentages, title, xAxisTitle) {
       new Chart(document.getElementById(canvasId), {
         type: 'bar',
         data: {
@@ -68,6 +71,17 @@
           plugins: {
             legend: {
               display: false,  // Disables the legend
+            },
+            tooltip: {
+              callbacks: {
+                // Custom tooltip callback to display both count and percentage
+                label: function(tooltipItem) {
+                  const index = tooltipItem.dataIndex;
+                  const count = counts[index];
+                  const percentage = percentages[index];
+                  return `Count: ${count} | Percentage: ${percentage}`;
+                }
+              }
             }
           },
           scales: {
@@ -90,7 +104,7 @@
         const response = await fetch(fileUrl);
         const text = await response.text();
         const data = parseHistogramData(text);
-        plotChart(canvasId, data.labels, data.counts, title, xAxisTitle);
+        plotChart(canvasId, data.labels, data.counts, data.percentages, title, xAxisTitle);
       } catch (err) {
         console.error(`Error loading ${fileUrl}:`, err);
       }
