@@ -1,9 +1,49 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Moon Sublunar Point</title>
+    <title>EME Observer – 10GHz</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Real-time EME (Earth-Moon-Earth) 10GHz tracking with live sublunar points, station map, and signal degradation chart for amateur radio and moonbounce enthusiasts.">
+    <meta name="keywords" content="EME, Moonbounce, Amateur Radio, Sublunar Point, DX, Ham Radio, Satellite, Earth-Moon-Earth, DX Map, 10GHz, Microwaves">
+    <meta name="author" content="SA5IKN">
+    <meta name="robots" content="index, follow">
+        
+        <meta property="og:title" content="EME Observer – 10GHz">
+        <meta property="og:description" content="Interactive map showing real-time sublunar point, station info, and moon signal degradation. Plots all stations active on 10GHz EME.">
+        <meta property="og:image" content="https://dxer.site/img/moon_preview.jpg">
+        <meta property="og:url" content="https://dxer.site/eme-observer.html">
+        <meta name="twitter:card" content="summary_large_image">
+            
+            <link rel="canonical" href="https://dxer.site/eme-observer.html" />
+            
+            <script type="application/ld+json">
+            {
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "EME Observer",
+              "url": "https://dxer.site/eme-observer.html",
+              "author": {
+                "@type": "Person",
+                "name": "SA5IKN"
+              },
+              "description": "Display all stations active on 10GHz EME on a map. Track the moon's sublunar point and degradation in real-time with this interactive map tool designed for Earth-Moon-Earth (EME) communications.",
+              "applicationCategory": "Science",
+              "operatingSystem": "All",
+              "browserRequirements": "Requires JavaScript",
+              "inLanguage": "en"
+              "applicationSubCategory": "Amateur Radio Application",
+              "offers": {
+                "@type": "Offer",
+                "price": "0.00",
+                "priceCurrency": "USD"
+              }
+
+            }
+            </script>
+
+
+
     <style>
       html, body {
         margin: 0;
@@ -307,7 +347,7 @@
           <button onclick="location.href='statistics.html'">Statistics</button>
           <button onclick="location.href='table.html'">Table View</button>
 
-          <button class="info-button" title="More info">?</button>
+          <button class="info-button" aria-label="More information about the map" title="More info">?</button>
 
       <!-- Declination graph inside controls -->
       <div id="chartWrapper">
@@ -380,7 +420,8 @@
                     Station Picture (clickable):<br>
                     <a href="https://dxer.site/db/${callsign}.jpg" target="_blank">
                       <img id="station-image-${callsign}"
-                           src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"/>
+                           src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"
+                           alt="${callsign} station"/>
                     </a>
                     <div id="image-placeholder-${callsign}" style="display:none;">
                       <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
@@ -461,7 +502,8 @@
                       Station Picture (clickable):<br>
                       <a href="https://dxer.site/db/${callsign}.jpg" target="_blank">
                         <img id="station-image-${callsign}"
-                             src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"/>
+                             src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"
+                             alt="${callsign} station"/>
                       </a>
                       <div id="image-placeholder-${callsign}" style="display:none;">
                         <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
