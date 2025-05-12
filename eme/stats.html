@@ -45,14 +45,7 @@
       background-color: #00408a;
     }
 
-    /* Responsive adjustments for mobile */
-    @media (max-width: 768px) {
-      .button-container button {
-        width: 150px;
-        font-size: 14px;
-      }
-    }
-
+    /* Container for the charts */
     .container {
       width: 90%;
       max-width: 1200px;
@@ -71,31 +64,51 @@
       color: #333;
     }
 
+    /* Canvas Styling */
     canvas {
       max-width: 100%;
       margin: 20px auto;
       display: block;
-      height: auto; /* Maintain aspect ratio */
-      min-height: 300px; /* Ensures the graphs don’t get too small */
+      height: auto;
+      min-height: 300px;  /* Ensure graphs don't get too small */
     }
 
-    /* Adjust for smaller screens */
-    @media (max-width: 768px) {
+    /* Desktop-specific layout */
+    @media (min-width: 768px) {
       .container {
-        width: 100%;
-        padding: 10px;
-      }
-      h1, h2 {
-        font-size: 1.5em;
+        display: block;
       }
 
-      /* Increase the height for smaller devices to make graphs larger */
+      /* All charts visible and nicely spaced */
       canvas {
         min-height: 400px;
       }
     }
 
+    /* Mobile-specific adjustments */
+    @media (max-width: 768px) {
+      .button-container {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .container {
+        width: 100%;
+        padding: 10px;
+      }
+
+      h1, h2 {
+        font-size: 1.5em;
+      }
+
+      /* Adjust the canvas height on smaller screens */
+      canvas {
+        min-height: 250px;
+      }
+    }
+
   </style>
+
 
 </head>
 <body>
