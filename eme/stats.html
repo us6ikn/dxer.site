@@ -50,7 +50,7 @@
       return { labels, counts, originalLabels };
     }
 
-    function plotChart(canvasId, labels, counts, originalLabels, title) {
+    function plotChart(canvasId, labels, counts, title) {
       new Chart(document.getElementById(canvasId), {
         type: 'bar',
         data: {
@@ -68,12 +68,8 @@
           scales: {
             x: {
               title: { display: true, text: 'Range' },
-              ticks: {
-                // Align x-axis labels with the original labels (keep them aligned with non-zero counts)
-                callback: function(value, index) {
-                  return originalLabels[index];
-                }
-              }
+              type: 'category', // Treat the x-axis as a categorical axis
+              labels: labels, // Use the filtered labels for x-axis
             },
             y: { title: { display: true, text: 'Count' }, beginAtZero: true }
           }
@@ -86,7 +82,7 @@
         const response = await fetch(fileUrl);
         const text = await response.text();
         const data = parseHistogramData(text);
-        plotChart(canvasId, data.labels, data.counts, data.originalLabels, title);
+        plotChart(canvasId, data.labels, data.counts, title);
       } catch (err) {
         console.error(`Error loading ${fileUrl}:`, err);
       }
