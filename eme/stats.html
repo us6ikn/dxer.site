@@ -186,12 +186,9 @@
         options: {
           responsive: true,
           plugins: {
-            legend: {
-              display: false,  // Disables the legend
-            },
+            legend: { display: false },
             tooltip: {
               callbacks: {
-                // Custom tooltip callback to display both count and percentage
                 label: function(tooltipItem) {
                   const index = tooltipItem.dataIndex;
                   const count = counts[index];
@@ -203,16 +200,25 @@
           },
           scales: {
             x: {
-              title: { display: true, text: xAxisTitle }, // Custom x-axis title
-              type: 'category', // Treat the x-axis as categorical
-              labels: labels,   // Use the filtered labels
+              title: { display: true, text: xAxisTitle },
+              ticks: {
+                font: {
+                  size: window.innerWidth < 768 ? 10 : 14 // ✅ smaller on mobile
+                }
+              }
             },
             y: {
-              title: { display: true, text: 'Number of Stations' }, // Updated y-axis title
-              beginAtZero: true
+              title: { display: true, text: 'Number of Stations' },
+              beginAtZero: true,
+              ticks: {
+                font: {
+                  size: window.innerWidth < 768 ? 10 : 14 // ✅ smaller on mobile
+                }
+              }
             }
           }
         }
+
       });
     }
 
