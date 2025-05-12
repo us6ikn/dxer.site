@@ -1,121 +1,106 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Amateur Radio | EME | Satellite Operations | Max SA5IKN M0SKN US6IKN EI6KC" />
-  <title>Max SA5IKN | EME & Satellite Ops</title>
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <title>Max SA5IKN M0SKN US6IKN EI6KC</title>
+  <link rel="icon" href="favicon.ico" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .filter-btn.active {
-      @apply bg-blue-600 text-white;
+  <script>
+    function filterPosts(type) {
+      document.querySelectorAll('[data-type]').forEach(el => {
+        if (type === 'ALL' || el.dataset.type === type) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
     }
-  </style>
+  </script>
 </head>
 
 <body class="bg-gray-50 text-gray-800">
-  <!-- Header -->
-  <header class="bg-black text-white py-6 shadow">
-    <div class="container mx-auto flex flex-col sm:flex-row items-center justify-between px-4">
-      <div class="flex items-center gap-4">
-        <img src="https://dxer.site/img/SA5IKN_sc.jpeg" alt="Profile" class="rounded-full w-16 h-16" />
+  <header class="bg-white shadow">
+    <div class="container mx-auto p-4 flex flex-col md:flex-row items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <img src="https://dxer.site/img/SA5IKN_sc.jpeg" alt="Profile" class="w-16 h-16 rounded-full" />
         <div>
-          <h1 class="text-xl font-bold">Max SA5IKN / M0SKN / US6IKN / EI6KC 🇺🇦</h1>
-          <p class="text-sm">DXer | PhD in Theoretical Physics | HF / VHF / UHF / SAT / EME 📡</p>
+          <h1 class="text-xl font-bold">Max SA5IKN M0SKN US6IKN EI6KC 🇺🇦</h1>
+          <p class="text-sm">DXer with a PhD in Theoretical Physics | HF, VHF, UHF, EME, SAT 📡</p>
+          <iframe id="twitter-widget-0" scrolling="no" frameborder="0" allowtransparency="true" allowfullscreen="true" class="mt-1" style="width:182px; height:20px;" src="https://platform.twitter.com/widgets/follow_button.2b2d73daf636805223fb11d48f3e94f7.en.html#dnt=true&amp;lang=en&amp;screen_name=M0SKN_SA5IKN&amp;show_count=false&amp;show_screen_name=true&amp;size=m"></iframe>
         </div>
       </div>
-      <div class="mt-4 sm:mt-0">
-        <a href="https://twitter.com/M0SKN_SA5IKN" class="text-sm text-blue-400 hover:underline">@M0SKN_SA5IKN</a>
-      </div>
+      <nav class="mt-4 md:mt-0">
+        <ul class="flex space-x-4 text-sm font-semibold">
+          <li><a href="index.html" class="text-blue-600">Home</a></li>
+          <li><a href="greencube-observer.html">GreenCube Observer</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact & QSL</a></li>
+        </ul>
+      </nav>
     </div>
   </header>
 
-  <!-- Navigation -->
-  <nav class="bg-gray-800 text-white py-3">
-    <div class="container mx-auto flex justify-center gap-6">
-      <a href="index.html" class="hover:text-yellow-400">Home</a>
-      <a href="greencube-observer.html" class="hover:text-yellow-400">GreenCube</a>
-      <a href="#EME" class="hover:text-yellow-400">EME</a>
-      <a href="about.html" class="hover:text-yellow-400">About</a>
-      <a href="contact.html" class="hover:text-yellow-400">Contact</a>
+  <main class="container mx-auto p-4">
+    <div class="mb-4">
+      <div class="flex flex-wrap gap-2">
+        <button onclick="filterPosts('ALL')" class="px-4 py-1 bg-blue-100 hover:bg-blue-300 rounded">ALL</button>
+        <button onclick="filterPosts('LEO')" class="px-4 py-1 bg-blue-100 hover:bg-blue-300 rounded">LEO SATS</button>
+        <button onclick="filterPosts('GREENCUBE')" class="px-4 py-1 bg-blue-100 hover:bg-blue-300 rounded">GREENCUBE</button>
+        <button onclick="filterPosts('QO100')" class="px-4 py-1 bg-blue-100 hover:bg-blue-300 rounded">QO-100</button>
+        <button onclick="filterPosts('EME')" class="px-4 py-1 bg-blue-100 hover:bg-blue-300 rounded">EME</button>
+      </div>
     </div>
-  </nav>
 
-  <!-- Filters -->
-  <div class="container mx-auto px-4 my-6">
-    <div class="flex flex-wrap justify-center gap-2">
-      <button class="filter-btn px-4 py-2 border rounded" data-filter="all">All</button>
-      <button class="filter-btn px-4 py-2 border rounded" data-filter="LEO">LEO SATS</button>
-      <button class="filter-btn px-4 py-2 border rounded" data-filter="GREENCUBE">GreenCube</button>
-      <button class="filter-btn px-4 py-2 border rounded" data-filter="QO100">QO-100</button>
-      <button class="filter-btn px-4 py-2 border rounded" data-filter="EME">EME</button>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Cards -->
+      <div data-type="QO100" class="bg-white rounded shadow p-4">
+        <img src="https://dxer.site/img/works/Flatpanel.jpeg" alt="QO-100" class="w-full h-48 object-cover rounded" />
+        <h3 class="mt-2 font-semibold">Working QO-100 without a dish: An ultraportable FT8 station</h3>
+        <a href="https://threadreaderapp.com/thread/1532743698966093831.html" class="text-blue-600 text-sm">Read more</a>
+      </div>
+      <div data-type="LEO" class="bg-white rounded shadow p-4">
+        <img src="https://dxer.site/img/works/RasPi.jpeg" alt="Doppler Controller" class="w-full h-48 object-cover rounded" />
+        <h3 class="mt-2 font-semibold">A Doppler controller for 2x FT-818 based on Raspberry Pi Zero W</h3>
+        <a href="https://threadreaderapp.com/thread/1582098584882716674.html" class="text-blue-600 text-sm">Read more</a>
+      </div>
+      <div data-type="GREENCUBE" class="bg-white rounded shadow p-4">
+        <img src="https://dxer.site/img/works/GCequipment.jpeg" alt="GreenCube Setup" class="w-full h-48 object-cover rounded" />
+        <h3 class="mt-2 font-semibold">My simplistic and portable GreenCube setup</h3>
+        <a href="https://dxer.site/img/works/GCequipment.jpeg" class="text-blue-600 text-sm">View Image</a>
+      </div>
+      <div data-type="LEO" class="bg-white rounded shadow p-4">
+        <img src="https://dxer.site/img/works/LNA.jpeg" alt="LNA" class="w-full h-48 object-cover rounded" />
+        <h3 class="mt-2 font-semibold">Can an LNA (preamp) be helpful in LEO Satellite DXing?</h3>
+        <a href="https://threadreaderapp.com/thread/1587432316443435016.html" class="text-blue-600 text-sm">Read more</a>
+      </div>
+      <div data-type="EME" class="bg-white rounded shadow p-4">
+        <img src="https://dxer.site/img/works/EMElinkbudget.jpeg" alt="EME Link Budget" class="w-full h-48 object-cover rounded" />
+        <h3 class="mt-2 font-semibold">Who Can Work Who or The Physics and Fairy Tales of EME</h3>
+        <a href="https://threadreaderapp.com/thread/1629474932609392642.html" class="text-blue-600 text-sm">Read more</a>
+      </div>
+      <div data-type="EME" class="bg-white rounded shadow p-4">
+        <img src="https://dxer.site/img/works/DiamondAntenna2.jpeg" alt="Q65 Setup" class="w-full h-48 object-cover rounded" />
+        <h3 class="mt-2 font-semibold">WSJT-X Q65 setup guide for EME novices</h3>
+        <a href="https://threadreaderapp.com/thread/1620467867287449601.html" class="text-blue-600 text-sm">Read more</a>
+      </div>
+      <div data-type="LEO" class="bg-white rounded shadow p-4">
+        <img src="https://dxer.site/img/works/CWkey.jpeg" alt="CW Key" class="w-full h-48 object-cover rounded" />
+        <h3 class="mt-2 font-semibold">Going old school with a home made CW key on the Arrow II</h3>
+        <a href="https://threadreaderapp.com/thread/1531594072636497920.html" class="text-blue-600 text-sm">Read more</a>
+      </div>
+      <div data-type="EME" class="bg-white rounded shadow p-4">
+        <img src="https://dxer.site/img/works/rigstability.jpeg" alt="Rig Stability" class="w-full h-48 object-cover rounded" />
+        <h3 class="mt-2 font-semibold">Is your rig stable enough for EME using Q65?</h3>
+        <a href="https://dxer.site/img/works/rigstability.jpeg" class="text-blue-600 text-sm">View Image</a>
+      </div>
     </div>
-  </div>
+  </main>
 
-  <!-- Content Grid -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 container mx-auto px-4" id="postGrid">
-    <!-- Example Card -->
-    <div class="card QO100 bg-white shadow rounded overflow-hidden" data-category="QO100">
-      <img src="https://dxer.site/img/works/Flatpanel.jpeg" alt="QO100" class="w-full h-48 object-cover">
-      <div class="p-4">
-        <h3 class="font-bold">Working QO-100 without a dish</h3>
-        <p class="text-sm text-gray-600">An ultraportable FT8 station</p>
-        <a href="https://threadreaderapp.com/thread/1532743698966093831.html" class="text-blue-500 text-sm hover:underline">Read more →</a>
-      </div>
-    </div>
-    <!-- Repeat for other posts -->
-    <div class="card LEO bg-white shadow rounded overflow-hidden" data-category="LEO">
-      <img src="https://dxer.site/img/works/RasPi.jpeg" alt="LEO" class="w-full h-48 object-cover">
-      <div class="p-4">
-        <h3 class="font-bold">Doppler controller with Pi Zero W</h3>
-        <p class="text-sm text-gray-600">Controlling FT-818 pair</p>
-        <a href="https://threadreaderapp.com/thread/1582098584882716674.html" class="text-blue-500 text-sm hover:underline">Read more →</a>
-      </div>
-    </div>
-    <div class="card GREENCUBE bg-white shadow rounded overflow-hidden" data-category="GREENCUBE">
-      <img src="https://dxer.site/img/works/GCequipment.jpeg" alt="GreenCube" class="w-full h-48 object-cover">
-      <div class="p-4">
-        <h3 class="font-bold">Portable GreenCube setup</h3>
-        <a href="https://dxer.site/img/works/GCequipment.jpeg" class="text-blue-500 text-sm hover:underline">View setup →</a>
-      </div>
-    </div>
-    <div class="card EME bg-white shadow rounded overflow-hidden" data-category="EME">
-      <img src="https://dxer.site/img/works/EMElinkbudget.jpeg" alt="EME" class="w-full h-48 object-cover">
-      <div class="p-4">
-        <h3 class="font-bold">Who Can Work Who on EME?</h3>
-        <p class="text-sm text-gray-600">Physics & realities of EME</p>
-        <a href="https://threadreaderapp.com/thread/1629474932609392642.html" class="text-blue-500 text-sm hover:underline">Read more →</a>
-      </div>
-    </div>
-    <!-- Add other posts here following same structure -->
-  </div>
-
-  <!-- Footer -->
-  <footer class="bg-black text-white mt-10 py-6">
-    <div class="container mx-auto text-center px-4">
-      &copy; 2025 Max SA5IKN / M0SKN. All rights reserved.
-    </div>
+  <footer class="bg-gray-100 text-center p-4 mt-10 text-sm text-gray-600">
+    &copy; All rights reserved. SA5IKN M0SKN US6IKN EI6KC, 2023
   </footer>
-
-  <!-- Filter Script -->
-  <script>
-    const buttons = document.querySelectorAll('.filter-btn');
-    const cards = document.querySelectorAll('.card');
-
-    buttons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        buttons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        const filter = btn.dataset.filter;
-        cards.forEach(card => {
-          card.style.display = filter === 'all' || card.classList.contains(filter) ? 'block' : 'none';
-        });
-      });
-    });
-  </script>
 </body>
 
 </html>
