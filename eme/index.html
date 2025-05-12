@@ -255,26 +255,13 @@
         const markerIcon = "https://dxer.site/img/m_30.png";  // Define the marker icon
 
         // Load and process file
-        fetch('output_2_10GHz.txt')
-          .then(response => response.text())
+        fetch('output_2_10GHz.json')
+          .then(response => response.json())
           .then(data => {
-            const lines = data.trim().split('\n');
-            lines.forEach((line, index) => {
-              if (index === 0) return; // skip header
+            data.forEach(station => {
+              const { Call: callsign, Locator: locator, Antenna: antenna, Power: power, Website: website, Coordinates } = station;
 
-              const columns = line.split('\t');
-
-              // Assuming these fields are in known column positions
-              const callsign = columns[0];  // Adjust according to actual column
-              const locator = columns[1];   // Adjust according to actual column
-              const antenna = columns[3];   // Adjust according to actual column
-              const power = columns[4];     // Adjust according to actual column
-              const website = columns[5];   // Adjust according to actual column
-
-              // Find the last column (assumed to be the coordinate string)
-              const coordStr = columns[columns.length - 1];
-
-              const [latStr, lngStr] = coordStr.split(',');
+              const [latStr, lngStr] = Coordinates.split(',');
               const lat = parseFloat(latStr);
               const lng = parseFloat(lngStr);
               if (isNaN(lat) || isNaN(lng)) return;
@@ -290,12 +277,11 @@
                 position: markerPosition,
                 map: map,
                 icon: {
-                  url: markerIcon,
+                  url: "https://dxer.site/img/m_30.png",
                   scaledSize: new google.maps.Size(20, 20)
                 }
               });
 
-              // Create the InfoWindow content with a placeholder for the image
               const infoContent = `
                 <div>
                   <div style="font-weight:bold; font-size: 16px;">${callsign}</div>
@@ -317,61 +303,41 @@
                 </div>
               `;
 
-              const infoWindow = new google.maps.InfoWindow({
-                content: infoContent
-              });
-              
-              // Add click event to display InfoWindow
+              const infoWindow = new google.maps.InfoWindow({ content: infoContent });
+
               marker.addListener('click', () => {
-                  
-                  // Close previously open InfoWindow
-                    if (currentInfoWindow) {
-                      currentInfoWindow.close();
-                    }
-                // Open the InfoWindow
+                if (currentInfoWindow) {
+                  currentInfoWindow.close();
+                }
+
                 infoWindow.open(map, marker);
                 currentInfoWindow = infoWindow;
-                
-                // Set a higher z-index to ensure the info window is always on top
-                          const infoWindowElement = document.querySelector('.gm-style-iw');
-                          if (infoWindowElement) {
-                            infoWindowElement.style.zIndex = 999;  // A very high value
-                          }
 
-                // Use setTimeout to ensure the InfoWindow content is fully rendered before accessing the image
                 setTimeout(() => {
                   const imageElement = document.getElementById(`station-image-${callsign}`);
                   const placeholder = document.getElementById(`image-placeholder-${callsign}`);
-                  const imageContainer = document.getElementById(`image-container-${callsign}`);
 
-                  // Check if the thumbnail image exists
                   const imageUrl = `https://dxer.site/db/${callsign}_thumb.jpg`;
-
-                  fetch(imageUrl, { method: 'HEAD' })  // Check if the image exists
+                  fetch(imageUrl, { method: 'HEAD' })
                     .then(response => {
                       if (!response.ok) {
-                        // Image doesn't exist, remove the image element and show "Add Image" link
-                        imageElement.style.display = 'none';
-                        imageElement.remove(); // This removes the image element from the DOM
+                        imageElement.remove();
                         placeholder.style.display = 'block';
                       } else {
-                        // Image exists, show it
-                        imageElement.style.display = 'block';
-                        placeholder.style.display = 'none';
                         imageElement.src = imageUrl;
+                        placeholder.style.display = 'none';
                       }
                     })
                     .catch(() => {
-                      // In case the fetch fails, assume the image is missing
-                      imageElement.style.display = 'none';
-                      imageElement.remove(); // This removes the image element from the DOM
+                      imageElement.remove();
                       placeholder.style.display = 'block';
                     });
-                }, 100); // Delay to ensure InfoWindow content is rendered
+                }, 100);
               });
             });
           })
-          .catch(error => console.error('Failed to load station data:', error));
+          .catch(error => console.error('Failed to load station JSON data:', error));
+
 
         fetch('moon_data_cleaned.txt')
           .then(response => response.json())
