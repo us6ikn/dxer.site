@@ -255,7 +255,7 @@
         const markerIcon = "https://dxer.site/img/m_30.png";  // Define the marker icon
 
         // Load and process file
-        fetch('output_2_10GHz.json')
+        fetch('output_2_10GHz_with_DXCC.json')
           .then(response => response.json())
           .then(data => {
             data.forEach(station => {
@@ -338,7 +338,7 @@
           })
           .catch(error => console.error('Failed to load station JSON data:', error));
           
-          fetch('output_2_10GHz_SK.json')
+          fetch('output_2_10GHz_SK_with_DXCC.json')
             .then(response => response.json())
             .then(data => {
               data.forEach(station => {
