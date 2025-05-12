@@ -31,7 +31,7 @@
           box-sizing: border-box;
           overflow: auto;
           max-height: 90vh; /* allow scrolling if needed */
-          max-width: 50vw;
+          max-width: 90vw;
         }
 
       label {
@@ -74,7 +74,12 @@
           padding-bottom: 20px; /* Add space for X-axis labels */
         }
 
-
+        /* Add this */
+        @media (min-width: 768px) {
+          #controls {
+            max-width: 400px;
+          }
+        }
 
 
 
