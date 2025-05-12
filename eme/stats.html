@@ -24,7 +24,7 @@
             return match ? parseInt(match[1]) : 0;
         }
 
-        function calculateBinSize(values, targetBins = 10) {
+        function calculateBinSize(values, targetBins = 20) {
             const min = Math.min(...values);
             const max = Math.max(...values);
             const range = max - min;
