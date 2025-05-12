@@ -97,7 +97,9 @@
                     responsive: true,
                     scales: {
                         x: {
-                            suggestedMin: minAntennaSize,  // Use suggestedMin to set the minimum of the x-axis
+                            ticks: {
+                                min: minAntennaSize, // Start the x-axis at the smallest value of antenna sizes
+                            }
                         },
                         y: {
                             beginAtZero: false,
@@ -125,7 +127,9 @@
                     responsive: true,
                     scales: {
                         x: {
-                            suggestedMin: minPowerValue,  // Use suggestedMin to set the minimum of the x-axis
+                            ticks: {
+                                min: minPowerValue, // Start the x-axis at the smallest value of power values
+                            }
                         },
                         y: {
                             beginAtZero: false,
