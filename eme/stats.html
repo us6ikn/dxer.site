@@ -12,13 +12,13 @@
 <body>
   <h1>10GHz EME Stations Statistics</h1>
 
-  <h2>Antenna Histogram</h2>
+  <h2>Antenna</h2>
   <canvas id="antennaChart"></canvas>
 
-  <h2>Power Histogram</h2>
+  <h2>Power</h2>
   <canvas id="powerChart"></canvas>
 
-  <h2>ERP Histogram</h2>
+  <h2>Effective Radiated Power</h2>
   <canvas id="erpChart"></canvas>
 
   <script>
@@ -56,7 +56,7 @@
         data: {
           labels: labels,
           datasets: [{
-            label: title,
+            label: title, // This is for the dataset label
             data: counts,
             backgroundColor: 'rgba(75, 192, 192, 0.6)',
             borderColor: 'rgba(75, 192, 192, 1)',
@@ -65,11 +65,16 @@
         },
         options: {
           responsive: true,
+          plugins: {
+            legend: {
+              display: false,  // This disables the legend
+            }
+          },
           scales: {
             x: {
               title: { display: true, text: 'Range' },
-              type: 'category', // Treat the x-axis as a categorical axis
-              labels: labels, // Use the filtered labels for x-axis
+              type: 'category', // Treat the x-axis as categorical
+              labels: labels,   // Use the filtered labels
             },
             y: { title: { display: true, text: 'Count' }, beginAtZero: true }
           }
