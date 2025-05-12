@@ -215,6 +215,19 @@
         #tableViewButton:hover {
           background-color: #0056b3;
         }
+        
+        .info-button {
+          background-color: transparent;
+          border: none;
+          font-size: 16px;
+          cursor: pointer;
+          padding: 4px;
+          border-radius: 50%;
+        }
+        .info-button:hover {
+          background-color: #eee;
+        }
+
 
     </style>
 
@@ -237,10 +250,11 @@
           <span id="hour-value" style="font-size: 12px;">Time (UTC): 00:00</span>
           <button id="toggleChartBtn" style="margin-top: 8px;">Hide Chart</button>
           <button id="editButton" style="margin-top: 8px;">Edit / Add Station</button>
-          <button id="statisticsButton" style="margin-top: 4px;">Statistics</button>
-          <button id="tableViewButton" style="margin-top: 4px;">Table View</button>
+          <button onclick="location.href='statistics.html'">Statistics</button>
+          <button onclick="location.href='table.html'">Table View</button>
 
-          <button id="infoButton" style="margin-top: 2px;" onclick="window.open('https://dxer.site/eme/info.html', '_blank')">ℹ️</button>
+          <button class="info-button" title="More info">?</button>
+
       <!-- Declination graph inside controls -->
       <div id="chartWrapper">
           <span style="font-size: 12px; display: block; text-align: center; color: rgba(255, 0, 0, 0.6); margin-top: 5px;">Degradation</span>
