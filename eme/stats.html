@@ -267,6 +267,8 @@
 
           const labels = Object.keys(countryCounts);
           const data = Object.values(countryCounts);
+          document.getElementById('dxccTotal').textContent = `Total DXCCs: ${labels.length}`;
+
 
           const backgroundColors = labels.map((_, i) => `hsl(${i * 360 / labels.length}, 70%, 60%)`);
 
