@@ -200,6 +200,21 @@
           background-color: #0056b3;
         }
 
+        #statisticsButton,
+        #tableViewButton {
+          padding: 2px 3px;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 2px;
+          font-size: 10px;
+          cursor: pointer;
+        }
+
+        #statisticsButton:hover,
+        #tableViewButton:hover {
+          background-color: #0056b3;
+        }
 
     </style>
 
@@ -222,6 +237,9 @@
           <span id="hour-value" style="font-size: 12px;">Time (UTC): 00:00</span>
           <button id="toggleChartBtn" style="margin-top: 8px;">Hide Chart</button>
           <button id="editButton" style="margin-top: 8px;">Edit / Add Station</button>
+          <button id="statisticsButton" style="margin-top: 4px;">Statistics</button>
+          <button id="tableViewButton" style="margin-top: 4px;">Table View</button>
+
           <button id="infoButton" style="margin-top: 2px;" onclick="window.open('https://dxer.site/eme/info.html', '_blank')">ℹ️</button>
       <!-- Declination graph inside controls -->
       <div id="chartWrapper">
