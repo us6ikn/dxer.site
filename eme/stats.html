@@ -32,18 +32,33 @@
             return 0; // Default if no power is found
         }
 
-        // Helper function to compute the distribution of values (in percentages)
-        function computeDistribution(values) {
-            let distribution = {};
+        // Helper function to compute the distribution of values (binned into ranges)
+        function computeBinnedDistribution(values, binSize) {
+            let bins = {};
             values.forEach(value => {
-                distribution[value] = (distribution[value] || 0) + 1;
+                let bin = Math.floor(value / binSize) * binSize;
+                bins[bin] = (bins[bin] || 0) + 1;
             });
             let total = values.length;
-            let percentageDistribution = {};
-            for (let value in distribution) {
-                percentageDistribution[value] = (distribution[value] / total) * 100;
+            let binnedDistribution = [];
+            for (let bin in bins) {
+                let percentage = (bins[bin] / total) * 100;
+                binnedDistribution.push({ bin: parseFloat(bin), percentage });
             }
-            return percentageDistribution;
+            return binnedDistribution.sort((a, b) => a.bin - b.bin);
+        }
+
+        // Helper function to compute median
+        function median(values) {
+            values.sort((a, b) => a - b);
+            const half = Math.floor(values.length / 2);
+            return values.length % 2 ? values[half] : (values[half - 1] + values[half]) / 2.0;
+        }
+
+        // Helper function to compute average
+        function average(values) {
+            const sum = values.reduce((acc, value) => acc + value, 0);
+            return sum / values.length;
         }
 
         // Setup the charts
@@ -57,55 +72,127 @@
             let antennaSizes = allData.map(item => getAntennaSize(item.Antenna));
             let powerValues = allData.map(item => getPower(item.Power));
 
-            // Compute distributions
-            let antennaDistribution = computeDistribution(antennaSizes);
-            let powerDistribution = computeDistribution(powerValues);
+            // Compute binned distributions (for example: bin size of 0.5m for antenna size)
+            let antennaDistribution = computeBinnedDistribution(antennaSizes, 0.5);  // Binning by 0.5m
+            let powerDistribution = computeBinnedDistribution(powerValues, 25);  // Binning by 25W
 
-            // Create labels and data for the charts
-            let antennaLabels = Object.keys(antennaDistribution);
-            let antennaData = Object.values(antennaDistribution);
+            // Calculate averages and medians
+            let antennaAvg = average(antennaSizes);
+            let antennaMedian = median(antennaSizes);
+            let powerAvg = average(powerValues);
+            let powerMedian = median(powerValues);
 
-            let powerLabels = Object.keys(powerDistribution);
-            let powerData = Object.values(powerDistribution);
+            // Prepare chart data (for shaded area, we'll use 'fill' in Chart.js)
+            let antennaLabels = antennaDistribution.map(item => `${item.bin}m`);
+            let antennaData = antennaDistribution.map(item => item.percentage);
+
+            let powerLabels = powerDistribution.map(item => `${item.bin}W`);
+            let powerData = powerDistribution.map(item => item.percentage);
 
             // Antenna Size Distribution Chart
             new Chart(document.getElementById('antennaChart'), {
-                type: 'bar',
+                type: 'line',
                 data: {
                     labels: antennaLabels,
                     datasets: [{
                         label: 'Antenna Size Distribution (%)',
                         data: antennaData,
-                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                        fill: true, // Creates a shaded area under the line
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
                         borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1
+                        borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
                     scales: {
                         y: { beginAtZero: true, ticks: { stepSize: 10 } }
+                    },
+                    plugins: {
+                        annotation: {
+                            annotations: [
+                                {
+                                    type: 'line',
+                                    mode: 'vertical',
+                                    scaleID: 'x',
+                                    value: antennaAvg,
+                                    borderColor: 'green',
+                                    borderWidth: 2,
+                                    label: {
+                                        content: `Avg: ${antennaAvg.toFixed(2)}m`,
+                                        enabled: true,
+                                        position: "top"
+                                    }
+                                },
+                                {
+                                    type: 'line',
+                                    mode: 'vertical',
+                                    scaleID: 'x',
+                                    value: antennaMedian,
+                                    borderColor: 'blue',
+                                    borderWidth: 2,
+                                    label: {
+                                        content: `Median: ${antennaMedian.toFixed(2)}m`,
+                                        enabled: true,
+                                        position: "top"
+                                    }
+                                }
+                            ]
+                        }
                     }
                 }
             });
 
             // Power Distribution Chart
             new Chart(document.getElementById('powerChart'), {
-                type: 'bar',
+                type: 'line',
                 data: {
                     labels: powerLabels,
                     datasets: [{
                         label: 'Power Distribution (%)',
                         data: powerData,
-                        backgroundColor: 'rgba(53, 162, 235, 0.6)',
+                        fill: true, // Creates a shaded area under the line
+                        backgroundColor: 'rgba(53, 162, 235, 0.2)',
                         borderColor: 'rgba(53, 162, 235, 1)',
-                        borderWidth: 1
+                        borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
                     scales: {
                         y: { beginAtZero: true, ticks: { stepSize: 10 } }
+                    },
+                    plugins: {
+                        annotation: {
+                            annotations: [
+                                {
+                                    type: 'line',
+                                    mode: 'vertical',
+                                    scaleID: 'x',
+                                    value: powerAvg,
+                                    borderColor: 'green',
+                                    borderWidth: 2,
+                                    label: {
+                                        content: `Avg: ${powerAvg.toFixed(2)}W`,
+                                        enabled: true,
+                                        position: "top"
+                                    }
+                                },
+                                {
+                                    type: 'line',
+                                    mode: 'vertical',
+                                    scaleID: 'x',
+                                    value: powerMedian,
+                                    borderColor: 'blue',
+                                    borderWidth: 2,
+                                    label: {
+                                        content: `Median: ${powerMedian.toFixed(2)}W`,
+                                        enabled: true,
+                                        position: "top"
+                                    }
+                                }
+                            ]
+                        }
                     }
                 }
             });
