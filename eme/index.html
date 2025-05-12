@@ -247,6 +247,19 @@
           padding: 4px 8px;
           font-size: 1rem;
         }
+        .app-name-wrapper {
+          position: relative;
+          display: inline-block;
+        }
+
+        .creator-label {
+          position: absolute;
+          top: -10px;
+          left: 60px; /* Adjust this value to align starting at "b" in "Observer" */
+          font-size: 10px;
+          color: #555;
+          font-style: italic;
+        }
 
 
     </style>
@@ -260,7 +273,11 @@
     <div id="map"></div>
     <div id="controls">
         <div id="date-container">
-        <div class="app-name">EME Observer</div>
+            <div class="app-name-wrapper">
+              <div class="creator-label">by SA5IKN</div>
+              <div class="app-name">EME Observer</div>
+            </div>
+
           <button id="prevDay" type="button">←</button>
           <input type="date" id="date" class="date-picker" />
           <button id="nextDay" type="button">→</button>
