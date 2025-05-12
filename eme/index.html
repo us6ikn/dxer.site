@@ -337,6 +337,88 @@
             });
           })
           .catch(error => console.error('Failed to load station JSON data:', error));
+          
+          fetch('output_2_10GHz_SK.json')
+            .then(response => response.json())
+            .then(data => {
+              data.forEach(station => {
+                const { Call: callsign, Locator: locator, Antenna: antenna, Power: power, Website: website, Coordinates } = station;
+
+                const [latStr, lngStr] = Coordinates.split(',');
+                const lat = parseFloat(latStr);
+                const lng = parseFloat(lngStr);
+                if (isNaN(lat) || isNaN(lng)) return;
+
+                const markerPosition = {
+                  lat: lat + (0.1 / 10000), // Same slight offset to avoid overlap
+                  lng: lng + (0.1 / 10000)
+                };
+
+                const marker = new google.maps.Marker({
+                  position: markerPosition,
+                  map: map,
+                  icon: {
+                    url: "https://dxer.site/img/notworked.png", // <- Different marker icon
+                    scaledSize: new google.maps.Size(20, 20)
+                  }
+                });
+
+                const infoContent = `
+                  <div>
+                    <div style="font-weight:bold; font-size: 16px;">${callsign}</div>
+                    <div>Locator: ${locator}</div>
+                    <div>Antenna: ${antenna}</div>
+                    <div>Power: ${power}</div>
+                    <div>Website: <a href="${website}" target="_blank">${website}</a></div>
+                    <div><a href="https://www.qrz.com/db/${callsign}" target="_blank">QRZ.com lookup</a></div>
+                    <div id="image-container-${callsign}">
+                      Station Picture (clickable):<br>
+                      <a href="https://dxer.site/db/${callsign}.jpg" target="_blank">
+                        <img id="station-image-${callsign}"
+                             src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"/>
+                      </a>
+                      <div id="image-placeholder-${callsign}" style="display:none;">
+                        <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
+                      </div>
+                    </div>
+                  </div>
+                `;
+
+                const infoWindow = new google.maps.InfoWindow({ content: infoContent });
+
+                marker.addListener('click', () => {
+                  if (currentInfoWindow) {
+                    currentInfoWindow.close();
+                  }
+
+                  infoWindow.open(map, marker);
+                  currentInfoWindow = infoWindow;
+
+                  setTimeout(() => {
+                    const imageElement = document.getElementById(`station-image-${callsign}`);
+                    const placeholder = document.getElementById(`image-placeholder-${callsign}`);
+
+                    const imageUrl = `https://dxer.site/db/${callsign}_thumb.jpg`;
+                    fetch(imageUrl, { method: 'HEAD' })
+                      .then(response => {
+                        if (!response.ok) {
+                          imageElement.remove();
+                          placeholder.style.display = 'block';
+                        } else {
+                          imageElement.src = imageUrl;
+                          placeholder.style.display = 'none';
+                        }
+                      })
+                      .catch(() => {
+                        imageElement.remove();
+                        placeholder.style.display = 'block';
+                      });
+                  }, 100);
+                });
+              });
+            })
+            .catch(error => console.error('Failed to load SK station JSON data:', error));
+
 
 
         fetch('moon_data_cleaned.txt')
