@@ -37,8 +37,12 @@
       for (const line of lines) {
         const parts = line.trim().split(/\t+/);
         if (parts.length >= 2) {
-          labels.push(parts[0]);
-          counts.push(parseInt(parts[1], 10));
+          const label = parts[0];
+          const count = parseInt(parts[1], 10);
+          if (count > 0) {  // Only include bins where count > 0
+            labels.push(label);
+            counts.push(count);
+          }
         }
       }
       return { labels, counts };
