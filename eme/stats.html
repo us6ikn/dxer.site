@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>10GHz EME Stations Statistics</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -11,11 +11,6 @@
 </head>
 <body>
   <h1>10GHz EME Stations Statistics</h1>
-
-  <input type="file" id="antennaFile" accept=".txt" />
-  <input type="file" id="powerFile" accept=".txt" />
-  <input type="file" id="erpFile" accept=".txt" />
-  <button onclick="processFiles()">Plot Histograms</button>
 
   <h2>Antenna Histogram</h2>
   <canvas id="antennaChart"></canvas>
@@ -27,17 +22,25 @@
   <canvas id="erpChart"></canvas>
 
   <script>
+    const FILE_URL_BASE = ''; // e.g. 'https://yourwebsite.com/' if needed
+
+    const files = {
+      antenna: FILE_URL_BASE + 'antenna_histogram.txt',
+      power: FILE_URL_BASE + 'power_histogram.txt',
+      erp: FILE_URL_BASE + 'erp_histogram.txt',
+    };
+
     function parseHistogramData(text) {
-      const lines = text.trim().split("\n").slice(1); // skip header
+      const lines = text.trim().split('\n').slice(1); // Skip header
       const labels = [];
       const counts = [];
-      lines.forEach(line => {
-        const parts = line.trim().split(/\t+/); // split on tabs or spaces
+      for (const line of lines) {
+        const parts = line.trim().split(/\t+/);
         if (parts.length >= 2) {
           labels.push(parts[0]);
           counts.push(parseInt(parts[1], 10));
         }
-      });
+      }
       return { labels, counts };
     }
 
@@ -49,8 +52,8 @@
           datasets: [{
             label: title,
             data: counts,
-            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            borderColor: 'rgba(75, 192, 192, 1)',
             borderWidth: 1
           }]
         },
@@ -64,27 +67,21 @@
       });
     }
 
-    function readFile(fileInput) {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.readAsText(fileInput.files[0]);
-      });
+    async function loadAndPlot(fileUrl, canvasId, title) {
+      try {
+        const response = await fetch(fileUrl);
+        const text = await response.text();
+        const data = parseHistogramData(text);
+        plotChart(canvasId, data.labels, data.counts, title);
+      } catch (err) {
+        console.error(`Error loading ${fileUrl}:`, err);
+      }
     }
 
-    async function processFiles() {
-      const antennaText = await readFile(document.getElementById('antennaFile'));
-      const powerText = await readFile(document.getElementById('powerFile'));
-      const erpText = await readFile(document.getElementById('erpFile'));
-
-      const antennaData = parseHistogramData(antennaText);
-      const powerData = parseHistogramData(powerText);
-      const erpData = parseHistogramData(erpText);
-
-      plotChart("antennaChart", antennaData.labels, antennaData.counts, "Antenna Count");
-      plotChart("powerChart", powerData.labels, powerData.counts, "Power Count");
-      plotChart("erpChart", erpData.labels, erpData.counts, "ERP Count");
-    }
+    // Load all charts
+    loadAndPlot(files.antenna, 'antennaChart', 'Antenna Count');
+    loadAndPlot(files.power, 'powerChart', 'Power Count');
+    loadAndPlot(files.erp, 'erpChart', 'ERP Count');
   </script>
 </body>
 </html>
