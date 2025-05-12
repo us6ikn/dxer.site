@@ -1,168 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>10GHz EME Stations Statistics</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
-    <script>
-        async function fetchData(file) {
-            const response = await fetch(file);
-            return await response.json();
-        }
-
-        function getAntennaSize(antennaStr) {
-            let regex = /(\d+(\.\d+)?)(m|ft)/;
-            let match = antennaStr.match(regex);
-            return match ? parseFloat(match[1]) : 0;
-        }
-
-        function getPower(powerStr) {
-            let regex = /(\d+)(W|w)/;
-            let match = powerStr.match(regex);
-            return match ? parseInt(match[1]) : 0;
-        }
-
-        function calculateBinSize(values, targetBins = 20) {
-            const min = Math.min(...values);
-            const max = Math.max(...values);
-            const range = max - min;
-
-            let rawBin = range / targetBins;
-            const magnitude = Math.pow(10, Math.floor(Math.log10(rawBin)));
-            const residual = rawBin / magnitude;
-
-            let niceBin;
-            if (residual <= 1) niceBin = 1 * magnitude;
-            else if (residual <= 2) niceBin = 2 * magnitude;
-            else if (residual <= 5) niceBin = 5 * magnitude;
-            else niceBin = 10 * magnitude;
-
-            return niceBin;
-        }
-
-        function computeBinnedDistribution(values, binSize) {
-            const min = Math.floor(Math.min(...values) / binSize) * binSize;
-            const max = Math.ceil(Math.max(...values) / binSize) * binSize;
-            const bins = {};
-
-            for (let i = min; i <= max; i += binSize) {
-                const roundedBin = parseFloat(i.toFixed(2));
-                bins[roundedBin] = 0;
-            }
-
-            values.forEach(value => {
-                let bin = Math.ceil(value / binSize) * binSize;
-                bin = parseFloat(bin.toFixed(2));
-                bins[bin] = (bins[bin] || 0) + 1;
-            });
-
-            const total = values.length;
-            const binnedDistribution = [];
-
-            for (let bin in bins) {
-                let percentage = (bins[bin] / total) * 100;
-                binnedDistribution.push({ bin: parseFloat(bin), percentage });
-            }
-
-            return binnedDistribution.sort((a, b) => a.bin - b.bin);
-        }
-
-        async function setupCharts() {
-            let data1 = await fetchData('output_2_10GHz.json');
-            let data2 = await fetchData('output_2_10GHz_SK.json');
-            let allData = [...data1, ...data2];
-
-            let antennaSizes = allData.map(item => getAntennaSize(item.Antenna));
-            let powerValues = allData.map(item => getPower(item.Power));
-
-            const antennaBinSize = calculateBinSize(antennaSizes, 12);
-            const powerBinSize = calculateBinSize(powerValues, 12);
-
-            let antennaDistribution = computeBinnedDistribution(antennaSizes, antennaBinSize);
-            let powerDistribution = computeBinnedDistribution(powerValues, powerBinSize);
-
-            const antennaLabels = antennaDistribution.map(item => `${item.bin.toFixed(1)}m`);
-            const antennaData = antennaDistribution.map(item => item.percentage);
-
-            const powerLabels = powerDistribution.map(item => `${item.bin}W`);
-            const powerData = powerDistribution.map(item => item.percentage);
-
-            const minAntennaBin = Math.floor(Math.min(...antennaSizes) / antennaBinSize) * antennaBinSize;
-            const minPowerBin = Math.floor(Math.min(...powerValues) / powerBinSize) * powerBinSize;
-
-            new Chart(document.getElementById('antennaChart'), {
-                type: 'line',
-                data: {
-                    labels: antennaLabels,
-                    datasets: [{
-                        label: 'Antenna Size Distribution (%)',
-                        data: antennaData,
-                        fill: true,
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: {
-                            title: { display: true, text: 'Antenna Size (m)' },
-                            ticks: {
-                                min: minAntennaBin
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            title: { display: true, text: 'Percentage (%)' },
-                            ticks: { stepSize: 10 }
-                        }
-                    }
-                }
-            });
-
-            new Chart(document.getElementById('powerChart'), {
-                type: 'line',
-                data: {
-                    labels: powerLabels,
-                    datasets: [{
-                        label: 'Power Distribution (%)',
-                        data: powerData,
-                        fill: true,
-                        backgroundColor: 'rgba(53, 162, 235, 0.2)',
-                        borderColor: 'rgba(53, 162, 235, 1)',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: {
-                            title: { display: true, text: 'Power (W)' },
-                            ticks: {
-                                min: minPowerBin
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            title: { display: true, text: 'Percentage (%)' },
-                            ticks: { stepSize: 10 }
-                        }
-                    }
-                }
-            });
-        }
-
-        window.onload = setupCharts;
-    </script>
+  <meta charset="UTF-8" />
+  <title>10GHz EME Stations Statistics</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    canvas { max-width: 800px; margin-bottom: 50px; }
+  </style>
 </head>
 <body>
-    <h1>10GHz EME Stations Statistics</h1>
-    <h2>Antenna Size Distribution</h2>
-    <canvas id="antennaChart" width="400" height="200"></canvas>
-    <h2>Power Distribution</h2>
-    <canvas id="powerChart" width="400" height="200"></canvas>
+  <h1>10GHz EME Stations Statistics</h1>
+
+  <input type="file" id="antennaFile" accept=".txt" />
+  <input type="file" id="powerFile" accept=".txt" />
+  <input type="file" id="erpFile" accept=".txt" />
+  <button onclick="processFiles()">Plot Histograms</button>
+
+  <h2>Antenna Histogram</h2>
+  <canvas id="antennaChart"></canvas>
+
+  <h2>Power Histogram</h2>
+  <canvas id="powerChart"></canvas>
+
+  <h2>ERP Histogram</h2>
+  <canvas id="erpChart"></canvas>
+
+  <script>
+    function parseHistogramData(text) {
+      const lines = text.trim().split("\n").slice(1); // skip header
+      const labels = [];
+      const counts = [];
+      lines.forEach(line => {
+        const parts = line.trim().split(/\t+/); // split on tabs or spaces
+        if (parts.length >= 2) {
+          labels.push(parts[0]);
+          counts.push(parseInt(parts[1], 10));
+        }
+      });
+      return { labels, counts };
+    }
+
+    function plotChart(canvasId, labels, counts, title) {
+      new Chart(document.getElementById(canvasId), {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: title,
+            data: counts,
+            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: { title: { display: true, text: 'Range' } },
+            y: { title: { display: true, text: 'Count' }, beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    function readFile(fileInput) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.readAsText(fileInput.files[0]);
+      });
+    }
+
+    async function processFiles() {
+      const antennaText = await readFile(document.getElementById('antennaFile'));
+      const powerText = await readFile(document.getElementById('powerFile'));
+      const erpText = await readFile(document.getElementById('erpFile'));
+
+      const antennaData = parseHistogramData(antennaText);
+      const powerData = parseHistogramData(powerText);
+      const erpData = parseHistogramData(erpText);
+
+      plotChart("antennaChart", antennaData.labels, antennaData.counts, "Antenna Count");
+      plotChart("powerChart", powerData.labels, powerData.counts, "Power Count");
+      plotChart("erpChart", erpData.labels, erpData.counts, "ERP Count");
+    }
+  </script>
 </body>
 </html>
