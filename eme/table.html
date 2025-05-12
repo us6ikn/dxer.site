@@ -33,19 +33,27 @@
         }
 
         .button-container button {
-            background-color: #4CAF50;
+            background-color: #0056b3; /* Button color */
             color: white;
             border: none;
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
             border-radius: 5px;
-            width: 200px;
+            width: 200px; /* Standard width for desktop */
             text-align: center;
         }
 
         .button-container button:hover {
-            background-color: #45a049;
+            background-color: #00408a; /* Darker shade on hover */
+        }
+
+        /* Responsive adjustments for mobile */
+        @media (max-width: 768px) {
+            .button-container button {
+                width: 150px; /* Smaller width for mobile */
+                font-size: 14px; /* Smaller font size for mobile */
+            }
         }
 
         .container {
