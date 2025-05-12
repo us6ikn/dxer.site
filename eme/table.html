@@ -6,6 +6,8 @@
     <title>10GHz EME Stations</title>
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <!-- DataTables Responsive CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.dataTables.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -51,12 +53,34 @@
         table.dataTable {
             margin: 0 auto;
         }
+
+        /* Responsive adjustments for small screens */
+        @media (max-width: 768px) {
+            .container {
+                width: 100%;
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            table {
+                font-size: 0.9em;
+            }
+        }
+
+        /* Hide less important columns on smaller screens */
+        @media (max-width: 600px) {
+            .dataTable td:nth-child(6), /* Website column */
+            .dataTable td:nth-child(7) { /* Note column */
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>10GHz EME Stations</h1>
-        <table id="stationsTable" class="display">
+        <table id="stationsTable" class="display responsive">
             <thead>
                 <tr>
                     <th>Call</th>
@@ -76,6 +100,7 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.3.0/js/dataTables.responsive.min.js"></script>
     <script>
         // Fetch the data from both JSON files and merge them
         async function fetchData() {
@@ -116,7 +141,8 @@
 
             // Initialize DataTable after rendering the data
             $('#stationsTable').DataTable({
-                "order": [[0, 'asc']] // Default sorting by Call alphabetically
+                "order": [[0, 'asc']], // Default sorting by Call alphabetically
+                "responsive": true // Enable responsiveness
             });
         }
 
