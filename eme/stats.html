@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>10GHz EME Stations Statistics</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
@@ -24,18 +24,34 @@
             return match ? parseInt(match[1]) : 0;
         }
 
+        function calculateBinSize(values, targetBins = 10) {
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+            const range = max - min;
+
+            let rawBin = range / targetBins;
+            const magnitude = Math.pow(10, Math.floor(Math.log10(rawBin)));
+            const residual = rawBin / magnitude;
+
+            let niceBin;
+            if (residual <= 1) niceBin = 1 * magnitude;
+            else if (residual <= 2) niceBin = 2 * magnitude;
+            else if (residual <= 5) niceBin = 5 * magnitude;
+            else niceBin = 10 * magnitude;
+
+            return niceBin;
+        }
+
         function computeBinnedDistribution(values, binSize) {
             const min = Math.floor(Math.min(...values) / binSize) * binSize;
             const max = Math.ceil(Math.max(...values) / binSize) * binSize;
             const bins = {};
 
-            // Prefill bins with 0
             for (let i = min; i <= max; i += binSize) {
                 const roundedBin = parseFloat(i.toFixed(2));
                 bins[roundedBin] = 0;
             }
 
-            // Count values
             values.forEach(value => {
                 let bin = Math.ceil(value / binSize) * binSize;
                 bin = parseFloat(bin.toFixed(2));
@@ -61,11 +77,8 @@
             let antennaSizes = allData.map(item => getAntennaSize(item.Antenna));
             let powerValues = allData.map(item => getPower(item.Power));
 
-            console.log("Extracted Antenna Sizes (m):", antennaSizes);
-            console.log("Extracted Power Values (W):", powerValues);
-
-            const antennaBinSize = 0.5;
-            const powerBinSize = 25;
+            const antennaBinSize = calculateBinSize(antennaSizes, 12);
+            const powerBinSize = calculateBinSize(powerValues, 12);
 
             let antennaDistribution = computeBinnedDistribution(antennaSizes, antennaBinSize);
             let powerDistribution = computeBinnedDistribution(powerValues, powerBinSize);
@@ -104,9 +117,7 @@
                         y: {
                             beginAtZero: true,
                             title: { display: true, text: 'Percentage (%)' },
-                            ticks: {
-                                stepSize: 10
-                            }
+                            ticks: { stepSize: 10 }
                         }
                     }
                 }
@@ -137,9 +148,7 @@
                         y: {
                             beginAtZero: true,
                             title: { display: true, text: 'Percentage (%)' },
-                            ticks: {
-                                stepSize: 10
-                            }
+                            ticks: { stepSize: 10 }
                         }
                     }
                 }
