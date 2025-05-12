@@ -12,13 +12,13 @@
 <body>
   <h1>10GHz EME Stations Statistics</h1>
 
-  <h2>Antenna</h2>
+  <h2>Antenna Histogram</h2>
   <canvas id="antennaChart"></canvas>
 
-  <h2>Power</h2>
+  <h2>Power Histogram</h2>
   <canvas id="powerChart"></canvas>
 
-  <h2>Effective Radiated Power</h2>
+  <h2>ERP Histogram</h2>
   <canvas id="erpChart"></canvas>
 
   <script>
@@ -50,7 +50,7 @@
       return { labels, counts, originalLabels };
     }
 
-    function plotChart(canvasId, labels, counts, title) {
+    function plotChart(canvasId, labels, counts, title, xAxisTitle) {
       new Chart(document.getElementById(canvasId), {
         type: 'bar',
         data: {
@@ -67,12 +67,12 @@
           responsive: true,
           plugins: {
             legend: {
-              display: false,  // This disables the legend
+              display: false,  // Disables the legend
             }
           },
           scales: {
             x: {
-              title: { display: true, text: 'Range' },
+              title: { display: true, text: xAxisTitle }, // Set dynamic x-axis title
               type: 'category', // Treat the x-axis as categorical
               labels: labels,   // Use the filtered labels
             },
@@ -82,21 +82,21 @@
       });
     }
 
-    async function loadAndPlot(fileUrl, canvasId, title) {
+    async function loadAndPlot(fileUrl, canvasId, title, xAxisTitle) {
       try {
         const response = await fetch(fileUrl);
         const text = await response.text();
         const data = parseHistogramData(text);
-        plotChart(canvasId, data.labels, data.counts, title);
+        plotChart(canvasId, data.labels, data.counts, title, xAxisTitle);
       } catch (err) {
         console.error(`Error loading ${fileUrl}:`, err);
       }
     }
 
-    // Load all charts
-    loadAndPlot(files.antenna, 'antennaChart', 'Antenna Count');
-    loadAndPlot(files.power, 'powerChart', 'Power Count');
-    loadAndPlot(files.erp, 'erpChart', 'ERP Count');
+    // Load all charts with custom x-axis titles
+    loadAndPlot(files.antenna, 'antennaChart', 'Antenna Count', 'Antenna diameter (m)');
+    loadAndPlot(files.power, 'powerChart', 'Power Count', 'Power (W)');
+    loadAndPlot(files.erp, 'erpChart', 'ERP Count', 'ERP (MW)');
   </script>
 </body>
 </html>
