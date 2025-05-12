@@ -34,36 +34,20 @@
         }
 
         // Helper function to compute the distribution of values (binned into ranges)
-        // Helper function to compute the distribution of values (binned into ranges)
-        // Helper function to compute the distribution of antenna sizes
-        function computeAntennaBinnedDistribution(values) {
+        function computeBinnedDistribution(values, binSize) {
             let bins = {};
             values.forEach(value => {
-                let bin;
-                if (value >= 0.3 && value < 0.8) {
-                    bin = Math.floor(value / 0.5) * 0.5;  // Bins from 0.3m to 0.8m
-                } else if (value >= 0.8 && value < 1.0) {
-                    bin = Math.floor(value / 0.5) * 0.5;  // Bins from 0.8m to 1m
-                } else if (value >= 1.0 && value < 1.5) {
-                    bin = Math.floor(value / 0.5) * 0.5;  // Bins from 1m to 1.5m
-                } else {
-                    bin = Math.floor(value / 1) * 1;  // Larger antennas beyond 1.5m
-                }
-
+                let bin = Math.floor(value / binSize) * binSize;
                 bins[bin] = (bins[bin] || 0) + 1;
             });
-
             let total = values.length;
             let binnedDistribution = [];
             for (let bin in bins) {
                 let percentage = (bins[bin] / total) * 100;
                 binnedDistribution.push({ bin: parseFloat(bin), percentage });
             }
-
             return binnedDistribution.sort((a, b) => a.bin - b.bin);
         }
-
-
 
         // Setup the charts
         async function setupCharts() {
@@ -81,8 +65,12 @@
             console.log("Extracted Power Values (W):", powerValues);
 
             // Compute binned distributions (for example: bin size of 0.5m for antenna size)
-            let antennaDistribution = computeBinnedDistribution(antennaSizes, 0.5, 0.3);  // Binning by 0.5m, start from 0.3m
-            let powerDistribution = computeBinnedDistribution(powerValues, 25, 3);  // Binning by 25W, start from 3W
+            let antennaDistribution = computeBinnedDistribution(antennaSizes, 0.5);  // Binning by 0.5m
+            let powerDistribution = computeBinnedDistribution(powerValues, 25);  // Binning by 25W
+
+            // Find minimum values for both distributions
+            let minAntennaSize = Math.min(...antennaSizes);
+            let minPowerValue = Math.min(...powerValues);
 
             // Prepare chart data (for shaded area, we'll use 'fill' in Chart.js)
             let antennaLabels = antennaDistribution.map(item => `${item.bin}m`);
@@ -110,7 +98,7 @@
                     scales: {
                         x: {
                             ticks: {
-                                min: 0.3, // Start the x-axis at 0.3 meters for antenna size
+                                min: minAntennaSize, // Start the x-axis at the smallest value of antenna sizes
                             }
                         },
                         y: {
@@ -140,7 +128,7 @@
                     scales: {
                         x: {
                             ticks: {
-                                min: 3, // Start the x-axis at 3W for power values
+                                min: minPowerValue, // Start the x-axis at the smallest value of power values
                             }
                         },
                         y: {
