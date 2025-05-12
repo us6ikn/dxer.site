@@ -111,6 +111,18 @@
         font-size: 1.2em;
       }
     }
+      .chart-wrapper {
+        width: 100%;
+        max-width: 600px; /* ✅ limits chart size */
+        margin: 0 auto 40px auto;
+        padding: 0 10px;
+      }
+
+      #countryChart {
+        width: 100% !important;
+        height: auto !important;
+        max-height: 400px; /* ✅ restricts height */
+      }
 
 
   </style>
@@ -137,8 +149,11 @@
     <h2>Effective Radiated Power</h2>
     <canvas id="erpChart"></canvas>
     
-    <h2>Stations per Country</h2>
-    <canvas id="countryChart"></canvas>
+    <div class="chart-wrapper">
+      <h2>Stations per Country</h2>
+      <canvas id="countryChart"></canvas>
+    </div>
+
   </div>
 
   <script>
