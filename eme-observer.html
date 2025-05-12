@@ -322,6 +322,13 @@
           margin-bottom: -4px; /* Pull it a bit closer to the app name */
         }
 
+        .ghz-label {
+          font-size: 14px;              /* Slightly larger than .creator-label */
+          font-weight: bold;
+          color: #2c3e50;               /* Same color as .app-name */
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Match .app-name */
+          margin-top: -4px;             /* Tighten spacing between lines */
+        }
 
 
     </style>
@@ -335,10 +342,12 @@
     <div id="map"></div>
     <div id="controls">
         <div id="date-container">
-          <div class="app-name-wrapper">
-            <div class="creator-label">by SA5IKN</div>
-            <div class="app-name">10 GHz EME Observer</div>
-          </div>
+            <div class="app-name-wrapper">
+              <div class="creator-label">by SA5IKN</div>
+              <div class="app-name">EME Observer</div>
+              <div class="ghz-label">10GHz</div>
+            </div>
+
 
           <button id="prevDay" type="button">←</button>
           <input type="date" id="date" class="date-picker" />
