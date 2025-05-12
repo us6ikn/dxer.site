@@ -34,10 +34,11 @@
         }
 
         // Helper function to compute the distribution of values (binned into ranges)
-        function computeBinnedDistribution(values, binSize) {
+        function computeBinnedDistribution(values, binSize, minValue) {
             let bins = {};
             values.forEach(value => {
-                let bin = Math.floor(value / binSize) * binSize;
+                // Start binning from the minValue (e.g., 0.3m or 3W)
+                let bin = Math.max(minValue, Math.floor(value / binSize) * binSize);
                 bins[bin] = (bins[bin] || 0) + 1;
             });
             let total = values.length;
@@ -65,12 +66,8 @@
             console.log("Extracted Power Values (W):", powerValues);
 
             // Compute binned distributions (for example: bin size of 0.5m for antenna size)
-            let antennaDistribution = computeBinnedDistribution(antennaSizes, 0.5);  // Binning by 0.5m
-            let powerDistribution = computeBinnedDistribution(powerValues, 25);  // Binning by 25W
-
-            // Find minimum values for both distributions
-            let minAntennaSize = Math.min(...antennaSizes);
-            let minPowerValue = Math.min(...powerValues);
+            let antennaDistribution = computeBinnedDistribution(antennaSizes, 0.5, 0.3);  // Binning by 0.5m, start from 0.3m
+            let powerDistribution = computeBinnedDistribution(powerValues, 25, 3);  // Binning by 25W, start from 3W
 
             // Prepare chart data (for shaded area, we'll use 'fill' in Chart.js)
             let antennaLabels = antennaDistribution.map(item => `${item.bin}m`);
@@ -98,7 +95,7 @@
                     scales: {
                         x: {
                             ticks: {
-                                min: minAntennaSize, // Start the x-axis at the smallest value of antenna sizes
+                                min: 0.3, // Start the x-axis at 0.3 meters for antenna size
                             }
                         },
                         y: {
@@ -128,7 +125,7 @@
                     scales: {
                         x: {
                             ticks: {
-                                min: minPowerValue, // Start the x-axis at the smallest value of power values
+                                min: 3, // Start the x-axis at 3W for power values
                             }
                         },
                         y: {
