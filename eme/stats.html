@@ -41,6 +41,7 @@
             let bins = {};
             values.forEach(value => {
                 let bin;
+                // Bin based on predefined intervals
                 if (value >= 0.3 && value < 0.8) {
                     bin = 0.3;  // From 0.3m to 0.8m
                 } else if (value >= 0.8 && value < 1.0) {
@@ -50,9 +51,8 @@
                 } else if (value >= 1.5 && value < 2.0) {
                     bin = 1.5;  // From 1.5m to 2m
                 } else {
-                    bin = Math.floor(value);  // Binning for values beyond 2m
+                    bin = Math.floor(value);  // Values beyond 2m
                 }
-
                 bins[bin] = (bins[bin] || 0) + 1;
             });
 
@@ -66,21 +66,23 @@
             return binnedDistribution.sort((a, b) => a.bin - b.bin);
         }
 
-        // Helper function to compute the distribution of power values (binned into ranges)
-        function computePowerBinnedDistribution(values) {
+
+        function computeAntennaBinnedDistribution(values) {
             let bins = {};
             values.forEach(value => {
                 let bin;
-                if (value >= 3 && value < 10) {
-                    bin = Math.floor(value / 5) * 5;  // Bins from 3W to 10W in 5W increments
-                } else if (value >= 10 && value < 25) {
-                    bin = Math.floor(value / 5) * 5;  // Bins from 10W to 25W in 5W increments
-                } else if (value >= 25 && value < 50) {
-                    bin = Math.floor(value / 25) * 25;  // Bins from 25W to 50W in 25W increments
+                // Bin based on predefined intervals
+                if (value >= 0.3 && value < 0.8) {
+                    bin = 0.3;  // From 0.3m to 0.8m
+                } else if (value >= 0.8 && value < 1.0) {
+                    bin = 0.8;  // From 0.8m to 1m
+                } else if (value >= 1.0 && value < 1.5) {
+                    bin = 1.0;  // From 1m to 1.5m
+                } else if (value >= 1.5 && value < 2.0) {
+                    bin = 1.5;  // From 1.5m to 2m
                 } else {
-                    bin = Math.floor(value / 50) * 50;  // Bins from 50W and beyond
+                    bin = Math.floor(value);  // Values beyond 2m
                 }
-
                 bins[bin] = (bins[bin] || 0) + 1;
             });
 
@@ -93,6 +95,7 @@
 
             return binnedDistribution.sort((a, b) => a.bin - b.bin);
         }
+
 
 
 
