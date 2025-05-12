@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10GHz EME Stations Statistics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Sample data, you would replace this with actual file loading logic
+        let data1 = [
+            { "Call": "DL7NN", "Antenna": "2.4m dish", "Power": "50W" },
+            { "Call": "YO2BCT", "Antenna": "3m dish", "Power": "110W" },
+            { "Call": "K2UYH", "Antenna": "8.7m dish", "Power": "75W" },
+            { "Call": "HB9SV", "Antenna": "3m solid dish", "Power": "50W" },
+            { "Call": "UA4HTS", "Antenna": "2.4m dish", "Power": "25W" },
+            { "Call": "UA3TCF", "Antenna": "2.2m", "Power": "100W" }
+        ];
+
+        let data2 = [];  // Same format for the second JSON file, output_2_10GHz_SK.json
+
+        // Function to convert antenna size string to numeric value
+        function getAntennaSize(antennaStr) {
+            let regex = /(\d+(\.\d+)?)(m|ft)/;
+            let match = antennaStr.match(regex);
+            if (match) {
+                return parseFloat(match[1]);
+            }
+            return 0;
+        }
+
+        // Function to extract power value from string (in watts)
+        function getPower(powerStr) {
+            let regex = /(\d+)(W|w)/;
+            let match = powerStr.match(regex);
+            if (match) {
+                return parseInt(match[1]);
+            }
+            return 0;
+        }
+
+        // Helper function to compute median of an array
+        function median(values) {
+            values.sort((a, b) => a - b);
+            const half = Math.floor(values.length / 2);
+            if (values.length % 2) {
+                return values[half];
+            }
+            return (values[half - 1] + values[half]) / 2.0;
+        }
+
+        // Helper function to compute average of an array
+        function average(values) {
+            const sum = values.reduce((acc, value) => acc + value, 0);
+            return sum / values.length;
+        }
+
+        // Parse data and prepare for chart
+        function prepareData(data) {
+            let antennaSizes = data.map(item => getAntennaSize(item.Antenna));
+            let powers = data.map(item => getPower(item.Power));
+
+            let antennaAvg = average(antennaSizes);
+            let antennaMedian = median(antennaSizes);
+            let powerAvg = average(powers);
+            let powerMedian = median(powers);
+
+            return {
+                antennaSizes,
+                powers,
+                antennaAvg,
+                antennaMedian,
+                powerAvg,
+                powerMedian
+            };
+        }
+
+        // Set up chart data and options
+        function setupCharts(data) {
+            const chartData = prepareData(data);
+
+            // Chart for Antenna Sizes
+            new Chart(document.getElementById('antennaChart'), {
+                type: 'bar',
+                data: {
+                    labels: chartData.antennaSizes.map((size, index) => `Station ${index + 1}`),
+                    datasets: [{
+                        label: 'Antenna Sizes (m)',
+                        data: chartData.antennaSizes,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    return `Size: ${tooltipItem.raw}m`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    },
+                    annotation: {
+                        annotations: [
+                            {
+                                type: 'line',
+                                mode: 'horizontal',
+                                scaleID: 'y',
+                                value: chartData.antennaAvg,
+                                borderColor: 'green',
+                                borderWidth: 2,
+                                label: { content: `Avg: ${chartData.antennaAvg.toFixed(2)}m`, enabled: true, position: "right" }
+                            },
+                            {
+                                type: 'line',
+                                mode: 'horizontal',
+                                scaleID: 'y',
+                                value: chartData.antennaMedian,
+                                borderColor: 'blue',
+                                borderWidth: 2,
+                                label: { content: `Median: ${chartData.antennaMedian}m`, enabled: true, position: "right" }
+                            }
+                        ]
+                    }
+                }
+            });
+
+            // Chart for Power Sizes
+            new Chart(document.getElementById('powerChart'), {
+                type: 'bar',
+                data: {
+                    labels: chartData.powers.map((power, index) => `Station ${index + 1}`),
+                    datasets: [{
+                        label: 'Power (W)',
+                        data: chartData.powers,
+                        borderColor: 'rgba(53, 162, 235, 1)',
+                        backgroundColor: 'rgba(53, 162, 235, 0.2)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    return `Power: ${tooltipItem.raw}W`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    },
+                    annotation: {
+                        annotations: [
+                            {
+                                type: 'line',
+                                mode: 'horizontal',
+                                scaleID: 'y',
+                                value: chartData.powerAvg,
+                                borderColor: 'green',
+                                borderWidth: 2,
+                                label: { content: `Avg: ${chartData.powerAvg.toFixed(2)}W`, enabled: true, position: "right" }
+                            },
+                            {
+                                type: 'line',
+                                mode: 'horizontal',
+                                scaleID: 'y',
+                                value: chartData.powerMedian,
+                                borderColor: 'blue',
+                                borderWidth: 2,
+                                label: { content: `Median: ${chartData.powerMedian}W`, enabled: true, position: "right" }
+                            }
+                        ]
+                    }
+                }
+            });
+        }
+
+        // Call the setupCharts function on page load
+        window.onload = function() {
+            setupCharts(data1); // Pass the first dataset, you can load data2 similarly
+        };
+    </script>
+</head>
+<body>
+    <h1>10GHz EME Stations Statistics</h1>
+    <h2>Antenna Diameter Distribution</h2>
+    <canvas id="antennaChart" width="400" height="200"></canvas>
+    <h2>Power Distribution</h2>
+    <canvas id="powerChart" width="400" height="200"></canvas>
+</body>
+</html>
