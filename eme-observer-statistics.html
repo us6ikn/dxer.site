@@ -1,8 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7YST3WTEH3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-7YST3WTEH3');
+    </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <!-- Meta Description -->
+      <meta name="description" content="Visual statistics for 10GHz EME stations, including antenna sizes, transmit power, ERP, and DXCC country distribution.">
+
+      <!-- Canonical URL -->
+      <link rel="canonical" href="https://dxer.site/eme-observer-statistics.html" />
+      <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+
+      <!-- Open Graph -->
+      <meta property="og:type" content="website">
+      <meta property="og:title" content="10GHz EME Stations Statistics">
+      <meta property="og:description" content="Explore interactive charts of antenna size, power output, ERP, and DXCC breakdown for 10GHz EME stations.">
+      <meta property="og:url" content="https://dxer.site/eme-observer-statistics.html">
+      <meta property="og:image" content="https://dxer.site/social/eme-observer-statistics.jpg"> <!-- optional preview image -->
+
+      <!-- Twitter Card -->
+      <meta name="twitter:card" content="summary_large_image">
+      <meta name="twitter:title" content="10GHz EME Stations Statistics">
+      <meta name="twitter:description" content="Visual breakdown of antenna size, power, and DXCC participation in 10GHz EME communication.">
+      <meta name="twitter:image" content="https://dxer.site/social/eme-observer-statistics.jpg"> <!-- optional preview image -->
+
+      <!-- Structured Data (JSON-LD for Dataset or WebPage) -->
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "10GHz EME Stations Statistics",
+        "url": "https://dxer.site/eme-observer-statistics.html",
+        "description": "Interactive statistics showing antenna diameter, transmit power, ERP, and DXCC for 10GHz Earth-Moon-Earth (EME) amateur radio stations."
+      }
+      </script>
+
   <title>10GHz EME Stations Statistics</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -147,8 +187,8 @@
 <body>
   <!-- Button container with "Map View" and "Statistics" buttons -->
   <div class="button-container">
-    <button onclick="window.location.href='index.html'">Map View</button>
-    <button onclick="window.location.href='table.html'">Table View</button>
+    <button onclick="window.location.href='eme-observer.html'">Map View</button>
+    <button onclick="window.location.href='eme-observer-table.html'">Table View</button>
   </div>
 
   <div class="container">

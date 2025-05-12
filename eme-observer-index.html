@@ -1,9 +1,59 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Moon Sublunar Point</title>
+      <!-- Google tag (gtag.js) -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-7YST3WTEH3"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-7YST3WTEH3');
+      </script>
+    <title>EME Observer – 10GHz</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Real-time EME (Earth-Moon-Earth) 10GHz tracking with live sublunar points, station map, and signal degradation chart for amateur radio and moonbounce enthusiasts.">
+    <meta name="keywords" content="EME, Moonbounce, Amateur Radio, Sublunar Point, DX, Ham Radio, Satellite, Earth-Moon-Earth, DX Map, 10GHz, Microwaves">
+    <meta name="author" content="SA5IKN">
+    <meta name="robots" content="index, follow">
+        
+        <meta property="og:title" content="EME Observer – 10GHz">
+        <meta property="og:description" content="Interactive map showing real-time sublunar point, station info, and moon signal degradation. Plots all stations active on 10GHz EME.">
+        <meta property="og:image" content="https://dxer.site/social/eme-observer.jpg">
+        <meta property="og:url" content="https://dxer.site/eme-observer.html">
+        <meta name="twitter:card" content="summary_large_image">
+            
+            <link rel="canonical" href="https://dxer.site/eme-observer.html" />
+            <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+            
+            <script type="application/ld+json">
+            {
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "EME Observer",
+              "url": "https://dxer.site/eme-observer.html",
+              "author": {
+                "@type": "Person",
+                "name": "SA5IKN"
+              },
+              "description": "Display all stations active on 10GHz EME on a map. Track the moon's sublunar point and degradation in real-time with this interactive map tool designed for Earth-Moon-Earth (EME) communications.",
+              "applicationCategory": "Science",
+              "operatingSystem": "All",
+              "browserRequirements": "Requires JavaScript",
+              "inLanguage": "en"
+              "applicationSubCategory": "Amateur Radio Application",
+              "offers": {
+                "@type": "Offer",
+                "price": "0.00",
+                "priceCurrency": "USD"
+              }
+
+            }
+            </script>
+
+
+
     <style>
       html, body {
         margin: 0;
@@ -31,6 +81,7 @@
           box-sizing: border-box;
           overflow: auto;
           max-height: 90vh; /* allow scrolling if needed */
+          max-width: 90vw;
         }
 
       label {
@@ -48,10 +99,11 @@
         margin-top: 5px;
       }
 
-      input[type="date"] {
-        width: 100%;
-        margin-bottom: 10px;
-      }
+        input[type="date"] {
+            width: auto;
+            max-width: 200px; /* Optional, to prevent the field from becoming too wide */
+        }
+
 
         #chartWrapper {
           width: 100%;
@@ -72,7 +124,12 @@
           padding-bottom: 20px; /* Add space for X-axis labels */
         }
 
-
+        /* Add this */
+        @media (min-width: 768px) {
+          #controls {
+            max-width: 400px;
+          }
+        }
 
 
 
@@ -134,8 +191,13 @@
         #date-container {
           display: flex;
           align-items: center;
+          justify-content: center;
+          flex-wrap: wrap; /* This allows wrapping on small screens */
           gap: 5px;
+          margin-top: 10px;
         }
+
+
         
         #date-container input[type="date"] {
           flex-grow: 1;
@@ -227,6 +289,39 @@
         .info-button:hover {
           background-color: #eee;
         }
+        .header-container {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 10px;
+        }
+
+        .app-name {
+          font-size: 1.0rem;
+          font-weight: bold;
+          color: #2c3e50;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .date-picker {
+          width: 150px;
+          padding: 4px 8px;
+          font-size: 1rem;
+        }
+        .app-name-wrapper {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          position: relative;
+        }
+
+        .creator-label {
+          font-size: 10px;
+          color: #555;
+          font-style: italic;
+          margin-bottom: -4px; /* Pull it a bit closer to the app name */
+        }
+
 
 
     </style>
@@ -239,21 +334,30 @@
   <body>
     <div id="map"></div>
     <div id="controls">
-          <div id="date-container">
-            <button id="prevDay" type="button">←</button>
-            <input type="date" id="date" />
-            <button id="nextDay" type="button">→</button>
+        <div id="date-container">
+          <div class="app-name-wrapper">
+            <div class="creator-label">by SA5IKN</div>
+            <div class="app-name">EME Observer</div>
           </div>
+
+          <button id="prevDay" type="button">←</button>
+          <input type="date" id="date" class="date-picker" />
+          <button id="nextDay" type="button">→</button>
+
+          <!-- Move hour-value here -->
+          <span id="hour-value" style="font-size: 12px; margin-left: 8px;">Time (UTC): 00:00</span>
+        </div>
+
+
 
 
           <input type="range" id="hour" min="0" max="23" value="0" step="1" />
-          <span id="hour-value" style="font-size: 12px;">Time (UTC): 00:00</span>
           <button id="toggleChartBtn" style="margin-top: 8px;">Hide Chart</button>
           <button id="editButton" style="margin-top: 8px;">Edit / Add Station</button>
-          <button onclick="location.href='statistics.html'">Statistics</button>
-          <button onclick="location.href='table.html'">Table View</button>
+          <button onclick="location.href='eme-observer-statistics.html'">Statistics</button>
+          <button onclick="location.href='eme-observer-table.html'">Table View</button>
 
-          <button class="info-button" title="More info">?</button>
+          <button class="info-button" aria-label="More information about the map" title="More info">?</button>
 
       <!-- Declination graph inside controls -->
       <div id="chartWrapper">
@@ -311,7 +415,8 @@
                 icon: {
                   url: "https://dxer.site/img/m_30.png",
                   scaledSize: new google.maps.Size(20, 20)
-                }
+                },
+                title: callsign
               });
 
               const infoContent = `
@@ -326,7 +431,8 @@
                     Station Picture (clickable):<br>
                     <a href="https://dxer.site/db/${callsign}.jpg" target="_blank">
                       <img id="station-image-${callsign}"
-                           src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"/>
+                           src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"
+                           alt="${callsign} station"/>
                     </a>
                     <div id="image-placeholder-${callsign}" style="display:none;">
                       <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
@@ -392,7 +498,8 @@
                   icon: {
                     url: "https://dxer.site/img/notworked.png", // <- Different marker icon
                     scaledSize: new google.maps.Size(20, 20)
-                  }
+                  },
+                  title: callsign
                 });
 
                 const infoContent = `
@@ -407,7 +514,8 @@
                       Station Picture (clickable):<br>
                       <a href="https://dxer.site/db/${callsign}.jpg" target="_blank">
                         <img id="station-image-${callsign}"
-                             src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"/>
+                             src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"
+                             alt="${callsign} station"/>
                       </a>
                       <div id="image-placeholder-${callsign}" style="display:none;">
                         <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
