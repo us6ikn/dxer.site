@@ -163,25 +163,48 @@
   </footer>
   
   <script>
-  fetch('news.html')
-    .then(response => response.text())
-    .then(html => {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const newsItems = doc.querySelectorAll('.news-item');
-      const list = document.getElementById('news-list');
+    fetch('news.html')
+      .then(response => response.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newsItems = doc.querySelectorAll('.news-item');
+        const list = document.getElementById('news-list');
 
-      [...newsItems].slice(0, 4).forEach(item => {
-        const li = document.createElement('li');
-        li.innerHTML = item.innerHTML;
-        list.appendChild(li);
-      }); // Change newsItems].slice(0, 4).forEach to required number of news to display
-    })
-    .catch(err => {
-      document.getElementById('news-list').innerHTML = '<li class="text-xs text-gray-400">Could not load news.</li>';
-      console.error(err);
-    });
+        [...newsItems].slice(0, 3).forEach(item => {
+          const li = document.createElement('li');
+          li.innerHTML = item.innerHTML;
+          list.appendChild(li);
+        });
+
+        truncateNewsText(); // Truncate after insertion
+      })
+      .catch(err => {
+        document.getElementById('news-list').innerHTML = '<li class="text-xs text-gray-400">Could not load news.</li>';
+        console.error(err);
+      });
+
+    function truncateNewsText() {
+      document.querySelectorAll('#news-list p').forEach(p => {
+        const maxLength = 120;
+        if (p.textContent.length > maxLength) {
+          const fullText = p.textContent;
+          p.textContent = fullText.slice(0, maxLength).trim() + '…';
+
+          const readMore = p.parentElement.querySelector('a');
+          if (readMore) {
+            const moreLink = document.createElement('a');
+            moreLink.href = readMore.href;
+            moreLink.textContent = ' Read more';
+            moreLink.className = 'text-blue-600 hover:underline ml-1';
+            moreLink.target = '_blank';
+            p.appendChild(moreLink);
+          }
+        }
+      });
+    }
   </script>
+
   <script>
     document.getElementById('toggle-news').addEventListener('click', function () {
       const list = document.getElementById('news-list');
