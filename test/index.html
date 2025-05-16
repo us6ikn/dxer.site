@@ -184,25 +184,29 @@
         console.error(err);
       });
 
-    function truncateNewsText() {
-      document.querySelectorAll('#news-list p').forEach(p => {
-        const maxLength = 80;
-        if (p.textContent.length > maxLength) {
-          const fullText = p.textContent;
-          p.textContent = fullText.slice(0, maxLength).trim() + '…';
+      function truncateNewsText() {
+        document.querySelectorAll('#news-list li').forEach(item => {
+          const p = item.querySelector('p');
+          const a = item.querySelector('a');
 
-          const readMore = p.parentElement.querySelector('a');
-          if (readMore) {
-            const moreLink = document.createElement('a');
-            moreLink.href = readMore.href;
-            moreLink.textContent = ' Read more';
-            moreLink.className = 'text-blue-600 hover:underline ml-1';
-            moreLink.target = '_blank';
-            p.appendChild(moreLink);
+          if (p && p.textContent.length > 120) {
+            const fullText = p.textContent;
+            p.textContent = fullText.slice(0, 120).trim() + '…';
+
+            // Only add a "Read more" link if it isn't already there
+            if (a) {
+              // Move the existing <a> inside <p>, if it isn't already
+              if (!p.contains(a)) {
+                a.textContent = ' Read more';
+                a.className = 'text-blue-600 hover:underline ml-1';
+                a.target = '_blank';
+                p.appendChild(a);
+              }
+            }
           }
-        }
-      });
-    }
+        });
+      }
+
   </script>
 
   <script>
