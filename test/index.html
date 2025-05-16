@@ -186,7 +186,7 @@
 
     function truncateNewsText() {
       document.querySelectorAll('#news-list p').forEach(p => {
-        const maxLength = 120;
+        const maxLength = 80;
         if (p.textContent.length > maxLength) {
           const fullText = p.textContent;
           p.textContent = fullText.slice(0, maxLength).trim() + '…';
