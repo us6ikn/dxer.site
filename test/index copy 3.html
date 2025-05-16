@@ -92,13 +92,6 @@
       </script>
     </header>
 
-    <section id="latest-news" class="bg-white shadow-sm border-b border-gray-200 py-3 px-4 mt-2 mx-auto max-w-7xl">
-      <div class="flex items-center justify-between mb-2">
-        <h2 class="text-sm font-bold text-gray-700">Latest News</h2>
-        <a href="news.html" class="text-xs text-blue-600 hover:underline">View all</a>
-      </div>
-      <ul id="news-list" class="space-y-1 text-sm text-gray-600"></ul>
-    </section>
 
 
   <main class="container mx-auto p-4">
@@ -160,28 +153,6 @@
   <footer class="bg-gray-100 text-center p-4 mt-10 text-sm text-gray-600">
     &copy; All rights reserved. SA5IKN M0SKN US6IKN EI6KC, 2025
   </footer>
-  
-  <script>
-  fetch('news.html')
-    .then(response => response.text())
-    .then(html => {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const newsItems = doc.querySelectorAll('.news-item');
-      const list = document.getElementById('news-list');
-
-      [...newsItems].slice(0, 4).forEach(item => {
-        const li = document.createElement('li');
-        li.innerHTML = item.innerHTML;
-        list.appendChild(li);
-      });
-    })
-    .catch(err => {
-      document.getElementById('news-list').innerHTML = '<li class="text-xs text-gray-400">Could not load news.</li>';
-      console.error(err);
-    });
-  </script>
-
 </body>
 
 </html>
