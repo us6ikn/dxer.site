@@ -98,6 +98,7 @@
         <a href="news.html" class="text-xs text-blue-600 hover:underline">View all</a>
       </div>
       <ul id="news-list" class="space-y-1 text-sm text-gray-600"></ul>
+      <button id="toggle-news" class="text-xs text-blue-600 hover:underline mt-2">Hide News</button>
     </section>
 
 
@@ -174,13 +175,27 @@
         const li = document.createElement('li');
         li.innerHTML = item.innerHTML;
         list.appendChild(li);
-      });
+      }); // Change newsItems].slice(0, 4).forEach to required number of news to display
     })
     .catch(err => {
       document.getElementById('news-list').innerHTML = '<li class="text-xs text-gray-400">Could not load news.</li>';
       console.error(err);
     });
   </script>
+  <script>
+    document.getElementById('toggle-news').addEventListener('click', function () {
+      const list = document.getElementById('news-list');
+      const btn = this;
+      if (list.classList.contains('hidden')) {
+        list.classList.remove('hidden');
+        btn.textContent = 'Hide News';
+      } else {
+        list.classList.add('hidden');
+        btn.textContent = 'Show News';
+      }
+    });
+  </script>
+
 
 </body>
 
