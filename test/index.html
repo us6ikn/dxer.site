@@ -173,7 +173,9 @@
 
         [...newsItems].slice(0, 3).forEach(item => {
           const li = document.createElement('li');
-          li.innerHTML = item.innerHTML;
+          const clone = item.cloneNode(true);
+          clone.querySelectorAll('.only-full-news').forEach(el => el.remove());
+          li.innerHTML = clone.innerHTML;
           list.appendChild(li);
         });
 
