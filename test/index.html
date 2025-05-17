@@ -66,26 +66,22 @@
         </div>
 
         <!-- Desktop Navigation -->
-        <nav>
-          <ul class="main-menu">
-            <li><a href="/">Home</a></li>
-            <li><a href="https://dxer.site/eme-observer.html">EME Observer - 10GHz</a></li>
-            <li><a href="https://dxer.site/greencube-observer.html">Satellite Observer</a></li>
-            
-            <li class="has-submenu">
-              <a href="#">Tools</a>
-              <ul class="submenu">
-                <li><a href="https://dxer.site/eme-observer.html">EME Observer - 10GHz</a></li>
-                <li><a href="https://dxer.site/greencube-observer.html">GreenCube Observer</a></li>
-                <li><a href="https://dxer.site/leo-satellite-observer.html">LEO Satellite Observer</a></li>
-                <li><a href="https://dxer.site/qo100-satellite-observer.html">QO-100 Satellite Observer</a></li>
-              </ul>
-            </li>
-
-            <li><a href="https://dxer.site/links.html">Links</a></li>
-            <li><a href="/about.html">About</a></li>
-            <li><a href="/contact.html">Contact & QSL</a></li>
-          </ul>
+        <nav class="hidden md:flex md:ml-auto space-x-4 text-sm font-semibold mt-4 md:mt-0">
+          <a href="index.html" class="text-blue-600">Home</a>
+          <a href="https://dxer.site/eme-observer.html">EME Observer - 10GHz</a>
+          <a href="https://dxer.site/greencube-observer.html">Satellite Observer</a>
+          <div class="relative group">
+            <button class="text-sm font-semibold focus:outline-none">Tools ▾</button>
+            <div class="absolute left-0 mt-2 w-56 bg-white shadow-lg rounded hidden group-hover:block z-50">
+              <a href="https://dxer.site/eme-observer.html" class="block px-4 py-2 hover:bg-gray-100">EME Observer - 10GHz</a>
+              <a href="https://dxer.site/greencube-observer.html" class="block px-4 py-2 hover:bg-gray-100">GreenCube Observer</a>
+              <a href="https://dxer.site/leo-satellite-observer.html" class="block px-4 py-2 hover:bg-gray-100">LEO Satellite Observer</a>
+              <a href="https://dxer.site/qo100-satellite-observer.html" class="block px-4 py-2 hover:bg-gray-100">QO-100 Satellite Observer</a>
+            </div>
+          </div>
+          <a href="https://dxer.site/links.html">Links</a>
+          <a href="about.html">About</a>
+          <a href="contact.html">Contact & QSL</a>
         </nav>
 
       </div>
