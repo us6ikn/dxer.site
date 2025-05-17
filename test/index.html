@@ -99,14 +99,20 @@
           <li><a href="https://dxer.site/eme-observer.html">EME Observer - 10GHz</a></li>
           <li><a href="https://dxer.site/greencube-observer.html">Satellite Observer</a></li>
           <li class="relative">
-            <span class="block text-gray-800 font-semibold">Tools</span>
-            <ul class="ml-4 mt-1 space-y-1">
+            <button onclick="toggleMobileSubmenu()" class="w-full text-left text-gray-800 font-semibold flex items-center justify-between">
+              Tools
+              <svg id="submenu-arrow" class="w-4 h-4 ml-2 transition-transform transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <ul id="mobile-tools-submenu" class="ml-4 mt-1 space-y-1 hidden">
               <li><a href="https://dxer.site/eme-observer.html" class="text-blue-600">EME Observer - 10GHz</a></li>
               <li><a href="https://dxer.site/greencube-observer.html" class="text-blue-600">GreenCube Observer</a></li>
               <li><a href="https://dxer.site/leo-satellite-observer.html" class="text-blue-600">LEO Satellite Observer</a></li>
               <li><a href="https://dxer.site/qo100-satellite-observer.html" class="text-blue-600">QO-100 Satellite Observer</a></li>
             </ul>
           </li>
+
           <li><a href="https://dxer.site/links.html">Links</a></li>
           <li><a href="about.html">About</a></li>
           <li><a href="contact.html">Contact & QSL</a></li>
@@ -304,6 +310,14 @@
         btn.textContent = 'Show News';
       }
     });
+  </script>
+  <script>
+    function toggleMobileSubmenu() {
+      const submenu = document.getElementById('mobile-tools-submenu');
+      const arrow = document.getElementById('submenu-arrow');
+      submenu.classList.toggle('hidden');
+      arrow.classList.toggle('rotate-180');
+    }
   </script>
 
 
