@@ -298,9 +298,9 @@
           const p = item.querySelector('p');
           const a = item.querySelector('a');
 
-          if (p && p.textContent.length > 120) {
+          if (p && p.textContent.length > 80) {
             const fullText = p.textContent;
-            p.textContent = fullText.slice(0, 120).trim() + '…';
+            p.textContent = fullText.slice(0, 80).trim() + '…';
 
             // Only add a "Read more" link if it isn't already there
             if (a) {
