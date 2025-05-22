@@ -25,41 +25,48 @@
 <div id="output"></div>
 
 <script>
-async function convertLibration() {
-  const obsLat = parseFloat(document.getElementById('obsLat').value);
-  const obsLon = parseFloat(document.getElementById('obsLon').value);
+    async function convertLibration() {
+      const obsLat = parseFloat(document.getElementById('obsLat').value);
+      const obsLon = parseFloat(document.getElementById('obsLon').value);
 
-  if (isNaN(obsLat) || isNaN(obsLon)) {
-    alert("Please enter valid observer latitude and longitude.");
-    return;
-  }
+      if (isNaN(obsLat) || isNaN(obsLon)) {
+        alert("Please enter valid observer latitude and longitude.");
+        return;
+      }
 
-  try {
-    const response = await fetch('libration_output.txt');
-    if (!response.ok) throw new Error('Failed to fetch the data file.');
+      try {
+        const response = await fetch('libration_output.txt');
+        if (!response.ok) throw new Error('Failed to fetch the data file.');
 
-    const text = await response.text();
-    const lines = text.trim().split('\n').slice(1); // skip header
+        const text = await response.text();
+        const lines = text.trim().split('\n').slice(1); // skip header
 
-    const results = lines.map(line => {
-      const parts = line.trim().split(/\s+/);
-      const time = parts[0] + ' ' + parts[1];
-      const geoLat = parseFloat(parts[2]);
-      const geoLon = parseFloat(parts[3]);
+        const degToRad = Math.PI / 180;
+        const radToDeg = 180 / Math.PI;
 
-      // Approximate topocentric libration = geo - observer
-      const topoLat = geoLat - obsLat;
-      const topoLon = geoLon - obsLon;
+        const results = lines.map(line => {
+          const parts = line.trim().split(/\s+/);
+          const time = parts[0] + ' ' + parts[1];
+          const geoLat = parseFloat(parts[2]);
+          const geoLon = parseFloat(parts[3]);
 
-      return { time, geoLat, geoLon, topoLat, topoLon };
-    });
+          // Approximate parallax-based topocentric correction (small angle in degrees)
+          const deltaLat = 0.01745 * Math.cos(geoLat * degToRad) * Math.sin((obsLat - geoLat) * degToRad);
+          const deltaLon = 0.01745 * Math.cos(geoLat * degToRad) * Math.sin((obsLon - geoLon) * degToRad);
 
-    displayResults(results);
+          const topoLat = geoLat + deltaLat * radToDeg;
+          const topoLon = geoLon + deltaLon * radToDeg;
 
-  } catch (err) {
-    document.getElementById('output').innerHTML = `<p style="color: red;">❌ Error: ${err.message}</p>`;
-  }
-}
+          return { time, geoLat, geoLon, topoLat, topoLon };
+        });
+
+        displayResults(results);
+
+      } catch (err) {
+        document.getElementById('output').innerHTML = `<p style="color: red;">❌ Error: ${err.message}</p>`;
+      }
+    }
+
 
 function displayResults(data) {
   const html = `
