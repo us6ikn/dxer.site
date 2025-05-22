@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Moon Libration: Topocentric Converter</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 900px; margin: auto; }
+    input, button { margin: 5px; padding: 5px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: right; }
+    th { background-color: #f0f0f0; }
+  </style>
+</head>
+<body>
+
+<h2>Moon Libration: Geocentric → Topocentric Conversion</h2>
+
+<p>Enter your observer coordinates below and click "Convert":</p>
+
+<label>Observer Latitude (°): <input type="number" id="obsLat" step="0.01" required></label>
+<label>Observer Longitude (°): <input type="number" id="obsLon" step="0.01" required></label>
+<br>
+<button onclick="convertLibration()">Convert</button>
+
+<div id="output"></div>
+
+<script>
+async function convertLibration() {
+  const obsLat = parseFloat(document.getElementById('obsLat').value);
+  const obsLon = parseFloat(document.getElementById('obsLon').value);
+
+  if (isNaN(obsLat) || isNaN(obsLon)) {
+    alert("Please enter valid observer latitude and longitude.");
+    return;
+  }
+
+  try {
+    const response = await fetch('libration_output.txt');
+    if (!response.ok) throw new Error('Failed to fetch the data file.');
+
+    const text = await response.text();
+    const lines = text.trim().split('\n').slice(1); // skip header
+
+    const results = lines.map(line => {
+      const parts = line.trim().split(/\s+/);
+      const time = parts[0] + ' ' + parts[1];
+      const geoLat = parseFloat(parts[2]);
+      const geoLon = parseFloat(parts[3]);
+
+      // Approximate topocentric libration = geo - observer
+      const topoLat = geoLat - obsLat;
+      const topoLon = geoLon - obsLon;
+
+      return { time, geoLat, geoLon, topoLat, topoLon };
+    });
+
+    displayResults(results);
+
+  } catch (err) {
+    document.getElementById('output').innerHTML = `<p style="color: red;">❌ Error: ${err.message}</p>`;
+  }
+}
+
+function displayResults(data) {
+  const html = `
+    <h3>Converted Topocentric Libration</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Date-Time (UTC)</th>
+          <th>Geo Lat (°)</th>
+          <th>Geo Lon (°)</th>
+          <th>Topo Lat (°)</th>
+          <th>Topo Lon (°)</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.map(d => `
+          <tr>
+            <td>${d.time}</td>
+            <td>${d.geoLat.toFixed(4)}</td>
+            <td>${d.geoLon.toFixed(4)}</td>
+            <td>${d.topoLat.toFixed(4)}</td>
+            <td>${d.topoLon.toFixed(4)}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+  `;
+  document.getElementById('output').innerHTML = html;
+}
+</script>
+
+</body>
+</html>
