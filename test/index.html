@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Moon Geocentric Data Plotter</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #plots {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Moon Geocentric Data Plotter</h1>
+  <label for="month">Select Month and Year:</label>
+  <input type="month" id="month" value="2024-11">
+  <button onclick="plotData()">Generate Plot</button>
+
+  <div id="plots">
+    <div id="distancePlot"></div>
+    <div id="declinationPlot"></div>
+    <div id="librationLatPlot"></div>
+    <div id="librationLonPlot"></div>
+  </div>
+
+  <script>
+    // Simplified lunar motion parameters (analytical approximation)
+    function moonGeocentricData(date) {
+      const daysSinceJ2000 = (Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) - Date.UTC(2000, 0, 1)) / 86400000;
+      const T = daysSinceJ2000 / 36525; // Julian centuries since J2000
+
+      // Mean longitude of Moon
+      const L = (218.316 + 13.176396 * daysSinceJ2000) % 360;
+      // Mean anomaly
+      const M = (134.963 + 13.064993 * daysSinceJ2000) % 360;
+      // Moon's argument of latitude
+      const F = (93.272 + 13.229350 * daysSinceJ2000) % 360;
+
+      // Distance (km): mean distance + variation
+      const distance = 385000 - 20905 * Math.cos(toRad(M));
+
+      // Declination: basic approximation
+      const decl = 5.145 * Math.sin(toRad(F));
+
+      // Libration in latitude (optical): simplified approximation
+      const libLat = 6.687 * Math.sin(toRad(F));
+
+      // Libration in longitude (optical): simplified approximation
+      const libLon = 7.7 * Math.sin(toRad(M));
+
+      return {
+        distance: distance,
+        declination: decl,
+        librationLat: libLat,
+        librationLon: libLon
+      };
+    }
+
+    function toRad(deg) {
+      return deg * Math.PI / 180;
+    }
+
+    function plotData() {
+      const input = document.getElementById('month').value;
+      const [year, month] = input.split('-').map(Number);
+
+      const labels = [];
+      const distances = [], declinations = [], librationLats = [], librationLons = [];
+
+      const daysInMonth = new Date(year, month, 0).getDate();
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(Date.UTC(year, month - 1, day));
+        labels.push(date.toISOString().split('T')[0]);
+
+        const data = moonGeocentricData(date);
+        distances.push(data.distance);
+        declinations.push(data.declination);
+        librationLats.push(data.librationLat);
+        librationLons.push(data.librationLon);
+      }
+
+      Plotly.newPlot('distancePlot', [{
+        x: labels,
+        y: distances,
+        type: 'scatter',
+        name: 'Distance (km)'
+      }], {
+        title: 'Moon Geocentric Distance',
+        yaxis: { title: 'Distance (km)' }
+      });
+
+      Plotly.newPlot('declinationPlot', [{
+        x: labels,
+        y: declinations,
+        type: 'scatter',
+        name: 'Declination (deg)'
+      }], {
+        title: 'Moon Declination (approx.)',
+        yaxis: { title: 'Declination (deg)' }
+      });
+
+      Plotly.newPlot('librationLatPlot', [{
+        x: labels,
+        y: librationLats,
+        type: 'scatter',
+        name: 'Libration in Latitude (deg)'
+      }], {
+        title: 'Libration in Latitude (approx.)',
+        yaxis: { title: 'Latitude (deg)' }
+      });
+
+      Plotly.newPlot('librationLonPlot', [{
+        x: labels,
+        y: librationLons,
+        type: 'scatter',
+        name: 'Libration in Longitude (deg)'
+      }], {
+        title: 'Libration in Longitude (approx.)',
+        yaxis: { title: 'Longitude (deg)' }
+      });
+    }
+  </script>
+</body>
+</html>
