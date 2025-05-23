@@ -91,46 +91,40 @@
         const c = 299792458; // speed of light in m/s
         const freqGHz = 10.368e9; // 10.368 GHz in Hz
 
+        const stepMinutes = 30;
+        const sampled = results.filter((_, i) => {
+          const minutes = results[i].dateTimeUTC.getUTCMinutes();
+          return minutes % stepMinutes === 0;
+        });
 
-        const interval = 15; // minutes
+        for (let i = 1; i < sampled.length; i++) {
+          const prev = sampled[i - 1];
+          const curr = sampled[i];
 
-        for (let i = interval; i < results.length - interval; i++) {
-          const prev = results[i - interval];
-          const next = results[i + interval];
-
-          // Check time spacing
-          const dt = (next.dateTimeUTC.getTime() - prev.dateTimeUTC.getTime()) / 60000;
-
-          if (Math.abs(dt - 2 * interval) > 0.5) {
-            results[i].rate = null;
-            results[i].doppler = null;
+          const dt = (curr.dateTimeUTC - prev.dateTimeUTC) / 60000; // minutes
+          if (dt !== stepMinutes) {
+            curr.rate = null;
+            curr.doppler = null;
             continue;
           }
 
-          const deltaLat = next.topoLat - prev.topoLat;
-          const deltaLon = next.topoLon - prev.topoLon;
+          const deltaLat = curr.topoLat - prev.topoLat;
+          const deltaLon = curr.topoLon - prev.topoLon;
           const rate = Math.sqrt(deltaLat * deltaLat + deltaLon * deltaLon) / dt;
 
           const omega = rate * Math.PI / 180 / 60;
           const v = moonRadius * omega;
           const doppler = (v / c) * freqGHz;
 
-          results[i].rate = rate;
-          results[i].doppler = doppler;
+          curr.rate = rate;
+          curr.doppler = doppler;
         }
 
-        // Pad edges
-        for (let i = 0; i < interval; i++) {
-          results[i].rate = null;
-          results[i].doppler = null;
-        }
-        for (let i = results.length - interval; i < results.length; i++) {
-          results[i].rate = null;
-          results[i].doppler = null;
-        }
+        sampled[0].rate = null;
+        sampled[0].doppler = null;
 
+        displayResults(sampled);
 
-        displayResults(results);
 
 
       } catch (err) {
