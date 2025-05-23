@@ -14,61 +14,62 @@
   <pre id="output"></pre>
 
   <script>
-    let data = null;
+  async function computeLibration() {
+    const response = await fetch('libration_data.json');
+    const data = await response.json();
 
-    async function loadData() {
-      const res = await fetch('libration_data.json');
-      data = await res.json();
+    const year = parseInt(document.getElementById('year').value);
+    const month = parseInt(document.getElementById('month').value);
+    const day = parseInt(document.getElementById('day').value);
+    const latDeg = parseFloat(document.getElementById('latitude').value);
+    const lonDeg = parseFloat(document.getElementById('longitude').value);
+
+    const dtStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T00:00:00Z`;
+    const entry = data.find(e => e.datetime === dtStr);
+    if (!entry) {
+      alert("No data for this date.");
+      return;
     }
 
-    function computeLibration() {
-      const date = document.getElementById('dateInput').value;
-      const lat = parseFloat(document.getElementById('latInput').value);
-      const lon = parseFloat(document.getElementById('lonInput').value);
-      const dt = date + 'T00:00:00Z';
-      const entry = data.find(d => d.datetime === dt);
-      if (!entry) {
-        document.getElementById('output').textContent = 'No data for that date';
-        return;
-      }
-
-      // Convert observer position to cartesian coordinates (approximate)
-      const R = 6378.137; // Earth radius in km
-      const phi = lat * Math.PI / 180;
-      const lambda = lon * Math.PI / 180;
-      const obs = [
-        R * Math.cos(phi) * Math.cos(lambda),
-        R * Math.cos(phi) * Math.sin(lambda),
-        R * Math.sin(phi)
-      ];
-
-      // Compute topocentric vector in ICRF
-      const moon_icrf = entry.moon_vector_icrf;
-      const topocentric_icrf = moon_icrf.map((m, i) => m - obs[i] / 149597870.7); // km to AU
-
-      // Rotate to Moon body-fixed frame
-      const Rmat = entry.moon_rotation;
-      const rotated = [
-        Rmat[0][0]*topocentric_icrf[0] + Rmat[0][1]*topocentric_icrf[1] + Rmat[0][2]*topocentric_icrf[2],
-        Rmat[1][0]*topocentric_icrf[0] + Rmat[1][1]*topocentric_icrf[1] + Rmat[1][2]*topocentric_icrf[2],
-        Rmat[2][0]*topocentric_icrf[0] + Rmat[2][1]*topocentric_icrf[1] + Rmat[2][2]*topocentric_icrf[2]
-      ];
-
-      // Compute spherical coordinates
-      const r = Math.sqrt(rotated[0]**2 + rotated[1]**2 + rotated[2]**2);
-      const lat_topo = Math.asin(rotated[2] / r) * 180 / Math.PI;
-      let lon_topo = Math.atan2(rotated[1], rotated[0]) * 180 / Math.PI;
-      lon_topo = ((lon_topo + 180) % 360) - 180;
-
-      // Output
-      const result = `
-Geocentric: Lat ${entry.geo_lat.toFixed(2)}°, Lon ${entry.geo_lon.toFixed(2)}°
-Topocentric: Lat ${lat_topo.toFixed(2)}°, Lon ${lon_topo.toFixed(2)}°
-`;
-      document.getElementById('output').textContent = result;
+    // Convert observer lat/lon to ECEF vector
+    function observerICRF(lat, lon, radiusAU = 6378.137 / 149597870.7) {
+      const latRad = lat * Math.PI / 180;
+      const lonRad = lon * Math.PI / 180;
+      const x = radiusAU * Math.cos(latRad) * Math.cos(lonRad);
+      const y = radiusAU * Math.cos(latRad) * Math.sin(lonRad);
+      const z = radiusAU * Math.sin(latRad);
+      return [x, y, z];
     }
 
-    loadData();
+    const observer = observerICRF(latDeg, lonDeg);
+    const moon = entry.moon_vector_icrf;
+
+    // Vector from observer to Moon
+    const relative = moon.map((v, i) => v - observer[i]);
+
+    // Apply rotation matrix
+    const R = entry.moon_rotation;
+    const rotated = [
+      R[0][0] * relative[0] + R[0][1] * relative[1] + R[0][2] * relative[2],
+      R[1][0] * relative[0] + R[1][1] * relative[1] + R[1][2] * relative[2],
+      R[2][0] * relative[0] + R[2][1] * relative[1] + R[2][2] * relative[2]
+    ];
+
+    // Convert to spherical coords
+    const r = Math.sqrt(rotated[0] ** 2 + rotated[1] ** 2 + rotated[2] ** 2);
+    const latTopo = Math.asin(rotated[2] / r) * 180 / Math.PI;
+    let lonTopo = Math.atan2(rotated[1], rotated[0]) * 180 / Math.PI;
+    if (lonTopo < 0) lonTopo += 360;
+
+    // Normalize longitude to [-180, +180]
+    lonTopo = ((lonTopo + 180) % 360) - 180;
+
+    document.getElementById('output').textContent = `
+  Geocentric: Lat ${entry.geo_lat.toFixed(2)}°, Lon ${entry.geo_lon.toFixed(2)}°
+  Topocentric: Lat ${latTopo.toFixed(2)}°, Lon ${lonTopo.toFixed(2)}°
+    `;
+  }
   </script>
+
 </body>
 </html>
