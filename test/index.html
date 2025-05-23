@@ -90,6 +90,12 @@
           const moonRadius = 1737400; // meters
           const c = 299792458; // speed of light in m/s
           const freqGHz = 10.368e9; // 10.368 GHz in Hz
+          
+          if (results.length < 3) {
+            document.getElementById('output').innerHTML = "<p>Not enough data points to compute rate of change.</p>";
+            return;
+          }
+
 
           for (let i = 1; i < results.length - 1; i++) {
             const prev = results[i - 1];
