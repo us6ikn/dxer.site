@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moon Libration Calculator</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
+    label, input, button { margin: 5px 0; display: block; }
+    .result { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Moon Libration Calculator</h1>
+
+  <label for="year">Year:</label>
+  <input type="number" id="year" value="2024">
+
+  <label for="month">Month:</label>
+  <input type="number" id="month" value="11">
+
+  <label for="day">Day (UT):</label>
+  <input type="number" id="day" value="30">
+
+  <label for="hour">Hour (UT):</label>
+  <input type="number" id="hour" value="20">
+
+  <label for="minute">Minute:</label>
+  <input type="number" id="minute" value="38">
+
+  <label for="longitude">Longitude (East +):</label>
+  <input type="number" id="longitude" value="17.650674">
+
+  <label for="latitude">Latitude (North +):</label>
+  <input type="number" id="latitude" value="59.801505">
+
+  <button onclick="calculateLibration()">Calculate</button>
+
+  <div class="result" id="results"></div>
+
+  <script>
+    function degToRad(deg) { return deg * Math.PI / 180; }
+    function radToDeg(rad) { return rad * 180 / Math.PI; }
+
+    function calculateLibration() {
+      const y = parseInt(document.getElementById('year').value);
+      const m = parseInt(document.getElementById('month').value);
+      const d = parseInt(document.getElementById('day').value);
+      const hour = parseInt(document.getElementById('hour').value);
+      const min = parseInt(document.getElementById('minute').value);
+      const lon = parseFloat(document.getElementById('longitude').value);
+      const lat = parseFloat(document.getElementById('latitude').value);
+
+      // Julian Date calculation
+      let JD = (367 * y) - Math.floor((7 * (y + Math.floor((m + 9) / 12))) / 4) + Math.floor((275 * m) / 9) + d + 1721013.5 + ((hour + min / 60) / 24);
+      let T = (JD - 2451545.0) / 36525;
+
+      // Mean longitude of the Moon
+      let Lm = 218.316 + 13.176396 * (JD - 2451545.0);
+
+      // Mean anomaly of the Moon
+      let Mm = 134.963 + 13.064993 * (JD - 2451545.0);
+
+      // Mean elongation of the Moon
+      let D = 297.850 + 12.190749 * (JD - 2451545.0);
+
+      // Libration calculations (simplified, not precise)
+      let Bo = 5.128 * Math.sin(degToRad(Mm)); // Libration in latitude
+      let Lo = 6.289 * Math.sin(degToRad(Mm)); // Libration in longitude
+
+      // Colongitude approximation
+      let colong = (Lm + 90 - Lo) % 360;
+
+      // Result display
+      const result = `
+        <strong>Julian Date:</strong> ${JD.toFixed(5)}<br>
+        <strong>Geocentric Libration in Latitude (Bo):</strong> ${Bo.toFixed(6)}&deg;<br>
+        <strong>Geocentric Libration in Longitude (Lo):</strong> ${Lo.toFixed(6)}&deg;<br>
+        <strong>Colongitude of the Sun:</strong> ${colong.toFixed(6)}&deg;
+      `;
+      document.getElementById('results').innerHTML = result;
+    }
+  </script>
+</body>
+</html>
