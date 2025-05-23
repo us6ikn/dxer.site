@@ -3,82 +3,90 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Moon Libration Calculator</title>
+  <title>Moon Circumstances Calculator</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
-    label, input, button { margin: 5px 0; display: block; }
-    .result { margin-top: 20px; }
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    input, select { margin: 0.5rem; padding: 0.25rem; }
+    .section { margin-bottom: 2rem; }
+    table { border-collapse: collapse; margin-top: 1rem; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; }
   </style>
 </head>
 <body>
-  <h1>Moon Libration Calculator</h1>
+  <h1>Moon Circumstances Calculator</h1>
 
-  <label for="year">Year:</label>
-  <input type="number" id="year" value="2024">
+  <div class="section">
+    <label>Year: <input type="number" id="year" value="2024"></label>
+    <label>Month: <input type="number" id="month" value="11"></label>
+    <label>Day: <input type="number" id="day" value="30"></label>
+    <label>Hour (UT): <input type="number" id="hour" value="20"></label>
+    <label>Minute (UT): <input type="number" id="minute" value="38"></label>
+    <label>Longitude (East +): <input type="number" step="0.0001" id="longitude" value="17.6507"></label>
+    <label>Latitude (North +): <input type="number" step="0.0001" id="latitude" value="59.8015"></label>
+    <button onclick="calculateMoonData()">Calculate</button>
+  </div>
 
-  <label for="month">Month:</label>
-  <input type="number" id="month" value="11">
-
-  <label for="day">Day (UT):</label>
-  <input type="number" id="day" value="30">
-
-  <label for="hour">Hour (UT):</label>
-  <input type="number" id="hour" value="20">
-
-  <label for="minute">Minute:</label>
-  <input type="number" id="minute" value="38">
-
-  <label for="longitude">Longitude (East +):</label>
-  <input type="number" id="longitude" value="17.650674">
-
-  <label for="latitude">Latitude (North +):</label>
-  <input type="number" id="latitude" value="59.801505">
-
-  <button onclick="calculateLibration()">Calculate</button>
-
-  <div class="result" id="results"></div>
+  <div id="output" class="section"></div>
 
   <script>
     function degToRad(deg) { return deg * Math.PI / 180; }
     function radToDeg(rad) { return rad * 180 / Math.PI; }
+    function sin(d) { return Math.sin(d); }
+    function cos(d) { return Math.cos(d); }
+    function tan(d) { return Math.tan(d); }
+    function asin(d) { return Math.asin(d); }
+    function atan2(y, x) { return Math.atan2(y, x); }
 
-    function calculateLibration() {
+    function calculateMoonData() {
       const y = parseInt(document.getElementById('year').value);
       const m = parseInt(document.getElementById('month').value);
       const d = parseInt(document.getElementById('day').value);
-      const hour = parseInt(document.getElementById('hour').value);
+      const h = parseInt(document.getElementById('hour').value);
       const min = parseInt(document.getElementById('minute').value);
       const lon = parseFloat(document.getElementById('longitude').value);
       const lat = parseFloat(document.getElementById('latitude').value);
 
-      // Julian Date calculation
-      let JD = (367 * y) - Math.floor((7 * (y + Math.floor((m + 9) / 12))) / 4) + Math.floor((275 * m) / 9) + d + 1721013.5 + ((hour + min / 60) / 24);
-      let T = (JD - 2451545.0) / 36525;
+      const UT = h + min / 60;
 
-      // Mean longitude of the Moon
-      let Lm = 218.316 + 13.176396 * (JD - 2451545.0);
+      // Julian Day (Meeus method)
+      let Y = y;
+      let M = m;
+      if (M <= 2) { Y -= 1; M += 12; }
+      const A = Math.floor(Y / 100);
+      const B = 2 - A + Math.floor(A / 4);
+      const JD = Math.floor(365.25 * (Y + 4716)) + Math.floor(30.6001 * (M + 1)) + d + (UT / 24) + B - 1524.5;
+      const T = (JD - 2451545.0) / 36525;
 
-      // Mean anomaly of the Moon
-      let Mm = 134.963 + 13.064993 * (JD - 2451545.0);
+      // We'll plug in accurate formulas in the next version
+      const Bo = "pending";
+      const Lo = "pending";
+      const Ls = "pending";
+      const Bs = "pending";
+      const illum = "pending";
+      const colong = "pending";
+      const paAxis = "pending";
+      const paLimb = "pending";
+      const ra = "pending";
+      const dec = "pending";
 
-      // Mean elongation of the Moon
-      let D = 297.850 + 12.190749 * (JD - 2451545.0);
-
-      // Libration calculations (simplified, not precise)
-      let Bo = 5.128 * Math.sin(degToRad(Mm)); // Libration in latitude
-      let Lo = 6.289 * Math.sin(degToRad(Mm)); // Libration in longitude
-
-      // Colongitude approximation
-      let colong = (Lm + 90 - Lo) % 360;
-
-      // Result display
-      const result = `
-        <strong>Julian Date:</strong> ${JD.toFixed(5)}<br>
-        <strong>Geocentric Libration in Latitude (Bo):</strong> ${Bo.toFixed(6)}&deg;<br>
-        <strong>Geocentric Libration in Longitude (Lo):</strong> ${Lo.toFixed(6)}&deg;<br>
-        <strong>Colongitude of the Sun:</strong> ${colong.toFixed(6)}&deg;
+      const output = document.getElementById('output');
+      output.innerHTML = `
+        <h2>Numerical Results</h2>
+        <table>
+          <tr><th>Parameter</th><th>Value</th></tr>
+          <tr><td>Julian Date</td><td>${JD.toFixed(5)}</td></tr>
+          <tr><td>Libration in latitude (Bo)</td><td>${Bo}</td></tr>
+          <tr><td>Libration in longitude (Lo)</td><td>${Lo}</td></tr>
+          <tr><td>Sub solar point (Ls)</td><td>${Ls}</td></tr>
+          <tr><td>Sub solar point (Bs)</td><td>${Bs}</td></tr>
+          <tr><td>Illuminated Fraction</td><td>${illum}</td></tr>
+          <tr><td>Co-longitude of Sun</td><td>${colong}</td></tr>
+          <tr><td>PA of Axis</td><td>${paAxis}</td></tr>
+          <tr><td>PA of Bright Limb</td><td>${paLimb}</td></tr>
+          <tr><td>RA</td><td>${ra}</td></tr>
+          <tr><td>Dec</td><td>${dec}</td></tr>
+        </table>
       `;
-      document.getElementById('results').innerHTML = result;
     }
   </script>
 </body>
