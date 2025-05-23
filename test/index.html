@@ -95,11 +95,19 @@
           const prev = results[i - 1];
           const next = results[i + 1];
 
+          const dtPrev = (results[i].dateTimeUTC - prev.dateTimeUTC) / 60000; // min
+          const dtNext = (next.dateTimeUTC - results[i].dateTimeUTC) / 60000; // min
+
+          if (Math.abs(dtPrev - 1) > 0.5 || Math.abs(dtNext - 1) > 0.5) {
+            results[i].rate = null;
+            results[i].doppler = null;
+            continue;
+          }
+
           const deltaLat = next.topoLat - prev.topoLat;
           const deltaLon = next.topoLon - prev.topoLon;
           const rate = Math.sqrt(deltaLat * deltaLat + deltaLon * deltaLon) / 2;
 
-          // Convert deg/min to rad/s
           const omega = rate * Math.PI / 180 / 60;
           const v = moonRadius * omega;
           const doppler = (v / c) * freqGHz;
@@ -107,11 +115,11 @@
           results[i].rate = rate;
           results[i].doppler = doppler;
         }
+
         results[0].rate = null;
         results[0].doppler = null;
         results[results.length - 1].rate = null;
         results[results.length - 1].doppler = null;
-
 
         displayResults(results);
 
