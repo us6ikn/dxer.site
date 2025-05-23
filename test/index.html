@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-        <title>Moon Libration: Topocentric Converter</title>
-        <style>
-            body { font-family: sans-serif; padding: 20px; max-width: 900px; margin: auto; }
-            input, button { margin: 5px; padding: 5px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
-            th, td { border: 1px solid #ccc; padding: 6px; text-align: right; }
-            th { background-color: #f0f0f0; }
-        </style>
-        <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
-
+  <meta charset="UTF-8">
+  <title>Moon Libration: Topocentric Converter</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 900px; margin: auto; }
+    input, button { margin: 5px; padding: 5px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: right; }
+    th { background-color: #f0f0f0; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
 </head>
 <body>
 
@@ -29,146 +28,142 @@
 <div id="output"></div>
 
 <script>
-    async function convertLibration() {
-      const obsLat = parseFloat(document.getElementById('obsLat').value);
-      const obsLon = parseFloat(document.getElementById('obsLon').value);
-      const selectedDate = document.getElementById('obsDate').value;
+  async function convertLibration() {
+    const obsLat = parseFloat(document.getElementById('obsLat').value);
+    const obsLon = parseFloat(document.getElementById('obsLon').value);
+    const selectedDate = document.getElementById('obsDate').value;
 
-      if (isNaN(obsLat) || isNaN(obsLon)) {
-        alert("Please enter valid observer latitude and longitude.");
-        return;
-      }
-      if (!selectedDate) {
-        alert("Please select a date.");
-        return;
-      }
+    if (isNaN(obsLat) || isNaN(obsLon)) {
+      alert("Please enter valid observer latitude and longitude.");
+      return;
+    }
+    if (!selectedDate) {
+      alert("Please select a date.");
+      return;
+    }
 
-      try {
-        const response = await fetch('libration_output.txt');
-        if (!response.ok) throw new Error('Failed to fetch the data file.');
+    try {
+      const response = await fetch('libration_output.txt');
+      if (!response.ok) throw new Error('Failed to fetch the data file.');
 
-        const text = await response.text();
-        const lines = text.trim().split('\n').slice(1); // skip header
+      const text = await response.text();
+      const lines = text.trim().split('\n').slice(1); // skip header
 
-        const degToRad = Math.PI / 180;
-        const radToDeg = 180 / Math.PI;
+      const degToRad = Math.PI / 180;
+      const radToDeg = 180 / Math.PI;
 
-        const results = lines
-          .map(line => {
-            const parts = line.trim().split(/\s+/);
-            const date = parts[0];
-            const time = parts[1];
-            const geoLat = parseFloat(parts[2]);
-            const geoLon = parseFloat(parts[3]);
-            return { date, time, geoLat, geoLon };
-          })
-          .filter(d => d.date === selectedDate)
-          .map(d => {
-            const dateTimeUTC = new Date(d.date + 'T' + d.time + 'Z');
-            const moonPos = SunCalc.getMoonPosition(dateTimeUTC, obsLat, obsLon);
-            const altitudeDeg = moonPos.altitude * (180 / Math.PI);
-            if (altitudeDeg <= 0) return null;
+      // Sample every 30th line BEFORE parsing
+      const sampledLines = lines.filter((_, index) => index % 30 === 0);
 
-            const deltaLat = 0.01745 * Math.cos(d.geoLat * degToRad) * Math.sin((obsLat - d.geoLat) * degToRad);
-            const deltaLon = 0.01745 * Math.cos(d.geoLat * degToRad) * Math.sin((obsLon - d.geoLon) * degToRad);
-            const topoLat = d.geoLat + deltaLat * radToDeg;
-            const topoLon = d.geoLon + deltaLon * radToDeg;
+      const sampled = sampledLines
+        .map(line => {
+          const parts = line.trim().split(/\s+/);
+          const date = parts[0];
+          const time = parts[1];
+          const geoLat = parseFloat(parts[2]);
+          const geoLon = parseFloat(parts[3]);
+          return { date, time, geoLat, geoLon };
+        })
+        .filter(d => d.date === selectedDate)
+        .map(d => {
+          const dateTimeUTC = new Date(d.date + 'T' + d.time + 'Z');
+          const moonPos = SunCalc.getMoonPosition(dateTimeUTC, obsLat, obsLon);
+          const altitudeDeg = moonPos.altitude * (180 / Math.PI);
+          if (altitudeDeg <= 0) return null;
 
-            return {
-              time: d.date + ' ' + d.time,
-              dateTimeUTC,
-              geoLat: d.geoLat,
-              geoLon: d.geoLon,
-              topoLat,
-              topoLon,
-              alt: altitudeDeg.toFixed(2)
-            };
-          })
-          .filter(Boolean);
+          const deltaLat = 0.01745 * Math.cos(d.geoLat * degToRad) * Math.sin((obsLat - d.geoLat) * degToRad);
+          const deltaLon = 0.01745 * Math.cos(d.geoLat * degToRad) * Math.sin((obsLon - d.geoLon) * degToRad);
+          const topoLat = d.geoLat + deltaLat * radToDeg;
+          const topoLon = d.geoLon + deltaLon * radToDeg;
 
-        // Compute rate of change (in °/min)
-        const moonRadius = 1737400; // meters
-        const c = 299792458; // speed of light in m/s
-        const freqGHz = 10.368e9; // 10.368 GHz in Hz
+          return {
+            time: d.date + ' ' + d.time,
+            dateTimeUTC,
+            geoLat: d.geoLat,
+            geoLon: d.geoLon,
+            topoLat,
+            topoLon,
+            alt: altitudeDeg.toFixed(2)
+          };
+        })
+        .filter(Boolean);
 
-        const stepMinutes = 30;
-        const sampled = results.filter((_, i) => {
-          const minutes = results[i].dateTimeUTC.getUTCMinutes();
-          return minutes % stepMinutes === 0;
-        });
+      // Compute rate of change (in °/min)
+      const moonRadius = 1737400; // meters
+      const c = 299792458; // speed of light in m/s
+      const freqGHz = 10.368e9; // 10.368 GHz in Hz
 
-        for (let i = 1; i < sampled.length; i++) {
-          const prev = sampled[i - 1];
-          const curr = sampled[i];
+      for (let i = 1; i < sampled.length; i++) {
+        const prev = sampled[i - 1];
+        const curr = sampled[i];
 
-          const dt = (curr.dateTimeUTC - prev.dateTimeUTC) / 60000; // minutes
-          if (dt !== stepMinutes) {
-            curr.rate = null;
-            curr.doppler = null;
-            continue;
-          }
-
-          const deltaLat = curr.topoLat - prev.topoLat;
-          const deltaLon = curr.topoLon - prev.topoLon;
-          const rate = Math.sqrt(deltaLat * deltaLat + deltaLon * deltaLon) / dt;
-
-          const omega = rate * Math.PI / 180 / 60;
-          const v = moonRadius * omega;
-          const doppler = (v / c) * freqGHz;
-
-          curr.rate = rate;
-          curr.doppler = doppler;
+        const dt = (curr.dateTimeUTC - prev.dateTimeUTC) / 60000; // minutes
+        if (dt !== 30) {
+          curr.rate = null;
+          curr.doppler = null;
+          continue;
         }
 
+        const deltaLat = curr.topoLat - prev.topoLat;
+        const deltaLon = curr.topoLon - prev.topoLon;
+        const rate = Math.sqrt(deltaLat * deltaLat + deltaLon * deltaLon) / dt;
+
+        const omega = rate * Math.PI / 180 / 60;
+        const v = moonRadius * omega;
+        const doppler = (v / c) * freqGHz;
+
+        curr.rate = rate;
+        curr.doppler = doppler;
+      }
+
+      if (sampled.length > 0) {
         sampled[0].rate = null;
         sampled[0].doppler = null;
-
-        displayResults(sampled);
-
-
-
-      } catch (err) {
-        document.getElementById('output').innerHTML = `<p style="color: red;">❌ Error: ${err.message}</p>`;
-      }
-    }
-
-    function displayResults(data) {
-      if (data.length === 0) {
-        document.getElementById('output').innerHTML = "<p>No data found for the selected date.</p>";
-        return;
       }
 
-      const html = `
-        <h3>Converted Topocentric Libration</h3>
-        <table>
-            <thead>
-              <tr>
-                <th>Date-Time (UTC)</th>
-                <th>Geo Lat (°)</th>
-                <th>Geo Lon (°)</th>
-                <th>Topo Lat (°)</th>
-                <th>Topo Lon (°)</th>
-                <th>Rate (°/min)</th>
-                <th>Doppler (Hz)</th>
-              </tr>
-            </thead>
-          <tbody>
-            ${data.map(d => `
-              <tr>
-                <td>${d.time}</td>
-                <td>${d.geoLat.toFixed(4)}</td>
-                <td>${d.geoLon.toFixed(4)}</td>
-                <td>${d.topoLat.toFixed(4)}</td>
-                <td>${d.topoLon.toFixed(4)}</td>
-                <td>${d.rate !== null ? d.rate.toFixed(5) : '-'}</td>
-                <td>${d.doppler !== null ? d.doppler.toFixed(2) : '-'}</td>
-              </tr>`).join('')}
-          </tbody>
-        </table>
-      `;
-      document.getElementById('output').innerHTML = html;
+      displayResults(sampled);
+
+    } catch (err) {
+      document.getElementById('output').innerHTML = `<p style="color: red;">❌ Error: ${err.message}</p>`;
+    }
+  }
+
+  function displayResults(data) {
+    if (data.length === 0) {
+      document.getElementById('output').innerHTML = "<p>No data found for the selected date.</p>";
+      return;
     }
 
+    const html = `
+      <h3>Converted Topocentric Libration</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Date-Time (UTC)</th>
+            <th>Geo Lat (°)</th>
+            <th>Geo Lon (°)</th>
+            <th>Topo Lat (°)</th>
+            <th>Topo Lon (°)</th>
+            <th>Rate (°/min)</th>
+            <th>Doppler (Hz)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.map(d => `
+            <tr>
+              <td>${d.time}</td>
+              <td>${d.geoLat.toFixed(4)}</td>
+              <td>${d.geoLon.toFixed(4)}</td>
+              <td>${d.topoLat.toFixed(4)}</td>
+              <td>${d.topoLon.toFixed(4)}</td>
+              <td>${d.rate !== null ? d.rate.toFixed(5) : '-'}</td>
+              <td>${d.doppler !== null ? d.doppler.toFixed(2) : '-'}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    `;
+    document.getElementById('output').innerHTML = html;
+  }
 </script>
 
 </body>
