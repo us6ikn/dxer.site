@@ -3,6 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <title>Topocentric Libration Calculator</title>
+  <style>
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+      padding: 4px;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
 </head>
 <body>
   <h2>Topocentric Libration Calculator</h2>
@@ -11,32 +21,23 @@
   <label>Longitude (deg): <input type="number" id="lonInput" value="0.0"></label><br>
   <button onclick="computeLibration()">Compute</button>
 
-  <pre id="output"></pre>
+  <div id="output"></div>
 
   <script>
   async function computeLibration() {
     const response = await fetch('libration_data.json');
     const data = await response.json();
 
-    // Read input values
     const dateStr = document.getElementById('dateInput').value;
     const latDeg = parseFloat(document.getElementById('latInput').value);
     const lonDeg = parseFloat(document.getElementById('lonInput').value);
 
-    // Match the date to a record in JSON
-    const dtStr = `${dateStr}T00:00:00Z`;
-    const entry = data.find(e => e.datetime === dtStr);
-    if (!entry) {
-      alert("No data for this date.");
+    const filtered = data.filter(entry => entry.datetime.startsWith(dateStr));
+    if (filtered.length === 0) {
+      alert("No data available for this date.");
       return;
     }
 
-    // Vector from Earth to Moon in ICRF
-    const moon = entry.moon_vector_icrf;
-    const earth = entry.earth_vector_icrf;
-    const moonFromEarth = moon.map((v, i) => v - earth[i]);
-
-    // Approximate observer offset from Earth center (ECEF-like, rough)
     function observerOffset(lat, lon, radiusAU = 6378.137 / 149597870.7) {
       const latRad = lat * Math.PI / 180;
       const lonRad = lon * Math.PI / 180;
@@ -48,31 +49,49 @@
 
     const offset = observerOffset(latDeg, lonDeg);
 
-    // Vector from observer to Moon in ICRF
-    const moonFromObserver = moonFromEarth.map((v, i) => v - offset[i]);
-
-    // Rotate into Moon body-fixed frame
-    const R = entry.moon_rotation;
-    const rotated = [
-      R[0][0] * moonFromObserver[0] + R[0][1] * moonFromObserver[1] + R[0][2] * moonFromObserver[2],
-      R[1][0] * moonFromObserver[0] + R[1][1] * moonFromObserver[1] + R[1][2] * moonFromObserver[2],
-      R[2][0] * moonFromObserver[0] + R[2][1] * moonFromObserver[1] + R[2][2] * moonFromObserver[2]
-    ];
-
-    // Convert to spherical coordinates
-    const r = Math.sqrt(rotated[0]**2 + rotated[1]**2 + rotated[2]**2);
-    const latTopo = Math.asin(rotated[2] / r) * 180 / Math.PI;
-    let lonTopo = Math.atan2(rotated[1], rotated[0]) * 180 / Math.PI;
-    lonTopo = ((lonTopo + 180) % 360) - 180; // Normalize to [-180, 180]
-
-    // Output
-    document.getElementById('output').textContent = `
-  Geocentric: Lat ${entry.geo_lat.toFixed(2)}°, Lon ${entry.geo_lon.toFixed(2)}°
-  Topocentric: Lat ${latTopo.toFixed(2)}°, Lon ${lonTopo.toFixed(2)}°
+    let html = `
+      <table>
+        <tr>
+          <th>Time (UTC)</th>
+          <th>Geo Lat (°)</th>
+          <th>Geo Lon (°)</th>
+          <th>Topo Lat (°)</th>
+          <th>Topo Lon (°)</th>
+        </tr>
     `;
+
+    for (const entry of filtered) {
+      const moon = entry.moon_vector_icrf;
+      const earth = entry.earth_vector_icrf;
+      const moonFromEarth = moon.map((v, i) => v - earth[i]);
+      const moonFromObserver = moonFromEarth.map((v, i) => v - offset[i]);
+
+      const R = entry.moon_rotation;
+      const rotated = [
+        R[0][0] * moonFromObserver[0] + R[0][1] * moonFromObserver[1] + R[0][2] * moonFromObserver[2],
+        R[1][0] * moonFromObserver[0] + R[1][1] * moonFromObserver[1] + R[1][2] * moonFromObserver[2],
+        R[2][0] * moonFromObserver[0] + R[2][1] * moonFromObserver[1] + R[2][2] * moonFromObserver[2]
+      ];
+
+      const r = Math.sqrt(rotated[0] ** 2 + rotated[1] ** 2 + rotated[2] ** 2);
+      const latTopo = Math.asin(rotated[2] / r) * 180 / Math.PI;
+      let lonTopo = Math.atan2(rotated[1], rotated[0]) * 180 / Math.PI;
+      lonTopo = ((lonTopo + 180) % 360) - 180;
+
+      html += `
+        <tr>
+          <td>${entry.datetime.slice(11, 16)}</td>
+          <td>${entry.geo_lat.toFixed(2)}</td>
+          <td>${entry.geo_lon.toFixed(2)}</td>
+          <td>${latTopo.toFixed(2)}</td>
+          <td>${lonTopo.toFixed(2)}</td>
+        </tr>
+      `;
+    }
+
+    html += "</table>";
+    document.getElementById('output').innerHTML = html;
   }
   </script>
-
-
 </body>
 </html>
