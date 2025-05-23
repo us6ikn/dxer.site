@@ -113,6 +113,7 @@
               <th>Geo Lon (°)</th>
               <th>Topo Lat (°)</th>
               <th>Topo Lon (°)</th>
+              <th>Moon Alt (°)</th> <!-- new -->
             </tr>
           </thead>
           <tbody>
@@ -123,8 +124,10 @@
                 <td>${d.geoLon.toFixed(4)}</td>
                 <td>${d.topoLat.toFixed(4)}</td>
                 <td>${d.topoLon.toFixed(4)}</td>
+                <td>${d.alt}</td> <!-- new -->
               </tr>`).join('')}
           </tbody>
+
         </table>
       `;
       document.getElementById('output').innerHTML = html;
