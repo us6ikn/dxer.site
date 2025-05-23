@@ -45,6 +45,10 @@
       return rad * 180 / Math.PI;
     }
 
+    function normalizeAngle(angle) {
+      return (angle % 360 + 360) % 360;
+    }
+
     function calculateJulianDate(year, month, day, hour, minute) {
       if (month <= 2) {
         year--;
@@ -71,33 +75,37 @@
       const T = (JD - 2451545.0) / 36525.0;
 
       // Mean elongation of the Moon
-      const D = deg2rad((297.8501921 + 445267.1114034 * T - 0.0018819 * T*T + T*T*T / 545868 - T*T*T*T / 113065000) % 360);
+      const D = deg2rad(normalizeAngle(297.8501921 + 445267.1114034 * T - 0.0018819 * T*T + T*T*T / 545868 - T*T*T*T / 113065000));
 
       // Sun's mean anomaly
-      const M = deg2rad((357.5291092 + 35999.0502909 * T - 0.0001536 * T*T + T*T*T / 24490000) % 360);
+      const M = deg2rad(normalizeAngle(357.5291092 + 35999.0502909 * T - 0.0001536 * T*T + T*T*T / 24490000));
 
       // Moon's mean anomaly
-      const Mp = deg2rad((134.9633964 + 477198.8675055 * T + 0.0087414 * T*T + T*T*T / 69699 - T*T*T*T / 14712000) % 360);
+      const Mp = deg2rad(normalizeAngle(134.9633964 + 477198.8675055 * T + 0.0087414 * T*T + T*T*T / 69699 - T*T*T*T / 14712000));
 
       // Moon's argument of latitude
-      const F = deg2rad((93.2720950 + 483202.0175233 * T - 0.0036539 * T*T - T*T*T / 3526000 + T*T*T*T / 863310000) % 360);
+      const F = deg2rad(normalizeAngle(93.2720950 + 483202.0175233 * T - 0.0036539 * T*T - T*T*T / 3526000 + T*T*T*T / 863310000));
 
       // Longitude of the ascending node of the Moon
-      const Omega = deg2rad((125.0445479 - 1934.1362891 * T + 0.0020754 * T*T + T*T*T / 467441 - T*T*T*T / 60616000) % 360);
+      const Omega = deg2rad(normalizeAngle(125.0445479 - 1934.1362891 * T + 0.0020754 * T*T + T*T*T / 467441 - T*T*T*T / 60616000));
 
       // Ecliptic latitude (approximate)
       const beta = 5.128 * Math.sin(F);
 
-      // Ecliptic longitude (approximate, simplified)
-      const lambda = (218.316 + 6.289 * Math.sin(Mp)) % 360;
+      // Moon's longitude (mean longitude + equation of center)
+      const Lm = normalizeAngle(218.316 + 13.176396 * (JD - 2451545.0)); // mean longitude
+      const lambda = normalizeAngle(Lm + 6.289 * Math.sin(Mp));
 
-      // Subsolar longitude
-      const lambda_sun = (280.466 + 36000.77 * T) % 360;
+      // Sun's longitude (mean + equation of center)
+      const Ls = normalizeAngle(280.466 + 36000.77 * T); // mean
+      const lambda_sun = normalizeAngle(Ls + 1.915 * Math.sin(M) + 0.020 * Math.sin(2 * M));
 
-      // Libration (geocentric, approximated)
+      // Geocentric librations
       const Bo = beta;
-      const Lo = -rad2deg(D);
-      const colong = (lambda_sun + 180 - lambda + 360) % 360;
+      const Lo = normalizeAngle(lambda - lambda_sun - 180);
+
+      // Colongitude
+      const colong = normalizeAngle(lambda_sun + 180 - lambda);
 
       // Output rendering
       document.getElementById('output').innerHTML = `
