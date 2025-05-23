@@ -92,14 +92,15 @@
         const freqGHz = 10.368e9; // 10.368 GHz in Hz
 
 
-        const interval = 30; // minutes
+        const interval = 15; // minutes
 
         for (let i = interval; i < results.length - interval; i++) {
           const prev = results[i - interval];
           const next = results[i + interval];
 
           // Check time spacing
-          const dt = (next.dateTimeUTC - prev.dateTimeUTC) / 60000; // in minutes
+          const dt = (next.dateTimeUTC.getTime() - prev.dateTimeUTC.getTime()) / 60000;
+
           if (Math.abs(dt - 2 * interval) > 0.5) {
             results[i].rate = null;
             results[i].doppler = null;
