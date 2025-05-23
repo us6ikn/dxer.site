@@ -108,6 +108,8 @@
 
             const deltaLat = next.topoLat - prev.topoLat;
             const deltaLon = next.topoLon - prev.topoLon;
+            console.log(deltaLat);
+            console.log(deltaLon);
 
             // Central difference rate over 60 minutes total
             const rate = Math.sqrt(deltaLat * deltaLat + deltaLon * deltaLon) / 60;
