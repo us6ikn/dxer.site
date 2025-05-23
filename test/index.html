@@ -24,81 +24,77 @@
   <div id="output"></div>
 
   <script>
-      async function computeLibration() {
-        const response = await fetch('libration_data.json');
-        const data = await response.json();
+  async function computeLibration() {
+    const response = await fetch('libration_data.json');
+    const data = await response.json();
 
-        const dateStr = document.getElementById('dateInput').value;
-        const latDeg = parseFloat(document.getElementById('latInput').value);
-        const lonDeg = parseFloat(document.getElementById('lonInput').value);
+    const dateStr = document.getElementById('dateInput').value;
+    const latDeg = parseFloat(document.getElementById('latInput').value);
+    const lonDeg = parseFloat(document.getElementById('lonInput').value);
 
-        const filtered = data.filter(entry => entry.datetime.startsWith(dateStr));
-        if (filtered.length === 0) {
-          alert("No data available for this date.");
-          return;
-        }
+    const filtered = data.filter(entry => entry.datetime.startsWith(dateStr));
 
-        function observerOffset(lat, lon, radiusAU = 6378.137 / 149597870.7) {
-          const latRad = lat * Math.PI / 180;
-          const lonRad = lon * Math.PI / 180;
-          const x = radiusAU * Math.cos(latRad) * Math.cos(lonRad);
-          const y = radiusAU * Math.cos(latRad) * Math.sin(lonRad);
-          const z = radiusAU * Math.sin(latRad);
-          return [x, y, z];
-        }
+    function observerOffset(lat, lon, radiusAU = 6378.137 / 149597870.7) {
+      const latRad = lat * Math.PI / 180;
+      const lonRad = lon * Math.PI / 180;
+      const x = radiusAU * Math.cos(latRad) * Math.cos(lonRad);
+      const y = radiusAU * Math.cos(latRad) * Math.sin(lonRad);
+      const z = radiusAU * Math.sin(latRad);
+      return [x, y, z];
+    }
 
-        const offset = observerOffset(latDeg, lonDeg);
+    function unwrapLongitude(reference, value) {
+      let delta = value - reference;
+      if (delta > 180) value -= 360;
+      if (delta < -180) value += 360;
+      return value;
+    }
 
-        let html = `
-          <table>
-            <tr>
-              <th>Time (UTC)</th>
-              <th>Geo Lat (°)</th>
-              <th>Geo Lon (°)</th>
-              <th>Topo Lat (°)</th>
-              <th>Topo Lon (°)</th>
-            </tr>
-        `;
+    let table = `
+      <table border="1" cellspacing="0" cellpadding="4">
+        <tr>
+          <th>Time (UTC)</th>
+          <th>Geo Lat (°)</th>
+          <th>Geo Lon (°)</th>
+          <th>Topo Lat (°)</th>
+          <th>Topo Lon (°)</th>
+        </tr>
+    `;
 
-        for (const entry of filtered) {
-          const moon = entry.moon_vector_icrf;
-          const earth = entry.earth_vector_icrf;
-          const moonFromEarth = moon.map((v, i) => v - earth[i]);
+    for (const entry of filtered) {
+      const moon = entry.moon_vector_icrf;
+      const earth = entry.earth_vector_icrf;
+      const moonFromEarth = moon.map((v, i) => v - earth[i]);
+      const offset = observerOffset(latDeg, lonDeg);
+      const moonFromObserver = moonFromEarth.map((v, i) => v - offset[i]);
 
-          // Get observer position in ICRF frame
-          const observerICRF = earth.map((v, i) => v + offset[i]);
+      const R = entry.moon_rotation;
+      const rotated = [
+        R[0][0] * moonFromObserver[0] + R[0][1] * moonFromObserver[1] + R[0][2] * moonFromObserver[2],
+        R[1][0] * moonFromObserver[0] + R[1][1] * moonFromObserver[1] + R[1][2] * moonFromObserver[2],
+        R[2][0] * moonFromObserver[0] + R[2][1] * moonFromObserver[1] + R[2][2] * moonFromObserver[2]
+      ];
 
-          // Vector from observer to Moon
-          const vectorICRF = moon.map((v, i) => v - observerICRF[i]);
+      const r = Math.sqrt(rotated[0]**2 + rotated[1]**2 + rotated[2]**2);
+      const latTopo = Math.asin(rotated[2] / r) * 180 / Math.PI;
+      let lonTopo = Math.atan2(rotated[1], rotated[0]) * 180 / Math.PI;
+      lonTopo = ((lonTopo + 180) % 360) - 180;
+      lonTopo = unwrapLongitude(entry.geo_lon, lonTopo);
 
-          // Rotate vector into Moon-fixed frame (ICRF → Moon-fixed)
-          const R = entry.moon_rotation;
-          const rotated = [
-            R[0][0] * vectorICRF[0] + R[0][1] * vectorICRF[1] + R[0][2] * vectorICRF[2],
-            R[1][0] * vectorICRF[0] + R[1][1] * vectorICRF[1] + R[1][2] * vectorICRF[2],
-            R[2][0] * vectorICRF[0] + R[2][1] * vectorICRF[1] + R[2][2] * vectorICRF[2]
-          ];
+      const time = entry.datetime.slice(11, 16);
+      table += `<tr>
+        <td>${time}</td>
+        <td>${entry.geo_lat.toFixed(2)}</td>
+        <td>${entry.geo_lon.toFixed(2)}</td>
+        <td>${latTopo.toFixed(2)}</td>
+        <td>${lonTopo.toFixed(2)}</td>
+      </tr>`;
+    }
 
-          const r = Math.sqrt(rotated[0] ** 2 + rotated[1] ** 2 + rotated[2] ** 2);
-          const latTopo = Math.asin(rotated[2] / r) * 180 / Math.PI;
-          let lonTopo = Math.atan2(rotated[1], rotated[0]) * 180 / Math.PI;
-          lonTopo = ((lonTopo + 180) % 360) - 180;
-
-          html += `
-            <tr>
-              <td>${entry.datetime.slice(11, 16)}</td>
-              <td>${entry.geo_lat.toFixed(2)}</td>
-              <td>${entry.geo_lon.toFixed(2)}</td>
-              <td>${latTopo.toFixed(2)}</td>
-              <td>${lonTopo.toFixed(2)}</td>
-            </tr>
-          `;
-        }
-
-        html += "</table>";
-        document.getElementById('output').innerHTML = html;
-      }
-
+    table += '</table>';
+    document.getElementById('output').innerHTML = table;
+  }
   </script>
+
 </body>
 </html>
