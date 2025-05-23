@@ -70,37 +70,39 @@
                              const minute = parseInt(document.getElementById('minute').value);
 
                              const JD = calculateJulianDate(year, month, day, hour, minute);
-                             const T = (JD - 2451545.0) / 36525.0;
+                             const T = (JD - 2451545.0) / 36525;
 
-                             // Orbital elements
-                             const D = deg2rad(normalizeAngle(297.85036 + 445267.111480 * T - 0.0019142 * T*T + T*T*T / 189474));
-                             const M = deg2rad(normalizeAngle(357.52772 + 35999.050340 * T - 0.0001603 * T*T - T*T*T / 300000));
-                             const Mp = deg2rad(normalizeAngle(134.96298 + 477198.867398 * T + 0.0086972 * T*T + T*T*T / 56250));
-                             const F = deg2rad(normalizeAngle(93.27191 + 483202.017538 * T - 0.0036825 * T*T + T*T*T / 327270));
-                             const Omega = deg2rad(normalizeAngle(125.04452 - 1934.136261 * T + 0.0020708 * T*T + T*T*T / 450000));
+                             // Moon's mean elements
+                             const Lp = normalizeAngle(218.3164477 + 481267.88123421 * T - 0.0015786 * T * T);
+                             const D = normalizeAngle(297.8501921 + 445267.1114034 * T - 0.0018819 * T*T);
+                             const M = normalizeAngle(357.5291092 + 35999.0502909 * T - 0.0001536 * T*T);
+                             const Mp = normalizeAngle(134.9633964 + 477198.8675055 * T + 0.0087414 * T*T);
+                             const F = normalizeAngle(93.2720950 + 483202.0175233 * T - 0.0036539 * T*T);
+                             const Omega = normalizeAngle(125.04452 - 1934.136261 * T);
 
-                             // Inclination of the Moon's axis
-                             const I = deg2rad(1.54242);
+                             const I = deg2rad(1.54242); // Inclination of Moon's equator to ecliptic
+                             const W = deg2rad(Lp - Omega);
 
-                             // Moon's ecliptic latitude and longitude
-                             const W = Mp + deg2rad(6.289 * Math.sin(Mp));
-                             const A = Math.atan2(Math.sin(W) * Math.cos(I) - Math.tan(F) * Math.sin(I), Math.cos(W));
-                             const l = normalizeAngle(rad2deg(A) - normalizeAngle(Omega));
-                             const b = Math.asin(Math.sin(F) * Math.cos(I) + Math.cos(F) * Math.sin(I) * Math.sin(W));
+                             // Geocentric libration in longitude and latitude
+                             const A = Math.atan2(
+                               Math.sin(W) * Math.cos(I),
+                               Math.cos(W)
+                             );
+                             const l = rad2deg(A) - Lp;
+
+                             const b = Math.asin(Math.sin(W) * Math.sin(I));
 
                              const Bo = rad2deg(b);
-                             const Lo = l;
+                             const Lo = normalizeAngle(l);
 
-                             // Sun's longitude (approximate)
-                             const Ls = normalizeAngle(280.466 + 36000.77 * T);
-                             const lambda_sun = normalizeAngle(Ls + 1.915 * Math.sin(M) + 0.020 * Math.sin(2 * M));
+                             // Apparent longitude of the Moon (approx)
+                             const lambda_moon = normalizeAngle(Lp + 6.289 * Math.sin(deg2rad(Mp)));
 
-                             // Moon's longitude (mean longitude + equation of center)
-                             const Lm = normalizeAngle(218.316 + 13.176396 * (JD - 2451545.0));
-                             const lambda = normalizeAngle(Lm + 6.289 * Math.sin(Mp));
+                             // Apparent longitude of the Sun (approx)
+                             const lambda_sun = normalizeAngle(280.4665 + 36000.7698 * T + 1.9146 * Math.sin(deg2rad(M)) + 0.02 * Math.sin(2 * deg2rad(M)));
 
                              // Colongitude of the Sun
-                             const colong = normalizeAngle(lambda_sun + 180 - lambda);
+                             const colong = normalizeAngle(lambda_sun + 180 - lambda_moon);
 
                              document.getElementById('output').innerHTML = `
                                <div><strong>Julian Date:</strong> ${JD.toFixed(5)}</div>
@@ -109,6 +111,7 @@
                                <div><strong>Colongitude of the Sun:</strong> ${colong.toFixed(2)}°</div>
                              `;
                            }
+
 
   </script>
 </body>
