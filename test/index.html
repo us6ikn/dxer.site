@@ -99,6 +99,8 @@
         results[results.length - 1].rate = null;
 
 
+        displayResults(results);
+
 
       } catch (err) {
         document.getElementById('output').innerHTML = `<p style="color: red;">❌ Error: ${err.message}</p>`;
