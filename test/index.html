@@ -10,7 +10,7 @@
             th, td { border: 1px solid #ccc; padding: 6px; text-align: right; }
             th { background-color: #f0f0f0; }
         </style>
-        <script src="https://cdn.jsdelivr.net/npm/astronomia@1.13.0/astronomia.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
 
 </head>
 <body>
@@ -70,31 +70,14 @@
           .map(d => {
             const dateTimeUTC = new Date(d.date + 'T' + d.time + 'Z');
 
-            const jd = julian.CalendarGregorianToJD(
-              dateTimeUTC.getUTCFullYear(),
-              dateTimeUTC.getUTCMonth() + 1,
-              dateTimeUTC.getUTCDate()
-            ) + (
-              dateTimeUTC.getUTCHours() +
-              dateTimeUTC.getUTCMinutes() / 60 +
-              dateTimeUTC.getUTCSeconds() / 3600
-            ) / 24;
+            // Get Moon position using SunCalc
+            const moonPos = SunCalc.getMoonPosition(dateTimeUTC, obsLat, obsLon);
+            const altitudeDeg = moonPos.altitude * (180 / Math.PI); // radians → degrees
 
-            const moonEq = moonposition.position(jd);
-            const moonHor = coord.eq2hor(
-              jd,
-              moonEq.ra,
-              moonEq.dec,
-              obsLat * degToRad,
-              obsLon * degToRad
-            );
-
-            const altitudeDeg = moonHor.alt * radToDeg;
-            if (altitudeDeg <= 0) return null; // skip if below horizon
+            if (altitudeDeg <= 0) return null; // below horizon
 
             const deltaLat = 0.01745 * Math.cos(d.geoLat * degToRad) * Math.sin((obsLat - d.geoLat) * degToRad);
             const deltaLon = 0.01745 * Math.cos(d.geoLat * degToRad) * Math.sin((obsLon - d.geoLon) * degToRad);
-
             const topoLat = d.geoLat + deltaLat * radToDeg;
             const topoLon = d.geoLon + deltaLon * radToDeg;
 
@@ -107,7 +90,8 @@
               alt: altitudeDeg.toFixed(2)
             };
           })
-          .filter(Boolean); // remove nulls (Moon below horizon)
+          .filter(Boolean); // keep only rows with Moon above horizon
+
 
         displayResults(results);
 
