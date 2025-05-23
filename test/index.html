@@ -87,16 +87,30 @@
           .filter(Boolean);
 
         // Compute rate of change (in °/min)
+        const moonRadius = 1737400; // meters
+        const c = 299792458; // speed of light in m/s
+        const freqGHz = 10.368e9; // 10.368 GHz in Hz
+
         for (let i = 1; i < results.length - 1; i++) {
           const prev = results[i - 1];
           const next = results[i + 1];
+
           const deltaLat = next.topoLat - prev.topoLat;
           const deltaLon = next.topoLon - prev.topoLon;
-          const rate = Math.sqrt(deltaLat * deltaLat + deltaLon * deltaLon) / 2; // central diff
+          const rate = Math.sqrt(deltaLat * deltaLat + deltaLon * deltaLon) / 2;
+
+          // Convert deg/min to rad/s
+          const omega = rate * Math.PI / 180 / 60;
+          const v = moonRadius * omega;
+          const doppler = (v / c) * freqGHz;
+
           results[i].rate = rate;
+          results[i].doppler = doppler;
         }
-        results[0].rate = null; // can't compute central diff at edges
+        results[0].rate = null;
+        results[0].doppler = null;
         results[results.length - 1].rate = null;
+        results[results.length - 1].doppler = null;
 
 
         displayResults(results);
@@ -116,16 +130,17 @@
       const html = `
         <h3>Converted Topocentric Libration</h3>
         <table>
-          <thead>
-            <tr>
-              <th>Date-Time (UTC)</th>
-              <th>Geo Lat (°)</th>
-              <th>Geo Lon (°)</th>
-              <th>Topo Lat (°)</th>
-              <th>Topo Lon (°)</th>
-              <th>Rate (°/min)</th>
-            </tr>
-          </thead>
+            <thead>
+              <tr>
+                <th>Date-Time (UTC)</th>
+                <th>Geo Lat (°)</th>
+                <th>Geo Lon (°)</th>
+                <th>Topo Lat (°)</th>
+                <th>Topo Lon (°)</th>
+                <th>Rate (°/min)</th>
+                <th>Doppler (Hz)</th>
+              </tr>
+            </thead>
           <tbody>
             ${data.map(d => `
               <tr>
@@ -135,6 +150,7 @@
                 <td>${d.topoLat.toFixed(4)}</td>
                 <td>${d.topoLon.toFixed(4)}</td>
                 <td>${d.rate !== null ? d.rate.toFixed(5) : '-'}</td>
+                <td>${d.doppler !== null ? d.doppler.toFixed(2) : '-'}</td>
               </tr>`).join('')}
           </tbody>
         </table>
