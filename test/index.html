@@ -1,62 +1,74 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Topocentric Libration</title>
+  <meta charset="UTF-8">
+  <title>Topocentric Libration Calculator</title>
 </head>
 <body>
-  <h1>Topocentric Libration Calculator</h1>
-  <label>Date: <input type="date" id="date" value="2010-06-14"></label><br>
-  <label>Hour: <input type="number" id="hour" min="0" max="23" value="0"></label>
-  <label>Minute: <input type="number" id="minute" min="0" max="59" value="0"></label><br>
-  <label>Latitude: <input type="number" id="lat" step="0.1" value="60"></label>
-  <label>Longitude: <input type="number" id="lon" step="0.1" value="0"></label><br>
+  <h2>Topocentric Libration Calculator</h2>
+  <label>Date (YYYY-MM-DD): <input type="date" id="dateInput" value="2010-06-14"></label><br>
+  <label>Latitude (deg): <input type="number" id="latInput" value="60.0"></label><br>
+  <label>Longitude (deg): <input type="number" id="lonInput" value="0.0"></label><br>
   <button onclick="computeLibration()">Compute</button>
+
   <pre id="output"></pre>
 
   <script>
-    async function computeLibration() {
-      const date = document.getElementById("date").value;
-      const hour = document.getElementById("hour").value.padStart(2, '0');
-      const minute = document.getElementById("minute").value.padStart(2, '0');
-      const timestamp = `${date}T${hour}:${minute}`;
-      const lat = parseFloat(document.getElementById("lat").value);
-      const lon = parseFloat(document.getElementById("lon").value);
+    let data = null;
 
+    async function loadData() {
       const res = await fetch('libration_data.json');
-      const data = await res.json();
+      data = await res.json();
+    }
 
-      if (!data[timestamp]) {
-        document.getElementById("output").innerText = "No data for this time.";
+    function computeLibration() {
+      const date = document.getElementById('dateInput').value;
+      const lat = parseFloat(document.getElementById('latInput').value);
+      const lon = parseFloat(document.getElementById('lonInput').value);
+      const dt = date + 'T00:00:00Z';
+      const entry = data.find(d => d.datetime === dt);
+      if (!entry) {
+        document.getElementById('output').textContent = 'No data for that date';
         return;
       }
 
-      const entry = data[timestamp];
-      const R = entry.rotation;
-      const lat_geo = entry.lat_geo;
-      const lon_geo = entry.lon_geo;
-
-      // Convert observer's lat/lon to unit vector in ICRF (approximation)
+      // Convert observer position to cartesian coordinates (approximate)
+      const R = 6378.137; // Earth radius in km
       const phi = lat * Math.PI / 180;
       const lambda = lon * Math.PI / 180;
-      const x = Math.cos(phi) * Math.cos(lambda);
-      const y = Math.cos(phi) * Math.sin(lambda);
-      const z = Math.sin(phi);
-
-      const v = [x, y, z];
-      const m = R;
-      const r = [
-        m[0][0]*v[0] + m[0][1]*v[1] + m[0][2]*v[2],
-        m[1][0]*v[0] + m[1][1]*v[1] + m[1][2]*v[2],
-        m[2][0]*v[0] + m[2][1]*v[1] + m[2][2]*v[2],
+      const obs = [
+        R * Math.cos(phi) * Math.cos(lambda),
+        R * Math.cos(phi) * Math.sin(lambda),
+        R * Math.sin(phi)
       ];
 
-      const topoLat = Math.asin(r[2]) * 180 / Math.PI;
-      const topoLon = Math.atan2(r[1], r[0]) * 180 / Math.PI;
+      // Compute topocentric vector in ICRF
+      const moon_icrf = entry.moon_vector_icrf;
+      const topocentric_icrf = moon_icrf.map((m, i) => m - obs[i] / 149597870.7); // km to AU
 
-      document.getElementById("output").innerText =
-        `Geocentric: Lat ${lat_geo.toFixed(2)}°, Lon ${lon_geo.toFixed(2)}°\n` +
-        `Topocentric: Lat ${topoLat.toFixed(2)}°, Lon ${topoLon.toFixed(2)}°`;
+      // Rotate to Moon body-fixed frame
+      const Rmat = entry.moon_rotation;
+      const rotated = [
+        Rmat[0][0]*topocentric_icrf[0] + Rmat[0][1]*topocentric_icrf[1] + Rmat[0][2]*topocentric_icrf[2],
+        Rmat[1][0]*topocentric_icrf[0] + Rmat[1][1]*topocentric_icrf[1] + Rmat[1][2]*topocentric_icrf[2],
+        Rmat[2][0]*topocentric_icrf[0] + Rmat[2][1]*topocentric_icrf[1] + Rmat[2][2]*topocentric_icrf[2]
+      ];
+
+      // Compute spherical coordinates
+      const r = Math.sqrt(rotated[0]**2 + rotated[1]**2 + rotated[2]**2);
+      const lat_topo = Math.asin(rotated[2] / r) * 180 / Math.PI;
+      let lon_topo = Math.atan2(rotated[1], rotated[0]) * 180 / Math.PI;
+      lon_topo = ((lon_topo + 180) % 360) - 180;
+
+      // Output
+      const result = `
+Geocentric: Lat ${entry.geo_lat.toFixed(2)}°, Lon ${entry.geo_lon.toFixed(2)}°
+Topocentric: Lat ${lat_topo.toFixed(2)}°, Lon ${lon_topo.toFixed(2)}°
+`;
+      document.getElementById('output').textContent = result;
     }
+
+    loadData();
   </script>
 </body>
 </html>
