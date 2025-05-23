@@ -96,10 +96,9 @@
             const curr = results[i];
             const next = results[i + 1];
 
-            const dtPrev = (curr.dateTimeUTC - prev.dateTimeUTC) / 60000; // minutes
-            const dtNext = (next.dateTimeUTC - curr.dateTimeUTC) / 60000; // minutes
+            const dtPrev = (curr.dateTimeUTC - prev.dateTimeUTC) / 60000;
+            const dtNext = (next.dateTimeUTC - curr.dateTimeUTC) / 60000;
 
-            // Ensure both time intervals are 30 minutes
             if (Math.abs(dtPrev - 30) > 1 || Math.abs(dtNext - 30) > 1) {
               curr.rate = null;
               curr.doppler = null;
@@ -108,9 +107,7 @@
 
             const deltaLat = next.topoLat - prev.topoLat;
             const deltaLon = next.topoLon - prev.topoLon;
-
-            // Central difference rate over 60 minutes total
-            const rate = Math.sqrt(deltaLat * deltaLat + deltaLon * deltaLon) / 60;
+            const rate = Math.sqrt(deltaLat ** 2 + deltaLon ** 2) / 60; // degrees per minute
 
             const omega = rate * Math.PI / 180 / 60; // rad/s
             const v = moonRadius * omega;
@@ -120,11 +117,6 @@
             curr.doppler = doppler;
           }
 
-          // Endpoints cannot be calculated using central difference
-          results[0].rate = null;
-          results[0].doppler = null;
-          results[results.length - 1].rate = null;
-          results[results.length - 1].doppler = null;
 
 
         displayResults(results);
