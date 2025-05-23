@@ -18,11 +18,11 @@
     const response = await fetch('libration_data.json');
     const data = await response.json();
 
-    const year = parseInt(document.getElementById('year').value);
-    const month = parseInt(document.getElementById('month').value);
-    const day = parseInt(document.getElementById('day').value);
-    const latDeg = parseFloat(document.getElementById('latitude').value);
-    const lonDeg = parseFloat(document.getElementById('longitude').value);
+    const dateStr = document.getElementById('dateInput').value;
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const latDeg = parseFloat(document.getElementById('latInput').value);
+    const lonDeg = parseFloat(document.getElementById('lonInput').value);
+
 
     const dtStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T00:00:00Z`;
     const entry = data.find(e => e.datetime === dtStr);
