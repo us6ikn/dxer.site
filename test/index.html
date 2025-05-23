@@ -18,21 +18,26 @@
     const response = await fetch('libration_data.json');
     const data = await response.json();
 
+    // Read input values
     const dateStr = document.getElementById('dateInput').value;
-    const [year, month, day] = dateStr.split('-').map(Number);
     const latDeg = parseFloat(document.getElementById('latInput').value);
     const lonDeg = parseFloat(document.getElementById('lonInput').value);
 
-
-    const dtStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T00:00:00Z`;
+    // Match the date to a record in JSON
+    const dtStr = `${dateStr}T00:00:00Z`;
     const entry = data.find(e => e.datetime === dtStr);
     if (!entry) {
       alert("No data for this date.");
       return;
     }
 
-    // Convert observer lat/lon to ECEF vector
-    function observerICRF(lat, lon, radiusAU = 6378.137 / 149597870.7) {
+    // Vector from Earth to Moon in ICRF
+    const moon = entry.moon_vector_icrf;
+    const earth = entry.earth_vector_icrf;
+    const moonFromEarth = moon.map((v, i) => v - earth[i]);
+
+    // Approximate observer offset from Earth center (ECEF-like, rough)
+    function observerOffset(lat, lon, radiusAU = 6378.137 / 149597870.7) {
       const latRad = lat * Math.PI / 180;
       const lonRad = lon * Math.PI / 180;
       const x = radiusAU * Math.cos(latRad) * Math.cos(lonRad);
@@ -41,35 +46,33 @@
       return [x, y, z];
     }
 
-    const observer = observerICRF(latDeg, lonDeg);
-    const moon = entry.moon_vector_icrf;
+    const offset = observerOffset(latDeg, lonDeg);
 
-    // Vector from observer to Moon
-    const relative = moon.map((v, i) => v - observer[i]);
+    // Vector from observer to Moon in ICRF
+    const moonFromObserver = moonFromEarth.map((v, i) => v - offset[i]);
 
-    // Apply rotation matrix
+    // Rotate into Moon body-fixed frame
     const R = entry.moon_rotation;
     const rotated = [
-      R[0][0] * relative[0] + R[0][1] * relative[1] + R[0][2] * relative[2],
-      R[1][0] * relative[0] + R[1][1] * relative[1] + R[1][2] * relative[2],
-      R[2][0] * relative[0] + R[2][1] * relative[1] + R[2][2] * relative[2]
+      R[0][0] * moonFromObserver[0] + R[0][1] * moonFromObserver[1] + R[0][2] * moonFromObserver[2],
+      R[1][0] * moonFromObserver[0] + R[1][1] * moonFromObserver[1] + R[1][2] * moonFromObserver[2],
+      R[2][0] * moonFromObserver[0] + R[2][1] * moonFromObserver[1] + R[2][2] * moonFromObserver[2]
     ];
 
-    // Convert to spherical coords
-    const r = Math.sqrt(rotated[0] ** 2 + rotated[1] ** 2 + rotated[2] ** 2);
+    // Convert to spherical coordinates
+    const r = Math.sqrt(rotated[0]**2 + rotated[1]**2 + rotated[2]**2);
     const latTopo = Math.asin(rotated[2] / r) * 180 / Math.PI;
     let lonTopo = Math.atan2(rotated[1], rotated[0]) * 180 / Math.PI;
-    if (lonTopo < 0) lonTopo += 360;
+    lonTopo = ((lonTopo + 180) % 360) - 180; // Normalize to [-180, 180]
 
-    // Normalize longitude to [-180, +180]
-    lonTopo = ((lonTopo + 180) % 360) - 180;
-
+    // Output
     document.getElementById('output').textContent = `
   Geocentric: Lat ${entry.geo_lat.toFixed(2)}°, Lon ${entry.geo_lon.toFixed(2)}°
   Topocentric: Lat ${latTopo.toFixed(2)}°, Lon ${lonTopo.toFixed(2)}°
     `;
   }
   </script>
+
 
 </body>
 </html>
