@@ -10,29 +10,39 @@
 </head>
 <body>
 
-<!-- Three.js (UMD version) -->
+<!-- Three.js core -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
 
-<!-- OrbitControls (as standalone script, will attach to window) -->
+<!-- OrbitControls (global UMD) -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/examples/js/controls/OrbitControls.js"></script>
 
-<!-- PapaParse -->
+<!-- PapaParse for CSV -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <script>
-  // Fix for UMD-style OrbitControls (older builds attach globally)
+  // Set up basic THREE.js scene
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.z = 2;
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  // Orbit controls (must come after camera/renderer definition)
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
 
-
+  // For data plotting
   let minNoise = Infinity, maxNoise = -Infinity;
   const points = [];
 
   function getColor(noise) {
     const norm = (noise - minNoise) / (maxNoise - minNoise);
-    return new THREE.Color().setHSL(0.7 - norm * 0.7, 1.0, 0.5);
+    return new THREE.Color().setHSL(0.7 - norm * 0.7, 1.0, 0.5); // from blue to red
   }
 
+  // Load CSV data
   fetch('2025-05-29_20.44.04.csv')
     .then(response => response.text())
     .then(csv => {
@@ -62,6 +72,7 @@
             points.push({ x, y, z, noise });
           });
 
+          // Add spheres to the scene
           points.forEach(p => {
             const geometry = new THREE.SphereGeometry(0.015);
             const material = new THREE.MeshBasicMaterial({ color: getColor(p.noise) });
@@ -81,6 +92,7 @@
 
   animate();
 
+  // Handle resizing
   window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
