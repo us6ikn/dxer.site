@@ -164,8 +164,8 @@
         // Degree label (skip cardinal points)
         if (isMajor && ![0, 90, 180, 270].includes(i)) {
           const labelDist = compassRadius + 0.1;
-          const lx = labelDist * Math.sin(angle);  // instead of cos
-          const lz = labelDist * Math.cos(angle);  // instead of sin
+          const lx = labelDist * Math.cos(angle);
+          const lz = labelDist * Math.sin(angle);
 
           const degGeom = new THREE.TextGeometry(i.toString(), {
             font: font,
@@ -190,10 +190,11 @@
         const outer = compassRadius + 0.02;
         const inner = compassRadius - (isMajor ? 0.05 : 0.02);
 
-        const x1 = inner * Math.cos(angle);
-        const z1 = inner * Math.sin(angle);
-        const x2 = outer * Math.cos(angle);
-        const z2 = outer * Math.sin(angle);
+        const x1 = inner * Math.sin(angle); // instead of cos
+        const z1 = inner * Math.cos(angle); // instead of sin
+        const x2 = outer * Math.sin(angle); // instead of cos
+        const z2 = outer * Math.cos(angle); // instead of sin
+
 
         const tickGeom = new THREE.BufferGeometry().setFromPoints([
           new THREE.Vector3(x1, 0, z1),
