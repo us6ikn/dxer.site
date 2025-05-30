@@ -73,13 +73,14 @@
             minNoise = Math.min(minNoise, noise);
             maxNoise = Math.max(maxNoise, noise);
 
-            const azRad = THREE.MathUtils.degToRad(az);
+            const azRad = THREE.MathUtils.degToRad(360 - az);  // Flip azimuth to match real-world direction
             const elRad = THREE.MathUtils.degToRad(el);
             const r = 1;
 
             const x = r * Math.cos(elRad) * Math.sin(azRad);
             const y = r * Math.sin(elRad);
             const z = r * Math.cos(elRad) * Math.cos(azRad);
+
 
             const geometry = new THREE.SphereGeometry(0.015);
             const material = new THREE.MeshBasicMaterial({ color: getColor(noise) });
