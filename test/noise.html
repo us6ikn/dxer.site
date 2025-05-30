@@ -84,6 +84,50 @@
   infoBox.style.fontFamily = 'monospace';
   infoBox.style.display = 'none';
   document.body.appendChild(infoBox);
+  
+  function addAzimuthCompass() {
+    const compassRadius = 1.05;
+    const labelDistance = 1.2;
+    const compassGroup = new THREE.Group();
+
+    const fontLoader = new THREE.FontLoader();
+    fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+      const directions = [
+        { label: 'N', az: 0 },
+        { label: 'E', az: 90 },
+        { label: 'S', az: 180 },
+        { label: 'W', az: 270 }
+      ];
+
+      directions.forEach(dir => {
+        const azRad = THREE.MathUtils.degToRad(360 - dir.az);
+        const x = labelDistance * Math.sin(azRad);
+        const z = labelDistance * Math.cos(azRad);
+        const y = 0;
+
+        const textGeom = new THREE.TextGeometry(dir.label, {
+          font: font,
+          size: 0.1,
+          height: 0.01
+        });
+
+        const textMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const text = new THREE.Mesh(textGeom, textMat);
+        text.position.set(x, y, z);
+        text.lookAt(0, 0, 0);
+        compassGroup.add(text);
+      });
+
+      const ringGeom = new THREE.RingGeometry(compassRadius - 0.01, compassRadius + 0.01, 64);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0x888888, side: THREE.DoubleSide });
+      const ring = new THREE.Mesh(ringGeom, ringMat);
+      ring.rotation.x = -Math.PI / 2;
+      compassGroup.add(ring);
+
+      scene.add(compassGroup);
+    });
+  }
+
 
   fetch('2025-05-29_20.44.04.csv')
     .then(response => response.text())
@@ -129,50 +173,6 @@
             spheres.push(sphere);
           });
           
-          // Create azimuth compass ring
-          const compassRadius = 1.05;
-          const labelDistance = 1.2;
-          const compassGroup = new THREE.Group();
-
-          const fontLoader = new THREE.FontLoader();
-          fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-            const directions = [
-              { label: 'N', az: 0 },
-              { label: 'E', az: 90 },
-              { label: 'S', az: 180 },
-              { label: 'W', az: 270 }
-            ];
-
-            directions.forEach(dir => {
-              const azRad = THREE.MathUtils.degToRad(360 - dir.az);
-              const x = labelDistance * Math.sin(azRad);
-              const z = labelDistance * Math.cos(azRad);
-              const y = 0;
-
-              const textGeom = new THREE.TextGeometry(dir.label, {
-                font: font,
-                size: 0.1,
-                height: 0.01
-              });
-
-              const textMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-              const text = new THREE.Mesh(textGeom, textMat);
-              text.position.set(x, y, z);
-              text.lookAt(0, 0, 0);
-              compassGroup.add(text);
-            });
-
-            // Optionally add a circular base ring
-            const ringGeom = new THREE.RingGeometry(compassRadius - 0.01, compassRadius + 0.01, 64);
-            const ringMat = new THREE.MeshBasicMaterial({ color: 0x888888, side: THREE.DoubleSide });
-            const ring = new THREE.Mesh(ringGeom, ringMat);
-            ring.rotation.x = -Math.PI / 2;
-            compassGroup.add(ring);
-
-            scene.add(compassGroup);
-          });
-
-          
           // Get the bounding box and center of the data
           const boundingBox = new THREE.Box3();
           spheres.forEach(s => boundingBox.expandByPoint(s.position));
@@ -200,6 +200,7 @@
           camera.lookAt(center);
           controls.target.copy(center);
           controls.update();
+          addAzimuthCompass();
 
         }
       });
