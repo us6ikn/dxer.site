@@ -154,6 +154,33 @@
       infoBox.style.display = 'none';
     }
   });
+    
+    // Touch support for mobile
+    window.addEventListener('touchend', (event) => {
+      if (event.changedTouches.length === 0) return;
+
+      const touch = event.changedTouches[0];
+      mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = - (touch.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(spheres);
+
+      if (intersects.length > 0) {
+        const sphere = intersects[0].object;
+        const { azimuth, elevation, noise } = sphere.userData;
+
+        infoBox.innerHTML = `
+          <b>Azimuth:</b> ${azimuth.toFixed(1)}°<br>
+          <b>Elevation:</b> ${elevation.toFixed(1)}°<br>
+          <b>Noise:</b> ${noise.toFixed(2)} dB
+        `;
+        infoBox.style.display = 'block';
+      } else {
+        infoBox.style.display = 'none';
+      }
+    });
+
 
   function animate() {
     requestAnimationFrame(animate);
