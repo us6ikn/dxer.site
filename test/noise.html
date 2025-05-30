@@ -18,14 +18,18 @@
       font-size: 14px;
       display: none;
       max-width: 80vw;
+      z-index: 10;
     }
 
-    @media (max-width: 600px) {
+    /* Make text larger on phones in portrait mode */
+    @media (max-width: 600px), (orientation: portrait) {
       #infoBox {
-        font-size: 18px;
-        padding: 15px;
+        font-size: 20px;
+        padding: 16px;
         top: 15px;
         left: 15px;
+        max-width: 90vw;
+        line-height: 1.4;
       }
     }
   </style>
