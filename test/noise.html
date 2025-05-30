@@ -36,10 +36,11 @@
   const spheres = [];
 
   let minNoise = Infinity, maxNoise = -Infinity;
-  const points = [];
+  const rawPoints = [];
 
   function getColor(noise) {
-    const norm = (noise - minNoise) / (maxNoise - minNoise);
+    const range = maxNoise - minNoise;
+    const norm = range === 0 ? 0.5 : (noise - minNoise) / range;
     return new THREE.Color().setHSL(0.7 - norm * 0.7, 1.0, 0.5);
   }
 
@@ -62,27 +63,26 @@
         header: true,
         delimiter: ";",
         complete: function (results) {
+          // First pass: gather and calculate min/max
           results.data.forEach(row => {
             if (!row.Valid || row.Valid !== "True") return;
 
-            const azStr = row.Azimuth?.replace(",", ".");
-            const elStr = row.Elevation?.replace(",", ".");
-            const noiseStr = row.Noise?.replace(",", ".");
+            const az = parseFloat(row.Azimuth?.replace(",", "."));
+            const el = parseFloat(row.Elevation?.replace(",", "."));
+            const noise = parseFloat(row.Noise?.replace(",", "."));
 
-            const az = parseFloat(azStr);
-            const el = parseFloat(elStr);
-            const noise = parseFloat(noiseStr);
-
-            if (isNaN(az) || isNaN(el) || isNaN(noise)) {
-              console.warn("Skipping invalid row:", row);
-              return;
-            }
+            if (isNaN(az) || isNaN(el) || isNaN(noise)) return;
 
             minNoise = Math.min(minNoise, noise);
             maxNoise = Math.max(maxNoise, noise);
 
-            const azRad = THREE.MathUtils.degToRad(360 - az);
-            const elRad = THREE.MathUtils.degToRad(el);
+            rawPoints.push({ az, el, noise });
+          });
+
+          // Second pass: place all points with accurate color
+          rawPoints.forEach(p => {
+            const azRad = THREE.MathUtils.degToRad(360 - p.az); // flip azimuth to match compass
+            const elRad = THREE.MathUtils.degToRad(p.el);
             const r = 1;
 
             const x = r * Math.cos(elRad) * Math.sin(azRad);
@@ -90,23 +90,21 @@
             const z = r * Math.cos(elRad) * Math.cos(azRad);
 
             const geometry = new THREE.SphereGeometry(0.015);
-            const material = new THREE.MeshBasicMaterial({ color: getColor(noise) });
+            const material = new THREE.MeshBasicMaterial({ color: getColor(p.noise) });
             const sphere = new THREE.Mesh(geometry, material);
             sphere.position.set(x, y, z);
 
-            sphere.userData = { azimuth: az, elevation: el, noise: noise };
+            sphere.userData = { azimuth: p.az, elevation: p.el, noise: p.noise };
 
             scene.add(sphere);
             spheres.push(sphere);
           });
         }
-
       });
     });
 
   // Listen for clicks
   window.addEventListener('click', (event) => {
-    // Normalize mouse position to -1..1
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
 
