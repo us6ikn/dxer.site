@@ -96,11 +96,12 @@
 
     const fontLoader = new THREE.FontLoader();
     fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+      // Cardinal directions
       const directions = [
-        { label: 'N', az: 0 },
-        { label: 'E', az: 90 },
-        { label: 'S', az: 180 },
-        { label: 'W', az: 270 }
+        { label: 'N', az: 0, color: 0xff0000 },  // Red for North
+        { label: 'E', az: 90, color: 0xffffff },
+        { label: 'S', az: 180, color: 0xffffff },
+        { label: 'W', az: 270, color: 0xffffff }
       ];
 
       directions.forEach(dir => {
@@ -112,53 +113,58 @@
         const textGeom = new THREE.TextGeometry(dir.label, {
           font: font,
           size: 0.1,
-          height: 0.01
+          height: 0.001
         });
 
-        const textMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const textMat = new THREE.MeshBasicMaterial({ color: dir.color });
         const text = new THREE.Mesh(textGeom, textMat);
         text.position.set(x, y, z);
         text.lookAt(0, 0, 0);
         compassGroup.add(text);
       });
 
-      // Make the ring slightly thicker and more visible
-      const ringGeom = new THREE.RingGeometry(compassRadius - 0.05, compassRadius + 0.05, 128);
-
+      // Draw the white ring
+      const ringGeom = new THREE.RingGeometry(compassRadius - 0.002, compassRadius + 0.002, 256);
       const ringMat = new THREE.MeshBasicMaterial({
-        color: 0xffffaa,         // Softer yellow
+        color: 0xffffff,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.5             // Semi-transparent
+        opacity: 0.9
       });
-
-      const dashedMat = new THREE.LineDashedMaterial({
-        color: 0xffffaa,
-        dashSize: 0.1,
-        gapSize: 0.05
-      });
-
-      const ringPoints = [];
-      const segments = 128;
-      for (let i = 0; i <= segments; i++) {
-        const theta = (i / segments) * 2 * Math.PI;
-        ringPoints.push(new THREE.Vector3(
-          compassRadius * Math.cos(theta),
-          0,
-          compassRadius * Math.sin(theta)
-        ));
-      }
-
-      const ringGeom = new THREE.BufferGeometry().setFromPoints(ringPoints);
-      ringGeom.computeLineDistances(); // Required for dashed lines
-      const ring = new THREE.Line(ringGeom, dashedMat);
+      const ring = new THREE.Mesh(ringGeom, ringMat);
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.y = 0;
       compassGroup.add(ring);
 
+      // Add tick marks every 10°
+      for (let i = 0; i < 360; i += 10) {
+        const angle = THREE.MathUtils.degToRad(i);
+        const isMajor = i % 30 === 0;
+        const outer = compassRadius + 0.02;
+        const inner = compassRadius - (isMajor ? 0.05 : 0.02);
 
+        const x1 = inner * Math.cos(angle);
+        const z1 = inner * Math.sin(angle);
+        const x2 = outer * Math.cos(angle);
+        const z2 = outer * Math.sin(angle);
+
+        const tickGeom = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(x1, 0, z1),
+          new THREE.Vector3(x2, 0, z2)
+        ]);
+        const tickMat = new THREE.LineBasicMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: isMajor ? 1.0 : 0.5
+        });
+        const tick = new THREE.Line(tickGeom, tickMat);
+        compassGroup.add(tick);
+      }
 
       scene.add(compassGroup);
     });
   }
+
 
 
   fetch('2025-05-29_20.44.04.csv')
