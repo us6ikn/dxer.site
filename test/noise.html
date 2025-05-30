@@ -65,15 +65,23 @@
           results.data.forEach(row => {
             if (!row.Valid || row.Valid !== "True") return;
 
-            const az = parseFloat(row.Azimuth.replace(",", "."));
-            const el = parseFloat(row.Elevation.replace(",", "."));
-            const noise = parseFloat(row.Noise.replace(",", "."));
-            if (isNaN(az) || isNaN(el) || isNaN(noise)) return;
+            const azStr = row.Azimuth?.replace(",", ".");
+            const elStr = row.Elevation?.replace(",", ".");
+            const noiseStr = row.Noise?.replace(",", ".");
+
+            const az = parseFloat(azStr);
+            const el = parseFloat(elStr);
+            const noise = parseFloat(noiseStr);
+
+            if (isNaN(az) || isNaN(el) || isNaN(noise)) {
+              console.warn("Skipping invalid row:", row);
+              return;
+            }
 
             minNoise = Math.min(minNoise, noise);
             maxNoise = Math.max(maxNoise, noise);
 
-            const azRad = THREE.MathUtils.degToRad(360 - az);  // Flip azimuth to match real-world direction
+            const azRad = THREE.MathUtils.degToRad(360 - az);
             const elRad = THREE.MathUtils.degToRad(el);
             const r = 1;
 
@@ -81,19 +89,18 @@
             const y = r * Math.sin(elRad);
             const z = r * Math.cos(elRad) * Math.cos(azRad);
 
-
             const geometry = new THREE.SphereGeometry(0.015);
             const material = new THREE.MeshBasicMaterial({ color: getColor(noise) });
             const sphere = new THREE.Mesh(geometry, material);
             sphere.position.set(x, y, z);
 
-            // Attach custom data to sphere
             sphere.userData = { azimuth: az, elevation: el, noise: noise };
 
             scene.add(sphere);
             spheres.push(sphere);
           });
         }
+
       });
     });
 
