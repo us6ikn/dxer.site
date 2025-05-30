@@ -49,7 +49,8 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/loaders/FontLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/geometries/TextGeometry.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.2/browser/astronomy.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
+
 
 
 <script>
@@ -216,46 +217,39 @@
   }
 
     function addMoonTrajectory() {
-      const observer = new Astronomy.Observer(59.3293, 18.0686, 0); // Stockholm
-      const date = new Date(Date.UTC(2025, 4, 31, 0, 0, 0)); // May 31, 2025 (month is 0-based)
+      const lat = 59.3293; // Stockholm
+      const lon = 18.0686;
+      const date = new Date(Date.UTC(2025, 4, 31)); // May 31, 2025
 
       const moonPositions = [];
 
       for (let minutes = 0; minutes <= 1440; minutes += 10) {
         const time = new Date(date.getTime() + minutes * 60 * 1000);
-        const astroTime = Astronomy.MakeTime(time);
-        const moonEqu = Astronomy.Equator('Moon', astroTime, observer, true, true);
-        const hor = Astronomy.Horizon(astroTime, observer, moonEqu.ra, moonEqu.dec, 'normal');
+        const moonPos = SunCalc.getMoonPosition(time, lat, lon);
 
-        if (hor.altitude > 0) {  // Above horizon
-          moonPositions.push({
-            azimuth: hor.azimuth,
-            elevation: hor.altitude
-          });
+        if (moonPos.altitude > 0) {
+          const azimuthDeg = (moonPos.azimuth * 180 / Math.PI + 180) % 360; // SunCalc azimuth is from South, CW
+          const elevationDeg = moonPos.altitude * 180 / Math.PI;
+
+          const azRad = THREE.MathUtils.degToRad(360 - azimuthDeg);
+          const elRad = THREE.MathUtils.degToRad(elevationDeg);
+          const r = 1;
+
+          const x = r * Math.cos(elRad) * Math.sin(azRad);
+          const y = r * Math.sin(elRad);
+          const z = r * Math.cos(elRad) * Math.cos(azRad);
+
+          moonPositions.push(new THREE.Vector3(x, y, z));
         }
       }
 
-      // Draw moon trajectory line
-      const moonCurve = new THREE.CurvePath();
-      moonPositions.forEach((pos, i) => {
-        const azRad = THREE.MathUtils.degToRad(360 - pos.azimuth);
-        const elRad = THREE.MathUtils.degToRad(pos.elevation);
-        const r = 1;
-
-        const x = r * Math.cos(elRad) * Math.sin(azRad);
-        const y = r * Math.sin(elRad);
-        const z = r * Math.cos(elRad) * Math.cos(azRad);
-
-        moonPositions[i].vector = new THREE.Vector3(x, y, z);
-      });
-
-      const points = moonPositions.map(p => p.vector);
-      const moonGeom = new THREE.BufferGeometry().setFromPoints(points);
-      const moonMat = new THREE.LineBasicMaterial({ color: 0xffff00, linewidth: 2 });
+      const moonGeom = new THREE.BufferGeometry().setFromPoints(moonPositions);
+      const moonMat = new THREE.LineBasicMaterial({ color: 0xffff00 });
       const moonLine = new THREE.Line(moonGeom, moonMat);
 
       scene.add(moonLine);
     }
+
     window.addMoonTrajectory = addMoonTrajectory;
 
 
