@@ -256,6 +256,8 @@
 
       scene.add(moonLine);
     }
+    window.addMoonTrajectory = addMoonTrajectory;
+
 
 
 
@@ -332,7 +334,7 @@
           controls.update();
           addAzimuthCompass();
           
-          addMoonTrajectory();  // make sure the browser waits until the module loaded
+          window.addMoonTrajectory();  // make sure the browser waits until the module loaded
 
 
 
