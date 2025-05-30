@@ -242,6 +242,14 @@
           moonPositions.push(new THREE.Vector3(x, y, z));
         }
       }
+      
+      if (moonPositions.length >= 2) {
+        const moonGeom = new THREE.BufferGeometry().setFromPoints(moonPositions);
+        const moonMat = new THREE.LineBasicMaterial({ color: 0xffff00 });
+        const moonLine = new THREE.Line(moonGeom, moonMat);
+        scene.add(moonLine);
+      }
+
 
       const moonGeom = new THREE.BufferGeometry().setFromPoints(moonPositions);
       const moonMat = new THREE.LineBasicMaterial({ color: 0xffff00 });
