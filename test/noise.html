@@ -132,12 +132,28 @@
         opacity: 0.5             // Semi-transparent
       });
 
-      
+      const dashedMat = new THREE.LineDashedMaterial({
+        color: 0xffffaa,
+        dashSize: 0.1,
+        gapSize: 0.05
+      });
 
-      const ring = new THREE.Mesh(ringGeom, ringMat);
-      ring.rotation.x = -Math.PI / 2; // Lay flat on XZ plane
-      ring.position.y = 0; // Make sure it's at the same Y as data
+      const ringPoints = [];
+      const segments = 128;
+      for (let i = 0; i <= segments; i++) {
+        const theta = (i / segments) * 2 * Math.PI;
+        ringPoints.push(new THREE.Vector3(
+          compassRadius * Math.cos(theta),
+          0,
+          compassRadius * Math.sin(theta)
+        ));
+      }
+
+      const ringGeom = new THREE.BufferGeometry().setFromPoints(ringPoints);
+      ringGeom.computeLineDistances(); // Required for dashed lines
+      const ring = new THREE.Line(ringGeom, dashedMat);
       compassGroup.add(ring);
+
 
 
       scene.add(compassGroup);
