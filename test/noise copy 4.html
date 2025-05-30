@@ -36,9 +36,6 @@
 
 </head>
 <body>
-    
-    <input type="date" id="datePicker" style="position:absolute; top:10px; right:10px; z-index:20; padding:5px; font-size:16px;">
-
 
 <!-- THREE.js core -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/build/three.min.js"></script>
@@ -219,20 +216,10 @@
     });
   }
 
-    function addMoonTrajectory(selectedDate) {
+    function addMoonTrajectory() {
       const lat = 59.8185; // Stockholm
       const lon = 17.6424;
-
-      const date = selectedDate ? new Date(selectedDate) : new Date();
-
-      // Remove existing trajectory lines
-      scene.children = scene.children.filter(child => {
-        if (child.userData && child.userData.isMoonTrajectory) {
-          scene.remove(child);
-          return false;
-        }
-        return true;
-      });
+      const date = new Date(2025, 5, 1); // June 1, 2025
 
       let segment = [];
       const segments = [];
@@ -255,22 +242,27 @@
 
           segment.push(new THREE.Vector3(x, y, z));
         } else {
-          if (segment.length > 1) segments.push(segment);
+          // If moon just dipped below horizon, push current segment and start new one
+          if (segment.length > 1) {
+            segments.push(segment);
+          }
           segment = [];
         }
       }
 
-      if (segment.length > 1) segments.push(segment);
+      // Push the last segment if still valid
+      if (segment.length > 1) {
+        segments.push(segment);
+      }
 
+      // Add each segment as a separate line
       segments.forEach(seg => {
         const geom = new THREE.BufferGeometry().setFromPoints(seg);
         const mat = new THREE.LineBasicMaterial({ color: 0xffff00 });
         const line = new THREE.Line(geom, mat);
-        line.userData = { isMoonTrajectory: true };
         scene.add(line);
       });
     }
-
 
     window.addMoonTrajectory = addMoonTrajectory;
 
@@ -350,9 +342,7 @@
           controls.update();
           addAzimuthCompass();
           
-          window.addMoonTrajectory = addMoonTrajectory;
-          addMoonTrajectory(); // Draw default on page load
-
+          window.addMoonTrajectory();  // make sure the browser waits until the module loaded
 
 
 
@@ -418,16 +408,6 @@
   }
 
   animate();
-  
-  document.getElementById('datePicker').addEventListener('change', (e) => {
-    const selectedDate = e.target.value;
-    if (selectedDate) {
-      addMoonTrajectory(selectedDate);
-    }
-  });
-
-    document.getElementById('datePicker').valueAsDate = new Date();
-
 
   window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
