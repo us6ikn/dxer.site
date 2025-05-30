@@ -135,6 +135,52 @@
       ring.rotation.x = -Math.PI / 2;
       ring.position.y = 0;
       compassGroup.add(ring);
+      
+      // Add tick marks and degree labels every 10°, with labels every 30°
+      for (let i = 0; i < 360; i += 10) {
+        const angle = THREE.MathUtils.degToRad(i);
+        const isMajor = i % 30 === 0;
+        const outer = compassRadius + 0.02;
+        const inner = compassRadius - (isMajor ? 0.05 : 0.02);
+
+        const x1 = inner * Math.cos(angle);
+        const z1 = inner * Math.sin(angle);
+        const x2 = outer * Math.cos(angle);
+        const z2 = outer * Math.sin(angle);
+
+        // Tick mark
+        const tickGeom = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(x1, 0, z1),
+          new THREE.Vector3(x2, 0, z2)
+        ]);
+        const tickMat = new THREE.LineBasicMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: isMajor ? 1.0 : 0.5
+        });
+        const tick = new THREE.Line(tickGeom, tickMat);
+        compassGroup.add(tick);
+
+        // Degree label (skip cardinal points)
+        if (isMajor && ![0, 90, 180, 270].includes(i)) {
+          const labelDist = compassRadius + 0.1;
+          const lx = labelDist * Math.cos(angle);
+          const lz = labelDist * Math.sin(angle);
+
+          const degGeom = new THREE.TextGeometry(i.toString(), {
+            font: font,
+            size: 0.045, // smaller than cardinal labels
+            height: 0.001
+          });
+
+          const degMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+          const label = new THREE.Mesh(degGeom, degMat);
+          label.position.set(lx, 0, lz);
+          label.lookAt(0, 0, 0);
+          compassGroup.add(label);
+        }
+      }
+
 
       // Add tick marks every 10°
       for (let i = 0; i < 360; i += 10) {
