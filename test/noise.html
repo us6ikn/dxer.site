@@ -227,7 +227,7 @@
         const time = new Date(date.getTime() + minutes * 60 * 1000);
         const moonPos = SunCalc.getMoonPosition(time, lat, lon);
 
-        if (moonPos.altitude > 10) {
+        if (moonPos.altitude > 0.1) {
           const azimuthDeg = (moonPos.azimuth * 180 / Math.PI + 180) % 360; // SunCalc azimuth is from South, CW
           const elevationDeg = moonPos.altitude * 180 / Math.PI;
 
