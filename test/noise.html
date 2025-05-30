@@ -37,14 +37,16 @@
 </head>
 <body>
 
-<!-- THREE.js core -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.146.0/build/three.min.js"></script>
+    <!-- THREE.js core -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/build/three.min.js"></script>
 
-<!-- OrbitControls (attached to global THREE) -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- Add missing loaders/geometries from examples -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/loaders/FontLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/geometries/TextGeometry.js"></script>
 
-<!-- PapaParse for CSV parsing -->
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <!-- OrbitControls -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/controls/OrbitControls.js"></script>
+
 
 <script>
   const scene = new THREE.Scene();
@@ -214,8 +216,7 @@
         }
       });
     });
-    addAzimuthCompass();
-
+    
 
   // Listen for clicks
   window.addEventListener('click', (event) => {
