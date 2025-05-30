@@ -219,16 +219,17 @@
     function addMoonTrajectory() {
       const lat = 59.8185; // Stockholm
       const lon = 17.6424;
-      const date = new Date(2025, 5, 1); // May 31, 2025
+      const date = new Date(2025, 5, 1); // June 1, 2025
 
-      const moonPositions = [];
+      let segment = [];
+      const segments = [];
 
       for (let minutes = 0; minutes <= 1440; minutes += 10) {
         const time = new Date(date.getTime() + minutes * 60 * 1000);
         const moonPos = SunCalc.getMoonPosition(time, lat, lon);
 
-        if (moonPos.altitude > 0.1) {
-          const azimuthDeg = (moonPos.azimuth * 180 / Math.PI + 180) % 360; // SunCalc azimuth is from South, CW
+        if (moonPos.altitude > 0) {
+          const azimuthDeg = (moonPos.azimuth * 180 / Math.PI + 180) % 360;
           const elevationDeg = moonPos.altitude * 180 / Math.PI;
 
           const azRad = THREE.MathUtils.degToRad(360 - azimuthDeg);
@@ -239,23 +240,28 @@
           const y = r * Math.sin(elRad);
           const z = r * Math.cos(elRad) * Math.cos(azRad);
 
-          moonPositions.push(new THREE.Vector3(x, y, z));
+          segment.push(new THREE.Vector3(x, y, z));
+        } else {
+          // If moon just dipped below horizon, push current segment and start new one
+          if (segment.length > 1) {
+            segments.push(segment);
+          }
+          segment = [];
         }
       }
-      
-      if (moonPositions.length >= 2) {
-        const moonGeom = new THREE.BufferGeometry().setFromPoints(moonPositions);
-        const moonMat = new THREE.LineBasicMaterial({ color: 0xffff00 });
-        const moonLine = new THREE.Line(moonGeom, moonMat);
-        scene.add(moonLine);
+
+      // Push the last segment if still valid
+      if (segment.length > 1) {
+        segments.push(segment);
       }
 
-
-      const moonGeom = new THREE.BufferGeometry().setFromPoints(moonPositions);
-      const moonMat = new THREE.LineBasicMaterial({ color: 0xffff00 });
-      const moonLine = new THREE.Line(moonGeom, moonMat);
-
-      scene.add(moonLine);
+      // Add each segment as a separate line
+      segments.forEach(seg => {
+        const geom = new THREE.BufferGeometry().setFromPoints(seg);
+        const mat = new THREE.LineBasicMaterial({ color: 0xffff00 });
+        const line = new THREE.Line(geom, mat);
+        scene.add(line);
+      });
     }
 
     window.addMoonTrajectory = addMoonTrajectory;
