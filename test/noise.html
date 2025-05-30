@@ -138,7 +138,7 @@
       
       // Add tick marks and degree labels every 10°, with labels every 30°
       for (let i = 0; i < 360; i += 10) {
-        const angle = THREE.MathUtils.degToRad(i);
+          const angle = THREE.MathUtils.degToRad(360 - i);
         const isMajor = i % 30 === 0;
         const outer = compassRadius + 0.02;
         const inner = compassRadius - (isMajor ? 0.05 : 0.02);
@@ -177,6 +177,7 @@
           const label = new THREE.Mesh(degGeom, degMat);
           label.position.set(lx, 0, lz);
           label.lookAt(0, 0, 0);
+          label.rotation.y += Math.PI; // flip so text isn't mirrored
           compassGroup.add(label);
         }
       }
