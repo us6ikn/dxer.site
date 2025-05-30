@@ -100,8 +100,7 @@
             scene.add(sphere);
             spheres.push(sphere);
           });
-          // Center and scale camera based on data
-          // Center and scale camera based on actual data
+          // Get the bounding box and center of the data
           const boundingBox = new THREE.Box3();
           spheres.forEach(s => boundingBox.expandByPoint(s.position));
 
@@ -112,11 +111,19 @@
           boundingBox.getSize(size);
           const maxDim = Math.max(size.x, size.y, size.z);
 
-          // Move camera behind the data, along positive Z
-          const distance = maxDim * 2;
-          camera.position.set(center.x, center.y, center.z + distance);
+          // Compute average position to estimate data-facing direction
+          let avgPosition = new THREE.Vector3();
+          spheres.forEach(s => avgPosition.add(s.position));
+          avgPosition.divideScalar(spheres.length);
 
-          // Look at the center of the data cluster
+          // Get the direction from origin to average data position
+          const directionToData = avgPosition.clone().normalize();
+
+          // Set camera away from data along that direction (zoomed out)
+          const distance = maxDim * 2;
+          const cameraPos = directionToData.clone().multiplyScalar(distance);
+
+          camera.position.copy(cameraPos);
           camera.lookAt(center);
           controls.target.copy(center);
           controls.update();
