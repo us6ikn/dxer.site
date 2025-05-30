@@ -101,23 +101,25 @@
             spheres.push(sphere);
           });
           // Center and scale camera based on data
-          // Place the camera to view the dome from the south (toward north at azimuth 0°)
-          const domeRadius = 1.5; // a little further than your data points
-          const cameraAzimuth = 180; // looking north (0°)
-          const cameraElevation = 20; // slight downward angle
+          // Center and scale camera based on actual data
+          const boundingBox = new THREE.Box3();
+          spheres.forEach(s => boundingBox.expandByPoint(s.position));
 
-          const azRad = THREE.MathUtils.degToRad(cameraAzimuth);
-          const elRad = THREE.MathUtils.degToRad(cameraElevation);
+          const center = new THREE.Vector3();
+          boundingBox.getCenter(center);
 
-          const camX = domeRadius * Math.cos(elRad) * Math.sin(azRad);
-          const camY = domeRadius * Math.sin(elRad);
-          const camZ = domeRadius * Math.cos(elRad) * Math.cos(azRad);
+          const size = new THREE.Vector3();
+          boundingBox.getSize(size);
+          const maxDim = Math.max(size.x, size.y, size.z);
 
-          camera.position.set(camX, camY, camZ);
-          camera.lookAt(0, 0, 0);
-          controls.target.set(0, 0, 0);
+          // Move camera behind the data, along positive Z
+          const distance = maxDim * 2;
+          camera.position.set(center.x, center.y, center.z + distance);
+
+          // Look at the center of the data cluster
+          camera.lookAt(center);
+          controls.target.copy(center);
           controls.update();
-
 
         }
       });
