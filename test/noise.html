@@ -168,6 +168,12 @@
         <input type="date" id="datePicker"
                style="font-size: 11px; padding: 2px 4px; border-radius: 4px; border: none; width: 100%;">
       </div>
+        
+        <div id="demoStatus" style="color: red; font-weight: bold; margin-top: 10px;">
+          Demo loaded!
+        </div>
+
+      
     </div>
         
         <div id="moonTimeControls" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; align-items: center; gap: 20px;">
@@ -666,12 +672,19 @@
       const file = e.target.files[0];
       if (!file) return;
 
+      // Hide the demo message
+      const demoStatus = document.getElementById('demoStatus');
+      if (demoStatus) {
+        demoStatus.style.display = 'none';
+      }
+
       const reader = new FileReader();
       reader.onload = function (event) {
         parseCsvData(event.target.result);
       };
       reader.readAsText(file);
     });
+
 
 
   // Listen for clicks
