@@ -143,9 +143,9 @@
 
     // Update time display
     const time = pos.time;
-    const hours = String(time.getUTCHours()).padStart(2, '0');
-    const minutes = String(time.getUTCMinutes()).padStart(2, '0');
-    moonTimeDisplay.textContent = `${hours}:${minutes} UTC`;
+    const hours = String(time.getHours()).padStart(2, '0');
+    const minutes = String(time.getMinutes()).padStart(2, '0');
+    moonTimeDisplay.textContent = `${hours}:${minutes}`;
   }
 
   function changeMoonTime(delta) {
@@ -390,7 +390,7 @@
 
       const date = selectedDate ? new Date(selectedDate) : new Date();
 
-      const startOfDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+      const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
 
       moonTrajectoryGroup.clear();
@@ -401,12 +401,7 @@
       const segments = [];
 
       for (let minutes = 0; minutes < 1440; minutes += 10) {
-          const now = new Date();
-          const utcNow = new Date(Date.UTC(
-            now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
-            now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds()
-          ));
-
+        const time = new Date(startOfDay.getTime() + minutes * 60 * 1000);
         if (time >= endOfDay) break;
 
         const moonPos = SunCalc.getMoonPosition(time, lat, lon);
@@ -449,12 +444,7 @@
       moonPositions = [];
 
       for (let minutes = 0; minutes < 1440; minutes += 10) {
-          const now = new Date();
-          const utcNow = new Date(Date.UTC(
-            now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
-            now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds()
-          ));
-
+        const time = new Date(startOfDay.getTime() + minutes * 60 * 1000);
         const moonPos = SunCalc.getMoonPosition(time, lat, lon);
 
         if (moonPos.altitude > 0) {
