@@ -17,7 +17,6 @@
         min-height: 44px;
       }
 
-
     #infoBox {
       position: absolute;
       top: 10px;
@@ -108,6 +107,43 @@
     currentMoonIndex = Math.max(0, Math.min(currentMoonIndex + delta, moonPositions.length - 1));
     updateMoonMarker();
   }
+  
+  let timeInterval = null;
+
+    function startChangingTime(delta) {
+      changeMoonTime(delta); // Immediate change
+      timeInterval = setInterval(() => {
+        changeMoonTime(delta);
+      }, 200); // Change every 200ms while held
+    }
+
+    function stopChangingTime() {
+      clearInterval(timeInterval);
+      timeInterval = null;
+    }
+
+    // Increase button
+    increaseTimeBtn.addEventListener('mousedown', () => startChangingTime(+1));
+    increaseTimeBtn.addEventListener('mouseup', stopChangingTime);
+    increaseTimeBtn.addEventListener('mouseleave', stopChangingTime);
+
+    // Decrease button
+    decreaseTimeBtn.addEventListener('mousedown', () => startChangingTime(-1));
+    decreaseTimeBtn.addEventListener('mouseup', stopChangingTime);
+    decreaseTimeBtn.addEventListener('mouseleave', stopChangingTime);
+
+    // For touch devices
+    increaseTimeBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault(); // prevent simulated mouse events
+      startChangingTime(+1);
+    });
+    increaseTimeBtn.addEventListener('touchend', stopChangingTime);
+
+    decreaseTimeBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      startChangingTime(-1);
+    });
+    decreaseTimeBtn.addEventListener('touchend', stopChangingTime);
   
   scene.add(moonTrajectoryGroup);
 
@@ -351,7 +387,6 @@
           moonPositions.push({ position: point, time });
         }
       }
-
 
       currentMoonIndex = 0;
       updateMoonMarker();
