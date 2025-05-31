@@ -515,45 +515,7 @@
       infoBox.style.display = 'none';
     }
   });
-    window.addEventListener('touchend', (event) => {
-      const touch = event.changedTouches[0];
-      if (!touch) return;
-
-      // Convert touch coordinates to normalized device coordinates
-      mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = - (touch.clientY / window.innerHeight) * 2 + 1;
-
-      raycaster.setFromCamera(mouse, camera);
-      const intersects = raycaster.intersectObjects([...spheres, moonMarker]);
-
-      if (intersects.length > 0) {
-        const clickedObject = intersects[0].object;
-
-        if (clickedObject === moonMarker) {
-          const moonData = moonPositions[currentMoonIndex];
-          infoBox.innerHTML = `
-            <b>Moon Data</b><br>
-            Time: ${moonData.time.toLocaleTimeString()}<br>
-            Azimuth: ${moonData.azimuth.toFixed(2)}°<br>
-            Elevation: ${moonData.elevation.toFixed(2)}°
-          `;
-          infoBox.style.display = 'block';
-        } else if (clickedObject.userData.noise !== undefined) {
-          const { azimuth, elevation, noise } = clickedObject.userData;
-          infoBox.innerHTML = `
-            <b>Measurement</b><br>
-            Azimuth: ${azimuth.toFixed(2)}°<br>
-            Elevation: ${elevation.toFixed(2)}°<br>
-            Noise: ${noise.toFixed(2)}
-          `;
-          infoBox.style.display = 'block';
-        }
-      } else {
-        infoBox.style.display = 'none';
-      }
-    });
-
-
+    
     
     // Touch support for mobile
     window.addEventListener('touchend', (event) => {
