@@ -82,42 +82,67 @@
 <body>
     
     <!-- App Title -->
-    <div style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 30;
-                font-size: 20px; font-family: 'Segoe UI', sans-serif; color: white; font-weight: 600;
-                background: rgba(0,0,0,0.6); padding: 6px 12px; border-radius: 10px;">
+    <div style="
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 30;
+      font-size: 16px;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      font-weight: 600;
+      background: rgba(0,0,0,0.6);
+      padding: 4px 10px;
+      border-radius: 8px;
+    ">
       Sky Observer
     </div>
 
-    <!-- Compact Control Panel -->
-    <div id="controlPanel" style="position: absolute; top: 50px; left: 10px; z-index: 20;
-         background: rgba(0,0,0,0.6); padding: 10px 12px; border-radius: 10px; display: flex;
-         flex-direction: column; gap: 8px; font-family: 'Segoe UI', sans-serif; font-size: 14px; color: white;">
+    <!-- Ultra-Compact Control Panel -->
+    <div id="controlPanel" style="
+      position: absolute;
+      top: 36px;
+      left: 8px;
+      z-index: 20;
+      background: rgba(0,0,0,0.6);
+      padding: 6px 8px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 12px;
+      color: white;
+      max-width: 150px;
+    ">
 
-      <!-- Grid Control -->
-      <div style="display: flex; align-items: center; gap: 6px;">
+      <!-- Grid -->
+      <div style="display: flex; align-items: center; gap: 4px;">
         <label for="gridInput">Grid:</label>
         <input type="text" id="gridInput" maxlength="6" placeholder="JO89tt"
-               style="width: 70px; font-size: 13px; padding: 3px 6px; border-radius: 5px; border: none;">
+               style="width: 60px; font-size: 11px; padding: 2px 4px; border-radius: 4px; border: none;">
         <button id="applyGrid"
-                style="padding: 3px 8px; font-size: 13px; border-radius: 5px; background: #444; color: white; border: none; cursor: pointer;">
+                style="padding: 2px 6px; font-size: 11px; border-radius: 4px; background: #444; color: white; border: none; cursor: pointer;">
           Go
         </button>
       </div>
 
-      <!-- File Upload -->
-      <div style="display: flex; flex-direction: column; gap: 4px;">
-        <label for="csvUpload">Upload CSV:</label>
+      <!-- CSV -->
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <label for="csvUpload">CSV:</label>
         <input type="file" id="csvUpload" accept=".csv"
-               style="font-size: 13px; padding: 3px 4px; color: white;">
+               style="font-size: 11px; padding: 2px 0px; color: white;">
       </div>
 
-      <!-- Date Picker -->
-      <div style="display: flex; flex-direction: column; gap: 4px;">
+      <!-- Date -->
+      <div style="display: flex; flex-direction: column; gap: 2px;">
         <label for="datePicker">Date:</label>
         <input type="date" id="datePicker"
-               style="font-size: 13px; padding: 3px 4px; border-radius: 5px; border: none;">
+               style="font-size: 11px; padding: 2px 4px; border-radius: 4px; border: none; width: 100%;">
       </div>
     </div>
+
 
 
         
