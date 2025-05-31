@@ -108,25 +108,19 @@
     updateMoonMarker();
   }
   
-  let intervalId;
-  let timeoutId;
+  let timeInterval = null;
 
-  function startChangingTime(delta) {
-    updateTime(delta); // one immediate step
+    function startChangingTime(delta) {
+      changeMoonTime(delta); // Immediate change
+      timeInterval = setInterval(() => {
+        changeMoonTime(delta);
+      }, 500); // Change every 200ms while held
+    }
 
-    // Delay before repeating
-    timeoutId = setTimeout(() => {
-      intervalId = setInterval(() => {
-        updateTime(delta);
-      }, 200);
-    }, 400); // hold delay
-  }
-
-  function stopChangingTime() {
-    clearTimeout(timeoutId);
-    clearInterval(intervalId);
-  }
-
+    function stopChangingTime() {
+      clearInterval(timeInterval);
+      timeInterval = null;
+    }
 
     function setupButtonInteractions(button, delta) {
       let isTouch = false;
