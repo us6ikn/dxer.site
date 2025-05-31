@@ -407,11 +407,6 @@
 
         const moonPos = SunCalc.getMoonPosition(time, lat, lon);
 
-
-        if (time >= endOfDay) break;
-
-        const moonPos = SunCalc.getMoonPosition(time, lat, lon);
-
         if (moonPos.altitude > 0) {
           const azimuthDeg = (moonPos.azimuth * 180 / Math.PI + 180) % 360;
           const elevationDeg = moonPos.altitude * 180 / Math.PI;
