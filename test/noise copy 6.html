@@ -384,13 +384,7 @@
           const point = new THREE.Vector3(x, y, z);
 
           // Store moonPositions directly with accurate timestamp
-          moonPositions.push({
-            position: point,
-            time,
-            azimuth: azimuthDeg,
-            elevation: elevationDeg
-          });
-
+          moonPositions.push({ position: point, time });
         }
       }
 
@@ -488,20 +482,6 @@
     const intersects = raycaster.intersectObjects(spheres);
 
     if (intersects.length > 0) {
-        const clickedObject = intersects[0].object;
-
-        if (clickedObject === moonMarker) {
-          const moonData = moonPositions[currentMoonIndex];
-          infoBox.innerHTML = `
-            <b>Moon Position</b><br>
-            <b>Azimuth:</b> ${moonData.azimuth.toFixed(1)}°<br>
-            <b>Elevation:</b> ${moonData.elevation.toFixed(1)}°<br>
-            <b>Time:</b> ${moonTimeDisplay.textContent}
-          `;
-          infoBox.style.display = 'block';
-          return;
-        }
-
       const sphere = intersects[0].object;
       const { azimuth, elevation, noise } = sphere.userData;
 
