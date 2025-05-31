@@ -42,6 +42,40 @@
         line-height: 1.4;
       }
     }
+      
+      #moonTimeControls button {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        color: white;
+        font-size: 24px;
+        font-family: sans-serif;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.2s;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      }
+
+      #moonTimeControls button:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.05);
+      }
+
+      #moonTimeControls button:active {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(0.97);
+      }
+
+      #moonTimeDisplay {
+        color: white;
+        font-family: 'Courier New', monospace;
+        font-size: 20px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background-color: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
   </style>
 
 </head>
