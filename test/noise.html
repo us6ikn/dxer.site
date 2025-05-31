@@ -463,7 +463,6 @@
     
     // Touch support for mobile
     window.addEventListener('touchend', (event) => {
-      event.preventDefault(); // Prevents iOS zoom/flicker
       if (event.changedTouches.length === 0) return;
 
       const touch = event.changedTouches[0];
@@ -486,8 +485,7 @@
       } else {
         infoBox.style.display = 'none';
       }
-    }, { passive: false });
-
+    });
 
   function animate() {
     requestAnimationFrame(animate);
