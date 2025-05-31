@@ -86,12 +86,6 @@
       <input type="text" id="gridInput" maxlength="6" placeholder="JO89tt" style="width: 80px; font-size: 16px;">
       <button id="applyGrid" style="margin-left: 4px;">Go</button>
     </div>
-    
-    <div style="position: absolute; top: 10px; left: 10px; z-index: 20; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 8px;">
-      <label for="csvUpload" style="color:white; font-family: monospace;">Upload CSV:</label>
-      <input type="file" id="csvUpload" accept=".csv" style="color:white; font-family: monospace;">
-    </div>
-
 
     
     <input type="date" id="datePicker" style="position:absolute; top:10px; right:10px; z-index:20; padding:5px; font-size:16px;">
@@ -556,67 +550,6 @@
         }
       });
     });
-    
-    function parseCsvData(csvText) {
-      Papa.parse(csvText, {
-        header: true,
-        delimiter: ";",
-        complete: function (results) {
-          // Clear previous data
-          rawPoints.length = 0;
-          spheres.forEach(s => scene.remove(s));
-          spheres.length = 0;
-          minNoise = Infinity;
-          maxNoise = -Infinity;
-
-          // First pass: gather and calculate min/max
-          results.data.forEach(row => {
-            if (!row.Valid || row.Valid !== "True") return;
-
-            const az = parseFloat(row.Azimuth?.replace(",", "."));
-            const el = parseFloat(row.Elevation?.replace(",", "."));
-            const noise = parseFloat(row.Noise?.replace(",", "."));
-
-            if (isNaN(az) || isNaN(el) || isNaN(noise)) return;
-
-            minNoise = Math.min(minNoise, noise);
-            maxNoise = Math.max(maxNoise, noise);
-
-            rawPoints.push({ az, el, noise });
-          });
-
-          // Second pass: render
-          rawPoints.forEach(point => {
-            const azRad = THREE.MathUtils.degToRad(360 - point.az);
-            const elRad = THREE.MathUtils.degToRad(point.el);
-            const r = 1;
-
-            const x = r * Math.cos(elRad) * Math.sin(azRad);
-            const y = r * Math.sin(elRad);
-            const z = r * Math.cos(elRad) * Math.cos(azRad);
-
-            const geometry = new THREE.SphereGeometry(0.015, 8, 8);
-            const material = new THREE.MeshBasicMaterial({ color: getColor(point.noise) });
-            const sphere = new THREE.Mesh(geometry, material);
-            sphere.position.set(x, y, z);
-            spheres.push(sphere);
-            scene.add(sphere);
-          });
-        }
-      });
-    }
-
-    document.getElementById('csvUpload').addEventListener('change', function (e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        parseCsvData(event.target.result);
-      };
-      reader.readAsText(file);
-    });
-
 
   // Listen for clicks
   window.addEventListener('click', (event) => {
