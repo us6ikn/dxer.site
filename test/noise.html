@@ -45,8 +45,6 @@
           <button id="increaseTime" style="font-size: 24px; padding: 10px 15px;">➡️</button>
         </div>
 
-
-
 <!-- THREE.js core -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/build/three.min.js"></script>
 
@@ -60,8 +58,6 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/geometries/TextGeometry.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
-
-
 
 <script>
   const scene = new THREE.Scene();
@@ -101,8 +97,6 @@
     currentMoonIndex = Math.max(0, Math.min(currentMoonIndex + delta, moonPositions.length - 1));
     updateMoonMarker();
   }
-
-
   
   scene.add(moonTrajectoryGroup);
 
@@ -236,7 +230,6 @@
         }
       }
 
-
       // Add tick marks every 10°
       for (let i = 0; i < 360; i += 10) {
         const angle = THREE.MathUtils.degToRad(i);
@@ -325,23 +318,33 @@
       
       moonPositions = [];
 
-      segments.forEach(seg => {
-        const step = Math.max(1, Math.floor(seg.length / 24)); // roughly 1 hour steps
-        for (let i = 0; i < seg.length; i += step) {
-          const index = i;
-          const minutesSinceMidnight = index * 10; // because we sample every 10 minutes
-          const time = new Date(date.getTime() + minutesSinceMidnight * 60 * 1000);
-          moonPositions.push({ position: seg[i], time });
+      for (let minutes = 0; minutes < 1440; minutes += 10) {
+        const time = new Date(startOfDay.getTime() + minutes * 60 * 1000);
+        const moonPos = SunCalc.getMoonPosition(time, lat, lon);
+
+        if (moonPos.altitude > 0) {
+          const azimuthDeg = (moonPos.azimuth * 180 / Math.PI + 180) % 360;
+          const elevationDeg = moonPos.altitude * 180 / Math.PI;
+
+          const azRad = THREE.MathUtils.degToRad(360 - azimuthDeg);
+          const elRad = THREE.MathUtils.degToRad(elevationDeg);
+          const r = 1;
+
+          const x = r * Math.cos(elRad) * Math.sin(azRad);
+          const y = r * Math.sin(elRad);
+          const z = r * Math.cos(elRad) * Math.cos(azRad);
+
+          const point = new THREE.Vector3(x, y, z);
+
+          // Store moonPositions directly with accurate timestamp
+          moonPositions.push({ position: point, time });
         }
-      });
+      }
+
 
       currentMoonIndex = 0;
       updateMoonMarker();
-
-
-      addOrUpdateMoonMarker();
     }
-
     
     window.addMoonTrajectory = addMoonTrajectory;
 
@@ -420,14 +423,9 @@
           
           window.addMoonTrajectory = addMoonTrajectory;
           addMoonTrajectory(); // Draw default on page load
-
-
-
-
         }
       });
     });
-    
 
   // Listen for clicks
   window.addEventListener('click', (event) => {
@@ -477,29 +475,12 @@
         infoBox.style.display = 'none';
       }
     });
-    
-    window.addEventListener('keydown', (event) => {
-      if (!moonPositions.length) return;
-
-      if (event.key === 'ArrowRight') {
-        currentMoonIndex = Math.min(currentMoonIndex + 1, moonPositions.length - 1);
-        addOrUpdateMoonMarker();
-      }
-
-      if (event.key === 'ArrowLeft') {
-        currentMoonIndex = Math.max(currentMoonIndex - 1, 0);
-        addOrUpdateMoonMarker();
-      }
-    });
-
-
 
   function animate() {
     requestAnimationFrame(animate);
     controls.update();
     renderer.render(scene, camera);
   }
-
 
   animate();
   
@@ -513,9 +494,7 @@
     decreaseTimeBtn.addEventListener('click', () => changeMoonTime(-1));
     increaseTimeBtn.addEventListener('click', () => changeMoonTime(1));
 
-
     document.getElementById('datePicker').valueAsDate = new Date();
-
 
   window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -523,6 +502,5 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 </script>
-
 </body>
 </html>
