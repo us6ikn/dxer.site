@@ -226,13 +226,13 @@
       const date = selectedDate ? new Date(selectedDate) : new Date();
 
       // Remove existing trajectory lines
-      scene.children = scene.children.filter(child => {
+      // Properly remove existing moon trajectory lines
+      scene.children.forEach(child => {
         if (child.userData && child.userData.isMoonTrajectory) {
           scene.remove(child);
-          return false;
         }
-        return true;
       });
+
 
       let segment = [];
       const segments = [];
