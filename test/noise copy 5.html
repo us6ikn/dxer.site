@@ -59,12 +59,6 @@
 <script>
   const scene = new THREE.Scene();
   const moonTrajectoryGroup = new THREE.Group();
-  
-  let moonPositions = [];
-  let currentMoonIndex = 0;
-  let moonMarker = null;
-
-  
   scene.add(moonTrajectoryGroup);
 
   const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -229,16 +223,16 @@
   }
 
     function addMoonTrajectory(selectedDate) {
-      const lat = 59.8185;
+      const lat = 59.8185; // Stockholm
       const lon = 17.6424;
+
       const date = selectedDate ? new Date(selectedDate) : new Date();
 
+      // Normalize date to start of day in local time
       const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
 
       moonTrajectoryGroup.clear();
-      moonPositions = [];
-      currentMoonIndex = 0;
 
       let segment = [];
       const segments = [];
@@ -261,13 +255,7 @@
           const y = r * Math.sin(elRad);
           const z = r * Math.cos(elRad) * Math.cos(azRad);
 
-          const point = new THREE.Vector3(x, y, z);
-          segment.push(point);
-
-          // Store only positions at exact hour steps
-          if (minutes % 60 === 0) {
-            moonPositions.push({ time, position: point });
-          }
+          segment.push(new THREE.Vector3(x, y, z));
         } else {
           if (segment.length > 1) segments.push(segment);
           segment = [];
@@ -283,8 +271,6 @@
         line.userData = { isMoonTrajectory: true };
         moonTrajectoryGroup.add(line);
       });
-
-      addOrUpdateMoonMarker();
     }
 
     
@@ -422,21 +408,6 @@
         infoBox.style.display = 'none';
       }
     });
-    
-    window.addEventListener('keydown', (event) => {
-      if (!moonPositions.length) return;
-
-      if (event.key === 'ArrowRight') {
-        currentMoonIndex = Math.min(currentMoonIndex + 1, moonPositions.length - 1);
-        addOrUpdateMoonMarker();
-      }
-
-      if (event.key === 'ArrowLeft') {
-        currentMoonIndex = Math.max(currentMoonIndex - 1, 0);
-        addOrUpdateMoonMarker();
-      }
-    });
-
 
 
   function animate() {
@@ -444,22 +415,6 @@
     controls.update();
     renderer.render(scene, camera);
   }
-    
-    function addOrUpdateMoonMarker() {
-      if (!moonPositions.length) return;
-
-      const pos = moonPositions[currentMoonIndex].position;
-
-      if (!moonMarker) {
-        const geometry = new THREE.SphereGeometry(0.02, 16, 16);
-        const material = new THREE.MeshBasicMaterial({ color: 0xffffff, emissive: 0xffffcc });
-        moonMarker = new THREE.Mesh(geometry, material);
-        scene.add(moonMarker);
-      }
-
-      moonMarker.position.copy(pos);
-    }
-
 
   animate();
   
