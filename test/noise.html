@@ -223,49 +223,52 @@
   }
 
     function addMoonTrajectory(selectedDate) {
-      const lat = 59.8185;
+      const lat = 59.8185; // Stockholm
       const lon = 17.6424;
 
       const date = selectedDate ? new Date(selectedDate) : new Date();
-      const startTime = new Date(date.getTime() - 12 * 60 * 60 * 1000);  // 12h before
-      const endTime = new Date(date.getTime() + 36 * 60 * 60 * 1000);    // 36h after
+
+      // Normalize date to start of day in local time
+      const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
 
       moonTrajectoryGroup.clear();
 
       let segment = [];
       const segments = [];
 
-      for (let time = new Date(startTime); time <= endTime; time.setMinutes(time.getMinutes() + 10)) {
-        const moonPos = SunCalc.getMoonPosition(new Date(time), lat, lon);
-        const elevation = moonPos.altitude * 180 / Math.PI;
+      for (let minutes = 0; minutes < 1440; minutes += 10) {
+        const time = new Date(startOfDay.getTime() + minutes * 60 * 1000);
+        if (time >= endOfDay) break;
 
-        if (elevation > 0) {
+        const moonPos = SunCalc.getMoonPosition(time, lat, lon);
+
+        if (moonPos.altitude > 0) {
           const azimuthDeg = (moonPos.azimuth * 180 / Math.PI + 180) % 360;
-          const elRad = THREE.MathUtils.degToRad(elevation);
-          const azRad = THREE.MathUtils.degToRad(360 - azimuthDeg);
+          const elevationDeg = moonPos.altitude * 180 / Math.PI;
 
+          const azRad = THREE.MathUtils.degToRad(360 - azimuthDeg);
+          const elRad = THREE.MathUtils.degToRad(elevationDeg);
           const r = 1;
+
           const x = r * Math.cos(elRad) * Math.sin(azRad);
           const y = r * Math.sin(elRad);
           const z = r * Math.cos(elRad) * Math.cos(azRad);
 
           segment.push(new THREE.Vector3(x, y, z));
         } else {
-          if (segment.length > 1) {
-            segments.push([...segment]);
-          }
+          if (segment.length > 1) segments.push(segment);
           segment = [];
         }
       }
 
-      if (segment.length > 1) {
-        segments.push([...segment]);
-      }
+      if (segment.length > 1) segments.push(segment);
 
       segments.forEach(seg => {
         const geom = new THREE.BufferGeometry().setFromPoints(seg);
         const mat = new THREE.LineBasicMaterial({ color: 0xffff00 });
         const line = new THREE.Line(geom, mat);
+        line.userData = { isMoonTrajectory: true };
         moonTrajectoryGroup.add(line);
       });
     }
