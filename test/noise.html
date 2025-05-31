@@ -539,6 +539,13 @@
           spheres.length = 0;
           minNoise = Infinity;
           maxNoise = -Infinity;
+          
+          // 🧼 Clear moon data to prevent stale clicks
+            moonPositions.length = 0;
+            currentMoonIndex = 0;
+            if (moonMarker) {
+              moonMarker.visible = false;
+            }
 
           // First pass: gather and calculate min/max
           results.data.forEach(row => {
