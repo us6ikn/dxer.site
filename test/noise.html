@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Sky Noise Dome</title>
+  <title>Sky Observer</title>
   <style>
     body { margin: 0; overflow: hidden; }
     canvas { display: block; }
@@ -89,34 +89,37 @@
 </head>
 <body>
     
-    <!-- App Title + Author -->
+    <!-- App Title + Author + Buttons -->
     <div style="position: absolute; top: 8px; left: 8px; z-index: 30; font-family: 'Segoe UI', sans-serif;">
       
-      <div style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1;">
-        <!-- Author, right-aligned with "Observer" -->
-        <div style="
-          font-size: 10px;
-          color: #aaa;
-          padding-right: 2px;
-        ">
-          by SA5IKN
-        </div>
+      <div style="display: flex; flex-direction: row; align-items: flex-end; gap: 8px;">
         
-        <!-- App Name -->
-        <div style="
-          font-size: 16px;
-          color: white;
-          font-weight: 600;
-          background: rgba(0, 0, 0, 0.6);
-          padding: 2px 4px;
-          border-radius: 2px;
-          margin-top: 0px;
-        ">
-          Sky Observer
+        <!-- Left side: Author + App Name -->
+        <div style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1;">
+          <div style="font-size: 10px; color: #aaa; padding-right: 2px;">
+            by SA5IKN
+          </div>
+          <div style="font-size: 16px; color: white; font-weight: 600; background: rgba(0, 0, 0, 0.6); padding: 2px 4px; border-radius: 2px;">
+            Sky Observer
+          </div>
         </div>
+
+        <!-- Right side: Buttons -->
+        <div style="display: flex; flex-direction: row; gap: 4px;">
+          <a href="https://dxer.site" target="_blank" title="Go to homepage"
+             style="text-decoration: none; font-size: 16px; background: rgba(255,255,255,0.1); color: white; padding: 2px 6px; border-radius: 4px;">
+            🏠
+          </a>
+          <a href="https://dxer.site/sky-observer-faq.html" target="_blank" title="Open FAQ"
+             style="text-decoration: none; font-size: 16px; background: rgba(255,255,255,0.1); color: white; padding: 2px 6px; border-radius: 4px;">
+            ❓
+          </a>
+        </div>
+
       </div>
 
     </div>
+
 
 
 
