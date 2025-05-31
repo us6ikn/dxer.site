@@ -122,28 +122,29 @@
       timeInterval = null;
     }
 
-    // Increase button
-    increaseTimeBtn.addEventListener('mousedown', () => startChangingTime(+1));
-    increaseTimeBtn.addEventListener('mouseup', stopChangingTime);
-    increaseTimeBtn.addEventListener('mouseleave', stopChangingTime);
+    function setupButtonInteractions(button, delta) {
+      let isTouch = false;
 
-    // Decrease button
-    decreaseTimeBtn.addEventListener('mousedown', () => startChangingTime(-1));
-    decreaseTimeBtn.addEventListener('mouseup', stopChangingTime);
-    decreaseTimeBtn.addEventListener('mouseleave', stopChangingTime);
+      button.addEventListener('mousedown', () => {
+        if (isTouch) return;
+        startChangingTime(delta);
+      });
+      button.addEventListener('mouseup', stopChangingTime);
+      button.addEventListener('mouseleave', stopChangingTime);
 
-    // For touch devices
-    increaseTimeBtn.addEventListener('touchstart', (e) => {
-      e.preventDefault(); // prevent simulated mouse events
-      startChangingTime(+1);
-    });
-    increaseTimeBtn.addEventListener('touchend', stopChangingTime);
+      button.addEventListener('touchstart', (e) => {
+        isTouch = true;
+        e.preventDefault(); // Prevents duplicate mouse events
+        startChangingTime(delta);
+      });
+      button.addEventListener('touchend', stopChangingTime);
+      button.addEventListener('touchcancel', stopChangingTime);
+    }
 
-    decreaseTimeBtn.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      startChangingTime(-1);
-    });
-    decreaseTimeBtn.addEventListener('touchend', stopChangingTime);
+    // Apply to both buttons
+    setupButtonInteractions(increaseTimeBtn, +1);
+    setupButtonInteractions(decreaseTimeBtn, -1);
+
   
   scene.add(moonTrajectoryGroup);
 
@@ -485,7 +486,7 @@
     mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
 
     raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(spheres);
+    const intersects = raycaster.intersectObjects([...spheres, moonMarker]);
 
     if (intersects.length > 0) {
         const clickedObject = intersects[0].object;
@@ -515,6 +516,45 @@
       infoBox.style.display = 'none';
     }
   });
+    window.addEventListener('touchend', (event) => {
+      const touch = event.changedTouches[0];
+      if (!touch) return;
+
+      // Convert touch coordinates to normalized device coordinates
+      mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = - (touch.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects([...spheres, moonMarker]);
+
+      if (intersects.length > 0) {
+        const clickedObject = intersects[0].object;
+
+        if (clickedObject === moonMarker) {
+          const moonData = moonPositions[currentMoonIndex];
+          infoBox.innerHTML = `
+            <b>Moon Data</b><br>
+            Time: ${moonData.time.toLocaleTimeString()}<br>
+            Azimuth: ${moonData.azimuth.toFixed(2)}°<br>
+            Elevation: ${moonData.elevation.toFixed(2)}°
+          `;
+          infoBox.style.display = 'block';
+        } else if (clickedObject.userData.noise !== undefined) {
+          const { azimuth, elevation, noise } = clickedObject.userData;
+          infoBox.innerHTML = `
+            <b>Measurement</b><br>
+            Azimuth: ${azimuth.toFixed(2)}°<br>
+            Elevation: ${elevation.toFixed(2)}°<br>
+            Noise: ${noise.toFixed(2)}
+          `;
+          infoBox.style.display = 'block';
+        }
+      } else {
+        infoBox.style.display = 'none';
+      }
+    });
+
+
     
     // Touch support for mobile
     window.addEventListener('touchend', (event) => {
