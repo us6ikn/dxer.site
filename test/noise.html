@@ -443,31 +443,6 @@
       });
       
 
-        if (moonPos.altitude > 0) {
-          const azimuthDeg = (moonPos.azimuth * 180 / Math.PI + 180) % 360;
-          const elevationDeg = moonPos.altitude * 180 / Math.PI;
-
-          const azRad = THREE.MathUtils.degToRad(360 - azimuthDeg);
-          const elRad = THREE.MathUtils.degToRad(elevationDeg);
-          const r = 1;
-
-          const x = r * Math.cos(elRad) * Math.sin(azRad);
-          const y = r * Math.sin(elRad);
-          const z = r * Math.cos(elRad) * Math.cos(azRad);
-
-          const point = new THREE.Vector3(x, y, z);
-
-          // Store moonPositions directly with accurate timestamp
-          moonPositions.push({
-            position: point,
-            time,
-            azimuth: azimuthDeg,
-            elevation: elevationDeg
-          });
-
-        }
-      }
-
       currentMoonIndex = 0;
       updateMoonMarker();
     }
