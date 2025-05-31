@@ -423,9 +423,8 @@
           segment.push(point);
 
           // Store only positions at exact hour steps
-          if (minutes % 60 === 0) {
-            moonPositions.push({ time, position: point });
-          }
+          moonPositions.push({ time, position: point, azimuth: azimuthDeg, elevation: elevationDeg });
+
         } else {
           if (segment.length > 1) segments.push(segment);
           segment = [];
