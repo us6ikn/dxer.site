@@ -485,7 +485,7 @@
     mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
 
     raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects([...spheres, moonMarker]);
+    const intersects = raycaster.intersectObjects(spheres);
 
     if (intersects.length > 0) {
         const clickedObject = intersects[0].object;
@@ -515,7 +515,6 @@
       infoBox.style.display = 'none';
     }
   });
-    
     
     // Touch support for mobile
     window.addEventListener('touchend', (event) => {
