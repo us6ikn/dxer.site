@@ -234,7 +234,8 @@
 
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
-  const spheres = [];
+  let spheres = []; // ✅ not const
+
 
   let minNoise = Infinity, maxNoise = -Infinity;
   const rawPoints = [];
