@@ -58,6 +58,9 @@
 
 <script>
   const scene = new THREE.Scene();
+  const moonTrajectoryGroup = new THREE.Group();
+  scene.add(moonTrajectoryGroup);
+
   const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
   // Temporary — we'll set proper camera position after data is loaded
   camera.position.set(0, 0, 2);
@@ -225,13 +228,8 @@
 
       const date = selectedDate ? new Date(selectedDate) : new Date();
 
-      // Remove existing trajectory lines
-      // Properly remove existing moon trajectory lines
-      scene.children.forEach(child => {
-        if (child.userData && child.userData.isMoonTrajectory) {
-          scene.remove(child);
-        }
-      });
+      // Clear previous moon trajectory
+      moonTrajectoryGroup.clear();
 
 
       let segment = [];
@@ -267,7 +265,7 @@
         const mat = new THREE.LineBasicMaterial({ color: 0xffff00 });
         const line = new THREE.Line(geom, mat);
         line.userData = { isMoonTrajectory: true };
-        scene.add(line);
+        moonTrajectoryGroup.add(line);
       });
     }
 
