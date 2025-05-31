@@ -38,6 +38,13 @@
 <body>
     
     <input type="date" id="datePicker" style="position:absolute; top:10px; right:10px; z-index:20; padding:5px; font-size:16px;">
+        
+        <div id="moonTimeControls" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; align-items: center; gap: 20px;">
+          <button id="decreaseTime" style="font-size: 24px; padding: 10px 15px;">⬅️</button>
+          <span id="moonTimeDisplay" style="color: white; font-family: monospace; font-size: 18px;">--:--</span>
+          <button id="increaseTime" style="font-size: 24px; padding: 10px 15px;">➡️</button>
+        </div>
+
 
 
 <!-- THREE.js core -->
@@ -63,6 +70,38 @@
   let moonPositions = [];
   let currentMoonIndex = 0;
   let moonMarker = null;
+  
+  const moonTimeDisplay = document.getElementById('moonTimeDisplay');
+  const decreaseTimeBtn = document.getElementById('decreaseTime');
+  const increaseTimeBtn = document.getElementById('increaseTime');
+
+  function updateMoonMarker() {
+    if (!moonPositions.length) return;
+
+    const pos = moonPositions[currentMoonIndex];
+    if (!moonMarker) {
+      const geom = new THREE.SphereGeometry(0.03);
+      const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      moonMarker = new THREE.Mesh(geom, mat);
+      scene.add(moonMarker);
+    }
+
+    moonMarker.position.copy(pos.position);
+
+    // Update time display
+    const time = pos.time;
+    const hours = String(time.getHours()).padStart(2, '0');
+    const minutes = String(time.getMinutes()).padStart(2, '0');
+    moonTimeDisplay.textContent = `${hours}:${minutes}`;
+  }
+
+  function changeMoonTime(delta) {
+    if (!moonPositions.length) return;
+
+    currentMoonIndex = Math.max(0, Math.min(currentMoonIndex + delta, moonPositions.length - 1));
+    updateMoonMarker();
+  }
+
 
   
   scene.add(moonTrajectoryGroup);
@@ -283,6 +322,22 @@
         line.userData = { isMoonTrajectory: true };
         moonTrajectoryGroup.add(line);
       });
+      
+      moonPositions = [];
+
+      segments.forEach(seg => {
+        const step = Math.max(1, Math.floor(seg.length / 24)); // roughly 1 hour steps
+        for (let i = 0; i < seg.length; i += step) {
+          const index = i;
+          const minutesSinceMidnight = index * 10; // because we sample every 10 minutes
+          const time = new Date(date.getTime() + minutesSinceMidnight * 60 * 1000);
+          moonPositions.push({ position: seg[i], time });
+        }
+      });
+
+      currentMoonIndex = 0;
+      updateMoonMarker();
+
 
       addOrUpdateMoonMarker();
     }
@@ -444,21 +499,6 @@
     controls.update();
     renderer.render(scene, camera);
   }
-    
-    function addOrUpdateMoonMarker() {
-      if (!moonPositions.length) return;
-
-      const pos = moonPositions[currentMoonIndex].position;
-
-      if (!moonMarker) {
-        const geometry = new THREE.SphereGeometry(0.02, 16, 16);
-        const material = new THREE.MeshBasicMaterial({ color: 0xffffff, emissive: 0xffffcc });
-        moonMarker = new THREE.Mesh(geometry, material);
-        scene.add(moonMarker);
-      }
-
-      moonMarker.position.copy(pos);
-    }
 
 
   animate();
@@ -469,6 +509,10 @@
       addMoonTrajectory(selectedDate);
     }
   });
+    
+    decreaseTimeBtn.addEventListener('click', () => changeMoonTime(-1));
+    increaseTimeBtn.addEventListener('click', () => changeMoonTime(1));
+
 
     document.getElementById('datePicker').valueAsDate = new Date();
 
