@@ -539,13 +539,6 @@
           spheres.length = 0;
           minNoise = Infinity;
           maxNoise = -Infinity;
-          
-          // 🧼 Clear moon data to prevent stale clicks
-            moonPositions.length = 0;
-            currentMoonIndex = 0;
-            if (moonMarker) {
-              moonMarker.visible = false;
-            }
 
           // First pass: gather and calculate min/max
           results.data.forEach(row => {
@@ -575,14 +568,24 @@
 
             const geometry = new THREE.SphereGeometry(0.015, 8, 8);
             const material = new THREE.MeshBasicMaterial({ color: getColor(point.noise) });
+
             const sphere = new THREE.Mesh(geometry, material);
             sphere.position.set(x, y, z);
+
+            // ✅ Fix: store az/el/noise in userData
+            sphere.userData = {
+              azimuth: point.az,
+              elevation: point.el,
+              noise: point.noise
+            };
+
             spheres.push(sphere);
             scene.add(sphere);
           });
         }
       });
     }
+
 
     document.getElementById('csvUpload').addEventListener('change', function (e) {
       const file = e.target.files[0];
