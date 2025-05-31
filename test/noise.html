@@ -401,11 +401,12 @@
       const segments = [];
 
       for (let minutes = 0; minutes < 1440; minutes += 10) {
-          const now = new Date();
-          const utcNow = new Date(Date.UTC(
-            now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
-            now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds()
-          ));
+        const time = new Date(startOfDay.getTime() + minutes * 60 * 1000); // Proper UTC-based timestamp
+
+        if (time >= endOfDay) break;
+
+        const moonPos = SunCalc.getMoonPosition(time, lat, lon);
+
 
         if (time >= endOfDay) break;
 
@@ -448,13 +449,7 @@
       
       moonPositions = [];
 
-      for (let minutes = 0; minutes < 1440; minutes += 10) {
-          const now = new Date();
-          const utcNow = new Date(Date.UTC(
-            now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
-            now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds()
-          ));
-
+      
         const moonPos = SunCalc.getMoonPosition(time, lat, lon);
 
         if (moonPos.altitude > 0) {
