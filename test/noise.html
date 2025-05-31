@@ -516,12 +516,13 @@
     }
   });
     window.addEventListener('touchend', (event) => {
-      // Convert touch to normalized coordinates (just like mouse click)
       const touch = event.changedTouches[0];
-      const x = (touch.clientX / window.innerWidth) * 2 - 1;
-      const y = -(touch.clientY / window.innerHeight) * 2 + 1;
+      if (!touch) return;
 
-      mouse.set(x, y);
+      // Convert touch coordinates to normalized device coordinates
+      mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = - (touch.clientY / window.innerHeight) * 2 + 1;
+
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObjects([...spheres, moonMarker]);
 
@@ -530,17 +531,28 @@
 
         if (clickedObject === moonMarker) {
           const moonData = moonPositions[currentMoonIndex];
-          infoBox.textContent = `Moon\nAzimuth: ${moonData.azimuth.toFixed(1)}°\nElevation: ${moonData.elevation.toFixed(1)}°\nTime: ${moonData.time.toLocaleTimeString()}`;
+          infoBox.innerHTML = `
+            <b>Moon Data</b><br>
+            Time: ${moonData.time.toLocaleTimeString()}<br>
+            Azimuth: ${moonData.azimuth.toFixed(2)}°<br>
+            Elevation: ${moonData.elevation.toFixed(2)}°
+          `;
           infoBox.style.display = 'block';
-        } else if (clickedObject.userData) {
+        } else if (clickedObject.userData.noise !== undefined) {
           const { azimuth, elevation, noise } = clickedObject.userData;
-          infoBox.textContent = `Azimuth: ${azimuth.toFixed(1)}°\nElevation: ${elevation.toFixed(1)}°\nNoise: ${noise.toFixed(1)}`;
+          infoBox.innerHTML = `
+            <b>Measurement</b><br>
+            Azimuth: ${azimuth.toFixed(2)}°<br>
+            Elevation: ${elevation.toFixed(2)}°<br>
+            Noise: ${noise.toFixed(2)}
+          `;
           infoBox.style.display = 'block';
         }
       } else {
         infoBox.style.display = 'none';
       }
     });
+
 
     
     // Touch support for mobile
