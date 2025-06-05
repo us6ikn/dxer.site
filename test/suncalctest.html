@@ -51,14 +51,16 @@
           data: distances,
           borderColor: 'blue',
           yAxisID: 'y1',
-          tension: 0.2
+          tension: 0.2,
+          pointRadius: 0
         },
         {
           label: 'Moon Declination (°)',
           data: declinations,
           borderColor: 'orange',
           yAxisID: 'y2',
-          tension: 0.2
+          tension: 0.2,
+          pointRadius: 0
         }
       ]
     },
@@ -69,36 +71,52 @@
         intersect: false
       },
       scales: {
-        y1: {
-          type: 'linear',
-          position: 'left',
-          title: { display: true, text: 'Distance (km)' }
-        },
-        y2: {
-          type: 'linear',
-          position: 'right',
-          title: { display: true, text: 'Declination (°)' },
-          grid: { drawOnChartArea: false }
-        },
         x: {
           ticks: {
             maxRotation: 45,
-            minRotation: 45
+            minRotation: 45,
+            maxTicksLimit: 15
           },
           title: {
             display: true,
             text: 'Date & Time (UTC)'
+          }
+        },
+        y1: {
+          type: 'linear',
+          position: 'left',
+          title: {
+            display: true,
+            text: 'Distance (km)'
+          },
+          ticks: {
+            beginAtZero: false
+          }
+        },
+        y2: {
+          type: 'linear',
+          position: 'right',
+          title: {
+            display: true,
+            text: 'Declination (°)'
+          },
+          grid: {
+            drawOnChartArea: false
+          },
+          ticks: {
+            beginAtZero: false
           }
         }
       },
       plugins: {
         title: {
           display: true,
-          text: `Moon Distance and Declination - ${year}-${String(month + 1).padStart(2, '0')}`
+          text: `Moon Distance and Declination – ${year}-${String(month + 1).padStart(2, '0')}`
         }
       }
     }
   });
+
 </script>
 
 
