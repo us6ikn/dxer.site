@@ -21,11 +21,10 @@
 <canvas id="moonChart" width="1000" height="400"></canvas>
 
 <script>
-  // Set your parameters here
   const year = 2025;
   const month = 5; // June (0-indexed: Jan = 0)
-  const latitude = 0;   // Equator
-  const longitude = 0;  // Prime meridian
+  const latitude = 0;   // Not used for distance/declination
+  const longitude = 0;
 
   const startDate = new Date(year, month, 1, 0, 0, 0);
   const endDate = new Date(year, month + 1, 1, 0, 0, 0);
@@ -36,9 +35,9 @@
 
   for (let d = new Date(startDate); d < endDate; d.setHours(d.getHours() + 1)) {
     const moon = SunCalc.getMoonPosition(d, latitude, longitude);
-    dates.push(new Date(d));  // Clone the date
-    distances.push(SunCalc.getMoonIllumination(d).distance);
-    declinations.push(moon.dec * (180 / Math.PI)); // convert to degrees
+    dates.push(new Date(d));
+    distances.push(moon.distance); // ✅ Correct geocentric distance
+    declinations.push(moon.dec * (180 / Math.PI)); // radians → degrees
   }
 
   const ctx = document.getElementById('moonChart').getContext('2d');
@@ -101,6 +100,7 @@
     }
   });
 </script>
+
 
 </body>
 </html>
