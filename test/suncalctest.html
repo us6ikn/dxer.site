@@ -40,7 +40,7 @@
     const moonCoords = moonposition.position(jd);
 
     // Distance in km (original is in Earth radii)
-    const distanceKm = moonCoords.range * 6378.14;
+    const distanceKm = moonCoords.range * 149597870.7;
 
     // Declination in degrees
     const decDeg = radToDeg(moonCoords.dec);
