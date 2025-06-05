@@ -39,8 +39,9 @@
     const moon = SunCalc.getMoonPosition(date, latitude, longitude);
     dates.push(date);
     distances.push(moon.distance);
-    declinations.push(moon.dec * (180 / Math.PI));
+    declinations.push(moon.declination * (180 / Math.PI));  // ✅ CORRECTED
   }
+
 
   console.log("Declinations:", declinations.slice(0, 10));
 
