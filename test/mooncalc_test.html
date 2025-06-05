@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Moon Distance and Declination</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/suncalc"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2em;
+    }
+    canvas {
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Moon Distance and Declination - 1 Hour Resolution</h2>
+<canvas id="moonChart" width="1000" height="400"></canvas>
+
+<script>
+  // Set your parameters here
+  const year = 2025;
+  const month = 5; // June (0-indexed: Jan = 0)
+  const latitude = 0;   // Equator
+  const longitude = 0;  // Prime meridian
+
+  const startDate = new Date(year, month, 1, 0, 0, 0);
+  const endDate = new Date(year, month + 1, 1, 0, 0, 0);
+
+  const dates = [];
+  const distances = [];
+  const declinations = [];
+
+  for (let d = new Date(startDate); d < endDate; d.setHours(d.getHours() + 1)) {
+    const moon = SunCalc.getMoonPosition(d, latitude, longitude);
+    dates.push(new Date(d));  // Clone the date
+    distances.push(SunCalc.getMoonIllumination(d).distance);
+    declinations.push(moon.dec * (180 / Math.PI)); // convert to degrees
+  }
+
+  const ctx = document.getElementById('moonChart').getContext('2d');
+  const moonChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: dates.map(d => d.toISOString().slice(0, 16).replace('T', ' ')),
+      datasets: [
+        {
+          label: 'Moon Distance (km)',
+          data: distances,
+          borderColor: 'blue',
+          yAxisID: 'y1',
+          tension: 0.2
+        },
+        {
+          label: 'Moon Declination (°)',
+          data: declinations,
+          borderColor: 'orange',
+          yAxisID: 'y2',
+          tension: 0.2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: {
+        mode: 'index',
+        intersect: false
+      },
+      scales: {
+        y1: {
+          type: 'linear',
+          position: 'left',
+          title: { display: true, text: 'Distance (km)' }
+        },
+        y2: {
+          type: 'linear',
+          position: 'right',
+          title: { display: true, text: 'Declination (°)' },
+          grid: { drawOnChartArea: false }
+        },
+        x: {
+          ticks: {
+            maxRotation: 45,
+            minRotation: 45
+          },
+          title: {
+            display: true,
+            text: 'Date & Time (UTC)'
+          }
+        }
+      },
+      plugins: {
+        title: {
+          display: true,
+          text: `Moon Distance and Declination - ${year}-${String(month + 1).padStart(2, '0')}`
+        }
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
