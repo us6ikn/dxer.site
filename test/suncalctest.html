@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Moon Distance and Declination</title>
+  <title>Moon Distance and Declination (Geocentric)</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/suncalc"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -17,39 +16,45 @@
 </head>
 <body>
 
-<h2>Moon Distance and Declination - 1 Hour Resolution</h2>
+<h2>Moon Distance and Declination (Geocentric) - June 2025</h2>
 <canvas id="moonChart" width="1000" height="400"></canvas>
 
-<script>
+<script type="module">
+  import { julian, moonposition } from "https://cdn.jsdelivr.net/npm/astronomia/+esm";
+
   const year = 2025;
   const month = 5; // June (0-indexed)
-  const latitude = 0;
-  const longitude = 0;
-
-  const startDate = new Date(year, month, 1);
-  const endDate = new Date(year, month + 1, 1);
+  const startDate = new Date(Date.UTC(year, month, 1));
+  const endDate = new Date(Date.UTC(year, month + 1, 1));
 
   const dates = [];
   const distances = [];
   const declinations = [];
 
+  const radToDeg = r => r * (180 / Math.PI);
   const hourMs = 3600 * 1000;
+
   for (let t = startDate.getTime(); t < endDate.getTime(); t += hourMs) {
     const date = new Date(t);
-    const moon = SunCalc.getMoonPosition(date, latitude, longitude);
-    dates.push(date);
-    distances.push(moon.distance);
-    declinations.push(moon.declination * (180 / Math.PI));  // ✅ CORRECTED
+    const jd = julian.DateToJD(date);
+    const moonCoords = moonposition.position(jd);
+
+    // Distance in km (original is in Earth radii)
+    const distanceKm = moonCoords.range * 6378.14;
+
+    // Declination in degrees
+    const decDeg = radToDeg(moonCoords.dec);
+
+    dates.push(date.toISOString().slice(0, 16).replace('T', ' '));
+    distances.push(distanceKm);
+    declinations.push(decDeg);
   }
-
-
-  console.log("Declinations:", declinations.slice(0, 10));
 
   const ctx = document.getElementById('moonChart').getContext('2d');
   const moonChart = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: dates.map(d => d.toISOString().slice(0, 16).replace('T', ' ')),
+      labels: dates,
       datasets: [
         {
           label: 'Moon Distance (km)',
@@ -93,9 +98,6 @@
           title: {
             display: true,
             text: 'Distance (km)'
-          },
-          ticks: {
-            beginAtZero: false
           }
         },
         y2: {
@@ -107,9 +109,6 @@
           },
           grid: {
             drawOnChartArea: false
-          },
-          ticks: {
-            beginAtZero: false
           }
         }
       },
@@ -122,7 +121,6 @@
     }
   });
 </script>
-
 
 </body>
 </html>
