@@ -22,23 +22,27 @@
 
 <script>
   const year = 2025;
-  const month = 5; // June (0-indexed: Jan = 0)
-  const latitude = 0;   // Not used for distance/declination
+  const month = 5; // June (0-indexed)
+  const latitude = 0;
   const longitude = 0;
 
-  const startDate = new Date(year, month, 1, 0, 0, 0);
-  const endDate = new Date(year, month + 1, 1, 0, 0, 0);
+  const startDate = new Date(year, month, 1);
+  const endDate = new Date(year, month + 1, 1);
 
   const dates = [];
   const distances = [];
   const declinations = [];
 
-  for (let d = new Date(startDate); d < endDate; d.setHours(d.getHours() + 1)) {
-    const moon = SunCalc.getMoonPosition(d, latitude, longitude);
-    dates.push(new Date(d));
-    distances.push(moon.distance); // ✅ Correct geocentric distance
-    declinations.push(moon.dec * (180 / Math.PI)); // radians → degrees
+  const hourMs = 3600 * 1000;
+  for (let t = startDate.getTime(); t < endDate.getTime(); t += hourMs) {
+    const date = new Date(t);
+    const moon = SunCalc.getMoonPosition(date, latitude, longitude);
+    dates.push(date);
+    distances.push(moon.distance);
+    declinations.push(moon.dec * (180 / Math.PI));
   }
+
+  console.log("Declinations:", declinations.slice(0, 10));
 
   const ctx = document.getElementById('moonChart').getContext('2d');
   const moonChart = new Chart(ctx, {
@@ -116,7 +120,6 @@
       }
     }
   });
-
 </script>
 
 
