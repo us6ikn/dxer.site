@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Libration Rate at 30° Latitude</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 1rem;
+    }
+    th, td {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      text-align: right;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    td:first-child, th:first-child {
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>Libration Rate at Latitude 30°</h1>
+  <p>Data source: <code>moon_topo_coords_lat0.txt</code></p>
+
+  <table id="rateTable">
+    <thead>
+      <tr>
+        <th>Date-Time (UTC)</th>
+        <th>Libration Rate (deg/min)</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const LATITUDE_DEG = 30;
+    const COS_LAT = Math.cos(LATITUDE_DEG * Math.PI / 180);  // Latitude correction factor
+
+    fetch('moon_topo_coords_lat0.txt')
+      .then(response => response.text())
+      .then(text => {
+        const lines = text.trim().split('\n');
+        const data = [];
+
+        // Skip header
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          const dateStr = line.slice(0, 20).trim();
+          const latVal = parseFloat(line.slice(20, 32));
+          const lonVal = parseFloat(line.slice(32));
+          data.push({ date: dateStr, lat: latVal, lon: lonVal });
+        }
+
+        // Compute libration rate using central difference
+        const results = [];
+        for (let i = 0; i < data.length; i++) {
+          let rate = 0;
+          if (i > 0 && i < data.length - 1) {
+            let dlat = (data[i + 1].lat - data[i - 1].lat) / 60;
+            let dlon = (data[i + 1].lon - data[i - 1].lon) / 60;
+
+            // Normalize longitude difference to [-180, 180]
+            dlon = ((dlon + 180) % 360) - 180;
+
+            // Apply latitude correction
+            dlat *= COS_LAT;
+            dlon *= COS_LAT;
+
+            rate = Math.sqrt(dlat * dlat + dlon * dlon);
+          }
+          results.push({ date: data[i].date, rate: rate });
+        }
+
+        // Render table
+        const tbody = document.querySelector('#rateTable tbody');
+        results.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${row.date}</td><td>${row.rate.toFixed(4)}</td>`;
+          tbody.appendChild(tr);
+        });
+      })
+      .catch(error => {
+        console.error('Error loading data:', error);
+        document.body.innerHTML += `<p style="color: red;">Failed to load the data file.</p>`;
+      });
+  </script>
+</body>
+</html>
