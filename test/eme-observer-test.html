@@ -570,8 +570,6 @@
             })
             .catch(error => console.error('Failed to load SK station JSON data:', error));
 
-
-
         fetch('moon_data.json')
           .then(response => response.json())
           .then(data => {
@@ -604,7 +602,6 @@
           updateMap();
         }
 
-
         function restrictDatePicker() {
           const moonData = window.moonData;
           if (!moonData || moonData.length === 0) return;
@@ -625,7 +622,6 @@
           document.getElementById('hour-value').textContent = `Time (UTC): ${hour}:${minutes}`;
           updateMap();
         });
-
 
       document.getElementById('date').addEventListener('change', updateMap);
 
@@ -751,8 +747,6 @@
 
             }
           });
-            
-
 
             // Update the chart options to include new moon annotations
             declinationChart = new Chart(ctx, {
@@ -873,71 +867,37 @@
               },
               plugins: [Chart.registry.getPlugin('annotation')],
             });
-
         }
 
-        
-
         function updateDeclinationHighlight(dateStr) {
-          if (!declinationChart) return;
+          if (!window.moonData) return;
 
-          const labels = declinationChart.data.labels;
-          const index = labels.indexOf(dateStr);
-          if (index === -1) return;
-
-          const annotation = declinationChart.options.plugins.annotation.annotations.todayLine;
-          annotation.xMin = dateStr;
-          annotation.xMax = dateStr;
-
-          // Determine if selected date is outside current visible range
           const selected = new Date(dateStr);
-          const visibleStart = new Date(labels[0]);
-          const visibleEnd = new Date(labels[labels.length - 1]);
+          const newFrom = new Date(Date.UTC(selected.getUTCFullYear(), selected.getUTCMonth(), 1));
+          const newTo = new Date(Date.UTC(selected.getUTCFullYear(), selected.getUTCMonth() + 1, 0));
 
-          if (selected < visibleStart || selected > visibleEnd) {
-            // Rebuild chart for the selected date's month
-            const newFrom = new Date(Date.UTC(selected.getUTCFullYear(), selected.getUTCMonth(), 1));
-            const newTo = new Date(Date.UTC(selected.getUTCFullYear(), selected.getUTCMonth() + 1, 0));
+          const newFiltered = window.moonData.filter(entry => {
+            const time = new Date(entry.t.replace(' ', 'T') + 'Z');
+            return time >= newFrom && time <= newTo;
+          });
 
-            const newFiltered = window.moonData.filter(entry => {
-              const time = new Date(entry.t.replace(' ', 'T') + 'Z');
-              return time >= newFrom && time <= newTo;
-            });
+          // Remove old chart instance before creating a new one
+          if (declinationChart) {
+            declinationChart.destroy();
+          }
 
-            // Rebuild data and update chart
-            const newDateMap = new Map();
-            newFiltered.forEach(entry => {
-              const dateStr = entry.t.split(' ')[0];
-              if (!newDateMap.has(dateStr)) newDateMap.set(dateStr, []);
-              newDateMap.get(dateStr).push(entry);
-            });
+          // Call init function again with filtered data
+          initDeclinationChart(newFiltered);
 
-            const newLabels = Array.from(newDateMap.keys());
-            const newDeclinations = newLabels.map(date => {
-              const entries = newDateMap.get(date);
-              const avgDec = entries.reduce((sum, e) => sum + parseFloat(e.n), 0) / entries.length;
-              return parseFloat(avgDec.toFixed(2));
-            });
-
-            const newDistances = newLabels.map(date => {
-              const entries = newDateMap.get(date);
-              const avgDist = entries.reduce((sum, e) => sum + parseFloat(e.d), 0) / entries.length;
-              return Math.round(avgDist);
-            });
-
-            // Update chart data
-            declinationChart.data.labels = newLabels;
-            declinationChart.data.datasets[0].data = newDeclinations;
-            declinationChart.data.datasets[1].data = newDistances;
-
+          // Ensure the new annotation line is shown for selected date
+          if (declinationChart) {
+            const annotation = declinationChart.options.plugins.annotation.annotations.todayLine;
             annotation.xMin = dateStr;
             annotation.xMax = dateStr;
-
-            declinationChart.update();
-          } else {
             declinationChart.update();
           }
         }
+
 
         function addDegradationOverlays() {
           fetch('degrad_data.txt')
@@ -981,8 +941,6 @@
             .catch(err => console.error('Error loading degradation data:', err));
         }
 
-
-
         document.getElementById('prevDay').addEventListener('click', function() {
           changeDateByDays(-1); // Decrease date by 1
         });
@@ -1010,9 +968,6 @@
 
 
     </script>
-
-
-
 
     <script>
       document.getElementById('toggleChartBtn').addEventListener('click', function () {
