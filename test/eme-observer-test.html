@@ -888,12 +888,11 @@
                         const minDist = 356352.93;
                         const loss = 40 * Math.log10(value / minDist);
                         const dB = loss.toFixed(1) + 'dB';
-                        return `${km}\n${dB}`;
+                        return `${km}/${loss.toFixed(1)}dB`;
+
                       },
                       color: 'green',
                       stepSize: 20000,
-                      rotation: 315,   // or try 270 for vertical
-                      align: 'end',
                     },
                   },
 
