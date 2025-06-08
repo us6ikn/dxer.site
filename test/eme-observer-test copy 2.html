@@ -711,14 +711,6 @@
             const avgDist = entries.reduce((sum, entry) => sum + parseFloat(entry.d), 0) / entries.length;
             return Math.round(avgDist);
           });
-          
-          const minDistance = Math.min(...distances);
-
-          const emeLoss = distances.map(d => {
-            const loss = 20 * Math.log10(d / minDistance);
-            return parseFloat(loss.toFixed(2));
-          });
-
 
           const ctx = document.getElementById('declinationChart').getContext('2d');
           
@@ -783,16 +775,6 @@
                     pointRadius: 0,
                     tension: 0.2,
                   },
-                           {
-                             label: 'EME Extra Loss (dB)',
-                             data: emeLoss,
-                             borderColor: 'rgba(0,128,0,0.5)', // translucent green
-                             yAxisID: 'y2',
-                             fill: false,
-                             pointRadius: 0,
-                             tension: 0.2,
-                           },
-
                 ],
               },
               options: {
@@ -884,23 +866,6 @@
                       stepSize: 20000, // Set step size to reduce the number of ticks
                     },
                   },
-                  y2: {
-                    position: 'right',
-                    offset: true, // push ticks away from y1
-                    title: {
-                      display: true,
-                      text: 'EME Extra Loss (dB)',
-                      color: 'green'
-                    },
-                    grid: { drawOnChartArea: false },
-                    ticks: {
-                      color: 'green',
-                      callback: (value) => value + ' dB',
-                      stepSize: 1,
-                      autoSkip: true,
-                    },
-                  },
-
                 },
               },
               plugins: [Chart.registry.getPlugin('annotation')],
