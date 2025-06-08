@@ -715,7 +715,7 @@
           const minDistance = Math.min(...distances);
 
           const emeLoss = distances.map(d => {
-            const loss = 20 * Math.log10(d / minDistance);
+            const loss = 40 * Math.log10(d / minDistance);
             return parseFloat(loss.toFixed(2));
           });
 
