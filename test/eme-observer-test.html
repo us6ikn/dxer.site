@@ -823,10 +823,15 @@
                             const annotation = chart.options.plugins.annotation.annotations.todayLine;
                             const index = chart.data.labels.indexOf(annotation.xMin);
                             if (index === -1) return '';
+
                             const dec = chart.data.datasets[0]?.data[index];
                             const dist = chart.data.datasets[1]?.data[index];
                             if (dec === undefined || dist === undefined) return '';
-                            return `Dec: ${dec}°\nDist: ${Math.round(dist / 1000)}k`;
+
+                            const minDist = 356352.93;
+                            const emeLoss = 40 * Math.log10(dist / minDist);
+
+                            return `Dec: ${dec}°\nDist: ${Math.round(dist / 1000)}k\nLoss: ${emeLoss.toFixed(1)} dB`;
                           },
                           backgroundColor: 'rgba(255,255,255,0.5)',
                           font: {
@@ -836,6 +841,7 @@
                           color: 'black',
                           padding: 4,
                         },
+
                       },
                       ...newMoonAnnotations, // Spread new moon annotations here
                     },
