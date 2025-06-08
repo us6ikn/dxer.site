@@ -870,40 +870,24 @@
                     position: 'right',
                     title: {
                       display: true,
-                      text: 'Distance (km)',
-                      color: 'green', // ← matches green distance line
+                      text: 'Distance (km) / Extra EME Loss (dB)',
+                      color: 'green',
                     },
                     min: 356400,
                     max: 406700,
                     grid: { drawOnChartArea: false },
                     ticks: {
                       callback: function (value) {
-                        return (value / 1000).toFixed(0) + 'k';
-                      },
-                      color: 'green', // Optional: make tick numbers green too
-                      stepSize: 20000, // Set step size to reduce the number of ticks
-                    },
-                  },
-                  y2: {
-                    position: 'right',
-                    grid: { drawOnChartArea: false },
-                    title: {
-                      display: true,
-                      text: 'Extra EME Loss (dB)',
-                      color: 'green',
-                    },
-                    ticks: {
-                      callback: function(value) {
+                        const km = (value / 1000).toFixed(0) + 'k';
                         const minDist = 356352.93;
                         const loss = 40 * Math.log10(value / minDist);
-                        return loss.toFixed(1) + ' dB';
+                        const dB = loss.toFixed(1) + 'dB';
+                        return `${km}\n${dB}`;
                       },
                       color: 'green',
-                      stepSize: 20000, // same as y1 to keep alignment
+                      stepSize: 20000,
                     },
-                    min: 356400,  // same as y1
-                    max: 406700,
-                  }
+                  },
 
 
                 },
