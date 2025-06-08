@@ -687,7 +687,7 @@
 
           const dateMap = new Map();
           filtered.forEach(entry => {
-            const dateStr = entry.time.split(' ')[0];
+            const dateStr = entry.t.split(' ')[0];
             if (!dateMap.has(dateStr)) dateMap.set(dateStr, []);
             dateMap.get(dateStr).push(entry);
           });
