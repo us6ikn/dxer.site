@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Libration Rate at 30° Latitude</title>
+  <title>Libration Rate at Lat 30°, Lon 30° (Approx)</title>
   <style>
     body {
       font-family: sans-serif;
@@ -27,8 +27,8 @@
   </style>
 </head>
 <body>
-  <h1>Libration Rate at Latitude 30°</h1>
-  <p>Data source: <code>moon_topo_coords_lat0.txt</code></p>
+  <h1>Libration Rate at Latitude 30°, Longitude 30° (Approximation)</h1>
+  <p>Using data from <code>moon_topo_coords_lat0.txt</code>, shifted back 2 hours to simulate view from 30°E longitude.</p>
 
   <table id="rateTable">
     <thead>
@@ -42,44 +42,68 @@
 
   <script>
     const LATITUDE_DEG = 30;
-    const COS_LAT = Math.cos(LATITUDE_DEG * Math.PI / 180);  // Latitude correction factor
+    const COS_LAT = Math.cos(LATITUDE_DEG * Math.PI / 180);
+    const LONGITUDE_SHIFT_DEG = 30;
+    const TIME_SHIFT_MIN = -LONGITUDE_SHIFT_DEG * 4; // Shift back in time: 30°E → -2 hours
+    const INTERVAL_MIN = 30;
+    const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN); // -4
 
     fetch('moon_topo_coords_lat0.txt')
       .then(response => response.text())
       .then(text => {
         const lines = text.trim().split('\n');
-        const data = [];
+        const rawData = [];
 
-        // Skip header
+        // Parse data (assuming fixed-width columns)
         for (let i = 1; i < lines.length; i++) {
           const line = lines[i].trim();
           const dateStr = line.slice(0, 20).trim();
           const latVal = parseFloat(line.slice(20, 32));
           const lonVal = parseFloat(line.slice(32));
-          data.push({ date: dateStr, lat: latVal, lon: lonVal });
+          rawData.push({ date: dateStr, lat: latVal, lon: lonVal });
         }
 
-        // Compute libration rate using central difference
+        // Shift data back in time (simulate eastern longitude)
+        const shiftedData = [];
+        for (let i = 0; i < rawData.length; i++) {
+          const shiftedIndex = i + SHIFT_STEPS; // e.g. i - 4
+          if (shiftedIndex >= 0 && shiftedIndex < rawData.length) {
+            shiftedData.push({
+              date: rawData[i].date, // Keep original time
+              lat: rawData[shiftedIndex].lat,
+              lon: rawData[shiftedIndex].lon
+            });
+          } else {
+            shiftedData.push({ date: rawData[i].date, lat: null, lon: null });
+          }
+        }
+
+        // Compute libration rates
         const results = [];
-        for (let i = 0; i < data.length; i++) {
+        for (let i = 0; i < shiftedData.length; i++) {
+          const curr = shiftedData[i];
           let rate = 0;
-          if (i > 0 && i < data.length - 1) {
-            let dlat = (data[i + 1].lat - data[i - 1].lat) / 60;
-            let dlon = (data[i + 1].lon - data[i - 1].lon) / 60;
 
-            // Normalize longitude difference to [-180, 180]
-            dlon = ((dlon + 180) % 360) - 180;
+          if (
+            i > 0 && i < shiftedData.length - 1 &&
+            shiftedData[i - 1].lat !== null &&
+            shiftedData[i + 1].lat !== null
+          ) {
+            let dlat = (shiftedData[i + 1].lat - shiftedData[i - 1].lat) / 60;
+            let dlon = (shiftedData[i + 1].lon - shiftedData[i - 1].lon) / 60;
 
-            // Apply latitude correction
+            dlon = ((dlon + 180) % 360) - 180; // Normalize jump across ±180°
+
             dlat *= COS_LAT;
             dlon *= COS_LAT;
 
             rate = Math.sqrt(dlat * dlat + dlon * dlon);
           }
-          results.push({ date: data[i].date, rate: rate });
+
+          results.push({ date: curr.date, rate: rate });
         }
 
-        // Render table
+        // Display results
         const tbody = document.querySelector('#rateTable tbody');
         results.forEach(row => {
           const tr = document.createElement('tr');
@@ -88,8 +112,8 @@
         });
       })
       .catch(error => {
-        console.error('Error loading data:', error);
-        document.body.innerHTML += `<p style="color: red;">Failed to load the data file.</p>`;
+        console.error('Failed to load file:', error);
+        document.body.innerHTML += `<p style="color:red">Error loading file.</p>`;
       });
   </script>
 </body>
