@@ -81,7 +81,7 @@
           box-sizing: border-box;
           overflow: auto;
           max-height: 90vh; /* allow scrolling if needed */
-          max-width: 90vw;
+          max-width: 95vw;
         }
 
       label {
@@ -132,9 +132,8 @@
         }
 
 
-
         /* Optional: better mobile spacing */
-        @media (max-width: 480px) {
+        @media (max-width: 560px) {
           #controls {
             font-size: 13px;
             padding: 10px;
@@ -144,6 +143,22 @@
             height: 80px;
           }
         }
+        
+        @media (max-width: 480px) {
+          #controls {
+            padding: 8px; /* Was 10px or 12px */
+            font-size: 12.5px;
+          }
+
+          #chartWrapper {
+            height: 160px; /* Slightly tighter */
+          }
+
+          #declinationChart {
+            height: calc(100% - 36px); /* Adjust accordingly */
+          }
+        }
+
         
         #hour {
           width: 100%;
@@ -196,8 +211,6 @@
           gap: 5px;
           margin-top: 10px;
         }
-
-
         
         #date-container input[type="date"] {
           flex-grow: 1;
@@ -766,7 +779,7 @@
                 labels: labels,
                 datasets: [
                   {
-                    label: 'Declination (°)',
+                    label: 'Declination, °',
                     data: declinations,
                     borderColor: 'blue',
                     yAxisID: 'y',
