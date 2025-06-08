@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Libration Rate at Lat 30°, Lon 30°E (Approx)</title>
+  <title>Libration Rate at Lat 30°, Lon 30°E (Corrected)</title>
   <style>
     body {
       font-family: sans-serif;
@@ -27,11 +27,10 @@
   </style>
 </head>
 <body>
-  <h1>Libration Rate at Latitude 30°, Longitude 30°E (Approximated)</h1>
+  <h1>Libration Rate at Latitude 30°, Longitude 30°E (Corrected)</h1>
   <p>
-    This page approximates libration rates for <strong>latitude 30°, longitude 30°E</strong> using
-    data from <code>moon_topo_coords_lat0.txt</code> (which is for 0°, 0°) by shifting the dataset
-    <strong>forward 2 hours</strong> to account for Earth's rotation.
+    This approximates libration rates for <strong>latitude 30°, longitude 30°E</strong> by shifting
+    data from <code>moon_topo_coords_lat0.txt</code> (at 0°, 0°) <strong>forward by 2 hours</strong>.
   </p>
 
   <table id="rateTable">
@@ -48,7 +47,7 @@
     const LATITUDE_DEG = 30;
     const COS_LAT = Math.cos(LATITUDE_DEG * Math.PI / 180);
     const LONGITUDE_SHIFT_DEG = 30;
-    const TIME_SHIFT_MIN = LONGITUDE_SHIFT_DEG * 4; // +120 min = shift FORWARD in data
+    const TIME_SHIFT_MIN = LONGITUDE_SHIFT_DEG * 4; // 2 hours = 120 min
     const INTERVAL_MIN = 30;
     const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN); // = 4
 
@@ -58,7 +57,7 @@
         const lines = text.trim().split('\n');
         const rawData = [];
 
-        // Parse data (assuming fixed-width columns)
+        // Parse data (fixed-width columns)
         for (let i = 1; i < lines.length; i++) {
           const line = lines[i].trim();
           const dateStr = line.slice(0, 20).trim();
@@ -67,11 +66,11 @@
           rawData.push({ date: dateStr, lat: latVal, lon: lonVal });
         }
 
-        // Shift data forward in time (simulate eastern longitude)
+        // Shift data forward in time (simulate what 0° sees later)
         const shiftedData = [];
         for (let i = 0; i < rawData.length; i++) {
-          const shiftedIndex = i + SHIFT_STEPS; // shift forward
-          if (shiftedIndex >= 0 && shiftedIndex < rawData.length) {
+          const shiftedIndex = i + SHIFT_STEPS; // ✅ correct direction
+          if (shiftedIndex < rawData.length) {
             shiftedData.push({
               date: rawData[i].date, // Keep original timestamp
               lat: rawData[shiftedIndex].lat,
@@ -96,7 +95,7 @@
             let dlat = (shiftedData[i + 1].lat - shiftedData[i - 1].lat) / 60;
             let dlon = (shiftedData[i + 1].lon - shiftedData[i - 1].lon) / 60;
 
-            // Normalize longitude jump across ±180°
+            // Normalize longitude jump
             dlon = ((dlon + 180) % 360) - 180;
 
             // Apply cos(latitude) scaling
@@ -109,7 +108,7 @@
           results.push({ date: curr.date, rate: rate });
         }
 
-        // Display results
+        // Display
         const tbody = document.querySelector('#rateTable tbody');
         results.forEach(row => {
           const tr = document.createElement('tr');
@@ -118,7 +117,7 @@
         });
       })
       .catch(error => {
-        console.error('Failed to load file:', error);
+        console.error('Error loading data:', error);
         document.body.innerHTML += `<p style="color:red">Error loading file.</p>`;
       });
   </script>
