@@ -584,17 +584,26 @@
           .catch(error => console.error('Error loading moon data:', error));
       }
 
-      function setDefaultTimeAndUpdateMap() {
-        const now = new Date();
-        const currentDate = now.toISOString().split('T')[0];
-        const currentHour = now.getUTCHours().toString().padStart(2, '0');
+        function setDefaultTimeAndUpdateMap() {
+          const now = new Date();
+          const currentDate = now.toISOString().split('T')[0];
 
-        document.getElementById('date').value = currentDate;
-        document.getElementById('hour').value = parseInt(currentHour);
-        document.getElementById('hour-value').textContent = `Time (UTC): ${currentHour}:00`;
+          const minutes = now.getUTCMinutes();
+          const roundedMinutes = minutes < 15 ? 0 : minutes < 45 ? 30 : 0;
+          let hour = now.getUTCHours();
+          if (minutes >= 45) hour += 1;
+          if (hour === 24) hour = 0; // wrap around midnight
 
-        updateMap();
-      }
+          const index = hour * 2 + (roundedMinutes === 30 ? 1 : 0);
+
+          document.getElementById('date').value = currentDate;
+          document.getElementById('hour').value = index;
+          const timeStr = `${hour.toString().padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
+          document.getElementById('hour-value').textContent = `Time (UTC): ${timeStr}`;
+
+          updateMap();
+        }
+
 
       function restrictDatePicker() {
         const now = new Date();
@@ -611,27 +620,29 @@
         dateInput.setAttribute('max', maxDateString);
       }
 
-      document.getElementById('hour').addEventListener('input', function () {
-        const hourStr = this.value.toString().padStart(2, '0');
-        document.getElementById('hour-value').textContent = `Time (UTC): ${hourStr}:00`;
-        updateMap();
-      });
+        document.getElementById('hour').addEventListener('input', function () {
+          const index = parseInt(this.value); // 0 to 47
+          const hour = Math.floor(index / 2).toString().padStart(2, '0');
+          const minutes = index % 2 === 0 ? '00' : '30';
+          document.getElementById('hour-value').textContent = `Time (UTC): ${hour}:${minutes}`;
+          updateMap();
+        });
+
 
       document.getElementById('date').addEventListener('change', updateMap);
 
       function updateMap() {
         const selectedDate = document.getElementById('date').value;
-        const selectedHour = document.getElementById('hour').value.toString().padStart(2, '0');
+        const index = parseInt(document.getElementById('hour').value);
+        const hour = Math.floor(index / 2).toString().padStart(2, '0');
+        const minutes = index % 2 === 0 ? '00' : '30';
 
         if (!selectedDate) {
           alert("Please select a date.");
           return;
         }
 
-        const utcTimeString = new Date(`${selectedDate}T${selectedHour}:00:00Z`)
-          .toISOString()
-          .slice(0, 19)
-          .replace('T', ' ');
+        const utcTimeString = `${selectedDate} ${hour}:${minutes}:00`;
 
         const moonData = window.moonData.find(entry => entry.t === utcTimeString);
 
