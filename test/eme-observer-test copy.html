@@ -605,18 +605,20 @@
         }
 
 
-        function restrictDatePicker() {
-          const moonData = window.moonData;
-          if (!moonData || moonData.length === 0) return;
+      function restrictDatePicker() {
+        const now = new Date();
+        const minDate = new Date(now);
+        const maxDate = new Date(now);
+        minDate.setDate(minDate.getDate() - 15);
+        maxDate.setDate(maxDate.getDate() + 15);
 
-          const minDateString = moonData[0].t.split(' ')[0];
-          const maxDateString = moonData[moonData.length - 1].t.split(' ')[0];
+        const minDateString = minDate.toISOString().split('T')[0];
+        const maxDateString = maxDate.toISOString().split('T')[0];
 
-          const dateInput = document.getElementById('date');
-          dateInput.setAttribute('min', minDateString);
-          dateInput.setAttribute('max', maxDateString);
-        }
-
+        const dateInput = document.getElementById('date');
+        dateInput.setAttribute('min', minDateString);
+        dateInput.setAttribute('max', maxDateString);
+      }
 
         document.getElementById('hour').addEventListener('input', function () {
           const index = parseInt(this.value); // 0 to 47
@@ -684,8 +686,10 @@
 
         function initDeclinationChart(data) {
           const now = new Date();
-          const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-          const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0));
+          const from = new Date(now);
+          const to = new Date(now);
+          from.setDate(from.getDate() - 15);
+          to.setDate(to.getDate() + 15);
 
           const filtered = data.filter(entry => {
             const time = new Date(entry.t.replace(' ', 'T') + 'Z');
@@ -889,54 +893,7 @@
           annotation.xMin = dateStr;
           annotation.xMax = dateStr;
 
-          // Determine if selected date is outside current visible range
-          const selected = new Date(dateStr);
-          const visibleStart = new Date(labels[0]);
-          const visibleEnd = new Date(labels[labels.length - 1]);
-
-          if (selected < visibleStart || selected > visibleEnd) {
-            // Rebuild chart for the selected date's month
-            const newFrom = new Date(Date.UTC(selected.getUTCFullYear(), selected.getUTCMonth(), 1));
-            const newTo = new Date(Date.UTC(selected.getUTCFullYear(), selected.getUTCMonth() + 1, 0));
-
-            const newFiltered = window.moonData.filter(entry => {
-              const time = new Date(entry.t.replace(' ', 'T') + 'Z');
-              return time >= newFrom && time <= newTo;
-            });
-
-            // Rebuild data and update chart
-            const newDateMap = new Map();
-            newFiltered.forEach(entry => {
-              const dateStr = entry.t.split(' ')[0];
-              if (!newDateMap.has(dateStr)) newDateMap.set(dateStr, []);
-              newDateMap.get(dateStr).push(entry);
-            });
-
-            const newLabels = Array.from(newDateMap.keys());
-            const newDeclinations = newLabels.map(date => {
-              const entries = newDateMap.get(date);
-              const avgDec = entries.reduce((sum, e) => sum + parseFloat(e.n), 0) / entries.length;
-              return parseFloat(avgDec.toFixed(2));
-            });
-
-            const newDistances = newLabels.map(date => {
-              const entries = newDateMap.get(date);
-              const avgDist = entries.reduce((sum, e) => sum + parseFloat(e.d), 0) / entries.length;
-              return Math.round(avgDist);
-            });
-
-            // Update chart data
-            declinationChart.data.labels = newLabels;
-            declinationChart.data.datasets[0].data = newDeclinations;
-            declinationChart.data.datasets[1].data = newDistances;
-
-            annotation.xMin = dateStr;
-            annotation.xMax = dateStr;
-
-            declinationChart.update();
-          } else {
-            declinationChart.update();
-          }
+          declinationChart.update();
         }
 
         function addDegradationOverlays() {
