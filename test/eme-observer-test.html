@@ -806,7 +806,7 @@
                 plugins: {
                   legend: { display: false },
                   annotation: {
-                    drawTime: 'beforeDatasetsDraw', // <-- This makes boxes draw behind lines
+                    drawTime: 'afterDatasetsDraw', // <-- renders on top of curves behind lines
                     annotations: {
                       todayLine: {
                         type: 'line',
@@ -876,7 +876,7 @@
                     position: 'right',
                     title: {
                       display: true,
-                      text: 'Distance (km) / Extra EME Loss (dB)',
+                      text: 'Distance (km) / Extra Loss (dB)',
                       color: 'green',
                     },
                     min: 356400,
