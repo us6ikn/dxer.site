@@ -387,6 +387,8 @@
       let footprintCircle;
       let declinationChart;
       let currentInfoWindow = null;
+      let currentChartMonth = null;
+
 
       function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
@@ -874,25 +876,40 @@
           if (!window.moonData) return;
 
           const selected = new Date(dateStr);
-          const newFrom = new Date(Date.UTC(selected.getUTCFullYear(), selected.getUTCMonth(), 1));
-          const newTo = new Date(Date.UTC(selected.getUTCFullYear(), selected.getUTCMonth() + 1, 0));
+          const selectedMonthKey = selected.getUTCFullYear() + '-' + selected.getUTCMonth();
 
-          // Remove old chart instance before creating a new one
-          if (declinationChart) {
-            declinationChart.destroy();
-          }
+          // Only rebuild the chart if the month has changed
+          if (selectedMonthKey !== currentChartMonth) {
+            currentChartMonth = selectedMonthKey;
 
-          // Call init function again with filtered data
-          initDeclinationChart(window.moonData, selected);
+            // Remove old chart instance before creating a new one
+            if (declinationChart) {
+              declinationChart.destroy();
+            }
 
-          // Ensure the new annotation line is shown for selected date
-          if (declinationChart) {
-            const annotation = declinationChart.options.plugins.annotation.annotations.todayLine;
-            annotation.xMin = dateStr;
-            annotation.xMax = dateStr;
-            declinationChart.update();
+            // Create chart for new month
+            initDeclinationChart(window.moonData, selected);
+
+            // Delay update to ensure chart is initialized before annotation is moved
+            setTimeout(() => {
+              if (declinationChart) {
+                const annotation = declinationChart.options.plugins.annotation.annotations.todayLine;
+                annotation.xMin = dateStr;
+                annotation.xMax = dateStr;
+                declinationChart.update();
+              }
+            }, 0);
+          } else {
+            // Just move the annotation line
+            if (declinationChart) {
+              const annotation = declinationChart.options.plugins.annotation.annotations.todayLine;
+              annotation.xMin = dateStr;
+              annotation.xMax = dateStr;
+              declinationChart.update();
+            }
           }
         }
+
 
 
         function addDegradationOverlays() {
