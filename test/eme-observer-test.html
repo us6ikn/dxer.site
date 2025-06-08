@@ -831,7 +831,7 @@
                             const minDist = 356352.93;
                             const emeLoss = 40 * Math.log10(dist / minDist);
 
-                            return `Dec ${dec}°\nDist ${Math.round(dist / 1000)}k\n+Loss ${emeLoss.toFixed(1)} dB`;
+                            return `Dec ${dec}°\nDist ${Math.round(dist / 1000)}k\n-${emeLoss.toFixed(1)} dB`;
                           },
                           backgroundColor: 'rgba(255,255,255,0.5)',
                           font: {
