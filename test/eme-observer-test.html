@@ -702,7 +702,7 @@
 
           const distances = labels.map(date => {
             const entries = dateMap.get(date);
-            const avgDist = entries.reduce((sum, entry) => sum + parseFloat(entry.distance_km), 0) / entries.length;
+            const avgDist = entries.reduce((sum, entry) => sum + parseFloat(entry.d), 0) / entries.length;
             return Math.round(avgDist);
           });
 
