@@ -681,7 +681,7 @@
           to.setDate(to.getDate() + 15);
 
           const filtered = data.filter(entry => {
-            const time = new Date(entry.time.replace(' ', 'T') + 'Z');
+            const time = new Date(entry.t.replace(' ', 'T') + 'Z');
             return time >= from && time <= to;
           });
 
