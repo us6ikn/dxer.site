@@ -678,7 +678,7 @@
         updateDeclinationHighlight(selectedDate);
       }
 
-        function initDeclinationChart(data, baseDate = new Date())
+        function initDeclinationChart(data, baseDate = new Date()){
           const now = new Date();
           const from = new Date(Date.UTC(baseDate.getUTCFullYear(), baseDate.getUTCMonth(), 1));
           const to = new Date(Date.UTC(baseDate.getUTCFullYear(), baseDate.getUTCMonth() + 1, 0));
@@ -877,13 +877,18 @@
           const newFrom = new Date(Date.UTC(selected.getUTCFullYear(), selected.getUTCMonth(), 1));
           const newTo = new Date(Date.UTC(selected.getUTCFullYear(), selected.getUTCMonth() + 1, 0));
 
+          const newFiltered = window.moonData.filter(entry => {
+            const time = new Date(entry.t.replace(' ', 'T') + 'Z');
+            return time >= newFrom && time <= newTo;
+          });
+
           // Remove old chart instance before creating a new one
           if (declinationChart) {
             declinationChart.destroy();
           }
 
           // Call init function again with filtered data
-          initDeclinationChart(window.moonData, selected);
+          initDeclinationChart(newFiltered);
 
           // Ensure the new annotation line is shown for selected date
           if (declinationChart) {
