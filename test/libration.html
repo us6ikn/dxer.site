@@ -70,7 +70,7 @@
         // Shift data forward in time (simulate eastern longitude)
         const shiftedData = [];
         for (let i = 0; i < rawData.length; i++) {
-          const shiftedIndex = i - SHIFT_STEPS; // shift forward
+          const shiftedIndex = i + SHIFT_STEPS; // shift forward
           if (shiftedIndex >= 0 && shiftedIndex < rawData.length) {
             shiftedData.push({
               date: rawData[i].date, // Keep original timestamp
