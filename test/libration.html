@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Libration Rate at Lat 30°, Lon 30° (Approx)</title>
+  <title>Libration Rate at Lat 30°, Lon 30°E (Approx)</title>
   <style>
     body {
       font-family: sans-serif;
@@ -27,8 +27,12 @@
   </style>
 </head>
 <body>
-  <h1>Libration Rate at Latitude 30°, Longitude 30° (Approximation)</h1>
-  <p>Using data from <code>moon_topo_coords_lat0.txt</code>, shifted back 2 hours to simulate view from 30°E longitude.</p>
+  <h1>Libration Rate at Latitude 30°, Longitude 30°E (Approximated)</h1>
+  <p>
+    This page approximates libration rates for <strong>latitude 30°, longitude 30°E</strong> using
+    data from <code>moon_topo_coords_lat0.txt</code> (which is for 0°, 0°) by shifting the dataset
+    <strong>forward 2 hours</strong> to account for Earth's rotation.
+  </p>
 
   <table id="rateTable">
     <thead>
@@ -44,9 +48,9 @@
     const LATITUDE_DEG = 30;
     const COS_LAT = Math.cos(LATITUDE_DEG * Math.PI / 180);
     const LONGITUDE_SHIFT_DEG = 30;
-    const TIME_SHIFT_MIN = -LONGITUDE_SHIFT_DEG * 4; // Shift back in time: 30°E → -2 hours
+    const TIME_SHIFT_MIN = LONGITUDE_SHIFT_DEG * 4; // +120 min = shift FORWARD in data
     const INTERVAL_MIN = 30;
-    const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN); // -4
+    const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN); // = 4
 
     fetch('moon_topo_coords_lat0.txt')
       .then(response => response.text())
@@ -63,13 +67,13 @@
           rawData.push({ date: dateStr, lat: latVal, lon: lonVal });
         }
 
-        // Shift data back in time (simulate eastern longitude)
+        // Shift data forward in time (simulate eastern longitude)
         const shiftedData = [];
         for (let i = 0; i < rawData.length; i++) {
-          const shiftedIndex = i + SHIFT_STEPS; // e.g. i - 4
+          const shiftedIndex = i - SHIFT_STEPS; // shift forward
           if (shiftedIndex >= 0 && shiftedIndex < rawData.length) {
             shiftedData.push({
-              date: rawData[i].date, // Keep original time
+              date: rawData[i].date, // Keep original timestamp
               lat: rawData[shiftedIndex].lat,
               lon: rawData[shiftedIndex].lon
             });
@@ -92,8 +96,10 @@
             let dlat = (shiftedData[i + 1].lat - shiftedData[i - 1].lat) / 60;
             let dlon = (shiftedData[i + 1].lon - shiftedData[i - 1].lon) / 60;
 
-            dlon = ((dlon + 180) % 360) - 180; // Normalize jump across ±180°
+            // Normalize longitude jump across ±180°
+            dlon = ((dlon + 180) % 360) - 180;
 
+            // Apply cos(latitude) scaling
             dlat *= COS_LAT;
             dlon *= COS_LAT;
 
