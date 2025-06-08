@@ -886,20 +886,25 @@
                   },
                   y2: {
                     position: 'right',
-                    offset: true, // push ticks away from y1
+                    grid: { drawOnChartArea: false },
                     title: {
                       display: true,
-                      text: 'EME Extra Loss (dB)',
-                      color: 'green'
-                    },
-                    grid: { drawOnChartArea: false },
-                    ticks: {
+                      text: 'Extra EME Loss (dB)',
                       color: 'green',
-                      callback: (value) => value + ' dB',
-                      stepSize: 1,
-                      autoSkip: true,
                     },
-                  },
+                    ticks: {
+                      callback: function(value) {
+                        const minDist = 356352.93;
+                        const loss = 40 * Math.log10(value / minDist);
+                        return loss.toFixed(1) + ' dB';
+                      },
+                      color: 'green',
+                      stepSize: 20000, // same as y1 to keep alignment
+                    },
+                    min: 356400,  // same as y1
+                    max: 406700,
+                  }
+
 
                 },
               },
