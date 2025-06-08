@@ -877,8 +877,13 @@
           const newFrom = new Date(Date.UTC(selected.getUTCFullYear(), selected.getUTCMonth(), 1));
           const newTo = new Date(Date.UTC(selected.getUTCFullYear(), selected.getUTCMonth() + 1, 0));
 
-          initDeclinationChart(window.moonData, selected);
+          // Remove old chart instance before creating a new one
+          if (declinationChart) {
+            declinationChart.destroy();
+          }
 
+          // Call init function again with filtered data
+          initDeclinationChart(window.moonData, selected);
 
           // Ensure the new annotation line is shown for selected date
           if (declinationChart) {
