@@ -275,7 +275,6 @@
         }
       }
 
-
       document.getElementById("hour").addEventListener("input", e => {
           const hourIndex = parseInt(document.getElementById("hour").value);
         const hour = Math.floor(hourIndex / 2);
@@ -284,7 +283,6 @@
 
         updateChart(hourIndex); // Move the black bar
       });
-
 
     document.getElementById("prevDay").addEventListener("click", () => {
       const d = new Date(document.getElementById("date").value);
@@ -300,14 +298,36 @@
       updateChart(0);
     });
 
-    window.onload = () => {
-      document.getElementById("date").valueAsDate = new Date();
-    }
-      document.getElementById("date").addEventListener("input", () => {
+      window.onload = () => {
+        const now = new Date();
+
+        // Set date picker to today
+        document.getElementById("date").valueAsDate = now;
+
+        // Round current time to nearest 30 minutes
+        const minutes = now.getMinutes();
+        const roundedMinutes = minutes < 15 ? 0 : minutes < 45 ? 30 : 0;
+        if (minutes >= 45) now.setHours(now.getHours() + 1);
+
+        const hour = now.getHours();
+        const hourIndex = hour * 2 + (roundedMinutes === 30 ? 1 : 0);
+
+        // Set slider to closest half-hour
+        const hourSlider = document.getElementById("hour");
+        hourSlider.value = hourIndex;
+
+        // Display label
+        document.getElementById("hour-value").textContent =
+          `Time (UTC): ${String(hour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
+
+        // Update chart (if rawData is loaded later, you may move this inside `calculateLibration` callback)
+        updateChart(hourIndex);
+      };
+
+    document.getElementById("date").addEventListener("input", () => {
         const hourIndex = parseInt(document.getElementById("hour").value);
         updateChart(hourIndex);
       });
-
   </script>
   
   <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
