@@ -229,14 +229,6 @@
             return altitude > 0; // Only include times when Moon is above the horizon
           });
 
-
-          const visibleShifted = shifted.filter((entry, i) => {
-            if (entry.lat === null || entry.lon === null) return false;
-            const jdStep = jd + (i / 48); // 48 = 24h / 0.5h
-            const altitude = getMoonAltitude(jdStep, lat, lon);
-            return altitude > 0;
-          });
-
           const results = visibleShifted.map((curr, i, arr) => {
             if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null) return { date: curr.date, rate: 0 };
             let dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
