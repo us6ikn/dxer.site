@@ -145,6 +145,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/astronomia@2.5.0/umd/astronomia.min.js"></script>
 
   <script>
     let chart;
@@ -192,6 +193,25 @@
           lon: parseFloat(line.slice(32))
         }));
 
+        // Extract date from the first line
+        const firstDateUTC = new Date(tempData[0].date);
+        const year = firstDateUTC.getUTCFullYear();
+        const month = firstDateUTC.getUTCMonth() + 1; // JS month is 0-based
+        const day = firstDateUTC.getUTCDate();
+
+        // Compute Julian Day
+        const jd = astronomia.julian.CalendarGregorianToJD(year, month, day);
+        const moonTimes = astronomia.rise.moonRiseSet(jd, lat, lon);
+
+        if (!moonTimes.rise || !moonTimes.set) {
+          alert("Moon does not rise/set on this day at this location.");
+          return;
+        }
+
+        const riseMin = moonTimes.rise.hour * 60 + moonTimes.rise.minute;
+        const setMin = moonTimes.set.hour * 60 + moonTimes.set.minute;
+
+        // Shift data based on longitude
         const shifted = tempData.map((entry, i) => {
           const shiftedIndex = i + SHIFT_STEPS;
           const ref = tempData[shiftedIndex] || {};
@@ -203,18 +223,33 @@
         });
 
         const results = shifted.map((curr, i, arr) => {
-          if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null) return { date: curr.date, rate: 0 };
-          let dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
-          let dlon = (((arr[i+1].lon - arr[i-1].lon) / 60 + 180) % 360) - 180;
+          const date = new Date(curr.date);
+          const minutes = date.getUTCHours() * 60 + date.getUTCMinutes();
+
+          if (minutes < riseMin || minutes > setMin) {
+            return null; // Moon below horizon
+          }
+
+          if (i <= 0 || i >= arr.length - 1 || arr[i - 1].lat === null || arr[i + 1].lat === null) {
+            return { date: curr.date, rate: 0 };
+          }
+
+          let dlat = (arr[i + 1].lat - arr[i - 1].lat) / 60;
+          let dlon = (((arr[i + 1].lon - arr[i - 1].lon) / 60 + 180) % 360) - 180;
           dlat *= COS_LAT;
           dlon *= COS_LAT;
-          return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
-        });
+
+          return {
+            date: curr.date,
+            rate: Math.sqrt(dlat * dlat + dlon * dlon)
+          };
+        }).filter(r => r !== null); // Remove times when Moon is below horizon
 
         rawData = results;
         document.getElementById("chartWrapper").style.display = "block";
         updateChart(hourIndex);
       }
+
 
       function updateChart(hourIndex) {
         const dateInput = document.getElementById("date").value;
