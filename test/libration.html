@@ -232,6 +232,8 @@
 
             if (alt <= 0) {
               return { date: dateStr, rate: null }; // Below horizon
+            } else {
+              console.log(`Moon above horizon at: ${dateStr} | Alt: ${alt.toFixed(2)}°`);
             }
 
             // Compute libration rate using central difference (only if neighbors exist)
