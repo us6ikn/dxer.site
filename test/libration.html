@@ -266,8 +266,9 @@
 
         const dataForDay = rawData.filter(r => {
           const entryDate = new Date(r.date).toISOString().slice(0, 10);
-          return entryDate === dateStr;
+          return entryDate === dateStr && r.rate !== null;
         });
+
 
         const labels = dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
         const rates = dataForDay.map(r => r.rate);
