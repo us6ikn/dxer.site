@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <!-- Google tag (gtag.js) -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-7YST3WTEH3"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-7YST3WTEH3');
+      </script>
+    <title>EME Observer – 10GHz</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Real-time EME (Earth-Moon-Earth) 10GHz tracking with live sublunar points, station map, and signal degradation chart for amateur radio and moonbounce enthusiasts.">
+    <meta name="keywords" content="EME, Moonbounce, Amateur Radio, Sublunar Point, DX, Ham Radio, Satellite, Earth-Moon-Earth, DX Map, 10GHz, Microwaves">
+    <meta name="author" content="SA5IKN">
+    <meta name="robots" content="index, follow">
+        
+        <meta property="og:title" content="EME Observer – 10GHz">
+        <meta property="og:description" content="Interactive map showing real-time sublunar point, station info, and moon signal degradation. Plots all stations active on 10GHz EME.">
+        <meta property="og:image" content="https://dxer.site/social/eme-observer.jpg">
+        <meta property="og:url" content="https://dxer.site/eme-observer.html">
+        <meta name="twitter:card" content="summary_large_image">
+            
+            <link rel="canonical" href="https://dxer.site/eme-observer.html" />
+            <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+            
+            <script type="application/ld+json">
+            {
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "EME Observer",
+              "url": "https://dxer.site/eme-observer.html",
+              "author": {
+                "@type": "Person",
+                "name": "SA5IKN"
+              },
+              "description": "Display all stations active on 10GHz EME on a map. Track the moon's sublunar point and degradation in real-time with this interactive map tool designed for Earth-Moon-Earth (EME) communications.",
+              "applicationCategory": "Science",
+              "operatingSystem": "All",
+              "browserRequirements": "Requires JavaScript",
+              "inLanguage": "en"
+              "applicationSubCategory": "Amateur Radio Application",
+              "offers": {
+                "@type": "Offer",
+                "price": "0.00",
+                "priceCurrency": "USD"
+              }
+
+            }
+            </script>
+
+
+
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+      }
+
+      #map {
+        height: 100dvh;
+        width: 100%;
+        z-index: 0;
+      }
+
+        #controls {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          z-index: 5;
+          background-color: rgba(255, 255, 255, 0.95);
+          padding: 12px;
+          border-radius: 8px;
+          max-width: 90vw;
+          box-sizing: border-box;
+          overflow: auto;
+          max-height: 90vh; /* allow scrolling if needed */
+          max-width: 95vw;
+        }
+
+      label {
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      #hour-value {
+        margin-left: 10px;
+        font-weight: normal;
+      }
+
+      #hour {
+        width: 100%;
+        margin-top: 5px;
+      }
+
+        input[type="date"] {
+            width: auto;
+            max-width: 200px; /* Optional, to prevent the field from becoming too wide */
+        }
+
+
+        #chartWrapper {
+          width: 100%;
+          height: 180px; /* Keep the height of both chart and legend together */
+          margin-top: 6px;
+          background-color: rgba(255, 255, 255, 0.85);
+          border-radius: 6px;
+          box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
+          overflow: hidden; /* Prevent any horizontal overflow */
+          position: relative;
+          box-sizing: border-box;
+        }
+
+        #declinationChart {
+          width: 100%;
+          height: calc(100% - 40px); /* Adjust for space needed for the legend */
+          box-sizing: border-box; /* Ensure chart doesn't exceed wrapper width */
+          padding-bottom: 20px; /* Add space for X-axis labels */
+        }
+
+        /* Add this */
+        @media (min-width: 768px) {
+          #controls {
+            max-width: 600px;
+          }
+        }
+
+
+        /* Optional: better mobile spacing */
+        @media (max-width: 560px) {
+          #controls {
+            font-size: 13px;
+            padding: 10px;
+          }
+
+          #declinationChart {
+            height: 80px;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          #controls {
+            padding: 8px; /* Was 10px or 12px */
+            font-size: 12.5px;
+          }
+
+          #chartWrapper {
+            height: 160px; /* Slightly tighter */
+          }
+
+          #declinationChart {
+            height: calc(100% - 36px); /* Adjust accordingly */
+          }
+        }
+
+        
+        #hour {
+          width: 100%;
+          margin-top: 5px;
+          -webkit-appearance: none; /* For Webkit-based browsers like Chrome/Safari */
+          appearance: none; /* For Firefox */
+          height: 10px; /* Add height for better touch handling */
+          background: rgba(0, 0, 0, 0.1); /* Make background visible */
+          border-radius: 5px;
+          outline: none;
+          transition: background 0.3s ease;
+          padding: 0;
+        }
+
+        #hour::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 20px; /* Thumb width */
+          height: 20px; /* Thumb height */
+          background: #007bff;
+          border-radius: 50%;
+          cursor: pointer;
+        }
+
+        #hour::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+          background: #007bff;
+          border-radius: 50%;
+          cursor: pointer;
+        }
+
+        #hour:active {
+          background: rgba(0, 123, 255, 0.5); /* Active state background */
+        }
+
+        #hour-container {
+          position: relative;
+          width: 100%;
+          height: 40px;
+          margin-top: 10px;
+          padding: 5px 0;
+        }
+
+        #date-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-wrap: wrap; /* This allows wrapping on small screens */
+          gap: 5px;
+          margin-top: 10px;
+        }
+        
+        #date-container input[type="date"] {
+          flex-grow: 1;
+          padding: 5px;
+          margin: 0;
+          height: 32px; /* Explicit height for consistency */
+          box-sizing: border-box;
+          vertical-align: middle;
+        }
+
+        #date-container button {
+          font-size: 16px;
+          padding: 5px 10px;
+          background-color: #f1f1f1;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          cursor: pointer;
+          height: 32px; /* Match the height of the date input */
+          box-sizing: border-box;
+        }
+
+        #prevDay, #nextDay {
+          font-size: 16px;
+          padding: 5px 10px;
+          background-color: #f1f1f1;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+
+        #prevDay:hover, #nextDay:hover {
+          background-color: #e0e0e0;
+        }
+
+        input[type="date"] {
+          flex-grow: 1; /* Makes the input field take up remaining space */
+          padding: 5px;
+        }
+
+        #edit-button-container {
+          position: absolute;
+          top: 280px; /* Adjust the position as needed */
+          left: 60px;
+          transform: translateX(-50%);
+          z-index: 20;
+          padding: 2px;
+          background-color: rgba(255, 255, 255, 0.95);
+          border-radius: 2px;
+        }
+
+        #editButton {
+          padding: 2px 3px;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 2px;
+          font-size: 10px;
+          cursor: pointer;
+        }
+
+        #editButton:hover {
+          background-color: #0056b3;
+        }
+
+        #statisticsButton,
+        #tableViewButton {
+          padding: 2px 3px;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 2px;
+          font-size: 10px;
+          cursor: pointer;
+        }
+
+        #statisticsButton:hover,
+        #tableViewButton:hover {
+          background-color: #0056b3;
+        }
+        
+        .info-button {
+          background-color: transparent;
+          border: none;
+          font-size: 16px;
+          cursor: pointer;
+          padding: 4px;
+          border-radius: 50%;
+        }
+        .info-button:hover {
+          background-color: #eee;
+        }
+        .header-container {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 10px;
+        }
+
+        .app-name {
+          font-size: 1.0rem;
+          font-weight: bold;
+          color: #2c3e50;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .date-picker {
+          width: 150px;
+          padding: 4px 8px;
+          font-size: 1rem;
+        }
+        .app-name-wrapper {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          position: relative;
+        }
+
+        .creator-label {
+          font-size: 10px;
+          color: #555;
+          font-style: italic;
+          margin-bottom: -4px; /* Pull it a bit closer to the app name */
+        }
+
+        .ghz-label {
+          font-size: 10px;              /* Slightly larger than .creator-label */
+          font-weight: bold;
+          color: #2c3e50;               /* Same color as .app-name */
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Match .app-name */
+          margin-top: -4px;             /* Tighten spacing between lines */
+        }
+
+
+    </style>
+
+    <!-- Chart.js and Annotation Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
+  </head>
+
+  <body>
+    <div id="map"></div>
+    <div id="controls">
+        <div id="date-container">
+            <div class="app-name-wrapper">
+              <div class="creator-label">by SA5IKN</div>
+              <div class="app-name">EME Observer</div>
+              <div class="ghz-label">10GHz</div>
+            </div>
+
+          <button id="prevDay" type="button">←</button>
+          <input type="date" id="date" class="date-picker" />
+          <button id="nextDay" type="button">→</button>
+
+          <!-- Move hour-value here -->
+          <span id="hour-value" style="font-size: 12px; margin-left: 8px;">Time (UTC): 00:00</span>
+        </div>
+
+        <input type="range" id="hour" min="0" max="47" value="0" step="1" />
+          <button id="toggleChartBtn" style="margin-top: 8px;">Hide Chart</button>
+          <button id="editButton" style="margin-top: 8px;">Edit / Add Station</button>
+          <button onclick="location.href='eme-observer-statistics.html'">Statistics</button>
+          <button onclick="location.href='eme-observer-table.html'">Table View</button>
+
+          <button class="info-button" aria-label="Go to homepage" title="Home" onclick="location.href='http://dxer.site'">🏠</button>
+          <button class="info-button" aria-label="More information about the map" title="More info" onclick="location.href='http://dxer.site/eme-observer-faq.html'">?</button>
+
+
+      <!-- Declination graph inside controls -->
+      <div id="chartWrapper">
+          <span style="font-size: 12px; display: block; text-align: center; color: rgba(255, 0, 0, 0.6); margin-top: 5px;">Degradation</span>
+        <canvas id="declinationChart"></canvas>
+      </div>
+
+
+      </div>
+    </div>
+
+
+    <script>
+      let map;
+      let moonMarker;
+      let footprintCircle;
+      let declinationChart;
+      let currentInfoWindow = null;
+      let currentChartMonth = null;
+
+
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 2,
+          center: { lat: 0, lng: 0 },
+          mapTypeId: 'terrain',
+          gestureHandling: 'greedy',
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false
+        });
+        
+        const markerIcon = "https://dxer.site/img/m_30.png";  // Define the marker icon
+
+        // Load and process file
+        fetch('output_2_10GHz_with_DXCC.json')
+          .then(response => response.json())
+          .then(data => {
+            data.forEach(station => {
+              const { Call: callsign, Locator: locator, Antenna: antenna, Power: power, Website: website, Coordinates } = station;
+
+              const [latStr, lngStr] = Coordinates.split(',');
+              const lat = parseFloat(latStr);
+              const lng = parseFloat(lngStr);
+              if (isNaN(lat) || isNaN(lng)) return;
+
+              const offsetLat = 0.1;
+              const offsetLng = 0.1;
+              const markerPosition = {
+                lat: lat + (offsetLat / 10000),
+                lng: lng + (offsetLng / 10000)
+              };
+
+              const marker = new google.maps.Marker({
+                position: markerPosition,
+                map: map,
+                icon: {
+                  url: "https://dxer.site/img/m_30.png",
+                  scaledSize: new google.maps.Size(20, 20)
+                },
+                title: callsign
+              });
+
+              const infoContent = `
+                <div>
+                  <div style="font-weight:bold; font-size: 16px;">${callsign}</div>
+                  <div>Locator: ${locator}</div>
+                  <div>Antenna: ${antenna}</div>
+                  <div>Power: ${power}</div>
+                  <div>Website: <a href="${website}" target="_blank">${website}</a></div>
+                  <div><a href="https://www.qrz.com/db/${callsign}" target="_blank">QRZ.com lookup</a></div>
+                  <div id="image-container-${callsign}">
+                    Station Picture (clickable):<br>
+                    <a href="https://dxer.site/db/${callsign}.jpg" target="_blank">
+                      <img id="station-image-${callsign}"
+                           src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"
+                           alt="${callsign} station"/>
+                    </a>
+                    <div id="image-placeholder-${callsign}" style="display:none;">
+                      <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
+                    </div>
+                  </div>
+                </div>
+              `;
+
+              const infoWindow = new google.maps.InfoWindow({ content: infoContent });
+
+              marker.addListener('click', () => {
+                if (currentInfoWindow) {
+                  currentInfoWindow.close();
+                }
+
+                infoWindow.open(map, marker);
+                currentInfoWindow = infoWindow;
+
+                setTimeout(() => {
+                  const imageElement = document.getElementById(`station-image-${callsign}`);
+                  const placeholder = document.getElementById(`image-placeholder-${callsign}`);
+
+                  const imageUrl = `https://dxer.site/db/${callsign}_thumb.jpg`;
+                  fetch(imageUrl, { method: 'HEAD' })
+                    .then(response => {
+                      if (!response.ok) {
+                        imageElement.remove();
+                        placeholder.style.display = 'block';
+                      } else {
+                        imageElement.src = imageUrl;
+                        placeholder.style.display = 'none';
+                      }
+                    })
+                    .catch(() => {
+                      imageElement.remove();
+                      placeholder.style.display = 'block';
+                    });
+                }, 100);
+              });
+            });
+          })
+          .catch(error => console.error('Failed to load station JSON data:', error));
+          
+          fetch('output_2_10GHz_SK_with_DXCC.json')
+            .then(response => response.json())
+            .then(data => {
+              data.forEach(station => {
+                const { Call: callsign, Locator: locator, Antenna: antenna, Power: power, Website: website, Coordinates } = station;
+
+                const [latStr, lngStr] = Coordinates.split(',');
+                const lat = parseFloat(latStr);
+                const lng = parseFloat(lngStr);
+                if (isNaN(lat) || isNaN(lng)) return;
+
+                const markerPosition = {
+                  lat: lat + (0.1 / 10000), // Same slight offset to avoid overlap
+                  lng: lng + (0.1 / 10000)
+                };
+
+                const marker = new google.maps.Marker({
+                  position: markerPosition,
+                  map: map,
+                  icon: {
+                    url: "https://dxer.site/img/notworked.png", // <- Different marker icon
+                    scaledSize: new google.maps.Size(20, 20)
+                  },
+                  title: callsign
+                });
+
+                const infoContent = `
+                  <div>
+                    <div style="font-weight:bold; font-size: 16px;">${callsign} (SK)</div>
+                    <div>Locator: ${locator}</div>
+                    <div>Antenna: ${antenna}</div>
+                    <div>Power: ${power}</div>
+                    <div>Website: <a href="${website}" target="_blank">${website}</a></div>
+                    <div><a href="https://www.qrz.com/db/${callsign}" target="_blank">QRZ.com lookup</a></div>
+                    <div id="image-container-${callsign}">
+                      Station Picture (clickable):<br>
+                      <a href="https://dxer.site/db/${callsign}.jpg" target="_blank">
+                        <img id="station-image-${callsign}"
+                             src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"
+                             alt="${callsign} station"/>
+                      </a>
+                      <div id="image-placeholder-${callsign}" style="display:none;">
+                        <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
+                      </div>
+                    </div>
+                  </div>
+                `;
+
+                const infoWindow = new google.maps.InfoWindow({ content: infoContent });
+
+                marker.addListener('click', () => {
+                  if (currentInfoWindow) {
+                    currentInfoWindow.close();
+                  }
+
+                  infoWindow.open(map, marker);
+                  currentInfoWindow = infoWindow;
+
+                  setTimeout(() => {
+                    const imageElement = document.getElementById(`station-image-${callsign}`);
+                    const placeholder = document.getElementById(`image-placeholder-${callsign}`);
+
+                    const imageUrl = `https://dxer.site/db/${callsign}_thumb.jpg`;
+                    fetch(imageUrl, { method: 'HEAD' })
+                      .then(response => {
+                        if (!response.ok) {
+                          imageElement.remove();
+                          placeholder.style.display = 'block';
+                        } else {
+                          imageElement.src = imageUrl;
+                          placeholder.style.display = 'none';
+                        }
+                      })
+                      .catch(() => {
+                        imageElement.remove();
+                        placeholder.style.display = 'block';
+                      });
+                  }, 100);
+                });
+              });
+            })
+            .catch(error => console.error('Failed to load SK station JSON data:', error));
+
+        fetch('moon_data.json')
+          .then(response => response.json())
+          .then(data => {
+            window.moonData = data;
+            initDeclinationChart(data);
+            addDegradationOverlays();
+            setDefaultTimeAndUpdateMap();
+            restrictDatePicker();
+          })
+          .catch(error => console.error('Error loading moon data:', error));
+      }
+
+        function setDefaultTimeAndUpdateMap() {
+          const now = new Date();
+          const currentDate = now.toISOString().split('T')[0];
+
+          const minutes = now.getUTCMinutes();
+          const roundedMinutes = minutes < 15 ? 0 : minutes < 45 ? 30 : 0;
+          let hour = now.getUTCHours();
+          if (minutes >= 45) hour += 1;
+          if (hour === 24) hour = 0; // wrap around midnight
+
+          const index = hour * 2 + (roundedMinutes === 30 ? 1 : 0);
+
+          document.getElementById('date').value = currentDate;
+          document.getElementById('hour').value = index;
+          const timeStr = `${hour.toString().padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
+          document.getElementById('hour-value').textContent = `Time (UTC): ${timeStr}`;
+
+          updateMap();
+        }
+
+        function restrictDatePicker() {
+          const moonData = window.moonData;
+          if (!moonData || moonData.length === 0) return;
+
+          const minDateString = moonData[0].t.split(' ')[0];
+          const maxDateString = moonData[moonData.length - 1].t.split(' ')[0];
+
+          const dateInput = document.getElementById('date');
+          dateInput.setAttribute('min', minDateString);
+          dateInput.setAttribute('max', maxDateString);
+        }
+
+
+        document.getElementById('hour').addEventListener('input', function () {
+          const index = parseInt(this.value); // 0 to 47
+          const hour = Math.floor(index / 2).toString().padStart(2, '0');
+          const minutes = index % 2 === 0 ? '00' : '30';
+          document.getElementById('hour-value').textContent = `Time (UTC): ${hour}:${minutes}`;
+          updateMap();
+        });
+
+      document.getElementById('date').addEventListener('change', updateMap);
+
+      function updateMap() {
+        const selectedDate = document.getElementById('date').value;
+        const index = parseInt(document.getElementById('hour').value);
+        const hour = Math.floor(index / 2).toString().padStart(2, '0');
+        const minutes = index % 2 === 0 ? '00' : '30';
+
+        if (!selectedDate) {
+          alert("Please select a date.");
+          return;
+        }
+
+        const utcTimeString = `${selectedDate} ${hour}:${minutes}:00`;
+
+        const moonData = window.moonData.find(entry => entry.t === utcTimeString);
+
+        if (!moonData) {
+          alert("No moon data available for the selected UTC time.");
+          return;
+        }
+
+        const lat = parseFloat(moonData.p);
+        const lon = parseFloat(moonData.m); // Negate if needed for direction
+        const radius = parseFloat(moonData.r) * 1000;
+
+        //map.setCenter({ lat: 0, lng: 0 });
+
+        if (moonMarker) moonMarker.setMap(null);
+        if (footprintCircle) footprintCircle.setMap(null);
+
+        moonMarker = new google.maps.Marker({
+          position: { lat, lng: lon },
+          map: map,
+          icon: {
+            url: 'https://dxer.site/img/moon-icon.png',
+            scaledSize: new google.maps.Size(48, 48)
+          },
+          title: 'Moon Sublunar Point'
+        });
+
+        footprintCircle = new google.maps.Circle({
+          map: map,
+          center: { lat, lng: lon },
+          radius: radius,
+          fillColor: '#0088FF',
+          fillOpacity: 0.3,
+          strokeColor: '#0000FF',
+          strokeOpacity: 0.6,
+          strokeWeight: 2
+        });
+
+        updateDeclinationHighlight(selectedDate);
+      }
+
+        function initDeclinationChart(data, baseDate = new Date()){
+          const now = new Date();
+          const from = new Date(Date.UTC(baseDate.getUTCFullYear(), baseDate.getUTCMonth(), 1));
+          const to = new Date(Date.UTC(baseDate.getUTCFullYear(), baseDate.getUTCMonth() + 1, 0));
+
+
+          const filtered = data.filter(entry => {
+            const time = new Date(entry.t.replace(' ', 'T') + 'Z');
+            return time >= from && time <= to;
+          });
+
+          const dateMap = new Map();
+          filtered.forEach(entry => {
+            const dateStr = entry.t.split(' ')[0];
+            if (!dateMap.has(dateStr)) dateMap.set(dateStr, []);
+            dateMap.get(dateStr).push(entry);
+          });
+
+          const labels = Array.from(dateMap.keys());
+
+          const declinations = labels.map(date => {
+            const entries = dateMap.get(date);
+            const avgDec = entries.reduce((sum, entry) => sum + parseFloat(entry.n), 0) / entries.length;
+            return parseFloat(avgDec.toFixed(2));
+          });
+
+          const distances = labels.map(date => {
+            const entries = dateMap.get(date);
+            const avgDist = entries.reduce((sum, entry) => sum + parseFloat(entry.d), 0) / entries.length;
+            return Math.round(avgDist);
+          });
+          
+          const minDistance = 356352.93;
+
+          const emeLoss = distances.map(d => {
+            const loss = 40 * Math.log10(d / minDistance);
+            return parseFloat(loss.toFixed(2));
+          });
+
+
+          const ctx = document.getElementById('declinationChart').getContext('2d');
+          
+          // Look for the transition between Waning Crescent and Waxing Crescent
+          const newMoonDates = [];
+
+          for (let i = 1; i < filtered.length; i++) {
+            const previousPhase = filtered[i - 1].phase_name;
+            const currentPhase = filtered[i].phase_name;
+
+            // Check for transition from Waning Crescent to Waxing Crescent
+            if (previousPhase === 'Waning Crescent' && currentPhase === 'Waxing Crescent') {
+              const newMoonDate = filtered[i].time.split(' ')[0]; // Get the date of the transition
+              newMoonDates.push(newMoonDate);
+            }
+          }
+
+          // Now you can use newMoonDates to add annotations for New Moon
+          const newMoonAnnotations = {};
+          newMoonDates.forEach((dateStr, i) => {
+            const index = labels.indexOf(dateStr);
+            if (index !== -1) {
+                newMoonAnnotations[`newMoon${i}`] = {
+                  type: 'label',
+                  xValue: dateStr,
+                  yValue: -5,
+                  content: ['🌑'], // Unicode new moon
+                  backgroundColor: 'transparent',
+                  font: {
+                    size: 12
+                  },
+                  color: 'black',
+                  textAlign: 'center',
+                  yAdjust: -8,
+                  xAdjust: 0
+                };
+
+            }
+          });
+
+            // Update the chart options to include new moon annotations
+            declinationChart = new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [
+                  {
+                    label: 'Declination, °',
+                    data: declinations,
+                    borderColor: 'blue',
+                    yAxisID: 'y',
+                    fill: false,
+                    pointRadius: 0,
+                    tension: 0.2,
+                  },
+                  {
+                    label: 'Distance (km)',
+                    data: distances,
+                    borderColor: 'green',
+                    yAxisID: 'y1',
+                    fill: false,
+                    pointRadius: 0,
+                    tension: 0.2,
+                  },
+
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                  padding: {
+                    bottom: 0, // Add padding below the chart for X-axis labels
+                  },
+                },
+                plugins: {
+                  legend: { display: false },
+                  annotation: {
+                    drawTime: 'afterDatasetsDraw', // <-- renders on top of curves behind lines
+                    annotations: {
+                      todayLine: {
+                        type: 'line',
+                        xMin: '',
+                        xMax: '',
+                        borderColor: 'black',
+                        borderWidth: 2,
+                        label: {
+                          display: true,
+                          enabled: true,
+                          position: 'start',
+                          content: function (ctx) {
+                            const chart = ctx.chart;
+                            const annotation = chart.options.plugins.annotation.annotations.todayLine;
+                            const index = chart.data.labels.indexOf(annotation.xMin);
+                            if (index === -1) return '';
+
+                            const dec = chart.data.datasets[0]?.data[index];
+                            const dist = chart.data.datasets[1]?.data[index];
+                            if (dec === undefined || dist === undefined) return '';
+
+                            const minDist = 356352.93;
+                            const emeLoss = 40 * Math.log10(dist / minDist);
+
+                            return `Dec ${dec}°\nDist ${Math.round(dist / 1000)}k\n-${emeLoss.toFixed(1)} dB`;
+                          },
+                          backgroundColor: 'rgba(255,255,255,0.5)',
+                          font: {
+                            size: 10,
+                            weight: 'normal',
+                          },
+                          color: 'black',
+                          padding: 4,
+                        },
+
+                      },
+                      ...newMoonAnnotations, // Spread new moon annotations here
+                    },
+                  },
+                },
+                scales: {
+                  x: {
+                    type: 'category',
+                    ticks: {
+                      callback: function (value, index, ticks) {
+                        const label = this.getLabelForValue(value);
+                        const date = new Date(label);
+                        return date.getUTCDate(); // just the day number
+                      },
+                    },
+                  },
+                  y: {
+                    title: {
+                      display: true,
+                      text: 'Declination (°)',
+                      color: 'blue', // ← matches blue declination line
+                    },
+                    min: -30,
+                    max: 30,
+                    position: 'left',
+                    ticks: {
+                      color: 'blue', // Optional: make tick numbers blue too
+                      stepSize: 10, // Set step size to reduce the number of ticks
+                    },
+                  },
+                  y1: {
+                    position: 'right',
+                    title: {
+                      display: true,
+                      text: 'Distance, km | Extra Loss, dB',
+                      color: 'green',
+                    },
+                    min: 356400,
+                    max: 406700,
+                    grid: { drawOnChartArea: false },
+                    ticks: {
+                      callback: function (value) {
+                        const km = (value / 1000).toFixed(0) + 'k';
+                        const minDist = 356352.93;
+                        const loss = 40 * Math.log10(value / minDist);
+                        const dB = loss.toFixed(1) + 'dB';
+                        return `${km}/${loss.toFixed(1)}dB`;
+
+                      },
+                      color: 'green',
+                      stepSize: 20000,
+                    },
+                  },
+
+
+                },
+              },
+              plugins: [Chart.registry.getPlugin('annotation')],
+            });
+        }
+
+        function updateDeclinationHighlight(dateStr) {
+          if (!window.moonData) return;
+
+          const selected = new Date(dateStr);
+          const selectedMonthKey = selected.getUTCFullYear() + '-' + selected.getUTCMonth();
+
+          // Only rebuild the chart if the month has changed
+          if (selectedMonthKey !== currentChartMonth) {
+            currentChartMonth = selectedMonthKey;
+
+            // Remove old chart instance before creating a new one
+            if (declinationChart) {
+              declinationChart.destroy();
+            }
+
+            // Create chart for new month
+            initDeclinationChart(window.moonData, selected);
+
+            // Delay update to ensure chart is initialized before annotation is moved
+            setTimeout(() => {
+              if (declinationChart) {
+                const annotation = declinationChart.options.plugins.annotation.annotations.todayLine;
+                annotation.xMin = dateStr;
+                annotation.xMax = dateStr;
+                declinationChart.update();
+              }
+            }, 0);
+          } else {
+            // Just move the annotation line
+            if (declinationChart) {
+              const annotation = declinationChart.options.plugins.annotation.annotations.todayLine;
+              annotation.xMin = dateStr;
+              annotation.xMax = dateStr;
+              declinationChart.update();
+            }
+          }
+        }
+
+
+
+        function addDegradationOverlays() {
+          fetch('degrad_data.txt')
+            .then(response => response.text())
+            .then(text => {
+              const lines = text.trim().split('\n');
+              const degradData = lines.map(line => {
+                const [date, value] = line.trim().split(/\s+/);
+                return { date, value: parseFloat(value) };
+              });
+
+              const chartLabels = declinationChart.data.labels;
+
+              const values = chartLabels.map(label => {
+                const match = degradData.find(d => d.date === label);
+                return match ? match.value : null;
+              });
+
+              // Add degradation dataset
+              declinationChart.data.datasets.push({
+                label: 'Degradation',
+                data: values,
+                backgroundColor: 'rgba(255, 0, 0, 0.3)',
+                borderColor: 'rgba(255,0,0,0)',
+                yAxisID: 'y2',
+                type: 'line',
+                pointRadius: 0,
+                tension: 0.2,
+                fill: true,
+              });
+
+              // Add y2 axis with no ticks
+              declinationChart.options.scales['y2'] = {
+                display: false,
+                min: 0,
+                max: 14,
+              };
+
+              declinationChart.update();
+            })
+            .catch(err => console.error('Error loading degradation data:', err));
+        }
+
+        document.getElementById('prevDay').addEventListener('click', function() {
+          changeDateByDays(-1); // Decrease date by 1
+        });
+
+        document.getElementById('nextDay').addEventListener('click', function() {
+          changeDateByDays(1); // Increase date by 1
+        });
+
+        function changeDateByDays(delta) {
+          const dateInput = document.getElementById('date');
+          const selectedDate = new Date(dateInput.value);
+          selectedDate.setDate(selectedDate.getDate() + delta);
+
+          // Format the new date to YYYY-MM-DD for the input field
+          const formattedDate = selectedDate.toISOString().split('T')[0];
+          dateInput.value = formattedDate;
+
+          // Update the map and chart for the new date
+          updateMap();
+        }
+
+        document.getElementById('editButton').addEventListener('click', function() {
+          window.open('https://forms.gle/vLCqCySPEkH926AX8', '_blank');
+        });
+
+
+    </script>
+
+    <script>
+      document.getElementById('toggleChartBtn').addEventListener('click', function () {
+        const chartWrapper = document.getElementById('chartWrapper');
+        const btn = this;
+
+        if (chartWrapper.style.display === 'none') {
+          chartWrapper.style.display = 'block';
+          btn.textContent = 'Hide Chart';
+        } else {
+          chartWrapper.style.display = 'none';
+          btn.textContent = 'Show Chart';
+        }
+      });
+    </script>
+
+
+
+
+    <!-- Google Maps API -->
+    <script async
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap">
+    </script>
+  </body>
+</html>
