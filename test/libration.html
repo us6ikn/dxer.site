@@ -303,6 +303,11 @@
     window.onload = () => {
       document.getElementById("date").valueAsDate = new Date();
     }
+      document.getElementById("date").addEventListener("input", () => {
+        const hourIndex = parseInt(document.getElementById("hour").value);
+        updateChart(hourIndex);
+      });
+
   </script>
   
   <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
