@@ -159,16 +159,19 @@
       });
     }
       function addMoonEventsToChart(lat, lon, dateStr) {
-        const date = new Date(dateStr + 'T00:00:00Z');
-        const nextDate = new Date(date.getTime() + 24 * 60 * 60 * 1000);
-        const msPerStep = 5 * 60 * 1000; // 5-minute steps
+          const utcBase = new Date(dateStr + 'T00:00:00Z');
+          const localOffsetMin = lon * 4; // 1 deg = 4 min time shift
+          const localStart = new Date(utcBase.getTime() - localOffsetMin * 60 * 1000);
+          const localEnd = new Date(localStart.getTime() + 24 * 60 * 60 * 1000);
+          const msPerStep = 5 * 60 * 1000; // 5-minute steps
+
 
         const annotations = {};
         let lastAlt = null;
         let lastTime = null;
         let count = 0;
 
-        for (let t = new Date(date); t < nextDate; t = new Date(t.getTime() + msPerStep)) {
+        for (let t = new Date(localStart); t < localEnd; t = new Date(t.getTime() + msPerStep)) {
           const pos = SunCalc.getMoonPosition(t, lat, lon);
           const alt = pos.altitude;
 
@@ -176,7 +179,7 @@
             if (lastAlt < 0 && alt >= 0) {
               // Moonrise
               const riseTime = interpolateCrossingTime(lastTime, t, lat, lon, true);
-              if (riseTime >= date && riseTime < nextDate) {
+              if (riseTime >= localStart && riseTime < localEnd) {
                 const index = timeToIndex(riseTime);
                 annotations[`moonrise${count}`] = makeAnnotation(index, 'Moonrise', 'blue');
                 count++;
@@ -184,7 +187,7 @@
             } else if (lastAlt >= 0 && alt < 0) {
               // Moonset
               const setTime = interpolateCrossingTime(lastTime, t, lat, lon, false);
-              if (setTime >= date && setTime < nextDate) {
+              if (setTime >= localStart && setTime < localEnd) {
                 const index = timeToIndex(setTime);
                 annotations[`moonset${count}`] = makeAnnotation(index, 'Moonset', 'orange');
                 count++;
