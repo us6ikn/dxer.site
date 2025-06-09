@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>EME Libration Visualizer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Libration Rate Visualizer</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    /* === INSERTED STYLE FROM USER === */
+    /* Include your CSS styles from your previous message here */
     html, body {
       margin: 0;
       padding: 0;
@@ -13,11 +14,13 @@
       overflow: hidden;
       font-family: Arial, sans-serif;
     }
+
     #map {
       height: 100dvh;
       width: 100%;
       z-index: 0;
     }
+
     #controls {
       position: absolute;
       top: 10px;
@@ -30,89 +33,9 @@
       box-sizing: border-box;
       overflow: auto;
       max-height: 90vh;
-      max-width: 95vw;
     }
-    label {
-      font-weight: bold;
-      font-size: 14px;
-    }
-    #hour-value {
-      margin-left: 10px;
-      font-weight: normal;
-    }
-    #hour {
-      width: 100%;
-      margin-top: 5px;
-      -webkit-appearance: none;
-      appearance: none;
-      height: 10px;
-      background: rgba(0, 0, 0, 0.1);
-      border-radius: 5px;
-      outline: none;
-      transition: background 0.3s ease;
-      padding: 0;
-    }
-    #hour::-webkit-slider-thumb,
-    #hour::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
-      background: #007bff;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-    #date-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 5px;
-      margin-top: 10px;
-    }
-    input[type="date"] {
-      width: auto;
-      max-width: 200px;
-    }
-    .app-name-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      position: relative;
-    }
-    .creator-label {
-      font-size: 10px;
-      color: #555;
-      font-style: italic;
-      margin-bottom: -4px;
-    }
-    .app-name {
-      font-size: 1.0rem;
-      font-weight: bold;
-      color: #2c3e50;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    .ghz-label {
-      font-size: 10px;
-      font-weight: bold;
-      color: #2c3e50;
-      margin-top: -4px;
-    }
-    #chartWrapper {
-      width: 100%;
-      height: 180px;
-      margin-top: 6px;
-      background-color: rgba(255, 255, 255, 0.85);
-      border-radius: 6px;
-      box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      position: relative;
-      box-sizing: border-box;
-    }
-    #declinationChart {
-      width: 100%;
-      height: calc(100% - 40px);
-      box-sizing: border-box;
-      padding-bottom: 20px;
-    }
+
+    /* ... rest of your styles ... */
   </style>
 </head>
 <body>
@@ -125,128 +48,135 @@
         <div class="ghz-label">10GHz</div>
       </div>
       <button id="prevDay">←</button>
-      <input type="date" id="date" />
+      <input type="date" id="date" class="date-picker" />
       <button id="nextDay">→</button>
       <span id="hour-value">Time (UTC): 00:00</span>
     </div>
     <input type="range" id="hour" min="0" max="47" value="0" step="1" />
-
-    <label for="qth">Enter QTH Locator:</label>
-    <input type="text" id="qth" maxlength="6" />
-    <button onclick="calculateLibration()">Calculate</button>
-
+    <label for="qth">QTH Locator:</label>
+    <input type="text" id="qth" maxlength="6">
+    <button onclick="loadLibrationData()">Plot</button>
     <div id="chartWrapper">
-      <span style="font-size: 12px; text-align: center; display: block; color: rgba(255, 0, 0, 0.6);">Libration Rate (deg/min)</span>
+      <span style="font-size: 12px; display: block; text-align: center; color: rgba(255, 0, 0, 0.6); margin-top: 5px;">Libration Rate</span>
       <canvas id="declinationChart"></canvas>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
-
   <script>
     let chart;
-    let rawData = [];
-
-    function initMap() {
-      new google.maps.Map(document.getElementById("map"), {
-        zoom: 2,
-        center: { lat: 0, lng: 0 },
-      });
-    }
 
     function qthToLatLon(locator) {
-      if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
-        throw new Error("Invalid QTH locator format (must be 6 characters)");
-      }
-      locator = locator.toUpperCase();
       const A = 'A'.charCodeAt(0);
-      const lon = (locator.charCodeAt(0) - A) * 20 + parseInt(locator[2]) * 2 + (locator.charCodeAt(4) - A) * (5 / 60) - 180 + (2.5 / 60);
-      const lat = (locator.charCodeAt(1) - A) * 10 + parseInt(locator[3]) + (locator.charCodeAt(5) - A) * (2.5 / 60) - 90 + (1.25 / 60);
+      locator = locator.toUpperCase();
+      const lonField = (locator.charCodeAt(0) - A) * 20;
+      const latField = (locator.charCodeAt(1) - A) * 10;
+      const lonSquare = parseInt(locator[2]) * 2;
+      const latSquare = parseInt(locator[3]) * 1;
+      const lonSub = (locator.charCodeAt(4) - A) * (5 / 60);
+      const latSub = (locator.charCodeAt(5) - A) * (2.5 / 60);
+      const lon = lonField + lonSquare + lonSub - 180 + (2.5 / 60);
+      const lat = latField + latSquare + latSub - 90 + (1.25 / 60);
       return { lat, lon };
     }
 
-    async function calculateLibration() {
-      const locator = document.getElementById("qth").value.trim();
-      const { lat, lon } = qthToLatLon(locator);
+    async function loadLibrationData() {
+      const locator = document.getElementById('qth').value.trim();
+      const date = new Date(document.getElementById('date').value);
+      const latLon = qthToLatLon(locator);
+      const lat = latLon.lat;
+      const lon = latLon.lon;
       const COS_LAT = Math.cos(lat * Math.PI / 180);
       const TIME_SHIFT_MIN = (lon / 15) * 60;
       const INTERVAL_MIN = 30;
       const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN);
 
-      const res = await fetch("moon_topo_coords_lat0.txt");
-      const lines = (await res.text()).trim().split("\n").slice(1);
-      const tempData = lines.map(line => ({
+      const res = await fetch('moon_topo_coords_lat0.txt');
+      const txt = await res.text();
+      const lines = txt.trim().split('\n').slice(1);
+      const rawData = lines.map(line => ({
         date: line.slice(0, 20).trim(),
         lat: parseFloat(line.slice(20, 32)),
         lon: parseFloat(line.slice(32))
       }));
 
-      const shifted = tempData.map((entry, i) => {
+      const shiftedData = rawData.map((d, i) => {
         const shiftedIndex = i + SHIFT_STEPS;
-        const ref = tempData[shiftedIndex] || {};
-        return {
-          date: entry.date,
-          lat: ref.lat ?? null,
-          lon: ref.lon ?? null
-        };
+        if (shiftedIndex >= 0 && shiftedIndex < rawData.length) {
+          return {
+            date: d.date,
+            lat: rawData[shiftedIndex].lat,
+            lon: rawData[shiftedIndex].lon
+          };
+        } else {
+          return { date: d.date, lat: null, lon: null };
+        }
       });
 
-      const results = shifted.map((curr, i, arr) => {
-        if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null) return { date: curr.date, rate: 0 };
-        let dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
-        let dlon = (((arr[i+1].lon - arr[i-1].lon) / 60 + 180) % 360) - 180;
-        dlat *= COS_LAT;
-        dlon *= COS_LAT;
-        return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
+      const rates = shiftedData.map((d, i, arr) => {
+        if (i === 0 || i === arr.length - 1 || !arr[i - 1].lat || !arr[i + 1].lat) return 0;
+        let dlat = (arr[i + 1].lat - arr[i - 1].lat) / 60 * COS_LAT;
+        let dlon = ((arr[i + 1].lon - arr[i - 1].lon + 180) % 360 - 180) / 60 * COS_LAT;
+        return Math.sqrt(dlat * dlat + dlon * dlon);
       });
 
-      rawData = results;
-      updateChart(0);
-    }
-
-    function updateChart(hourIndex) {
-      const dateStr = document.getElementById("date").value;
-      const dataForDay = rawData.filter(r => r.date.startsWith(dateStr));
-      const labels = dataForDay.map((r, i) => `${Math.floor(i/2)}:${i%2===0 ? '00':'30'}`);
-      const rates = dataForDay.map(r => r.rate);
-
-      if (!chart) {
-        chart = new Chart(document.getElementById("declinationChart"), {
-          type: 'line',
-          data: { labels, datasets: [{ label: "Libration Rate", data: rates, borderColor: "#ff0000" }] },
-          options: { responsive: true, scales: { x: { display: true }, y: { display: true, title: { display: true, text: "deg/min" } } } }
-        });
-      } else {
-        chart.data.labels = labels;
-        chart.data.datasets[0].data = rates;
-        chart.update();
+      const labels = shiftedData.map(d => d.date);
+      const selectedDateStr = date.toISOString().split('T')[0];
+      const filteredLabels = [];
+      const filteredRates = [];
+      for (let i = 0; i < labels.length; i++) {
+        if (labels[i].startsWith(selectedDateStr)) {
+          filteredLabels.push(labels[i]);
+          filteredRates.push(rates[i]);
+        }
       }
+
+      if (chart) chart.destroy();
+      const ctx = document.getElementById('declinationChart').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: filteredLabels,
+          datasets: [{
+            label: 'Libration Rate (deg/min)',
+            data: filteredRates,
+            borderColor: 'rgba(255, 0, 0, 0.7)',
+            backgroundColor: 'rgba(255, 0, 0, 0.1)',
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: {
+          scales: {
+            x: {
+              type: 'category',
+              ticks: { maxTicksLimit: 10 }
+            },
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
     }
 
-    document.getElementById("hour").addEventListener("input", e => {
-      const hour = Math.floor(e.target.value / 2);
-      const minutes = (e.target.value % 2) * 30;
-      document.getElementById("hour-value").textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}`;
+    document.getElementById('prevDay').addEventListener('click', () => {
+      const date = new Date(document.getElementById('date').value);
+      date.setDate(date.getDate() - 1);
+      document.getElementById('date').valueAsDate = date;
+      loadLibrationData();
     });
 
-    document.getElementById("prevDay").addEventListener("click", () => {
-      const d = new Date(document.getElementById("date").value);
-      d.setDate(d.getDate() - 1);
-      document.getElementById("date").valueAsDate = d;
-      updateChart(0);
+    document.getElementById('nextDay').addEventListener('click', () => {
+      const date = new Date(document.getElementById('date').value);
+      date.setDate(date.getDate() + 1);
+      document.getElementById('date').valueAsDate = date;
+      loadLibrationData();
     });
 
-    document.getElementById("nextDay").addEventListener("click", () => {
-      const d = new Date(document.getElementById("date").value);
-      d.setDate(d.getDate() + 1);
-      document.getElementById("date").valueAsDate = d;
-      updateChart(0);
-    });
-
-    window.onload = () => {
-      document.getElementById("date").valueAsDate = new Date();
-    }
+    document.getElementById('date').valueAsDate = new Date();
   </script>
+
+  <!-- Google Maps API -->
+  <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
 </body>
 </html>
