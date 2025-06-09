@@ -299,30 +299,45 @@
     });
 
       window.onload = () => {
+        // Get current UTC time
         const now = new Date();
+        const utcHours = now.getUTCHours();
+        const utcMinutes = now.getUTCMinutes();
 
-        // Set date picker to today
-        document.getElementById("date").valueAsDate = now;
+        // Set date picker to current UTC date
+        const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+        document.getElementById("date").valueAsDate = utcDate;
 
-        // Round current time to nearest 30 minutes
-        const minutes = now.getMinutes();
-        const roundedMinutes = minutes < 15 ? 0 : minutes < 45 ? 30 : 0;
-        if (minutes >= 45) now.setHours(now.getHours() + 1);
+        // Round to nearest half-hour
+        let roundedHour = utcHours;
+        let roundedMinutes = 0;
 
-        const hour = now.getHours();
-        const hourIndex = hour * 2 + (roundedMinutes === 30 ? 1 : 0);
+        if (utcMinutes >= 45) {
+          roundedHour += 1;
+          roundedMinutes = 0;
+        } else if (utcMinutes >= 15) {
+          roundedMinutes = 30;
+        } else {
+          roundedMinutes = 0;
+        }
 
-        // Set slider to closest half-hour
+        // Calculate hour index (0–47)
+        const hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
+
+        // Set slider to the correct UTC hour index
         const hourSlider = document.getElementById("hour");
         hourSlider.value = hourIndex;
 
-        // Display label
+        // Display time label
         document.getElementById("hour-value").textContent =
-          `Time (UTC): ${String(hour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
+          `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
 
-        // Update chart (if rawData is loaded later, you may move this inside `calculateLibration` callback)
-        updateChart(hourIndex);
+        // Update chart (after libration data has been loaded)
+        calculateLibration().then(() => {
+          updateChart(hourIndex);
+        });
       };
+
 
     document.getElementById("date").addEventListener("input", () => {
         const hourIndex = parseInt(document.getElementById("hour").value);
