@@ -147,6 +147,7 @@
   <script>
     let chart;
     let rawData = [];
+    let hourIndex = 0; // global
 
     function initMap() {
       new google.maps.Map(document.getElementById("map"), {
@@ -202,7 +203,7 @@
       });
 
       rawData = results;
-      updateChart(0);
+      updateChart(hourIndex);
     }
 
       function updateChart(hourIndex) {
@@ -276,7 +277,7 @@
       }
 
       document.getElementById("hour").addEventListener("input", e => {
-          const hourIndex = parseInt(document.getElementById("hour").value);
+        hourIndex = parseInt(document.getElementById("hour").value);
         const hour = Math.floor(hourIndex / 2);
         const minutes = (hourIndex % 2) * 30;
         document.getElementById("hour-value").textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}`;
@@ -299,16 +300,13 @@
     });
 
       window.onload = () => {
-        // Get current UTC time
         const now = new Date();
         const utcHours = now.getUTCHours();
         const utcMinutes = now.getUTCMinutes();
 
-        // Set date picker to current UTC date
         const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
         document.getElementById("date").valueAsDate = utcDate;
 
-        // Round to nearest half-hour
         let roundedHour = utcHours;
         let roundedMinutes = 0;
 
@@ -317,30 +315,21 @@
           roundedMinutes = 0;
         } else if (utcMinutes >= 15) {
           roundedMinutes = 30;
-        } else {
-          roundedMinutes = 0;
         }
 
-        // Calculate hour index (0–47)
-        const hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
+        hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0); // ✅ set global hourIndex
 
-        // Set slider to the correct UTC hour index
-        const hourSlider = document.getElementById("hour");
-        hourSlider.value = hourIndex;
-
-        // Display time label
+        document.getElementById("hour").value = hourIndex;
         document.getElementById("hour-value").textContent =
           `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
 
-        // Update chart (after libration data has been loaded)
         calculateLibration().then(() => {
-          updateChart(hourIndex);
+          updateChart(hourIndex); // ✅ use global value
         });
       };
 
-
     document.getElementById("date").addEventListener("input", () => {
-        const hourIndex = parseInt(document.getElementById("hour").value);
+        hourIndex = parseInt(document.getElementById("hour").value);
         updateChart(hourIndex);
       });
   </script>
