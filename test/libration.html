@@ -255,6 +255,9 @@
                 }
               },
               plugins: {
+                legend: {
+                  display: false  // ✅ Hides the legend
+                },
                 annotation: {
                   annotations: {
                     timeMarker: annotation
@@ -274,7 +277,7 @@
 
 
       document.getElementById("hour").addEventListener("input", e => {
-        const hourIndex = parseInt(e.target.value);
+          const hourIndex = parseInt(document.getElementById("hour").value);
         const hour = Math.floor(hourIndex / 2);
         const minutes = (hourIndex % 2) * 30;
         document.getElementById("hour-value").textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}`;
