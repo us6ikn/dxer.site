@@ -227,8 +227,11 @@
             }
 
             // Compute JD for this step
-            const jdStep = jd + (i / 48);
+            const jdStep = julian.DateTime.fromDate(new Date(entry.date)).jd;
             const alt = getMoonAltitude(jdStep, lat, lon);
+            const moon = moonposition.position(jdStep);
+            console.log(`⏱ ${entry.date} | Alt: ${alt.toFixed(2)}° | RA: ${moon.ra.toFixed(2)}h | Dec: ${moon.dec.toFixed(2)}°`);
+
 
             if (alt <= 0) {
               return { date: dateStr, rate: null }; // Below horizon
