@@ -218,8 +218,11 @@
           console.log("Moon RA/Dec:", moonPos.ra, moonPos.dec);
 
           const results = tempData.map((entry, i, arr) => {
-            const shiftedIndex = i + SHIFT_STEPS;
-            const ref = tempData[shiftedIndex];
+              const shiftedIndex = i + SHIFT_STEPS;
+              if (shiftedIndex < 1 || shiftedIndex >= arr.length - 1) return { date: dateStr, rate: null };
+
+              const ref = tempData[shiftedIndex];
+
             const dateStr = entry?.date || "";
 
             if (!ref || ref.lat == null || ref.lon == null) {
@@ -227,7 +230,9 @@
             }
 
             // Compute JD for this step
-            const jdStep = julian.DateTime.fromDate(new Date(entry.date)).jd;
+            const d = new Date(entry.date);
+            const jdStep = julian.CalendarGregorianToJD(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate()) +
+                           (d.getUTCHours() + d.getUTCMinutes() / 60 + d.getUTCSeconds() / 3600) / 24;
             const alt = getMoonAltitude(jdStep, lat, lon);
             const moon = moonposition.position(jdStep);
             console.log(`⏱ ${entry.date} | Alt: ${alt.toFixed(2)}° | RA: ${moon.ra.toFixed(2)}h | Dec: ${moon.dec.toFixed(2)}°`);
