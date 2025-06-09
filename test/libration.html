@@ -332,11 +332,8 @@
         document.getElementById("hour").value = hourIndex;
         document.getElementById("hour-value").textContent =
           `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
-
-        calculateLibration().then(() => {
-          updateChart(hourIndex);
-        });
       };
+
 
     document.getElementById("date").addEventListener("input", () => {
         hourIndex = parseInt(document.getElementById("hour").value);
