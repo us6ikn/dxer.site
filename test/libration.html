@@ -178,20 +178,21 @@
           if (lastAlt !== null) {
             if (lastAlt < 0 && alt >= 0) {
               // Moonrise
-              const riseTime = interpolateCrossingTime(lastTime, t, lat, lon, true);
-              if (riseTime >= localStart && riseTime < localEnd) {
-                const index = timeToIndex(riseTime);
+              const riseUTC = new Date(riseTime);
+              if (riseUTC.toISOString().slice(0, 10) === date.toISOString().slice(0, 10)) {
+                const index = timeToIndex(riseUTC);
                 annotations[`moonrise${count}`] = makeAnnotation(index, 'Moonrise', 'blue');
                 count++;
               }
             } else if (lastAlt >= 0 && alt < 0) {
               // Moonset
-              const setTime = interpolateCrossingTime(lastTime, t, lat, lon, false);
-              if (setTime >= localStart && setTime < localEnd) {
-                const index = timeToIndex(setTime);
+              const setUTC = new Date(setTime);
+              if (setUTC.toISOString().slice(0, 10) === date.toISOString().slice(0, 10)) {
+                const index = timeToIndex(setUTC);
                 annotations[`moonset${count}`] = makeAnnotation(index, 'Moonset', 'orange');
                 count++;
               }
+
             }
           }
 
