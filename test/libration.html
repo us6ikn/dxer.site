@@ -143,9 +143,9 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/astronomia@2.5.0/umd/astronomia.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
-  <script src="https://cdn.jsdelivr.net/npm/astronomia@2.5.0/umd/astronomia.min.js"></script>
 
   <script>
     let chart;
@@ -171,6 +171,7 @@
     }
 
       async function calculateLibration() {
+          const astro = window.astronomia;
         const locator = document.getElementById("qth").value.trim();
 
         // Validate QTH locator
@@ -200,7 +201,7 @@
         const day = firstDateUTC.getUTCDate();
 
         // Compute Julian Day
-        const jd = astronomia.julian.CalendarGregorianToJD(year, month, day);
+        const jd = window.astronomia.julian.CalendarGregorianToJD(year, month, day);
         const moonTimes = astronomia.rise.moonRiseSet(jd, lat, lon);
 
         if (!moonTimes.rise || !moonTimes.set) {
