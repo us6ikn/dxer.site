@@ -142,7 +142,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
 
   <script>
     let chart;
@@ -205,30 +205,83 @@
       updateChart(0);
     }
 
-    function updateChart(hourIndex) {
-      const dateStr = document.getElementById("date").value;
-      const dataForDay = rawData.filter(r => r.date.startsWith(dateStr));
-      const labels = dataForDay.map((r, i) => `${Math.floor(i/2)}:${i%2===0 ? '00':'30'}`);
-      const rates = dataForDay.map(r => r.rate);
+      function updateChart(hourIndex) {
+        const dateInput = document.getElementById("date").value;
+        const dateStr = new Date(dateInput).toISOString().slice(0, 10);
 
-      if (!chart) {
-        chart = new Chart(document.getElementById("declinationChart"), {
-          type: 'line',
-          data: { labels, datasets: [{ label: "Libration Rate", data: rates, borderColor: "#ff0000" }] },
-          options: { responsive: true, scales: { x: { display: true }, y: { display: true, title: { display: true, text: "deg/min" } } } }
+        const dataForDay = rawData.filter(r => {
+          const entryDate = new Date(r.date).toISOString().slice(0, 10);
+          return entryDate === dateStr;
         });
-      } else {
-        chart.data.labels = labels;
-        chart.data.datasets[0].data = rates;
-        chart.update();
-      }
-    }
 
-    document.getElementById("hour").addEventListener("input", e => {
-      const hour = Math.floor(e.target.value / 2);
-      const minutes = (e.target.value % 2) * 30;
-      document.getElementById("hour-value").textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}`;
-    });
+        const labels = dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
+        const rates = dataForDay.map(r => r.rate);
+
+        const annotation = {
+          type: 'line',
+          mode: 'vertical',
+          scaleID: 'x',
+          value: hourIndex,
+          borderColor: 'black',
+          borderWidth: 2,
+          label: {
+            enabled: false
+          }
+        };
+
+        if (!chart) {
+          chart = new Chart(document.getElementById("declinationChart"), {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [{
+                label: "Libration Rate",
+                data: rates,
+                borderColor: "#ff0000"
+              }]
+            },
+            options: {
+              responsive: true,
+              scales: {
+                x: {
+                  display: true
+                },
+                y: {
+                  display: true,
+                  title: {
+                    display: true,
+                    text: "deg/min"
+                  }
+                }
+              },
+              plugins: {
+                annotation: {
+                  annotations: {
+                    timeMarker: annotation
+                  }
+                }
+              }
+            }
+          });
+        } else {
+          chart.data.labels = labels;
+          chart.data.datasets[0].data = rates;
+
+          chart.options.plugins.annotation.annotations.timeMarker.value = hourIndex;
+          chart.update();
+        }
+      }
+
+
+      document.getElementById("hour").addEventListener("input", e => {
+        const hourIndex = parseInt(e.target.value);
+        const hour = Math.floor(hourIndex / 2);
+        const minutes = (hourIndex % 2) * 30;
+        document.getElementById("hour-value").textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}`;
+
+        updateChart(hourIndex); // Move the black bar
+      });
+
 
     document.getElementById("prevDay").addEventListener("click", () => {
       const d = new Date(document.getElementById("date").value);
@@ -248,5 +301,7 @@
       document.getElementById("date").valueAsDate = new Date();
     }
   </script>
+  
+  <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
 </body>
 </html>
