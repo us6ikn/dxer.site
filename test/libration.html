@@ -156,14 +156,14 @@
   </script>
 
   <script type="module">
-      import { moonposition, julian, coord, sexagesimal as sexa } from "https://cdn.jsdelivr.net/npm/astronomia/+esm";
+      import { moonposition, julian, coord, sexagesimal as sexa, sidereal } from "https://cdn.jsdelivr.net/npm/astronomia/+esm";
     let chart;
     let rawData = [];
     let hourIndex = 0; // global
 
     function getMoonAltitude(jd, observerLat, observerLon) {
       const pos = moonposition.position(jd);
-      const lst = julian.gmst(jd) * 15 + observerLon; // Local Sidereal Time in degrees
+      const lst = sidereal.apparent(jd) * 15 + observerLon; // in degrees
       const hor = coord.equatorialToHorizontal(pos.ra * 15, pos.dec, lst, observerLat);
       return hor.alt;
     }
