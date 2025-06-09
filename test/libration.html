@@ -175,25 +175,24 @@
           const pos = SunCalc.getMoonPosition(t, lat, lon);
           const alt = pos.altitude;
 
-          if (lastAlt !== null) {
-            if (lastAlt < 0 && alt >= 0) {
-              // Moonrise
-              const riseUTC = new Date(riseTime);
-              if (riseUTC.toISOString().slice(0, 10) === date.toISOString().slice(0, 10)) {
-                const index = timeToIndex(riseUTC);
-                annotations[`moonrise${count}`] = makeAnnotation(index, 'Moonrise', 'blue');
-                count++;
-              }
-            } else if (lastAlt >= 0 && alt < 0) {
-              // Moonset
-              const setUTC = new Date(setTime);
-              if (setUTC.toISOString().slice(0, 10) === date.toISOString().slice(0, 10)) {
-                const index = timeToIndex(setUTC);
-                annotations[`moonset${count}`] = makeAnnotation(index, 'Moonset', 'orange');
-                count++;
-              }
-
+          if (lastAlt < 0 && alt >= 0) {
+            // Moonrise
+            const riseUTC = interpolateCrossingTime(lastTime, t, lat, lon, true);
+            if (riseUTC.toISOString().slice(0, 10) === utcBase.toISOString().slice(0, 10)) {
+              const index = timeToIndex(riseUTC);
+              annotations[`moonrise${count}`] = makeAnnotation(index, 'Moonrise', 'blue');
+              count++;
             }
+          } else if (lastAlt >= 0 && alt < 0) {
+            // Moonset
+            const setUTC = interpolateCrossingTime(lastTime, t, lat, lon, false);
+            if (setUTC.toISOString().slice(0, 10) === utcBase.toISOString().slice(0, 10)) {
+              const index = timeToIndex(setUTC);
+              annotations[`moonset${count}`] = makeAnnotation(index, 'Moonset', 'orange');
+              count++;
+            }
+          }
+
           }
 
           lastAlt = alt;
