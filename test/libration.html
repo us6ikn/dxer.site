@@ -160,57 +160,83 @@
     }
       function addMoonEventsToChart(lat, lon, dateStr) {
         const date = new Date(dateStr + 'T00:00:00Z');
-        const nextDay = new Date(date);
-        nextDay.setUTCDate(nextDay.getUTCDate() + 1);
-
-        const seen = new Set();
-        const events = [];
-
-        // Check 00:00, 06:00, 12:00, 18:00 to capture any edge events
-        for (let h = 0; h <= 24; h += 6) {
-          const checkTime = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), h));
-          const moon = SunCalc.getMoonTimes(checkTime, lat, lon, true);
-
-          ['rise', 'set'].forEach(type => {
-            const t = moon[type];
-            if (t && t >= date && t < nextDay) {
-              const key = `${type}_${t.getUTCHours()}_${t.getUTCMinutes()}`;
-              if (!seen.has(key)) {
-                seen.add(key);
-                const hour = t.getUTCHours();
-                const min = t.getUTCMinutes();
-                const index = hour * 2 + (min >= 30 ? 1 : 0);
-                events.push({
-                  index,
-                  type,
-                  time: t
-                });
-              }
-            }
-          });
-        }
+        const msPerStep = 5 * 60 * 1000; // 5-minute steps
+        const end = new Date(date.getTime() + 24 * 60 * 60 * 1000);
 
         const annotations = {};
-        events.forEach((event, i) => {
-          annotations[`moonEvent${i}`] = {
-            type: 'line',
-            mode: 'vertical',
-            scaleID: 'x',
-            value: event.index,
-            borderColor: event.type === 'rise' ? 'blue' : 'orange',
-            borderWidth: 1.5,
-            label: {
-              enabled: true,
-              content: event.type === 'rise' ? 'Moonrise' : 'Moonset',
-              position: 'start',
-              backgroundColor: 'rgba(255,255,255,0.8)',
-              color: 'black',
-              font: { size: 10 }
+        let lastAlt = null;
+        let lastTime = null;
+        let count = 0;
+
+        for (let t = new Date(date); t < end; t = new Date(t.getTime() + msPerStep)) {
+          const pos = SunCalc.getMoonPosition(t, lat, lon);
+          const alt = pos.altitude;
+
+          if (lastAlt !== null) {
+            if (lastAlt < 0 && alt >= 0) {
+              // Moonrise
+              const riseTime = interpolateCrossingTime(lastTime, t, lat, lon, true);
+              const index = timeToIndex(riseTime);
+              annotations[`moonrise${count}`] = makeAnnotation(index, 'Moonrise', 'blue');
+              count++;
+            } else if (lastAlt >= 0 && alt < 0) {
+              // Moonset
+              const setTime = interpolateCrossingTime(lastTime, t, lat, lon, false);
+              const index = timeToIndex(setTime);
+              annotations[`moonset${count}`] = makeAnnotation(index, 'Moonset', 'orange');
+              count++;
             }
-          };
-        });
+          }
+
+          lastAlt = alt;
+          lastTime = t;
+        }
 
         return annotations;
+      }
+
+      function interpolateCrossingTime(t1, t2, lat, lon, rising) {
+        let low = t1;
+        let high = t2;
+        let mid;
+
+        // Binary search to approximate exact rise/set time
+        for (let i = 0; i < 10; i++) {
+          mid = new Date((low.getTime() + high.getTime()) / 2);
+          const alt = SunCalc.getMoonPosition(mid, lat, lon).altitude;
+          if ((rising && alt >= 0) || (!rising && alt < 0)) {
+            high = mid;
+          } else {
+            low = mid;
+          }
+        }
+
+        return mid;
+      }
+
+      function timeToIndex(time) {
+        const hours = time.getUTCHours();
+        const minutes = time.getUTCMinutes();
+        return hours * 2 + (minutes >= 30 ? 1 : 0);
+      }
+
+      function makeAnnotation(index, label, color) {
+        return {
+          type: 'line',
+          mode: 'vertical',
+          scaleID: 'x',
+          value: index,
+          borderColor: color,
+          borderWidth: 1.5,
+          label: {
+            enabled: true,
+            content: label,
+            position: 'start',
+            backgroundColor: 'rgba(255,255,255,0.85)',
+            color: 'black',
+            font: { size: 10 }
+          }
+        };
       }
 
 
