@@ -51,24 +51,26 @@
   </table>
 
   <script>
-    function qthToLatLon(locator) {
-      if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
-        throw new Error("Invalid QTH locator format");
+      function qthToLatLon(locator) {
+        if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
+          throw new Error("Invalid QTH locator format (must be 6 characters)");
+        }
+
+        locator = locator.toUpperCase();
+        const A = 'A'.charCodeAt(0);
+        const lonField = (locator.charCodeAt(0) - A) * 20;
+        const latField = (locator.charCodeAt(1) - A) * 10;
+        const lonSquare = parseInt(locator[2]) * 2;
+        const latSquare = parseInt(locator[3]) * 1;
+        const lonSub = (locator.charCodeAt(4) - A) * (5 / 60);
+        const latSub = (locator.charCodeAt(5) - A) * (2.5 / 60);
+
+        const lon = lonField + lonSquare + lonSub - 180 + (2.5 / 60); // center offset
+        const lat = latField + latSquare + latSub - 90 + (1.25 / 60); // center offset
+
+        return { lat, lon };
       }
 
-      locator = locator.toUpperCase();
-
-      const A = 'A'.charCodeAt(0);
-
-      const lon = ((locator.charCodeAt(0) - A) * 20 +
-                  (parseInt(locator[2]) * 2) +
-                  (locator.charCodeAt(4) - A) * (5 / 60)) - 180 + 1;
-      const lat = ((locator.charCodeAt(1) - A) * 10 +
-                  (parseInt(locator[3]) * 1) +
-                  (locator.charCodeAt(5) - A) * (2.5 / 60)) - 90 + 1.25;
-
-      return { lat, lon };
-    }
 
     async function calculateLibration() {
       const locator = document.getElementById('qth').value.trim();
