@@ -146,7 +146,8 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
 
-  <script>
+  <script type="module">
+      import { julian, moonposition } from "https://cdn.jsdelivr.net/npm/astronomia/+esm";
     let chart;
     let rawData = [];
     let hourIndex = 0; // global
@@ -158,63 +159,72 @@
       });
     }
 
-    function qthToLatLon(locator) {
-      if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
-        throw new Error("Invalid QTH locator format (must be 6 characters)");
-      }
-      locator = locator.toUpperCase();
-      const A = 'A'.charCodeAt(0);
-      const lon = (locator.charCodeAt(0) - A) * 20 + parseInt(locator[2]) * 2 + (locator.charCodeAt(4) - A) * (5 / 60) - 180 + (2.5 / 60);
-      const lat = (locator.charCodeAt(1) - A) * 10 + parseInt(locator[3]) + (locator.charCodeAt(5) - A) * (2.5 / 60) - 90 + (1.25 / 60);
-      return { lat, lon };
-    }
-
-      async function calculateLibration() {
-        const locator = document.getElementById("qth").value.trim();
-
-        // Validate QTH locator
-        if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
-          alert("Please enter a valid 6-character QTH locator (e.g., JO89FB)");
-          return;
+      function qthToLatLon(locator) {
+          if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
+            throw new Error("Invalid QTH locator format (must be 6 characters)");
+          }
+          locator = locator.toUpperCase();
+          const A = 'A'.charCodeAt(0);
+          const lon = (locator.charCodeAt(0) - A) * 20 + parseInt(locator[2]) * 2 + (locator.charCodeAt(4) - A) * (5 / 60) - 180 + (2.5 / 60);
+          const lat = (locator.charCodeAt(1) - A) * 10 + parseInt(locator[3]) + (locator.charCodeAt(5) - A) * (2.5 / 60) - 90 + (1.25 / 60);
+          return { lat, lon };
         }
 
-        const { lat, lon } = qthToLatLon(locator);
-        const COS_LAT = Math.cos(lat * Math.PI / 180);
-        const TIME_SHIFT_MIN = (lon / 15) * 60;
-        const INTERVAL_MIN = 30;
-        const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN);
+        window.calculateLibration = async function () {
+          const locator = document.getElementById("qth").value.trim();
 
-        const res = await fetch("moon_topo_coords_lat0.txt");
-        const lines = (await res.text()).trim().split("\n").slice(1);
-        const tempData = lines.map(line => ({
-          date: line.slice(0, 20).trim(),
-          lat: parseFloat(line.slice(20, 32)),
-          lon: parseFloat(line.slice(32))
-        }));
+          if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
+            alert("Please enter a valid 6-character QTH locator (e.g., JO89FB)");
+            return;
+          }
 
-        const shifted = tempData.map((entry, i) => {
-          const shiftedIndex = i + SHIFT_STEPS;
-          const ref = tempData[shiftedIndex] || {};
-          return {
-            date: entry.date,
-            lat: ref.lat ?? null,
-            lon: ref.lon ?? null
-          };
-        });
+          const { lat, lon } = qthToLatLon(locator);
+          const COS_LAT = Math.cos(lat * Math.PI / 180);
+          const TIME_SHIFT_MIN = (lon / 15) * 60;
+          const INTERVAL_MIN = 30;
+          const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN);
 
-        const results = shifted.map((curr, i, arr) => {
-          if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null) return { date: curr.date, rate: 0 };
-          let dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
-          let dlon = (((arr[i+1].lon - arr[i-1].lon) / 60 + 180) % 360) - 180;
-          dlat *= COS_LAT;
-          dlon *= COS_LAT;
-          return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
-        });
+          const res = await fetch("moon_topo_coords_lat0.txt");
+          const lines = (await res.text()).trim().split("\n").slice(1);
+          const tempData = lines.map(line => ({
+            date: line.slice(0, 20).trim(),
+            lat: parseFloat(line.slice(20, 32)),
+            lon: parseFloat(line.slice(32))
+          }));
 
-        rawData = results;
-        document.getElementById("chartWrapper").style.display = "block";
-        updateChart(hourIndex);
-      }
+          // Get selected date and compute Julian day
+          const dateInput = document.getElementById("date").value;
+          const [year, month, day] = dateInput.split("-").map(Number);
+          const jd = julian.CalendarGregorianToJD(year, month, day);
+
+          // Moon geocentric position for this JD (not used in core logic yet, placeholder)
+          const moonPos = moonposition.position(jd); // Optional: you can use this if needed
+          console.log("Moon RA/Dec:", moonPos.ra, moonPos.dec);
+
+          const shifted = tempData.map((entry, i) => {
+            const shiftedIndex = i + SHIFT_STEPS;
+            const ref = tempData[shiftedIndex] || {};
+            return {
+              date: entry.date,
+              lat: ref.lat ?? null,
+              lon: ref.lon ?? null
+            };
+          });
+
+          const results = shifted.map((curr, i, arr) => {
+            if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null) return { date: curr.date, rate: 0 };
+            let dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
+            let dlon = (((arr[i+1].lon - arr[i-1].lon) / 60 + 180) % 360) - 180;
+            dlat *= COS_LAT;
+            dlon *= COS_LAT;
+            return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
+          });
+
+          rawData = results;
+          document.getElementById("chartWrapper").style.display = "block";
+          updateChart(hourIndex);
+        }
+
 
       function updateChart(hourIndex) {
         const dateInput = document.getElementById("date").value;
