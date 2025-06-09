@@ -152,7 +152,7 @@
     let rawData = [];
     let hourIndex = 0; // global
 
-    function initMap() {
+    window.initMap = function () {
       new google.maps.Map(document.getElementById("map"), {
         zoom: 2,
         center: { lat: 0, lng: 0 },
@@ -224,7 +224,6 @@
           document.getElementById("chartWrapper").style.display = "block";
           updateChart(hourIndex);
         }
-
 
       function updateChart(hourIndex) {
         const dateInput = document.getElementById("date").value;
