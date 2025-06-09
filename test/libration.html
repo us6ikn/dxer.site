@@ -160,15 +160,15 @@
     }
       function addMoonEventsToChart(lat, lon, dateStr) {
         const date = new Date(dateStr + 'T00:00:00Z');
+        const nextDate = new Date(date.getTime() + 24 * 60 * 60 * 1000);
         const msPerStep = 5 * 60 * 1000; // 5-minute steps
-        const end = new Date(date.getTime() + 24 * 60 * 60 * 1000);
 
         const annotations = {};
         let lastAlt = null;
         let lastTime = null;
         let count = 0;
 
-        for (let t = new Date(date); t < end; t = new Date(t.getTime() + msPerStep)) {
+        for (let t = new Date(date); t < nextDate; t = new Date(t.getTime() + msPerStep)) {
           const pos = SunCalc.getMoonPosition(t, lat, lon);
           const alt = pos.altitude;
 
@@ -176,15 +176,19 @@
             if (lastAlt < 0 && alt >= 0) {
               // Moonrise
               const riseTime = interpolateCrossingTime(lastTime, t, lat, lon, true);
-              const index = timeToIndex(riseTime);
-              annotations[`moonrise${count}`] = makeAnnotation(index, 'Moonrise', 'blue');
-              count++;
+              if (riseTime >= date && riseTime < nextDate) {
+                const index = timeToIndex(riseTime);
+                annotations[`moonrise${count}`] = makeAnnotation(index, 'Moonrise', 'blue');
+                count++;
+              }
             } else if (lastAlt >= 0 && alt < 0) {
               // Moonset
               const setTime = interpolateCrossingTime(lastTime, t, lat, lon, false);
-              const index = timeToIndex(setTime);
-              annotations[`moonset${count}`] = makeAnnotation(index, 'Moonset', 'orange');
-              count++;
+              if (setTime >= date && setTime < nextDate) {
+                const index = timeToIndex(setTime);
+                annotations[`moonset${count}`] = makeAnnotation(index, 'Moonset', 'orange');
+                count++;
+              }
             }
           }
 
@@ -194,6 +198,7 @@
 
         return annotations;
       }
+
 
       function interpolateCrossingTime(t1, t2, lat, lon, rising) {
         let low = t1;
