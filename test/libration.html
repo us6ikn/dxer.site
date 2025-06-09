@@ -5,7 +5,6 @@
   <title>EME Libration Visualizer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    /* === INSERTED STYLE FROM USER === */
     html, body {
       margin: 0;
       padding: 0;
@@ -13,6 +12,9 @@
       overflow: hidden;
       font-family: Arial, sans-serif;
     }
+      #chartWrapper {
+        display: none;
+      }
     #map {
       height: 100dvh;
       width: 100%;
@@ -167,44 +169,52 @@
       return { lat, lon };
     }
 
-    async function calculateLibration() {
-      const locator = document.getElementById("qth").value.trim();
-      const { lat, lon } = qthToLatLon(locator);
-      const COS_LAT = Math.cos(lat * Math.PI / 180);
-      const TIME_SHIFT_MIN = (lon / 15) * 60;
-      const INTERVAL_MIN = 30;
-      const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN);
+      async function calculateLibration() {
+        const locator = document.getElementById("qth").value.trim();
 
-      const res = await fetch("moon_topo_coords_lat0.txt");
-      const lines = (await res.text()).trim().split("\n").slice(1);
-      const tempData = lines.map(line => ({
-        date: line.slice(0, 20).trim(),
-        lat: parseFloat(line.slice(20, 32)),
-        lon: parseFloat(line.slice(32))
-      }));
+        // Validate QTH locator
+        if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
+          alert("Please enter a valid 6-character QTH locator (e.g., JO89FB)");
+          return;
+        }
 
-      const shifted = tempData.map((entry, i) => {
-        const shiftedIndex = i + SHIFT_STEPS;
-        const ref = tempData[shiftedIndex] || {};
-        return {
-          date: entry.date,
-          lat: ref.lat ?? null,
-          lon: ref.lon ?? null
-        };
-      });
+        const { lat, lon } = qthToLatLon(locator);
+        const COS_LAT = Math.cos(lat * Math.PI / 180);
+        const TIME_SHIFT_MIN = (lon / 15) * 60;
+        const INTERVAL_MIN = 30;
+        const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN);
 
-      const results = shifted.map((curr, i, arr) => {
-        if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null) return { date: curr.date, rate: 0 };
-        let dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
-        let dlon = (((arr[i+1].lon - arr[i-1].lon) / 60 + 180) % 360) - 180;
-        dlat *= COS_LAT;
-        dlon *= COS_LAT;
-        return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
-      });
+        const res = await fetch("moon_topo_coords_lat0.txt");
+        const lines = (await res.text()).trim().split("\n").slice(1);
+        const tempData = lines.map(line => ({
+          date: line.slice(0, 20).trim(),
+          lat: parseFloat(line.slice(20, 32)),
+          lon: parseFloat(line.slice(32))
+        }));
 
-      rawData = results;
-      updateChart(hourIndex);
-    }
+        const shifted = tempData.map((entry, i) => {
+          const shiftedIndex = i + SHIFT_STEPS;
+          const ref = tempData[shiftedIndex] || {};
+          return {
+            date: entry.date,
+            lat: ref.lat ?? null,
+            lon: ref.lon ?? null
+          };
+        });
+
+        const results = shifted.map((curr, i, arr) => {
+          if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null) return { date: curr.date, rate: 0 };
+          let dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
+          let dlon = (((arr[i+1].lon - arr[i-1].lon) / 60 + 180) % 360) - 180;
+          dlat *= COS_LAT;
+          dlon *= COS_LAT;
+          return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
+        });
+
+        rawData = results;
+        document.getElementById("chartWrapper").style.display = "block";
+        updateChart(hourIndex);
+      }
 
       function updateChart(hourIndex) {
         const dateInput = document.getElementById("date").value;
@@ -257,7 +267,7 @@
               },
               plugins: {
                 legend: {
-                  display: false  // ✅ Hides the legend
+                  display: false
                 },
                 annotation: {
                   annotations: {
@@ -317,14 +327,14 @@
           roundedMinutes = 30;
         }
 
-        hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0); // ✅ set global hourIndex
+        hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
 
         document.getElementById("hour").value = hourIndex;
         document.getElementById("hour-value").textContent =
           `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
 
         calculateLibration().then(() => {
-          updateChart(hourIndex); // ✅ use global value
+          updateChart(hourIndex);
         });
       };
 
