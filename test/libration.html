@@ -147,128 +147,74 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
 
   <script>
+    let chart;
+    let rawData = [];
+    let hourIndex = 0; // global
+
     function initMap() {
       new google.maps.Map(document.getElementById("map"), {
         zoom: 2,
         center: { lat: 0, lng: 0 },
       });
     }
-  </script>
 
-  <script type="module">
-      import { moonposition, julian, coord, sexagesimal as sexa, sidereal } from "https://cdn.jsdelivr.net/npm/astronomia/+esm";
-    let chart;
-    let rawData = [];
-    let hourIndex = 0; // global
-
-    function getMoonAltitude(jd, observerLat, observerLon) {
-      const pos = moonposition.position(jd);
-      const lst = sidereal.apparent(jd) * 15 + observerLon;
-
-      const H = (lst - pos.ra * 15) * Math.PI / 180;  // Hour angle in radians
-      const dec = pos.dec * Math.PI / 180;
-      const lat = observerLat * Math.PI / 180;
-
-      const sinAlt = Math.sin(dec) * Math.sin(lat) + Math.cos(dec) * Math.cos(lat) * Math.cos(H);
-      const alt = Math.asin(sinAlt) * 180 / Math.PI; // in degrees
-
-      return alt;
+    function qthToLatLon(locator) {
+      if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
+        throw new Error("Invalid QTH locator format (must be 6 characters)");
+      }
+      locator = locator.toUpperCase();
+      const A = 'A'.charCodeAt(0);
+      const lon = (locator.charCodeAt(0) - A) * 20 + parseInt(locator[2]) * 2 + (locator.charCodeAt(4) - A) * (5 / 60) - 180 + (2.5 / 60);
+      const lat = (locator.charCodeAt(1) - A) * 10 + parseInt(locator[3]) + (locator.charCodeAt(5) - A) * (2.5 / 60) - 90 + (1.25 / 60);
+      return { lat, lon };
     }
 
-      function qthToLatLon(locator) {
-          if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
-            throw new Error("Invalid QTH locator format (must be 6 characters)");
-          }
-          locator = locator.toUpperCase();
-          const A = 'A'.charCodeAt(0);
-          const lon = (locator.charCodeAt(0) - A) * 20 + parseInt(locator[2]) * 2 + (locator.charCodeAt(4) - A) * (5 / 60) - 180 + (2.5 / 60);
-          const lat = (locator.charCodeAt(1) - A) * 10 + parseInt(locator[3]) + (locator.charCodeAt(5) - A) * (2.5 / 60) - 90 + (1.25 / 60);
-          return { lat, lon };
+      async function calculateLibration() {
+        const locator = document.getElementById("qth").value.trim();
+
+        // Validate QTH locator
+        if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
+          alert("Please enter a valid 6-character QTH locator (e.g., JO89FB)");
+          return;
         }
 
-        window.calculateLibration = async function () {
-          const locator = document.getElementById("qth").value.trim();
+        const { lat, lon } = qthToLatLon(locator);
+        const COS_LAT = Math.cos(lat * Math.PI / 180);
+        const TIME_SHIFT_MIN = (lon / 15) * 60;
+        const INTERVAL_MIN = 30;
+        const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN);
 
-          if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
-            alert("Please enter a valid 6-character QTH locator (e.g., JO89FB)");
-            return;
-          }
+        const res = await fetch("moon_topo_coords_lat0.txt");
+        const lines = (await res.text()).trim().split("\n").slice(1);
+        const tempData = lines.map(line => ({
+          date: line.slice(0, 20).trim(),
+          lat: parseFloat(line.slice(20, 32)),
+          lon: parseFloat(line.slice(32))
+        }));
 
-          const { lat, lon } = qthToLatLon(locator);
-          const COS_LAT = Math.cos(lat * Math.PI / 180);
-          const TIME_SHIFT_MIN = (lon / 15) * 60;
-          const INTERVAL_MIN = 30;
-          const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN);
+        const shifted = tempData.map((entry, i) => {
+          const shiftedIndex = i + SHIFT_STEPS;
+          const ref = tempData[shiftedIndex] || {};
+          return {
+            date: entry.date,
+            lat: ref.lat ?? null,
+            lon: ref.lon ?? null
+          };
+        });
 
-          const res = await fetch("moon_topo_coords_lat0.txt");
-          const lines = (await res.text()).trim().split("\n").slice(1);
-          const tempData = lines.map(line => ({
-            date: line.slice(0, 20).trim(),
-            lat: parseFloat(line.slice(20, 32)),
-            lon: parseFloat(line.slice(32))
-          }));
+        const results = shifted.map((curr, i, arr) => {
+          if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null) return { date: curr.date, rate: 0 };
+          let dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
+          let dlon = (((arr[i+1].lon - arr[i-1].lon) / 60 + 180) % 360) - 180;
+          dlat *= COS_LAT;
+          dlon *= COS_LAT;
+          return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
+        });
 
-          // Get selected date and compute Julian day
-          const dateInput = document.getElementById("date").value;
-          const [year, month, day] = dateInput.split("-").map(Number);
-          const jd = julian.CalendarGregorianToJD(year, month, day);
-
-          // Moon geocentric position for this JD (not used in core logic yet, placeholder)
-          const moonPos = moonposition.position(jd); // Optional: you can use this if needed
-          console.log("Moon RA/Dec:", moonPos.ra, moonPos.dec);
-
-          const results = tempData.map((entry, i, arr) => {
-              const shiftedIndex = i + SHIFT_STEPS;
-              if (shiftedIndex < 1 || shiftedIndex >= arr.length - 1) return { date: dateStr, rate: null };
-
-              const ref = tempData[shiftedIndex];
-
-            const dateStr = entry?.date || "";
-
-            if (!ref || ref.lat == null || ref.lon == null) {
-              return { date: dateStr, rate: null };
-            }
-
-            // Compute JD for this step
-            const d = new Date(entry.date);
-            const jdStep = julian.CalendarGregorianToJD(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate()) +
-                           (d.getUTCHours() + d.getUTCMinutes() / 60 + d.getUTCSeconds() / 3600) / 24;
-            const alt = getMoonAltitude(jdStep, lat, lon);
-            const moon = moonposition.position(jdStep);
-            console.log(`⏱ ${entry.date} | Alt: ${alt.toFixed(2)}° | RA: ${moon.ra.toFixed(2)}h | Dec: ${moon.dec.toFixed(2)}°`);
-
-
-            if (alt <= 0) {
-              return { date: dateStr, rate: null }; // Below horizon
-            } else {
-              console.log(`Moon above horizon at: ${dateStr} | Alt: ${alt.toFixed(2)}°`);
-            }
-
-            // Compute libration rate using central difference (only if neighbors exist)
-            if (i <= 0 || i >= arr.length - 1) {
-              return { date: dateStr, rate: null };
-            }
-
-            const prev = tempData[i - 1 + SHIFT_STEPS];
-            const next = tempData[i + 1 + SHIFT_STEPS];
-
-            if (!prev || !next || prev.lat == null || next.lat == null) {
-              return { date: dateStr, rate: null };
-            }
-
-            let dlat = (next.lat - prev.lat) / 60;
-            let dlon = (((next.lon - prev.lon) / 60 + 180) % 360) - 180;
-            dlat *= COS_LAT;
-            dlon *= COS_LAT;
-
-            const rate = Math.sqrt(dlat * dlat + dlon * dlon);
-            return { date: dateStr, rate };
-          });
-
-          rawData = results;
-          document.getElementById("chartWrapper").style.display = "block";
-          updateChart(hourIndex);
-        }
+        rawData = results;
+        document.getElementById("chartWrapper").style.display = "block";
+        updateChart(hourIndex);
+      }
 
       function updateChart(hourIndex) {
         const dateInput = document.getElementById("date").value;
@@ -276,9 +222,8 @@
 
         const dataForDay = rawData.filter(r => {
           const entryDate = new Date(r.date).toISOString().slice(0, 10);
-          return entryDate === dateStr && r.rate !== null;
+          return entryDate === dateStr;
         });
-
 
         const labels = dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
         const rates = dataForDay.map(r => r.rate);
