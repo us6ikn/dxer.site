@@ -164,8 +164,15 @@
     function getMoonAltitude(jd, observerLat, observerLon) {
       const pos = moonposition.position(jd);
       const lst = sidereal.apparent(jd) * 15 + observerLon;
-      const hor = coord.equatorialToHorizontal(pos.ra * 15, pos.dec, lst, observerLat);
-      return hor.alt;
+
+      const H = (lst - pos.ra * 15) * Math.PI / 180;  // Hour angle in radians
+      const dec = pos.dec * Math.PI / 180;
+      const lat = observerLat * Math.PI / 180;
+
+      const sinAlt = Math.sin(dec) * Math.sin(lat) + Math.cos(dec) * Math.cos(lat) * Math.cos(H);
+      const alt = Math.asin(sinAlt) * 180 / Math.PI; // in degrees
+
+      return alt;
     }
 
       function qthToLatLon(locator) {
