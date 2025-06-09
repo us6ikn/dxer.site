@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <title>EME Libration Visualizer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://cdn.jsdelivr.net/npm/astronomia@2.5.0/umd/astronomia.min.js"></script>
   <style>
     html, body {
       margin: 0;
@@ -173,6 +172,7 @@
       async function calculateLibration() {
         const locator = document.getElementById("qth").value.trim();
 
+        // Validate QTH locator
         if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
           alert("Please enter a valid 6-character QTH locator (e.g., JO89FB)");
           return;
@@ -192,31 +192,6 @@
           lon: parseFloat(line.slice(32))
         }));
 
-        // Get selected date
-        const dateInput = document.getElementById("date").value;
-        const dateObj = new Date(dateInput + "T00:00:00Z");
-        const year = dateObj.getUTCFullYear();
-        const month = dateObj.getUTCMonth() + 1;
-        const day = dateObj.getUTCDate();
-
-        const jd = window.julian.CalendarGregorianToJD(year, month, day);
-        const riseSet = window.rise.moonRiseSet(jd, lat, lon);
-
-        if (!riseSet.rise || !riseSet.set) {
-          alert("Moon does not rise or set on this date at this location.");
-          return;
-        }
-
-        const riseJD = riseSet.rise;
-        const setJD = riseSet.set;
-        const jdToDate = jd => {
-          const date = window.julian.JDToDate(jd);
-          return new Date(Date.UTC(date.year, date.month - 1, date.day, date.hour, date.minute, Math.floor(date.second)));
-        };
-
-        const riseTime = jdToDate(riseJD);
-        const setTime = jdToDate(setJD);
-
         const shifted = tempData.map((entry, i) => {
           const shiftedIndex = i + SHIFT_STEPS;
           const ref = tempData[shiftedIndex] || {};
@@ -228,31 +203,18 @@
         });
 
         const results = shifted.map((curr, i, arr) => {
-          const entryDate = new Date(curr.date);
-          if (
-            i <= 0 ||
-            i >= arr.length - 1 ||
-            arr[i - 1].lat === null ||
-            arr[i + 1].lat === null ||
-            entryDate < riseTime ||
-            entryDate > setTime
-          ) {
-            return { date: curr.date, rate: 0 };
-          }
-
-          let dlat = (arr[i + 1].lat - arr[i - 1].lat) / 60;
-          let dlon = (((arr[i + 1].lon - arr[i - 1].lon) / 60 + 180) % 360) - 180;
+          if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null) return { date: curr.date, rate: 0 };
+          let dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
+          let dlon = (((arr[i+1].lon - arr[i-1].lon) / 60 + 180) % 360) - 180;
           dlat *= COS_LAT;
           dlon *= COS_LAT;
-          return { date: curr.date, rate: Math.sqrt(dlat * dlat + dlon * dlon) };
+          return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
         });
 
         rawData = results;
         document.getElementById("chartWrapper").style.display = "block";
         updateChart(hourIndex);
       }
-
-
 
       function updateChart(hourIndex) {
         const dateInput = document.getElementById("date").value;
