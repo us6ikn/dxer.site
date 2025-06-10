@@ -229,16 +229,27 @@
         const rates = dataForDay.map(r => r.rate);
 
         const annotation = {
-          type: 'line',
-          mode: 'vertical',
-          scaleID: 'x',
-          value: hourIndex,
-          borderColor: 'black',
-          borderWidth: 2,
-          label: {
-            enabled: false
+          timeMarker: {
+            type: 'line',
+            mode: 'vertical',
+            scaleID: 'x',
+            value: hourIndex,
+            borderColor: 'black',
+            borderWidth: 2,
+            label: { enabled: false }
           }
         };
+
+        // Add moonrise/moonset lines
+        if (document.getElementById("qth").value) {
+          try {
+            const { lat, lon } = qthToLatLon(document.getElementById("qth").value.trim());
+            const moonAnnotations = getMoonAnnotations(dateStr, lat, lon);
+            Object.assign(annotation, moonAnnotations);
+          } catch (e) {
+            console.warn("Failed to calculate moon annotations:", e);
+          }
+        }
 
         if (!chart) {
           chart = new Chart(document.getElementById("declinationChart"), {
@@ -255,37 +266,64 @@
               responsive: true,
               maintainAspectRatio: false,
               scales: {
-                x: {
-                  display: true
-                },
+                x: { display: true },
                 y: {
                   display: true,
-                  title: {
-                    display: true,
-                    text: "deg/min"
-                  }
+                  title: { display: true, text: "deg/min" }
                 }
               },
               plugins: {
-                legend: {
-                  display: false
-                },
-                annotation: {
-                  annotations: {
-                    timeMarker: annotation
-                  }
-                }
+                legend: { display: false },
+                annotation: { annotations: annotation }
               }
             }
           });
         } else {
           chart.data.labels = labels;
           chart.data.datasets[0].data = rates;
-
-          chart.options.plugins.annotation.annotations.timeMarker.value = hourIndex;
+          chart.options.plugins.annotation.annotations = annotation;
           chart.update();
         }
       }
+
+      
+      function getMoonAnnotations(dateStr, lat, lon) {
+        const date = new Date(dateStr + 'T00:00:00Z');
+
+        const moonTimes = SunCalc.getMoonTimes(date, lat, lon, true); // always use UTC
+
+        const annotations = {};
+
+        const addAnnotation = (time, label, color, id) => {
+          if (!time || isNaN(time)) return;
+          const utcHour = time.getUTCHours();
+          const utcMin = time.getUTCMinutes();
+          const index = utcHour * 2 + (utcMin >= 30 ? 1 : 0);
+          annotations[id] = {
+            type: 'line',
+            mode: 'vertical',
+            scaleID: 'x',
+            value: index,
+            borderColor: color,
+            borderWidth: 1,
+            borderDash: [6, 3],
+            label: {
+              enabled: true,
+              content: label,
+              position: 'top',
+              backgroundColor: color,
+              color: 'white',
+              font: { size: 10 }
+            }
+          };
+        };
+
+        addAnnotation(moonTimes.rise, 'Moonrise', 'blue', 'moonrise');
+        addAnnotation(moonTimes.set, 'Moonset', 'orange', 'moonset');
+
+        return annotations;
+      }
+
 
       document.getElementById("hour").addEventListener("input", e => {
         hourIndex = parseInt(document.getElementById("hour").value);
