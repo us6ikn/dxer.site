@@ -292,6 +292,9 @@
         const date = new Date(dateStr + 'T00:00:00Z'); // midnight UTC of selected date
 
         const moonTimes = SunCalc.getMoonTimes(date, lat, lon, true); // always use UTC
+        console.log('Moonrise:', moonTimes.rise?.toISOString());
+        console.log('Moonset:', moonTimes.set?.toISOString());
+
         const annotations = {};
 
         const addAnnotation = (time, label, color, id) => {
