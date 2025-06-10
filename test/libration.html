@@ -288,19 +288,25 @@
         }
       }
 
-      
       function getMoonAnnotations(dateStr, lat, lon) {
-        const date = new Date(dateStr + 'T00:00:00Z');
+        const date = new Date(dateStr + 'T00:00:00Z'); // midnight UTC of selected date
 
         const moonTimes = SunCalc.getMoonTimes(date, lat, lon, true); // always use UTC
-
         const annotations = {};
 
         const addAnnotation = (time, label, color, id) => {
-          if (!time || isNaN(time)) return;
+          if (!time || isNaN(time.getTime())) return;
+
+          const eventDay = time.getUTCDate();
+          const chartDay = date.getUTCDate();
+
+          // Only include event if it occurs on the same UTC day as chart
+          if (eventDay !== chartDay) return;
+
           const utcHour = time.getUTCHours();
           const utcMin = time.getUTCMinutes();
           const index = utcHour * 2 + (utcMin >= 30 ? 1 : 0);
+
           annotations[id] = {
             type: 'line',
             mode: 'vertical',
