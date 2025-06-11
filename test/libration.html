@@ -235,7 +235,6 @@
           return entryDate === dateStr;
         });
         
-        const labels = [];
         const moonElevations = [];
         const visibleRates = [];
 
@@ -249,9 +248,11 @@
           const elevationDeg = moonPos.altitude * 180 / Math.PI;
 
           if (elevationDeg > 0) {
-            labels.push(`${hour}:${minutes === 0 ? '00' : '30'}`);
             moonElevations.push(elevationDeg);
             visibleRates.push(dataForDay[i]?.rate ?? null);
+          } else {
+            moonElevations.push(null); // Hide from chart
+            visibleRates.push(null);
           }
         }
 
