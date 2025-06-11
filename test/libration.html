@@ -240,6 +240,8 @@
 
         ({ lat, lon } = qthToLatLon(document.getElementById("qth").value.trim()));
 
+        let moonIsAboveHorizon = false;
+
         for (let i = 0; i < 48; i++) {
           const hour = Math.floor(i / 2);
           const minutes = (i % 2) * 30;
@@ -247,34 +249,23 @@
           const moonPos = SunCalc.getMoonPosition(dt, lat, lon);
           const elevationDeg = moonPos.altitude * 180 / Math.PI;
 
-          let moonIsAboveHorizon = false;
-
-          for (let i = 0; i < 48; i++) {
-            const hour = Math.floor(i / 2);
-            const minutes = (i % 2) * 30;
-            const dt = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}:00Z`);
-            const moonPos = SunCalc.getMoonPosition(dt, lat, lon);
-            const elevationDeg = moonPos.altitude * 180 / Math.PI;
-
-            if (!moonIsAboveHorizon && elevationDeg > 0) {
-              // Include one point just before the Moon is above the horizon
-              moonIsAboveHorizon = true;
-              if (i > 0) {
-                moonElevations[i - 1] = 0.001; // Just a small elevation to connect line
-                visibleRates[i - 1] = dataForDay[i - 1]?.rate ?? null;
-              }
-            }
-
-            if (moonIsAboveHorizon && elevationDeg > 0) {
-              moonElevations.push(elevationDeg);
-              visibleRates.push(dataForDay[i]?.rate ?? null);
-            } else {
-              moonElevations.push(null);
-              visibleRates.push(null);
+          if (!moonIsAboveHorizon && elevationDeg > 0) {
+            // Include one point just before the Moon is above the horizon
+            moonIsAboveHorizon = true;
+            if (i > 0) {
+              moonElevations[i - 1] = 0.001; // Just a small elevation to connect line
+              visibleRates[i - 1] = dataForDay[i - 1]?.rate ?? null;
             }
           }
 
-
+          if (moonIsAboveHorizon && elevationDeg > 0) {
+            moonElevations.push(elevationDeg);
+            visibleRates.push(dataForDay[i]?.rate ?? null);
+          } else {
+            moonElevations.push(null);
+            visibleRates.push(null);
+          }
+        }
 
         const labels = dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
         const rates = dataForDay.map(r => r.rate);
