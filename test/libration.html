@@ -246,6 +246,8 @@
           const moonPos = SunCalc.getMoonPosition(dt, lat, lon);
           const elevationDeg = moonPos.altitude * 180 / Math.PI;
           moonElevations.push(elevationDeg);
+          console.log(dt.toISOString(), elevationDeg);
+
         }
 
 
