@@ -231,10 +231,15 @@
         const dateInput = document.getElementById("date").value;
         const dateStr = new Date(dateInput).toISOString().slice(0, 10);
 
+        const selectedDate = new Date(dateStr);
         const dataForDay = rawData.filter(r => {
-          const entryDate = new Date(r.date).toISOString().slice(0, 10);
-          return entryDate === dateStr;
+          return (
+            r.date.getUTCFullYear() === selectedDate.getUTCFullYear() &&
+            r.date.getUTCMonth() === selectedDate.getUTCMonth() &&
+            r.date.getUTCDate() === selectedDate.getUTCDate()
+          );
         });
+
         
         const moonElevations = [];
         const visibleRates = [];
