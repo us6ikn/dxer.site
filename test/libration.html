@@ -260,7 +260,7 @@
             // Calculate full Doppler spread in Hz
             const dopplerHz = 4 * FREQUENCY_HZ * ((MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT);
             // Store kHz for chart
-            dopplerSpreads.push(dopplerHz / 1000);
+            dopplerSpreads.push(dopplerHz);
           } else {
             moonElevations.push(null);
             visibleRates.push(null);
@@ -322,7 +322,7 @@
                   yAxisID: "y2"
                 },
                 {
-                  label: "Doppler Spread (kHz)",
+                  label: "Doppler Spread (Hz)",
                   data: dopplerSpreads,
                   borderColor: "green",
                   pointRadius: 0,
@@ -374,9 +374,9 @@
                   offset: true,
                   title: { display: true, text: "Doppler Spread (kHz)" },
                   min: 0,
-                  max: 0.4, // adjust max for your data scale
+                  max: 300, // adjust max for your data scale
                   grid: { drawOnChartArea: false },
-                  ticks: { stepSize: 0.2 }
+                  ticks: { stepSize: 50 }
                 }
               },
               plugins: {
