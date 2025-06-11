@@ -329,12 +329,17 @@
                     display: true,
                     text: 'Moon Elevation (°)'
                   },
-                  beginAtZero: true,
                   display: true,
                   min: 0,
                   max: 90,
                   grid: {
                     drawOnChartArea: false
+                  },
+                  ticks: {
+                    stepSize: 15,
+                    callback: function (value) {
+                      return value + '°';
+                    }
                   }
                 }
               },
