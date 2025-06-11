@@ -191,23 +191,17 @@
 
         const res = await fetch("moon_topo_coords_lat0.txt");
         const lines = (await res.text()).trim().split("\n").slice(1);
-        function parseDate(str) {
-          const [datePart, timePart] = str.trim().split(' ');
-          return new Date(`${datePart}T${timePart}Z`);
-        }
-
         const tempData = lines.map(line => ({
-          date: parseDate(line.slice(0, 20)),
+          date: line.slice(0, 20).trim(),
           lat: parseFloat(line.slice(20, 32)),
           lon: parseFloat(line.slice(32))
         }));
-
 
         const shifted = tempData.map((entry, i) => {
           const shiftedIndex = i + SHIFT_STEPS;
           const ref = tempData[shiftedIndex] || {};
           return {
-            date: entry.date, // keep original unshifted date
+            date: entry.date,
             lat: ref.lat ?? null,
             lon: ref.lon ?? null
           };
@@ -225,7 +219,7 @@
         ({ lat, lon } = qthToLatLon(locator));
         rawData = results;
         document.getElementById("chartWrapper").style.display = "block";
-        setTimeout(() => updateChart(hourIndex), 0);
+        updateChart(hourIndex);
       }
 
       function updateChart(hourIndex) {
@@ -237,15 +231,10 @@
         const dateInput = document.getElementById("date").value;
         const dateStr = new Date(dateInput).toISOString().slice(0, 10);
 
-        const selectedDate = new Date(dateStr);
         const dataForDay = rawData.filter(r => {
-          return (
-            r.date.getUTCFullYear() === selectedDate.getUTCFullYear() &&
-            r.date.getUTCMonth() === selectedDate.getUTCMonth() &&
-            r.date.getUTCDate() === selectedDate.getUTCDate()
-          );
+          const entryDate = new Date(r.date).toISOString().slice(0, 10);
+          return entryDate === dateStr;
         });
-
         
         const moonElevations = [];
         const visibleRates = [];
@@ -357,6 +346,7 @@
           chart.data.labels = labels;
           chart.data.datasets[0].data = visibleRates;
           chart.data.datasets[1].data = moonElevations;
+
           chart.options.plugins.annotation.annotations = annotation;
           chart.update();
         }
