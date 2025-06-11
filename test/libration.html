@@ -191,8 +191,13 @@
 
         const res = await fetch("moon_topo_coords_lat0.txt");
         const lines = (await res.text()).trim().split("\n").slice(1);
+        function parseDate(str) {
+          const [datePart, timePart] = str.trim().split(' ');
+          return new Date(`${datePart}T${timePart}Z`);
+        }
+
         const tempData = lines.map(line => ({
-          date: new Date(line.slice(0, 20).trim()), // <-- FIX: parse into Date object
+          date: parseDate(line.slice(0, 20)),
           lat: parseFloat(line.slice(20, 32)),
           lon: parseFloat(line.slice(32))
         }));
