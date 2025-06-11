@@ -240,6 +240,8 @@
 
         ({ lat, lon } = qthToLatLon(document.getElementById("qth").value.trim()));
 
+        let firstAboveHorizonIndex = -1;
+
         for (let i = 0; i < 48; i++) {
           const hour = Math.floor(i / 2);
           const minutes = (i % 2) * 30;
@@ -247,15 +249,13 @@
           const moonPos = SunCalc.getMoonPosition(dt, lat, lon);
           const elevationDeg = moonPos.altitude * 180 / Math.PI;
 
-          if (elevationDeg > 0) {
-            moonElevations.push(elevationDeg);
-            visibleRates.push(dataForDay[i]?.rate ?? null);
-          } else {
-            moonElevations.push(null); // Hide from chart
-            visibleRates.push(null);
+          if (elevationDeg > 0 && firstAboveHorizonIndex === -1) {
+            firstAboveHorizonIndex = i;
           }
-        }
 
+          moonElevations.push(elevationDeg > 0 || i === firstAboveHorizonIndex - 1 ? elevationDeg : null);
+          visibleRates.push((elevationDeg > 0 || i === firstAboveHorizonIndex - 1) ? dataForDay[i]?.rate ?? null : null);
+        }
 
         const labels = dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
         const rates = dataForDay.map(r => r.rate);
