@@ -230,7 +230,10 @@
         const dateInput = document.getElementById("date").value;
         const dateStr = new Date(dateInput).toISOString().slice(0, 10);
 
-        const dataForDay = rawData.filter(r => r.date.startsWith(dateStr));
+        const dataForDay = rawData.filter(r => {
+          const entryDate = new Date(r.date).toISOString().slice(0, 10);
+          return entryDate === dateStr;
+        });
         
         const moonElevations = [];
         const visibleRates = [];
@@ -254,7 +257,9 @@
         }
 
 
-        const labels = dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
+        const labels = Array.from({ length: 48 }, (_, i) =>
+          `${String(Math.floor(i / 2)).padStart(2, '0')}:${i % 2 === 0 ? '00' : '30'}`
+        );
         const rates = dataForDay.map(r => r.rate);
 
         const annotation = {
