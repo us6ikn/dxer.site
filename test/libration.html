@@ -235,12 +235,9 @@
           return entryDate === dateStr;
         });
         
-        const moonElevations = [];
-        const visibleRates = [];
-
-        ({ lat, lon } = qthToLatLon(document.getElementById("qth").value.trim()));
-
-        let moonIsAboveHorizon = false;
+        let moonElevations = [];
+        let visibleRates = [];
+        let hasStartedPlotting = false;
 
         for (let i = 0; i < 48; i++) {
           const hour = Math.floor(i / 2);
@@ -249,21 +246,31 @@
           const moonPos = SunCalc.getMoonPosition(dt, lat, lon);
           const elevationDeg = moonPos.altitude * 180 / Math.PI;
 
-          if (!moonIsAboveHorizon && elevationDeg > 0) {
-            // Include one point just before the Moon is above the horizon
-            moonIsAboveHorizon = true;
-            if (i > 0) {
-              moonElevations[i - 1] = 0.001; // Just a small elevation to connect line
-              visibleRates[i - 1] = dataForDay[i - 1]?.rate ?? null;
+          // Check if moon is above horizon
+          if (elevationDeg > 0) {
+            // If this is the first visible point, include the one before it too
+            if (!hasStartedPlotting) {
+              hasStartedPlotting = true;
+              if (i > 0) {
+                const prevData = dataForDay[i - 1];
+                const prevDt = new Date(dt.getTime() - 30 * 60 * 1000); // 30 min before
+                const prevMoonPos = SunCalc.getMoonPosition(prevDt, lat, lon);
+                const prevElevation = prevMoonPos.altitude * 180 / Math.PI;
+                moonElevations[i - 1] = prevElevation;
+                visibleRates[i - 1] = prevData?.rate ?? null;
+              }
             }
-          }
 
-          if (moonIsAboveHorizon && elevationDeg > 0) {
-            moonElevations.push(elevationDeg);
-            visibleRates.push(dataForDay[i]?.rate ?? null);
+            moonElevations[i] = elevationDeg;
+            visibleRates[i] = dataForDay[i]?.rate ?? null;
+
+          } else if (hasStartedPlotting) {
+            // Moon has set — stop plotting after this point
+            break;
           } else {
-            moonElevations.push(null);
-            visibleRates.push(null);
+            // Not started yet, fill with nulls
+            moonElevations[i] = null;
+            visibleRates[i] = null;
           }
         }
 
