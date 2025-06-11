@@ -278,7 +278,7 @@
         }
 
         if (!chart) {
-          chart = new Chart(document.getElementById("declinationChart"), {
+            chart = new Chart(document.getElementById("declinationChart"), {
             type: 'line',
             data: {
               labels,
@@ -338,6 +338,7 @@
         } else {
           chart.data.labels = labels;
           chart.data.datasets[0].data = rates;
+          chart.data.datasets[1].data = moonElevations; // ← Add this line
           chart.options.plugins.annotation.annotations = annotation;
           chart.update();
         }
