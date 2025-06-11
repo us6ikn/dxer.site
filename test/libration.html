@@ -328,7 +328,7 @@
             borderDash: [6, 3],
             label: {
               enabled: true,
-              content: `${label}\n${utcStr} / ${localStr}`,
+              content: [label, utcStr, localStr], // Array = vertical lines
               position: 'top',
               backgroundColor: color,
               color: 'white',
@@ -337,6 +337,7 @@
             }
           };
         };
+
 
         addAnnotation(moonTimes.rise, 'Moonrise', 'blue', 'moonrise');
         addAnnotation(moonTimes.set, 'Moonset', 'orange', 'moonset');
