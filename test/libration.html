@@ -302,13 +302,21 @@
 
           const eventDay = time.getUTCDate();
           const chartDay = date.getUTCDate();
-
-          // Only include event if it occurs on the same UTC day as chart
           if (eventDay !== chartDay) return;
 
           const utcHour = time.getUTCHours();
           const utcMin = time.getUTCMinutes();
           const index = utcHour * 2 + (utcMin >= 30 ? 1 : 0);
+
+          // Format UTC time
+          const utcStr = `${String(utcHour).padStart(2, '0')}:${String(utcMin).padStart(2, '0')} UTC`;
+
+          // Compute local time using longitude offset
+          const timeOffsetMin = (lon / 15) * 60;
+          const localTime = new Date(time.getTime() + timeOffsetMin * 60000);
+          const localHour = localTime.getUTCHours();
+          const localMin = localTime.getUTCMinutes();
+          const localStr = `${String(localHour).padStart(2, '0')}:${String(localMin).padStart(2, '0')} Local`;
 
           annotations[id] = {
             type: 'line',
@@ -320,11 +328,12 @@
             borderDash: [6, 3],
             label: {
               enabled: true,
-              content: label,
+              content: `${label}\n${utcStr} / ${localStr}`,
               position: 'top',
               backgroundColor: color,
               color: 'white',
-              font: { size: 10 }
+              font: { size: 10 },
+              padding: 4,
             }
           };
         };
