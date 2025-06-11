@@ -183,7 +183,7 @@
           return;
         }
 
-        const { lat, lon } = qthToLatLon(locator);
+        let { lat, lon } = qthToLatLon(locator);
         const COS_LAT = Math.cos(lat * Math.PI / 180);
         const TIME_SHIFT_MIN = (lon / 15) * 60;
         const INTERVAL_MIN = 30;
