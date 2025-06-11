@@ -321,10 +321,11 @@
                     display: true,
                     ticks: {
                       autoSkip: false,
-                      minRotation: 45,  // Rotate labels 45°
-                      maxRotation: 45
-                    }
-                  },
+                      callback: function(value, index) {
+                        // Only label every hour (i.e., every 2nd index)
+                        return index % 2 === 0 ? this.getLabelForValue(value) : '';
+                      }
+                    },
                 y: {
                   display: true,
                   title: { display: true, text: "deg/min" }
