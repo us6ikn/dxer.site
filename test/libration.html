@@ -140,7 +140,6 @@
     <button onclick="calculateLibration()">Calculate</button>
 
     <div id="chartWrapper">
-      <span style="font-size: 12px; text-align: center; display: block; color: rgba(255, 0, 0, 0.6);">Libration Rate (deg/min)</span>
       <canvas id="declinationChart"></canvas>
     </div>
   </div>
@@ -231,10 +230,7 @@
         const dateInput = document.getElementById("date").value;
         const dateStr = new Date(dateInput).toISOString().slice(0, 10);
 
-        const dataForDay = rawData.filter(r => {
-          const entryDate = new Date(r.date).toISOString().slice(0, 10);
-          return entryDate === dateStr;
-        });
+        const dataForDay = rawData.filter(r => r.date.startsWith(dateStr));
         
         const moonElevations = [];
         const visibleRates = [];
