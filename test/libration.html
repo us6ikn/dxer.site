@@ -237,6 +237,8 @@
         });
         
         const moonElevations = [];
+        const visibleRates = [];
+
         ({ lat, lon } = qthToLatLon(document.getElementById("qth").value.trim()));
 
         for (let i = 0; i < 48; i++) {
@@ -245,9 +247,14 @@
           const dt = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}:00Z`);
           const moonPos = SunCalc.getMoonPosition(dt, lat, lon);
           const elevationDeg = moonPos.altitude * 180 / Math.PI;
-          moonElevations.push(elevationDeg);
-          console.log(dt.toISOString(), elevationDeg);
 
+          if (elevationDeg > 0) {
+            moonElevations.push(elevationDeg);
+            visibleRates.push(dataForDay[i]?.rate ?? null);
+          } else {
+            moonElevations.push(null); // Hide from chart
+            visibleRates.push(null);
+          }
         }
 
 
@@ -337,8 +344,8 @@
           });
         } else {
           chart.data.labels = labels;
-          chart.data.datasets[0].data = rates;
-          chart.data.datasets[1].data = moonElevations; // ← Add this line
+          chart.data.datasets[0].data = visibleRates;
+          chart.data.datasets[1].data = moonElevations;
           chart.options.plugins.annotation.annotations = annotation;
           chart.update();
         }
