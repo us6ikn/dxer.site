@@ -231,12 +231,15 @@
         const dateInput = document.getElementById("date").value;
         const dateStr = new Date(dateInput).toISOString().slice(0, 10);
 
+        const startDate = new Date(`${dateStr}T00:00:00Z`);
+        const endDate = new Date(`${dateStr}T23:59:59Z`);
+
         const dataForDay = rawData.filter(r => {
-            const targetDate = new Date(dateStr + "T00:00:00Z");
-            return new Date(r.date).getUTCFullYear() === targetDate.getUTCFullYear() &&
-                   new Date(r.date).getUTCMonth() === targetDate.getUTCMonth() &&
-                   new Date(r.date).getUTCDate() === targetDate.getUTCDate();
+          const t = new Date(r.date);
+          return t >= startDate && t <= endDate;
         });
+        console.log("Data points found:", dataForDay.length);
+        console.log(dataForDay.map(d => d.date));
         
         const moonElevations = [];
         const visibleRates = [];
