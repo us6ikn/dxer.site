@@ -196,11 +196,6 @@
           return new Date(`${datePart}T${timePart}Z`);
         }
 
-        function parseDate(str) {
-          const [datePart, timePart] = str.trim().split(' ');
-          return new Date(`${datePart}T${timePart}Z`);
-        }
-
         const tempData = lines.map(line => ({
           date: parseDate(line.slice(0, 20)),
           lat: parseFloat(line.slice(20, 32)),
