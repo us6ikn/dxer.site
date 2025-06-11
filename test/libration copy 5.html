@@ -258,9 +258,7 @@
         }
 
 
-        const labels = Array.from({ length: 48 }, (_, i) =>
-          `${String(Math.floor(i / 2)).padStart(2, '0')}:${i % 2 === 0 ? '00' : '30'}`
-        );
+        const labels = dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
         const rates = dataForDay.map(r => r.rate);
 
         const annotation = {
