@@ -316,19 +316,32 @@
               responsive: true,
               maintainAspectRatio: false,
               scales: {
-                  x: {
-                    display: true,
-                    ticks: {
-                      autoSkip: false,
-                      callback: function(value, index) {
-                        // Only label every hour (i.e., every 2nd index)
-                        return index % 2 === 0 ? this.getLabelForValue(value) : '';
-                      }
+                x: {
+                  display: true,
+                  ticks: {
+                    autoSkip: false,
+                    callback: function(value, index) {
+                      return index % 2 === 0 ? this.getLabelForValue(value) : '';
                     }
-                  },
+                  }
+                },
                 y: {
                   display: true,
-                  title: { display: true, text: "deg/min" }
+                  title: { display: true, text: "Libration rate (deg/min)" },
+                  min: 0,
+                  max: 0.005,
+                  ticks: {
+                    stepSize: 0.001,
+                    // Optionally format tick labels with 3 decimals:
+                    callback: function(value) {
+                      return value.toFixed(3);
+                    }
+                  },
+                  // grid lines if you want equal spacing lines
+                  grid: {
+                    drawTicks: true,
+                    drawBorder: true,
+                  }
                 },
                 y2: {
                   position: 'right',
