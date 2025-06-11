@@ -383,7 +383,7 @@
 
           const utcHour = time.getUTCHours();
           const utcMin = time.getUTCMinutes();
-          const index = utcHour * 2 + (utcMin >= 30 ? 1 : 0);
+          const floatIndex = utcHour * 2 + utcMin / 30;
 
           const utcStr = `${String(utcHour).padStart(2, '0')}:${String(utcMin).padStart(2, '0')} UTC`;
 
@@ -391,7 +391,7 @@
             type: 'line',
             mode: 'vertical',
             scaleID: 'x',
-            value: index,
+            value: floatIndex,
             borderColor: color,
             borderWidth: 1,
             borderDash: [6, 3],
