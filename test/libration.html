@@ -220,6 +220,22 @@
         document.getElementById("chartWrapper").style.display = "block";
         updateChart(hourIndex);
       }
+      
+      function interpolateDataAtIndex(dataArray, fractionalIndex) {
+        const i = Math.floor(fractionalIndex);
+        const frac = fractionalIndex - i;
+
+        if (i < 0) return dataArray[0];
+        if (i >= dataArray.length - 1) return dataArray[dataArray.length - 1];
+
+        const v0 = dataArray[i];
+        const v1 = dataArray[i + 1];
+
+        if (v0 === null || v1 === null) return null; // can't interpolate
+
+        return v0 + frac * (v1 - v0);
+      }
+
 
       function updateChart(hourIndex) {
         if (!rawData.length) return; // Prevent empty chart before calculateLibration()
@@ -255,6 +271,64 @@
             visibleRates.push(null);
           }
         }
+        
+        // Get moonrise and moonset fractional indices
+        let moonriseIndex = null;
+        let moonsetIndex = null;
+
+        try {
+          const moonTimes = SunCalc.getMoonTimes(new Date(dateStr + 'T00:00:00Z'), lat, lon, true);
+          if (moonTimes.rise) {
+            const riseHour = moonTimes.rise.getUTCHours();
+            const riseMin = moonTimes.rise.getUTCMinutes();
+            moonriseIndex = riseHour * 2 + riseMin / 30;
+          }
+          if (moonTimes.set) {
+            const setHour = moonTimes.set.getUTCHours();
+            const setMin = moonTimes.set.getUTCMinutes();
+            moonsetIndex = setHour * 2 + setMin / 30;
+          }
+        } catch (e) {
+          console.warn("Moonrise/set calculation failed:", e);
+        }
+
+        // If both moonrise and moonset are valid and within range:
+        if (moonriseIndex !== null && moonsetIndex !== null &&
+            moonriseIndex >= 0 && moonsetIndex <= 47 && moonriseIndex < moonsetIndex) {
+          
+          // Interpolate start and end values for moon elevation and libration rate
+          const startElev = interpolateDataAtIndex(moonElevations, moonriseIndex);
+          const endElev = interpolateDataAtIndex(moonElevations, moonsetIndex);
+          const startRate = interpolateDataAtIndex(visibleRates, moonriseIndex);
+          const endRate = interpolateDataAtIndex(visibleRates, moonsetIndex);
+
+          // Build new arrays from moonrise to moonset:
+          const newElevations = [startElev];
+          const newRates = [startRate];
+          const newLabels = [`${Math.floor(moonriseIndex / 2)}:${(moonriseIndex % 2) * 30 === 0 ? '00' : '30'}`];
+
+          // Include all integer indices between moonrise and moonset:
+          for (let idx = Math.ceil(moonriseIndex); idx < Math.floor(moonsetIndex); idx++) {
+            newElevations.push(moonElevations[idx]);
+            newRates.push(visibleRates[idx]);
+            newLabels.push(`${Math.floor(idx / 2)}:${(idx % 2) * 30 === 0 ? '00' : '30'}`);
+          }
+
+          newElevations.push(endElev);
+          newRates.push(endRate);
+          newLabels.push(`${Math.floor(moonsetIndex / 2)}:${(moonsetIndex % 2) * 30 === 0 ? '00' : '30'}`);
+
+          // Replace original arrays with trimmed and interpolated arrays
+          moonElevations.length = 0;
+          visibleRates.length = 0;
+
+          moonElevations.push(...newElevations);
+          visibleRates.push(...newRates);
+
+          labels.length = 0;
+          labels.push(...newLabels);
+        }
+
         
         const labels = dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
         const rates = dataForDay.map(r => r.rate);
