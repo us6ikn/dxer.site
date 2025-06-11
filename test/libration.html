@@ -223,6 +223,13 @@
       }
 
       function updateChart(hourIndex) {
+        const locatorInput = document.getElementById("qth").value.trim();
+        if (/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locatorInput)) {
+          const pos = qthToLatLon(locatorInput);
+          lat = pos.lat;
+          lon = pos.lon;
+        }
+        
         const dateInput = document.getElementById("date").value;
         const dateStr = new Date(dateInput).toISOString().slice(0, 10);
 
@@ -232,15 +239,17 @@
         });
         
         const moonElevations = [];
+        ({ lat, lon } = qthToLatLon(document.getElementById("qth").value.trim()));
 
         for (let i = 0; i < 48; i++) {
           const hour = Math.floor(i / 2);
           const minutes = (i % 2) * 30;
-          const utcDate = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}:00Z`);
-          const moonPos = SunCalc.getMoonPosition(utcDate, lat, lon);
+          const dt = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}:00Z`);
+          const moonPos = SunCalc.getMoonPosition(dt, lat, lon);
           const elevationDeg = moonPos.altitude * 180 / Math.PI;
-          moonElevations.push(elevationDeg > 0 ? elevationDeg : null); // Only plot above horizon
+          moonElevations.push(elevationDeg);
         }
+
 
         const labels = dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
         const rates = dataForDay.map(r => r.rate);
