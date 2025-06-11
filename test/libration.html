@@ -371,21 +371,7 @@
           const utcMin = time.getUTCMinutes();
           const index = utcHour * 2 + (utcMin >= 30 ? 1 : 0);
 
-          // Format UTC
           const utcStr = `${String(utcHour).padStart(2, '0')}:${String(utcMin).padStart(2, '0')} UTC`;
-
-          // Compute local time offset by longitude
-          const timeOffsetMin = (lon / 15) * 60;
-          const localTime = new Date(time.getTime() + timeOffsetMin * 60000);
-          const localHour = localTime.getUTCHours();
-          const localMin = localTime.getUTCMinutes();
-          const localStr = `${String(localHour).padStart(2, '0')}:${String(localMin).padStart(2, '0')} Local`;
-
-          // Compare day difference
-          const dayDiff = localTime.getUTCDate() - time.getUTCDate();
-          let dayNote = '';
-          if (dayDiff === 1) dayNote = ' (+day)';
-          else if (dayDiff === -1 || (dayDiff < 0 && Math.abs(dayDiff) > 15)) dayNote = ' (-day)';
 
           annotations[id] = {
             type: 'line',
@@ -397,7 +383,7 @@
             borderDash: [6, 3],
             label: {
               enabled: true,
-              content: [label, utcStr, localStr + dayNote],
+              content: [label, utcStr],
               position: 'top',
               backgroundColor: color,
               color: 'white',
