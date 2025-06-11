@@ -276,8 +276,7 @@
           try {
             const { lat, lon } = qthToLatLon(document.getElementById("qth").value.trim());
             const moonAnnotations = getMoonAnnotations(dateStr, lat, lon);
-            const sunAnnotations = getSunAnnotations(dateStr, lat, lon);
-            Object.assign(annotation, sunAnnotations, moonAnnotations);
+            Object.assign(annotation, moonAnnotations);
           } catch (e) {
             console.warn("Failed to calculate moon annotations:", e);
           }
@@ -378,55 +377,6 @@
           chart.update();
         }
       }
-      
-      function getSunAnnotations(dateStr, lat, lon) {
-        const date = new Date(dateStr + 'T00:00:00Z');
-        const sunTimes = SunCalc.getTimes(date, lat, lon);
-
-        const annotations = {};
-
-        const addAnnotation = (time, label, color, id) => {
-          if (!time || isNaN(time.getTime())) return;
-
-          const eventDay = time.getUTCDate();
-          const chartDay = date.getUTCDate();
-          if (eventDay !== chartDay) return;
-
-          const utcHour = time.getUTCHours();
-          const utcMin = time.getUTCMinutes();
-          const floatIndex = utcHour * 2 + utcMin / 30;
-
-          const utcStr = `${String(utcHour).padStart(2, '0')}:${String(utcMin).padStart(2, '0')} UTC`;
-
-          annotations[id] = {
-            type: 'line',
-            mode: 'vertical',
-            scaleID: 'x',
-            value: floatIndex,
-            borderColor: color,
-            borderWidth: 1,
-            borderDash: [3, 6], // more subtle dash
-            label: {
-              enabled: true,
-              content: [label, utcStr],
-              position: 'top',
-              backgroundColor: color,
-              color: 'rgba(0,0,0,0.6)',
-              font: { size: 8 },
-              padding: 2,
-              opacity: 0.5
-            },
-            // Lower zIndex so it appears below moon annotations
-            z: 0
-          };
-        };
-
-        addAnnotation(sunTimes.sunrise, 'Sunrise', 'rgba(255, 223, 0, 0.5)', 'sunrise'); // soft yellow, semi-transparent
-        addAnnotation(sunTimes.sunset, 'Sunset', 'rgba(255, 140, 0, 0.5)', 'sunset');     // orange, semi-transparent
-
-        return annotations;
-      }
-
 
       function getMoonAnnotations(dateStr, lat, lon) {
         const date = new Date(dateStr + 'T00:00:00Z'); // midnight UTC of selected date
