@@ -219,7 +219,7 @@
         ({ lat, lon } = qthToLatLon(locator));
         rawData = results;
         document.getElementById("chartWrapper").style.display = "block";
-        updateChart(hourIndex);
+        setTimeout(() => updateChart(hourIndex), 0);
       }
 
       function updateChart(hourIndex) {
