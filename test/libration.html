@@ -232,8 +232,10 @@
         const dateStr = new Date(dateInput).toISOString().slice(0, 10);
 
         const dataForDay = rawData.filter(r => {
-          const entryDate = new Date(r.date).toISOString().slice(0, 10);
-          return entryDate === dateStr;
+            const targetDate = new Date(dateStr + "T00:00:00Z");
+            return new Date(r.date).getUTCFullYear() === targetDate.getUTCFullYear() &&
+                   new Date(r.date).getUTCMonth() === targetDate.getUTCMonth() &&
+                   new Date(r.date).getUTCDate() === targetDate.getUTCDate();
         });
         
         const moonElevations = [];
