@@ -226,6 +226,17 @@
           const entryDate = new Date(r.date).toISOString().slice(0, 10);
           return entryDate === dateStr;
         });
+        
+        const moonElevations = [];
+
+        for (let i = 0; i < 48; i++) {
+          const hour = Math.floor(i / 2);
+          const minutes = (i % 2) * 30;
+          const utcDate = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}:00Z`);
+          const moonPos = SunCalc.getMoonPosition(utcDate, lat, lon);
+          const elevationDeg = moonPos.altitude * 180 / Math.PI;
+          moonElevations.push(elevationDeg > 0 ? elevationDeg : null); // Only plot above horizon
+        }
 
         const labels = dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
         const rates = dataForDay.map(r => r.rate);
@@ -258,12 +269,31 @@
             type: 'line',
             data: {
               labels,
-              datasets: [{
-                label: "Libration Rate",
-                data: rates,
-                borderColor: "#ff0000"
-              }]
-            },
+              datasets: [
+                {
+                  label: "Libration Rate",
+                  data: rates,
+                  borderColor: "#ff0000",
+                  pointRadius: 0,
+                  borderWidth: 1.5,
+                  tension: 0.2
+                },
+                {
+                  label: "Moon Elevation (°)",
+                  data: moonElevations,
+                  borderColor: "rgba(0, 0, 255, 0.6)",
+                  backgroundColor: "rgba(0, 0, 255, 0.15)",
+                  fill: {
+                    target: { value: 0 },
+                    above: 'rgba(0, 0, 255, 0.15)'
+                  },
+                  pointRadius: 0,
+                  borderWidth: 1,
+                  tension: 0.3,
+                  yAxisID: "y2"
+                }
+              ]
+            }
             options: {
               responsive: true,
               maintainAspectRatio: false,
@@ -272,6 +302,18 @@
                 y: {
                   display: true,
                   title: { display: true, text: "deg/min" }
+                },
+                y2: {
+                  position: 'right',
+                  title: {
+                    display: true,
+                    text: 'Moon Elevation (°)'
+                  },
+                  beginAtZero: true,
+                  display: true,
+                  grid: {
+                    drawOnChartArea: false
+                  }
                 }
               },
               plugins: {
