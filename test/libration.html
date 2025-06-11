@@ -258,7 +258,7 @@
             // Convert libration rate deg/min to rad/s
             const omegaRadSec = (dataForDay[i]?.rate ?? 0) * (Math.PI / 180) / 60;
             // Calculate full Doppler spread in Hz
-            const dopplerHz = 4 * FREQUENCY_HZ * ((MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT);
+            const dopplerHz = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
             // Store kHz for chart
             dopplerSpreads.push(dopplerHz);
           } else {
