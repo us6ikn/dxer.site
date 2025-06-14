@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MeeusJs Moon Example</title>
+</head>
+<body>
+  <h1>Moonrise/Moonset Times</h1>
+  <p id="moontimes"></p>
+
+  <!-- Use the minified MeeusJs -->
+  <script src="meuusjs.1.0.3.min.js"></script>
+
+  <script>
+    // Set observer coordinates (Zurich)
+    const lat = 59.8116;
+    const lon = 17.64.74;
+    const alt = 30; // meters
+
+    const date = new Date(); // Now
+    const jdo = new A.JulianDay(date);
+    const coord = A.EclCoord.fromWgs84(lat, lon, alt);
+
+    const moontimes = A.Moon.times(jdo, coord);
+
+    // Convert seconds to HH:MM:SS string
+    const riseStr = A.Coord.secondsToHMSStr(moontimes.rise);
+    const transitStr = A.Coord.secondsToHMSStr(moontimes.transit);
+    const setStr = A.Coord.secondsToHMSStr(moontimes.set);
+
+    document.getElementById("moontimes").innerText =
+      `Rise: ${riseStr}, Transit: ${transitStr}, Set: ${setStr}`;
+  </script>
+</body>
+</html>
