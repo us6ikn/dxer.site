@@ -2,34 +2,105 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>MeeusJs Moon Example</title>
+  <title>Moon Tracker (UTC)</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="meuusjs.1.0.3.min.js"></script>
+  <style>
+    canvas { max-width: 800px; margin: 2em auto; display: block; }
+  </style>
 </head>
 <body>
-  <h1>Moonrise/Moonset Times</h1>
+  <h1>Moon Data for Uppsala (UTC)</h1>
   <p id="moontimes"></p>
-
-  <!-- Use the minified MeeusJs -->
-  <script src="meuusjs.1.0.3.min.js"></script>
+  <canvas id="moonChart"></canvas>
 
   <script>
-    // Set observer coordinates (Zurich)
     const lat = 59.8116;
     const lon = 17.6474;
-    const alt = 30; // meters
-
-    const date = new Date(); // Now
-    const jdo = new A.JulianDay(date);
+    const alt = 30;
     const coord = A.EclCoord.fromWgs84(lat, lon, alt);
 
+    // Set date to today's UTC midnight
+    const now = new Date();
+    const utcMidnight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
+    // Moon rise/set times in UTC seconds from midnight
+    const jdo = new A.JulianDay(utcMidnight);
     const moontimes = A.Moon.times(jdo, coord);
 
-    // Convert seconds to HH:MM:SS string
     const riseStr = A.Coord.secondsToHMSStr(moontimes.rise);
     const transitStr = A.Coord.secondsToHMSStr(moontimes.transit);
     const setStr = A.Coord.secondsToHMSStr(moontimes.set);
 
     document.getElementById("moontimes").innerText =
-      `Rise: ${riseStr}, Transit: ${transitStr}, Set: ${setStr}`;
+      `UTC Moon Times — Rise: ${riseStr}, Transit: ${transitStr}, Set: ${setStr}`;
+
+    // Sample elevation and azimuth every 10 minutes
+    const times = [];
+    const elevations = [];
+    const azimuths = [];
+
+    for (let minutes = 0; minutes <= 1440; minutes += 10) {
+      const sampleUTC = new Date(utcMidnight.getTime() + minutes * 60 * 1000);
+      const jdsample = new A.JulianDay(sampleUTC);
+      const moonpos = A.Moon.topocentricPosition(jdsample, coord, true);
+      times.push(`${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`);
+      elevations.push(moonpos.hz.alt);
+      azimuths.push(moonpos.hz.az);
+    }
+
+    const ctx = document.getElementById('moonChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: times,
+        datasets: [
+          {
+            label: 'Elevation (°)',
+            data: elevations,
+            borderColor: 'blue',
+            fill: false,
+            yAxisID: 'y',
+          },
+          {
+            label: 'Azimuth (°)',
+            data: azimuths,
+            borderColor: 'orange',
+            fill: false,
+            yAxisID: 'y2',
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            type: 'linear',
+            position: 'left',
+            title: { display: true, text: 'Elevation (°)' },
+            min: -10,
+            max: 90
+          },
+          y2: {
+            type: 'linear',
+            position: 'right',
+            title: { display: true, text: 'Azimuth (°)' },
+            min: 0,
+            max: 360,
+            grid: { drawOnChartArea: false }
+          }
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: 'Moon Elevation and Azimuth in Uppsala (UTC)'
+          },
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }
+    });
   </script>
 </body>
 </html>
