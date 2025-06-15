@@ -124,6 +124,7 @@ function julianDate(obs) {
 
 function MoonPos(obs) {
   // julian date
+    obs.jd = julianDate(obs);
   var jdobs=jd(obs,true);
   var T=(jdobs-2451545.0)/36525;
   var T2=T*T;
