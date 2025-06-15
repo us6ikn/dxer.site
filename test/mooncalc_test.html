@@ -39,8 +39,10 @@
     const jd = julian.DateToJD(date);
     const moonCoords = moonposition.position(jd);
 
-    const distanceKm = moonCoords.range * 6378.14;           // ✅ Earth radii to km
-    const decDeg = moonCoords.dec * (180 / Math.PI);         // ✅ radians to degrees
+    const AU_TO_KM = 149597870.7;
+    const distanceKm = moonCoords.range * AU_TO_KM;
+    const eclCoords = coord.eclToEq(moonCoords.lon, moonCoords.lat, jd);
+    const decDeg = radToDeg(eclCoords.dec);
 
 
     dates.push(date.toISOString().slice(0, 16).replace('T', ' '));
