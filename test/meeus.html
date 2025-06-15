@@ -1,126 +1,163 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<title>Moonrise and Moonset Times</title>
-<meta charset="utf-8" />
-<script language="JavaScript" src="observer.js"></script>
-<script language="JavaScript" src="datetime.js"></script>
-<script language="JavaScript" src="moon.js"></script>
-<script language="JavaScript" src="util.js"></script>
-<script language="JavaScript" src="math.js"></script>
-
-<script>
-// Observer object with defaults
-var observer = {
-  latitude: 0,
-  longitude: 0,
-  tz: 0,
-  year: 2000,
-  month: 1,
-  day: 1,
-  hours: 0,
-  minutes: 0,
-  seconds: 0
-};
-
-// Convert input to observer and calculate moon rise/set
-function calculateMoonRiseSet() {
-  var lat = parseFloat(document.getElementById("lat").value);
-  var latDir = document.getElementById("latDir").value;
-  var lon = parseFloat(document.getElementById("lon").value);
-  var lonDir = document.getElementById("lonDir").value;
-  var dateStr = document.getElementById("date").value; // expected YYYY-MM-DD
-  var tzOffset = parseFloat(document.getElementById("tzOffset").value);
-
-  observer.latitude = (latDir === "S") ? -lat : lat;
-  observer.longitude = (lonDir === "W") ? -lon : lon;
-  observer.tz = tzOffset * 60; // in minutes
-
-  var parts = dateStr.split("-");
-  if (parts.length !== 3) {
-    alert("Please enter date in YYYY-MM-DD format.");
-    return;
-  }
-  observer.year = parseInt(parts[0],10);
-  observer.month = parseInt(parts[1],10);
-  observer.day = parseInt(parts[2],10);
-  observer.hours = 0;
-  observer.minutes = 0;
-  observer.seconds = 0;
-
-  // Moon rise/set calculation: use moon.js function doMoon(observer, 0)
-  // But that shows a lot; we want only rise/set times.
-  // Let's call moonRiseSet(observer) if available, or use internal functions.
-  // The original library likely has something like rise/set times in moon.js
-
-  // If you have a function called moonRiseSet(observer) returning times, do:
-  var riseSet = getMoonRiseSet(observer);
-
-  var output = "";
-  if (riseSet.rise !== null) {
-    output += "Moonrise: " + riseSet.rise + " (local time)<br>";
-  } else {
-    output += "Moonrise: No moonrise on this date<br>";
-  }
-  if (riseSet.set !== null) {
-    output += "Moonset: " + riseSet.set + " (local time)<br>";
-  } else {
-    output += "Moonset: No moonset on this date<br>";
-  }
-  document.getElementById("result").innerHTML = output;
-}
-
-// Dummy function to illustrate - you must replace this with actual moon rise/set calculation
-function getMoonRiseSet(obs) {
-  // The original moon.js has function doMoon(observer,mode)
-  // mode=0 = one calculation for current date/time
-  // We want to extract moonrise and moonset times.
-
-  // Pseudo-code:
-  // Use moon.js rise/set algorithm here for observer on the date
-
-  // Since I can't see full moon.js here, let's just simulate
-  // In real usage, call moonrise/moonset calculation functions here
-
-  // Example returns time strings HH:MM:SS local time or null if no rise/set
-
-  // For demonstration:
-  return {
-    rise: "19:23:45",
-    set: "05:41:22"
-  };
-}
-</script>
+  <meta charset="UTF-8" />
+  <title>Moon Az/El & Rise/Set Calculator</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 2em;
+    }
+    label, input {
+      margin: 0.5em;
+    }
+  </style>
 </head>
 <body>
-<h2>Moonrise and Moonset Calculator</h2>
-<p>Enter your location, date, and time zone offset (hours from UTC):</p>
 
-Latitude:
-<input type="number" id="lat" step="0.01" value="51.5" style="width:70px">
-<select id="latDir">
-  <option value="N" selected>North</option>
-  <option value="S">South</option>
-</select>
-<br>
+<h2>Moon Position Calculator</h2>
 
-Longitude:
-<input type="number" id="lon" step="0.01" value="0" style="width:70px">
-<select id="lonDir">
-  <option value="E" selected>East</option>
-  <option value="W">West</option>
-</select>
-<br>
+<form id="inputForm">
+  <label>Latitude: <input type="number" step="0.01" id="lat" value="40.0"></label>
+  <label>Longitude: <input type="number" step="0.01" id="lon" value="-74.0"></label>
+  <label>Date: <input type="date" id="date" value=""></label>
+  <button type="submit">Calculate</button>
+</form>
 
-Date (YYYY-MM-DD):
-<input type="date" id="date" value="2025-06-15"><br>
+<h3>Moonrise & Moonset</h3>
+<p id="riseSetText">No data yet.</p>
 
-Time Zone offset from UTC (hours, e.g. -5, 1, 2):
-<input type="number" id="tzOffset" step="0.5" value="0" style="width:50px"><br><br>
+<canvas id="azElChart" width="800" height="400"></canvas>
 
-<button onclick="calculateMoonRiseSet()">Calculate Moonrise and Moonset</button>
+<!-- External JS dependencies -->
+<script src="observer.js"></script>
+<script src="datetime.js"></script>
+<script src="sun.js"></script>
+<script src="moon.js"></script>
+<script src="planets.js"></script>
+<script src="stars.js"></script>
+<script src="separation.js"></script>
+<script src="util.js"></script>
+<script src="math.js"></script>
 
-<hr>
-<div id="result" style="font-weight:bold;"></div>
+<script>
+function setToday() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('date').value = today;
+}
+setToday();
+
+// Converts fractional hours (e.g. 14.5) into HH:MM:SS format string
+function toLocalTimeString(h) {
+  if (h < 0) return 'Not found';
+  const hr = Math.floor(h);
+  const min = Math.floor((h - hr) * 60);
+  const sec = Math.floor(((h - hr) * 60 - min) * 60);
+  return `${String(hr).padStart(2, '0')}:${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+}
+
+document.getElementById('inputForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  const lat = parseFloat(document.getElementById('lat').value);
+  const lon = parseFloat(document.getElementById('lon').value);
+  const dateStr = document.getElementById('date').value;
+
+  if (!dateStr) {
+    alert("Please select a valid date.");
+    return;
+  }
+
+  const dateObj = new Date(dateStr + "T00:00:00");
+
+  // Calculate local timezone offset in hours (e.g. -4 for EDT)
+  const tzOffsetHours = -dateObj.getTimezoneOffset() / 60;
+
+  const obs = {
+    year: dateObj.getFullYear(),
+    month: dateObj.getMonth() + 1,
+    day: dateObj.getDate(),
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+    tz: tzOffsetHours,  // Use local timezone offset here
+    dst: 0,             // Assuming no DST offset needed or handled inside functions
+    lon: lon,
+    lat: lat
+  };
+
+  // Compute Moonrise/Moonset
+  const riseSet = moonrise(obs);
+  console.log('moonrise result:', riseSet);
+
+  let riseSetText = '';
+  riseSetText += `Moonrise: ${toLocalTimeString(riseSet[0])} `;
+  riseSetText += `Moonset: ${toLocalTimeString(riseSet[1])}`;
+  document.getElementById('riseSetText').innerText = riseSetText;
+
+  // Azimuth & Elevation Plot for every hour of the day
+  const azimuths = [], elevations = [], labels = [];
+  for (let h = 0; h <= 24; h += 1) {
+    obs.hours = h;
+    obs.minutes = 0;
+    obs.seconds = 0;
+    const moon = MoonPos(obs);
+    azimuths.push(moon[4]);
+    elevations.push(moon[3]);
+    labels.push(`${h}:00`);
+  }
+
+  const ctx = document.getElementById('azElChart').getContext('2d');
+  if (window.moonChart) window.moonChart.destroy();
+
+  window.moonChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Azimuth (°)',
+          data: azimuths,
+          borderColor: 'blue',
+          yAxisID: 'y',
+          fill: false,
+        },
+        {
+          label: 'Elevation (°)',
+          data: elevations,
+          borderColor: 'green',
+          yAxisID: 'y1',
+          fill: false,
+        }
+      ]
+    },
+    options: {
+      scales: {
+        y: {
+          type: 'linear',
+          position: 'left',
+          title: { display: true, text: 'Azimuth (°)' },
+          min: 0,
+          max: 360,
+        },
+        y1: {
+          type: 'linear',
+          position: 'right',
+          title: { display: true, text: 'Elevation (°)' },
+          min: -90,
+          max: 90,
+        }
+      },
+      plugins: {
+        legend: { position: 'top' },
+        title: { display: true, text: 'Moon Azimuth and Elevation Over 24h' }
+      }
+    }
+  });
+
+});
+</script>
 
 </body>
 </html>
