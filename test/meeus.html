@@ -85,6 +85,8 @@ document.getElementById('inputForm').addEventListener('submit', function(e) {
 
   // Compute Moonrise/Moonset
   const riseSet = moonrise(obs);
+  console.log('moonrise result:', riseSet);
+
   let riseSetText = '';
   if (riseSet[0] >= 0) riseSetText += `Moonrise: ${toLocalTimeString(riseSet[0])} `;
   else riseSetText += `Moonrise: Not found `;
