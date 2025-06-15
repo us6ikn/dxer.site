@@ -63,8 +63,9 @@
         time.setUTCHours(hour);
 
         const astroTime = Astronomy.MakeTime(time);
-        const hor = Astronomy.MoonPosition(astroTime);
-        const horCoords = Astronomy.Horizon(astroTime, observer, hor.vec, 'normal');
+        const equ = Astronomy.Equator(Astronomy.Body.Moon, astroTime, observer, true, true);
+        const horCoords = Astronomy.Horizon(astroTime, observer, equ, 'normal');
+
 
         times.push(`${hour}:00`);
         altitudes.push(horCoords.altitude);
