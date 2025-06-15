@@ -63,14 +63,18 @@
         time.setUTCHours(hour);
 
         const astroTime = Astronomy.MakeTime(time);
-        const equ = Astronomy.Equator(Astronomy.Body.Moon, astroTime, observer, true, true);
-        const horCoords = Astronomy.Horizon(astroTime, observer, equ.vec, 'normal');
 
+        // ✅ Use geocentric equatorial coordinates
+        const equ = Astronomy.Equator(Astronomy.Body.Moon, astroTime, undefined, true, true);
+
+        // ✅ Use observer for local horizon conversion
+        const horCoords = Astronomy.Horizon(astroTime, observer, equ.vec, 'normal');
 
         times.push(`${hour}:00`);
         altitudes.push(horCoords.altitude);
         azimuths.push(horCoords.azimuth);
       }
+
 
       // Moonrise and Moonset
       const startTime = Astronomy.MakeTime(new Date(date + "T00:00:00Z"));
