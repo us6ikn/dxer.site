@@ -1,162 +1,139 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<title>JavaScript Ephemeris - Sun and Moon</title>
-<meta http-equiv="content-type" content="text/html">
-<meta http-equiv="charset" content="ISO-8859-1">
-<meta name="Description" content="Implementation in Javascript of Meeus ephemeris algorithms">
-<meta name="Keywords" content="Meeus,ephemeris,sun,moon,astronomy,javascript">
-<link href="default.css" rel="stylesheet" type="text/css" />
-
-<script language="JavaScript" src="observer.js"></script>
-<script language="JavaScript" src="datetime.js"></script>
-<script language="JavaScript" src="sun.js"></script>
-<script language="JavaScript" src="moon.js"></script>
-<script language="JavaScript" src="util.js"></script>
-<script language="JavaScript" src="math.js"></script>
-
-<script language="JavaScript" type="text/javascript">
-function clockhandler(settimezone) {
-  var lastdst = checkdst(observer);
-  var now = new Date();
-  if (settimezone) {
-    observer.tz = now.getTimezoneOffset();
-  } else {
-    observer.year = getFullYear(now);
-    month_length[1] = leapyear(observer.year) ? 29 : 28;
-    observer.month = now.getMonth() + 1;
-    observer.day = now.getDate();
-    observer.hours = now.getHours();
-    observer.minutes = now.getMinutes();
-    observer.seconds = now.getSeconds();
-    var dst = checkdst(observer);
-    if (lastdst != dst) observer.tz += (dst - lastdst);
-  }
-  rewrite1();
-}
-
-function rewrite1() {
-  with (document.table1) {
-    local_date.value = datestring(observer);
-    civil_time.value = timestring(observer, false);
-    ut_offset.value = (observer.tz >= 0 ? "+" : "-") + hmstring(observer.tz / 60.0);
-    julian.value = Math.round(100 * jd(observer)) / 100;
-  }
-}
-
-function updatelocal(timezone) {
-  var lastdst = checkdst(observer);
-  with (document.table1) {
-    if (timezone) {
-      observer.tz = 60.0 * parsecol(ut_offset.value);
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Moon Tracker</title>
+  <script src="astronomy.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
     }
-    var col1 = local_date.value.indexOf(":");
-    var col2 = local_date.value.lastIndexOf(":");
-    var col3 = local_date.value.length;
-    observer.year = parseInt(local_date.value.substring(0, col1), 10);
-    if (observer.year < 100) {
-      if (observer.year > 50) { observer.year += 1900; }
-      else { observer.year += 2000; }
+    label, input {
+      display: block;
+      margin: 10px 0;
     }
-    month_length[1] = leapyear(observer.year) ? 29 : 28;
-    observer.month = parseInt(local_date.value.substring(col1 + 1, col2), 10);
-    observer.day = parseInt(local_date.value.substring(col2 + 1, col3), 10);
-    col1 = civil_time.value.indexOf(":");
-    col2 = civil_time.value.lastIndexOf(":");
-    col3 = civil_time.value.length;
-    observer.hours = parseInt(civil_time.value.substring(0, col1), 10);
-    observer.minutes = col2 > (col1 + 1) ? parseInt(civil_time.value.substring(col1 + 1, col2), 10) : 0;
-    observer.seconds = col3 > (col2 + 1) ? parseInt(civil_time.value.substring(col2 + 1, col3), 10) : 0;
-    var dst = checkdst(observer);
-    if (lastdst != dst) observer.tz += (dst - lastdst);
-    rewrite1();
-  }
-}
-
-function set12(noon) {
-  if (noon) {
-    document.table1.civil_time.value = "12:00:00";
-  } else {
-    document.table1.civil_time.value = "00:00:00";
-    var year = observer.year;
-    var month = observer.month;
-    var day = observer.day + 1;
-    if (day > month_length[month - 1]) {
-      day -= month_length[month - 1];
-      month += 1;
-      if (month == 13) {
-        year += 1;
-        month = 1;
-      }
+    #moon-times {
+      margin-top: 20px;
     }
-    document.table1.local_date.value = year + ":" + month + ":" + day;
-  }
-  updatelocal(false);
-}
-
-function jdtozdt() {
-  var zdt = jdtocd(parseFloat(document.table1.julian.value) - observer.tz / 1440.0);
-  document.table1.local_date.value = zdt[0] + ":" + zdt[1] + ":" + zdt[2];
-  document.table1.civil_time.value = zdt[4] + ":" + zdt[5] + ":" + zdt[6];
-  updatelocal(false);
-}
-</script>
+  </style>
 </head>
-
 <body>
-<h1 align="center">JavaScript Ephemeris - Sun and Moon</h1>
-<center><b>Last update 18 September 2002</b></center>
-<hr noshade size="3" width="80%">
+  <h1>Moon Tracker</h1>
 
-<form name="table1" width="80%">
-<table class="fixed_bluebox" border="1" cellpadding="5">
-<tr><th colspan="3">Location for observations</th></tr>
-<tr>
-<td align="left">
-<select name="Place">
-<option>Select your home location</option>
-<option>unknown</option>
-</select>
-</td>
-<td align="center">
-<select name="North"><option>North</option><option>South</option></select>
-<input type="text" size="9" name="Latitude">
-</td>
-<td align="center">
-<select name="West"><option>West</option><option>East</option></select>
-<input type="text" size="9" name="Longitude">
-</td>
-</tr>
+  <label for="date">Date:</label>
+  <input type="date" id="date" required />
 
-<tr><th colspan="3">Date and time for observations</th></tr>
-<tr>
-<td align="center">Date <input type="text" size="10" name="local_date" onchange="updatelocal(false)"></td>
-<td align="center">Civil Time <input type="text" size="8" name="civil_time" onchange="updatelocal(false)"></td>
-<td align="center">UT Offset <input type="text" size="6" name="ut_offset" onchange="updatelocal(true)"></td>
-</tr>
-<tr>
-<td align="center" colspan="3">
-Julian Date <input type="text" size="10" name="julian" onchange="jdtozdt()">
-</td>
-</tr>
-<tr>
-<td colspan="3" align="center">
-<input type="button" value="Set Date/Time from computer" onclick="clockhandler(false)">
-<input type="button" value="Set Time Zone from computer" onclick="clockhandler(true)">
-<input type="button" value="Set time to Noon" onclick="set12(true)">
-<input type="button" value="Set time to Midnight" onclick="set12(false)">
-</td>
-</tr>
-<tr><td align="center" colspan="3">
-<b>Compute Ephemeris</b>
-<input type="button" name="sun" value="Sun" onclick="doSun(observer,0)">
-<input type="button" name="moon" value="Moon" onclick="doMoon(observer,false)">
-</td></tr>
-<tr><td align="center" colspan="3">
-<b>Compute Monthly Ephemeris</b>
-<input type="button" name="monthsun" value="Sun" onclick="doSun(observer,2)">
-<input type="button" name="mmoon" value="Moon" onclick="doMoon(observer,2)">
-</td></tr>
-</table>
-</form>
+  <label for="latitude">Latitude (decimal degrees):</label>
+  <input type="number" id="latitude" step="any" required />
+
+  <label for="longitude">Longitude (decimal degrees):</label>
+  <input type="number" id="longitude" step="any" required />
+
+  <button onclick="plotMoon()">Show Moon Data</button>
+
+  <div id="moon-times"></div>
+
+  <canvas id="moonChart" width="800" height="400"></canvas>
+
+  <script>
+    async function plotMoon() {
+      const date = document.getElementById("date").value;
+      const lat = parseFloat(document.getElementById("latitude").value);
+      const lon = parseFloat(document.getElementById("longitude").value);
+
+      if (!date || isNaN(lat) || isNaN(lon)) {
+        alert("Please enter valid date and coordinates.");
+        return;
+      }
+
+      const observer = new Astronomy.Observer(lat, lon, 0);
+      const times = [], altitudes = [], azimuths = [];
+
+      for (let hour = 0; hour <= 24; hour++) {
+        const time = new Date(date + "T00:00:00Z");
+        time.setUTCHours(hour);
+
+        const astroTime = Astronomy.MakeTime(time);
+        const hor = Astronomy.MoonPosition(astroTime);
+        const horCoords = Astronomy.Horizon(astroTime, observer, hor.vec, 'normal');
+
+        times.push(`${hour}:00`);
+        altitudes.push(horCoords.altitude);
+        azimuths.push(horCoords.azimuth);
+      }
+
+      // Moonrise and Moonset
+      const startTime = Astronomy.MakeTime(new Date(date + "T00:00:00Z"));
+      const endTime = Astronomy.MakeTime(new Date(date + "T23:59:59Z"));
+      const moonrise = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, startTime, 1);
+      const moonset = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, startTime, 1);
+
+      let moonTimesHTML = "<h3>Moonrise and Moonset:</h3><ul>";
+      moonTimesHTML += `<li>Moonrise: ${moonrise ? moonrise.date.toLocaleTimeString() : "Not found"}</li>`;
+      moonTimesHTML += `<li>Moonset: ${moonset ? moonset.date.toLocaleTimeString() : "Not found"}</li>`;
+      moonTimesHTML += "</ul>";
+      document.getElementById("moon-times").innerHTML = moonTimesHTML;
+
+      const ctx = document.getElementById("moonChart").getContext("2d");
+      if (window.moonChart) {
+        window.moonChart.destroy();
+      }
+
+      window.moonChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: times,
+          datasets: [
+            {
+              label: "Altitude (°)",
+              data: altitudes,
+              borderColor: "blue",
+              fill: false,
+              yAxisID: 'y1'
+            },
+            {
+              label: "Azimuth (°)",
+              data: azimuths,
+              borderColor: "green",
+              fill: false,
+              yAxisID: 'y2'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y1: {
+              type: 'linear',
+              position: 'left',
+              title: {
+                display: true,
+                text: 'Altitude (°)'
+              }
+            },
+            y2: {
+              type: 'linear',
+              position: 'right',
+              title: {
+                display: true,
+                text: 'Azimuth (°)'
+              },
+              min: 0,
+              max: 360
+            }
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: `Moon Position on ${date}`
+            }
+          }
+        }
+      });
+    }
+  </script>
 </body>
 </html>
