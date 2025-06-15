@@ -103,6 +103,25 @@
 // MoonPos calculates the Moon position, based on Meeus chapter 45
 // and the illuminated percentage from Meeus equations 46.4 and 46.1
 
+function julianDate(obs) {
+  let y = obs.year;
+  let m = obs.month;
+  let d = obs.day + (obs.hours + obs.minutes / 60 + obs.seconds / 3600) / 24;
+
+  if (m <= 2) {
+    y -= 1;
+    m += 12;
+  }
+
+  const A = Math.floor(y / 100);
+  const B = 2 - A + Math.floor(A / 4);
+
+  return Math.floor(365.25 * (y + 4716)) +
+         Math.floor(30.6001 * (m + 1)) +
+         d + B - 1524.5;
+}
+
+
 function MoonPos(obs) {
   // julian date
   var jdobs=jd(obs,true);
