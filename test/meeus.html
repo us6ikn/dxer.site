@@ -4,8 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Moon Tracker</title>
-  <script src="astronomy.min.js"></script>
+
+  <!-- ✅ Correct browser-compatible UMD version -->
+  <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.2/astronomy.min.js"></script>
+  
+  <!-- Chart.js for plotting -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     body {
       font-family: sans-serif;
@@ -67,7 +72,6 @@
 
       // Moonrise and Moonset
       const startTime = Astronomy.MakeTime(new Date(date + "T00:00:00Z"));
-      const endTime = Astronomy.MakeTime(new Date(date + "T23:59:59Z"));
       const moonrise = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, startTime, 1);
       const moonset = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, startTime, 1);
 
