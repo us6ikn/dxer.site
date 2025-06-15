@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Moon Az/El & Rise/Set Calculator</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -30,24 +30,16 @@
 
 <canvas id="azElChart" width="800" height="400"></canvas>
 
-<script language="JavaScript" src="observer.js">
-</script>
-<script language="JavaScript" src="datetime.js">
-</script>
-<script language="JavaScript" src="sun.js">
-</script>
-<script language="JavaScript" src="moon.js">
-</script>
-<script language="JavaScript" src="planets.js">
-</script>
-<script language="JavaScript" src="stars.js">
-</script>
-<script language="JavaScript" src="separation.js">
-</script>
-<script language="JavaScript" src="util.js">
-</script>
-<script language="JavaScript" src="math.js">
-</script>
+<!-- External JS dependencies -->
+<script src="observer.js"></script>
+<script src="datetime.js"></script>
+<script src="sun.js"></script>
+<script src="moon.js"></script>
+<script src="planets.js"></script>
+<script src="stars.js"></script>
+<script src="separation.js"></script>
+<script src="util.js"></script>
+<script src="math.js"></script>
 
 <script>
 function setToday() {
@@ -56,10 +48,13 @@ function setToday() {
 }
 setToday();
 
+// Converts fractional hours (e.g. 14.5) into HH:MM:SS format string
 function toLocalTimeString(h) {
+  if (h < 0) return 'Not found';
   const hr = Math.floor(h);
   const min = Math.floor((h - hr) * 60);
-  return `${String(hr).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+  const sec = Math.floor(((h - hr) * 60 - min) * 60);
+  return `${String(hr).padStart(2, '0')}:${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
 }
 
 document.getElementById('inputForm').addEventListener('submit', function(e) {
@@ -68,7 +63,16 @@ document.getElementById('inputForm').addEventListener('submit', function(e) {
   const lat = parseFloat(document.getElementById('lat').value);
   const lon = parseFloat(document.getElementById('lon').value);
   const dateStr = document.getElementById('date').value;
+
+  if (!dateStr) {
+    alert("Please select a valid date.");
+    return;
+  }
+
   const dateObj = new Date(dateStr + "T00:00:00");
+
+  // Calculate local timezone offset in hours (e.g. -4 for EDT)
+  const tzOffsetHours = -dateObj.getTimezoneOffset() / 60;
 
   const obs = {
     year: dateObj.getFullYear(),
@@ -77,8 +81,8 @@ document.getElementById('inputForm').addEventListener('submit', function(e) {
     hours: 0,
     minutes: 0,
     seconds: 0,
-    tz: 0,       // ✅ Correct property
-    dst: 0,      // ✅ Already correct
+    tz: tzOffsetHours,  // Use local timezone offset here
+    dst: 0,             // Assuming no DST offset needed or handled inside functions
     lon: lon,
     lat: lat
   };
@@ -88,13 +92,11 @@ document.getElementById('inputForm').addEventListener('submit', function(e) {
   console.log('moonrise result:', riseSet);
 
   let riseSetText = '';
-  if (riseSet[0] >= 0) riseSetText += `Moonrise: ${toLocalTimeString(riseSet[0])} `;
-  else riseSetText += `Moonrise: Not found `;
-  if (riseSet[1] >= 0) riseSetText += `Moonset: ${toLocalTimeString(riseSet[1])}`;
-  else riseSetText += `Moonset: Not found`;
+  riseSetText += `Moonrise: ${toLocalTimeString(riseSet[0])} `;
+  riseSetText += `Moonset: ${toLocalTimeString(riseSet[1])}`;
   document.getElementById('riseSetText').innerText = riseSetText;
 
-  // Azimuth & Elevation Plot
+  // Azimuth & Elevation Plot for every hour of the day
   const azimuths = [], elevations = [], labels = [];
   for (let h = 0; h <= 24; h += 1) {
     obs.hours = h;
@@ -107,7 +109,7 @@ document.getElementById('inputForm').addEventListener('submit', function(e) {
   }
 
   const ctx = document.getElementById('azElChart').getContext('2d');
-  if (window.moonChart) window.moonChart.destroy(); // Reset if chart already exists
+  if (window.moonChart) window.moonChart.destroy();
 
   window.moonChart = new Chart(ctx, {
     type: 'line',
@@ -119,12 +121,14 @@ document.getElementById('inputForm').addEventListener('submit', function(e) {
           data: azimuths,
           borderColor: 'blue',
           yAxisID: 'y',
+          fill: false,
         },
         {
           label: 'Elevation (°)',
           data: elevations,
           borderColor: 'green',
           yAxisID: 'y1',
+          fill: false,
         }
       ]
     },
@@ -133,12 +137,16 @@ document.getElementById('inputForm').addEventListener('submit', function(e) {
         y: {
           type: 'linear',
           position: 'left',
-          title: { display: true, text: 'Azimuth' }
+          title: { display: true, text: 'Azimuth (°)' },
+          min: 0,
+          max: 360,
         },
         y1: {
           type: 'linear',
           position: 'right',
-          title: { display: true, text: 'Elevation' }
+          title: { display: true, text: 'Elevation (°)' },
+          min: -90,
+          max: 90,
         }
       },
       plugins: {
@@ -147,6 +155,7 @@ document.getElementById('inputForm').addEventListener('submit', function(e) {
       }
     }
   });
+
 });
 </script>
 
