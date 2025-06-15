@@ -64,7 +64,7 @@
 
         const astroTime = Astronomy.MakeTime(time);
         const equ = Astronomy.Equator(Astronomy.Body.Moon, astroTime, observer, true, true);
-        const horCoords = Astronomy.Horizon(astroTime, observer, equ, 'normal');
+        const horCoords = Astronomy.Horizon(astroTime, observer, equ.vec, 'normal');
 
 
         times.push(`${hour}:00`);
