@@ -124,7 +124,6 @@ function julianDate(obs) {
 
 function MoonPos(obs) {
   // julian date
-    obs.jd = julianDate(obs);
   var jdobs=jd(obs,true);
   var T=(jdobs-2451545.0)/36525;
   var T2=T*T;
@@ -193,6 +192,8 @@ function MoonPos(obs) {
 function moonrise(obs) {
   // obs is a reference variable make a copy
   var obscopy=new Object();
+    obs.jd = julianDate(obs);
+
   for (var i in obs) obscopy[i] = obs[i];
   obscopy.hours=0;
   obscopy.minutes=0;
