@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Moon Distance and Declination (Geocentric)</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -20,7 +20,7 @@
 <canvas id="moonChart" width="1000" height="400"></canvas>
 
 <script type="module">
-  import { julian, moonposition } from "https://cdn.jsdelivr.net/npm/astronomia/+esm";
+  import { julian, moonposition, nutation } from "https://cdn.jsdelivr.net/npm/astronomia/+esm";
 
   const year = 2025;
   const month = 5; // June (0-indexed)
@@ -34,16 +34,38 @@
   const radToDeg = r => r * (180 / Math.PI);
   const hourMs = 3600 * 1000;
 
+  // Convert ecliptic lon/lat to equatorial ra/dec using obliquity
+  function eclToEq(lon, lat, jd) {
+    const eps = nutation.meanObliquity(jd); // in radians
+    const sinEps = Math.sin(eps);
+    const cosEps = Math.cos(eps);
+
+    const sinLat = Math.sin(lat);
+    const cosLat = Math.cos(lat);
+    const sinLon = Math.sin(lon);
+    const cosLon = Math.cos(lon);
+
+    const sinDec = sinLat * cosEps + cosLat * sinEps * sinLon;
+    const dec = Math.asin(sinDec);
+
+    // Right ascension calculation (not used but included for completeness)
+    const y = sinLon * cosEps - Math.tan(lat) * sinEps;
+    const x = cosLon;
+    const ra = Math.atan2(y, x);
+
+    return { ra, dec };
+  }
+
   for (let t = startDate.getTime(); t < endDate.getTime(); t += hourMs) {
     const date = new Date(t);
     const jd = julian.DateToJD(date);
     const moonCoords = moonposition.position(jd);
 
-    const AU_TO_KM = 149597870.7;
-    const distanceKm = moonCoords.range * AU_TO_KM;
-    const eclCoords = coord.eclToEq(moonCoords.lon, moonCoords.lat, jd);
-    const decDeg = radToDeg(eclCoords.dec);
+    const EARTH_RADIUS_KM = 6378.14;
+    const distanceKm = moonCoords.range;
 
+    const eqCoords = eclToEq(moonCoords.lon, moonCoords.lat, jd);
+    const decDeg = radToDeg(eqCoords.dec);
 
     dates.push(date.toISOString().slice(0, 16).replace('T', ' '));
     distances.push(distanceKm);
