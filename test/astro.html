@@ -400,56 +400,49 @@
           chart.update();
         }
       }
+                                                                function getMoonAnnotations(dateStr, lat, lon) {
+                                                                  const observer = new Astronomy.Observer(lat, lon, 0);
+                                                                  const date = new Date(dateStr + 'T00:00:00Z');
+                                                                  const annotations = {};
 
-
-                                                              function getMoonAnnotations(dateStr, lat, lon) {
-                                                                const observer = new Astronomy.Observer(lat, lon, 0);
-                                                                const date = new Date(dateStr + 'T00:00:00Z');
-
-                                                                const annotations = {};
-
-                                                                const addAnnotation = (time, label, color, id) => {
-                                                                  if (!time) return;
-
-                                                                  const utcHour = time.date.getUTCHours();
-                                                                  const utcMin = time.date.getUTCMinutes();
-                                                                  const floatIndex = utcHour * 2 + utcMin / 30;
-
-                                                                  const utcStr = `${String(utcHour).padStart(2, '0')}:${String(utcMin).padStart(2, '0')} UTC`;
-
-                                                                  annotations[id] = {
-                                                                    type: 'line',
-                                                                    mode: 'vertical',
-                                                                    scaleID: 'x',
-                                                                    value: floatIndex,
-                                                                    borderColor: color,
-                                                                    borderWidth: 1,
-                                                                    borderDash: [6, 3],
-                                                                    label: {
-                                                                      enabled: true,
-                                                                      content: [label, utcStr],
-                                                                      position: 'top',
-                                                                      backgroundColor: color,
-                                                                      color: 'white',
-                                                                      font: { size: 10 },
-                                                                      padding: 4,
-                                                                    }
+                                                                  const addAnnotation = (time, label, color, id) => {
+                                                                    if (!time) return;
+                                                                    const utcHour = time.date.getUTCHours();
+                                                                    const utcMin = time.date.getUTCMinutes();
+                                                                    const floatIndex = utcHour * 2 + utcMin / 30;
+                                                                    const utcStr = `${String(utcHour).padStart(2, '0')}:${String(utcMin).padStart(2, '0')} UTC`;
+                                                                    annotations[id] = {
+                                                                      type: 'line',
+                                                                      mode: 'vertical',
+                                                                      scaleID: 'x',
+                                                                      value: floatIndex,
+                                                                      borderColor: color,
+                                                                      borderWidth: 1,
+                                                                      borderDash: [6, 3],
+                                                                      label: {
+                                                                        enabled: true,
+                                                                        content: [label, utcStr],
+                                                                        position: 'top',
+                                                                        backgroundColor: color,
+                                                                        color: 'white',
+                                                                        font: { size: 10 },
+                                                                        padding: 4,
+                                                                      }
+                                                                    };
                                                                   };
-                                                                };
 
-                                                                try {
-                                                                  const rise = Astronomy.SearchMoonRise(observer, date, 1);
-                                                                  const set = Astronomy.SearchMoonSet(observer, date, 1);
+                                                                  try {
+                                                                    const rise = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, date, 300);
+                                                                    const set = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, date, 300);
 
-                                                                  addAnnotation(rise, 'Moonrise', 'blue', 'moonrise');
-                                                                  addAnnotation(set, 'Moonset', 'orange', 'moonset');
-                                                                } catch (e) {
-                                                                  console.warn("Moon rise/set error:", e);
+                                                                    addAnnotation(rise, 'Moonrise', 'blue', 'moonrise');
+                                                                    addAnnotation(set, 'Moonset', 'orange', 'moonset');
+                                                                  } catch (e) {
+                                                                    console.warn("Moon rise/set error:", e);
+                                                                  }
+
+                                                                  return annotations;
                                                                 }
-
-                                                                return annotations;
-                                                              }
-
 
 
       document.getElementById("hour").addEventListener("input", e => {
