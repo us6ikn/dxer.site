@@ -224,7 +224,7 @@
         updateChart(hourIndex);
       }
 
-      function updateChart(hourIndex) {
+      async function updateChart(hourIndex) {
         if (!rawData.length) return;
 
         const locatorInput = document.getElementById("qth").value.trim();
@@ -249,22 +249,25 @@
           const minutes = (i % 2) * 30;
           const dt = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}:00Z`);
           const observer = new Astronomy.Observer(lat, lon, 0);
-          let elevationDeg = null;
-          try {
-            const moonEqu = Astronomy.Equator("Moon", dt, observer, true, true);
-            elevationDeg = moonEqu?.hor?.altitude;
-          } catch (e) {
-            console.warn("Astronomy.Equator failed for", dt, e);
-          }
+          const moonEqu = Astronomy.Equator("Moon", dt, observer, true, true);
+          const elevationDeg = moonEqu.hor.altitude;
 
-          if (elevationDeg != null && elevationDeg > 0) {
-            ...
+          if (elevationDeg > 0) {
+            moonElevations.push(elevationDeg);
+            visibleRates.push(dataForDay[i]?.rate ?? null);
+
+            // Convert libration rate deg/min to rad/s
+            const omegaRadSec = (dataForDay[i]?.rate ?? 0) * (Math.PI / 180) / 60;
+            // Calculate full Doppler spread in Hz
+            const dopplerHz = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
+            // Store kHz for chart
+            dopplerSpreads.push(dopplerHz);
           } else {
             moonElevations.push(null);
             visibleRates.push(null);
             dopplerSpreads.push(null);
           }
-
+        }
 
         const labels = dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
 
