@@ -337,24 +337,22 @@
               maintainAspectRatio: false,
               scales: {
                 x: {
-                  // (same as before)
+                  display: true,
+                  ticks: {
+                    autoSkip: false,
+                    callback: function(value, index) {
+                      return index % 2 === 0 ? this.getLabelForValue(value) : '';
+                    }
+                  }
                 },
                 y1: {
                   type: "linear",
                   display: true,
                   position: "left",
-                  title: {
-                    display: true,
-                    text: "Libration rate (deg/min)",
-                    color: "#ff0000" // 🔴 Matches curve color
-                  },
+                  title: { display: true, text: "Libration rate (deg/min)" },
                   min: 0,
                   max: 0.005,
-                  ticks: {
-                    stepSize: 0.001,
-                    callback: v => v.toFixed(3),
-                    color: "#ff0000" // Optional: match tick color too
-                  },
+                  ticks: { stepSize: 0.001, callback: v => v.toFixed(3) },
                   grid: { drawTicks: true, drawBorder: true }
                 },
                 y2: {
@@ -362,16 +360,11 @@
                   display: true,
                   min: 0,
                   max: 90,
-                  title: {
-                    display: true,
-                    text: "Moon Elevation (°)",
-                    color: "rgba(0, 0, 255, 0.6)" // 🔵 Matches curve color
-                  },
+                  title: { display: true, text: "Moon Elevation (°)" },
                   grid: { drawOnChartArea: false },
                   ticks: {
                     stepSize: 15,
-                    callback: val => val + "°",
-                    color: "rgba(0, 0, 255, 0.6)"
+                    callback: val => val + "°"
                   }
                 },
                 y3: {
@@ -379,22 +372,15 @@
                   display: true,
                   position: "right",
                   offset: true,
-                  title: {
-                    display: true,
-                    text: "Doppler Spread (Hz)",
-                    color: "green" // 🟢 Matches curve color
-                  },
+                  title: { display: true, text: "Doppler Spread (Hz)" },
                   min: 0,
-                  max: 300,
+                  max: 300, // adjust max for your data scale
                   grid: { drawOnChartArea: false },
-                  ticks: {
-                    stepSize: 50,
-                    color: "green"
-                  }
+                  ticks: { stepSize: 50 }
                 }
               },
               plugins: {
-                legend: { display: false },
+                legend: { display: true },
                 annotation: { annotations: annotation }
               }
             }
