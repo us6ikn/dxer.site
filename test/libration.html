@@ -417,21 +417,21 @@
 
                                                                 let riseEvent = null, setEvent = null;
                                                                 try {
-                                                                  riseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, astroTime, 1.0);
+                                                                    riseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, astroTime, 1.0);
                                                                 } catch {
                                                                   riseEvent = null;
                                                                 }
 
                                                                 try {
-                                                                  setEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, astroTime, 1.0);
+                                                                    setEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, astroTime, 1.0);
                                                                 } catch {
                                                                   setEvent = null;
                                                                 }
 
                                                                 const annotations = {};
 
-                                                                if (riseEvent && riseEvent.date && riseEvent.date instanceof Astronomy.AstroTime) {
-                                                                  const riseDate = riseEvent.date.date;
+                                                                if (riseEvent && riseEvent.date) {
+                                                                  const riseDate = riseEvent.date;
                                                                   const index = timeToChartIndex(riseDate);
                                                                   annotations['moonrise'] = {
                                                                     type: 'line',
@@ -448,8 +448,8 @@
                                                                   };
                                                                 }
 
-                                                                if (setEvent && setEvent.date && setEvent.date instanceof Astronomy.AstroTime) {
-                                                                  const setDate = setEvent.date.date;
+                                                                if (setEvent && setEvent.date) {
+                                                                  const setDate = setEvent.date;
                                                                   const index = timeToChartIndex(setDate);
                                                                   annotations['moonset'] = {
                                                                     type: 'line',
