@@ -322,7 +322,7 @@
                   pointRadius: 0,
                   borderWidth: 1.5,
                   tension: 0.2,
-                  yAxisID: "y2"
+                  yAxisID: "y1"
                 },
                 {
                   label: "Moon Elevation (°)",
@@ -336,7 +336,7 @@
                   pointRadius: 0,
                   borderWidth: 1,
                   tension: 0.3,
-                  yAxisID: "y1"
+                  yAxisID: "y2"
                 },
                 {
                   label: "Doppler Spread (Hz)",
@@ -358,10 +358,10 @@
                 y1: {
                   type: "linear",
                   display: true,
-                  position: "left",
+                  position: "right",
                   title: {
                     display: true,
-                    text: "Libration rate (deg/min)",
+                    text: "Libration rate, °/min",
                     color: "#ff0000"
                   },
                   min: 0,
@@ -374,13 +374,13 @@
                   grid: { drawTicks: true, drawBorder: true }
                 },
                 y2: {
-                  position: "right",
+                  position: "left",
                   display: true,
                   min: 0,
                   max: 90,
                   title: {
                     display: true,
-                    text: "Moon Elevation (°)",
+                    text: "Moon Elevation",
                     color: "rgba(0, 0, 255, 0.6)"
                   },
                   grid: { drawOnChartArea: false },
