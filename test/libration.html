@@ -257,11 +257,8 @@
             moonElevations.push(elevationDeg);
             visibleRates.push(dataForDay[i]?.rate ?? null);
 
-            // Convert libration rate deg/min to rad/s
             const omegaRadSec = (dataForDay[i]?.rate ?? 0) * (Math.PI / 180) / 60;
-            // Calculate full Doppler spread in Hz
             const dopplerHz = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
-            // Store kHz for chart
             dopplerSpreads.push(dopplerHz);
           } else {
             moonElevations.push(null);
@@ -339,7 +336,6 @@
               maintainAspectRatio: false,
               scales: {
                 x: {
-                  // (same as before)
                 },
                 y1: {
                   type: "linear",
@@ -348,14 +344,14 @@
                   title: {
                     display: true,
                     text: "Libration rate (deg/min)",
-                    color: "#ff0000" // 🔴 Matches curve color
+                    color: "#ff0000"
                   },
                   min: 0,
                   max: 0.005,
                   ticks: {
                     stepSize: 0.001,
                     callback: v => v.toFixed(3),
-                    color: "#ff0000" // Optional: match tick color too
+                    color: "#ff0000"
                   },
                   grid: { drawTicks: true, drawBorder: true }
                 },
@@ -367,7 +363,7 @@
                   title: {
                     display: true,
                     text: "Moon Elevation (°)",
-                    color: "rgba(0, 0, 255, 0.6)" // 🔵 Matches curve color
+                    color: "rgba(0, 0, 255, 0.6)"
                   },
                   grid: { drawOnChartArea: false },
                   ticks: {
@@ -452,21 +448,19 @@
                                                                       enabled: true,
                                                                       position: 'top',
                                                                       font: {
-                                                                        size: 11,           // slightly larger font
-                                                                        weight: 'bold',     // make text bold
-                                                                        family: 'Arial, sans-serif',  // clean, readable font
+                                                                        size: 11,
+                                                                        weight: 'bold',
+                                                                        family: 'Arial, sans-serif',
                                                                       },
-                                                                      color: 'white',       // white text for contrast on blue background
-                                                                      backgroundColor: 'rgba(0, 0, 255, 0.85)', // solid but slightly transparent blue
-                                                                      padding: 2,           // a bit more padding for breathing room
-                                                                      cornerRadius: 6,      // rounded corners for smooth look
-                                                                      boxShadow: '2px 2px 4px rgba(0,0,0,0.3)', // subtle shadow for depth (if supported)
-                                                                      textAlign: 'center',  // center-align multi-line text
-                                                                      // Optional: add border for better contrast
+                                                                      color: 'white',
+                                                                      backgroundColor: 'rgba(0, 0, 255, 0.85)',
+                                                                      padding: 2,
+                                                                      cornerRadius: 6,
+                                                                      boxShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+                                                                      textAlign: 'center',
                                                                       borderColor: 'rgba(255, 255, 255, 0.7)',
                                                                       borderWidth: 1,
                                                                     }
-
                                                                   };
                                                                 }
 
@@ -489,28 +483,22 @@
                                                                         weight: 'bold',
                                                                         family: 'Arial, sans-serif',
                                                                       },
-                                                                      color: 'white',  // white text for good contrast on orange
-                                                                      backgroundColor: 'rgba(255, 165, 0, 0.85)', // slightly transparent bright orange
+                                                                      color: 'white',
+                                                                      backgroundColor: 'rgba(255, 165, 0, 0.85)',
                                                                       padding: 2,
                                                                       cornerRadius: 6,
-                                                                      // Optional for depth and contrast:
                                                                       boxShadow: '2px 2px 4px rgba(0,0,0,0.3)',
                                                                       textAlign: 'center',
                                                                       borderColor: 'rgba(255, 255, 255, 0.7)',
                                                                       borderWidth: 1,
                                                                     }
-
                                                                   };
                                                                 }
-
-
                                                                 return annotations;
                                                               }
 
-
                                                               function timeToChartIndex(date) {
                                                                 if (!(date instanceof Date)) throw new Error("Expected a Date object");
-                                                                // Convert fractional hours to 30-minute intervals (chart indices)
                                                                 return (date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600) * 2;
                                                               }
 
@@ -519,8 +507,7 @@
         const hour = Math.floor(hourIndex / 2);
         const minutes = (hourIndex % 2) * 30;
         document.getElementById("hour-value").textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}`;
-
-        updateChart(hourIndex); // Move the black bar
+        updateChart(hourIndex);
       });
 
     document.getElementById("prevDay").addEventListener("click", () => {
@@ -560,8 +547,6 @@
         document.getElementById("hour-value").textContent =
           `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
       };
-
-
 
     document.getElementById("date").addEventListener("input", () => {
         hourIndex = parseInt(document.getElementById("hour").value);
