@@ -148,6 +148,9 @@
       </div>
       <button id="prevDay">←</button>
       <input type="date" id="date" />
+      document.getElementById("date").addEventListener("change", () => {
+        updateChart(hourIndex);  // preserve current time selection
+      });
       <button id="nextDay">→</button>
       <span id="hour-value">Time (UTC): 00:00</span>
     </div>
@@ -529,19 +532,22 @@
         updateChart(hourIndex);
       });
 
-    document.getElementById("prevDay").addEventListener("click", () => {
-      const d = new Date(document.getElementById("date").value);
-      d.setDate(d.getDate() - 1);
-      document.getElementById("date").valueAsDate = d;
-      updateChart(0);
-    });
+                                                              function adjustDate(days) {
+                                                                const dateInput = document.getElementById("date");
+                                                                const currentDate = new Date(dateInput.value);
+                                                                currentDate.setDate(currentDate.getDate() + days);
+                                                                dateInput.valueAsDate = currentDate;
 
-    document.getElementById("nextDay").addEventListener("click", () => {
-      const d = new Date(document.getElementById("date").value);
-      d.setDate(d.getDate() + 1);
-      document.getElementById("date").valueAsDate = d;
-      updateChart(0);
-    });
+                                                                updateChart(hourIndex);  // keep time line in sync
+                                                              }
+
+                                                              document.getElementById("prevDay").addEventListener("click", () => {
+                                                                adjustDate(-1);
+                                                              });
+
+                                                              document.getElementById("nextDay").addEventListener("click", () => {
+                                                                adjustDate(1);
+                                                              });
 
       window.onload = () => {
         const now = new Date();
