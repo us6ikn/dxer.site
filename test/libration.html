@@ -430,7 +430,7 @@
                                                                 const annotations = {};
 
                                                                 if (riseEvent) {
-                                                                  const index = timeToChartIndex(riseEvent.date);
+                                                                  const index = timeToChartIndex(riseEvent.date.toDate());  // ✅ convert to native Date
                                                                   annotations['moonrise'] = {
                                                                     type: 'line',
                                                                     mode: 'vertical',
@@ -447,7 +447,7 @@
                                                                 }
 
                                                                 if (setEvent) {
-                                                                  const index = timeToChartIndex(setEvent.date);
+                                                                  const index = timeToChartIndex(setEvent.date.toDate());
                                                                   annotations['moonset'] = {
                                                                     type: 'line',
                                                                     mode: 'vertical',
