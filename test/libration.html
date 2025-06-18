@@ -474,11 +474,10 @@
 
 
                                                               function timeToChartIndex(date) {
-                                                                  if (!(date instanceof Date)) throw new Error("Expected a Date object");
-                                                                  return date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
+                                                                if (!(date instanceof Date)) throw new Error("Expected a Date object");
+                                                                // Convert fractional hours to 30-minute intervals (chart indices)
+                                                                return (date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600) * 2;
                                                               }
-
-
 
       document.getElementById("hour").addEventListener("input", e => {
         hourIndex = parseInt(document.getElementById("hour").value);
