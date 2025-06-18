@@ -468,10 +468,10 @@
                                                               }
 
                                                               function timeToChartIndex(date) {
-                                                                const utcHour = date.getUTCHours();
-                                                                const utcMin = date.getUTCMinutes();
-                                                                return utcHour * 2 + (utcMin >= 30 ? 1 : 0);
+                                                                  if (!(date instanceof Date)) throw new Error("Expected a Date object");
+                                                                  return date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
                                                               }
+
 
 
       document.getElementById("hour").addEventListener("input", e => {
