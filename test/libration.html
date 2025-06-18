@@ -411,61 +411,64 @@
         }
       }
                                                               function getMoonAnnotations(dateStr, lat, lon) {
-                                                                  const observer = new Astronomy.Observer(lat, lon, 0);
-                                                                  const date = new Date(`${dateStr}T00:00:00Z`);
+                                                                const observer = new Astronomy.Observer(lat, lon, 0);
+                                                                const jsDate = new Date(`${dateStr}T00:00:00Z`);
+                                                                const astroTime = Astronomy.MakeTime(jsDate);
 
-                                                                  let riseEvent, setEvent;
+                                                                let riseEvent = null, setEvent = null;
+                                                                try {
+                                                                  riseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, astroTime, 1.0);
+                                                                } catch {
+                                                                  riseEvent = null;
+                                                                }
 
-                                                                  try {
-                                                                      riseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, date, 1.0);
-                                                                  } catch {
-                                                                      riseEvent = null;
-                                                                  }
+                                                                try {
+                                                                  setEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, astroTime, 1.0);
+                                                                } catch {
+                                                                  setEvent = null;
+                                                                }
 
-                                                                  try {
-                                                                      setEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, date, 1.0);
-                                                                  } catch {
-                                                                      setEvent = null;
-                                                                  }
+                                                                const annotations = {};
 
-                                                                  const annotations = {};
+                                                                if (riseEvent && riseEvent.date && riseEvent.date instanceof Astronomy.AstroTime) {
+                                                                  const riseDate = riseEvent.date.date;
+                                                                  const index = timeToChartIndex(riseDate);
+                                                                  annotations['moonrise'] = {
+                                                                    type: 'line',
+                                                                    mode: 'vertical',
+                                                                    scaleID: 'x',
+                                                                    value: index,
+                                                                    borderColor: 'orange',
+                                                                    borderWidth: 1,
+                                                                    label: {
+                                                                      content: 'Moonrise',
+                                                                      enabled: true,
+                                                                      position: 'top'
+                                                                    }
+                                                                  };
+                                                                }
 
-                                                                  if (riseEvent && riseEvent.date && riseEvent.date.date instanceof Date) {
-                                                                      const index = timeToChartIndex(riseEvent.date.date);
-                                                                      annotations['moonrise'] = {
-                                                                          type: 'line',
-                                                                          mode: 'vertical',
-                                                                          scaleID: 'x',
-                                                                          value: index,
-                                                                          borderColor: 'orange',
-                                                                          borderWidth: 1,
-                                                                          label: {
-                                                                              content: 'Moonrise',
-                                                                              enabled: true,
-                                                                              position: 'top'
-                                                                          }
-                                                                      };
-                                                                  }
+                                                                if (setEvent && setEvent.date && setEvent.date instanceof Astronomy.AstroTime) {
+                                                                  const setDate = setEvent.date.date;
+                                                                  const index = timeToChartIndex(setDate);
+                                                                  annotations['moonset'] = {
+                                                                    type: 'line',
+                                                                    mode: 'vertical',
+                                                                    scaleID: 'x',
+                                                                    value: index,
+                                                                    borderColor: 'gray',
+                                                                    borderWidth: 1,
+                                                                    label: {
+                                                                      content: 'Moonset',
+                                                                      enabled: true,
+                                                                      position: 'top'
+                                                                    }
+                                                                  };
+                                                                }
 
-                                                                  if (setEvent && setEvent.date && setEvent.date.date instanceof Date) {
-                                                                      const index = timeToChartIndex(setEvent.date.date);
-                                                                      annotations['moonset'] = {
-                                                                          type: 'line',
-                                                                          mode: 'vertical',
-                                                                          scaleID: 'x',
-                                                                          value: index,
-                                                                          borderColor: 'gray',
-                                                                          borderWidth: 1,
-                                                                          label: {
-                                                                              content: 'Moonset',
-                                                                              enabled: true,
-                                                                              position: 'top'
-                                                                          }
-                                                                      };
-                                                                  }
-
-                                                                  return annotations;
+                                                                return annotations;
                                                               }
+
 
                                                               function timeToChartIndex(date) {
                                                                   if (!(date instanceof Date)) throw new Error("Expected a Date object");
