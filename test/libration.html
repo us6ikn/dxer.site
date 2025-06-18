@@ -434,7 +434,7 @@
                                                                 const annotations = {};
 
                                                                 function formatTimeUTC(date) {
-                                                                  return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}`;
+                                                                  return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}z`;
                                                                 }
 
                                                                 if (riseEvent && riseEvent.date) {
@@ -481,7 +481,7 @@
                                                                     borderColor: 'gray',
                                                                     borderWidth: 1,
                                                                     label: {
-                                                                      content: ['Moonset', formatTimeUTC(setDate)],
+                                                                      content: ['Set', formatTimeUTC(setDate)],
                                                                       enabled: true,
                                                                       position: 'top',
                                                                       font: {
