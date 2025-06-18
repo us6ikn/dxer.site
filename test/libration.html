@@ -401,111 +401,118 @@
               }
             }
           });
-            } else {
-              chart.data.labels = labels;
-              chart.data.datasets[0].data = visibleRates;
-              chart.data.datasets[1].data = moonElevations;
-              chart.data.datasets[2].data = dopplerSpreads;
-              chart.options.plugins.annotation.annotations = annotation;
-              chart.update();
-            }
+        } else {
+          chart.data.labels = labels;
+          chart.data.datasets[0].data = visibleRates;
+          chart.data.datasets[1].data = moonElevations;
+          chart.data.datasets[2].data = dopplerSpreads;
+          chart.options.plugins.annotation.annotations = annotation;
+          chart.update();
+        }
+      }
+                                                              function getMoonAnnotations(dateStr, lat, lon) {
+                                                                const observer = new Astronomy.Observer(lat, lon, 0);
+                                                                const jsDate = new Date(`${dateStr}T00:00:00Z`);
+                                                                const astroTime = Astronomy.MakeTime(jsDate);
 
-            function getMoonAnnotations(dateStr, lat, lon) {
-              const observer = new Astronomy.Observer(lat, lon, 0);
-              const jsDate = new Date(`${dateStr}T00:00:00Z`);
-              const astroTime = Astronomy.MakeTime(jsDate);
+                                                                let riseEvent = null, setEvent = null;
+                                                                try {
+                                                                    riseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, astroTime, 1.0);
+                                                                } catch {
+                                                                  riseEvent = null;
+                                                                }
 
-              let riseEvent = null, setEvent = null;
-              try {
-                riseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, astroTime, 1.0);
-              } catch {
-                riseEvent = null;
-              }
+                                                                try {
+                                                                    setEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, astroTime, 1.0);
+                                                                } catch {
+                                                                  setEvent = null;
+                                                                }
 
-              try {
-                setEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, astroTime, 1.0);
-              } catch {
-                setEvent = null;
-              }
+                                                                console.log("Moonrise:", riseEvent?.date?.toISOString?.());
+                                                                console.log("Moonset:", setEvent?.date?.toISOString?.());
 
-              console.log("Moonrise:", riseEvent?.date?.toISOString?.());
-              console.log("Moonset:", setEvent?.date?.toISOString?.());
+                                                                const annotations = {};
 
-              const annotations = {};
+                                                                function formatTimeUTC(date) {
+                                                                  return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')} UTC`;
+                                                                }
 
-              function formatTimeUTC(date) {
-                return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')} UTC`;
-              }
+                                                                if (riseEvent && riseEvent.date) {
+                                                                  const riseDate = riseEvent.date;
+                                                                  const index = timeToChartIndex(riseDate);
+                                                                  annotations['moonrise'] = {
+                                                                    type: 'line',
+                                                                    mode: 'vertical',
+                                                                    scaleID: 'x',
+                                                                    value: index,
+                                                                    borderColor: 'orange',
+                                                                    borderWidth: 1,
+                                                                    label: {
+                                                                      content: ['Moonrise', formatTimeUTC(riseDate)],
+                                                                      enabled: true,
+                                                                      position: 'top',
+                                                                      font: {
+                                                                        size: 11,           // slightly larger font
+                                                                        weight: 'bold',     // make text bold
+                                                                        family: 'Arial, sans-serif',  // clean, readable font
+                                                                      },
+                                                                      color: 'white',       // white text for contrast on blue background
+                                                                      backgroundColor: 'rgba(0, 0, 255, 0.85)', // solid but slightly transparent blue
+                                                                      padding: 6,           // a bit more padding for breathing room
+                                                                      cornerRadius: 6,      // rounded corners for smooth look
+                                                                      boxShadow: '2px 2px 4px rgba(0,0,0,0.3)', // subtle shadow for depth (if supported)
+                                                                      textAlign: 'center',  // center-align multi-line text
+                                                                      // Optional: add border for better contrast
+                                                                      borderColor: 'rgba(255, 255, 255, 0.7)',
+                                                                      borderWidth: 1,
+                                                                    }
 
-              if (riseEvent && riseEvent.date) {
-                const riseDate = riseEvent.date;
-                const index = timeToChartIndex(riseDate);
-                annotations['moonrise'] = {
-                  type: 'line',
-                  mode: 'vertical',
-                  scaleID: 'x',
-                  value: index,
-                  borderColor: 'orange',
-                  borderWidth: 1,
-                  label: {
-                    content: ['Moonrise', formatTimeUTC(riseDate)],
-                    enabled: true,
-                    position: 'top',
-                    font: {
-                      size: 11,
-                      weight: 'bold',
-                      family: 'Arial, sans-serif',
-                    },
-                    color: 'white',
-                    backgroundColor: 'rgba(0, 0, 255, 0.85)',
-                    padding: 6,
-                    cornerRadius: 6,
-                    boxShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-                    textAlign: 'center',
-                    borderColor: 'rgba(255, 255, 255, 0.7)',
-                    borderWidth: 1,
-                  }
-                };
-              }
+                                                                  };
+                                                                }
 
-              if (setEvent && setEvent.date) {
-                const setDate = setEvent.date;
-                const index = timeToChartIndex(setDate);
-                annotations['moonset'] = {
-                  type: 'line',
-                  mode: 'vertical',
-                  scaleID: 'x',
-                  value: index,
-                  borderColor: 'gray',
-                  borderWidth: 1,
-                  label: {
-                    content: ['Moonset', formatTimeUTC(setDate)],
-                    enabled: true,
-                    position: 'top',
-                    font: {
-                      size: 11,
-                      weight: 'bold',
-                      family: 'Arial, sans-serif',
-                    },
-                    color: 'white',
-                    backgroundColor: 'rgba(255, 165, 0, 0.85)',
-                    padding: 6,
-                    cornerRadius: 6,
-                    boxShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-                    textAlign: 'center',
-                    borderColor: 'rgba(255, 255, 255, 0.7)',
-                    borderWidth: 1,
-                  }
-                };
-              }
+                                                                if (setEvent && setEvent.date) {
+                                                                  const setDate = setEvent.date;
+                                                                  const index = timeToChartIndex(setDate);
+                                                                  annotations['moonset'] = {
+                                                                    type: 'line',
+                                                                    mode: 'vertical',
+                                                                    scaleID: 'x',
+                                                                    value: index,
+                                                                    borderColor: 'gray',
+                                                                    borderWidth: 1,
+                                                                    label: {
+                                                                      content: ['Moonset', formatTimeUTC(setDate)],
+                                                                      enabled: true,
+                                                                      position: 'top',
+                                                                      font: {
+                                                                        size: 11,
+                                                                        weight: 'bold',
+                                                                        family: 'Arial, sans-serif',
+                                                                      },
+                                                                      color: 'white',  // white text for good contrast on orange
+                                                                      backgroundColor: 'rgba(255, 165, 0, 0.85)', // slightly transparent bright orange
+                                                                      padding: 6,
+                                                                      cornerRadius: 6,
+                                                                      // Optional for depth and contrast:
+                                                                      boxShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+                                                                      textAlign: 'center',
+                                                                      borderColor: 'rgba(255, 255, 255, 0.7)',
+                                                                      borderWidth: 1,
+                                                                    }
 
-              return annotations;
-            }
+                                                                  };
+                                                                }
 
-            function timeToChartIndex(date) {
-              if (!(date instanceof Date)) throw new Error("Expected a Date object");
-              return (date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600) * 2;
-            }
+
+                                                                return annotations;
+                                                              }
+
+
+                                                              function timeToChartIndex(date) {
+                                                                if (!(date instanceof Date)) throw new Error("Expected a Date object");
+                                                                // Convert fractional hours to 30-minute intervals (chart indices)
+                                                                return (date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600) * 2;
+                                                              }
 
       document.getElementById("hour").addEventListener("input", e => {
         hourIndex = parseInt(document.getElementById("hour").value);
