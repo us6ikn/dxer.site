@@ -44,18 +44,10 @@
       margin-left: 10px;
       font-weight: normal;
     }
-    #hour {
-      width: 100%;
-      margin-top: 5px;
-      -webkit-appearance: none;
-      appearance: none;
-      height: 10px;
-      background: rgba(0, 0, 0, 0.1);
-      border-radius: 5px;
-      outline: none;
-      transition: background 0.3s ease;
-      padding: 0;
-    }
+      #hour {
+        width: 100%;
+        margin-top: 5px;
+      }
     #hour::-webkit-slider-thumb,
     #hour::-moz-range-thumb {
       width: 20px;
@@ -135,7 +127,7 @@
     </div>
     <input type="range" id="hour" min="0" max="47" value="0" step="1" />
 
-    <label for="qth">Enter QTH Locator:</label>
+    <label for="qth">My Locator:</label>
     <input type="text" id="qth" maxlength="6" />
     <button onclick="calculateLibration()">Calculate</button>
 
