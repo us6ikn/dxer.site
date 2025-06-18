@@ -410,8 +410,6 @@
           chart.update();
         }
       }
-
-
                                                               function getMoonAnnotations(dateStr, lat, lon) {
                                                                 const observer = new Astronomy.Observer(lat, lon, 0);
                                                                 const date = new Date(`${dateStr}T00:00:00Z`);
@@ -430,7 +428,7 @@
                                                                 const annotations = {};
 
                                                                 if (riseEvent) {
-                                                                  const index = timeToChartIndex(riseEvent.date.toDate());  // ✅ convert to native Date
+                                                                  const index = timeToChartIndex(riseEvent.date.date);  // ⬅ FIXED
                                                                   annotations['moonrise'] = {
                                                                     type: 'line',
                                                                     mode: 'vertical',
@@ -447,7 +445,7 @@
                                                                 }
 
                                                                 if (setEvent) {
-                                                                  const index = timeToChartIndex(setEvent.date.toDate());
+                                                                  const index = timeToChartIndex(setEvent.date.date);  // ⬅ FIXED
                                                                   annotations['moonset'] = {
                                                                     type: 'line',
                                                                     mode: 'vertical',
