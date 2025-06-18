@@ -448,15 +448,25 @@
                                                                     borderColor: 'orange',
                                                                     borderWidth: 1,
                                                                     label: {
-                                                                        content: ['Moonrise', formatTimeUTC(riseDate)],
+                                                                      content: ['Moonrise', formatTimeUTC(riseDate)],
                                                                       enabled: true,
                                                                       position: 'top',
-                                                                      font: { size: 12 },
-                                                                      color: 'black',
-                                                                      backgroundColor: 'rgba(255, 165, 0, 1.0)',
-                                                                      padding: 4,
-                                                                      cornerRadius: 3,
+                                                                      font: {
+                                                                        size: 14,           // slightly larger font
+                                                                        weight: 'bold',     // make text bold
+                                                                        family: 'Arial, sans-serif',  // clean, readable font
+                                                                      },
+                                                                      color: 'white',       // white text for contrast on blue background
+                                                                      backgroundColor: 'rgba(0, 0, 255, 0.85)', // solid but slightly transparent blue
+                                                                      padding: 6,           // a bit more padding for breathing room
+                                                                      cornerRadius: 6,      // rounded corners for smooth look
+                                                                      boxShadow: '2px 2px 4px rgba(0,0,0,0.3)', // subtle shadow for depth (if supported)
+                                                                      textAlign: 'center',  // center-align multi-line text
+                                                                      // Optional: add border for better contrast
+                                                                      borderColor: 'rgba(255, 255, 255, 0.7)',
+                                                                      borderWidth: 1,
                                                                     }
+
                                                                   };
                                                                 }
 
@@ -476,7 +486,7 @@
                                                                       position: 'top',
                                                                       font: { size: 12 },
                                                                       color: 'black',
-                                                                      backgroundColor: 'rgba(0, 0, 255, 1.0)',
+                                                                      backgroundColor: 'rgba(255, 165, 0, 1.0)',
                                                                       padding: 4,
                                                                       cornerRadius: 3,
                                                                     }
