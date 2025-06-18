@@ -434,7 +434,7 @@
                                                                 const annotations = {};
 
                                                                 function formatTimeUTC(date) {
-                                                                  return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')} UTC`;
+                                                                  return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}`;
                                                                 }
 
                                                                 if (riseEvent && riseEvent.date) {
@@ -448,7 +448,7 @@
                                                                     borderColor: 'orange',
                                                                     borderWidth: 1,
                                                                     label: {
-                                                                      content: ['Moonrise', formatTimeUTC(riseDate)],
+                                                                      content: ['Rise', formatTimeUTC(riseDate)],
                                                                       enabled: true,
                                                                       position: 'top',
                                                                       font: {
