@@ -44,11 +44,27 @@
       margin-left: 10px;
       font-weight: normal;
     }
-      #hour {
-        width: 100%;
-        margin-top: 5px;
+    #hour {
+      width: 100%;
+      margin-top: 5px;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 10px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+      outline: none;
+      transition: background 0.3s ease;
+      padding: 0;
+    }
+      #hour::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px; /* Thumb width */
+        height: 20px; /* Thumb height */
+        background: #007bff;
+        border-radius: 50%;
+        cursor: pointer;
       }
-    #hour::-webkit-slider-thumb,
     #hour::-moz-range-thumb {
       width: 20px;
       height: 20px;
