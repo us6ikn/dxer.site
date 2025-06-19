@@ -510,6 +510,46 @@
       }
   </script>
   
+  <script>
+  function calculateLibration(locatorId = "qth") {
+    const locator = document.getElementById(locatorId).value.trim().toUpperCase();
+    if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) return;
+
+    const dataArray = [];
+    const now = new Date(document.getElementById("date").value);
+    const dateStr = now.toISOString().slice(0, 10);
+
+    const { lat, lon } = qthToLatLon(locator);
+
+    for (let i = 0; i < 48; i++) {
+      const hour = Math.floor(i / 2);
+      const minutes = (i % 2) * 30;
+      const dt = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}:00Z`);
+
+      const observer = new Astronomy.Observer(lat, lon, 0);
+      const moonEq = Astronomy.Equator(Astronomy.Body.Moon, dt, observer, true, false);
+
+      // Fake libration rate based on change in declination (just a simple stand-in)
+      const rate = Math.abs(moonEq.dec) / 10000; // placeholder logic
+
+      dataArray.push({
+        date: dt,
+        rate
+      });
+    }
+
+    if (locatorId === "qth") {
+      rawData = dataArray;
+    } else if (locatorId === "dx") {
+      rawDataDX = dataArray;
+    }
+
+    updateChart(locatorId, locatorId === "qth" ? "declinationChart" : "dxDeclinationChart",
+                locatorId === "qth" ? "chartWrapper" : "dxChartWrapper");
+  }
+  </script>
+
+  
   <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
 </body>
 </html>
