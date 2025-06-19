@@ -375,6 +375,9 @@
           chart.data.datasets[0].data = visibleRates;
           chart.data.datasets[1].data = moonElevations;
           chart.data.datasets[2].data = dopplerSpreads;
+          const elev = moonElevations[hourIndex];
+          const rate = visibleRates[hourIndex];
+          const doppler = dopplerSpreads[hourIndex];
           if (annotation.timeMarker.label) {
             annotation.timeMarker.label.content = [
               `${chart.data.labels[hourIndex]} UTC`,
