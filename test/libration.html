@@ -236,13 +236,6 @@
     if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) return;
 
     const dateStr = new Date(document.getElementById("date").value).toISOString().slice(0, 10);
-    const labels = [];
-    for (let i = 0; i < 48; i++) {
-      const hour = Math.floor(i / 2);
-      const minutes = (i % 2) * 30;
-      labels.push(`${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}`);
-    }
-
 
     let lat, lon;
     try {
@@ -264,18 +257,17 @@
 
       if (elevationDeg > 0) {
         moonElevations.push(elevationDeg);
-        const moonObsNow = Astronomy.Equator(Astronomy.Body.Moon, dt, observer, true, false);
-        const dtMinus = new Date(dt.getTime() - 30 * 1000); // 30 seconds before
-        const moonObsBefore = Astronomy.Equator(Astronomy.Body.Moon, dtMinus, observer, true, false);
 
-        // Approximate angular separation
-        const deltaRA = (moonObsNow.ra - moonObsBefore.ra) * 15; // convert RA hours to degrees
-        const deltaDec = moonObsNow.dec - moonObsBefore.dec;
-        const angularRateDegMin = Math.sqrt(deltaRA**2 + deltaDec**2) * 2; // 1 min interval = 2 * 30s
+        const deltaMinutes = 0.5;
+        const dtLater = new Date(dt.getTime() + deltaMinutes * 60 * 1000);
+        const moonEqLater = Astronomy.Equator(Astronomy.Body.Moon, dtLater, observer, true, false);
+        const deltaRA = (moonEqLater.ra - moonEq.ra) * 15;
+        const deltaDec = moonEqLater.dec - moonEq.dec;
+        const rate = Math.sqrt(deltaRA**2 + deltaDec**2) / deltaMinutes;
 
-        visibleRates.push(angularRateDegMin);
+        visibleRates.push(rate);
 
-        const omegaRadSec = (angularRateDegMin * Math.PI / 180) / 60;
+        const omegaRadSec = rate * (Math.PI / 180) / 60;
         const dopplerHz = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
         dopplerSpreads.push(dopplerHz);
       } else {
@@ -284,6 +276,7 @@
         dopplerSpreads.push(null);
       }
     }
+
 
     const labels = dataForDay.map((_, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
     const annotation = {
