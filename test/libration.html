@@ -182,17 +182,6 @@
       });
     }
 
-    function qthToLatLon(locator) {
-      if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
-        throw new Error("Invalid QTH locator format (must be 6 characters)");
-      }
-      locator = locator.toUpperCase();
-      const A = 'A'.charCodeAt(0);
-      const lon = (locator.charCodeAt(0) - A) * 20 + parseInt(locator[2]) * 2 + (locator.charCodeAt(4) - A) * (5 / 60) - 180 + (2.5 / 60);
-      const lat = (locator.charCodeAt(1) - A) * 10 + parseInt(locator[3]) + (locator.charCodeAt(5) - A) * (2.5 / 60) - 90 + (1.25 / 60);
-      return { lat, lon };
-    }
-
       function updateChart(hourIndex) {
         if (!rawData.length) return;
 
@@ -535,6 +524,19 @@
         document.getElementById("chartWrapper").style.display = "none";
       }
     });
+  </script>
+  
+  <script>
+  function qthToLatLon(locator) {
+    if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
+      throw new Error("Invalid QTH locator format (must be 6 characters)");
+    }
+    locator = locator.toUpperCase();
+    const A = 'A'.charCodeAt(0);
+    const lon = (locator.charCodeAt(0) - A) * 20 + parseInt(locator[2]) * 2 + (locator.charCodeAt(4) - A) * (5 / 60) - 180 + (2.5 / 60);
+    const lat = (locator.charCodeAt(1) - A) * 10 + parseInt(locator[3]) + (locator.charCodeAt(5) - A) * (2.5 / 60) - 90 + (1.25 / 60);
+    return { lat, lon };
+  }
   </script>
   
   <script>
