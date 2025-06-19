@@ -133,7 +133,6 @@
       width: 100%;
       max-width: 100%;
       height: calc(100% - 40px);
-      display: block;
       box-sizing: border-box;
       padding-bottom: 20px;
     }
@@ -279,7 +278,9 @@
           }
         }
 
-        const labels = dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
+                                                              const labels = Array.from({ length: 48 }, (_, i) =>
+                                                                `${String(Math.floor(i / 2)).padStart(2, '0')}:${i % 2 === 0 ? '00' : '30'}`
+                                                              );
 
         const annotation = {
           timeMarker: {
