@@ -386,9 +386,9 @@
           const azimuth = moonAzimuths[hourIndex];
           const labelText =
             `El: ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}  ` +
-            `Az: ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}  ` +
-            `Libration Rate: ${rate != null ? rate.toFixed(4) + '°/min' : 'N/A'}  ` +
-            `Spread: ${doppler != null ? doppler.toFixed(0) + ' Hz' : 'N/A'}`;
+            ` Az: ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}  ` +
+            ` Libration Rate: ${rate != null ? rate.toFixed(4) + '°/min' : 'N/A'}  ` +
+            ` Spread: ${doppler != null ? doppler.toFixed(0) + 'Hz' : 'N/A'}`;
 
           // Display it above the chart
           document.getElementById('chartLabel').textContent = labelText;
