@@ -384,14 +384,13 @@
           const doppler = dopplerSpreads[hourIndex];
           const azimuth = moonAzimuths[hourIndex];
           if (annotation.timeMarker.label) {
-              annotation.timeMarker.label.content = [
-                `${chart.data.labels[hourIndex]} UTC`,
-                `Elevation: ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}`,
-                `Azimuth: ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}`,
-                `Libration: ${rate != null ? (rate * 60).toFixed(3) + ' °/hr' : 'N/A'}`,
-                `Doppler: ${doppler != null ? doppler.toFixed(1) + ' Hz' : 'N/A'}`
-              ];
+            annotation.timeMarker.label.content =
+              `El: ${elev != null ? elev.toFixed(1) + '°' : 'N/A'} | ` +
+              `Az: ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'} | ` +
+              `LR: ${rate != null ? (rate * 60).toFixed(1) + '°' : 'N/A'} | ` +
+              `S: ${doppler != null ? doppler.toFixed(1) + ' Hz' : 'N/A'}`;
           }
+
 
           chart.options.plugins.annotation.annotations = annotation;
           chart.update('none');
