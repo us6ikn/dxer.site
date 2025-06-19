@@ -157,7 +157,6 @@
     <label for="qth">My Locator:</label>
     <input type="text" id="qth" maxlength="6" size="11" placeholder="e.g. JO89tt" />
     <div id="chartWrapper">
-        <div id="chartLabel" style="text-align: center; margin-bottom: 8px; font-weight: bold;"></div>
       <canvas id="declinationChart"></canvas>
     </div>
   </div>
@@ -384,21 +383,15 @@
           const rate = visibleRates[hourIndex];
           const doppler = dopplerSpreads[hourIndex];
           const azimuth = moonAzimuths[hourIndex];
-          const labelText =
-            `El: ${elev != null ? elev.toFixed(1) + '°' : 'N/A'} | ` +
-            `Az: ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'} | ` +
-            `LR: ${rate != null ? (rate * 60).toFixed(1) + '°' : 'N/A'} | ` +
-            `S: ${doppler != null ? doppler.toFixed(1) + ' Hz' : 'N/A'}`;
-
-          // Display it above the chart
-          document.getElementById('chartLabel').textContent = labelText;
-
-          // Hide label inside canvas (optional, but cleaner)
           if (annotation.timeMarker.label) {
-            annotation.timeMarker.label.enabled = false;
+              annotation.timeMarker.label.content = [
+                `${chart.data.labels[hourIndex]} UTC`,
+                `Elevation: ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}`,
+                `Azimuth: ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}`,
+                `Libration: ${rate != null ? (rate * 60).toFixed(3) + ' °/hr' : 'N/A'}`,
+                `Doppler: ${doppler != null ? doppler.toFixed(1) + ' Hz' : 'N/A'}`
+              ];
           }
-
-
 
           chart.options.plugins.annotation.annotations = annotation;
           chart.update('none');
