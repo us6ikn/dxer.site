@@ -181,7 +181,6 @@
   <script>
   let chart, dxChart;
   let rawData = [];
-  let rawDataDX = [];
   let hourIndex = 0;
   const MOON_RADIUS = 1.7374e6;
   const SPEED_OF_LIGHT = 299792458;
@@ -201,9 +200,6 @@
     const dxLocator = document.getElementById("dx").value.trim().toUpperCase();
     if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxLocator)) {
       updateChart("dx", "dxDeclinationChart", "dxChartWrapper");
-    }
-    if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxLocator)) {
-      calculateLibration("dx");
     }
   });
 
@@ -240,8 +236,7 @@
     if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) return;
 
     const dateStr = new Date(document.getElementById("date").value).toISOString().slice(0, 10);
-    const dataSource = locatorId === "qth" ? rawData : rawDataDX;
-    const dataForDay = dataSource.filter(r => new Date(r.date).toISOString().slice(0, 10) === dateStr);
+    const dataForDay = rawData.filter(r => new Date(r.date).toISOString().slice(0, 10) === dateStr);
 
     let lat, lon;
     try {
@@ -457,63 +452,48 @@
   </script>
   
   <script>
-  function qthToLatLon(locator) {
-    if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
-      throw new Error("Invalid QTH locator format (must be 6 characters)");
-    }
-    locator = locator.toUpperCase();
-    const A = 'A'.charCodeAt(0);
-    const lon = (locator.charCodeAt(0) - A) * 20 + parseInt(locator[2]) * 2 + (locator.charCodeAt(4) - A) * (5 / 60) - 180 + (2.5 / 60);
-    const lat = (locator.charCodeAt(1) - A) * 10 + parseInt(locator[3]) + (locator.charCodeAt(5) - A) * (2.5 / 60) - 90 + (1.25 / 60);
-    return { lat, lon };
+  function calculateLibration() {
+    const locator = document.getElementById("qth").value.trim();
+
+    let { lat, lon } = qthToLatLon(locator);
+    const COS_LAT = Math.cos(lat * Math.PI / 180);
+    const TIME_SHIFT_MIN = (lon / 15) * 60;
+    const INTERVAL_MIN = 30;
+    const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN);
+
+    const res = await fetch("moon_topo_coords_lat0.txt");
+    const lines = (await res.text()).trim().split("\n").slice(1);
+    const tempData = lines.map(line => ({
+      date: line.slice(0, 20).trim(),
+      lat: parseFloat(line.slice(20, 32)),
+      lon: parseFloat(line.slice(32))
+    }));
+
+    const shifted = tempData.map((entry, i) => {
+      const shiftedIndex = i + SHIFT_STEPS;
+      const ref = tempData[shiftedIndex] || {};
+      return {
+        date: entry.date,
+        lat: ref.lat ?? null,
+        lon: ref.lon ?? null
+      };
+    });
+
+    const results = shifted.map((curr, i, arr) => {
+      if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null) return { date: curr.date, rate: 0 };
+      let dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
+      let dlon = (((arr[i+1].lon - arr[i-1].lon) / 60 + 180) % 360) - 180;
+      dlat *= COS_LAT;
+      dlon *= COS_LAT;
+      return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
+    });
+
+    ({ lat, lon } = qthToLatLon(locator));
+    rawData = results;
+    document.getElementById("chartWrapper").style.display = "block";
+    updateChart("qth", "declinationChart", "chartWrapper");
   }
   </script>
-  
-  <script>
-    async function calculateLibration(locatorId = "qth") {
-      const locator = document.getElementById(locatorId).value.trim().toUpperCase();
-      if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) return;
-
-      const { lat, lon } = qthToLatLon(locator);
-      const observer = new Astronomy.Observer(lat, lon, 0);
-      const dateStr = document.getElementById("date").value;
-      const baseDate = new Date(`${dateStr}T00:00:00Z`);
-      const results = [];
-
-      for (let i = 0; i < 48; i++) {
-        const dt = new Date(baseDate.getTime() + i * 30 * 60 * 1000); // every 30 mins
-        const t = Astronomy.MakeTime(dt);
-        const geo = Astronomy.GeoVector(Astronomy.Body.Moon, t, true);
-        const equ = Astronomy.Equator(Astronomy.Body.Moon, t, observer, true, false);
-
-        // Estimate libration rate as angular velocity of Moon's apparent position
-        const t2 = Astronomy.MakeTime(new Date(dt.getTime() + 60 * 1000)); // +1 min
-        const geo2 = Astronomy.GeoVector(Astronomy.Body.Moon, t2, true);
-        const deltaLon = geo2.x - geo.x;
-        const deltaLat = geo2.y - geo.y;
-        const rate = Math.sqrt(deltaLon * deltaLon + deltaLat * deltaLat); // deg/min approx
-
-        results.push({
-          date: dt,
-          rate
-        });
-      }
-
-      if (locatorId === "qth") {
-        rawData = results;
-      } else if (locatorId === "dx") {
-        rawDataDX = results;
-      }
-
-      updateChart(
-        locatorId,
-        locatorId === "qth" ? "declinationChart" : "dxDeclinationChart",
-        locatorId === "qth" ? "chartWrapper" : "dxChartWrapper"
-      );
-    }
-  </script>
-
-
   
   <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
 </body>
