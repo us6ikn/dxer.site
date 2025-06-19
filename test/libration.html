@@ -278,16 +278,14 @@
           }
         }
 
-                                                              const labels = Array.from({ length: 48 }, (_, i) =>
-                                                                `${String(Math.floor(i / 2)).padStart(2, '0')}:${i % 2 === 0 ? '00' : '30'}`
-                                                              );
+        const labels = dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
 
         const annotation = {
           timeMarker: {
             type: 'line',
             mode: 'vertical',
             scaleID: 'x',
-            value: hourIndex,
+            value: Math.round(hourIndex),
             borderColor: 'black',
             borderWidth: 2,
             label: { enabled: false }
