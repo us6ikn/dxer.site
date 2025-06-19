@@ -187,35 +187,45 @@
         const SPEED_OF_LIGHT = 299792458;
         const FREQUENCY_HZ = 10.368e9;
 
-        document.getElementById("hour").addEventListener("input", e => {
+        // Validate locator format (6 characters, valid range)
+        function isValidLocator(locator) {
+          return /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator);
+        }
+
+        document.getElementById("hour")?.addEventListener("input", e => {
           hourIndex = parseInt(e.target.value);
           const hour = Math.floor(hourIndex / 2);
           const minutes = (hourIndex % 2) * 30;
-          document.getElementById("hour-value").textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}`;
+          const hourValueElem = document.getElementById("hour-value");
+          if (hourValueElem) {
+            hourValueElem.textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}`;
+          }
           updateChart("qth", "declinationChart", "chartWrapper");
           updateChart("dx", "dxDeclinationChart", "dxChartWrapper");
         });
 
-        document.getElementById("prevDay").addEventListener("click", () => adjustDate(-1));
-        document.getElementById("nextDay").addEventListener("click", () => adjustDate(1));
-        document.getElementById("date").addEventListener("input", () => {
+        document.getElementById("prevDay")?.addEventListener("click", () => adjustDate(-1));
+        document.getElementById("nextDay")?.addEventListener("click", () => adjustDate(1));
+        document.getElementById("date")?.addEventListener("input", () => {
           updateChart("qth", "declinationChart", "chartWrapper");
           updateChart("dx", "dxDeclinationChart", "dxChartWrapper");
         });
 
         ["qth", "dx"].forEach(id => {
-          document.getElementById(id).addEventListener("input", async () => {
-            const val = document.getElementById(id).value.trim().toUpperCase();
-            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(val)) {
+          document.getElementById(id)?.addEventListener("input", async () => {
+            const val = document.getElementById(id)?.value.trim().toUpperCase() || "";
+            if (isValidLocator(val)) {
               await calculateLibration(id);
             } else {
-              document.getElementById(id === "qth" ? "chartWrapper" : "dxChartWrapper").style.display = "none";
+              const wrapper = document.getElementById(id === "qth" ? "chartWrapper" : "dxChartWrapper");
+              if(wrapper) wrapper.style.display = "none";
             }
           });
         });
 
         function adjustDate(days) {
           const dateInput = document.getElementById("date");
+          if (!dateInput) return;
           const currentDate = new Date(dateInput.value);
           currentDate.setDate(currentDate.getDate() + days);
           dateInput.valueAsDate = currentDate;
@@ -224,10 +234,19 @@
         }
 
         function updateChart(locatorId, canvasId, wrapperId) {
-          const locator = document.getElementById(locatorId).value.trim().toUpperCase();
-          if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) return;
+          const locatorElem = document.getElementById(locatorId);
+          if (!locatorElem) return;
+          const locator = locatorElem.value.trim().toUpperCase();
+          if (!isValidLocator(locator)) {
+            const wrapper = document.getElementById(wrapperId);
+            if(wrapper) wrapper.style.display = "none";
+            return;
+          }
 
-          const dateStr = new Date(document.getElementById("date").value).toISOString().slice(0, 10);
+          const dateElem = document.getElementById("date");
+          if (!dateElem || !dateElem.value) return;
+          const dateStr = new Date(dateElem.value).toISOString().slice(0, 10);
+
           const dataSource = locatorId === "qth" ? rawDataQth : rawDataDx;
           const dataForDay = dataSource.filter(r => new Date(r.date).toISOString().slice(0, 10) === dateStr);
 
@@ -235,6 +254,9 @@
           try {
             ({ lat, lon } = qthToLatLon(locator));
           } catch (e) {
+            console.error(e);
+            const wrapper = document.getElementById(wrapperId);
+            if(wrapper) wrapper.style.display = "none";
             return;
           }
 
@@ -278,12 +300,15 @@
 
           const canvas = document.getElementById(canvasId);
           const wrapper = document.getElementById(wrapperId);
+          if (!canvas || !wrapper) return;
+
           if (locatorId === "qth" && !chart) {
             chart = new Chart(canvas, getChartConfig(labels, visibleRates, moonElevations, dopplerSpreads, annotation));
           } else if (locatorId === "dx" && !dxChart) {
             dxChart = new Chart(canvas, getChartConfig(labels, visibleRates, moonElevations, dopplerSpreads, annotation));
           } else {
             const targetChart = locatorId === "qth" ? chart : dxChart;
+            if (!targetChart) return;
             targetChart.data.labels = labels;
             targetChart.data.datasets[0].data = visibleRates;
             targetChart.data.datasets[1].data = moonElevations;
@@ -358,7 +383,7 @@
         }
 
         function qthToLatLon(locator) {
-          if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) throw new Error("Invalid QTH locator");
+          if (!isValidLocator(locator)) throw new Error("Invalid QTH locator format (must be 6 characters)");
           locator = locator.toUpperCase();
           const A = 'A'.charCodeAt(0);
           const lon = (locator.charCodeAt(0) - A) * 20 + parseInt(locator[2]) * 2 + (locator.charCodeAt(4) - A) * (5 / 60) - 180 + (2.5 / 60);
@@ -383,88 +408,84 @@
             const riseDate = riseEvent.date;
             annotations["moonrise"] = {
               type: "line", mode: "vertical", scaleID: "x", value: timeToChartIndex(riseDate), borderColor: "blue",
-              borderWidth: 1, label: {
-                enabled: true, content: `Moonrise ${formatUTC(riseDate)}`, position: "start",
-                backgroundColor: "rgba(0,0,255,0.5)", color: "#fff", font: { size: 10 }
-              }
+              borderWidth: 1, label: { content: "Moonrise " + formatUTC(riseDate), enabled: true }
             };
           }
           if (setEvent && setEvent.date) {
             const setDate = setEvent.date;
             annotations["moonset"] = {
               type: "line", mode: "vertical", scaleID: "x", value: timeToChartIndex(setDate), borderColor: "red",
-              borderWidth: 1, label: {
-                enabled: true, content: `Moonset ${formatUTC(setDate)}`, position: "start",
-                backgroundColor: "rgba(255,0,0,0.5)", color: "#fff", font: { size: 10 }
-              }
+              borderWidth: 1, label: { content: "Moonset " + formatUTC(setDate), enabled: true }
             };
           }
           return annotations;
         }
 
+        // Convert Date to chart index (0 to 47)
         function timeToChartIndex(date) {
-          // Convert a JS Date to chart hour index (0-47)
-          const utcHours = date.getUTCHours();
-          const utcMinutes = date.getUTCMinutes();
-          return utcHours * 2 + (utcMinutes >= 30 ? 1 : 0);
+          return date.getUTCHours() * 2 + (date.getUTCMinutes() >= 30 ? 1 : 0);
         }
 
         async function calculateLibration(locatorId) {
-          const locator = document.getElementById(locatorId).value.trim().toUpperCase();
-          if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-            document.getElementById(locatorId === "qth" ? "chartWrapper" : "dxChartWrapper").style.display = "none";
+          const locatorElem = document.getElementById(locatorId);
+          if (!locatorElem) return;
+          const locator = locatorElem.value.trim().toUpperCase();
+          if (!isValidLocator(locator)) {
+            const wrapper = document.getElementById(locatorId === "qth" ? "chartWrapper" : "dxChartWrapper");
+            if(wrapper) wrapper.style.display = "none";
             return;
           }
-          const dateValue = document.getElementById("date").value;
-          if (!dateValue) return;
 
-          // Build URL for your server endpoint or API (update as needed)
-          const url = `/calculate?locator=${locator}&date=${dateValue}`;
-          try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error("Failed to load libration data");
-            const results = await response.json();
+          const dateElem = document.getElementById("date");
+          if (!dateElem || !dateElem.value) return;
 
-            if (locatorId === "qth") rawDataQth = results;
-            else rawDataDx = results;
+          const { lat, lon } = qthToLatLon(locator);
+          const date = new Date(dateElem.value);
+          const dataArray = [];
 
-            // Show chart container
-            document.getElementById(locatorId === "qth" ? "chartWrapper" : "dxChartWrapper").style.display = "block";
+          for (let i = 0; i < 48; i++) {
+            const hour = Math.floor(i / 2);
+            const minutes = (i % 2) * 30;
+            const dt = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), hour, minutes, 0));
+            try {
+              const obs = new Astronomy.Observer(lat, lon, 0);
+              const moonEqu = Astronomy.Equator(Astronomy.Body.Moon, dt, obs, true, false);
+              const moonH = Astronomy.Horizon(dt, obs, moonEqu.ra, moonEqu.dec, 'normal');
 
-            // Update chart with new data
-            updateChart(locatorId, locatorId === "qth" ? "declinationChart" : "dxDeclinationChart", locatorId === "qth" ? "chartWrapper" : "dxChartWrapper");
-
-          } catch (err) {
-            console.error(err);
-            document.getElementById(locatorId === "qth" ? "chartWrapper" : "dxChartWrapper").style.display = "none";
+              // Calculate libration rate and add it to dataArray
+              // Placeholder: You should insert your actual libration rate calc here
+              const rate = Math.abs(Math.sin(dt.getUTCHours() / 24 * 2 * Math.PI)) * 0.003;  // fake sample data
+              dataArray.push({ date: dt.toISOString(), rate });
+            } catch (e) {
+              dataArray.push({ date: dt.toISOString(), rate: null });
+            }
           }
+
+          if (locatorId === "qth") {
+            rawDataQth = dataArray;
+          } else {
+            rawDataDx = dataArray;
+          }
+          updateChart(locatorId, locatorId === "qth" ? "declinationChart" : "dxDeclinationChart", locatorId === "qth" ? "chartWrapper" : "dxChartWrapper");
         }
 
         window.onload = async () => {
-          const now = new Date();
-          const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-          document.getElementById("date").valueAsDate = utcDate;
-
-          // Calculate initial hourIndex rounded to nearest half hour
-          let hour = now.getUTCHours();
-          let minutes = now.getUTCMinutes();
-          if (minutes >= 45) {
-            hour++;
-            minutes = 0;
-          } else if (minutes >= 15) {
-            minutes = 30;
-          } else {
-            minutes = 0;
+          // Initialize date input to today
+          const dateElem = document.getElementById("date");
+          if (dateElem && !dateElem.value) {
+            const now = new Date();
+            dateElem.valueAsDate = now;
           }
-          hourIndex = hour * 2 + (minutes === 30 ? 1 : 0);
-          document.getElementById("hour").value = hourIndex;
-          document.getElementById("hour-value").textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}`;
 
-          // Trigger initial calculations for both locators (if any set)
-          await calculateLibration("qth");
-          await calculateLibration("dx");
+          if (isValidLocator(document.getElementById("qth")?.value || "")) {
+            await calculateLibration("qth");
+          }
+          if (isValidLocator(document.getElementById("dx")?.value || "")) {
+            await calculateLibration("dx");
+          }
         };
       </script>
+
 
   
   <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
