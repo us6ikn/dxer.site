@@ -227,16 +227,18 @@
 
         const labels = dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
 
-        const annotation = {
-          timeMarker: {
-            type: 'line',
-            mode: 'vertical',
-            scaleID: 'x',
-            value: hourIndex,
-            borderColor: 'black',
-            borderWidth: 2,
-            label: { enabled: false }
-          }
+                                                              const localHourIndex = hourIndex; // freeze a snapshot
+
+                                                              const annotation = {
+                                                                timeMarker: {
+                                                                  type: 'line',
+                                                                  mode: 'vertical',
+                                                                  scaleID: 'x',
+                                                                  value: localHourIndex,
+                                                                  ...
+                                                                }
+                                                              };
+
         };
 
         if (locatorInput) {
