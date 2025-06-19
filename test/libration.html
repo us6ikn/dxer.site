@@ -258,8 +258,18 @@
 
       if (elevationDeg > 0) {
         moonElevations.push(elevationDeg);
-        visibleRates.push(dataForDay[i]?.rate ?? null);
-        const omegaRadSec = (dataForDay[i]?.rate ?? 0) * (Math.PI / 180) / 60;
+        const moonObsNow = Astronomy.Equator(Astronomy.Body.Moon, dt, observer, true, false);
+        const dtMinus = new Date(dt.getTime() - 30 * 1000); // 30 seconds before
+        const moonObsBefore = Astronomy.Equator(Astronomy.Body.Moon, dtMinus, observer, true, false);
+
+        // Approximate angular separation
+        const deltaRA = (moonObsNow.ra - moonObsBefore.ra) * 15; // convert RA hours to degrees
+        const deltaDec = moonObsNow.dec - moonObsBefore.dec;
+        const angularRateDegMin = Math.sqrt(deltaRA**2 + deltaDec**2) * 2; // 1 min interval = 2 * 30s
+
+        visibleRates.push(angularRateDegMin);
+
+        const omegaRadSec = (angularRateDegMin * Math.PI / 180) / 60;
         const dopplerHz = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
         dopplerSpreads.push(dopplerHz);
       } else {
