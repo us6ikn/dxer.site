@@ -157,7 +157,7 @@
     <label for="qth">My Locator:</label>
     <input type="text" id="qth" maxlength="6" size="11" placeholder="e.g. JO89tt" />
     <div id="chartWrapper">
-        <div id="chartLabel" style="text-align: center; margin-bottom: 8px; font-weight: bold; font-size: 10px;"></div>
+        <div id="chartLabel" style="text-align: center; margin-bottom: 8px; font-weight: bold; font-size: 12px;"></div>
       <canvas id="declinationChart"></canvas>
     </div>
   </div>
@@ -385,9 +385,9 @@
           const doppler = dopplerSpreads[hourIndex];
           const azimuth = moonAzimuths[hourIndex];
           const labelText =
-            `El: ${elev != null ? elev.toFixed(1) + '°' : 'N/A'} ` +
-            `Az: ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'} ` +
-            `Lib Rate: ${rate != null ? (rate * 60).toFixed(1) + '°' : 'N/A'}  ` +
+            `El: ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}  ` +
+            `Az: ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}  ` +
+            `Libration Rate: ${rate != null ? (rate * 60).toFixed(1) + '°' : 'N/A'}  ` +
             `Spread: ${doppler != null ? doppler.toFixed(1) + ' Hz' : 'N/A'}`;
 
           // Display it above the chart
