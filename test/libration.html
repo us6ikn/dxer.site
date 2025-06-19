@@ -157,7 +157,7 @@
     <label for="qth">My Locator:</label>
     <input type="text" id="qth" maxlength="6" size="11" placeholder="e.g. JO89tt" />
     <div id="chartWrapper">
-        <div id="chartLabel" style="text-align: center; margin-bottom: 0px; font-weight: bold; font-size: 12px;"></div>
+        <div id="chartLabel" style="text-align: center; margin-bottom: 0px; font-weight: normal; font-size: 12px;"></div>
       <canvas id="declinationChart"></canvas>
     </div>
   </div>
@@ -393,16 +393,12 @@
           // Display it above the chart
           document.getElementById('chartLabel').textContent = labelText;
 
-          // Hide label inside canvas (optional, but cleaner)
           if (annotation.timeMarker.label) {
             annotation.timeMarker.label.enabled = false;
           }
 
-
-
           chart.options.plugins.annotation.annotations = annotation;
           chart.update('none');
-
 
           chart.update('none'); // prevent animation to avoid flicker
         }
