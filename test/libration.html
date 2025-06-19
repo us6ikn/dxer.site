@@ -360,8 +360,10 @@
           chart.data.datasets[0].data = visibleRates;
           chart.data.datasets[1].data = moonElevations;
           chart.data.datasets[2].data = dopplerSpreads;
-          chart.options.plugins.annotation.annotations = annotation;
-          chart.update();
+          if (chart.options.plugins.annotation.annotations.timeMarker) {
+            chart.options.plugins.annotation.annotations.timeMarker.value = hourIndex;
+          }
+          chart.update('none'); // prevent animation to avoid flicker
         }
       }
     function getMoonAnnotations(dateStr, lat, lon) {
