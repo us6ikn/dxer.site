@@ -236,7 +236,13 @@
     if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) return;
 
     const dateStr = new Date(document.getElementById("date").value).toISOString().slice(0, 10);
-    const dataForDay = rawData.filter(r => new Date(r.date).toISOString().slice(0, 10) === dateStr);
+    const labels = [];
+    for (let i = 0; i < 48; i++) {
+      const hour = Math.floor(i / 2);
+      const minutes = (i % 2) * 30;
+      labels.push(`${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}`);
+    }
+
 
     let lat, lon;
     try {
