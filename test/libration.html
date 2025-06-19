@@ -191,9 +191,18 @@
     const hour = Math.floor(hourIndex / 2);
     const minutes = (hourIndex % 2) * 30;
     document.getElementById("hour-value").textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}`;
-    updateChart("qth", "declinationChart", "chartWrapper");
-    updateChart("dx", "dxDeclinationChart", "dxChartWrapper");
+
+    // Update charts only if locators are valid:
+    const qthLocator = document.getElementById("qth").value.trim().toUpperCase();
+    if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthLocator)) {
+      updateChart("qth", "declinationChart", "chartWrapper");
+    }
+    const dxLocator = document.getElementById("dx").value.trim().toUpperCase();
+    if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxLocator)) {
+      updateChart("dx", "dxDeclinationChart", "dxChartWrapper");
+    }
   });
+
 
   document.getElementById("prevDay").addEventListener("click", () => adjustDate(-1));
   document.getElementById("nextDay").addEventListener("click", () => adjustDate(1));
@@ -420,6 +429,10 @@
     document.getElementById("hour").value = hourIndex;
     document.getElementById("hour-value").textContent =
       `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
+      const locator = document.getElementById("qth").value.trim().toUpperCase();
+        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
+          calculateLibration();
+        }
   };
   </script>
 
