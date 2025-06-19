@@ -158,6 +158,22 @@
     <input type="text" id="qth" maxlength="6" size="11" placeholder="e.g. JO89tt" />
     <div id="chartWrapper">
       <canvas id="declinationChart"></canvas>
+      <div id="timeDataBox" style="
+        position: absolute;
+        top: 200px;
+        left: 20px;
+        z-index: 10;
+        background-color: rgba(255,255,255,0.95);
+        border: 1px solid #ccc;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-family: Arial, sans-serif;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        max-width: 250px;
+        display: none;
+      "></div>
+
     </div>
   </div>
 
@@ -223,6 +239,25 @@
             visibleRates.push(null);
             dopplerSpreads.push(null);
           }
+                                                              // Show data for current hourIndex
+                                                              const elev = moonElevations[hourIndex];
+                                                              const rate = visibleRates[hourIndex];
+                                                              const doppler = dopplerSpreads[hourIndex];
+
+                                                              const dataBox = document.getElementById("timeDataBox");
+
+                                                              if (elev != null && rate != null && doppler != null) {
+                                                                dataBox.style.display = "block";
+                                                                dataBox.innerHTML = `
+                                                                  <strong>Time:</strong> ${chart.data.labels[hourIndex]} UTC<br/>
+                                                                  <strong>Elevation:</strong> ${elev.toFixed(1)}°<br/>
+                                                                  <strong>Libration Rate:</strong> ${(rate * 60).toFixed(3)} °/hr<br/>
+                                                                  <strong>Doppler Spread:</strong> ${doppler.toFixed(1)} Hz
+                                                                `;
+                                                              } else {
+                                                                dataBox.style.display = "none";
+                                                              }
+
         }
 
         const labels = dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
