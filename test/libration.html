@@ -215,6 +215,7 @@
 
           if (elevationDeg > 0) {
             moonElevations.push(elevationDeg);
+            moonAzimuths.push(azimuthDeg);
             visibleRates.push(dataForDay[i]?.rate ?? null);
 
             const omegaRadSec = (dataForDay[i]?.rate ?? 0) * (Math.PI / 180) / 60;
@@ -222,6 +223,7 @@
             dopplerSpreads.push(dopplerHz);
           } else {
             moonElevations.push(null);
+            moonAzimuths.push(null);
             visibleRates.push(null);
             dopplerSpreads.push(null);
           }
