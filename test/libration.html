@@ -198,12 +198,12 @@
     if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthLocator)) {
       updateChart("qth", "declinationChart", "chartWrapper");
     }
-    if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxLocator)) {
-      calculateLibration("dx");
-    }
     const dxLocator = document.getElementById("dx").value.trim().toUpperCase();
     if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxLocator)) {
       updateChart("dx", "dxDeclinationChart", "dxChartWrapper");
+    }
+    if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxLocator)) {
+      calculateLibration("dx");
     }
   });
 
