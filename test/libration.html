@@ -407,20 +407,32 @@
     return (date.getUTCHours() + date.getUTCMinutes() / 60) * 2;
   }
 
-  window.onload = () => {
-    const now = new Date();
-    const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-    document.getElementById("date").valueAsDate = utcDate;
+                                                          window.onload = async () => {
+                                                            const now = new Date();
+                                                            const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+                                                            document.getElementById("date").valueAsDate = utcDate;
 
-    let roundedHour = now.getUTCHours();
-    let roundedMinutes = now.getUTCMinutes() >= 45 ? 0 : now.getUTCMinutes() >= 15 ? 30 : 0;
-    if (now.getUTCMinutes() >= 45) roundedHour++;
+                                                            let roundedHour = now.getUTCHours();
+                                                            let roundedMinutes = now.getUTCMinutes() >= 45 ? 0 : now.getUTCMinutes() >= 15 ? 30 : 0;
+                                                            if (now.getUTCMinutes() >= 45) roundedHour++;
 
-    hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
-    document.getElementById("hour").value = hourIndex;
-    document.getElementById("hour-value").textContent =
-      `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
-  };
+                                                            hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
+                                                            document.getElementById("hour").value = hourIndex;
+                                                            document.getElementById("hour-value").textContent =
+                                                              `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
+
+                                                            // Also, if valid locator in qth input, calculate libration and update charts:
+                                                            const locator = document.getElementById("qth").value.trim().toUpperCase();
+                                                            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
+                                                              await calculateLibration(); // this internally calls updateChart for "qth"
+                                                            }
+                                                            // If dx locator valid, call updateChart for it as well
+                                                            const dxLocator = document.getElementById("dx").value.trim().toUpperCase();
+                                                            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxLocator)) {
+                                                              updateChart("dx", "dxDeclinationChart", "dxChartWrapper");
+                                                            }
+                                                          };
+
   </script>
 
   
