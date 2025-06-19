@@ -15,6 +15,7 @@
       font-family: Arial, sans-serif;
     }
       #chartWrapper {
+          overflow: hidden;
         display: none;
       }
     #map {
@@ -523,7 +524,7 @@
                                                                 currentDate.setDate(currentDate.getDate() + days);
                                                                 dateInput.valueAsDate = currentDate;
 
-                                                                updateChart(hourIndex);  // keep time line in sync
+                                                                updateChart(hourIndex);
                                                               }
 
                                                               document.getElementById("prevDay").addEventListener("click", () => {
