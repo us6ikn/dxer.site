@@ -197,6 +197,7 @@
         });
 
         const moonElevations = [];
+        const moonAzimuths = [];
         const visibleRates = [];
         const dopplerSpreads = [];
 
@@ -210,6 +211,7 @@
           const moonEq = Astronomy.Equator(Astronomy.Body.Moon, dt, observer, true, false);
           const hor = Astronomy.Horizon(dt, observer, moonEq.ra, moonEq.dec, 'normal');
           const elevationDeg = hor.altitude;
+          const azimuthDeg = hor.azimuth;
 
           if (elevationDeg > 0) {
             moonElevations.push(elevationDeg);
@@ -378,13 +380,15 @@
           const elev = moonElevations[hourIndex];
           const rate = visibleRates[hourIndex];
           const doppler = dopplerSpreads[hourIndex];
+          const azimuth = moonAzimuths[hourIndex];
           if (annotation.timeMarker.label) {
-            annotation.timeMarker.label.content = [
-              `${chart.data.labels[hourIndex]} UTC`,
-              `Elevation: ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}`,
-              `Libration: ${rate != null ? (rate * 60).toFixed(3) + ' °/hr' : 'N/A'}`,
-              `Doppler: ${doppler != null ? doppler.toFixed(1) + ' Hz' : 'N/A'}`
-            ];
+              annotation.timeMarker.label.content = [
+                `${chart.data.labels[hourIndex]} UTC`,
+                `Elevation: ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}`,
+                `Azimuth: ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}`,
+                `Libration: ${rate != null ? (rate * 60).toFixed(3) + ' °/hr' : 'N/A'}`,
+                `Doppler: ${doppler != null ? doppler.toFixed(1) + ' Hz' : 'N/A'}`
+              ];
           }
 
           chart.options.plugins.annotation.annotations = annotation;
