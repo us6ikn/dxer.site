@@ -155,7 +155,7 @@
     <input type="range" id="hour" min="0" max="47" value="0" step="1" />
 
     <label for="qth">My Locator:</label>
-    <input type="text" id="dx" maxlength="6" size="11" placeholder="e.g. JO89tt" />
+    <input type="text" id="gth" maxlength="6" size="11" placeholder="e.g. JO89tt" />
     <label for="dx">DX Locator:</label>
     <input type="text" id="dx" maxlength="6" size="11" placeholder="e.g. JO88xx" />
     <div id="chartWrapper">
@@ -164,7 +164,7 @@
     </div>
   </div>
   <div id="dxChartWrapper" style="display:none;">
-      <div id="dxchartLabel" style="text-align: center; margin-bottom: 0px; font-weight: normal; font-size: 12px;"></div>
+      <div id="dxChartLabel" style="text-align: center; margin-bottom: 0px; font-weight: normal; font-size: 12px;"></div>
     <canvas id="dxDeclinationChart"></canvas>
   </div>
   </div>
@@ -398,7 +398,7 @@ textAlign: 'left'
             ` Spread: ${doppler != null ? doppler.toFixed(0) + 'Hz' : 'N/A'}`;
 
           // Display it above the chart
-          document.getElementById('chartLabel').textContent = labelText;
+          document.getElementById('dxChartLabel').textContent = labelText;
 
           if (annotation.timeMarker.label) {
             annotation.timeMarker.label.enabled = false;
