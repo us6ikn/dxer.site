@@ -276,8 +276,8 @@ textAlign: 'left'
           }
         }
 
-        if (!chart) {
-          chart = new Chart(document.getElementById("dxDeclinationChart"), {
+        if (!dxChart) {
+                dxChart = new Chart(document.getElementById("dxDeclinationChart"), {
             type: 'line',
             data: {
               labels,
@@ -383,10 +383,10 @@ textAlign: 'left'
             }
           });
         } else {
-          chart.data.labels = labels;
-          chart.data.datasets[0].data = visibleRates;
-          chart.data.datasets[1].data = moonElevations;
-          chart.data.datasets[2].data = dopplerSpreads;
+            dxChart.data.labels = labels;
+            dxChart.data.datasets[0].data = visibleRates;
+            dxChart.data.datasets[1].data = moonElevations;
+            dxChart.data.datasets[2].data = dopplerSpreads;
           const elev = moonElevations[hourIndex];
           const rate = visibleRates[hourIndex];
           const doppler = dopplerSpreads[hourIndex];
@@ -404,8 +404,8 @@ textAlign: 'left'
             annotation.timeMarker.label.enabled = false;
           }
 
-          chart.options.plugins.annotation.annotations = annotation;
-          chart.update('none');
+          dxChart.options.plugins.annotation.annotations = annotation;
+          dxChart.update('none');
         }
       }
     function getMoonAnnotations(dateStr, lat, lon) {
