@@ -277,7 +277,7 @@ textAlign: 'left'
         }
 
         if (!chart) {
-          chart = new Chart(document.getElementById("dxDeclinationChart"), {
+          chart = new Chart(document.getElementById("declinationChart"), {
             type: 'line',
             data: {
               labels,
@@ -398,7 +398,7 @@ textAlign: 'left'
             ` Spread: ${doppler != null ? doppler.toFixed(0) + 'Hz' : 'N/A'}`;
 
           // Display it above the chart
-          document.getElementById('dxchartLabel').textContent = labelText;
+          document.getElementById('chartLabel').textContent = labelText;
 
           if (annotation.timeMarker.label) {
             annotation.timeMarker.label.enabled = false;
@@ -407,6 +407,10 @@ textAlign: 'left'
           chart.options.plugins.annotation.annotations = annotation;
           chart.update('none');
         }
+                                                              if (document.getElementById("dx").value.trim()) {
+                                                                calculateDxLibration(); // will internally re-update the DX chart
+                                                              }
+
       }
     function getMoonAnnotations(dateStr, lat, lon) {
     const observer = new Astronomy.Observer(lat, lon, 0);
@@ -555,18 +559,92 @@ adjustDate(1);
         updateChart(hourIndex);
       });
 
-                                                              const dxInput = document.getElementById("dx");
+    const qthInput = document.getElementById("qth");
 
-                                                              dxInput.addEventListener("input", async () => {
-                                                                const locator = dxInput.value.trim().toUpperCase();
-
+    qthInput.addEventListener("input", async () => {
+      const locator = qthInput.value.trim().toUpperCase();
       if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
         await calculateLibration();
       } else {
         // Optional: hide chart if input becomes invalid again
-        document.getElementById("dxChartWrapper").style.display = "none";
+        document.getElementById("chartWrapper").style.display = "none";
       }
     });
+                                                              const dxInput = document.getElementById("dx");
+                                                              dxInput.addEventListener("input", () => {
+                                                                const dx = dxInput.value.trim().toUpperCase();
+                                                                if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dx)) {
+                                                                  calculateDxLibration();
+                                                                } else {
+                                                                  document.getElementById("dxChartWrapper").style.display = "none";
+                                                                }
+                                                              });
+
+                                                              
+                                                              function updateDxChart(dxData) {
+                                                                const dxLocator = document.getElementById("dx").value.trim();
+                                                                if (!dxData || dxData.length === 0) return;
+
+                                                                const dateInput = document.getElementById("date").value;
+                                                                const dateStr = new Date(dateInput).toISOString().slice(0, 10);
+
+                                                                const dataForDay = dxData.filter(r => {
+                                                                  const entryDate = new Date(r.date).toISOString().slice(0, 10);
+                                                                  return entryDate === dateStr;
+                                                                });
+
+                                                                const visibleRates = dataForDay.map(d => d.rate ?? null);
+
+                                                                const labels = dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
+
+                                                                if (!dxChart) {
+                                                                  dxChart = new Chart(document.getElementById("dxDeclinationChart"), {
+                                                                    type: 'line',
+                                                                    data: {
+                                                                      labels,
+                                                                      datasets: [{
+                                                                        label: "DX Libration Rate (deg/min)",
+                                                                        data: visibleRates,
+                                                                        borderColor: "magenta",
+                                                                        borderWidth: 1.5,
+                                                                        pointRadius: 0,
+                                                                        tension: 0.2
+                                                                      }]
+                                                                    },
+                                                                    options: {
+                                                                      responsive: true,
+                                                                      maintainAspectRatio: false,
+                                                                      scales: {
+                                                                        y: {
+                                                                          type: "linear",
+                                                                          min: 0,
+                                                                          max: 0.005,
+                                                                          ticks: {
+                                                                            stepSize: 0.001,
+                                                                            callback: v => v.toFixed(3)
+                                                                          },
+                                                                          title: {
+                                                                            display: true,
+                                                                            text: "Libration Rate (°/min)"
+                                                                          }
+                                                                        }
+                                                                      },
+                                                                      plugins: {
+                                                                        legend: { display: false }
+                                                                      }
+                                                                    }
+                                                                  });
+                                                                } else {
+                                                                  dxChart.data.labels = labels;
+                                                                  dxChart.data.datasets[0].data = visibleRates;
+                                                                  dxChart.update('none');
+                                                                }
+
+                                                                const rate = visibleRates[hourIndex];
+                                                                document.getElementById("dxchartLabel").textContent = `DX Libration Rate: ${rate != null ? rate.toFixed(4) + '°/min' : 'N/A'}`;
+                                                                document.getElementById("dxChartWrapper").style.display = "block";
+                                                              }
+
 
   function qthToLatLon(locator) {
     if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
@@ -580,7 +658,7 @@ adjustDate(1);
   }
   
   async function calculateLibration() {
-    const locator = document.getElementById("dx").value.trim();
+    const locator = document.getElementById("qth").value.trim();
 
     let { lat, lon } = qthToLatLon(locator);
     const COS_LAT = Math.cos(lat * Math.PI / 180);
@@ -617,9 +695,52 @@ adjustDate(1);
 
     ({ lat, lon } = qthToLatLon(locator));
     rawData = results;
-    document.getElementById("dxChartWrapper").style.display = "block";
+    document.getElementById("chartWrapper").style.display = "block";
     updateChart(hourIndex);
   }
+                                                              async function calculateDxLibration() {
+                                                                const dxLocator = document.getElementById("dx").value.trim();
+                                                                if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/i.test(dxLocator)) {
+                                                                  document.getElementById("dxChartWrapper").style.display = "none";
+                                                                  return;
+                                                                }
+
+                                                                let { lat, lon } = qthToLatLon(dxLocator);
+                                                                const COS_LAT = Math.cos(lat * Math.PI / 180);
+                                                                const TIME_SHIFT_MIN = (lon / 15) * 60;
+                                                                const INTERVAL_MIN = 30;
+                                                                const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN);
+
+                                                                const res = await fetch("moon_topo_coords_lat0.txt");
+                                                                const lines = (await res.text()).trim().split("\n").slice(1);
+                                                                const tempData = lines.map(line => ({
+                                                                  date: line.slice(0, 20).trim(),
+                                                                  lat: parseFloat(line.slice(20, 32)),
+                                                                  lon: parseFloat(line.slice(32))
+                                                                }));
+
+                                                                const shifted = tempData.map((entry, i) => {
+                                                                  const shiftedIndex = i + SHIFT_STEPS;
+                                                                  const ref = tempData[shiftedIndex] || {};
+                                                                  return {
+                                                                    date: entry.date,
+                                                                    lat: ref.lat ?? null,
+                                                                    lon: ref.lon ?? null
+                                                                  };
+                                                                });
+
+                                                                const results = shifted.map((curr, i, arr) => {
+                                                                  if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null) return { date: curr.date, rate: 0 };
+                                                                  let dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
+                                                                  let dlon = (((arr[i+1].lon - arr[i-1].lon) / 60 + 180) % 360) - 180;
+                                                                  dlat *= COS_LAT;
+                                                                  dlon *= COS_LAT;
+                                                                  return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
+                                                                });
+
+                                                                updateDxChart(results);
+                                                              }
+
   </script>
   
   <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
