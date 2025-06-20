@@ -486,7 +486,7 @@
             // Pass observer to Equator for consistent calculations
             const moonEq = Astronomy.Equator(Astronomy.Body.Moon, astroTime, observer, true, true);
             const geoMoon = Astronomy.GeoMoon(astroTime);
-            
+            console.log('Moon Data:', moonEq, geoMoon);
             if (!moonEq || !geoMoon) {
               throw new Error("Invalid Moon data");
             }
