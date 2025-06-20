@@ -388,6 +388,16 @@
             });
           })
           .catch(error => console.error('Failed to load SK station JSON data:', error));
+          fetch('https://dxer.site/moon_data.json')
+            .then(response => response.json())
+            .then(data => {
+              window.moonData = data;
+              initDeclinationChart(data);
+              addDegradationOverlays();
+              setDefaultTimeAndUpdateMap();
+              restrictDatePicker();
+            })
+            .catch(error => console.error('Error loading moon data:', error));
     }
     function updateMap() {
       const selectedDate = document.getElementById('date').value;
