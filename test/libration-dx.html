@@ -377,7 +377,10 @@
         })
         .catch(() => { /* Handle error silently */ });
 
-      updateMap(); // Initial map update
+      // Use a fixed date for initial update to ensure valid input
+      document.getElementById('date').value = '2025-06-20';
+      document.getElementById('hour').value = 0;
+      updateMap();
     }
 
     function parseCoordinates(coordinates) {
@@ -395,11 +398,13 @@
       const minutes = index % 2 === 0 ? '00' : '30';
       if (!selectedDate) return;
 
-      const utcTimeString = `${selectedDate}T${hour}:${minutes}:00Z`;
-      const utcDate = new Date(utcTimeString);
+      const utcTimeString = `${selectedDate} ${hour}:${minutes}`;
+      const utcDate = new Date(utcTimeString + 'Z');
+      if (isNaN(utcDate.getTime())) return;
+
       const time = Astronomy.MakeTime(utcDate);
 
-      // Calculate sublunar point
+      // Calculate sublunar point exactly as per example
       const observer = new Astronomy.Observer(0, 0, 0); // Geocenter
       const moon = Astronomy.Equator("Moon", time, observer, true, true);
       const raHours = moon.ra;
@@ -417,6 +422,14 @@
       const angularRadius = Math.asin(EARTH_RADIUS / moonDistance) * RAD2DEG; // Angular radius in degrees
       const radius = (angularRadius * Math.PI / 180) * EARTH_RADIUS; // Convert to meters
 
+      // Debug alert to inspect values
+      alert(
+        `Sublunar Point at ${utcDate.toISOString()} UTC:\n` +
+        `Latitude: ${decDeg.toFixed(6)}°\n` +
+        `Longitude: ${lonDeg.toFixed(6)}°\n` +
+        `Radius: ${radius.toFixed(0)} meters`
+      );
+
       if (isNaN(decDeg) || isNaN(lonDeg) || isNaN(radius)) return;
 
       if (moonMarker) moonMarker.setMap(null);
@@ -427,7 +440,9 @@
         map: map,
         icon: {
           url: 'https://dxer.site/img/moon-icon.png',
-          scaledSize: new google.maps.Size(48, 48)
+          scaledSize: new google.maps.Size(48, 48),
+          // Fallback if icon fails
+          anchor: new google.maps.Point(24, 24)
         },
         title: 'Moon Sublunar Point'
       });
@@ -443,9 +458,10 @@
         strokeWeight: 2
       });
 
-      // Optional: Center map on sublunar point
       map.setCenter({ lat: decDeg, lng: lonDeg });
     }
+
+    // ... (Rest of the script remains unchanged: updateChart, getMoonAnnotations, timeToChartIndex, event listeners, qthToLatLon, calculateLibration) ...
 
     function updateChart(hourIndex) {
       const qthInput = document.getElementById("qth").value.trim();
