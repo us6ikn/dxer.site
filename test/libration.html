@@ -543,6 +543,7 @@ adjustDate(1);
         document.getElementById("hour").value = hourIndex;
         document.getElementById("hour-value").textContent =
           `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
+          updateChart(hourIndex);
       };
 
     document.getElementById("date").addEventListener("input", () => {
