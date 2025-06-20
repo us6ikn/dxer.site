@@ -620,9 +620,9 @@
                   display: true,
                   position: "left",
                   title: { display: true, text: "Distance (km)", color: "#800080" },
-                  min: Math.min(...distances.filter(d => d != null), 350000) - 5000,
-                  max: Math.max(...distances.filter(d => d != null), 410000) + 5000,
-                  ticks: { stepSize: 10000, color: "#800080" },
+                  min: 356400,
+                  max: 406700,
+                  ticks: { stepSize: 20000, color: "#800080" },
                   grid: { drawTicks: true, drawBorder: true }
                 },
                 y2: {
@@ -630,8 +630,8 @@
                   display: true,
                   position: "right",
                   title: { display: true, text: "Declination (°)", color: "#FFA500" },
-                  min: Math.min(...declinations.filter(d => d != null), -30) - 5,
-                  max: Math.max(...declinations.filter(d => d != null), 30) + 5,
+                  min: -30,
+                  max: 30,
                   ticks: { stepSize: 10, callback: val => val + "°", color: "#FFA500" },
                   grid: { drawOnChartArea: false }
                 }
