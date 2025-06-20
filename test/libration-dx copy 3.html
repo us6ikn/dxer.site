@@ -201,13 +201,11 @@
     let moonMarker;
     let footprintCircle;
     let currentInfoWindow = null;
-    let map;
+    let map; // Declare map globally
 
     const MOON_RADIUS = 1.7374e6; // meters
     const SPEED_OF_LIGHT = 299792458; // m/s
     const FREQUENCY_HZ = 10.368e9; // 10.368 GHz
-    const EARTH_RADIUS = 6371000; // meters
-    const RAD2DEG = 180 / Math.PI;
 
     function initMap() {
       map = new google.maps.Map(document.getElementById('map'), {
@@ -226,12 +224,16 @@
         .then(data => {
           data.forEach(station => {
             const { Call: callsign, Locator: locator, Antenna: antenna, Power: power, Website: website, Coordinates } = station;
-            const { lat, lng } = parseCoordinates(Coordinates);
+            const [latStr, lngStr] = Coordinates.split(',');
+            const lat = parseFloat(latStr);
+            const lng = parseFloat(lngStr);
             if (isNaN(lat) || isNaN(lng)) return;
 
+            const offsetLat = 0.1;
+            const offsetLng = 0.1;
             const markerPosition = {
-              lat: lat + (0.1 / 10000),
-              lng: lng + (0.1 / 10000)
+              lat: lat + (offsetLat / 10000),
+              lng: lng + (offsetLng / 10000)
             };
 
             const marker = new google.maps.Marker({
@@ -377,7 +379,13 @@
         })
         .catch(() => { /* Handle error silently */ });
 
-      updateMap(); // Initial map update
+      fetch('moon_data.json')
+        .then(response => response.json())
+        .then(data => {
+          window.moonData = data;
+          updateMap(); // Call updateMap after moon data is loaded
+        })
+        .catch(() => { /* Handle error silently */ });
     }
 
     function parseCoordinates(coordinates) {
@@ -393,37 +401,24 @@
       const index = parseInt(document.getElementById('hour').value);
       const hour = Math.floor(index / 2).toString().padStart(2, '0');
       const minutes = index % 2 === 0 ? '00' : '30';
-      if (!selectedDate) return;
+      const utcTimeString = `${selectedDate} ${hour}:${minutes}:00`;
 
-      const utcTimeString = `${selectedDate}T${hour}:${minutes}:00Z`;
-      const utcDate = new Date(utcTimeString);
-      const time = Astronomy.MakeTime(utcDate);
+      if (!window.moonData) return; // Exit if moon data isn't loaded
 
-      // Calculate sublunar point
-      const observer = new Astronomy.Observer(0, 0, 0); // Geocenter
-      const moon = Astronomy.Equator("Moon", time, observer, true, true);
-      const raHours = moon.ra;
-      const decDeg = moon.dec;
-      const raDeg = raHours * 15;
-      let gastDeg = Astronomy.SiderealTime(time) * 15;
-      gastDeg = ((gastDeg % 360) + 360) % 360;
-      let lonDeg = gastDeg - raDeg;
-      if (lonDeg > 180) lonDeg -= 360;
-      if (lonDeg < -180) lonDeg += 360;
+      const moonData = window.moonData.find(entry => entry.t === utcTimeString);
+      if (!moonData) return; // Exit if no data for selected time
 
-      // Calculate footprint radius
-      const geoMoon = Astronomy.GeoMoon(time);
-      const moonDistance = geoMoon.dist * 1.495978707e11; // AU to meters
-      const angularRadius = Math.asin(EARTH_RADIUS / moonDistance) * RAD2DEG; // Angular radius in degrees
-      const radius = (angularRadius * Math.PI / 180) * EARTH_RADIUS; // Convert to meters
+      const lat = parseFloat(moonData.p);
+      const lon = parseFloat(moonData.m);
+      const radius = parseFloat(moonData.r) * 1000; // Convert km to meters
 
-      if (isNaN(decDeg) || isNaN(lonDeg) || isNaN(radius)) return;
+      if (isNaN(lat) || isNaN(lon) || isNaN(radius)) return; // Exit if invalid data
 
       if (moonMarker) moonMarker.setMap(null);
       if (footprintCircle) footprintCircle.setMap(null);
 
       moonMarker = new google.maps.Marker({
-        position: { lat: decDeg, lng: lonDeg },
+        position: { lat, lng: lon },
         map: map,
         icon: {
           url: 'https://dxer.site/img/moon-icon.png',
@@ -434,7 +429,7 @@
 
       footprintCircle = new google.maps.Circle({
         map: map,
-        center: { lat: decDeg, lng: lonDeg },
+        center: { lat, lng: lon },
         radius: radius,
         fillColor: '#0088FF',
         fillOpacity: 0.3,
@@ -442,9 +437,6 @@
         strokeOpacity: 0.6,
         strokeWeight: 2
       });
-
-      // Optional: Center map on sublunar point
-      map.setCenter({ lat: decDeg, lng: lonDeg });
     }
 
     function updateChart(hourIndex) {
@@ -463,6 +455,7 @@
         return entryDate === dateStr;
       });
 
+      // QTH Chart Data
       let moonElevations = [];
       let moonAzimuths = [];
       let visibleRates = [];
@@ -503,6 +496,7 @@
         document.getElementById("chartWrapper").style.display = "none";
       }
 
+      // DX Chart Data
       let dxMoonElevations = [];
       let dxMoonAzimuths = [];
       let dxVisibleRates = [];
@@ -545,6 +539,7 @@
 
       const labels = dataForDay.length ? dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`) : Array(48).fill('');
 
+      // QTH Chart Annotation
       const qthAnnotation = {
         timeMarker: {
           type: 'line',
@@ -577,6 +572,7 @@
         }
       }
 
+      // DX Chart Annotation
       const dxAnnotation = {
         timeMarker: {
           type: 'line',
@@ -609,6 +605,7 @@
         }
       }
 
+      // Update QTH Chart
       if (!chart && qthInput && /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(qthInput)) {
         chart = new Chart(document.getElementById("declinationChart"), {
           type: 'line',
@@ -710,6 +707,7 @@
         chart.update('none');
       }
 
+      // Update DX Chart
       if (!dxChart && dxInput && /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(dxInput) && dxDataForDay.length) {
         dxChart = new Chart(document.getElementById("dxDeclinationChart"), {
           type: 'line',
@@ -945,7 +943,7 @@
       document.getElementById("hour").value = hourIndex;
       document.getElementById("hour-value").textContent =
         `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
-      updateChart(hourIndex);
+      updateChart(hourIndex); // Initial chart and map update
     };
 
     document.getElementById("date").addEventListener("input", () => {
