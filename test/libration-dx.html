@@ -641,9 +641,9 @@ adjustDate(1);
   <script>
     let dxChart;
     let rawdxData = [];
-    let hourIndex = 0; // global
-    let lat = 0;
-    let lon = 0;
+    let hourdxIndex = 0; // global
+    let dxlat = 0;
+    let dxlon = 0;
     
     const MOON_RADIUS = 1.7374e6; // meters
     const SPEED_OF_LIGHT = 299792458; // m/s
@@ -652,11 +652,11 @@ adjustDate(1);
     function initMap() {
       new google.maps.Map(document.getElementById("map"), {
         zoom: 2,
-        center: { lat: 0, lng: 0 },
+        center: { dxlat: 0, dxlng: 0 },
       });
     }
 
-      function updatedxChart(hourIndex) {
+      function updatedxChart(hourdxIndex) {
         if (!rawdxData.length) return;
 
         const locatorInput = document.getElementById("qth").value.trim();
@@ -675,13 +675,13 @@ adjustDate(1);
         const visibleRates = [];
         const dopplerSpreads = [];
 
-        ({ lat, lon } = qthToLatLon(locatorInput));
+        ({ dxlat, dxlon } = qthToLatLon(locatorInput));
 
         for (let i = 0; i < 48; i++) {
           const hour = Math.floor(i / 2);
           const minutes = (i % 2) * 30;
           const dt = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}:00Z`);
-          const observer = new Astronomy.Observer(lat, lon, 0); // elevation = 0
+          const observer = new Astronomy.Observer(dxlat, dxlon, 0); // elevation = 0
           const moonEq = Astronomy.Equator(Astronomy.Body.Moon, dt, observer, true, false);
           const hor = Astronomy.Horizon(dt, observer, moonEq.ra, moonEq.dec, 'normal');
           const elevationDeg = hor.altitude;
@@ -710,7 +710,7 @@ timeMarker: {
 type: 'line',
 mode: 'vertical',
 scaleID: 'x',
-value: hourIndex,
+value: hourdxIndex,
 borderColor: 'black',
 borderWidth: 2,
 label: {
@@ -733,8 +733,8 @@ textAlign: 'left'
 
         if (locatorInput) {
           try {
-            const { lat, lon } = qthToLatLon(locatorInput);
-            const moonAnnotations = getMoonAnnotations(dateStr, lat, lon);
+            const { dxlat, dxlon } = qthToLatLon(locatorInput);
+            const moonAnnotations = getMoonAnnotations(dateStr, dxlat, dxlon);
             Object.assign(annotation, moonAnnotations);
           } catch (e) {
             console.warn("Failed to calculate moon annotations:", e);
@@ -852,10 +852,10 @@ textAlign: 'left'
             dxChart.data.datasets[0].data = visibleRates;
             dxChart.data.datasets[1].data = moonElevations;
             dxChart.data.datasets[2].data = dopplerSpreads;
-          const elev = moonElevations[hourIndex];
-          const rate = visibleRates[hourIndex];
-          const doppler = dopplerSpreads[hourIndex];
-          const azimuth = moonAzimuths[hourIndex];
+          const elev = moonElevations[hourdxIndex];
+          const rate = visibleRates[hourdxIndex];
+          const doppler = dopplerSpreads[hourdxIndex];
+          const azimuth = moonAzimuths[hourdxIndex];
           const labelText =
             `El: ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}  ` +
             ` Az: ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}  ` +
@@ -873,8 +873,8 @@ textAlign: 'left'
           dxChart.update('none');
         }
       }
-    function getMoonAnnotations(dateStr, lat, lon) {
-    const observer = new Astronomy.Observer(lat, lon, 0);
+    function getMoonAnnotations(dateStr, dxlat, dxlon) {
+    const observer = new Astronomy.Observer(dxlat, dxlon, 0);
     const jsDate = new Date(`${dateStr}T00:00:00Z`);
     const astroTime = Astronomy.MakeTime(jsDate);
 
@@ -967,11 +967,11 @@ return (date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 
 }
 
       document.getElementById("hour").addEventListener("input", e => {
-        hourIndex = parseInt(document.getElementById("hour").value);
-        const hour = Math.floor(hourIndex / 2);
-        const minutes = (hourIndex % 2) * 30;
+        hourdxIndex = parseInt(document.getElementById("hour").value);
+        const hour = Math.floor(hourdxIndex / 2);
+        const minutes = (hourdxIndex % 2) * 30;
         document.getElementById("hour-value").textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}`;
-        updatedxChart(hourIndex);
+        updatedxChart(hourdxIndex);
       });
 
 function adjustDate(days) {
@@ -980,7 +980,7 @@ const currentDate = new Date(dateInput.value);
 currentDate.setDate(currentDate.getDate() + days);
 dateInput.valueAsDate = currentDate;
 
-updatedxChart(hourIndex);
+updatedxChart(hourdxIndex);
 }
 
 document.getElementById("prevDay").addEventListener("click", () => {
@@ -1008,16 +1008,16 @@ adjustDate(1);
           roundedMinutes = 30;
         }
 
-        hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
+        hourdxIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
 
-        document.getElementById("hour").value = hourIndex;
+        document.getElementById("hour").value = hourdxIndex;
         document.getElementById("hour-value").textContent =
           `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
       };
 
     document.getElementById("date").addEventListener("input", () => {
-        hourIndex = parseInt(document.getElementById("hour").value);
-        updatedxChart(hourIndex);
+        hourdxIndex = parseInt(document.getElementById("hour").value);
+        updatedxChart(hourdxIndex);
       });
 
     const qthInput = document.getElementById("qth");
@@ -1038,17 +1038,17 @@ adjustDate(1);
     }
     locator = locator.toUpperCase();
     const A = 'A'.charCodeAt(0);
-    const lon = (locator.charCodeAt(0) - A) * 20 + parseInt(locator[2]) * 2 + (locator.charCodeAt(4) - A) * (5 / 60) - 180 + (2.5 / 60);
-    const lat = (locator.charCodeAt(1) - A) * 10 + parseInt(locator[3]) + (locator.charCodeAt(5) - A) * (2.5 / 60) - 90 + (1.25 / 60);
-    return { lat, lon };
+    const dxlon = (locator.charCodeAt(0) - A) * 20 + parseInt(locator[2]) * 2 + (locator.charCodeAt(4) - A) * (5 / 60) - 180 + (2.5 / 60);
+    const dxlat = (locator.charCodeAt(1) - A) * 10 + parseInt(locator[3]) + (locator.charCodeAt(5) - A) * (2.5 / 60) - 90 + (1.25 / 60);
+    return { dxlat, dxlon };
   }
   
   async function calculateLibration() {
     const locator = document.getElementById("qth").value.trim();
 
-    let { lat, lon } = qthToLatLon(locator);
-    const COS_LAT = Math.cos(lat * Math.PI / 180);
-    const TIME_SHIFT_MIN = (lon / 15) * 60;
+    let { dxlat, dxlon } = qthToLatLon(locator);
+    const COS_LAT = Math.cos(dxlat * Math.PI / 180);
+    const TIME_SHIFT_MIN = (dxlon / 15) * 60;
     const INTERVAL_MIN = 30;
     const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN);
 
@@ -1056,8 +1056,8 @@ adjustDate(1);
     const lines = (await res.text()).trim().split("\n").slice(1);
     const tempData = lines.map(line => ({
       date: line.slice(0, 20).trim(),
-      lat: parseFloat(line.slice(20, 32)),
-      lon: parseFloat(line.slice(32))
+      dxlat: parseFloat(line.slice(20, 32)),
+      dxlon: parseFloat(line.slice(32))
     }));
 
     const shifted = tempData.map((entry, i) => {
@@ -1065,15 +1065,15 @@ adjustDate(1);
       const ref = tempData[shiftedIndex] || {};
       return {
         date: entry.date,
-        lat: ref.lat ?? null,
-        lon: ref.lon ?? null
+        dxlat: ref.lat ?? null,
+        dxlon: ref.lon ?? null
       };
     });
 
     const results = shifted.map((curr, i, arr) => {
-      if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null) return { date: curr.date, rate: 0 };
-      let dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
-      let dlon = (((arr[i+1].lon - arr[i-1].lon) / 60 + 180) % 360) - 180;
+      if (i <= 0 || i >= arr.length - 1 || arr[i-1].dxlat === null || arr[i+1].dxlat === null) return { date: curr.date, rate: 0 };
+      let dlat = (arr[i+1].dxlat - arr[i-1].dxlat) / 60;
+      let dlon = (((arr[i+1].dxlon - arr[i-1].dxlon) / 60 + 180) % 360) - 180;
       dlat *= COS_LAT;
       dlon *= COS_LAT;
       return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
@@ -1082,7 +1082,7 @@ adjustDate(1);
     ({ lat, lon } = qthToLatLon(locator));
     rawdxData = results;
     document.getElementById("chartWrapper").style.display = "block";
-    updateChart(hourIndex);
+    updateChart(hourdxIndex);
   }
   </script>
   
