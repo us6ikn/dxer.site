@@ -388,7 +388,7 @@
             });
           })
           .catch(error => console.error('Failed to load SK station JSON data:', error));
-          fetch('https://dxer.site/moon_data.json')
+          fetch('moon_data.json')
             .then(response => response.json())
             .then(data => {
               window.moonData = data;
