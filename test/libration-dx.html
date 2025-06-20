@@ -622,7 +622,6 @@ adjustDate(1);
   </script>
   
   <script>
-    let chart;
     let dxChart;
     let rawData = [];
     let hourIndex = 0; // global
@@ -640,7 +639,7 @@ adjustDate(1);
       });
     }
 
-      function updateChart(hourIndex) {
+      function updatedxChart(hourIndex) {
         if (!rawData.length) return;
 
         const locatorInput = document.getElementById("qth").value.trim();
@@ -725,8 +724,8 @@ textAlign: 'left'
           }
         }
 
-        if (!chart) {
-          chart = new Chart(document.getElementById("declinationChart"), {
+        if (!dxChart) {
+                dxChart = new Chart(document.getElementById("declinationChart"), {
             type: 'line',
             data: {
               labels,
@@ -832,10 +831,10 @@ textAlign: 'left'
             }
           });
         } else {
-          chart.data.labels = labels;
-          chart.data.datasets[0].data = visibleRates;
-          chart.data.datasets[1].data = moonElevations;
-          chart.data.datasets[2].data = dopplerSpreads;
+            dxChart.data.labels = labels;
+            dxChart.data.datasets[0].data = visibleRates;
+            dxChart.data.datasets[1].data = moonElevations;
+            dxChart.data.datasets[2].data = dopplerSpreads;
           const elev = moonElevations[hourIndex];
           const rate = visibleRates[hourIndex];
           const doppler = dopplerSpreads[hourIndex];
@@ -853,8 +852,8 @@ textAlign: 'left'
             annotation.timeMarker.label.enabled = false;
           }
 
-          chart.options.plugins.annotation.annotations = annotation;
-          chart.update('none');
+          dxChart.options.plugins.annotation.annotations = annotation;
+          dxChart.update('none');
         }
       }
     function getMoonAnnotations(dateStr, lat, lon) {
@@ -955,7 +954,7 @@ return (date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 
         const hour = Math.floor(hourIndex / 2);
         const minutes = (hourIndex % 2) * 30;
         document.getElementById("hour-value").textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}`;
-        updateChart(hourIndex);
+        updatedxChart(hourIndex);
       });
 
 function adjustDate(days) {
@@ -964,7 +963,7 @@ const currentDate = new Date(dateInput.value);
 currentDate.setDate(currentDate.getDate() + days);
 dateInput.valueAsDate = currentDate;
 
-updateChart(hourIndex);
+updatedxChart(hourIndex);
 }
 
 document.getElementById("prevDay").addEventListener("click", () => {
@@ -1001,7 +1000,7 @@ adjustDate(1);
 
     document.getElementById("date").addEventListener("input", () => {
         hourIndex = parseInt(document.getElementById("hour").value);
-        updateChart(hourIndex);
+        updatedxChart(hourIndex);
       });
 
     const qthInput = document.getElementById("qth");
