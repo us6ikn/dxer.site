@@ -572,17 +572,18 @@ adjustDate(1);
     });
                                                               const dxInput = document.getElementById("dx");
                                                               dxInput.addEventListener("input", () => {
-                                                                const text = dxInput.value.trim().toUpperCase();
-                                                                if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(text)) {
+                                                                const dx = dxInput.value.trim().toUpperCase();
+                                                                if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dx)) {
                                                                   calculateDxLibration();
                                                                 } else {
                                                                   document.getElementById("dxChartWrapper").style.display = "none";
                                                                 }
                                                               });
 
-
                                                               
                                                               function updateDxChart(dxData) {
+                console.log("Updating DX chart data length:", dxData.length);
+
                                                                 const dxLocator = document.getElementById("dx").value.trim();
                                                                 if (!dxData || dxData.length === 0) return;
 
