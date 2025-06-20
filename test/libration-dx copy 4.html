@@ -14,26 +14,8 @@
       overflow: hidden;
       font-family: Arial, sans-serif;
     }
-    #chartWrapper, #dxChartWrapper, #moonChartWrapper {
+    #chartWrapper {
       display: none;
-    }
-    #moonChartWrapper {
-      width: 100%;
-      height: 180px;
-      margin-top: 6px;
-      background-color: rgba(255, 255, 255, 0.85);
-      border-radius: 6px;
-      box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      position: relative;
-      box-sizing: border-box;
-    }
-    #moonDistanceChart {
-      width: 100%;
-      max-width: 100%;
-      height: calc(100% - 40px);
-      box-sizing: border-box;
-      padding-bottom: 20px;
     }
     #map {
       height: 100dvh;
@@ -136,6 +118,42 @@
       color: #2c3e50;
       margin-top: -4px;
     }
+    #chartWrapper {
+      width: 100%;
+      height: 180px;
+      margin-top: 6px;
+      background-color: rgba(255, 255, 255, 0.85);
+      border-radius: 6px;
+      box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      position: relative;
+      box-sizing: border-box;
+    }
+    #declinationChart {
+      width: 100%;
+      max-width: 100%;
+      height: calc(100% - 40px);
+      box-sizing: border-box;
+      padding-bottom: 20px;
+    }
+    #dxChartWrapper {
+      width: 100%;
+      height: 180px;
+      margin-top: 6px;
+      background-color: rgba(255, 255, 255, 0.85);
+      border-radius: 6px;
+      box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      position: relative;
+      box-sizing: border-box;
+    }
+    #dxDeclinationChart {
+      width: 100%;
+      max-width: 100%;
+      height: calc(100% - 40px);
+      box-sizing: border-box;
+      padding-bottom: 20px;
+    }
   </style>
 </head>
 <body>
@@ -149,7 +167,7 @@
       </div>
       <button id="prevDay">←</button>
       <input type="date" id="date" />
-      <button id="nextDay">→</button>
+      <button.Networking id="nextDay">→</button>
       <span id="hour-value">Time (UTC): 00:00</span>
     </div>
     <input type="range" id="hour" min="0" max="47" value="0" step="1" />
@@ -165,10 +183,6 @@
       <div id="dxchartLabel" style="text-align: center; margin-bottom: 0px; font-weight: normal; font-size: 12px;"></div>
       <canvas id="dxDeclinationChart"></canvas>
     </div>
-    <div id="moonChartWrapper" style="display: block;">
-      <div id="moonChartLabel" style="text-align: center; margin-bottom: 0px; font-weight: normal; font-size: 12px;"></div>
-      <canvas id="moonDistanceChart"></canvas>
-    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -177,10 +191,8 @@
   <script>
     let chart;
     let dxChart;
-    let moonChart;
     let rawData = [];
     let dxRawData = [];
-    let moonDataForMonth = [];
     let hourIndex = 0;
     let lat = 0;
     let lon = 0;
@@ -189,7 +201,7 @@
     let moonMarker;
     let footprintCircle;
     let currentInfoWindow = null;
-    let map;
+    let map; // Declare map globally
 
     const MOON_RADIUS = 1.7374e6; // meters
     const SPEED_OF_LIGHT = 299792458; // m/s
@@ -206,7 +218,8 @@
         fullscreenControl: false
       });
 
-      fetch('output_2_10 пожалуйGHz_with_DXCC.json')
+      // Load and process station data
+      fetch('output_2_10GHz_with_DXCC.json')
         .then(response => response.json())
         .then(data => {
           data.forEach(station => {
@@ -370,8 +383,7 @@
         .then(response => response.json())
         .then(data => {
           window.moonData = data;
-          updateMap();
-          updateMoonChart(); // Initialize Moon chart on page load
+          updateMap(); // Call updateMap after moon data is loaded
         })
         .catch(() => { /* Handle error silently */ });
     }
@@ -391,16 +403,16 @@
       const minutes = index % 2 === 0 ? '00' : '30';
       const utcTimeString = `${selectedDate} ${hour}:${minutes}:00`;
 
-      if (!window.moonData) return;
+      if (!window.moonData) return; // Exit if moon data isn't loaded
 
       const moonData = window.moonData.find(entry => entry.t === utcTimeString);
-      if (!moonData) return;
+      if (!moonData) return; // Exit if no data for selected time
 
       const lat = parseFloat(moonData.p);
       const lon = parseFloat(moonData.m);
       const radius = parseFloat(moonData.r) * 1000; // Convert km to meters
 
-      if (isNaN(lat) || isNaN(lon) || isNaN(radius)) return;
+      if (isNaN(lat) || isNaN(lon) || isNaN(radius)) return; // Exit if invalid data
 
       if (moonMarker) moonMarker.setMap(null);
       if (footprintCircle) footprintCircle.setMap(null);
@@ -425,139 +437,6 @@
         strokeOpacity: 0.6,
         strokeWeight: 2
       });
-    }
-
-    function calculateMoonDataForMonth(dateStr) {
-      const startDate = new Date(dateStr);
-      startDate.setUTCDate(1); // Start from the 1st of the month
-      const endDate = new Date(startDate);
-      endDate.setUTCDate(endDate.getUTCDate() + 30); // Cover 30 days
-
-      const data = [];
-      const labels = [];
-
-      for (let dt = new Date(startDate); dt <= endDate; dt.setUTCDate(dt.getUTCDate() + 1)) {
-        const dateString = dt.toISOString().slice(0, 10);
-        const time = `${dateString}T00:00:00Z`;
-        const astroTime = Astronomy.MakeTime(new Date(time));
-        const moonEq = Astronomy.Equator(Astronomy.Body.Moon, astroTime, null, true, false);
-        const distanceKm = Astronomy.GeoMoon(astroTime).dist; // Geocentric distance in km
-        data.push({
-          date: dateString,
-          distance: distanceKm,
-          declination: moonEq.dec
-        });
-        labels.push(dateString.slice(5, 10)); // e.g., "06-01" for June 1
-      }
-
-      return { data, labels };
-    }
-
-    function updateMoonChart() {
-      const dateInput = document.getElementById("date").value;
-      const index = parseInt(document.getElementById("hour").value);
-      const hour = Math.floor(index / 2);
-      const minutes = (index % 2) * 30;
-      const selectedDateTime = new Date(`${dateInput}T${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}:00Z`);
-      const { data: moonData, labels } = calculateMoonDataForMonth(dateInput);
-
-      const distances = moonData.map(d => d.distance);
-      const declinations = moonData.map(d => d.declination);
-      const selectedDay = selectedDateTime.getUTCDate() - 1; // Index for the selected day
-
-      // Calculate current values for the selected time
-      const astroTime = Astronomy.MakeTime(selectedDateTime);
-      const moonEq = Astronomy.Equator(Astronomy.Body.Moon, astroTime, null, true, false);
-      const currentDistance = Astronomy.GeoMoon(astroTime).dist;
-      const currentDeclination = moonEq.dec;
-
-      // Moon Chart Annotation
-      const moonAnnotation = {
-        timeMarker: {
-          type: 'line',
-          mode: 'vertical',
-          scaleID: 'x',
-          value: selectedDay,
-          borderColor: 'black',
-          borderWidth: 2,
-          label: {
-            enabled: false
-          }
-        }
-      };
-
-      // Update label above chart
-      document.getElementById('moonChartLabel').textContent =
-        `Moon Distance: ${currentDistance.toFixed(0)} km  Declination: ${currentDeclination.toFixed(1)}°`;
-
-      if (!moonChart) {
-        moonChart = new Chart(document.getElementById("moonDistanceChart"), {
-          type: 'line',
-          data: {
-            labels,
-            datasets: [
-              {
-                label: "Moon Distance (km)",
-                data: distances,
-                borderColor: "#800080",
-                pointRadius: 0,
-                borderWidth: 1.5,
-                tension: 0.2,
-                yAxisID: "y1"
-              },
-              {
-                label: "Moon Declination (°)",
-                data: declinations,
-                borderColor: "#FFA500",
-                pointRadius: 0,
-                borderWidth: 1.5,
-                tension: 0.2,
-                yAxisID: "y2"
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              x: {
-                title: { display: true, text: "Date (MM-DD)" }
-              },
-              y1: {
-                type: "linear",
-                display: true,
-                position: "left",
-                title: { display: true, text: "Distance (km)", color: "#800080" },
-                min: 350000,
-                max: 410000,
-                ticks: { stepSize: 10000, color: "#800080" },
-                grid: { drawTicks: true, drawBorder: true }
-              },
-              y2: {
-                type: "linear",
-                display: true,
-                position: "right",
-                title: { display: true, text: "Declination (°)", color: "#FFA500" },
-                min: -30,
-                max: 30,
-                ticks: { stepSize: 10, callback: val => val + "°", color: "#FFA500" },
-                grid: { drawOnChartArea: false }
-              }
-            },
-            plugins: {
-              legend: { display: false },
-              annotation: { annotations: moonAnnotation }
-            }
-          }
-        });
-      } else {
-        moonChart.data.labels = labels;
-        moonChart.data.datasets[0].data = distances;
-        moonChart.data.datasets[1].data = declinations;
-        moonChart.options.plugins.annotation.annotations = moonAnnotation;
-        moonChart.options.plugins.annotation.annotations.timeMarker.value = selectedDay;
-        moonChart.update('none');
-      }
     }
 
     function updateChart(hourIndex) {
@@ -930,8 +809,7 @@
         dxChart.update('none');
       }
 
-      updateMap();
-      updateMoonChart(); // Update Moon chart after date/time changes
+      updateMap(); // Update map after chart updates
     }
 
     function getMoonAnnotations(dateStr, lat, lon) {
