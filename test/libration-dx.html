@@ -572,10 +572,10 @@ adjustDate(1);
         updateChart(hourIndex);
       });
 
-    const qthInput = document.getElementById("qth");
+    const dxqthInput = document.getElementById("qth");
 
-    qthInput.addEventListener("input", async () => {
-      const locator = qthInput.value.trim().toUpperCase();
+    dxqthInput.addEventListener("input", async () => {
+      const locator = dxqthInput.value.trim().toUpperCase();
       if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
         await calculateLibration();
       } else {
@@ -1017,10 +1017,10 @@ adjustDate(1);
         updatedxChart(hourdxIndex);
       });
 
-    const qthInput = document.getElementById("qth");
+    const dxqthInput = document.getElementById("qth");
 
-    qthInput.addEventListener("input", async () => {
-      const locator = qthInput.value.trim().toUpperCase();
+    dxqthInput.addEventListener("input", async () => {
+      const locator = dxqthInput.value.trim().toUpperCase();
       if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
         await calculateLibration();
       } else {
