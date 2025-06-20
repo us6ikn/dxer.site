@@ -240,32 +240,31 @@
 
         const labels = dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
 
-                                                              const annotation = {
-                                                                timeMarker: {
-                                                                  type: 'line',
-                                                                  mode: 'vertical',
-                                                                  scaleID: 'x',
-                                                                  value: hourIndex,
-                                                                  borderColor: 'black',
-                                                                  borderWidth: 2,
-                                                                  label: {
-                                                                    enabled: true,
-                                                                    position: 'top',
-                                                                    content: [], // <- to be filled dynamically below
-                                                                    font: {
-                                                                      size: 11,
-                                                                      weight: 'bold',
-                                                                      family: 'Arial, sans-serif'
-                                                                    },
-                                                                    backgroundColor: 'rgba(0,0,0,0.8)',
-                                                                    color: 'white',
-                                                                    padding: 4,
-                                                                    cornerRadius: 4,
-                                                                    textAlign: 'left'
-                                                                  }
-                                                                }
-                                                              };
-
+const annotation = {
+timeMarker: {
+type: 'line',
+mode: 'vertical',
+scaleID: 'x',
+value: hourIndex,
+borderColor: 'black',
+borderWidth: 2,
+label: {
+enabled: true,
+position: 'top',
+content: [],
+font: {
+size: 11,
+weight: 'bold',
+family: 'Arial, sans-serif'
+},
+backgroundColor: 'rgba(0,0,0,0.8)',
+color: 'white',
+padding: 4,
+cornerRadius: 4,
+textAlign: 'left'
+}
+}
+};
 
         if (locatorInput) {
           try {
@@ -409,210 +408,6 @@
           chart.update('none');
         }
       }
-                                                              function updateDxChart(hourIndex) {
-                                                                const locatorInput = document.getElementById("dx").value.trim();
-                                                                if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locatorInput)) return;
-
-                                                                const dateInput = document.getElementById("date").value;
-                                                                const dateStr = new Date(dateInput).toISOString().slice(0, 10);
-
-                                                                const dataForDay = rawData.filter(r => {
-                                                                  const entryDate = new Date(r.date).toISOString().slice(0, 10);
-                                                                  return entryDate === dateStr;
-                                                                });
-
-                                                                const moonElevations = [];
-                                                                const moonAzimuths = [];
-                                                                const visibleRates = [];
-                                                                const dopplerSpreads = [];
-
-                                                                let { lat, lon } = qthToLatLon(locatorInput);
-
-                                                                for (let i = 0; i < 48; i++) {
-                                                                  const hour = Math.floor(i / 2);
-                                                                  const minutes = (i % 2) * 30;
-                                                                  const dt = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}:00Z`);
-                                                                  const observer = new Astronomy.Observer(lat, lon, 0); // elevation = 0
-                                                                  const moonEq = Astronomy.Equator(Astronomy.Body.Moon, dt, observer, true, false);
-                                                                  const hor = Astronomy.Horizon(dt, observer, moonEq.ra, moonEq.dec, 'normal');
-                                                                  const elevationDeg = hor.altitude;
-                                                                  const azimuthDeg = hor.azimuth;
-
-                                                                  if (elevationDeg > 0) {
-                                                                    moonElevations.push(elevationDeg);
-                                                                    moonAzimuths.push(azimuthDeg);
-                                                                    visibleRates.push(dataForDay[i]?.rate ?? null);
-
-                                                                    const omegaRadSec = (dataForDay[i]?.rate ?? 0) * (Math.PI / 180) / 60;
-                                                                    const dopplerHz = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
-                                                                    dopplerSpreads.push(dopplerHz);
-                                                                  } else {
-                                                                    moonElevations.push(null);
-                                                                    moonAzimuths.push(null);
-                                                                    visibleRates.push(null);
-                                                                    dopplerSpreads.push(null);
-                                                                  }
-                                                                }
-
-                                                                const labels = dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
-                                                                const annotation = {
-                                                                  timeMarker: {
-                                                                    type: 'line',
-                                                                    mode: 'vertical',
-                                                                    scaleID: 'x',
-                                                                    value: hourIndex,
-                                                                    borderColor: 'black',
-                                                                    borderWidth: 2,
-                                                                    label: {
-                                                                      enabled: false,
-                                                                      content: [],
-                                                                      font: {
-                                                                        size: 11,
-                                                                        weight: 'bold',
-                                                                        family: 'Arial, sans-serif'
-                                                                      },
-                                                                      backgroundColor: 'rgba(0,0,0,0.8)',
-                                                                      color: 'white',
-                                                                      padding: 4,
-                                                                      cornerRadius: 4
-                                                                    }
-                                                                  }
-                                                                };
-
-                                                                                                                      if (locatorInput) {
-                                                                                                                        try {
-                                                                                                                          const { lat, lon } = qthToLatLon(locatorInput);
-                                                                                                                          const moonAnnotations = getMoonAnnotations(dateStr, lat, lon);
-                                                                                                                          Object.assign(annotation, moonAnnotations);
-                                                                                                                        } catch (e) {
-                                                                                                                          console.warn("Failed to calculate moon annotations:", e);
-                                                                                                                        }
-                                                                                                                      }
-                                                                if (!dxChart) {
-                                                                  dxChart = new Chart(document.getElementById("dxDeclinationChart"), {
-                                                                    type: 'line',
-                                                                    data: {
-                                                                      labels,
-                                                                      datasets: [
-                                                                        {
-                                                                          label: "Libration Rate (deg/min)",
-                                                                          data: visibleRates,
-                                                                          borderColor: "#ff0000",
-                                                                          pointRadius: 0,
-                                                                          borderWidth: 1.5,
-                                                                          tension: 0.2,
-                                                                          yAxisID: "y1"
-                                                                        },
-                                                                        {
-                                                                          label: "Moon Elevation (°)",
-                                                                          data: moonElevations,
-                                                                          borderColor: "rgba(0, 0, 255, 0.6)",
-                                                                          backgroundColor: "rgba(0, 0, 255, 0.15)",
-                                                                          fill: {
-                                                                            target: { value: 0 },
-                                                                            above: 'rgba(0, 0, 255, 0.15)'
-                                                                          },
-                                                                          pointRadius: 0,
-                                                                          borderWidth: 1,
-                                                                          tension: 0.3,
-                                                                          yAxisID: "y2"
-                                                                        },
-                                                                        {
-                                                                          label: "Doppler Spread, Hz",
-                                                                          data: dopplerSpreads,
-                                                                          borderColor: "green",
-                                                                          pointRadius: 0,
-                                                                          borderWidth: 1.5,
-                                                                          tension: 0.2,
-                                                                          yAxisID: "y3"
-                                                                        }
-                                                                      ]
-                                                                    },
-                                                                    options: {
-                                                                      responsive: true,
-                                                                      maintainAspectRatio: false,
-                                                                      scales: {
-                                                                        x: {},
-                                                                        y1: {
-                                                                          type: "linear",
-                                                                          position: "right",
-                                                                          min: 0,
-                                                                          max: 0.005,
-                                                                          title: {
-                                                                            display: true,
-                                                                            text: "Libration rate, °/min",
-                                                                            color: "#ff0000"
-                                                                          },
-                                                                          ticks: {
-                                                                            stepSize: 0.001,
-                                                                            callback: v => v.toFixed(3),
-                                                                            color: "#ff0000"
-                                                                          }
-                                                                        },
-                                                                        y2: {
-                                                                          position: "left",
-                                                                          min: 0,
-                                                                          max: 90,
-                                                                          title: {
-                                                                            display: true,
-                                                                            text: "Moon Elevation",
-                                                                            color: "rgba(0, 0, 255, 0.6)"
-                                                                          },
-                                                                          ticks: {
-                                                                            stepSize: 15,
-                                                                            callback: val => val + "°",
-                                                                            color: "rgba(0, 0, 255, 0.6)"
-                                                                          }
-                                                                        },
-                                                                        y3: {
-                                                                          type: "linear",
-                                                                          position: "right",
-                                                                          offset: true,
-                                                                          min: 0,
-                                                                          max: 300,
-                                                                          title: {
-                                                                            display: true,
-                                                                            text: "Doppler Spread (Hz)",
-                                                                            color: "green"
-                                                                          },
-                                                                          ticks: {
-                                                                            stepSize: 50,
-                                                                            color: "green"
-                                                                          }
-                                                                        }
-                                                                      },
-                                                                      plugins: {
-                                                                        legend: { display: false },
-                                                                        annotation: { annotations: annotation }
-                                                                      }
-                                                                    }
-                                                                  });
-                                                                } else {
-                                                                  dxChart.data.labels = labels;
-                                                                  dxChart.data.datasets[0].data = visibleRates;
-                                                                  dxChart.data.datasets[1].data = moonElevations;
-                                                                  dxChart.data.datasets[2].data = dopplerSpreads;
-
-                                                                  const elev = moonElevations[hourIndex];
-                                                                  const azimuth = moonAzimuths[hourIndex];
-                                                                  const rate = visibleRates[hourIndex];
-                                                                  const doppler = dopplerSpreads[hourIndex];
-
-                                                                  const labelText =
-                                                                    `El: ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}  ` +
-                                                                    ` Az: ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}  ` +
-                                                                    ` Libration Rate: ${rate != null ? rate.toFixed(4) + '°/min' : 'N/A'}  ` +
-                                                                    ` Spread: ${doppler != null ? doppler.toFixed(0) + 'Hz' : 'N/A'}`;
-
-                                                                  document.getElementById('dxChartLabel').textContent = labelText;
-
-                                                                  dxChart.options.plugins.annotation.annotations = annotation;
-                                                                  dxChart.update('none');
-                                                                }
-
-                                                                document.getElementById("dxChartWrapper").style.display = "block";
-                                                              }
-
     function getMoonAnnotations(dateStr, lat, lon) {
     const observer = new Astronomy.Observer(lat, lon, 0);
     const jsDate = new Date(`${dateStr}T00:00:00Z`);
@@ -712,7 +507,6 @@ return (date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 
         const minutes = (hourIndex % 2) * 30;
         document.getElementById("hour-value").textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}`;
         updateChart(hourIndex);
-        updateDxChart(hourIndex);
       });
 
 function adjustDate(days) {
@@ -722,7 +516,6 @@ currentDate.setDate(currentDate.getDate() + days);
 dateInput.valueAsDate = currentDate;
 
 updateChart(hourIndex);
-updateDxChart(hourIndex);
 }
 
 document.getElementById("prevDay").addEventListener("click", () => {
@@ -760,7 +553,6 @@ adjustDate(1);
     document.getElementById("date").addEventListener("input", () => {
         hourIndex = parseInt(document.getElementById("hour").value);
         updateChart(hourIndex);
-        updateDxChart(hourIndex);
       });
   </script>
   
@@ -832,23 +624,8 @@ adjustDate(1);
     rawData = results;
     document.getElementById("chartWrapper").style.display = "block";
     updateChart(hourIndex);
-    updateDxChart(hourIndex);
   }
   </script>
-  
-  <script>
-    const dxInput = document.getElementById("dx");
-
-    dxInput.addEventListener("input", () => {
-      const locator = dxInput.value.trim().toUpperCase();
-      if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-        updateDxChart(hourIndex);
-      } else {
-        document.getElementById("dxChartWrapper").style.display = "none";
-      }
-    });
-  </script>
-
   
   <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
 </body>
