@@ -474,7 +474,7 @@
         const data = [];
         const labels = [];
 
-        // Use a default observer (e.g., at lat: 0, lon: 0, height: 0) for geocentric calculations
+        // Use a default observer for declination calculations
         const observer = new Astronomy.Observer(0, 0, 0);
 
         for (let dt = new Date(startDate); dt <= endDate; dt.setUTCDate(dt.getUTCDate() + 1)) {
@@ -483,15 +483,17 @@
             const time = `${dateString}T00:00:00Z`;
             const astroTime = Astronomy.MakeTime(new Date(time));
             
-            // Pass observer to Equator for consistent calculations
+            // Calculate distance using Astronomy.Libration
+            const libration = Astronomy.Libration(astroTime);
+            const distanceKm = libration.dist_km;
+
+            // Calculate declination using Astronomy.Equator
             const moonEq = Astronomy.Equator(Astronomy.Body.Moon, astroTime, observer, true, true);
-            const geoMoon = Astronomy.GeoMoon(astroTime);
-            if (!moonEq || !geoMoon) {
+            
+            if (!moonEq || distanceKm == null) {
               throw new Error("Invalid Moon data");
             }
 
-            const distanceKm = geoMoon.dist;
-            console.log(geoMoon.dist);
             const declination = moonEq.dec;
 
             if (distanceKm != null && declination != null) {
@@ -500,7 +502,7 @@
                 distance: distanceKm,
                 declination: declination
               });
-              labels.push(dateString.slice(5, 10));
+              labels.push(dateString.slice(5, 10)); // e.g., "06-01" for June 1
             } else {
               console.warn(`Missing data for ${dateString}: distance=${distanceKm}, declination=${declination}`);
             }
@@ -528,12 +530,12 @@
         let currentDeclination = null;
         try {
           const astroTime = Astronomy.MakeTime(selectedDateTime);
-          const observer = new Astronomy.Observer(0, 0, 0); // Default observer
+          const observer = new Astronomy.Observer(0, 0, 0); // Default observer for declination
+          const libration = Astronomy.Libration(astroTime);
           const moonEq = Astronomy.Equator(Astronomy.Body.Moon, astroTime, observer, true, true);
-          const geoMoon = Astronomy.GeoMoon(astroTime);
           
-          if (moonEq && geoMoon) {
-            currentDistance = geoMoon.dist;
+          if (libration && moonEq) {
+            currentDistance = libration.dist_km;
             currentDeclination = moonEq.dec;
           } else {
             throw new Error("Invalid current Moon data");
@@ -633,7 +635,6 @@
           moonChart.update('none');
         }
       }
-
       function updateChart(hourIndex) {
         const qthInput = document.getElementById("qth").value.trim();
         const dxInput = document.getElementById("dx").value.trim();
