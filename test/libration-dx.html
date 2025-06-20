@@ -532,7 +532,7 @@ currentDate.setDate(currentDate.getDate() + days);
 dateInput.valueAsDate = currentDate;
 
 updateChart(hourIndex);
-updatedxChart(hourIndex);
+updateDxChart(hourIndex);
 }
 
 document.getElementById("prevDay").addEventListener("click", () => {
@@ -570,7 +570,7 @@ adjustDate(1);
     document.getElementById("date").addEventListener("input", () => {
         hourIndex = parseInt(document.getElementById("hour").value);
         updateChart(hourIndex);
-        updatedxChart(hourIndex);
+        updateDxChart(hourIndex);
       });
 
     const qthInput = document.getElementById("qth");
@@ -712,7 +712,7 @@ adjustDate(1);
     rawData = results;
     document.getElementById("chartWrapper").style.display = "block";
     updateChart(hourIndex);
-    updatedxChart(hourIndex);
+    updateDxChart(hourIndex);
   }
                                                               async function calculateDxLibration() {
                                                                 const dxLocator = document.getElementById("dx").value.trim();
