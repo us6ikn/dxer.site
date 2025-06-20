@@ -203,8 +203,7 @@
     }
 
       function updateChart(hourIndex) {
-          console.log("Updating  chart data length:", rawData.length);
-
+          
         if (!rawData.length) return;
 
         const locatorInput = document.getElementById("qth").value.trim();
@@ -753,6 +752,7 @@ adjustDate(1);
                                                                 });
 
                                                                 updateDxChart(results);
+                                                                console.log(results);
                                                               }
 
   </script>
