@@ -479,9 +479,9 @@
                                                                   }
                                                                 };
 
-                                                                                                                      if (dxInput) {
+                                                                                                                      if (locatorInput) {
                                                                                                                         try {
-                                                                                                                          const { lat, lon } = qthToLatLon(dxInput);
+                                                                                                                          const { lat, lon } = qthToLatLon(locatorInput);
                                                                                                                           const moonAnnotations = getMoonAnnotations(dateStr, lat, lon);
                                                                                                                           Object.assign(annotation, moonAnnotations);
                                                                                                                         } catch (e) {
