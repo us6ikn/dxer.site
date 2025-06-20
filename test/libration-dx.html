@@ -888,9 +888,9 @@
           const labelText =
             `El: ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}  ` +
             ` Az: ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}  ` +
-            ` Libration Rate: ${rate != null ? rate.toFixed(4) + '°/min' : 'N/A'}  ` +
+            ` Libration: ${rate != null ? rate.toFixed(4) + '°/min' : 'N/A'}  ` +
             ` Spread: ${doppler != null ? doppler.toFixed(0) + 'Hz' : 'N/A'}`;
-          document.getElementById('chartLabel').textContent = qthInput ? `QTH: ${qthInput.toUpperCase()} - ${labelText}` : 'Enter valid QTH';
+          document.getElementById('chartLabel').textContent = qthInput ? `${qthInput.toUpperCase()} - ${labelText}` : 'Enter valid QTH';
           if (qthAnnotation.timeMarker.label) {
             qthAnnotation.timeMarker.label.enabled = false;
           }
@@ -989,9 +989,9 @@
           const labelText =
             `El: ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}  ` +
             ` Az: ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}  ` +
-            ` Libration Rate: ${rate != null ? rate.toFixed(4) + '°/min' : 'N/A'}  ` +
+            ` Libration: ${rate != null ? rate.toFixed(4) + '°/min' : 'N/A'}  ` +
             ` Spread: ${doppler != null ? doppler.toFixed(0) + 'Hz' : 'N/A'}`;
-          document.getElementById('dxchartLabel').textContent = dxInput ? `DX: ${dxInput.toUpperCase()} - ${labelText}` : 'Enter valid DX';
+          document.getElementById('dxchartLabel').textContent = dxInput ? `${dxInput.toUpperCase()} - ${labelText}` : 'Enter valid DX';
           if (dxAnnotation.timeMarker.label) {
             dxAnnotation.timeMarker.label.enabled = false;
           }
