@@ -201,7 +201,7 @@
     let moonMarker;
     let footprintCircle;
     let currentInfoWindow = null;
-    let currentChartMonth = null;
+    let map; // Declare map globally
 
     const MOON_RADIUS = 1.7374e6; // meters
     const SPEED_OF_LIGHT = 299792458; // m/s
@@ -217,16 +217,13 @@
         streetViewControl: false,
         fullscreenControl: false
       });
-      
-      const markerIcon = "https://dxer.site/img/m_30.png";  // Define the marker icon
 
-      // Load and process file
+      // Load and process station data
       fetch('output_2_10GHz_with_DXCC.json')
         .then(response => response.json())
         .then(data => {
           data.forEach(station => {
             const { Call: callsign, Locator: locator, Antenna: antenna, Power: power, Website: website, Coordinates } = station;
-
             const [latStr, lngStr] = Coordinates.split(',');
             const lat = parseFloat(latStr);
             const lng = parseFloat(lngStr);
@@ -277,14 +274,12 @@
               if (currentInfoWindow) {
                 currentInfoWindow.close();
               }
-
               infoWindow.open(map, marker);
               currentInfoWindow = infoWindow;
 
               setTimeout(() => {
                 const imageElement = document.getElementById(`station-image-${callsign}`);
                 const placeholder = document.getElementById(`image-placeholder-${callsign}`);
-
                 const imageUrl = `https://dxer.site/db/${callsign}_thumb.jpg`;
                 fetch(imageUrl, { method: 'HEAD' })
                   .then(response => {
@@ -304,122 +299,120 @@
             });
           });
         })
-        .catch(error => console.error('Failed to load station JSON data:', error));
-        
-        fetch('output_2_10GHz_SK_with_DXCC.json')
-          .then(response => response.json())
-          .then(data => {
-            data.forEach(station => {
-              const { Call: callsign, Locator: locator, Antenna: antenna, Power: power, Website: website, Coordinates } = station;
+        .catch(() => { /* Handle error silently */ });
 
-              const [latStr, lngStr] = Coordinates.split(',');
-              const lat = parseFloat(latStr);
-              const lng = parseFloat(lngStr);
-              if (isNaN(lat) || isNaN(lng)) return;
+      fetch('output_2_10GHz_SK_with_DXCC.json')
+        .then(response => response.json())
+        .then(data => {
+          data.forEach(station => {
+            const { Call: callsign, Locator: locator, Antenna: antenna, Power: power, Website: website, Coordinates } = station;
+            const { lat, lng } = parseCoordinates(Coordinates);
+            if (isNaN(lat) || isNaN(lng)) return;
 
-              const markerPosition = {
-                lat: lat + (0.1 / 10000), // Same slight offset to avoid overlap
-                lng: lng + (0.1 / 10000)
-              };
+            const markerPosition = {
+              lat: lat + (0.1 / 10000),
+              lng: lng + (0.1 / 10000)
+            };
 
-              const marker = new google.maps.Marker({
-                position: markerPosition,
-                map: map,
-                icon: {
-                  url: "https://dxer.site/img/notworked.png", // <- Different marker icon
-                  scaledSize: new google.maps.Size(20, 20)
-                },
-                title: callsign
-              });
+            const marker = new google.maps.Marker({
+              position: markerPosition,
+              map: map,
+              icon: {
+                url: "https://dxer.site/img/notworked.png",
+                scaledSize: new google.maps.Size(20, 20)
+              },
+              title: callsign
+            });
 
-              const infoContent = `
-                <div>
-                  <div style="font-weight:bold; font-size: 16px;">${callsign} (SK)</div>
-                  <div>Locator: ${locator}</div>
-                  <div>Antenna: ${antenna}</div>
-                  <div>Power: ${power}</div>
-                  <div>Website: <a href="${website}" target="_blank">${website}</a></div>
-                  <div><a href="https://www.qrz.com/db/${callsign}" target="_blank">QRZ.com lookup</a></div>
-                  <div id="image-container-${callsign}">
-                    Station Picture (clickable):<br>
-                    <a href="https://dxer.site/db/${callsign}.jpg" target="_blank">
-                      <img id="station-image-${callsign}"
-                           src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"
-                           alt="${callsign} station"/>
-                    </a>
-                    <div id="image-placeholder-${callsign}" style="display:none;">
-                      <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
-                    </div>
+            const infoContent = `
+              <div>
+                <div style="font-weight:bold; font-size: 16px;">${callsign} (SK)</div>
+                <div>Locator: ${locator}</div>
+                <div>Antenna: ${antenna}</div>
+                <div>Power: ${power}</div>
+                <div>Website: <a href="${website}" target="_blank">${website}</a></div>
+                <div><a href="https://www.qrz.com/db/${callsign}" target="_blank">QRZ.com lookup</a></div>
+                <div id="image-container-${callsign}">
+                  Station Picture (clickable):<br>
+                  <a href="https://dxer.site/db/${callsign}.jpg" target="_blank">
+                    <img id="station-image-${callsign}"
+                         src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"
+                         alt="${callsign} station"/>
+                  </a>
+                  <div id="image-placeholder-${callsign}" style="display:none;">
+                    <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
                   </div>
                 </div>
-              `;
+              </div>
+            `;
 
-              const infoWindow = new google.maps.InfoWindow({ content: infoContent });
+            const infoWindow = new google.maps.InfoWindow({ content: infoContent });
 
-              marker.addListener('click', () => {
-                if (currentInfoWindow) {
-                  currentInfoWindow.close();
-                }
+            marker.addListener('click', () => {
+              if (currentInfoWindow) {
+                currentInfoWindow.close();
+              }
+              infoWindow.open(map, marker);
+              currentInfoWindow = infoWindow;
 
-                infoWindow.open(map, marker);
-                currentInfoWindow = infoWindow;
-
-                setTimeout(() => {
-                  const imageElement = document.getElementById(`station-image-${callsign}`);
-                  const placeholder = document.getElementById(`image-placeholder-${callsign}`);
-
-                  const imageUrl = `https://dxer.site/db/${callsign}_thumb.jpg`;
-                  fetch(imageUrl, { method: 'HEAD' })
-                    .then(response => {
-                      if (!response.ok) {
-                        imageElement.remove();
-                        placeholder.style.display = 'block';
-                      } else {
-                        imageElement.src = imageUrl;
-                        placeholder.style.display = 'none';
-                      }
-                    })
-                    .catch(() => {
+              setTimeout(() => {
+                const imageElement = document.getElementById(`station-image-${callsign}`);
+                const placeholder = document.getElementById(`image-placeholder-${callsign}`);
+                const imageUrl = `https://dxer.site/db/${callsign}_thumb.jpg`;
+                fetch(imageUrl, { method: 'HEAD' })
+                  .then(response => {
+                    if (!response.ok) {
                       imageElement.remove();
                       placeholder.style.display = 'block';
-                    });
-                }, 100);
-              });
+                    } else {
+                      imageElement.src = imageUrl;
+                      placeholder.style.display = 'none';
+                    }
+                  })
+                  .catch(() => {
+                    imageElement.remove();
+                    placeholder.style.display = 'block';
+                  });
+              }, 100);
             });
-          })
-          .catch(error => console.error('Failed to load SK station JSON data:', error));
-          fetch('moon_data.json')
-            .then(response => response.json())
-            .then(data => {
-              window.moonData = data;
-            })
-            .catch(error => console.error('Error loading moon data:', error));
+          });
+        })
+        .catch(() => { /* Handle error silently */ });
+
+      fetch('moon_data.json')
+        .then(response => response.json())
+        .then(data => {
+          window.moonData = data;
+          updateMap(); // Call updateMap after moon data is loaded
+        })
+        .catch(() => { /* Handle error silently */ });
     }
+
+    function parseCoordinates(coordinates) {
+      const [latStr, lngStr] = coordinates.split(',');
+      return {
+        lat: parseFloat(latStr),
+        lng: parseFloat(lngStr)
+      };
+    }
+
     function updateMap() {
       const selectedDate = document.getElementById('date').value;
       const index = parseInt(document.getElementById('hour').value);
       const hour = Math.floor(index / 2).toString().padStart(2, '0');
       const minutes = index % 2 === 0 ? '00' : '30';
-
-      if (!selectedDate) {
-        alert("Please select a date.");
-        return;
-      }
-
       const utcTimeString = `${selectedDate} ${hour}:${minutes}:00`;
 
-      const moonData = window.moonData.find(entry => entry.t === utcTimeString);
+      if (!window.moonData) return; // Exit if moon data isn't loaded
 
-      if (!moonData) {
-        alert("No moon data available for the selected UTC time.");
-        return;
-      }
+      const moonData = window.moonData.find(entry => entry.t === utcTimeString);
+      if (!moonData) return; // Exit if no data for selected time
 
       const lat = parseFloat(moonData.p);
-      const lon = parseFloat(moonData.m); // Negate if needed for direction
-      const radius = parseFloat(moonData.r) * 1000;
+      const lon = parseFloat(moonData.m);
+      const radius = parseFloat(moonData.r) * 1000; // Convert km to meters
 
-      //map.setCenter({ lat: 0, lng: 0 });
+      if (isNaN(lat) || isNaN(lon) || isNaN(radius)) return; // Exit if invalid data
 
       if (moonMarker) moonMarker.setMap(null);
       if (footprintCircle) footprintCircle.setMap(null);
@@ -444,7 +437,6 @@
         strokeOpacity: 0.6,
         strokeWeight: 2
       });
-
     }
 
     function updateChart(hourIndex) {
@@ -471,7 +463,6 @@
 
       if (/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(qthInput)) {
         ({ lat, lon } = qthToLatLon(qthInput));
-
         for (let i = 0; i < 48; i++) {
           const hour = Math.floor(i / 2);
           const minutes = (i % 2) * 30;
@@ -513,7 +504,6 @@
 
       if (/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(dxInput)) {
         ({ lat: dxLat, lon: dxLon } = qthToLatLon(dxInput));
-
         for (let i = 0; i < 48; i++) {
           const hour = Math.floor(i / 2);
           const minutes = (i % 2) * 30;
@@ -562,11 +552,7 @@
             enabled: true,
             position: 'top',
             content: [],
-            font: {
-              size: 11,
-              weight: 'bold',
-              family: 'Arial, sans-serif'
-            },
+            font: { size: 11, weight: 'bold', family: 'Arial, sans-serif' },
             backgroundColor: 'rgba(0,0,0,0.8)',
             color: 'white',
             padding: 4,
@@ -599,11 +585,7 @@
             enabled: true,
             position: 'top',
             content: [],
-            font: {
-              size: 11,
-              weight: 'bold',
-              family: 'Arial, sans-serif'
-            },
+            font: { size: 11, weight: 'bold', family: 'Arial, sans-serif' },
             backgroundColor: 'rgba(0,0,0,0.8)',
             color: 'white',
             padding: 4,
@@ -644,10 +626,7 @@
                 data: moonElevations,
                 borderColor: "rgba(0, 0, 255, 0.6)",
                 backgroundColor: "rgba(0, 0, 255, 0.15)",
-                fill: {
-                  target: { value: 0 },
-                  above: 'rgba(0, 0, 255, 0.15)'
-                },
+                fill: { target: { value: 0 }, above: 'rgba(0, 0, 255, 0.15)' },
                 pointRadius: 0,
                 borderWidth: 1,
                 tension: 0.3,
@@ -673,18 +652,10 @@
                 type: "linear",
                 display: true,
                 position: "right",
-                title: {
-                  display: true,
-                  text: "Libration rate, °/min",
-                  color: "#ff0000"
-                },
+                title: { display: true, text: "Libration rate, °/min", color: "#ff0000" },
                 min: 0,
                 max: 0.005,
-                ticks: {
-                  stepSize: 0.001,
-                  callback: v => v.toFixed(3),
-                  color: "#ff0000"
-                },
+                ticks: { stepSize: 0.001, callback: v => v.toFixed(3), color: "#ff0000" },
                 grid: { drawTicks: true, drawBorder: true }
               },
               y2: {
@@ -692,35 +663,20 @@
                 display: true,
                 min: 0,
                 max: 90,
-                title: {
-                  display: true,
-                  text: "Moon Elevation",
-                  color: "rgba(0, 0, 255, 0.6)"
-                },
+                title: { display: true, text: "Moon Elevation", color: "rgba(0, 0, 255, 0.6)" },
                 grid: { drawOnChartArea: false },
-                ticks: {
-                  stepSize: 15,
-                  callback: val => val + "°",
-                  color: "rgba(0, 0, 255, 0.6)"
-                }
+                ticks: { stepSize: 15, callback: val => val + "°", color: "rgba(0, 0, 255, 0.6)" }
               },
               y3: {
                 type: "linear",
                 display: true,
                 position: "right",
                 offset: true,
-                title: {
-                  display: true,
-                  text: "Doppler Spread (Hz)",
-                  color: "green"
-                },
+                title: { display: true, text: "Doppler Spread (Hz)", color: "green" },
                 min: 0,
                 max: 300,
                 grid: { drawOnChartArea: false },
-                ticks: {
-                  stepSize: 50,
-                  color: "green"
-                }
+                ticks: { stepSize: 50, color: "green" }
               }
             },
             plugins: {
@@ -772,10 +728,7 @@
                 data: dxMoonElevations,
                 borderColor: "rgba(0, 0, 255, 0.6)",
                 backgroundColor: "rgba(0, 0, 255, 0.15)",
-                fill: {
-                  target: { value: 0 },
-                  above: 'rgba(0, 0, 255, 0.15)'
-                },
+                fill: { target: { value: 0 }, above: 'rgba(0, 0, 255, 0.15)' },
                 pointRadius: 0,
                 borderWidth: 1,
                 tension: 0.3,
@@ -801,18 +754,10 @@
                 type: "linear",
                 display: true,
                 position: "right",
-                title: {
-                  display: true,
-                  text: "Libration rate, °/min",
-                  color: "#ff0000"
-                },
+                title: { display: true, text: "Libration rate, °/min", color: "#ff0000" },
                 min: 0,
                 max: 0.005,
-                ticks: {
-                  stepSize: 0.001,
-                  callback: v => v.toFixed(3),
-                  color: "#ff0000"
-                },
+                ticks: { stepSize: 0.001, callback: v => v.toFixed(3), color: "#ff0000" },
                 grid: { drawTicks: true, drawBorder: true }
               },
               y2: {
@@ -820,35 +765,20 @@
                 display: true,
                 min: 0,
                 max: 90,
-                title: {
-                  display: true,
-                  text: "Moon Elevation",
-                  color: "rgba(0, 0, 255, 0.6)"
-                },
+                title: { display: true, text: "Moon Elevation", color: "rgba(0, 0, 255, 0.6)" },
                 grid: { drawOnChartArea: false },
-                ticks: {
-                  stepSize: 15,
-                  callback: val => val + "°",
-                  color: "rgba(0, 0, 255, 0.6)"
-                }
+                ticks: { stepSize: 15, callback: val => val + "°", color: "rgba(0, 0, 255, 0.6)" }
               },
               y3: {
                 type: "linear",
                 display: true,
                 position: "right",
                 offset: true,
-                title: {
-                  display: true,
-                  text: "Doppler Spread (Hz)",
-                  color: "green"
-                },
+                title: { display: true, text: "Doppler Spread (Hz)", color: "green" },
                 min: 0,
                 max: 300,
                 grid: { drawOnChartArea: false },
-                ticks: {
-                  stepSize: 50,
-                  color: "green"
-                }
+                ticks: { stepSize: 50, color: "green" }
               }
             },
             plugins: {
@@ -878,6 +808,8 @@
         dxChart.options.plugins.annotation.annotations = dxAnnotation;
         dxChart.update('none');
       }
+
+      updateMap(); // Update map after chart updates
     }
 
     function getMoonAnnotations(dateStr, lat, lon) {
@@ -897,6 +829,7 @@
       } catch (e) {
         // Handle error silently
       }
+
       const annotations = {};
 
       function formatTimeUTC(date) {
@@ -918,11 +851,7 @@
             enabled: true,
             position: 'top',
             yAdjust: -40,
-            font: {
-              size: 11,
-              weight: 'bold',
-              family: 'Arial, sans-serif',
-            },
+            font: { size: 11, weight: 'bold', family: 'Arial, sans-serif' },
             color: 'white',
             backgroundColor: 'rgba(0, 0, 255, 0.85)',
             padding: 2,
@@ -930,7 +859,7 @@
             boxShadow: '2px 2px 4px rgba(0,0,0,0.3)',
             textAlign: 'center',
             borderColor: 'rgba(255, 255, 255, 0.7)',
-            borderWidth: 1,
+            borderWidth: 1
           }
         };
       }
@@ -949,11 +878,7 @@
             content: ['Set', formatTimeUTC(setDate)],
             enabled: true,
             position: 'top',
-            font: {
-              size: 11,
-              weight: 'bold',
-              family: 'Arial, sans-serif',
-            },
+            font: { size: 11, weight: 'bold', family: 'Arial, sans-serif' },
             color: 'white',
             backgroundColor: 'rgba(255, 165, 0, 0.85)',
             padding: 2,
@@ -961,7 +886,7 @@
             boxShadow: '2px 2px 4px rgba(0,0,0,0.3)',
             textAlign: 'center',
             borderColor: 'rgba(255, 255, 255, 0.7)',
-            borderWidth: 1,
+            borderWidth: 1
           }
         };
       }
@@ -973,7 +898,7 @@
       return (date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600) * 2;
     }
 
-    document.getElementById("hour").addEventListener("input", e => {
+    document.getElementById("hour").addEventListener("input", () => {
       hourIndex = parseInt(document.getElementById("hour").value);
       const hour = Math.floor(hourIndex / 2);
       const minutes = (hourIndex % 2) * 30;
@@ -1015,10 +940,10 @@
       }
 
       hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
-
       document.getElementById("hour").value = hourIndex;
       document.getElementById("hour-value").textContent =
         `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
+      updateChart(hourIndex); // Initial chart and map update
     };
 
     document.getElementById("date").addEventListener("input", () => {
@@ -1112,12 +1037,12 @@
         ({ lat, lon } = qthToLatLon(locator));
         rawData = results;
         document.getElementById("chartWrapper").style.display = "block";
-        updateChart(hourIndex); // Trigger chart update after data calculation
+        updateChart(hourIndex);
       } else {
         ({ lat: dxLat, lon: dxLon } = qthToLatLon(locator));
         dxRawData = results;
         document.getElementById("dxChartWrapper").style.display = "block";
-        updateChart(hourIndex); // Trigger chart update after data calculation
+        updateChart(hourIndex);
       }
     }
   </script>
