@@ -407,8 +407,6 @@
 
           chart.options.plugins.annotation.annotations = annotation;
           chart.update('none');
-
-          chart.update('none'); // prevent animation to avoid flicker
         }
       }
                                                               function updateDxChart(hourIndex) {
@@ -481,6 +479,15 @@
                                                                   }
                                                                 };
 
+                                                                                                                      if (dxInput) {
+                                                                                                                        try {
+                                                                                                                          const { lat, lon } = qthToLatLon(dxInput);
+                                                                                                                          const moonAnnotations = getMoonAnnotations(dateStr, lat, lon);
+                                                                                                                          Object.assign(annotation, moonAnnotations);
+                                                                                                                        } catch (e) {
+                                                                                                                          console.warn("Failed to calculate moon annotations:", e);
+                                                                                                                        }
+                                                                                                                      }
                                                                 if (!dxChart) {
                                                                   dxChart = new Chart(document.getElementById("dxDeclinationChart"), {
                                                                     type: 'line',
