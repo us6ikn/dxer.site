@@ -183,6 +183,7 @@
         border-radius: 4px;
         cursor: pointer;
         transition: background-color 0.3s ease;
+        z-index: 10;
       }
 
       #toggleMoonChart:hover {
@@ -192,6 +193,10 @@
       #toggleMoonChart:focus {
         outline: none;
         box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
+      }
+
+      #moonChartWrapper.hidden {
+        display: none;
       }
   </style>
 </head>
@@ -1261,16 +1266,17 @@
                                                                     const moonChartWrapper = document.getElementById("moonChartWrapper");
                                                                     const toggleButton = document.getElementById("toggleMoonChart");
                                                                     
-                                                                    if (moonChartWrapper.style.display === "block") {
-                                                                      moonChartWrapper.style.display = "none";
-                                                                      toggleButton.textContent = "Show";
-                                                                    } else {
-                                                                      moonChartWrapper.style.display = "block";
+                                                                    if (moonChartWrapper.classList.contains("hidden")) {
+                                                                      moonChartWrapper.classList.remove("hidden");
                                                                       toggleButton.textContent = "Hide";
                                                                       // Ensure chart is resized properly when shown
                                                                       if (moonChart) {
                                                                         moonChart.resize();
+                                                                        moonChart.update('none');
                                                                       }
+                                                                    } else {
+                                                                      moonChartWrapper.classList.add("hidden");
+                                                                      toggleButton.textContent = "Show";
                                                                     }
                                                                   });
   </script>
