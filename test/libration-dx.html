@@ -14,7 +14,7 @@
       overflow: hidden;
       font-family: Arial, sans-serif;
     }
-      #dxChartWrapper {
+      #chartWrapper {
         display: none;
       }
     #map {
@@ -118,7 +118,7 @@
       color: #2c3e50;
       margin-top: -4px;
     }
-    #dxChartWrapper {
+    #chartWrapper {
       width: 100%;
       height: 180px;
       margin-top: 6px;
@@ -129,7 +129,7 @@
       position: relative;
       box-sizing: border-box;
     }
-    #dxDeclinationChart {
+    #declinationChart {
       width: 100%;
       max-width: 100%;
       height: calc(100% - 40px);
@@ -164,7 +164,7 @@
     </div>
   </div>
   <div id="dxChartWrapper" style="display:none;">
-      <div id="dxChartLabel" style="text-align: center; margin-bottom: 0px; font-weight: normal; font-size: 12px;"></div>
+      <div id="dxchartLabel" style="text-align: center; margin-bottom: 0px; font-weight: normal; font-size: 12px;"></div>
     <canvas id="dxDeclinationChart"></canvas>
   </div>
   </div>
@@ -173,6 +173,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
 
   <script>
+    let chart;
     let dxChart;
     let rawData = [];
     let hourIndex = 0; // global
@@ -190,11 +191,11 @@
       });
     }
 
-      function updatedxChart(hourIndex) {
+      function updateChart(hourIndex) {
         if (!rawData.length) return;
 
-        const dxInput = document.getElementById("dx").value.trim();
-        if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(dxInput)) return;
+        const locatorInput = document.getElementById("qth").value.trim();
+        if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locatorInput)) return;
 
         const dateInput = document.getElementById("date").value;
         const dateStr = new Date(dateInput).toISOString().slice(0, 10);
@@ -209,7 +210,7 @@
         const visibleRates = [];
         const dopplerSpreads = [];
 
-        ({ lat, lon } = dxToLatLon(dxInput));
+        ({ lat, lon } = qthToLatLon(locatorInput));
 
         for (let i = 0; i < 48; i++) {
           const hour = Math.floor(i / 2);
@@ -265,9 +266,9 @@ textAlign: 'left'
 }
 };
 
-        if (dxInput) {
+        if (locatorInput) {
           try {
-            const { lat, lon } = dxToLatLon(dxInput);
+            const { lat, lon } = qthToLatLon(locatorInput);
             const moonAnnotations = getMoonAnnotations(dateStr, lat, lon);
             Object.assign(annotation, moonAnnotations);
           } catch (e) {
@@ -275,8 +276,8 @@ textAlign: 'left'
           }
         }
 
-        if (!dxChart) {
-                dxChart = new Chart(document.getElementById("dxDeclinationChart"), {
+        if (!chart) {
+          chart = new Chart(document.getElementById("dxDeclinationChart"), {
             type: 'line',
             data: {
               labels,
@@ -382,10 +383,10 @@ textAlign: 'left'
             }
           });
         } else {
-            dxChart.data.labels = labels;
-            dxChart.data.datasets[0].data = visibleRates;
-            dxChart.data.datasets[1].data = moonElevations;
-            dxChart.data.datasets[2].data = dopplerSpreads;
+          chart.data.labels = labels;
+          chart.data.datasets[0].data = visibleRates;
+          chart.data.datasets[1].data = moonElevations;
+          chart.data.datasets[2].data = dopplerSpreads;
           const elev = moonElevations[hourIndex];
           const rate = visibleRates[hourIndex];
           const doppler = dopplerSpreads[hourIndex];
@@ -397,14 +398,14 @@ textAlign: 'left'
             ` Spread: ${doppler != null ? doppler.toFixed(0) + 'Hz' : 'N/A'}`;
 
           // Display it above the chart
-          document.getElementById('dxChartLabel').textContent = labelText;
+          document.getElementById('dxchartLabel').textContent = labelText;
 
           if (annotation.timeMarker.label) {
             annotation.timeMarker.label.enabled = false;
           }
 
-          dxChart.options.plugins.annotation.annotations = annotation;
-          dxChart.update('none');
+          chart.options.plugins.annotation.annotations = annotation;
+          chart.update('none');
         }
       }
     function getMoonAnnotations(dateStr, lat, lon) {
@@ -505,7 +506,7 @@ return (date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 
         const hour = Math.floor(hourIndex / 2);
         const minutes = (hourIndex % 2) * 30;
         document.getElementById("hour-value").textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}`;
-        updatedxChart(hourIndex);
+        updateChart(hourIndex);
       });
 
 function adjustDate(days) {
@@ -514,7 +515,7 @@ const currentDate = new Date(dateInput.value);
 currentDate.setDate(currentDate.getDate() + days);
 dateInput.valueAsDate = currentDate;
 
-updatedxChart(hourIndex);
+updateChart(hourIndex);
 }
 
 document.getElementById("prevDay").addEventListener("click", () => {
@@ -551,13 +552,14 @@ adjustDate(1);
 
     document.getElementById("date").addEventListener("input", () => {
         hourIndex = parseInt(document.getElementById("hour").value);
-        updatedxChart(hourIndex);
+        updateChart(hourIndex);
       });
 
-    const dxInput = document.getElementById("dx");
+                                                              const dxInput = document.getElementById("dx");
 
-    dxInput.addEventListener("input", async () => {
-      const locator = dxInput.value.trim().toUpperCase();
+                                                              dxInput.addEventListener("input", async () => {
+                                                                const locator = dxInput.value.trim().toUpperCase();
+
       if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
         await calculateLibration();
       } else {
@@ -566,9 +568,9 @@ adjustDate(1);
       }
     });
 
-  function dxToLatLon(locator) {
+  function qthToLatLon(locator) {
     if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
-      throw new Error("Invalid dx locator format (must be 6 characters)");
+      throw new Error("Invalid QTH locator format (must be 6 characters)");
     }
     locator = locator.toUpperCase();
     const A = 'A'.charCodeAt(0);
@@ -580,7 +582,7 @@ adjustDate(1);
   async function calculateLibration() {
     const locator = document.getElementById("dx").value.trim();
 
-    let { lat, lon } = dxToLatLon(locator);
+    let { lat, lon } = qthToLatLon(locator);
     const COS_LAT = Math.cos(lat * Math.PI / 180);
     const TIME_SHIFT_MIN = (lon / 15) * 60;
     const INTERVAL_MIN = 30;
@@ -613,10 +615,10 @@ adjustDate(1);
       return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
     });
 
-    ({ lat, lon } = dxToLatLon(locator));
+    ({ lat, lon } = qthToLatLon(locator));
     rawData = results;
     document.getElementById("dxChartWrapper").style.display = "block";
-    updatedxChart(hourIndex);
+    updateChart(hourIndex);
   }
   </script>
   
