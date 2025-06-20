@@ -522,18 +522,24 @@
 
         const distances = moonData.map(d => d.distance);
         const declinations = moonData.map(d => d.declination);
-        const selectedDay = selectedDateTime.getUTCDate() - 1; // Index for the selected day
+        const selectedDay = selectedDateTime.getUTCDate() - 1;
 
         let currentDistance = null;
         let currentDeclination = null;
         try {
           const astroTime = Astronomy.MakeTime(selectedDateTime);
-          const moonEq = Astronomy.Equator(Astronomy.Body.Moon, astroTime, null, true, true);
+          const observer = new Astronomy.Observer(0, 0, 0); // Default observer
+          const moonEq = Astronomy.Equator(Astronomy.Body.Moon, astroTime, observer, true, true);
           const geoMoon = Astronomy.GeoMoon(astroTime);
-          currentDistance = geoMoon ? geoMoon.dist : null;
-          currentDeclination = moonEq ? moonEq.dec : null;
+          
+          if (moonEq && geoMoon) {
+            currentDistance = geoMoon.dist;
+            currentDeclination = moonEq.dec;
+          } else {
+            throw new Error("Invalid current Moon data");
+          }
         } catch (e) {
-          console.warn(`Error calculating current Moon data: ${e.message}`);
+          console.warn(`Error calculating current Moon data for ${selectedDateTime.toISOString()}: ${e.message}`);
         }
 
         const moonAnnotation = {
@@ -592,8 +598,8 @@
                   display: true,
                   position: "left",
                   title: { display: true, text: "Distance (km)", color: "#800080" },
-                  min: 350000,
-                  max: 410000,
+                  min: Math.min(...distances.filter(d => d != null), 350000) - 5000,
+                  max: Math.max(...distances.filter(d => d != null), 410000) + 5000,
                   ticks: { stepSize: 10000, color: "#800080" },
                   grid: { drawTicks: true, drawBorder: true }
                 },
@@ -602,8 +608,8 @@
                   display: true,
                   position: "right",
                   title: { display: true, text: "Declination (°)", color: "#FFA500" },
-                  min: -30,
-                  max: 30,
+                  min: Math.min(...declinations.filter(d => d != null), -30) - 5,
+                  max: Math.max(...declinations.filter(d => d != null), 30) + 5,
                   ticks: { stepSize: 10, callback: val => val + "°", color: "#FFA500" },
                   grid: { drawOnChartArea: false }
                 }
@@ -620,6 +626,10 @@
           moonChart.data.datasets[1].data = declinations;
           moonChart.options.plugins.annotation.annotations = moonAnnotation;
           moonChart.options.plugins.annotation.annotations.timeMarker.value = selectedDay;
+          moonChart.options.scales.y1.min = Math.min(...distances.filter(d => d != null), 350000) - 5000;
+          moonChart.options.scales.y1.max = Math.max(...distances.filter(d => d != null), 410000) + 5000;
+          moonChart.options.scales.y2.min = Math.min(...declinations.filter(d => d != null), -30) - 5;
+          moonChart.options.scales.y2.max = Math.max(...declinations.filter(d => d != null), 30) + 5;
           moonChart.update('none');
         }
       }
