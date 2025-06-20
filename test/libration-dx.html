@@ -194,8 +194,8 @@
       function updatedxChart(hourIndex) {
         if (!rawData.length) return;
 
-        const locatorInput = document.getElementById("dx").value.trim();
-        if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locatorInput)) return;
+        const dxInput = document.getElementById("dx").value.trim();
+        if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(dxInput)) return;
 
         const dateInput = document.getElementById("date").value;
         const dateStr = new Date(dateInput).toISOString().slice(0, 10);
@@ -210,7 +210,7 @@
         const visibleRates = [];
         const dopplerSpreads = [];
 
-        ({ lat, lon } = dxToLatLon(locatorInput));
+        ({ lat, lon } = dxToLatLon(dxInput));
 
         for (let i = 0; i < 48; i++) {
           const hour = Math.floor(i / 2);
@@ -266,9 +266,9 @@ textAlign: 'left'
 }
 };
 
-        if (locatorInput) {
+        if (dxInput) {
           try {
-            const { lat, lon } = dxToLatLon(locatorInput);
+            const { lat, lon } = dxToLatLon(dxInput);
             const moonAnnotations = getMoonAnnotations(dateStr, lat, lon);
             Object.assign(annotation, moonAnnotations);
           } catch (e) {
