@@ -392,10 +392,6 @@
             .then(response => response.json())
             .then(data => {
               window.moonData = data;
-              initDeclinationChart(data);
-              addDegradationOverlays();
-              setDefaultTimeAndUpdateMap();
-              restrictDatePicker();
             })
             .catch(error => console.error('Error loading moon data:', error));
     }
