@@ -17,6 +17,44 @@
     #chartWrapper, #dxChartWrapper, #moonChartWrapper {
       display: none;
     }
+      #chartWrapper {
+        width: 100%;
+        height: 180px; /* Match moonChartWrapper height for consistency */
+        margin-top: 6px;
+        background-color: rgba(255, 255, 255, 0.85);
+        border-radius: 6px;
+        box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        position: relative;
+        box-sizing: border-box;
+        display: none; /* Keep initial hidden state */
+      }
+
+      #declinationChart {
+        width: 100%;
+        max-width: 100%;
+        height: calc(100% - 20px); /* Adjust for label space */
+        box-sizing: border-box;
+      }
+      #dxChartWrapper {
+        width: 100%;
+        height: 180px;
+        margin-top: 6px;
+        background-color: rgba(255, 255, 255, 0.85);
+        border-radius: 6px;
+        box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        position: relative;
+        box-sizing: border-box;
+        display: none;
+      }
+
+      #dxDeclinationChart {
+        width: 100%;
+        max-width: 100%;
+        height: calc(100% - 20px);
+        box-sizing: border-box;
+      }
     #moonChartWrapper {
       width: 100%;
       height: 180px;
@@ -429,29 +467,42 @@
 
       function calculateMoonDataForMonth(dateStr) {
         const startDate = new Date(dateStr);
-        startDate.setUTCDate(1); // Start from the 1st of the month
+        startDate.setUTCDate(1);
         const endDate = new Date(startDate);
-        endDate.setUTCDate(endDate.getUTCDate() + 30); // Cover 30 days
+        endDate.setUTCDate(endDate.getUTCDate() + 30);
 
         const data = [];
         const labels = [];
+
+        // Use a default observer (e.g., at lat: 0, lon: 0, height: 0) for geocentric calculations
+        const observer = new Astronomy.Observer(0, 0, 0);
 
         for (let dt = new Date(startDate); dt <= endDate; dt.setUTCDate(dt.getUTCDate() + 1)) {
           try {
             const dateString = dt.toISOString().slice(0, 10);
             const time = `${dateString}T00:00:00Z`;
             const astroTime = Astronomy.MakeTime(new Date(time));
-            const moonEq = Astronomy.Equator(Astronomy.Body.Moon, astroTime, null, true, true);
+            
+            // Pass observer to Equator for consistent calculations
+            const moonEq = Astronomy.Equator(Astronomy.Body.Moon, astroTime, observer, true, true);
             const geoMoon = Astronomy.GeoMoon(astroTime);
-            const distanceKm = geoMoon ? geoMoon.dist : null;
-            const declination = moonEq ? moonEq.dec : null;
-            if (distanceKm !== null && declination !== null) {
+            
+            if (!moonEq || !geoMoon) {
+              throw new Error("Invalid Moon data");
+            }
+
+            const distanceKm = geoMoon.dist;
+            const declination = moonEq.dec;
+
+            if (distanceKm != null && declination != null) {
               data.push({
                 date: dateString,
                 distance: distanceKm,
                 declination: declination
               });
-              labels.push(dateString.slice(5, 10)); // e.g., "06-01" for June 1
+              labels.push(dateString.slice(5, 10));
+            } else {
+              console.warn(`Missing data for ${dateString}: distance=${distanceKm}, declination=${declination}`);
             }
           } catch (e) {
             console.warn(`Error calculating Moon data for ${dt.toISOString()}: ${e.message}`);
