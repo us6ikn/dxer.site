@@ -267,16 +267,12 @@
       <div id="chartLabel" style="text-align: center; margin-bottom: 0px; font-weight: normal;"></div>
       <canvas id="declinationChart"></canvas>
     </div>
-    <div id="chartWrapper" style="display: none;">
-      <div id="chartLabel"></div>
-      <canvas id="declinationChart"></canvas>
-    </div>
     <div id="dxChartWrapper" style="display: none;">
-      <div id="dxchartLabel"></div>
+      <div id="dxchartLabel" style="text-align: center; margin-bottom: 0px; font-weight: normal;"></div>
       <canvas id="dxDeclinationChart"></canvas>
     </div>
     <div id="moonChartWrapper" style="display: block;">
-      <div id="moonChartLabel"></div>
+      <div id="moonChartLabel" style="text-align: center; margin-bottom: 0px; font-weight: normal;"></div>
       <canvas id="moonDistanceChart"></canvas>
       <button id="toggleMoonChart" style="position: absolute; bottom: 5px; right: 5px; z-index: 10;">Hide</button>
     </div>
@@ -678,7 +674,7 @@
                   title: {
                     display: true,
                     text: "Date (MM-DD)",
-                    font: { size: 10, family: 'Arial, sans-serif' }
+                    font: { size: 12, family: 'Arial, sans-serif' }
                   },
                   ticks: { font: { size: 10 } }
                 },
@@ -697,7 +693,7 @@
                   ticks: {
                     stepSize: 10000,
                     color: "#800080",
-                    font: { size: 12 },
+                    font: { size: 10 },
                     callback: function(value) {
                       return (value / 1000).toFixed(0); // Show thousands of km (e.g., 356)
                     }
@@ -720,7 +716,7 @@
                     stepSize: 10,
                     callback: val => val + "°",
                     color: "#FFA500",
-                    font: { size: 12 }
+                    font: { size: 10 }
                   },
                   grid: { drawOnChartArea: false }
                 },
@@ -740,7 +736,7 @@
                     stepSize: 0.5,
                     callback: val => val.toFixed(1),
                     color: "#800080",
-                    font: { size: 12 }
+                    font: { size: 10 }
                   },
                   grid: { drawOnChartArea: false },
                   offset: true // Prevent overlap with y2
@@ -804,7 +800,7 @@
             if (elevationDeg > 0) {
               moonElevations.push(elevationDeg);
               moonAzimuths.push(azimuthDeg);
-              visibleRates.push((dataForDay[i]?.rate ?? null) * 1000); // Scale to ×10⁻³ °/min
+              visibleRates.push(dataForDay[i]?.rate ?? null);
               const omegaRadSec = (dataForDay[i]?.rate ?? 0) * (Math.PI / 180) / 60;
               const dopplerHz = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
               dopplerSpreads.push(dopplerHz);
@@ -844,7 +840,7 @@
             if (elevationDeg > 0) {
               dxMoonElevations.push(elevationDeg);
               dxMoonAzimuths.push(azimuthDeg);
-              dxVisibleRates.push((dxDataForDay[i]?.rate ?? null) * 1000); // Scale to ×10⁻³ °/min
+              dxVisibleRates.push(dxDataForDay[i]?.rate ?? null);
               const omegaRadSec = (dxDataForDay[i]?.rate ?? 0) * (Math.PI / 180) / 60;
               const dopplerHz = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
               dxDopplerSpreads.push(dopplerHz);
@@ -875,7 +871,15 @@
             borderColor: 'black',
             borderWidth: 2,
             label: {
-              enabled: false // Disable to avoid clutter
+              enabled: true,
+              position: 'top',
+              content: [],
+              font: { size: 11, weight: 'bold', family: 'Arial, sans-serif' },
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              color: 'white',
+              padding: 4,
+              cornerRadius: 4,
+              textAlign: 'left'
             }
           }
         };
@@ -899,7 +903,15 @@
             borderColor: 'black',
             borderWidth: 2,
             label: {
-              enabled: false // Disable to avoid clutter
+              enabled: true,
+              position: 'top',
+              content: [],
+              font: { size: 11, weight: 'bold', family: 'Arial, sans-serif' },
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              color: 'white',
+              padding: 4,
+              cornerRadius: 4,
+              textAlign: 'left'
             }
           }
         };
@@ -921,7 +933,7 @@
               labels,
               datasets: [
                 {
-                  label: "Libration Rate (×10⁻³ °/min)",
+                  label: "Libration Rate (deg/min)",
                   data: visibleRates,
                   borderColor: "#ff0000",
                   pointRadius: 0,
@@ -955,31 +967,15 @@
               responsive: true,
               maintainAspectRatio: false,
               scales: {
-                x: {
-                  title: {
-                    display: true,
-                    text: "Time (UTC)",
-                    font: { size: 10, family: 'Arial, sans-serif' }
-                  },
-                  ticks: { font: { size: 10 } }
-                },
+                x: {},
                 y1: {
                   type: "linear",
                   display: true,
                   position: "right",
-                  title: {
-                    display: true,
-                    text: "Libration Rate (×10⁻³ °/min)",
-                    color: "#ff0000",
-                    font: { size: 12, family: 'Arial, sans-serif' }
-                  },
+                  title: { display: true, text: "Libration rate, °/min", color: "#ff0000" },
                   min: 0,
-                  max: 5,
-                  ticks: {
-                    stepSize: 1,
-                    color: "#ff0000",
-                    font: { size: 12 }
-                  },
+                  max: 0.005,
+                  ticks: { stepSize: 0.001, callback: v => v.toFixed(3), color: "#ff0000" },
                   grid: { drawTicks: true, drawBorder: true }
                 },
                 y2: {
@@ -987,39 +983,20 @@
                   display: true,
                   min: 0,
                   max: 90,
-                  title: {
-                    display: true,
-                    text: "Moon Elevation (°)",
-                    color: "rgba(0, 0, 255, 0.6)",
-                    font: { size: 12, family: 'Arial, sans-serif' }
-                  },
+                  title: { display: true, text: "Moon Elevation", color: "rgba(0, 0, 255, 0.6)" },
                   grid: { drawOnChartArea: false },
-                  ticks: {
-                    stepSize: 15,
-                    callback: val => val + "°",
-                    color: "rgba(0, 0, 255, 0.6)",
-                    font: { size: 12 }
-                  }
+                  ticks: { stepSize: 15, callback: val => val + "°", color: "rgba(0, 0, 255, 0.6)" }
                 },
                 y3: {
                   type: "linear",
                   display: true,
                   position: "right",
                   offset: true,
-                  title: {
-                    display: true,
-                    text: "Doppler Spread (Hz)",
-                    color: "green",
-                    font: { size: 12, family: 'Arial, sans-serif' }
-                  },
+                  title: { display: true, text: "Doppler Spread (Hz)", color: "green" },
                   min: 0,
                   max: 300,
                   grid: { drawOnChartArea: false },
-                  ticks: {
-                    stepSize: 50,
-                    color: "green",
-                    font: { size: 12 }
-                  }
+                  ticks: { stepSize: 50, color: "green" }
                 }
               },
               plugins: {
@@ -1034,7 +1011,7 @@
           chart.data.datasets[1].data = moonElevations;
           chart.data.datasets[2].data = dopplerSpreads;
           const elev = moonElevations[hourIndex];
-          const rate = visibleRates[hourIndex] != null ? (visibleRates[hourIndex] / 1000).toFixed(4) : null; // Scale back for display
+          const rate = visibleRates[hourIndex];
           const doppler = dopplerSpreads[hourIndex];
           const azimuth = moonAzimuths[hourIndex];
           const labelText =
@@ -1044,7 +1021,7 @@
             `<span class="metric-separator">|</span>` +
             `<span class="metric-label metric-azimuth">Az:</span> ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}` +
             `<span class="metric-separator">|</span>` +
-            `<span class="metric-label metric-libration">Libration:</span> ${rate != null ? rate + '°/min' : 'N/A'}` +
+            `<span class="metric-label metric-libration">Libration:</span> ${rate != null ? rate.toFixed(4) + '°/min' : 'N/A'}` +
             `<span class="metric-separator">|</span>` +
             `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + 'Hz' : 'N/A'}`;
           document.getElementById('chartLabel').innerHTML = qthInput ? labelText : '<span class="metric-locator">Enter valid QTH</span>';
@@ -1062,7 +1039,7 @@
               labels,
               datasets: [
                 {
-                  label: "Libration Rate (×10⁻³ °/min)",
+                  label: "Libration Rate (deg/min)",
                   data: dxVisibleRates,
                   borderColor: "#ff0000",
                   pointRadius: 0,
@@ -1096,31 +1073,15 @@
               responsive: true,
               maintainAspectRatio: false,
               scales: {
-                x: {
-                  title: {
-                    display: true,
-                    text: "Time (UTC)",
-                    font: { size: 10, family: 'Arial, sans-serif' }
-                  },
-                  ticks: { font: { size: 10 } }
-                },
+                x: {},
                 y1: {
                   type: "linear",
                   display: true,
                   position: "right",
-                  title: {
-                    display: true,
-                    text: "Libration Rate (×10⁻³ °/min)",
-                    color: "#ff0000",
-                    font: { size: 12, family: 'Arial, sans-serif' }
-                  },
+                  title: { display: true, text: "Libration rate, °/min", color: "#ff0000" },
                   min: 0,
-                  max: 5,
-                  ticks: {
-                    stepSize: 1,
-                    color: "#ff0000",
-                    font: { size: 12 }
-                  },
+                  max: 0.005,
+                  ticks: { stepSize: 0.001, callback: v => v.toFixed(3), color: "#ff0000" },
                   grid: { drawTicks: true, drawBorder: true }
                 },
                 y2: {
@@ -1128,39 +1089,20 @@
                   display: true,
                   min: 0,
                   max: 90,
-                  title: {
-                    display: true,
-                    text: "Moon Elevation (°)",
-                    color: "rgba(0, 0, 255, 0.6)",
-                    font: { size: 12, family: 'Arial, sans-serif' }
-                  },
+                  title: { display: true, text: "Moon Elevation", color: "rgba(0, 0, 255, 0.6)" },
                   grid: { drawOnChartArea: false },
-                  ticks: {
-                    stepSize: 15,
-                    callback: val => val + "°",
-                    color: "rgba(0, 0, 255, 0.6)",
-                    font: { size: 12 }
-                  }
+                  ticks: { stepSize: 15, callback: val => val + "°", color: "rgba(0, 0, 255, 0.6)" }
                 },
                 y3: {
                   type: "linear",
                   display: true,
                   position: "right",
                   offset: true,
-                  title: {
-                    display: true,
-                    text: "Doppler Spread (Hz)",
-                    color: "green",
-                    font: { size: 12, family: 'Arial, sans-serif' }
-                  },
+                  title: { display: true, text: "Doppler Spread (Hz)", color: "green" },
                   min: 0,
                   max: 300,
                   grid: { drawOnChartArea: false },
-                  ticks: {
-                    stepSize: 50,
-                    color: "green",
-                    font: { size: 12 }
-                  }
+                  ticks: { stepSize: 50, color: "green" }
                 }
               },
               plugins: {
@@ -1175,7 +1117,7 @@
           dxChart.data.datasets[1].data = dxMoonElevations;
           dxChart.data.datasets[2].data = dxDopplerSpreads;
           const elev = dxMoonElevations[hourIndex];
-          const rate = dxVisibleRates[hourIndex] != null ? (dxVisibleRates[hourIndex] / 1000).toFixed(4) : null; // Scale back for display
+          const rate = dxVisibleRates[hourIndex];
           const doppler = dxDopplerSpreads[hourIndex];
           const azimuth = dxMoonAzimuths[hourIndex];
           const labelText =
@@ -1185,7 +1127,7 @@
             `<span class="metric-separator">|</span>` +
             `<span class="metric-label metric-azimuth">Az:</span> ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}` +
             `<span class="metric-separator">|</span>` +
-            `<span class="metric-label metric-libration">Libration:</span> ${rate != null ? rate + '°/min' : 'N/A'}` +
+            `<span class="metric-label metric-libration">Libration:</span> ${rate != null ? rate.toFixed(4) + '°/min' : 'N/A'}` +
             `<span class="metric-separator">|</span>` +
             `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + 'Hz' : 'N/A'}`;
           document.getElementById('dxchartLabel').innerHTML = dxInput ? labelText : '<span class="metric-locator">Enter valid DX</span>';
