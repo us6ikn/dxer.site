@@ -303,14 +303,6 @@
       const MOON_RADIUS = 1.7374e6; // meters
       const SPEED_OF_LIGHT = 299792458; // m/s
       const FREQUENCY_HZ = 10.368e9; // 10.368 GHz
-      
-      function debounce(func, wait) {
-        let timeout;
-        return function (...args) {
-          clearTimeout(timeout);
-          timeout = setTimeout(() => func.apply(this, args), wait);
-        };
-      }
 
       function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
@@ -1298,11 +1290,11 @@
                                                            // Recalculate libration data if QTH or DX is valid
                                                            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
                                                              cachedLibrationData.qth = null; // Clear cache for QTH
-                                                             await calculateLibration('qth');
+                                                             await calculateLibration('qth'); // This will call updateChart
                                                            }
                                                            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
                                                              cachedLibrationData.dx = null; // Clear cache for DX
-                                                             await calculateLibration('dx');
+                                                             await calculateLibration('dx'); // This will call updateChart
                                                            }
 
                                                            // Call updateChart only if no valid locators are provided
@@ -1341,11 +1333,11 @@
       const qthInput = document.getElementById("qth");
       const dxInput = document.getElementById("dx");
 
-                                                         qthInput.addEventListener("input", debounce(async () => {
+                                                         qthInput.addEventListener("input", async () => {
                                                            const locator = qthInput.value.trim().toUpperCase();
                                                            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
                                                              cachedLibrationData.qth = null; // Clear cache for QTH
-                                                             await calculateLibration('qth');
+                                                             await calculateLibration('qth'); // This will call updateChart internally
                                                            } else {
                                                              document.getElementById("chartWrapper").style.display = "none";
                                                              if (chart) {
@@ -1354,13 +1346,13 @@
                                                              }
                                                              document.getElementById('chartLabel').innerHTML = '<span class="metric-locator">Enter valid QTH</span>';
                                                            }
-                                                         }, 300));
+                                                         });
 
-                                                         dxInput.addEventListener("input", debounce(async () => {
+                                                         dxInput.addEventListener("input", async () => {
                                                            const locator = dxInput.value.trim().toUpperCase();
                                                            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
                                                              cachedLibrationData.dx = null; // Clear cache for DX
-                                                             await calculateLibration('dx');
+                                                             await calculateLibration('dx'); // This will call updateChart internally
                                                            } else {
                                                              document.getElementById("dxChartWrapper").style.display = "none";
                                                              if (dxChart) {
@@ -1369,7 +1361,7 @@
                                                              }
                                                              document.getElementById('dxchartLabel').innerHTML = '<span class="metric-locator">Enter valid DX</span>';
                                                            }
-                                                         }, 300));
+                                                         });
 
       function qthToLatLon(locator) {
         if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
@@ -1383,10 +1375,15 @@
       }
 
                                                          async function calculateLibration(type) {
-                                                           const locator = type === 'qth' ? document.getElementById("qth").value.trim() : document.getElementById("dx").value.trim();
+                                                           const locator = type === 'qth' ? document.getElementById("qth").value.trim().toUpperCase() : document.getElementById("dx").value.trim().toUpperCase();
                                                            const dateInput = document.getElementById("date").value;
                                                            const year = dateInput ? new Date(dateInput).getUTCFullYear() : new Date().getUTCFullYear();
                                                            const librationFile = `lib_${year}.txt`;
+
+                                                           // Validate locator before proceeding
+                                                           if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
+                                                             return; // Exit early if locator is invalid
+                                                           }
 
                                                            let { lat, lon } = qthToLatLon(locator);
                                                            const COS_LAT = Math.cos(lat * Math.PI / 180);
