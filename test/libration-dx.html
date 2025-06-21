@@ -533,11 +533,11 @@
           const lat = decDeg; // Sublunar latitude
           const lon = lonDeg; // Sublunar longitude
 
-          // Calculate footprint radius (approximation of Moon's visible disk on Earth's surface)
-          const earthRadius = 6371e3; // Earth's mean radius in meters
-          const moonAngularDiameter = libration.diam_deg; // Moon's angular diameter in degrees
-          const moonAngularRadius = (moonAngularDiameter / 2) * (Math.PI / 180); // Convert to radians
-          const footprintRadius = earthRadius * Math.sin(moonAngularRadius); // Approximate footprint radius in meters
+          // Calculate footprint radius
+          const earthRadius = 6371; // Earth's mean radius in km
+          const D_moon = libration.dist_km; // Moon's geocentric distance in km
+          const theta_rad = Math.acos(earthRadius / (earthRadius + D_moon));
+          const footprintRadius = earthRadius * theta_rad * 1000; // Convert km to meters for Google Maps
 
           if (isNaN(lat) || isNaN(lon) || isNaN(footprintRadius)) {
             console.warn(`Invalid sublunar point data for ${utcTimeString}: lat=${lat}, lon=${lon}, radius=${footprintRadius}`);
