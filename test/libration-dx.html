@@ -548,6 +548,9 @@
 
         let currentDistance = null;
         let currentDeclination = null;
+        let pathLoss = null;
+        const minDist = 356352.93; // Minimal Moon distance in km
+
         try {
           const astroTime = Astronomy.MakeTime(selectedDateTime);
           const observer = new Astronomy.Observer(0, 0, 0); // Default observer for declination
@@ -557,6 +560,9 @@
           if (libration && moonEq) {
             currentDistance = libration.dist_km;
             currentDeclination = moonEq.dec;
+            if (currentDistance != null) {
+              pathLoss = 40 * Math.log10(currentDistance / minDist);
+            }
           } else {
             throw new Error("Invalid current Moon data");
           }
@@ -580,7 +586,8 @@
 
         document.getElementById('moonChartLabel').textContent =
           `Moon Distance: ${currentDistance != null ? currentDistance.toFixed(0) + ' km' : 'N/A'}  ` +
-          `Declination: ${currentDeclination != null ? currentDeclination.toFixed(1) + '°' : 'N/A'}`;
+          `Declination: ${currentDeclination != null ? currentDeclination.toFixed(1) + '°' : 'N/A'}  ` +
+          `Path Loss: ${pathLoss != null ? pathLoss.toFixed(2) + ' dB' : 'N/A'}`;
 
         if (!moonChart) {
           moonChart = new Chart(document.getElementById("moonDistanceChart"), {
@@ -620,8 +627,8 @@
                   display: true,
                   position: "left",
                   title: { display: true, text: "Distance (km)", color: "#800080" },
-                  min: 356400, // Fixed minimum
-                  max: 406700, // Fixed maximum
+                  min: 356400,
+                  max: 406700,
                   ticks: { stepSize: 10000, color: "#800080" },
                   grid: { drawTicks: true, drawBorder: true }
                 },
@@ -630,8 +637,8 @@
                   display: true,
                   position: "right",
                   title: { display: true, text: "Declination (°)", color: "#FFA500" },
-                  min: -30, // Fixed minimum
-                  max: 30,  // Fixed maximum
+                  min: -30,
+                  max: 30,
                   ticks: { stepSize: 10, callback: val => val + "°", color: "#FFA500" },
                   grid: { drawOnChartArea: false }
                 }
@@ -648,10 +655,10 @@
           moonChart.data.datasets[1].data = declinations;
           moonChart.options.plugins.annotation.annotations = moonAnnotation;
           moonChart.options.plugins.annotation.annotations.timeMarker.value = selectedDay;
-          moonChart.options.scales.y1.min = 356400; // Fixed minimum
-          moonChart.options.scales.y1.max = 406700; // Fixed maximum
-          moonChart.options.scales.y2.min = -30;    // Fixed minimum
-          moonChart.options.scales.y2.max = 30;     // Fixed maximum
+          moonChart.options.scales.y1.min = 356400;
+          moonChart.options.scales.y1.max = 406700;
+          moonChart.options.scales.y2.min = -30;
+          moonChart.options.scales.y2.max = 30;
           moonChart.update('none');
         }
       }
