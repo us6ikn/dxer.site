@@ -264,44 +264,47 @@
       }
       .button-group {
         display: flex;
-        gap: 3px; /* Smaller gap for compactness */
-        margin-top: 6px; /* Tight margin to save space */
+        gap: 3px; /* Compact gap */
+        margin-top: 6px; /* Tight margin */
         flex-wrap: wrap;
         justify-content: center;
       }
 
       .nav-button {
-        padding: 2px 3px; /* Match provided padding for minimal height */
+        padding: 2px 3px; /* Compact padding for ~12px height */
         background-color: rgba(255, 255, 255, 0.3); /* Semi-transparent white */
-        color: #2c3e50; /* Dark color for contrast, matches .app-name */
-        border: none; /* No border, as in provided CSS */
-        border-radius: 2px; /* Match provided radius */
-        font-size: 10px; /* Match provided font size */
+        color: #2c3e50; /* Dark color, matches .app-name */
+        border: 1px solid rgba(0, 123, 255, 0.4); /* Subtle blue border */
+        border-radius: 2px; /* Small radius, matches provided example */
+        font-size: 10px; /* Small font size */
         cursor: pointer;
-        transition: background-color 0.3s ease, color 0.3s ease;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         text-decoration: none;
-        text-align: center;
-        line-height: 1.2; /* Tight line height for shorter buttons */
+        display: flex; /* Ensure centering */
+        align-items: center; /* Vertical centering */
+        justify-content: center; /* Horizontal centering */
+        line-height: 1; /* Minimize vertical space */
       }
 
       .nav-button:hover {
         background-color: rgba(255, 255, 255, 0.5); /* Slightly more opaque */
-        color: #0056b3; /* Blue on hover, matches provided hover color */
+        color: #0056b3; /* Blue on hover, matches provided example */
+        border-color: rgba(0, 123, 255, 0.6); /* Slightly darker border */
       }
 
       .nav-button:focus {
         outline: none;
-        box-shadow: 0 0 2px rgba(0, 123, 255, 0.3); /* Subtle focus effect */
+        box-shadow: 0 0 2px rgba(0, 123, 255, 0.5); /* Subtle focus effect */
       }
 
       .nav-button.icon-button {
-        padding: 2px; /* Same padding for consistency */
-        font-size: 12px; /* Slightly larger for emoji clarity */
-        width: 18px; /* Smaller square size */
-        height: 18px; /* Minimal height */
+        padding: 2px; /* Same padding */
+        font-size: 12px; /* Slightly larger for emojis */
+        width: 18px; /* Compact square */
+        height: 18px; /* Matches text button height */
         display: flex;
-        align-items: center;
-        justify-content: center;
+        align-items: center; /* Center emoji vertically */
+        justify-content: center; /* Center emoji horizontally */
       }
   </style>
 </head>
