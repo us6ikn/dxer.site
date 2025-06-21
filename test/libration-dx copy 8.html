@@ -842,10 +842,9 @@
             if (elevationDeg > 0) {
               moonElevations.push(elevationDeg);
               moonAzimuths.push(azimuthDeg);
-              const rate = dataForDay[i]?.rate ?? null;
-              visibleRates.push(rate != null ? rate * 1000 : null); // Scale to ×10⁻³ °/min, or null if missing
-              const omegaRadSec = rate != null ? rate * (Math.PI / 180) / 60 : 0;
-              const dopplerHz = rate != null ? (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT : null;
+              visibleRates.push((dataForDay[i]?.rate ?? null) * 1000); // Scale to ×10⁻³ °/min
+              const omegaRadSec = (dataForDay[i]?.rate ?? 0) * (Math.PI / 180) / 60;
+              const dopplerHz = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
               dopplerSpreads.push(dopplerHz);
             } else {
               moonElevations.push(null);
@@ -883,10 +882,9 @@
             if (elevationDeg > 0) {
               dxMoonElevations.push(elevationDeg);
               dxMoonAzimuths.push(azimuthDeg);
-              const rate = dxDataForDay[i]?.rate ?? null;
-              dxVisibleRates.push(rate != null ? rate * 1000 : null); // Scale to ×10⁻³ °/min, or null if missing
-              const omegaRadSec = rate != null ? rate * (Math.PI / 180) / 60 : 0;
-              const dopplerHz = rate != null ? (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT : null;
+              dxVisibleRates.push((dxDataForDay[i]?.rate ?? null) * 1000); // Scale to ×10⁻³ °/min
+              const omegaRadSec = (dxDataForDay[i]?.rate ?? 0) * (Math.PI / 180) / 60;
+              const dopplerHz = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
               dxDopplerSpreads.push(dopplerHz);
             } else {
               dxMoonElevations.push(null);
@@ -1436,75 +1434,60 @@
         return { lat, lon };
       }
 
-                                                                  async function calculateLibration(type) {
-                                                                    const locator = type === 'qth' ? document.getElementById("qth").value.trim() : document.getElementById("dx").value.trim();
-                                                                    const dateInput = document.getElementById("date").value;
-                                                                    const year = dateInput ? new Date(dateInput).getUTCFullYear() : new Date().getUTCFullYear();
-                                                                    const librationFile = `lib_${year}.txt`; // e.g., lib_2025.txt
+      async function calculateLibration(type) {
+        const locator = type === 'qth' ? document.getElementById("qth").value.trim() : document.getElementById("dx").value.trim();
+        let { lat, lon } = qthToLatLon(locator);
+        const COS_LAT = Math.cos(lat * Math.PI / 180);
+        const TIME_SHIFT_MIN = (lon / 15) * 60;
+        const INTERVAL_MIN = 30;
+        const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN);
 
-                                                                    let { lat, lon } = qthToLatLon(locator);
-                                                                    const COS_LAT = Math.cos(lat * Math.PI / 180);
-                                                                    const TIME_SHIFT_MIN = (lon / 15) * 60;
-                                                                    const INTERVAL_MIN = 30;
-                                                                    const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN);
+        let res;
+        try {
+          res = await fetch("moon_topo_coords_lat0.txt");
+          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        } catch (e) {
+          return;
+        }
 
-                                                                    let tempData = [];
-                                                                    try {
-                                                                      const res = await fetch(librationFile);
-                                                                      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                                                                      const lines = (await res.text()).trim().split("\n").slice(1);
-                                                                      tempData = lines.map(line => ({
-                                                                        date: line.slice(0, 20).trim(),
-                                                                        lat: parseFloat(line.slice(20, 32)),
-                                                                        lon: parseFloat(line.slice(32))
-                                                                      }));
-                                                                    } catch (e) {
-                                                                      console.warn(`Failed to load libration data from ${librationFile}: ${e.message}`);
-                                                                      // Initialize empty data for the year to prevent chart breakage
-                                                                      const startDate = new Date(Date.UTC(year, 0, 1));
-                                                                      const endDate = new Date(Date.UTC(year, 11, 31, 23, 30));
-                                                                      for (let dt = new Date(startDate); dt <= endDate; dt.setUTCMinutes(dt.getUTCMinutes() + 30)) {
-                                                                        tempData.push({
-                                                                          date: dt.toISOString().replace('.000Z', ''),
-                                                                          lat: null,
-                                                                          lon: null
-                                                                        });
-                                                                      }
-                                                                    }
+        const lines = (await res.text()).trim().split("\n").slice(1);
+        const tempData = lines.map(line => ({
+          date: line.slice(0, 20).trim(),
+          lat: parseFloat(line.slice(20, 32)),
+          lon: parseFloat(line.slice(32))
+        }));
 
-                                                                    const shifted = tempData.map((entry, i) => {
-                                                                      const shiftedIndex = i + SHIFT_STEPS;
-                                                                      const ref = tempData[shiftedIndex] || {};
-                                                                      return {
-                                                                        date: entry.date,
-                                                                        lat: ref.lat ?? null,
-                                                                        lon: ref.lon ?? null
-                                                                      };
-                                                                    });
+        const shifted = tempData.map((entry, i) => {
+          const shiftedIndex = i + SHIFT_STEPS;
+          const ref = tempData[shiftedIndex] || {};
+          return {
+            date: entry.date,
+            lat: ref.lat ?? null,
+            lon: ref.lon ?? null
+          };
+        });
 
-                                                                    const results = shifted.map((curr, i, arr) => {
-                                                                      if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null || curr.lat === null) {
-                                                                        return { date: curr.date, rate: null }; // Set rate to null if data is missing
-                                                                      }
-                                                                      let dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
-                                                                      let dlon = (((arr[i+1].lon - arr[i-1].lon) / 60 + 180) % 360) - 180;
-                                                                      dlat *= COS_LAT;
-                                                                      dlon *= COS_LAT;
-                                                                      return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
-                                                                    });
+        const results = shifted.map((curr, i, arr) => {
+          if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null) return { date: curr.date, rate: 0 };
+          let dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
+          let dlon = (((arr[i+1].lon - arr[i-1].lon) / 60 + 180) % 360) - 180;
+          dlat *= COS_LAT;
+          dlon *= COS_LAT;
+          return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
+        });
 
-                                                                    if (type === 'qth') {
-                                                                      ({ lat, lon } = qthToLatLon(locator));
-                                                                      rawData = results;
-                                                                      document.getElementById("chartWrapper").style.display = "block";
-                                                                      updateChart(hourIndex);
-                                                                    } else {
-                                                                      ({ lat: dxLat, lon: dxLon } = qthToLatLon(locator));
-                                                                      dxRawData = results;
-                                                                      document.getElementById("dxChartWrapper").style.display = "block";
-                                                                      updateChart(hourIndex);
-                                                                    }
-                                                                  }
+        if (type === 'qth') {
+          ({ lat, lon } = qthToLatLon(locator));
+          rawData = results;
+          document.getElementById("chartWrapper").style.display = "block";
+          updateChart(hourIndex);
+        } else {
+          ({ lat: dxLat, lon: dxLon } = qthToLatLon(locator));
+          dxRawData = results;
+          document.getElementById("dxChartWrapper").style.display = "block";
+          updateChart(hourIndex);
+        }
+      }
                                                                   document.getElementById("toggleMoonChart").addEventListener("click", () => {
                                                                     const moonChartWrapper = document.getElementById("moonChartWrapper");
                                                                     const toggleButton = document.getElementById("toggleMoonChart");
