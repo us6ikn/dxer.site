@@ -747,6 +747,7 @@
           moonChart.update('none');
         }
       }
+      
       function updateChart(hourIndex) {
         const qthInput = document.getElementById("qth").value.trim();
         const dxInput = document.getElementById("dx").value.trim();
@@ -998,11 +999,16 @@
           const doppler = dopplerSpreads[hourIndex];
           const azimuth = moonAzimuths[hourIndex];
           const labelText =
-            `El: ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}  ` +
-            ` Az: ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}  ` +
-            ` Libration: ${rate != null ? rate.toFixed(4) + '°/min' : 'N/A'}  ` +
-            ` Spread: ${doppler != null ? doppler.toFixed(0) + 'Hz' : 'N/A'}`;
-          document.getElementById('chartLabel').textContent = qthInput ? `${qthInput.toUpperCase()} - ${labelText}` : 'Enter valid QTH';
+            `<span class="metric-locator">${qthInput.toUpperCase()}</span>` +
+            `<span class="metric-separator"> - </span>` +
+            `<span class="metric-label metric-elevation">El:</span> ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}` +
+            `<span class="metric-separator">|</span>` +
+            `<span class="metric-label metric-azimuth">Az:</span> ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}` +
+            `<span class="metric-separator">|</span>` +
+            `<span class="metric-label metric-libration">Libration:</span> ${rate != null ? rate.toFixed(4) + '°/min' : 'N/A'}` +
+            `<span class="metric-separator">|</span>` +
+            `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + 'Hz' : 'N/A'}`;
+          document.getElementById('chartLabel').innerHTML = qthInput ? labelText : '<span class="metric-locator">Enter valid QTH</span>';
           if (qthAnnotation.timeMarker.label) {
             qthAnnotation.timeMarker.label.enabled = false;
           }
@@ -1099,11 +1105,16 @@
           const doppler = dxDopplerSpreads[hourIndex];
           const azimuth = dxMoonAzimuths[hourIndex];
           const labelText =
-            `El: ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}  ` +
-            ` Az: ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}  ` +
-            ` Libration: ${rate != null ? rate.toFixed(4) + '°/min' : 'N/A'}  ` +
-            ` Spread: ${doppler != null ? doppler.toFixed(0) + 'Hz' : 'N/A'}`;
-          document.getElementById('dxchartLabel').textContent = dxInput ? `${dxInput.toUpperCase()} - ${labelText}` : 'Enter valid DX';
+            `<span class="metric-locator">${dxInput.toUpperCase()}</span>` +
+            `<span class="metric-separator"> - </span>` +
+            `<span class="metric-label metric-elevation">El:</span> ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}` +
+            `<span class="metric-separator">|</span>` +
+            `<span class="metric-label metric-azimuth">Az:</span> ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}` +
+            `<span class="metric-separator">|</span>` +
+            `<span class="metric-label metric-libration">Libration:</span> ${rate != null ? rate.toFixed(4) + '°/min' : 'N/A'}` +
+            `<span class="metric-separator">|</span>` +
+            `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + 'Hz' : 'N/A'}`;
+          document.getElementById('dxchartLabel').innerHTML = dxInput ? labelText : '<span class="metric-locator">Enter valid DX</span>';
           if (dxAnnotation.timeMarker.label) {
             dxAnnotation.timeMarker.label.enabled = false;
           }
