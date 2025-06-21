@@ -306,42 +306,6 @@
         align-items: center; /* Center emoji vertically */
         justify-content: center; /* Center emoji horizontally */
       }
-      #controls {
-        transition: transform 0.3s ease; /* Smooth sliding animation */
-      }
-
-      #controls.folded {
-        transform: translateX(calc(-100% + 30px)); /* Slide left, leave 30px visible */
-      }
-
-      #showControlsPanel {
-        position: absolute;
-        top: 10px;
-        left: 5px;
-        padding: 2px 3px; /* Match nav-button size */
-        background-color: rgba(255, 255, 255, 0.3); /* Semi-transparent */
-        color: #2c3e50; /* Matches .app-name */
-        border: 1px solid rgba(0, 123, 255, 0.4); /* Subtle blue border */
-        border-radius: 2px;
-        font-size: 10px; /* Compact */
-        cursor: pointer;
-        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        line-height: 1;
-      }
-
-      #showControlsPanel:hover {
-        background-color: rgba(255, 255, 255, 0.5);
-        color: #0056b3; /* Matches nav-button hover */
-        border-color: rgba(0, 123, 255, 0.6);
-      }
-
-      #showControlsPanel:focus {
-        outline: none;
-        box-shadow: 0 0 2px rgba(0, 123, 255, 0.5);
-      }
   </style>
 </head>
 <body>
@@ -381,9 +345,8 @@
     <div id="moonChartWrapper" style="display: block;">
       <div id="moonChartLabel"></div>
       <canvas id="moonDistanceChart"></canvas>
-      <button id="toggleControlsPanel" style="position: absolute; bottom: 5px; right: 5px; z-index: 10;">Hide Panel</button>
+      <button id="toggleMoonChart" style="position: absolute; bottom: 5px; right: 5px; z-index: 10;">Hide</button>
     </div>
-    <button id="showControlsPanel" style="display: none;">Show Panel</button>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -1669,35 +1632,22 @@
 
                                                            updateChart(hourIndex);
                                                          }
-                                                         // Toggle controls panel folding
-                                                         document.getElementById("toggleControlsPanel").addEventListener("click", () => {
-                                                           const controls = document.getElementById("controls");
-                                                           const toggleButton = document.getElementById("toggleControlsPanel");
-                                                           const showButton = document.getElementById("showControlsPanel");
-
-                                                           if (!controls.classList.contains("folded")) {
-                                                             controls.classList.add("folded");
-                                                             toggleButton.style.display = "none"; // Hide toggle button
-                                                             showButton.style.display = "flex"; // Show the "Show Panel" button
-                                                           }
-                                                         });
-
-                                                         // Show controls panel
-                                                         document.getElementById("showControlsPanel").addEventListener("click", () => {
-                                                           const controls = document.getElementById("controls");
-                                                           const toggleButton = document.getElementById("toggleControlsPanel");
-                                                           const showButton = document.getElementById("showControlsPanel");
-
-                                                           if (controls.classList.contains("folded")) {
-                                                             controls.classList.remove("folded");
-                                                             toggleButton.style.display = "block"; // Show toggle button
-                                                             showButton.style.display = "none"; // Hide the "Show Panel" button
-                                                             // Resize charts if visible
-                                                             if (chart) chart.resize();
-                                                             if (dxChart) dxChart.resize();
-                                                             if (moonChart) moonChart.resize();
-                                                           }
-                                                         });
+                                                                  document.getElementById("toggleMoonChart").addEventListener("click", () => {
+                                                                    const moonChartWrapper = document.getElementById("moonChartWrapper");
+                                                                    const toggleButton = document.getElementById("toggleMoonChart");
+                                                                    
+                                                                    if (moonChartWrapper.style.display === "block") {
+                                                                      moonChartWrapper.style.display = "none";
+                                                                      toggleButton.textContent = "Show";
+                                                                    } else {
+                                                                      moonChartWrapper.style.display = "block";
+                                                                      toggleButton.textContent = "Hide";
+                                                                      if (moonChart) {
+                                                                        moonChart.resize();
+                                                                        moonChart.update('none');
+                                                                      }
+                                                                    }
+                                                                  });
   </script>
 
   <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
