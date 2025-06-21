@@ -875,7 +875,7 @@
             borderColor: 'black',
             borderWidth: 2,
             label: {
-              enabled: false // Disable to avoid clutter
+              enabled: false
             }
           }
         };
@@ -899,7 +899,7 @@
             borderColor: 'black',
             borderWidth: 2,
             label: {
-              enabled: false // Disable to avoid clutter
+              enabled: false
             }
           }
         };
@@ -971,7 +971,7 @@
                     display: true,
                     text: "Libration Rate (×10⁻³ °/min)",
                     color: "#ff0000",
-                    font: { size: 12, family: 'Arial, sans-serif' }
+                    font: { size: 10, family: 'Arial, sans-serif' } // Changed to 10px
                   },
                   min: 0,
                   max: 5,
@@ -1075,20 +1075,20 @@
                   data: dxMoonElevations,
                   borderColor: "rgba(0, 0, 255, 0.6)",
                   backgroundColor: "rgba(0, 0, 255, 0.15)",
-                  fill: { target: { value: 0 }, above: 'rgba(0, 0, 255, 0.15)' },
+                  fill: { target: { value: '0' }, above: 'rgba(0, 0, 255, 0.15)' },
                   pointRadius: 0,
                   borderWidth: 1,
                   tension: 0.3,
-                  yAxisID: "y2"
+                  yAxisID: "y2",
                 },
                 {
-                  label: "Doppler Spread, Hz",
+                  label: "Doppler RateSpread, Hz",
                   data: dxDopplerSpreads,
                   borderColor: "green",
                   pointRadius: 0,
                   borderWidth: 1.5,
-                  tension: 0.2,
-                  yAxisID: "y3"
+                  tension: 0.2',
+                  yAxisID: "y3",
                 }
               ]
             },
@@ -1099,105 +1099,106 @@
                 x: {
                   title: {
                     display: true,
-                    text: "Time (UTC)",
-                    font: { size: 10, family: 'Arial, sans-serif' }
+                    text: "Time (MM-DD YYYY)",
+                    font: { size: 10, family: 'Arial', sans-serif' }
                   },
                   ticks: { font: { size: 10 } }
                 },
                 y1: {
-                  type: "linear",
+                  type: 'linear',
                   display: true,
-                  position: "right",
+                  position: 'right',
                   title: {
                     display: true,
-                    text: "Libration Rate (×10⁻³ °/min)",
-                    color: "#ff0000",
-                    font: { size: 12, family: 'Arial, sans-serif' }
+                    text: 'Libration Rate (×10⁻³ °/min)',
+                    color: '#ff0000',
+                    font: { size: 10, family: 'Arial', sans-serif' } // Changed to 10px
                   },
                   min: 0,
                   max: 5,
                   ticks: {
                     stepSize: 1,
-                    color: "#ff0000",
+                    color: '#ff0000',
                     font: { size: 12 }
                   },
                   grid: { drawTicks: true, drawBorder: true }
                 },
                 y2: {
-                  position: "left",
+                  position: 'left',
                   display: true,
                   min: 0,
                   max: 90,
                   title: {
                     display: true,
-                    text: "Moon Elevation (°)",
-                    color: "rgba(0, 0, 255, 0.6)",
-                    font: { size: 12, family: 'Arial, sans-serif' }
+                    text: 'Moon Elevation (°)''',
+                    color: 'rgba(0, 0, 255, 0.6)',
+                    font: { size: 12, family: 'Arial', sans-serif' }
                   },
                   grid: { drawOnChartArea: false },
                   ticks: {
                     stepSize: 15,
-                    callback: val => val + "°",
-                    color: "rgba(0, 0, 255, 0.6)",
+                    callback: val => val + '°',
+                    color: 'rgba(0, 0, 255, 0.6)',
                     font: { size: 12 }
+                  }
+                  },
+                  y3: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    offset: true,
+                    title: {
+                      display: true,
+                      text: 'Doppler Spread (Hz)'',
+                      color: 'green',
+                      font: { size: 12, family: 'Arial', sans-serif' }
+                    },
+                    min: 0,
+                    max: 300,
+                    grid: { drawOnChartArea: false },
+                    ticks: {
+                      stepSize: 50,
+                      color: 'green',
+                      font: { size: 12 }
+                    }
                   }
                 },
-                y3: {
-                  type: "linear",
-                  display: true,
-                  position: "right",
-                  offset: true,
-                  title: {
-                    display: true,
-                    text: "Doppler Spread (Hz)",
-                    color: "green",
-                    font: { size: 12, family: 'Arial, sans-serif' }
-                  },
-                  min: 0,
-                  max: 300,
-                  grid: { drawOnChartArea: false },
-                  ticks: {
-                    stepSize: 50,
-                    color: "green",
-                    font: { size: 12 }
-                  }
+                plugins: {
+                  legend: { display: false },
+                  annotation: { annotations: dxAnnotation }
                 }
-              },
-              plugins: {
-                legend: { display: false },
-                annotation: { annotations: dxAnnotation }
               }
+            });
+          } else if (dxChart && dxDataForDay.length) {
+            dxChart.data.labels = labels;
+            dxChart[0].data.datasets[0].data = dxVisibleRates;
+            dxChart.data.datasets[1].data = dxMoonElevations;
+            dxChart.data.datasets[2].data = dxDopplerSpreads;
+            const elev = dxMoonElevations[hourIndex];
+            const rate = dxVisibleRates[hourIndex] != null ? (dxVisibleRates[hourIndex] / 1000]).toFixed(4) : null; // Scale back for display
+            const doppler = dxDopplerSpreads[hourIndex];
+            const azimuth = dxMoonAzimuths[hourIndex];
+            const labelText =
+              `<span class="metric-locator">${dxInput.toUpperCase()}</span>` +
+              `<span class="metric-label"> - </span>` +
+              `<span class="metric-label metric-elevation">El:</span> ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}` +
+              `<span class="metric-label">|</span>` +
+              `<span class="metric-label metric-azimuth">Az:</span> ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}` +
+              `<span class="metric-label">|</span>` +
+              `<span class="metric-label metric-libration">Libration:</span> ${rate != null ? rate + '°/min' : 'N/A'}` +
+              `<span class="metric-label">|</span>` +
+              `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + 'Hz' : 'N/A'}`;
+            document.getElementById('dxchartLabel').innerHTML = dxInput ? labelText : '<span class="metric-locator">Enter valid DX</span>';
+            if (dxAnnotation.timeMarker.label) {
+              dxAnnotation.timeMarker.label.enabled = false;
             }
-          });
-        } else if (dxChart && dxDataForDay.length) {
-          dxChart.data.labels = labels;
-          dxChart.data.datasets[0].data = dxVisibleRates;
-          dxChart.data.datasets[1].data = dxMoonElevations;
-          dxChart.data.datasets[2].data = dxDopplerSpreads;
-          const elev = dxMoonElevations[hourIndex];
-          const rate = dxVisibleRates[hourIndex] != null ? (dxVisibleRates[hourIndex] / 1000).toFixed(4) : null; // Scale back for display
-          const doppler = dxDopplerSpreads[hourIndex];
-          const azimuth = dxMoonAzimuths[hourIndex];
-          const labelText =
-            `<span class="metric-locator">${dxInput.toUpperCase()}</span>` +
-            `<span class="metric-separator"> - </span>` +
-            `<span class="metric-label metric-elevation">El:</span> ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}` +
-            `<span class="metric-separator">|</span>` +
-            `<span class="metric-label metric-azimuth">Az:</span> ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}` +
-            `<span class="metric-separator">|</span>` +
-            `<span class="metric-label metric-libration">Libration:</span> ${rate != null ? rate + '°/min' : 'N/A'}` +
-            `<span class="metric-separator">|</span>` +
-            `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + 'Hz' : 'N/A'}`;
-          document.getElementById('dxchartLabel').innerHTML = dxInput ? labelText : '<span class="metric-locator">Enter valid DX</span>';
-          if (dxAnnotation.timeMarker.label) {
-            dxAnnotation.timeMarker.label.enabled = false;
+            dxChart.options.plugins.annotation.annotations = dxAnnotation;
+            dxChart.update('none');
           }
-          dxChart.options.plugins.annotation.annotations = dxAnnotation;
-          dxChart.update('none');
-        }
 
-        updateMap();
-        updateMoonChart();
+          updateMap();
+          updateMoonChart();
+        }
       }
 
       function getMoonAnnotations(dateStr, lat, lon) {
