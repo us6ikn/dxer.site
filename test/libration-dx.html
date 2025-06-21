@@ -571,8 +571,6 @@
             strokeWeight: 2
           });
 
-          // Log coordinates for debugging
-          console.log(`Sublunar Point at ${utcTimeString}: Lat=${lat.toFixed(6)}°, Lon=${lon.toFixed(6)}°, Radius=${footprintRadius.toFixed(0)}m`);
         } catch (error) {
           console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
         }
