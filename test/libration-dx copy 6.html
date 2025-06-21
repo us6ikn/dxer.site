@@ -317,7 +317,6 @@
           fullscreenControl: false
         });
 
-        // Fetch and process output_2_10GHz_with_DXCC.json
         fetch('output_2_10GHz_with_DXCC.json')
           .then(response => response.json())
           .then(data => {
@@ -400,7 +399,6 @@
           })
           .catch(() => { /* Handle error silently */ });
 
-        // Fetch and process output_2_10GHz_SK_with_DXCC.json
         fetch('output_2_10GHz_SK_with_DXCC.json')
           .then(response => response.json())
           .then(data => {
@@ -434,17 +432,17 @@
                   <div><a href="https://www.qrz.com/db/${callsign}" target="_blank">QRZ.com lookup</a></div>
                   <div id="image-container-${callsign}">
                     Station Picture (clickable):<br>
-              <a href="https://dxer.site/db/${callsign}.jpg" target="_blank">
-                <img id="station-image-${callsign}"
-                     src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"
-                     alt="${callsign} station"/>
-              </a>
-              <div id="image-placeholder-${callsign}" style="display:none;">
-                <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
-              </div>
-            </div>
-          </div>
-        `;
+                    <a href="https://dxer.site/db/${callsign}.jpg" target="_blank">
+                      <img id="station-image-${callsign}"
+                           src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"
+                           alt="${callsign} station"/>
+                    </a>
+                    <div id="image-placeholder-${callsign}" style="display:none;">
+                      <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
+                    </div>
+                  </div>
+                </div>
+              `;
 
               const infoWindow = new google.maps.InfoWindow({ content: infoContent });
 
@@ -479,9 +477,14 @@
           })
           .catch(() => { /* Handle error silently */ });
 
-        // Initialize map and charts
-        updateMap();
-        updateMoonChart();
+        fetch('moon_data.json')
+          .then(response => response.json())
+          .then(data => {
+            window.moonData = data;
+            updateMap();
+            updateMoonChart(); // Initialize Moon chart on page load
+          })
+          .catch(() => { /* Handle error silently */ });
       }
 
       function parseCoordinates(coordinates) {
@@ -497,40 +500,22 @@
         const index = parseInt(document.getElementById('hour').value);
         const hour = Math.floor(index / 2).toString().padStart(2, '0');
         const minutes = index % 2 === 0 ? '00' : '30';
-        const utcTimeString = `${selectedDate}T${hour}:${minutes}:00Z`;
+        const utcTimeString = `${selectedDate} ${hour}:${minutes}:00`;
 
-        // Calculate sublunar point
-        const utcDate = new Date(utcTimeString);
-        const time = Astronomy.MakeTime(utcDate);
-        const observer = new Astronomy.Observer(0, 0, 0); // Geocenter
-        const moon = Astronomy.Equator("Moon", time, observer, true, true);
-        const libration = Astronomy.Libration(time);
+        if (!window.moonData) return;
 
-        const raHours = moon.ra; // Right Ascension in sidereal HOURS
-        const decDeg = moon.dec; // Declination in DEGREES (latitude)
-        const raDeg = raHours * 15; // Convert RA to degrees
+        const moonData = window.moonData.find(entry => entry.t === utcTimeString);
+        if (!moonData) return;
 
-        let gastDeg = Astronomy.SiderealTime(time) * 15; // GAST in degrees
-        gastDeg = ((gastDeg % 360) + 360) % 360; // Normalize to [0, 360)
+        const lat = parseFloat(moonData.p);
+        const lon = parseFloat(moonData.m);
+        const radius = parseFloat(moonData.r) * 1000; // Convert km to meters
 
-        let lonDeg = gastDeg - raDeg;
-        if (lonDeg > 180) lonDeg -= 360;
-        if (lonDeg < -180) lonDeg += 360;
+        if (isNaN(lat) || isNaN(lon) || isNaN(radius)) return;
 
-        const lat = decDeg; // Sublunar latitude
-        const lon = lonDeg; // Sublunar longitude
-        const radius = libration.dist_km * 1000; // Convert km to meters for footprint radius
-
-        if (isNaN(lat) || isNaN(lon) || isNaN(radius)) {
-          console.warn(`Invalid sublunar point data for ${utcTimeString}: lat=${lat}, lon=${lon}, radius=${radius}`);
-          return;
-        }
-
-        // Remove existing marker and circle if they exist
         if (moonMarker) moonMarker.setMap(null);
         if (footprintCircle) footprintCircle.setMap(null);
 
-        // Create new Moon marker
         moonMarker = new google.maps.Marker({
           position: { lat, lng: lon },
           map: map,
@@ -541,7 +526,6 @@
           title: 'Moon Sublunar Point'
         });
 
-        // Create new footprint circle
         footprintCircle = new google.maps.Circle({
           map: map,
           center: { lat, lng: lon },
