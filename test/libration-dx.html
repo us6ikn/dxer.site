@@ -264,40 +264,41 @@
       }
       .button-group {
         display: flex;
-        gap: 4px; /* Reduced gap for compactness */
-        margin-top: 8px; /* Slightly less margin */
+        gap: 4px;
+        margin-top: 6px; /* Reduced margin for tighter layout */
         flex-wrap: wrap;
         justify-content: center;
       }
 
       .nav-button {
-        font-size: 10px; /* Smaller font size */
-        padding: 3px 6px; /* Reduced padding */
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 3px; /* Slightly smaller radius */
+        font-size: 9px; /* Smaller font size */
+        padding: 2px 5px; /* Reduced padding to decrease height */
+        background-color: rgba(255, 255, 255, 0.3); /* Semi-transparent white */
+        color: #2c3e50; /* Dark color for contrast, matches app-name */
+        border: 1px solid rgba(0, 0, 0, 0.2); /* Subtle border */
+        border-radius: 3px;
         cursor: pointer;
-        transition: background-color 0.3s ease;
+        transition: background-color 0.3s ease, color 0.3s ease;
         text-decoration: none;
         text-align: center;
-        line-height: 1.4; /* Adjusted for smaller size */
+        line-height: 1.3; /* Tighter line height */
       }
 
       .nav-button:hover {
-        background-color: #0056b3;
+        background-color: rgba(255, 255, 255, 0.5); /* Slightly more opaque on hover */
+        color: #0056b3; /* Blue tint on hover, matches existing UI */
       }
 
       .nav-button:focus {
         outline: none;
-        box-shadow: 0 0 2px rgba(0, 123, 255, 0.5); /* Subtle focus effect */
+        box-shadow: 0 0 2px rgba(0, 123, 255, 0.3); /* Subtle focus effect */
       }
 
       .nav-button.icon-button {
-        padding: 3px; /* Even less padding for icons */
-        font-size: 12px; /* Slightly larger for emoji visibility */
-        width: 22px; /* Smaller square size */
-        height: 22px;
+        padding: 2px; /* Minimal padding */
+        font-size: 11px; /* Slightly larger for emoji clarity */
+        width: 20px; /* Smaller square size */
+        height: 20px; /* Reduced height */
         display: flex;
         align-items: center;
         justify-content: center;
@@ -321,6 +322,7 @@
     <div class="button-group">
       <a href="eme-observer-statistics.html" class="nav-button">Statistics</a>
       <a href="eme-observer-table.html" class="nav-button">Table</a>
+      <a href="https://forms.gle/vLCqCySPEkH926AX8" class="nav-button">Add Station</a>
       <a href="http://dxer.site" class="nav-button icon-button">🏠</a>
       <a href="http://dxer.site/eme-observer-faq.html" class="nav-button icon-button">?</a>
     </div>
