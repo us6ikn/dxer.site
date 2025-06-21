@@ -193,6 +193,39 @@
         outline: none;
         box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
       }
+      #moonChartLabel, #chartLabel, #dxchartLabel {
+        text-align: center;
+        margin-bottom: 0px;
+        font-weight: normal;
+        font-size: 10px;
+        font-family: 'Arial, sans-serif';
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        padding: 2px 0;
+      }
+
+      .metric-label {
+        font-weight: bold;
+      }
+
+      .metric-distance {
+        color: #800080; /* Purple, matches y1 axis */
+      }
+
+      .metric-declination {
+        color: #FFA500; /* Orange, matches y2 axis */
+      }
+
+      .metric-pathloss {
+        color: #800080; /* Purple, matches y3 axis */
+      }
+
+      .metric-separator {
+        color: #666;
+        margin: 0 4px;
+      }
   </style>
 </head>
 <body>
@@ -584,10 +617,12 @@
           }
         };
 
-        document.getElementById('moonChartLabel').textContent =
-          `Moon Distance: ${currentDistance != null ? currentDistance.toFixed(0) + ' km' : 'N/A'}  ` +
-          `Declination: ${currentDeclination != null ? currentDeclination.toFixed(1) + '°' : 'N/A'}  ` +
-          `Extra Loss: ${pathLoss != null ? pathLoss.toFixed(2) + ' dB' : 'N/A'}`;
+        document.getElementById('moonChartLabel').innerHTML =
+          `<span class="metric-label metric-distance">Distance:</span> ${currentDistance != null ? currentDistance.toFixed(0) + ' km' : 'N/A'}` +
+          `<span class="metric-separator">|</span>` +
+          `<span class="metric-label metric-declination">Declination:</span> ${currentDeclination != null ? currentDeclination.toFixed(1) + '°' : 'N/A'}` +
+          `<span class="metric-separator">|</span>` +
+          `<span class="metric-label metric-pathloss">Extra Loss:</span> ${pathLoss != null ? pathLoss.toFixed(2) + ' dB' : 'N/A'}`;
 
         if (!moonChart) {
           moonChart = new Chart(document.getElementById("moonDistanceChart"), {
