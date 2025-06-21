@@ -267,6 +267,10 @@
       <div id="chartLabel" style="text-align: center; margin-bottom: 0px; font-weight: normal;"></div>
       <canvas id="declinationChart"></canvas>
     </div>
+    <div id="chartWrapper" style="display: none;">
+      <div id="chartLabel"></div>
+      <canvas id="declinationChart"></canvas>
+    </div>
     <div id="dxChartWrapper" style="display: none;">
       <div id="dxchartLabel"></div>
       <canvas id="dxDeclinationChart"></canvas>
@@ -805,8 +809,8 @@
       }
       
       function updateChart(hourIndex) {
-        const qthInput = document.getElementById("qth").value.trim().toUpperCase();
-        const dxInput = document.getElementById("dx").value.trim().toUpperCase();
+        const qthInput = document.getElementById("qth").value.trim();
+        const dxInput = document.getElementById("dx").value.trim();
         const dateInput = document.getElementById("date").value;
         const dateStr = new Date(dateInput).toISOString().slice(0, 10);
 
@@ -825,7 +829,7 @@
         let visibleRates = [];
         let dopplerSpreads = [];
 
-        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
+        if (/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(qthInput)) {
           ({ lat, lon } = qthToLatLon(qthInput));
           for (let i = 0; i < 48; i++) {
             const hour = Math.floor(i / 2);
@@ -841,7 +845,7 @@
               moonElevations.push(elevationDeg);
               moonAzimuths.push(azimuthDeg);
               const rate = dataForDay[i]?.rate ?? null;
-              visibleRates.push(rate != null ? rate * 1000 : null);
+              visibleRates.push(rate != null ? rate * 1000 : null); // Scale to ×10⁻³ °/min, or null if missing
               const omegaRadSec = rate != null ? rate * (Math.PI / 180) / 60 : 0;
               const dopplerHz = rate != null ? (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT : null;
               dopplerSpreads.push(dopplerHz);
@@ -859,10 +863,6 @@
           visibleRates = Array(48).fill(null);
           dopplerSpreads = Array(48).fill(null);
           document.getElementById("chartWrapper").style.display = "none";
-          if (chart) {
-            chart.destroy();
-            chart = null;
-          }
         }
 
         let dxMoonElevations = [];
@@ -870,7 +870,7 @@
         let dxVisibleRates = [];
         let dxDopplerSpreads = [];
 
-        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
+        if (/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(dxInput)) {
           ({ lat: dxLat, lon: dxLon } = qthToLatLon(dxInput));
           for (let i = 0; i < 48; i++) {
             const hour = Math.floor(i / 2);
@@ -886,7 +886,7 @@
               dxMoonElevations.push(elevationDeg);
               dxMoonAzimuths.push(azimuthDeg);
               const rate = dxDataForDay[i]?.rate ?? null;
-              dxVisibleRates.push(rate != null ? rate * 1000 : null);
+              dxVisibleRates.push(rate != null ? rate * 1000 : null); // Scale to ×10⁻³ °/min, or null if missing
               const omegaRadSec = rate != null ? rate * (Math.PI / 180) / 60 : 0;
               const dopplerHz = rate != null ? (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT : null;
               dxDopplerSpreads.push(dopplerHz);
@@ -899,10 +899,6 @@
           }
           document.getElementById("dxChartWrapper").style.display = "block";
         } else {
-          dxMoonElevations = Array(48).fill(null);
-          dxMoonAzimuths = Array(48).fill(null);
-          dxVisibleRates = Array(48).fill(null);
-          dxDopplerSpreads = Array(48).fill(null);
           document.getElementById("dxChartWrapper").style.display = "none";
           if (dxChart) {
             dxChart.destroy();
@@ -910,7 +906,7 @@
           }
         }
 
-        const labels = Array(48).fill('').map((_, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
+        const labels = dataForDay.length ? dataForDay.map((r, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`) : Array(48).fill('');
 
         const qthAnnotation = {
           timeMarker: {
@@ -920,17 +916,19 @@
             value: hourIndex,
             borderColor: 'black',
             borderWidth: 2,
-            label: { enabled: false }
+            label: {
+              enabled: false // Disable to avoid clutter
+            }
           }
         };
 
-        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
+        if (qthInput && /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(qthInput)) {
           try {
             const { lat, lon } = qthToLatLon(qthInput);
             const moonAnnotations = getMoonAnnotations(dateStr, lat, lon);
             Object.assign(qthAnnotation, moonAnnotations);
           } catch (e) {
-            // Silent error handling
+            // Handle error silently
           }
         }
 
@@ -942,21 +940,23 @@
             value: hourIndex,
             borderColor: 'black',
             borderWidth: 2,
-            label: { enabled: false }
+            label: {
+              enabled: false // Disable to avoid clutter
+            }
           }
         };
 
-        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
+        if (dxInput && /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(dxInput)) {
           try {
             const { lat, lon } = qthToLatLon(dxInput);
             const moonAnnotations = getMoonAnnotations(dateStr, lat, lon);
             Object.assign(dxAnnotation, moonAnnotations);
           } catch (e) {
-            // Silent error handling
+            // Handle error silently
           }
         }
 
-        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput) && !chart) {
+        if (!chart && qthInput && /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(qthInput)) {
           chart = new Chart(document.getElementById("declinationChart"), {
             type: 'line',
             data: {
@@ -998,17 +998,30 @@
               maintainAspectRatio: false,
               scales: {
                 x: {
-                  title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
+                  title: {
+                    display: true,
+                    text: "Time (UTC)",
+                    font: { size: 10, family: 'Arial, sans-serif' }
+                  },
                   ticks: { font: { size: 10 } }
                 },
                 y1: {
                   type: "linear",
                   display: true,
                   position: "right",
-                  title: { display: true, text: "Libration Rate (×10⁻³ °/min)", color: "#ff0000", font: { size: 10, family: 'Arial, sans-serif' } },
+                  title: {
+                    display: true,
+                    text: "Libration Rate (×10⁻³ °/min)",
+                    color: "#ff0000",
+                    font: { size: 10, family: 'Arial, sans-serif' }
+                  },
                   min: 0,
                   max: 5,
-                  ticks: { stepSize: 1, color: "#ff0000", font: { size: 12 } },
+                  ticks: {
+                    stepSize: 1,
+                    color: "#ff0000",
+                    font: { size: 12 }
+                  },
                   grid: { drawTicks: true, drawBorder: true }
                 },
                 y2: {
@@ -1016,36 +1029,58 @@
                   display: true,
                   min: 0,
                   max: 90,
-                  title: { display: true, text: "Moon Elevation (°)", color: "rgba(0, 0, 255, 0.6)", font: { size: 12, family: 'Arial, sans-serif' } },
+                  title: {
+                    display: true,
+                    text: "Moon Elevation (°)",
+                    color: "rgba(0, 0, 255, 0.6)",
+                    font: { size: 12, family: 'Arial, sans-serif' }
+                  },
                   grid: { drawOnChartArea: false },
-                  ticks: { stepSize: 15, callback: val => val + "°", color: "rgba(0, 0, 255, 0.6)", font: { size: 12 } }
+                  ticks: {
+                    stepSize: 15,
+                    callback: val => val + "°",
+                    color: "rgba(0, 0, 255, 0.6)",
+                    font: { size: 12 }
+                  }
                 },
                 y3: {
                   type: "linear",
                   display: true,
                   position: "right",
                   offset: true,
-                  title: { display: true, text: "Doppler Spread (Hz)", color: "green", font: { size: 12, family: 'Arial, sans-serif' } },
+                  title: {
+                    display: true,
+                    text: "Doppler Spread (Hz)",
+                    color: "green",
+                    font: { size: 12, family: 'Arial, sans-serif' }
+                  },
                   min: 0,
                   max: 300,
                   grid: { drawOnChartArea: false },
-                  ticks: { stepSize: 50, color: "green", font: { size: 12 } }
+                  ticks: {
+                    stepSize: 50,
+                    color: "green",
+                    font: { size: 12 }
+                  }
                 }
               },
-              plugins: { legend: { display: false }, annotation: { annotations: qthAnnotation } }
+              plugins: {
+                legend: { display: false },
+                annotation: { annotations: qthAnnotation }
+              }
             }
           });
-        } else if (chart && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
+        } else if (chart) {
           chart.data.labels = labels;
           chart.data.datasets[0].data = visibleRates;
           chart.data.datasets[1].data = moonElevations;
           chart.data.datasets[2].data = dopplerSpreads;
           const elev = moonElevations[hourIndex];
-          const rate = visibleRates[hourIndex] != null ? (visibleRates[hourIndex] / 1000).toFixed(4) : null;
+          const rate = visibleRates[hourIndex] != null ? (visibleRates[hourIndex] / 1000).toFixed(4) : null; // Scale back for display
           const doppler = dopplerSpreads[hourIndex];
           const azimuth = moonAzimuths[hourIndex];
           const labelText =
-            `<span class="metric-locator">${qthInput}</span>` +
+            `<span class="metric-locator">${qthInput.toUpperCase()}</span>` +
             `<span class="metric-separator"> - </span>` +
             `<span class="metric-label metric-elevation">El:</span> ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}` +
             `<span class="metric-separator">|</span>` +
@@ -1054,19 +1089,15 @@
             `<span class="metric-label metric-libration">Libration:</span> ${rate != null ? rate + '°/min' : 'N/A'}` +
             `<span class="metric-separator">|</span>` +
             `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + 'Hz' : 'N/A'}`;
-          document.getElementById('chartLabel').innerHTML = labelText;
+          document.getElementById('chartLabel').innerHTML = qthInput ? labelText : '<span class="metric-locator">Enter valid QTH</span>';
           if (qthAnnotation.timeMarker.label) {
             qthAnnotation.timeMarker.label.enabled = false;
           }
           chart.options.plugins.annotation.annotations = qthAnnotation;
           chart.update('none');
-        } else if (chart) {
-          chart.destroy();
-          chart = null;
-          document.getElementById('chartLabel').innerHTML = '<span class="metric-locator">Enter valid QTH</span>';
         }
 
-        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput) && !dxChart) {
+        if (!dxChart && dxInput && /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(dxInput) && dxDataForDay.length) {
           dxChart = new Chart(document.getElementById("dxDeclinationChart"), {
             type: 'line',
             data: {
@@ -1108,17 +1139,30 @@
               maintainAspectRatio: false,
               scales: {
                 x: {
-                  title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
+                  title: {
+                    display: true,
+                    text: "Time (UTC)",
+                    font: { size: 10, family: 'Arial, sans-serif' }
+                  },
                   ticks: { font: { size: 10 } }
                 },
                 y1: {
                   type: "linear",
                   display: true,
                   position: "right",
-                  title: { display: true, text: "Libration Rate (×10⁻³ °/min)", color: "#ff0000", font: { size: 10, family: 'Arial, sans-serif' } },
+                  title: {
+                    display: true,
+                    text: "Libration Rate (×10⁻³ °/min)",
+                    color: "#ff0000",
+                    font: { size: 10, family: 'Arial, sans-serif' }
+                  },
                   min: 0,
                   max: 5,
-                  ticks: { stepSize: 1, color: "#ff0000", font: { size: 12 } },
+                  ticks: {
+                    stepSize: 1,
+                    color: "#ff0000",
+                    font: { size: 12 }
+                  },
                   grid: { drawTicks: true, drawBorder: true }
                 },
                 y2: {
@@ -1126,36 +1170,58 @@
                   display: true,
                   min: 0,
                   max: 90,
-                  title: { display: true, text: "Moon Elevation (°)", color: "rgba(0, 0, 255, 0.6)", font: { size: 12, family: 'Arial, sans-serif' } },
+                  title: {
+                    display: true,
+                    text: "Moon Elevation (°)",
+                    color: "rgba(0, 0, 255, 0.6)",
+                    font: { size: 12, family: 'Arial, sans-serif' }
+                  },
                   grid: { drawOnChartArea: false },
-                  ticks: { stepSize: 15, callback: val => val + "°", color: "rgba(0, 0, 255, 0.6)", font: { size: 12 } }
+                  ticks: {
+                    stepSize: 15,
+                    callback: val => val + "°",
+                    color: "rgba(0, 0, 255, 0.6)",
+                    font: { size: 12 }
+                  }
                 },
                 y3: {
                   type: "linear",
                   display: true,
                   position: "right",
                   offset: true,
-                  title: { display: true, text: "Doppler Spread (Hz)", color: "green", font: { size: 12, family: 'Arial, sans-serif' } },
+                  title: {
+                    display: true,
+                    text: "Doppler Spread (Hz)",
+                    color: "green",
+                    font: { size: 12, family: 'Arial, sans-serif' }
+                  },
                   min: 0,
                   max: 300,
                   grid: { drawOnChartArea: false },
-                  ticks: { stepSize: 50, color: "green", font: { size: 12 } }
+                  ticks: {
+                    stepSize: 50,
+                    color: "green",
+                    font: { size: 12 }
+                  }
                 }
               },
-              plugins: { legend: { display: false }, annotation: { annotations: dxAnnotation } }
+              plugins: {
+                legend: { display: false },
+                annotation: { annotations: dxAnnotation }
+              }
             }
           });
-        } else if (dxChart && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
+        } else if (dxChart && dxDataForDay.length) {
           dxChart.data.labels = labels;
           dxChart.data.datasets[0].data = dxVisibleRates;
           dxChart.data.datasets[1].data = dxMoonElevations;
           dxChart.data.datasets[2].data = dxDopplerSpreads;
           const elev = dxMoonElevations[hourIndex];
-          const rate = dxVisibleRates[hourIndex] != null ? (dxVisibleRates[hourIndex] / 1000).toFixed(4) : null;
+          const rate = dxVisibleRates[hourIndex] != null ? (dxVisibleRates[hourIndex] / 1000).toFixed(4) : null; // Scale back for display
           const doppler = dxDopplerSpreads[hourIndex];
           const azimuth = dxMoonAzimuths[hourIndex];
           const labelText =
-            `<span class="metric-locator">${dxInput}</span>` +
+            `<span class="metric-locator">${dxInput.toUpperCase()}</span>` +
             `<span class="metric-separator"> - </span>` +
             `<span class="metric-label metric-elevation">El:</span> ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}` +
             `<span class="metric-separator">|</span>` +
@@ -1164,16 +1230,12 @@
             `<span class="metric-label metric-libration">Libration:</span> ${rate != null ? rate + '°/min' : 'N/A'}` +
             `<span class="metric-separator">|</span>` +
             `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + 'Hz' : 'N/A'}`;
-          document.getElementById('dxchartLabel').innerHTML = labelText;
+          document.getElementById('dxchartLabel').innerHTML = dxInput ? labelText : '<span class="metric-locator">Enter valid DX</span>';
           if (dxAnnotation.timeMarker.label) {
             dxAnnotation.timeMarker.label.enabled = false;
           }
           dxChart.options.plugins.annotation.annotations = dxAnnotation;
           dxChart.update('none');
-        } else if (dxChart) {
-          dxChart.destroy();
-          dxChart = null;
-          document.getElementById('dxchartLabel').innerHTML = '<span class="metric-locator">Enter valid DX</span>';
         }
 
         updateMap();
@@ -1289,79 +1351,58 @@
       document.getElementById("nextDay").addEventListener("click", () => {
         adjustDate(1);
       });
-                                                         document.getElementById("date").addEventListener("change", async () => {
-                                                           const qthInput = document.getElementById("qth").value.trim().toUpperCase();
-                                                           const dxInput = document.getElementById("dx").value.trim().toUpperCase();
+                                                                  document.getElementById("date").addEventListener("change", async () => {
+                                                                    const qthInput = document.getElementById("qth").value.trim().toUpperCase();
+                                                                    const dxInput = document.getElementById("dx").value.trim().toUpperCase();
+                                                                    
+                                                                    // Recalculate libration data if QTH or DX is valid
+                                                                    if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
+                                                                      await calculateLibration('qth');
+                                                                    }
+                                                                    if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
+                                                                      await calculateLibration('dx');
+                                                                    }
+                                                                    
+                                                                    updateChart(hourIndex);
+                                                                  });
 
-                                                           // Recalculate libration data if QTH or DX is valid
-                                                           if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
-                                                             document.getElementById('chartLabel').innerHTML = '<span class="metric-locator">Loading...</span>';
-                                                             cachedLibrationData.qth = null; // Clear cache for QTH
-                                                             await calculateLibration('qth'); // This will call updateChart
-                                                           } else {
-                                                             document.getElementById("chartWrapper").style.display = "none";
-                                                             if (chart) {
-                                                               chart.destroy();
-                                                               chart = null;
-                                                             }
-                                                             document.getElementById('chartLabel').innerHTML = '<span class="metric-locator">Enter valid QTH</span>';
-                                                           }
+                                                                  window.onload = () => {
+                                                                    const now = new Date();
+                                                                    const utcHours = now.getUTCHours();
+                                                                    const utcMinutes = now.getUTCMinutes();
 
-                                                           if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
-                                                             document.getElementById('dxchartLabel').innerHTML = '<span class="metric-locator">Loading...</span>';
-                                                             cachedLibrationData.dx = null; // Clear cache for DX
-                                                             await calculateLibration('dx'); // This will call updateChart
-                                                           } else {
-                                                             document.getElementById("dxChartWrapper").style.display = "none";
-                                                             if (dxChart) {
-                                                               dxChart.destroy();
-                                                               dxChart = null;
-                                                             }
-                                                             document.getElementById('dxchartLabel').innerHTML = '<span class="metric-locator">Enter valid DX</span>';
-                                                           }
+                                                                    const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+                                                                    document.getElementById("date").valueAsDate = utcDate;
 
-                                                           // Call updateChart only if no valid locators are provided
-                                                           if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput) && !/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
-                                                             updateChart(hourIndex);
-                                                           }
-                                                         });
+                                                                    let roundedHour = utcHours;
+                                                                    let roundedMinutes = 0;
 
-                                                         window.onload = () => {
-                                                           const now = new Date();
-                                                           const utcHours = now.getUTCHours();
-                                                           const utcMinutes = now.getUTCMinutes();
+                                                                    if (utcMinutes >= 45) {
+                                                                      roundedHour += 1;
+                                                                    } else if (utcMinutes >= 15) {
+                                                                      roundedMinutes = 30;
+                                                                    }
 
-                                                           const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-                                                           document.getElementById("date").valueAsDate = utcDate;
+                                                                    hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
+                                                                    document.getElementById("hour").value = hourIndex;
+                                                                    document.getElementById("hour-value").textContent =
+                                                                      `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
 
-                                                           let roundedHour = utcHours;
-                                                           let roundedMinutes = 0;
-
-                                                           if (utcMinutes >= 45) {
-                                                             roundedHour += 1;
-                                                           } else if (utcMinutes >= 15) {
-                                                             roundedMinutes = 30;
-                                                           }
-
-                                                           hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
-                                                           document.getElementById("hour").value = hourIndex;
-                                                           document.getElementById("hour-value").textContent =
-                                                             `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
-
-                                                           // Initialize map and moon chart only
-                                                           updateMap();
-                                                           updateMoonChart();
-                                                         };
+                                                                    // Call updates after setting date
+                                                                    updateMap();
+                                                                    updateMoonChart();
+                                                                    updateChart(hourIndex);
+                                                                  };
 
       const qthInput = document.getElementById("qth");
       const dxInput = document.getElementById("dx");
 
-                                                         qthInput.addEventListener("change", async () => {
+                                                         qthInput.addEventListener("input", async () => {
                                                            const locator = qthInput.value.trim().toUpperCase();
                                                            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-                                                             document.getElementById('chartLabel').innerHTML = '<span class="metric-locator">Loading...</span>';
                                                              cachedLibrationData.qth = null; // Clear cache for QTH
-                                                             await calculateLibration('qth'); // This will call updateChart internally
+                                                             await calculateLibration('qth');
+                                                             updateChart(hourIndex);
                                                            } else {
                                                              document.getElementById("chartWrapper").style.display = "none";
                                                              if (chart) {
@@ -1372,12 +1413,12 @@
                                                            }
                                                          });
 
-                                                         dxInput.addEventListener("change", async () => {
+                                                         dxInput.addEventListener("input", async () => {
                                                            const locator = dxInput.value.trim().toUpperCase();
                                                            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-                                                             document.getElementById('dxchartLabel').innerHTML = '<span class="metric-locator">Loading...</span>';
                                                              cachedLibrationData.dx = null; // Clear cache for DX
-                                                             await calculateLibration('dx'); // This will call updateChart internally
+                                                             await calculateLibration('dx');
+                                                             updateChart(hourIndex);
                                                            } else {
                                                              document.getElementById("dxChartWrapper").style.display = "none";
                                                              if (dxChart) {
@@ -1400,26 +1441,10 @@
       }
 
                                                          async function calculateLibration(type) {
-                                                           const locator = type === 'qth' ? document.getElementById("qth").value.trim().toUpperCase() : document.getElementById("dx").value.trim().toUpperCase();
+                                                           const locator = type === 'qth' ? document.getElementById("qth").value.trim() : document.getElementById("dx").value.trim();
                                                            const dateInput = document.getElementById("date").value;
                                                            const year = dateInput ? new Date(dateInput).getUTCFullYear() : new Date().getUTCFullYear();
-                                                           const librationFile = `lib_${year}.txt`;
-
-                                                           // Validate locator before proceeding
-                                                           if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-                                                             const wrapperId = type === 'qth' ? "chartWrapper" : "dxChartWrapper";
-                                                             const labelId = type === 'qth' ? "chartLabel" : "dxchartLabel";
-                                                             document.getElementById(wrapperId).style.display = "none";
-                                                             if (type === 'qth' && chart) {
-                                                               chart.destroy();
-                                                               chart = null;
-                                                             } else if (type === 'dx' && dxChart) {
-                                                               dxChart.destroy();
-                                                               dxChart = null;
-                                                             }
-                                                             document.getElementById(labelId).innerHTML = `<span class="metric-locator">Enter valid ${type.toUpperCase()}</span>`;
-                                                             return;
-                                                           }
+                                                           const librationFile = `lib_${year}.txt`; // e.g., lib_2025.txt
 
                                                            let { lat, lon } = qthToLatLon(locator);
                                                            const COS_LAT = Math.cos(lat * Math.PI / 180);
@@ -1427,9 +1452,8 @@
                                                            const INTERVAL_MIN = 30;
                                                            const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN);
 
+                                                           // Check if we need to load new data
                                                            let tempData = [];
-                                                           let results = [];
-
                                                            if (year !== lastLoadedYear || !cachedLibrationData[type]) {
                                                              try {
                                                                const res = await fetch(librationFile);
@@ -1443,6 +1467,7 @@
                                                                lastLoadedYear = year;
                                                              } catch (e) {
                                                                console.warn(`Failed to load libration data from ${librationFile}: ${e.message}`);
+                                                               // Generate empty data for the year
                                                                const startDate = new Date(Date.UTC(year, 0, 1));
                                                                const endDate = new Date(Date.UTC(year, 11, 31, 23, 30));
                                                                for (let dt = new Date(startDate); dt <= endDate; dt.setUTCMinutes(dt.getUTCMinutes() + 30)) {
@@ -1454,6 +1479,7 @@
                                                                }
                                                              }
 
+                                                             // Process data
                                                              const shifted = tempData.map((entry, i) => {
                                                                const shiftedIndex = i + SHIFT_STEPS;
                                                                const ref = tempData[shiftedIndex] || {};
@@ -1464,7 +1490,7 @@
                                                                };
                                                              });
 
-                                                             results = shifted.map((curr, i, arr) => {
+                                                             const results = shifted.map((curr, i, arr) => {
                                                                if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null || curr.lat === null) {
                                                                  return { date: curr.date, rate: null };
                                                                }
@@ -1475,10 +1501,25 @@
                                                                return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
                                                              });
 
+                                                             // Cache the results
                                                              cachedLibrationData[type] = results;
                                                            } else {
-                                                             results = cachedLibrationData[type];
+                                                             // Use cached data
+                                                             ({ lat, lon } = qthToLatLon(locator)); // Recalculate lat/lon in case locator changed
+                                                             const COS_LAT = Math.cos(lat * Math.PI / 180);
+                                                             const shifted = tempData.map((entry, i) => {
+                                                               const shiftedIndex = i + SHIFT_STEPS;
+                                                               const ref = tempData[shiftedIndex] || {};
+                                                               return {
+                                                                 date: entry.date,
+                                                                 lat: ref.lat ?? null,
+                                                                 lon: ref.lon ?? null
+                                                               };
+                                                             });
                                                            }
+
+                                                           // Use cached or new data
+                                                           const results = cachedLibrationData[type];
 
                                                            if (type === 'qth') {
                                                              ({ lat, lon } = qthToLatLon(locator));
@@ -1490,7 +1531,6 @@
                                                              document.getElementById("dxChartWrapper").style.display = "block";
                                                            }
 
-                                                           // Update chart after data is ready
                                                            updateChart(hourIndex);
                                                          }
                                                                   document.getElementById("toggleMoonChart").addEventListener("click", () => {
