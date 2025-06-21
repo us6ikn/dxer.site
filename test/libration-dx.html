@@ -633,7 +633,7 @@
                   position: "left",
                   title: {
                     display: true,
-                    text: "Distance (thousands km)",
+                    text: "Distance (\u00D710³ km)",
                     color: "#800080",
                     font: { size: 12, family: 'Arial, sans-serif' }
                   },
@@ -675,15 +675,15 @@
                   position: "right",
                   title: {
                     display: true,
-                    text: "Path Loss (dB)",
-                    color: "#008000", // Green for distinction
+                    text: "Extra Path Loss (dB)",
+                    color: "#800080",
                     font: { size: 12, family: 'Arial, sans-serif' }
                   },
                   min: 0,
                   max: 2.5,
                   ticks: {
                     stepSize: 0.5,
-                    callback: val => val.toFixed(1) + " dB",
+                    callback: val => val.toFixed(1),
                     color: "#008000",
                     font: { size: 10 }
                   },
