@@ -1325,59 +1325,60 @@
         return { lat, lon };
       }
 
-                                                                  async function calculateLibration(type) {
-                                                                    const locator = type === 'qth' ? document.getElementById("qth").value.trim() : document.getElementById("dx").value.trim();
-                                                                    let { lat, lon } = qthToLatLon(locator);
-                                                                    const COS_LAT = Math.cos(lat * Math.PI / 180);
-                                                                    const TIME_SHIFT_MIN = (lon / 15) * 60;
-                                                                    const INTERVAL_MIN = 30;
-                                                                    const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN);
+      async function calculateLibration(type) {
+        const locator = type === 'qth' ? document.getElementById("qth").value.trim() : document.getElementById("dx").value.trim();
+        let { lat, lon } = qthToLatLon(locator);
+        const COS_LAT = Math.cos(lat * Math.PI / 180);
+        const TIME_SHIFT_MIN = (lon / 15) * 60;
+        const INTERVAL_MIN = 30;
+        const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN);
 
-                                                                    let res;
-                                                                    try {
-                                                                      res = await fetch("moon_topo_coords_lat0.txt");
-                                                                      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                                                                    } catch (e) {
-                                                                      console.warn(`Failed to fetch moon data: ${e.message}`);
-                                                                      return;
-                                                                    }
+        let res;
+        try {
+          res = await fetch("moon_topo_coords_lat0.txt");
+          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        } catch (e) {
+          return;
+        }
 
-                                                                    const lines = (await res.text()).trim().split("\n").slice(1);
-                                                                    const tempData = lines.map(line => ({
-                                                                      date: line.slice(0, 20).trim(),
-                                                                      lat: parseFloat(line.slice(20, 32)),
-                                                                      lon: parseFloat(line.slice(32))
-                                                                    }));
+        const lines = (await res.text()).trim().split("\n").slice(1);
+        const tempData = lines.map(line => ({
+          date: line.slice(0, 20).trim(),
+          lat: parseFloat(line.slice(20, 32)),
+          lon: parseFloat(line.slice(32))
+        }));
 
-                                                                    const shifted = tempData.map((entry, i) => {
-                                                                      const shiftedIndex = i + SHIFT_STEPS;
-                                                                      const ref = tempData[shiftedIndex] || {};
-                                                                      return {
-                                                                        date: entry.date,
-                                                                        lat: ref.lat ?? null,
-                                                                        lon: ref.lon ?? null
-                                                                      };
-                                                                    });
+        const shifted = tempData.map((entry, i) => {
+          const shiftedIndex = i + SHIFT_STEPS;
+          const ref = tempData[shiftedIndex] || {};
+          return {
+            date: entry.date,
+            lat: ref.lat ?? null,
+            lon: ref.lon ?? null
+          };
+        });
 
-                                                                    const results = shifted.map((curr, i, arr) => {
-                                                                      if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null) return { date: curr.date, rate: 0 };
-                                                                      let dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
-                                                                      let dlon = (((arr[i+1].lon - arr[i-1].lon) / 60 + 180) % 360) - 180;
-                                                                      dlat *= COS_LAT;
-                                                                      dlon *= COS_LAT;
-                                                                      return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
-                                                                    });
+        const results = shifted.map((curr, i, arr) => {
+          if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null) return { date: curr.date, rate: 0 };
+          let dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
+          let dlon = (((arr[i+1].lon - arr[i-1].lon) / 60 + 180) % 360) - 180;
+          dlat *= COS_LAT;
+          dlon *= COS_LAT;
+          return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
+        });
 
-                                                                    if (type === 'qth') {
-                                                                      ({ lat, lon } = qthToLatLon(locator));
-                                                                      rawData = results;
-                                                                      document.getElementById("chartWrapper").style.display = "block";
-                                                                    } else {
-                                                                      ({ lat: dxLat, lon: dxLon } = qthToLatLon(locator));
-                                                                      dxRawData = results;
-                                                                      document.getElementById("dxChartWrapper").style.display = "block";
-                                                                    }
-                                                                  }
+        if (type === 'qth') {
+          ({ lat, lon } = qthToLatLon(locator));
+          rawData = results;
+          document.getElementById("chartWrapper").style.display = "block";
+          updateChart(hourIndex);
+        } else {
+          ({ lat: dxLat, lon: dxLon } = qthToLatLon(locator));
+          dxRawData = results;
+          document.getElementById("dxChartWrapper").style.display = "block";
+          updateChart(hourIndex);
+        }
+      }
                                                                   document.getElementById("toggleMoonChart").addEventListener("click", () => {
                                                                     const moonChartWrapper = document.getElementById("moonChartWrapper");
                                                                     const toggleButton = document.getElementById("toggleMoonChart");
