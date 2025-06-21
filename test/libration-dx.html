@@ -1284,31 +1284,35 @@
       const qthInput = document.getElementById("qth");
       const dxInput = document.getElementById("dx");
 
-      qthInput.addEventListener("input", async () => {
-        const locator = qthInput.value.trim().toUpperCase();
-        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-          await calculateLibration('qth');
-        } else {
-          document.getElementById("chartWrapper").style.display = "none";
-          if (chart) {
-            chart.destroy();
-            chart = null;
-          }
-        }
-      });
+                                                                  qthInput.addEventListener("input", async () => {
+                                                                    const locator = qthInput.value.trim().toUpperCase();
+                                                                    if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
+                                                                      await calculateLibration('qth');
+                                                                      updateChart(hourIndex); // Add this to update chart and label immediately
+                                                                    } else {
+                                                                      document.getElementById("chartWrapper").style.display = "none";
+                                                                      if (chart) {
+                                                                        chart.destroy();
+                                                                        chart = null;
+                                                                      }
+                                                                      document.getElementById('chartLabel').innerHTML = '<span class="metric-locator">Enter valid QTH</span>'; // Clear label
+                                                                    }
+                                                                  });
 
-      dxInput.addEventListener("input", async () => {
-        const locator = dxInput.value.trim().toUpperCase();
-        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-          await calculateLibration('dx');
-        } else {
-          document.getElementById("dxChartWrapper").style.display = "none";
-          if (dxChart) {
-            dxChart.destroy();
-            dxChart = null;
-          }
-        }
-      });
+                                                                  dxInput.addEventListener("input", async () => {
+                                                                    const locator = dxInput.value.trim().toUpperCase();
+                                                                    if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
+                                                                      await calculateLibration('dx');
+                                                                      updateChart(hourIndex); // Add this to update chart and label immediately
+                                                                    } else {
+                                                                      document.getElementById("dxChartWrapper").style.display = "none";
+                                                                      if (dxChart) {
+                                                                        dxChart.destroy();
+                                                                        dxChart = null;
+                                                                      }
+                                                                      document.getElementById('dxchartLabel').innerHTML = '<span class="metric-locator">Enter valid DX</span>'; // Clear label
+                                                                    }
+                                                                  });
 
       function qthToLatLon(locator) {
         if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
