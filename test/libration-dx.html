@@ -317,23 +317,26 @@
 
       #showControlsPanel {
         position: fixed;
-        top: 10px;
-        left: 5px;
-        width: 24px; /* Fixed size for icon */
+        top: 50%;
+        left: 35px;
+        transform: translateY(-50%) scale(1); /* Added scale for hover effect */
+        width: 24px;
         height: 24px;
         padding: 2px;
-        background-color: rgba(255, 255, 255, 0.9);
+        background-color: rgba(255, 255, 255, 0.95);
         color: #2c3e50;
         border: 1px solid rgba(0, 123, 255, 0.4);
         border-radius: 4px;
-        font-size: 14px; /* Larger for icon */
+        font-size: 12px; /* Slightly smaller for cleaner look */
+        font-weight: bold; /* Bolder arrow */
         cursor: pointer;
-        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease, opacity 0.3s ease;
         display: none;
         align-items: center;
         justify-content: center;
         line-height: 1;
         z-index: 1000;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
       }
 
       #showControlsPanel.visible {
@@ -344,19 +347,27 @@
         background-color: rgba(255, 255, 255, 1);
         color: #0056b3;
         border-color: rgba(0, 123, 255, 0.6);
+        transform: translateY(-50%) scale(1.1); /* Slight scale on hover */
       }
 
       #showControlsPanel:focus {
         outline: none;
         box-shadow: 0 0 2px rgba(0, 123, 255, 0.5);
       }
+
+      #showControlsPanel:not(.visible) {
+        display: none !important;
+      }
+
       @media (max-width: 600px) {
         #showControlsPanel {
-          top: 5px;
-          left: 2px;
+          left: 32px;
+          width: 20px;
+          height: 20px;
           font-size: 10px;
-          padding: 2px 4px;
+          padding: 1px;
         }
+      }
       }
       .gm-style > div {
         z-index: 50 !important; /* Ensure map controls are below showControlsPanel */
@@ -1542,6 +1553,9 @@
                                                                     document.getElementById("hour").value = hourIndex;
                                                                     document.getElementById("hour-value").textContent =
                                                                       `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
+                                                                      
+                                                                      // Ensure showControlsPanel is hidden on load
+                                                                      document.getElementById("showControlsPanel").classList.remove("visible");
 
                                                                     // Call updates after setting date
                                                                     updateMap();
@@ -1718,6 +1732,11 @@
                                                              controls.classList.remove("folded");
                                                              toggleButton.style.display = "block";
                                                              showButton.classList.remove("visible");
+                                                             // Force repaint
+                                                             setTimeout(() => {
+                                                               showButton.style.display = 'none';
+                                                               showButton.offsetHeight; // Trigger reflow
+                                                             }, 0);
                                                              // Resize charts if visible
                                                              if (chart) chart.resize();
                                                              if (dxChart) dxChart.resize();
