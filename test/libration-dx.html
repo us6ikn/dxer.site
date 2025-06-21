@@ -499,59 +499,83 @@
         const minutes = index % 2 === 0 ? '00' : '30';
         const utcTimeString = `${selectedDate}T${hour}:${minutes}:00Z`;
 
-        // Calculate sublunar point
+        // Validate and create Date object
         const utcDate = new Date(utcTimeString);
-        const time = Astronomy.MakeTime(utcDate);
-        const observer = new Astronomy.Observer(0, 0, 0); // Geocenter
-        const moon = Astronomy.Equator("Moon", time, observer, true, true);
-        const libration = Astronomy.Libration(time);
-
-        const raHours = moon.ra; // Right Ascension in sidereal HOURS
-        const decDeg = moon.dec; // Declination in DEGREES (latitude)
-        const raDeg = raHours * 15; // Convert RA to degrees
-
-        let gastDeg = Astronomy.SiderealTime(time) * 15; // GAST in degrees
-        gastDeg = ((gastDeg % 360) + 360) % 360; // Normalize to [0, 360)
-
-        let lonDeg = gastDeg - raDeg;
-        if (lonDeg > 180) lonDeg -= 360;
-        if (lonDeg < -180) lonDeg += 360;
-
-        const lat = decDeg; // Sublunar latitude
-        const lon = lonDeg; // Sublunar longitude
-        const radius = libration.dist_km * 1000; // Convert km to meters for footprint radius
-
-        if (isNaN(lat) || isNaN(lon) || isNaN(radius)) {
-          console.warn(`Invalid sublunar point data for ${utcTimeString}: lat=${lat}, lon=${lon}, radius=${radius}`);
+        if (isNaN(utcDate.getTime())) {
+          console.error(`Invalid date string: ${utcTimeString}`);
           return;
         }
 
-        // Remove existing marker and circle if they exist
-        if (moonMarker) moonMarker.setMap(null);
-        if (footprintCircle) footprintCircle.setMap(null);
+        try {
+          // Calculate sublunar point
+          const time = Astronomy.MakeTime(utcDate);
+          const observer = new Astronomy.Observer(0, 0, 0); // Geocenter
+          const moon = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, true);
+          const libration = Astronomy.Libration(time);
 
-        // Create new Moon marker
-        moonMarker = new google.maps.Marker({
-          position: { lat, lng: lon },
-          map: map,
-          icon: {
-            url: 'https://dxer.site/img/moon-icon.png',
-            scaledSize: new google.maps.Size(48, 48)
-          },
-          title: 'Moon Sublunar Point'
-        });
+          if (!moon || !libration) {
+            console.warn(`Failed to compute Moon data for ${utcTimeString}`);
+            return;
+          }
 
-        // Create new footprint circle
-        footprintCircle = new google.maps.Circle({
-          map: map,
-          center: { lat, lng: lon },
-          radius: radius,
-          fillColor: '#0088FF',
-          fillOpacity: 0.3,
-          strokeColor: '#0000FF',
-          strokeOpacity: 0.6,
-          strokeWeight: 2
-        });
+          const raHours = moon.ra; // Right Ascension in sidereal HOURS
+          const decDeg = moon.dec; // Declination in DEGREES (latitude)
+          const raDeg = raHours * 15; // Convert RA to degrees
+
+          let gastDeg = Astronomy.SiderealTime(time) * 15; // GAST in degrees
+          gastDeg = ((gastDeg % 360) + 360) % 360; // Normalize to [0, 360)
+
+          let lonDeg = gastDeg - raDeg;
+          if (lonDeg > 180) lonDeg -= 360;
+          if (lonDeg < -180) lonDeg += 360;
+
+          const lat = decDeg; // Sublunar latitude
+          const lon = lonDeg; // Sublunar longitude
+
+          // Calculate footprint radius (approximation of Moon's visible disk on Earth's surface)
+          const earthRadius = 6371e3; // Earth's mean radius in meters
+          const moonDistance = libration.dist_km * 1000; // Moon's geocentric distance in meters
+          const moonAngularDiameter = libration.diam_deg; // Moon's angular diameter in degrees
+          const moonAngularRadius = (moonAngularDiameter / 2) * (Math.PI / 180); // Convert to radians
+          const footprintRadius = earthRadius * Math.sin(moonAngularRadius); // Approximate footprint radius in meters
+
+          if (isNaN(lat) || isNaN(lon) || isNaN(footprintRadius)) {
+            console.warn(`Invalid sublunar point data for ${utcTimeString}: lat=${lat}, lon=${lon}, radius=${footprintRadius}`);
+            return;
+          }
+
+          // Remove existing marker and circle if they exist
+          if (moonMarker) moonMarker.setMap(null);
+          if (footprintCircle) footprintCircle.setMap(null);
+
+          // Create new Moon marker
+          moonMarker = new google.maps.Marker({
+            position: { lat, lng: lon },
+            map: map,
+            icon: {
+              url: 'https://dxer.site/img/moon-icon.png',
+              scaledSize: new google.maps.Size(48, 48)
+            },
+            title: `Moon Sublunar Point (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
+          });
+
+          // Create new footprint circle
+          footprintCircle = new google.maps.Circle({
+            map: map,
+            center: { lat, lng: lon },
+            radius: footprintRadius,
+            fillColor: '#0088FF',
+            fillOpacity: 0.3,
+            strokeColor: '#0000FF',
+            strokeOpacity: 0.6,
+            strokeWeight: 2
+          });
+
+          // Optional: Log coordinates for debugging
+          console.log(`Sublunar Point at ${utcTimeString}: Lat=${lat.toFixed(6)}°, Lon=${lon.toFixed(6)}°, Radius=${footprintRadius.toFixed(0)}m`);
+        } catch (error) {
+          console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
+        }
       }
 
       function calculateMoonDataForMonth(dateStr) {
