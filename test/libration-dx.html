@@ -620,27 +620,75 @@
               maintainAspectRatio: false,
               scales: {
                 x: {
-                  title: { display: true, text: "Date (MM-DD)" }
+                  title: {
+                    display: true,
+                    text: "Date (MM-DD)",
+                    font: { size: 12, family: 'Arial, sans-serif' }
+                  },
+                  ticks: { font: { size: 10 } }
                 },
                 y1: {
                   type: "linear",
                   display: true,
                   position: "left",
-                  title: { display: true, text: "Distance (km)", color: "#800080" },
+                  title: {
+                    display: true,
+                    text: "Distance (thousands km)",
+                    color: "#800080",
+                    font: { size: 12, family: 'Arial, sans-serif' }
+                  },
                   min: 356400,
                   max: 406700,
-                  ticks: { stepSize: 10000, color: "#800080" },
+                  ticks: {
+                    stepSize: 10000,
+                    color: "#800080",
+                    font: { size: 10 },
+                    callback: function(value) {
+                      return (value / 1000).toFixed(0); // Show thousands of km (e.g., 356)
+                    }
+                  },
                   grid: { drawTicks: true, drawBorder: true }
                 },
                 y2: {
                   type: "linear",
                   display: true,
                   position: "right",
-                  title: { display: true, text: "Declination (°)", color: "#FFA500" },
+                  title: {
+                    display: true,
+                    text: "Declination (°)",
+                    color: "#FFA500",
+                    font: { size: 12, family: 'Arial, sans-serif' }
+                  },
                   min: -30,
                   max: 30,
-                  ticks: { stepSize: 10, callback: val => val + "°", color: "#FFA500" },
+                  ticks: {
+                    stepSize: 10,
+                    callback: val => val + "°",
+                    color: "#FFA500",
+                    font: { size: 10 }
+                  },
                   grid: { drawOnChartArea: false }
+                },
+                y3: {
+                  type: "linear",
+                  display: true,
+                  position: "right",
+                  title: {
+                    display: true,
+                    text: "Path Loss (dB)",
+                    color: "#008000", // Green for distinction
+                    font: { size: 12, family: 'Arial, sans-serif' }
+                  },
+                  min: 0,
+                  max: 2.5,
+                  ticks: {
+                    stepSize: 0.5,
+                    callback: val => val.toFixed(1) + " dB",
+                    color: "#008000",
+                    font: { size: 10 }
+                  },
+                  grid: { drawOnChartArea: false },
+                  offset: true // Prevent overlap with y2
                 }
               },
               plugins: {
@@ -659,6 +707,8 @@
           moonChart.options.scales.y1.max = 406700;
           moonChart.options.scales.y2.min = -30;
           moonChart.options.scales.y2.max = 30;
+          moonChart.options.scales.y3.min = 0;
+          moonChart.options.scales.y3.max = 2.5;
           moonChart.update('none');
         }
       }
