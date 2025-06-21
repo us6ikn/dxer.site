@@ -262,22 +262,68 @@
         outline: none;
         box-shadow: 0 0 3px rgba(40, 167, 69, 0.5);
       }
+      .button-group {
+        display: flex;
+        gap: 5px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .nav-button {
+        font-size: 12px;
+        padding: 4px 8px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        text-decoration: none;
+        text-align: center;
+        line-height: 1.5;
+      }
+
+      .nav-button:hover {
+        background-color: #0056b3;
+      }
+
+      .nav-button:focus {
+        outline: none;
+        box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
+      }
+
+      .nav-button.icon-button {
+        padding: 4px 6px;
+        font-size: 14px;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
   </style>
 </head>
 <body>
   <div id="map"></div>
   <div id="controls">
-    <div id="date-container">
-      <div class="app-name-wrapper">
-        <div class="creator-label">by SA5IKN</div>
-        <div class="app-name">EME Observer</div>
-        <div class="ghz-label">10GHz</div>
+      <div id="date-container">
+        <div class="app-name-wrapper">
+          <div class="creator-label">by SA5IKN</div>
+          <div class="app-name">EME Observer</div>
+          <div class="ghz-label">10GHz</div>
+        </div>
+        <button id="prevDay">←</button>
+        <input type="date" id="date" />
+        <button id="nextDay">→</button>
+        <span id="hour-value">Time (UTC): 00:00</span>
+        <div class="button-group">
+          <a href="eme-observer-statistics.html" class="nav-button">Statistics</a>
+          <a href="eme-observer-table.html" class="nav-button">Table</a>
+          <a href="http://dxer.site" class="nav-button icon-button">🏠</a>
+          <a href="http://dxer.site/eme-observer-faq.html" class="nav-button icon-button">?</a>
+        </div>
       </div>
-      <button id="prevDay">←</button>
-      <input type="date" id="date" />
-      <button id="nextDay">→</button>
-      <span id="hour-value">Time (UTC): 00:00</span>
-    </div>
     <input type="range" id="hour" min="0" max="47" value="0" step="1" />
     <label for="qth">My Locator:</label>
     <input type="text" id="qth" maxlength="6" size="9" placeholder="eg JO89tt" />
