@@ -226,6 +226,22 @@
         color: #666;
         margin: 0 4px;
       }
+      .metric-elevation {
+        color: rgba(0, 0, 255, 0.6); /* Blue, matches declination chart y2 */
+      }
+      .metric-azimuth {
+        color: #444; /* Dark gray, no axis but neutral */
+      }
+      .metric-libration {
+        color: #ff0000; /* Red, matches declination chart y1 */
+      }
+      .metric-doppler {
+        color: green; /* Green, matches declination chart y3 */
+      }
+      .metric-locator {
+        color: #000;
+        font-weight: bold;
+      }
   </style>
 </head>
 <body>
@@ -248,15 +264,15 @@
     <label for="dx">DX Locator:</label>
     <input type="text" id="dx" maxlength="6" size="9" placeholder="eg JO88xx" />
     <div id="chartWrapper" style="display: none;">
-      <div id="chartLabel" style="text-align: center; margin-bottom: 0px; font-weight: normal; font-size: 12px;"></div>
+      <div id="chartLabel" style="text-align: center; margin-bottom: 0px; font-weight: normal;"></div>
       <canvas id="declinationChart"></canvas>
     </div>
     <div id="dxChartWrapper" style="display: none;">
-      <div id="dxchartLabel" style="text-align: center; margin-bottom: 0px; font-weight: normal; font-size: 12px;"></div>
+      <div id="dxchartLabel" style="text-align: center; margin-bottom: 0px; font-weight: normal;"></div>
       <canvas id="dxDeclinationChart"></canvas>
     </div>
     <div id="moonChartWrapper" style="display: block;">
-      <div id="moonChartLabel" style="text-align: center; margin-bottom: 0px; font-weight: normal; font-size: 12px;"></div>
+      <div id="moonChartLabel" style="text-align: center; margin-bottom: 0px; font-weight: normal;"></div>
       <canvas id="moonDistanceChart"></canvas>
       <button id="toggleMoonChart" style="position: absolute; bottom: 5px; right: 5px; z-index: 10;">Hide</button>
     </div>
@@ -1359,7 +1375,6 @@
           updateChart(hourIndex);
         }
       }
-                                                                  // Toggle Moon chart visibility
                                                                   document.getElementById("toggleMoonChart").addEventListener("click", () => {
                                                                     const moonChartWrapper = document.getElementById("moonChartWrapper");
                                                                     const toggleButton = document.getElementById("toggleMoonChart");
@@ -1370,9 +1385,9 @@
                                                                     } else {
                                                                       moonChartWrapper.style.display = "block";
                                                                       toggleButton.textContent = "Hide";
-                                                                      // Ensure chart is resized properly when shown
                                                                       if (moonChart) {
                                                                         moonChart.resize();
+                                                                        moonChart.update('none');
                                                                       }
                                                                     }
                                                                   });
