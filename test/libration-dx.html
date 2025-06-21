@@ -587,7 +587,7 @@
         document.getElementById('moonChartLabel').textContent =
           `Moon Distance: ${currentDistance != null ? currentDistance.toFixed(0) + ' km' : 'N/A'}  ` +
           `Declination: ${currentDeclination != null ? currentDeclination.toFixed(1) + '°' : 'N/A'}  ` +
-          `Path Loss: ${pathLoss != null ? pathLoss.toFixed(2) + ' dB' : 'N/A'}`;
+          `Extra Loss: ${pathLoss != null ? pathLoss.toFixed(2) + ' dB' : 'N/A'}`;
 
         if (!moonChart) {
           moonChart = new Chart(document.getElementById("moonDistanceChart"), {
@@ -684,7 +684,7 @@
                   ticks: {
                     stepSize: 0.5,
                     callback: val => val.toFixed(1),
-                    color: "#008000",
+                    color: "#800080",
                     font: { size: 10 }
                   },
                   grid: { drawOnChartArea: false },
