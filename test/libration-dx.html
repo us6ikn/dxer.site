@@ -197,7 +197,7 @@
         text-align: center;
         margin-bottom: 0px;
         font-weight: normal;
-        font-size: 10px;
+        font-size: 11px;
         font-family: 'Arial, sans-serif';
         white-space: nowrap;
         overflow: hidden;
@@ -1088,7 +1088,7 @@
             `<span class="metric-separator">|</span>` +
             `<span class="metric-label metric-libration">Libration:</span> ${rate != null ? rate + '°/min' : 'N/A'}` +
             `<span class="metric-separator">|</span>` +
-            `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + 'Hz' : 'N/A'}`;
+            `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + ' Hz' : 'N/A'}`;
           document.getElementById('chartLabel').innerHTML = qthInput ? labelText : '<span class="metric-locator">Enter valid QTH</span>';
           if (qthAnnotation.timeMarker.label) {
             qthAnnotation.timeMarker.label.enabled = false;
@@ -1229,7 +1229,7 @@
             `<span class="metric-separator">|</span>` +
             `<span class="metric-label metric-libration">Libration:</span> ${rate != null ? rate + '°/min' : 'N/A'}` +
             `<span class="metric-separator">|</span>` +
-            `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + 'Hz' : 'N/A'}`;
+            `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + ' Hz' : 'N/A'}`;
           document.getElementById('dxchartLabel').innerHTML = dxInput ? labelText : '<span class="metric-locator">Enter valid DX</span>';
           if (dxAnnotation.timeMarker.label) {
             dxAnnotation.timeMarker.label.enabled = false;
