@@ -526,7 +526,7 @@
           let gastDeg = Astronomy.SiderealTime(time) * 15; // GAST in degrees
           gastDeg = ((gastDeg % 360) + 360) % 360; // Normalize to [0, 360)
 
-          let lonDeg = gastDeg - raDeg;
+          let lonDeg = raDeg - gastDeg;
           if (lonDeg > 180) lonDeg -= 360;
           if (lonDeg < -180) lonDeg += 360;
 
