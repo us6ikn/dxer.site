@@ -728,7 +728,7 @@
                     display: true,
                     text: "Distance (\u00D710³ km)",
                     color: "#800080",
-                    font: { size: 10, family: 'Arial, sans-serif' }
+                    font: { size: 12, family: 'Arial, sans-serif' }
                   },
                   min: 356400,
                   max: 406700,
@@ -1347,20 +1347,6 @@
       document.getElementById("nextDay").addEventListener("click", () => {
         adjustDate(1);
       });
-                                                                  document.getElementById("date").addEventListener("change", async () => {
-                                                                    const qthInput = document.getElementById("qth").value.trim().toUpperCase();
-                                                                    const dxInput = document.getElementById("dx").value.trim().toUpperCase();
-                                                                    
-                                                                    // Recalculate libration data if QTH or DX is valid
-                                                                    if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
-                                                                      await calculateLibration('qth');
-                                                                    }
-                                                                    if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
-                                                                      await calculateLibration('dx');
-                                                                    }
-                                                                    
-                                                                    updateChart(hourIndex);
-                                                                  });
 
                                                                   window.onload = () => {
                                                                     const now = new Date();
