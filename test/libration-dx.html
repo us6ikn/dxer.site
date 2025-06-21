@@ -303,6 +303,14 @@
       const MOON_RADIUS = 1.7374e6; // meters
       const SPEED_OF_LIGHT = 299792458; // m/s
       const FREQUENCY_HZ = 10.368e9; // 10.368 GHz
+      
+      function debounce(func, wait) {
+        let timeout;
+        return function (...args) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+      }
 
       function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
@@ -1283,58 +1291,61 @@
       document.getElementById("nextDay").addEventListener("click", () => {
         adjustDate(1);
       });
-                                                                  document.getElementById("date").addEventListener("change", async () => {
-                                                                    const qthInput = document.getElementById("qth").value.trim().toUpperCase();
-                                                                    const dxInput = document.getElementById("dx").value.trim().toUpperCase();
-                                                                    
-                                                                    // Recalculate libration data if QTH or DX is valid
-                                                                    if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
-                                                                      await calculateLibration('qth');
-                                                                    }
-                                                                    if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
-                                                                      await calculateLibration('dx');
-                                                                    }
-                                                                    
-                                                                    updateChart(hourIndex);
-                                                                  });
+                                                         document.getElementById("date").addEventListener("change", async () => {
+                                                           const qthInput = document.getElementById("qth").value.trim().toUpperCase();
+                                                           const dxInput = document.getElementById("dx").value.trim().toUpperCase();
 
-                                                                  window.onload = () => {
-                                                                    const now = new Date();
-                                                                    const utcHours = now.getUTCHours();
-                                                                    const utcMinutes = now.getUTCMinutes();
+                                                           // Recalculate libration data if QTH or DX is valid
+                                                           if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
+                                                             cachedLibrationData.qth = null; // Clear cache for QTH
+                                                             await calculateLibration('qth');
+                                                           }
+                                                           if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
+                                                             cachedLibrationData.dx = null; // Clear cache for DX
+                                                             await calculateLibration('dx');
+                                                           }
 
-                                                                    const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-                                                                    document.getElementById("date").valueAsDate = utcDate;
+                                                           // Call updateChart only if no valid locators are provided
+                                                           if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput) && !/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
+                                                             updateChart(hourIndex);
+                                                           }
+                                                         });
 
-                                                                    let roundedHour = utcHours;
-                                                                    let roundedMinutes = 0;
+                                                         window.onload = () => {
+                                                           const now = new Date();
+                                                           const utcHours = now.getUTCHours();
+                                                           const utcMinutes = now.getUTCMinutes();
 
-                                                                    if (utcMinutes >= 45) {
-                                                                      roundedHour += 1;
-                                                                    } else if (utcMinutes >= 15) {
-                                                                      roundedMinutes = 30;
-                                                                    }
+                                                           const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+                                                           document.getElementById("date").valueAsDate = utcDate;
 
-                                                                    hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
-                                                                    document.getElementById("hour").value = hourIndex;
-                                                                    document.getElementById("hour-value").textContent =
-                                                                      `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
+                                                           let roundedHour = utcHours;
+                                                           let roundedMinutes = 0;
 
-                                                                    // Call updates after setting date
-                                                                    updateMap();
-                                                                    updateMoonChart();
-                                                                    updateChart(hourIndex);
-                                                                  };
+                                                           if (utcMinutes >= 45) {
+                                                             roundedHour += 1;
+                                                           } else if (utcMinutes >= 15) {
+                                                             roundedMinutes = 30;
+                                                           }
+
+                                                           hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
+                                                           document.getElementById("hour").value = hourIndex;
+                                                           document.getElementById("hour-value").textContent =
+                                                             `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
+
+                                                           // Initialize map and moon chart only
+                                                           updateMap();
+                                                           updateMoonChart();
+                                                         };
 
       const qthInput = document.getElementById("qth");
       const dxInput = document.getElementById("dx");
 
-                                                         qthInput.addEventListener("input", async () => {
+                                                         qthInput.addEventListener("input", debounce(async () => {
                                                            const locator = qthInput.value.trim().toUpperCase();
                                                            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
                                                              cachedLibrationData.qth = null; // Clear cache for QTH
                                                              await calculateLibration('qth');
-                                                             updateChart(hourIndex);
                                                            } else {
                                                              document.getElementById("chartWrapper").style.display = "none";
                                                              if (chart) {
@@ -1343,14 +1354,13 @@
                                                              }
                                                              document.getElementById('chartLabel').innerHTML = '<span class="metric-locator">Enter valid QTH</span>';
                                                            }
-                                                         });
+                                                         }, 300));
 
-                                                         dxInput.addEventListener("input", async () => {
+                                                         dxInput.addEventListener("input", debounce(async () => {
                                                            const locator = dxInput.value.trim().toUpperCase();
                                                            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
                                                              cachedLibrationData.dx = null; // Clear cache for DX
                                                              await calculateLibration('dx');
-                                                             updateChart(hourIndex);
                                                            } else {
                                                              document.getElementById("dxChartWrapper").style.display = "none";
                                                              if (dxChart) {
@@ -1359,7 +1369,7 @@
                                                              }
                                                              document.getElementById('dxchartLabel').innerHTML = '<span class="metric-locator">Enter valid DX</span>';
                                                            }
-                                                         });
+                                                         }, 300));
 
       function qthToLatLon(locator) {
         if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
@@ -1446,6 +1456,9 @@
                                                              dxRawData = results;
                                                              document.getElementById("dxChartWrapper").style.display = "block";
                                                            }
+
+                                                           // Update chart after data is ready
+                                                           updateChart(hourIndex);
                                                          }
                                                                   document.getElementById("toggleMoonChart").addEventListener("click", () => {
                                                                     const moonChartWrapper = document.getElementById("moonChartWrapper");
