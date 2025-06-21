@@ -319,19 +319,21 @@
         position: fixed;
         top: 10px;
         left: 5px;
-        padding: 4px 6px; /* Slightly larger for visibility */
-        background-color: rgba(255, 255, 255, 0.8); /* More opaque for clarity */
+        width: 24px; /* Fixed size for icon */
+        height: 24px;
+        padding: 2px;
+        background-color: rgba(255, 255, 255, 0.9);
         color: #2c3e50;
         border: 1px solid rgba(0, 123, 255, 0.4);
         border-radius: 4px;
-        font-size: 12px; /* Slightly larger for readability */
+        font-size: 14px; /* Larger for icon */
         cursor: pointer;
         transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         display: none;
         align-items: center;
         justify-content: center;
         line-height: 1;
-        z-index: 100; /* Increased to ensure visibility */
+        z-index: 1000;
       }
 
       #showControlsPanel.visible {
@@ -398,8 +400,8 @@
       <button id="toggleControlsPanel" style="position: absolute; bottom: 5px; right: 5px; z-index: 10;">Hide Panel</button>
     </div>
   </div>
-  <button id="showControlsPanel" style="display: none;">Show Panel</button>
-
+  <button id="showControlsPanel" style="display: none;">→</button>
+  
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
 
@@ -1693,6 +1695,12 @@
                                                              controls.classList.add("folded");
                                                              toggleButton.style.display = "none";
                                                              showButton.classList.add("visible");
+                                                             // Force repaint
+                                                             setTimeout(() => {
+                                                               showButton.style.display = 'none';
+                                                               showButton.offsetHeight; // Trigger reflow
+                                                               showButton.style.display = 'flex';
+                                                             }, 0);
                                                              console.log("Panel folded, showControlsPanel should be visible:", showButton.classList.contains("visible"));
                                                            }
                                                          });
@@ -1707,11 +1715,11 @@
                                                              controls.classList.remove("folded");
                                                              toggleButton.style.display = "block";
                                                              showButton.classList.remove("visible");
-                                                             console.log("Panel unfolded, showControlsPanel should be hidden:", !showButton.classList.contains("visible"));
                                                              // Resize charts if visible
                                                              if (chart) chart.resize();
                                                              if (dxChart) dxChart.resize();
                                                              if (moonChart) moonChart.resize();
+                                                             console.log("Panel unfolded, showControlsPanel should be hidden:", !showButton.classList.contains("visible"));
                                                            }
                                                          });
   </script>
