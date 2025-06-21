@@ -242,26 +242,6 @@
         color: #000;
         font-weight: bold;
       }
-      .sked-button {
-        font-size: 12px;
-        padding: 2px 6px;
-        margin-left: 5px;
-        background-color: #28a745;
-        color: white;
-        border: none;
-        border-radius: 3px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-      }
-
-      .sked-button:hover {
-        background-color: #218838;
-      }
-
-      .sked-button:focus {
-        outline: none;
-        box-shadow: 0 0 3px rgba(40, 167, 69, 0.5);
-      }
   </style>
 </head>
 <body>
@@ -370,11 +350,7 @@
               const infoContent = `
                 <div>
                   <div style="font-weight:bold; font-size: 16px;">${callsign}</div>
-                  <div>Locator: ${locator}${
-                    /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)
-                      ? ` <button id="sked-${callsign}" class="sked-button" data-locator="${locator.toUpperCase()}">Sked</button>`
-                      : ''
-                  }</div>
+                  <div>Locator: ${locator}</div>
                   <div>Antenna: ${antenna}</div>
                   <div>Power: ${power}</div>
                   <div>Website: <a href="${website}" target="_blank">${website}</a></div>
@@ -420,18 +396,6 @@
                       imageElement.remove();
                       placeholder.style.display = 'block';
                     });
-
-                  // Add event listener for Sked button
-                  const skedButton = document.getElementById(`sked-${callsign}`);
-                  if (skedButton) {
-                    skedButton.addEventListener('click', () => {
-                      const locator = skedButton.getAttribute('data-locator');
-                      document.getElementById('dx').value = locator;
-                      // Trigger input event to update chart
-                      const inputEvent = new Event('input', { bubbles: true });
-                      document.getElementById('dx').dispatchEvent(inputEvent);
-                    });
-                  }
                 }, 100);
               });
             });
@@ -465,11 +429,7 @@
               const infoContent = `
                 <div>
                   <div style="font-weight:bold; font-size: 16px;">${callsign} (SK)</div>
-                  <div>Locator: ${locator}${
-                    /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)
-                      ? ` <button id="sked-${callsign}" class="sked-button" data-locator="${locator.toUpperCase()}">Sked</button>`
-                      : ''
-                  }</div>
+                  <div>Locator: ${locator}</div>
                   <div>Antenna: ${antenna}</div>
                   <div>Power: ${power}</div>
                   <div>Website: <a href="${website}" target="_blank">${website}</a></div>
@@ -515,18 +475,6 @@
                       imageElement.remove();
                       placeholder.style.display = 'block';
                     });
-
-                  // Add event listener for Sked button
-                  const skedButton = document.getElementById(`sked-${callsign}`);
-                  if (skedButton) {
-                    skedButton.addEventListener('click', () => {
-                      const locator = skedButton.getAttribute('data-locator');
-                      document.getElementById('dx').value = locator;
-                      // Trigger input event to update chart
-                      const inputEvent = new Event('input', { bubbles: true });
-                      document.getElementById('dx').dispatchEvent(inputEvent);
-                    });
-                  }
                 }, 100);
               });
             });
