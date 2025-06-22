@@ -1617,7 +1617,7 @@
                                                            const librationFile = `lib_${year}.txt`; // e.g., lib_2025.txt
 
                                                            let { lat, lon } = qthToLatLon(locator);
-                                                           const COS_LAT = Math.cos(lat * Math.PI / 180);
+                                                           const COS_LAT = Math.cos(lat);
                                                            const TIME_SHIFT_MIN = (lon / 15) * 60;
                                                            const INTERVAL_MIN = 30;
                                                            const SHIFT_STEPS = Math.round(TIME_SHIFT_MIN / INTERVAL_MIN);
@@ -1668,7 +1668,7 @@
                                                                let dlon = (arr[i+1].lon - arr[i-1].lon) / 60;
                                                                dlat *= COS_LAT;
                                                                dlon *= COS_LAT;
-                                                               console.log(date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon));
+                                                               console.log(dlat,dlon);
                                                                return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
                                                              });
 
@@ -1677,7 +1677,7 @@
                                                            } else {
                                                              // Use cached data
                                                              ({ lat, lon } = qthToLatLon(locator)); // Recalculate lat/lon in case locator changed
-                                                             const COS_LAT = Math.cos(lat * Math.PI / 180);
+                                                             const COS_LAT = Math.cos(lat);
                                                              const shifted = tempData.map((entry, i) => {
                                                                const shiftedIndex = i + SHIFT_STEPS;
                                                                const ref = tempData[shiftedIndex] || {};
