@@ -1665,7 +1665,7 @@
                                                                  return { date: curr.date, rate: null };
                                                                }
                                                                let dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
-                                                               let dlon = (((arr[i+1].lon - arr[i-1].lon) / 60 + 180) % 360) - 180;
+                                                               let dlon = (arr[i+1].lon - arr[i-1].lon) / 60;
                                                                dlat *= COS_LAT;
                                                                dlon *= COS_LAT;
                                                                return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
