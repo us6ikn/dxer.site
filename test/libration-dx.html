@@ -1668,7 +1668,7 @@
                                                                let dlon = (arr[i+1].lon - arr[i-1].lon) / 60;
                                                                dlat *= COS_LAT;
                                                                dlon *= COS_LAT;
-                                                               console.log(dlat,dlon);
+                                                               console.log(date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon));
                                                                return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
                                                              });
 
