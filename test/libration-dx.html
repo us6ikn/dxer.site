@@ -1014,7 +1014,6 @@
               visibleRates.push(rate != null ? rate * 1000 : null); // Scale to ×10⁻³ °/min, or null if missing
               const omegaRadSec = rate != null ? rate * (Math.PI / 180) / 60 : 0;
               const dopplerHz = rate != null ? (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT : null;
-                                                         console.log(rate);
               dopplerSpreads.push(dopplerHz);
             } else {
               moonElevations.push(null);
@@ -1668,6 +1667,12 @@
                                                                let dlon = (arr[i+1].lon - arr[i-1].lon) / 60;
                                                                dlat *= COS_LAT;
                                                                dlon *= COS_LAT;
+                                                               // Log used datapoints and intermediate values
+                                                                 console.log(`Date: ${curr.date}`);
+                                                                 console.log(`  Previous: [${prev.date}] lat=${prev.lat}, lon=${prev.lon}`);
+                                                                 console.log(`  Current : [${curr.date}] lat=${curr.lat}, lon=${curr.lon}`);
+                                                                 console.log(`  Next    : [${next.date}] lat=${next.lat}, lon=${next.lon}`);
+                                                                 console.log(`  dlat: ${dlat.toFixed(4)}, dlon: ${dlon.toFixed(4)}, rate: ${Math.sqrt(dlat * dlat + dlon * dlon).toFixed(4)}`);
                                                                return { date: curr.date, rate: Math.sqrt(dlat*dlat + dlon*dlon) };
                                                              });
 
