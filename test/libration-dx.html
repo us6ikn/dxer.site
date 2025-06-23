@@ -456,7 +456,7 @@
                 console.error(`Error converting locator ${locator} to lat/lon: ${e.message}`);
                 return [];
             }
-            
+
             // Parse date
             const date = new Date(dateStr);
             if (isNaN(date.getTime())) {
@@ -500,6 +500,9 @@
                 }
             }
 
+            // Log results length to verify
+            console.log(`computeLibrationForDay: Generated ${results.length} entries for ${locator} on ${dateStr}`);
+
             // Compute libration rates using finite differences
             const librationRates = results.map((curr, i, arr) => {
                 if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null || curr.lat === null) {
@@ -513,7 +516,7 @@
                 // Log date, time, libration values, and rate
                 console.log({
                     date: curr.date,
-                    time: curr.date.slice(11, 16), // e.g., "12:30"
+                    time: curr.date.slice(11, 16),
                     libLat: curr.lat != null ? curr.lat.toFixed(4) : 'N/A',
                     libLon: curr.lon != null ? curr.lon.toFixed(4) : 'N/A',
                     librationRate: rate != null ? rate.toFixed(6) : 'N/A'
@@ -522,12 +525,15 @@
                 return { date: curr.date, rate };
             });
 
+            // Log librationRates length
+            console.log(`computeLibrationForDay: Generated ${librationRates.length} rates for ${locator} on ${dateStr}`);
+
             // Update global variables
             if (type === 'qth') {
-                rawData = librationRates;
+                rawData = librationRates; // Overwrite to avoid stale data
                 document.getElementById("chartWrapper").style.display = "block";
             } else {
-                dxRawData = librationRates;
+                dxRawData = librationRates; // Overwrite to avoid stale data
                 document.getElementById("dxChartWrapper").style.display = "block";
             }
 
@@ -1072,18 +1078,20 @@
             const dateInput = document.getElementById("date").value;
             const dateStr = new Date(dateInput).toISOString().slice(0, 10);
 
-            // Recompute libration data if date mismatch
+            // Clear stale data and recompute if necessary
             if (qthInput && /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(qthInput)) {
-                const rawDataDate = rawData.length ? new Date(rawData[0].date).toISOString().slice(0, 10) : null;
-                if (rawDataDate !== dateStr) {
+                const rawDataDate = rawData.length ? new Date(rawData[0]?.date).toISOString().slice(0, 10) : null;
+                if (rawDataDate !== dateStr || rawData.length !== 48) {
                     console.log(`Recomputing libration for QTH ${qthInput} on ${dateStr}`);
+                    rawData = []; // Clear stale data
                     computeLibrationForDay(qthInput.toUpperCase(), dateStr, 'qth');
                 }
             }
             if (dxInput && /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(dxInput)) {
-                const dxRawDataDate = dxRawData.length ? new Date(dxRawData[0].date).toISOString().slice(0, 10) : null;
-                if (dxRawDataDate !== dateStr) {
+                const dxRawDataDate = dxRawData.length ? new Date(dxRawData[0]?.date).toISOString().slice(0, 10) : null;
+                if (dxRawDataDate !== dateStr || dxRawData.length !== 48) {
                     console.log(`Recomputing libration for DX ${dxInput} on ${dateStr}`);
+                    dxRawData = []; // Clear stale data
                     computeLibrationForDay(dxInput.toUpperCase(), dateStr, 'dx');
                 }
             }
@@ -1098,10 +1106,13 @@
                 return entryDate === dateStr;
             });
 
-            // Log dataForDay length to detect issues
+            // Log dataForDay length and sample entries
             console.log(`dataForDay length: ${dataForDay.length}, expected: 48`);
             if (dataForDay.length !== 48) {
-                console.warn(`Data mismatch for QTH on ${dateStr}. Recompute may have failed.`);
+                console.warn(`Data mismatch for QTH on ${dateStr}. Sample rawData:`, rawData.slice(0, 5));
+            }
+            if (dataForDay.length > 0) {
+                console.log(`Sample dataForDay entries:`, dataForDay.slice(0, 5));
             }
 
             let moonElevations = [];
@@ -1363,7 +1374,7 @@
                 chart.update('none');
             }
 
-            if (!dxChart && dxInput && /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(dxInput) && dxDataForDay.length) {
+            if (!dxChart && dxInput && /^[A-Za-z]{2}\d{2}$/.test(dxInput) && dxDataForDay.length) {
                 dxChart = new Chart(document.getElementById("dxDeclinationChart"), {
                     type: 'line',
                     data: {
@@ -1475,7 +1486,7 @@
             updateMap();
             updateMoonChart();
         }
-
+                                        
         function getMoonAnnotations(dateStr, lat, lon) {
             const observer = new Astronomy.Observer(lat, lon, 0);
             const jsDate = new Date(`${dateStr}T00:00:00Z`);
