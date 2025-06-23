@@ -1761,7 +1761,7 @@
                                                                     dxInput.addEventListener("input", () => {
                                                                         const locator = dxInput.value.trim().toUpperCase();
                                                                         const dxChartLabel = document.getElementById('dxchartLabel');
-                                                                        if if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
+                                                                        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
                                                                             console.log(`Processing DX input: ${locator}`);
                                                                             dxChartLabel.innerHTML = '<span class="metric-locator">Computing...</span>';
                                                                             try {
