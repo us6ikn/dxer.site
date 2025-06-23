@@ -1298,8 +1298,7 @@
                           `<span class="metric-separator">|</span>` +
                           `<span class="metric-label metric-libration">Libr:</span> ${rate != null ? rate + '°/min' : 'N/A'}` +
                           `<span class="metric-separator">|</span>` +
-                          `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + ' Hz' : 'N/A'}`
-                        : `<span class="metric-locator">${rawData.length ? 'Processing QTH data...' : 'No QTH data'}</span>`;
+                          `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + ' Hz' : 'N/A'}`;
                 
                 chart.update('none');
             } else {
