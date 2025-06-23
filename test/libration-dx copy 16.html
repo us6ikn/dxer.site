@@ -887,10 +887,7 @@
                             distance: distanceKm,
                             declination: declination
                         });
-                        // Format label as DD-MM
-                        const day = String(dt.getUTCDate()).padStart(2, '0');
-                        const month = String(dt.getUTCMonth() + 1).padStart(2, '0');
-                        labels.push(`${day}-${month}`); // e.g., "01-06" for June 1
+                        labels.push(dateString.slice(5, 10)); // e.g., "06-01" for June 1
                     } else {
                         console.warn(`Missing data for ${dateString}: distance=${distanceKm}, declination=${declination}`);
                     }
