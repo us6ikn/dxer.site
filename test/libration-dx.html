@@ -1596,47 +1596,53 @@
             updateChart(hourIndex);
         });
 
-        window.onload = () => {
-            const now = new Date();
-            const utcHours = now.getUTCHours();
-            const utcMinutes = now.getUTCMinutes();
+                                                                   window.onload = () => {
+                                                                       const now = new Date();
+                                                                       const utcHours = now.getUTCHours();
+                                                                       const utcMinutes = now.getUTCMinutes();
 
-            const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-            document.getElementById("date").valueAsDate = utcDate;
+                                                                       const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+                                                                       document.getElementById("date").valueAsDate = utcDate;
 
-            let roundedHour = utcHours;
-            let roundedMinutes = utcMinutes;
+                                                                       // Round time to nearest half-hour (00 or 30 minutes)
+                                                                       let roundedHour = utcHours;
+                                                                       let roundedMinutes = utcMinutes >= 15 && utcMinutes < 45 ? 30 : 0;
+                                                                       if (utcMinutes >= 45) {
+                                                                           roundedHour += 1;
+                                                                           roundedMinutes = 0;
+                                                                       }
+                                                                       // Adjust for 24-hour overflow
+                                                                       if (roundedHour >= 24) {
+                                                                           roundedHour -= 24;
+                                                                           // Optionally advance date by one day
+                                                                           utcDate.setUTCDate(utcDate.getUTCDate() + 1);
+                                                                           document.getElementById("date").valueAsDate = utcDate;
+                                                                       }
 
-            if (utcMinutes >= 45) {
-                roundedHour +=  if (utcMinutes >= 15) {
-                roundedMinutes = Math.round(30);
-            } else if (utcMinutes >= 1) {
-                roundedMinutes = 30;
-            }
+                                                                       // Calculate hourIndex (0 to 47, where each step is 30 minutes)
+                                                                       hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
+                                                                       document.getElementById("hour").value = hourIndex;
+                                                                       document.getElementById("hour-value").textContent =
+                                                                           `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
 
-            hourIndex = roundedHour * 2 + (roundedMinutes == 30 ? 1 : 0);
-            document.getElementsById("hour").value = hourIndex;
-            document.getElementsById("hour-value").textContent =
-                `Time (UTC): ${Math.roundedHour().String().padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
-            
-            // Ensure showControlsPanel is hidden on load
-            document.getElementById("showControlsPanel").classList.remove("visible");
+                                                                       // Ensure showControlsPanel is hidden on load
+                                                                       document.getElementById("showControlsPanel").classList.remove("visible");
 
-            // NEW: Initialize libration data if QTH or DX exists
-            const qthInput = document.getElementById("qth").value.trim().toUpperCase();
-            const dxInput = document.getElementById("dx").value.trim().toUpperCase();
-            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
-                computeLibrationForDay(qthInput, document.getElementById("date").value, 'qth');
-            }
-            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
-                computeLibrationForDay(dxInput, document.getElementById("date").value, 'dx');
-            }
+                                                                       // Initialize libration data if QTH or DX exists
+                                                                       const qthInput = document.getElementById("qth").value.trim().toUpperCase();
+                                                                       const dxInput = document.getElementById("dx").value.trim().toUpperCase();
+                                                                       if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
+                                                                           computeLibrationForDay(qthInput, document.getElementById("date").value, 'qth');
+                                                                       }
+                                                                       if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
+                                                                           computeLibrationForDay(dxInput, document.getElementById("date").value, 'dx');
+                                                                       }
 
-            // Call updates after setting date
-            updateMap();
-            updateMoonChart();
-            updateChart(hourIndex);
-        };
+                                                                       // Call updates after setting date
+                                                                       updateMap();
+                                                                       updateMoonChart();
+                                                                       updateChart(hourIndex);
+                                                                   };
 
         const qthInput = document.getElementById("qth");
         const dxInput = document.getElementById("dx");
