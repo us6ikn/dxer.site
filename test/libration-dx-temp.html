@@ -1112,7 +1112,7 @@
                         console.warn(`Invalid index ${index} for date ${r.date} in rawData[${idx}]`);
                     }
                 });
-                console.log(`dataForDay valid entries: ${dataForDay.filter(r => r != null).length}, hourIndex[${hourIndex}]:`, dataForDay[hourIndex]);
+                console.log(`dataForDay valid entries: ${dataForDay.filter(r => r != null).length}, sample:`, dataForDay.slice(hourIndex, hourIndex + 3));
             }
 
             let moonElevations = [];
@@ -1289,18 +1289,18 @@
                 const doppler = dopplerSpreads[hourIndex];
                 const azimuth = moonAzimuths[hourIndex];
                 document.getElementById('chartLabel').innerHTML =
-                    qthInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput) && rawData.length > 0
+                    dataForDay[hourIndex] && elev != null
                         ? `<span class="metric-locator">${qthInput}</span>` +
                           `<span class="metric-separator"> - </span>` +
-                          `<span class="metric-label metric-elevation">El:</span> ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}` +
+                          `<span class="metric-label metric-elevation">El:</span> ${elev.toFixed(1)}°` +
                           `<span class="metric-separator">|</span>` +
                           `<span class="metric-label metric-azimuth">Az:</span> ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}` +
                           `<span class="metric-separator">|</span>` +
                           `<span class="metric-label metric-libration">Libr:</span> ${rate != null ? rate + '°/min' : 'N/A'}` +
                           `<span class="metric-separator">|</span>` +
                           `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + ' Hz' : 'N/A'}`
-                        : `<span class="metric-locator">${rawData.length ? 'Computing QTH data...' : 'Enter valid QTH'}</span>`;
-
+                        : `<span class="metric-locator">${rawData.length ? 'Processing QTH data...' : 'No QTH data'}</span>`;
+                
                 chart.update('none');
             } else {
                 document.getElementById("chartWrapper").style.display = "none";
@@ -1718,49 +1718,45 @@
         const qthInput = document.getElementById("qth");
         const dxInput = document.getElementById("dx");
 
-                                                                    qthInput.addEventListener("input", () => {
-                                                                        const locator = qthInput.value.trim().toUpperCase();
-                                                                        const chartLabel = document.getElementById('chartLabel');
-                                                                        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-                                                                            console.log(`Processing QTH input: ${locator}`);
-                                                                            chartLabel.innerHTML = '<span class="metric-locator">Computing...</span>';
-                                                                            try {
-                                                                                computeLibrationForDay(locator, document.getElementById("date").value, 'qth');
-                                                                                if (rawData.length === 0) {
-                                                                                    console.warn(`No data computed for QTH ${locator}`);
-                                                                                    document.getElementById("chartWrapper").style.display = "none";
-                                                                                    if (chart) {
-                                                                                        chart.destroy();
-                                                                                        chart = null;
-                                                                                    }
-                                                                                    chartLabel.innerHTML = '<span class="metric-locator">No data for QTH</span>';
-                                                                                } else {
-                                                                                    console.log(`QTH rawData length: ${rawData.length}, sample:`, rawData.slice(0, 3));
-                                                                                    // Force updateChart to run after a microtask to ensure rawData is processed
-                                                                                    setTimeout(() => {
-                                                                                        updateChart(hourIndex);
-                                                                                        console.log(`Post-update rawData length: ${rawData.length}, dataForDay[${hourIndex}]:`, dataForDay[hourIndex]);
-                                                                                    }, 0);
-                                                                                }
-                                                                            } catch (e) {
-                                                                                console.error(`Error computing libration for QTH ${locator}: ${e.message}`);
-                                                                                document.getElementById("chartWrapper").style.display = "none";
-                                                                                if (chart) {
-                                                                                    chart.destroy();
-                                                                                    chart = null;
-                                                                                }
-                                                                                chartLabel.innerHTML = '<span class="metric-locator">Error computing QTH data</span>';
-                                                                            }
-                                                                        } else {
-                                                                            console.log(`Invalid QTH locator: ${locator}`);
-                                                                            document.getElementById("chartWrapper").style.display = "none";
-                                                                            if (chart) {
-                                                                                chart.destroy();
-                                                                                chart = null;
-                                                                            }
-                                                                            chartLabel.innerHTML = '<span class="metric-locator">Enter valid QTH</span>';
-                                                                        }
-                                                                    });
+                                        qthInput.addEventListener("input", () => {
+                                            const locator = qthInput.value.trim().toUpperCase();
+                                            const chartLabel = document.getElementById('chartLabel');
+                                            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
+                                                console.log(`Processing QTH input: ${locator}`);
+                                                chartLabel.innerHTML = '<span class="metric-locator">Computing...</span>';
+                                                try {
+                                                    computeLibrationForDay(locator, document.getElementById("date").value, 'qth');
+                                                    if (rawData.length === 0) {
+                                                        console.warn(`No data computed for QTH ${locator}`);
+                                                        document.getElementById("chartWrapper").style.display = "none";
+                                                        if (chart) {
+                                                            chart.destroy();
+                                                            chart = null;
+                                                        }
+                                                        chartLabel.innerHTML = '<span class="metric-locator">No data for QTH</span>';
+                                                    } else {
+                                                        console.log(`QTH rawData length: ${rawData.length}, sample:`, rawData.slice(0, 3));
+                                                        updateChart(hourIndex); // Direct call since computeLibrationForDay is synchronous
+                                                    }
+                                                } catch (e) {
+                                                    console.error(`Error computing libration for QTH ${locator}: ${e.message}`);
+                                                    document.getElementById("chartWrapper").style.display = "none";
+                                                    if (chart) {
+                                                        chart.destroy();
+                                                        chart = null;
+                                                    }
+                                                    chartLabel.innerHTML = '<span class="metric-locator">Error computing QTH data</span>';
+                                                }
+                                            } else {
+                                                console.log(`Invalid QTH locator: ${locator}`);
+                                                document.getElementById("chartWrapper").style.display = "none";
+                                                if (chart) {
+                                                    chart.destroy();
+                                                    chart = null;
+                                                }
+                                                chartLabel.innerHTML = '<span class="metric-locator">Enter valid QTH</span>';
+                                            }
+                                        });
 
                                                                     dxInput.addEventListener("input", () => {
                                                                         const locator = dxInput.value.trim().toUpperCase();
