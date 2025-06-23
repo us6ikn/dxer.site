@@ -1090,127 +1090,334 @@
             console.log(`updateChart called with hourIndex: ${hourIndex}, UTC time: ${Math.floor(hourIndex / 2)}:${hourIndex % 2 === 0 ? '00' : '30'}`);
 
             // Clear stale data and recompute if necessary
-            // Inside updateChart function, replace the QTH chart initialization and update block
-            if (qthInput && /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(qthInput) && dataForDay.some(r => r != null)) {
-                console.log(`Initializing/updating chart for QTH ${qthInput}`);
-                if (!chart) {
-                    chart = new Chart(document.getElementById("declinationChart"), {
-                        type: 'line',
-                        data: {
-                            labels,
-                            datasets: [
-                                {
-                                    label: "Libration Rate (×10⁻³ °/min)",
-                                    data: visibleRates,
-                                    borderColor: "#ff0000",
-                                    pointRadius: 0,
-                                    borderWidth: 1.5,
-                                    tension: 0.2,
-                                    yAxisID: "y1"
-                                },
-                                {
-                                    label: "Moon Elevation (°)",
-                                    data: moonElevations,
-                                    borderColor: "rgba(0, 0, 255, 0.6)",
-                                    backgroundColor: "rgba(0, 0, 255, 0.15)",
-                                    fill: { target: { value: 0 }, above: 'rgba(0, 0, 255, 0.15)' },
-                                    pointRadius: 0,
-                                    borderWidth: 1,
-                                    tension: 0.3,
-                                    yAxisID: "y2"
-                                },
-                                {
-                                    label: "Doppler Spread, Hz",
-                                    data: dopplerSpreads,
-                                    borderColor: "green",
-                                    pointRadius: 0,
-                                    borderWidth: 1.5,
-                                    tension: 0.2,
-                                    yAxisID: "y3"
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            scales: {
-                                x: {
-                                    title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
-                                    ticks: { font: { size: 10 } }
-                                },
-                                y1: {
-                                    type: "linear",
-                                    display: true,
-                                    position: "right",
-                                    title: { display: true, text: "Libration Rate (×10⁻³ °/min)", color: "#ff0000", font: { size: 10, family: 'Arial, sans-serif' } },
-                                    min: 0,
-                                    max: 5,
-                                    ticks: { stepSize: 1, color: "#ff0000", font: { size: 12 } },
-                                    grid: { drawTicks: true, drawBorder: true }
-                                },
-                                y2: {
-                                    position: "left",
-                                    display: true,
-                                    min: 0,
-                                    max: 90,
-                                    title: { display: true, text: "Moon Elevation (°)", color: "rgba(0, 0, 255, 0.6)", font: { size: 12, family: 'Arial, sans-serif' } },
-                                    grid: { drawOnChartArea: false },
-                                    ticks: { stepSize: 15, callback: val => val + "°", color: "rgba(0, 0, 255, 0.6)", font: { size: 12 } }
-                                },
-                                y3: {
-                                    type: "linear",
-                                    display: true,
-                                    position: "right",
-                                    offset: true,
-                                    title: { display: true, text: "Doppler Spread (Hz)", color: "green", font: { size: 12, family: 'Arial, sans-serif' } },
-                                    min: 0,
-                                    max: 300,
-                                    grid: { drawOnChartArea: false },
-                                    ticks: { stepSize: 50, color: "green", font: { size: 12 } }
-                                }
-                            },
-                            plugins: {
-                                legend: { display: false },
-                                annotation: { annotations: qthAnnotation }
-                            }
-                        }
-                    });
-                } else {
-                    chart.data.labels = labels;
-                    chart.data.datasets[0].data = visibleRates;
-                    chart.data.datasets[1].data = moonElevations;
-                    chart.data.datasets[2].data = dopplerSpreads;
-                    chart.options.plugins.annotation.annotations = qthAnnotation;
-                    chart.options.plugins.annotation.annotations.timeMarker.value = hourIndex;
+            if (qthInput && /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(qthInput)) {
+                const rawDataDate = rawData.length ? rawData[0]?.date.slice(0, 10) : null;
+                if (rawDataDate !== dateStr || rawData.length !== 48) {
+                    console.log(`Recomputing libration for QTH ${qthInput} on ${dateStr}`);
+                    rawData = [];
+                    computeLibrationForDay(qthInput.toUpperCase(), dateStr, 'qth');
                 }
-                
-                // Update chart label only if data is available
+            }
+            if (dxInput && /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(dxInput)) {
+                const dxRawDataDate = dxRawData.length ? dxRawData[0]?.date.slice(0, 10) : null;
+                if (dxRawDataDate !== dateStr || dxRawData.length !== 48) {
+                    console.log(`Recomputing libration for DX ${dxInput} on ${dateStr}`);
+                    dxRawData = [];
+                    computeLibrationForDay(dxInput.toUpperCase(), dateStr, 'dx');
+                }
+            }
+
+            // Ensure dataForDay has 48 entries, aligned by UTC time
+            const dataForDay = Array(48).fill(null);
+            rawData.forEach((r, idx) => {
+                const timeMatch = r.date.match(/T(\d{2}):(\d{2})/);
+                if (!timeMatch) {
+                    console.warn(`Invalid date format in rawData[${idx}]: ${r.date}`);
+                    return;
+                }
+                const hour = parseInt(timeMatch[1], 10);
+                const minute = parseInt(timeMatch[2], 10);
+                const index = hour * 2 + (minute === 30 ? 1 : 0);
+                if (index >= 0 && index < 48) {
+                    dataForDay[index] = r;
+                } else {
+                    console.warn(`Invalid index ${index} for date ${r.date} in rawData[${idx}]`);
+                }
+            });
+
+            // Log dataForDay length and check for null entries
+            const validDataCount = dataForDay.filter(r => r != null).length;
+            console.log(`dataForDay length: ${validDataCount}, expected: 48`);
+            if (validDataCount !== 48) {
+                console.warn(`Data mismatch for QTH on ${dateStr}. Missing entries at indices:`,
+                    dataForDay.map((r, i) => r == null ? i : null).filter(i => i != null));
+                console.log(`Sample rawData:`, rawData.slice(0, 5));
+                console.log(`Sample dataForDay:`, dataForDay.slice(0, 5));
+            }
+
+            // Verify dataForDay[hourIndex]
+            console.log(`dataForDay[${hourIndex}]:`, dataForDay[hourIndex]);
+
+            let moonElevations = [];
+            let moonAzimuths = [];
+            let visibleRates = [];
+            let dopplerSpreads = [];
+
+            if (/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(qthInput)) {
+                ({ lat, lon } = qthToLatLon(qthInput));
+                for (let i = 0; i < 48; i++) {
+                    const hour = Math.floor(i / 2);
+                    const minutes = (i % 2) * 30;
+                    const dt = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}:00Z`);
+                    const observer = new Astronomy.Observer(lat, lon, 0);
+                    const moonEq = Astronomy.Equator(Astronomy.Body.Moon, dt, observer, true, false);
+                    const hor = Astronomy.Horizon(dt, observer, moonEq.ra, moonEq.dec, 'normal');
+                    const elevationDeg = hor.altitude;
+                    const azimuthDeg = hor.azimuth;
+
+                    if (elevationDeg > 0) {
+                        moonElevations.push(elevationDeg);
+                        moonAzimuths.push(azimuthDeg);
+                        const rate = dataForDay[i]?.rate ?? null;
+                        visibleRates.push(rate != null ? rate * 1000 : null); // Scale to ×10⁻³ °/min
+                        const omegaRadSec = rate != null ? rate * (Math.PI / 180) / 60 : 0;
+                        const dopplerHz = rate != null ? (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT : null;
+                        dopplerSpreads.push(dopplerHz);
+
+                        if (i === hourIndex) {
+                            console.log(`QTH ${qthInput} at ${dt.toISOString()}:`, {
+                                elevation: elevationDeg?.toFixed(1),
+                                azimuth: azimuthDeg?.toFixed(1),
+                                librationRate: rate != null ? rate.toFixed(6) : 'N/A',
+                                visibleRate: visibleRates[i] != null ? (visibleRates[i] / 1000).toFixed(6) : 'N/A',
+                                dopplerSpread: dopplerHz != null ? dopplerHz.toFixed(1) : 'N/A',
+                                dataForDayEntry: dataForDay[i]
+                            });
+                        }
+                    } else {
+                        moonElevations.push(null);
+                        moonAzimuths.push(null);
+                        visibleRates.push(null);
+                        dopplerSpreads.push(null);
+                    }
+                }
+                document.getElementById("chartWrapper").style.display = "block";
+            } else {
+                moonElevations = Array(48).fill(null);
+                moonAzimuths = Array(48).fill(null);
+                visibleRates = Array(48).fill(null);
+                dopplerSpreads = Array(48).fill(null);
+                document.getElementById("chartWrapper").style.display = "none";
+            }
+
+            let dxMoonElevations = [];
+            let dxMoonAzimuths = [];
+            let dxVisibleRates = [];
+            let dxDopplerSpreads = [];
+            let dxDataForDay = Array(48).fill(null); // Initialize outside if block
+
+            if (/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(dxInput)) {
+                ({ lat: dxLat, lon: dxLon } = qthToLatLon(dxInput));
+                dxRawData.forEach((r, idx) => {
+                    const timeMatch = r.date.match(/T(\d{2}):(\d{2})/);
+                    if (!timeMatch) {
+                        console.warn(`Invalid date format in dxRawData[${idx}]: ${r.date}`);
+                        return;
+                    }
+                    const hour = parseInt(timeMatch[1], 10);
+                    const minute = parseInt(timeMatch[2], 10);
+                    const index = hour * 2 + (minute === 30 ? 1 : 0);
+                    if (index >= 0 && index < 48) {
+                        dxDataForDay[index] = r;
+                    } else {
+                        console.warn(`Invalid DX index ${index} for date ${r.date} in dxRawData[${idx}]`);
+                    }
+                });
+
+                for (let i = 0; i < 48; i++) {
+                    const hour = Math.floor(i / 2);
+                    const minutes = (i % 2) * 30;
+                    const dt = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}:00Z`);
+                    const observer = new Astronomy.Observer(dxLat, dxLon, 0);
+                    const moonEq = Astronomy.Equator(Astronomy.Body.Moon, dt, observer, true, false);
+                    const hor = Astronomy.Horizon(dt, observer, moonEq.ra, moonEq.dec, 'normal');
+                    const elevationDeg = hor.altitude;
+                    const azimuthDeg = hor.azimuth;
+
+                    if (elevationDeg > 0) {
+                        dxMoonElevations.push(elevationDeg);
+                        dxMoonAzimuths.push(azimuthDeg);
+                        const rate = dxDataForDay[i]?.rate ?? null;
+                        dxVisibleRates.push(rate != null ? rate * 1000 : null); // Scale to ×10⁻³ °/min
+                        const omegaRadSec = rate != null ? rate * (Math.PI / 180) / 60 : 0;
+                        const dopplerHz = rate != null ? (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT : null;
+                        dxDopplerSpreads.push(dopplerHz);
+
+                        if (i === hourIndex) {
+                            console.log(`DX ${dxInput} at ${dt.toISOString()}:`, {
+                                elevation: elevationDeg?.toFixed(1),
+                                azimuth: azimuthDeg?.toFixed(1),
+                                librationRate: rate != null ? rate.toFixed(6) : 'N/A',
+                                visibleRate: dxVisibleRates[i] != null ? (dxVisibleRates[i] / 1000).toFixed(6) : 'N/A',
+                                dopplerSpread: dopplerHz != null ? dopplerHz.toFixed(1) : 'N/A',
+                                dxDataForDayEntry: dxDataForDay[i]
+                            });
+                        }
+                    } else {
+                        dxMoonElevations.push(null);
+                        dxMoonAzimuths.push(null);
+                        dxVisibleRates.push(null);
+                        dxDopplerSpreads.push(null);
+                    }
+                }
+                document.getElementById("dxChartWrapper").style.display = "block";
+            } else {
+                document.getElementById("dxChartWrapper").style.display = "none";
+                if (dxChart) {
+                    dxChart.destroy();
+                    dxChart = null;
+                }
+                document.getElementById('dxchartLabel').innerHTML = '<span class="metric-locator">Enter valid DX</span>';
+            }
+
+            // Log dxDataForDay for debugging
+            console.log(`dxDataForDay length: ${dxDataForDay.filter(r => r != null).length}, expected: 48`);
+            console.log(`dxDataForDay[${hourIndex}]:`, dxDataForDay[hourIndex]);
+            console.log(`Sample dxRawData:`, dxRawData.slice(0, 5));
+
+            const labels = Array(48).fill('').map((_, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
+
+            const qthAnnotation = {
+                timeMarker: {
+                    type: 'line',
+                    mode: 'vertical',
+                    scaleID: 'x',
+                    value: hourIndex,
+                    borderColor: 'black',
+                    borderWidth: 2,
+                    label: { enabled: false }
+                }
+            };
+
+            if (qthInput && /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(qthInput)) {
+                try {
+                    const { lat, lon } = qthToLatLon(qthInput);
+                    const moonAnnotations = getMoonAnnotations(dateStr, lat, lon);
+                    Object.assign(qthAnnotation, moonAnnotations);
+                } catch (e) {
+                    console.warn(`Error getting moon annotations for QTH: ${e.message}`);
+                }
+            }
+
+            const dxAnnotation = {
+                timeMarker: {
+                    type: 'line',
+                    mode: 'vertical',
+                    scaleID: 'x',
+                    value: hourIndex,
+                    borderColor: 'black',
+                    borderWidth: 2,
+                    label: { enabled: false }
+                }
+            };
+
+            if (dxInput && /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(dxInput)) {
+                try {
+                    const { lat, lon } = qthToLatLon(dxInput);
+                    const moonAnnotations = getMoonAnnotations(dateStr, lat, lon);
+                    Object.assign(dxAnnotation, moonAnnotations);
+                } catch (e) {
+                    console.warn(`Error getting moon annotations for DX: ${e.message}`);
+                }
+            }
+
+            if (!chart && qthInput && /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(qthInput)) {
+                chart = new Chart(document.getElementById("declinationChart"), {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [
+                            {
+                                label: "Libration Rate (×10⁻³ °/min)",
+                                data: visibleRates,
+                                borderColor: "#ff0000",
+                                pointRadius: 0,
+                                borderWidth: 1.5,
+                                tension: 0.2,
+                                yAxisID: "y1"
+                            },
+                            {
+                                label: "Moon Elevation (°)",
+                                data: moonElevations,
+                                borderColor: "rgba(0, 0, 255, 0.6)",
+                                backgroundColor: "rgba(0, 0, 255, 0.15)",
+                                fill: { target: { value: 0 }, above: 'rgba(0, 0, 255, 0.15)' },
+                                pointRadius: 0,
+                                borderWidth: 1,
+                                tension: 0.3,
+                                yAxisID: "y2"
+                            },
+                            {
+                                label: "Doppler Spread, Hz",
+                                data: dopplerSpreads,
+                                borderColor: "green",
+                                pointRadius: 0,
+                                borderWidth: 1.5,
+                                tension: 0.2,
+                                yAxisID: "y3"
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
+                                ticks: { font: { size: 10 } }
+                            },
+                            y1: {
+                                type: "linear",
+                                display: true,
+                                position: "right",
+                                title: { display: true, text: "Libration Rate (×10⁻³ °/min)", color: "#ff0000", font: { size: 10, family: 'Arial, sans-serif' } },
+                                min: 0,
+                                max: 5,
+                                ticks: { stepSize: 1, color: "#ff0000", font: { size: 12 } },
+                                grid: { drawTicks: true, drawBorder: true }
+                            },
+                            y2: {
+                                position: "left",
+                                display: true,
+                                min: 0,
+                                max: 90,
+                                title: { display: true, text: "Moon Elevation (°)", color: "rgba(0, 0, 255, 0.6)", font: { size: 12, family: 'Arial, sans-serif' } },
+                                grid: { drawOnChartArea: false },
+                                ticks: { stepSize: 15, callback: val => val + "°", color: "rgba(0, 0, 255, 0.6)", font: { size: 12 } }
+                            },
+                            y3: {
+                                type: "linear",
+                                display: true,
+                                position: "right",
+                                offset: true,
+                                title: { display: true, text: "Doppler Spread (Hz)", color: "green", font: { size: 12, family: 'Arial, sans-serif' } },
+                                min: 0,
+                                max: 300,
+                                grid: { drawOnChartArea: false },
+                                ticks: { stepSize: 50, color: "green", font: { size: 12 } }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            annotation: { annotations: qthAnnotation }
+                        }
+                    }
+                });
+            } else if (chart) {
+                chart.data.labels = labels;
+                chart.data.datasets[0].data = visibleRates;
+                chart.data.datasets[1].data = moonElevations;
+                chart.data.datasets[2].data = dopplerSpreads;
                 const elev = moonElevations[hourIndex];
                 const rate = visibleRates[hourIndex] != null ? (visibleRates[hourIndex] / 1000).toFixed(4) : null;
                 const doppler = dopplerSpreads[hourIndex];
                 const azimuth = moonAzimuths[hourIndex];
                 const labelText =
-                    dataForDay[hourIndex]
-                        ? `<span class="metric-locator">${qthInput.toUpperCase()}</span>` +
-                          `<span class="metric-separator"> - </span>` +
-                          `<span class="metric-label metric-elevation">El:</span> ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}` +
-                          `<span class="metric-separator">|</span>` +
-                          `<span class="metric-label metric-azimuth">Az:</span> ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}` +
-                          `<span class="metric-separator">|</span>` +
-                          `<span class="metric-label metric-libration">Libr:</span> ${rate != null ? rate + '°/min' : 'N/A'}` +
-                          `<span class="metric-separator">|</span>` +
-                          `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + ' Hz' : 'N/A'}`
-                        : '<span class="metric-locator">Processing QTH data...</span>';
-                document.getElementById('chartLabel').innerHTML = labelText;
-                
-                chart.update('none');
-            } else {
-                document.getElementById("chartWrapper").style.display = "none";
-                if (chart) {
-                    chart.destroy();
-                    chart = null;
+                    `<span class="metric-locator">${qthInput.toUpperCase()}</span>` +
+                    `<span class="metric-separator"> - </span>` +
+                    `<span class="metric-label metric-elevation">El:</span> ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}` +
+                    `<span class="metric-separator">|</span>` +
+                    `<span class="metric-label metric-azimuth">Az:</span> ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}` +
+                    `<span class="metric-separator">|</span>` +
+                    `<span class="metric-label metric-libration">Libr:</span> ${rate != null ? rate + '°/min' : 'N/A'}` +
+                    `<span class="metric-separator">|</span>` +
+                    `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + ' Hz' : 'N/A'}`;
+                document.getElementById('chartLabel').innerHTML = qthInput ? labelText : '<span class="metric-locator">Enter valid QTH</span>';
+                if (qthAnnotation.timeMarker.label) {
+                    qthAnnotation.timeMarker.label.enabled = false;
                 }
-                document.getElementById('chartLabel').innerHTML = '<span class="metric-locator">Enter valid QTH</span>';
+                chart.options.plugins.annotation.annotations = qthAnnotation;
+                chart.update('none');
             }
 
             if (!dxChart && dxInput && /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(dxInput) && dxDataForDay.some(r => r != null)) {
@@ -1507,44 +1714,21 @@
         const qthInput = document.getElementById("qth");
         const dxInput = document.getElementById("dx");
 
-                                        qthInput.addEventListener("input", () => {
-                                            const locator = qthInput.value.trim().toUpperCase();
-                                            const chartLabel = document.getElementById('chartLabel');
-                                            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-                                                chartLabel.innerHTML = '<span class="metric-locator">Computing...</span>'; // Indicate processing
-                                                try {
-                                                    computeLibrationForDay(locator, document.getElementById("date").value, 'qth');
-                                                    if (rawData.length === 0) {
-                                                        console.warn(`No data computed for QTH ${locator}`);
-                                                        document.getElementById("chartWrapper").style.display = "none";
-                                                        if (chart) {
-                                                            chart.destroy();
-                                                            chart = null;
-                                                        }
-                                                        chartLabel.innerHTML = '<span class="metric-locator">No data for QTH</span>';
-                                                    } else {
-                                                        // Ensure chart updates after data is ready
-                                                        setTimeout(() => updateChart(hourIndex), 0); // Queue update to next event loop
-                                                    }
-                                                } catch (e) {
-                                                    console.error(`Error computing libration for QTH ${locator}: ${e.message}`);
-                                                    document.getElementById("chartWrapper").style.display = "none";
-                                                    if (chart) {
-                                                        chart.destroy();
-                                                        chart = null;
-                                                    }
-                                                    chartLabel.innerHTML = '<span class="metric-locator">Error computing QTH data</span>';
-                                                }
-                                            } else {
-                                                console.log(`Invalid QTH locator: ${locator}`);
-                                                document.getElementById("chartWrapper").style.display = "none";
-                                                if (chart) {
-                                                    chart.destroy();
-                                                    chart = null;
-                                                }
-                                                chartLabel.innerHTML = '<span class="metric-locator">Enter valid QTH</span>';
-                                            }
-                                        });
+        qthInput.addEventListener("input", () => {
+            const locator = qthInput.value.trim().toUpperCase();
+            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
+                // NEW: Compute libration for QTH
+                computeLibrationForDay(locator, document.getElementById("date").value, 'qth');
+                updateChart(hourIndex);
+            } else {
+                document.getElementById("chartWrapper").style.display = "none";
+                if (chart) {
+                    chart.destroy();
+                    chart = null;
+                }
+                document.getElementById('chartLabel').innerHTML = '<span class="metric-locator">Enter valid QTH</span>';
+            }
+        });
 
                                         dxInput.addEventListener("input", () => {
                                             const locator = dxInput.value.trim().toUpperCase();
