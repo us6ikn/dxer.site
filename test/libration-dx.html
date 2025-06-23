@@ -887,10 +887,7 @@
                             distance: distanceKm,
                             declination: declination
                         });
-                        // Format label as DD-MM
-                        const day = String(dt.getUTCDate()).padStart(2, '0');
-                        const month = String(dt.getUTCMonth() + 1).padStart(2, '0');
-                        labels.push(`${day}-${month}`); // e.g., "01-06" for June 1
+                        labels.push(dateString.slice(5, 10)); // e.g., "06-01" for June 1
                     } else {
                         console.warn(`Missing data for ${dateString}: distance=${distanceKm}, declination=${declination}`);
                     }
@@ -992,7 +989,7 @@
                             x: {
                                 title: {
                                     display: true,
-                                    text: "Date (DD-MM)",
+                                    text: "Date (MM-DD)",
                                     font: { size: 10, family: 'Arial, sans-serif' }
                                 },
                                 ticks: { font: { size: 10 } }
@@ -1115,7 +1112,7 @@
                         console.warn(`Invalid index ${index} for date ${r.date} in rawData[${idx}]`);
                     }
                 });
-                console.log(`dataForDay valid entries: ${dataForDay.filter(r => r != null).length}, hourIndex[${hourIndex}]:`, dataForDay[hourIndex]);
+                console.log(`dataForDay valid entries: ${dataForDay.filter(r => r != null).length}, sample:`, dataForDay.slice(hourIndex, hourIndex + 3));
             }
 
             let moonElevations = [];
@@ -1547,109 +1544,91 @@
             updateMoonChart();
         }
                                         
-                                                                    function getMoonAnnotations(dateStr, lat, lon) {
-                                                                        const observer = new Astronomy.Observer(lat, lon, 0);
-                                                                        const jsDate = new Date(`${dateStr}T00:00:00Z`);
-                                                                        const astroTime = Astronomy.MakeTime(jsDate);
+        function getMoonAnnotations(dateStr, lat, lon) {
+            const observer = new Astronomy.Observer(lat, lon, 0);
+            const jsDate = new Date(`${dateStr}T00:00:00Z`);
+            const astroTime = Astronomy.MakeTime(jsDate);
 
-                                                                        let riseEvent = null, setEvent = null;
-                                                                        try {
-                                                                            riseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, astroTime, 1.0);
-                                                                        } catch (e) {
-                                                                            console.warn(`Error calculating moonrise for ${dateStr}: ${e.message}`);
-                                                                        }
+            let riseEvent = null, setEvent = null;
+            try {
+                riseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, astroTime, 1.0);
+            } catch (e) {
+                // Handle error silently
+            }
 
-                                                                        try {
-                                                                            setEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, astroTime, 1.0);
-                                                                        } catch (e) {
-                                                                            console.warn(`Error calculating moonset for ${dateStr}: ${e.message}`);
-                                                                        }
+            try {
+                setEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, astroTime, 1.0);
+            } catch (e) {
+                // Handle error silently
+            }
 
-                                                                        const annotations = {};
+            const annotations = {};
 
-                                                                        function formatTimeUTC(date) {
-                                                                            return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}z`;
-                                                                        }
+            function formatTimeUTC(date) {
+                return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}z`;
+            }
 
-                                                                        // Check if date is same as dateStr to avoid annotating events from the next day
-                                                                        const targetDateStr = dateStr.slice(0, 10);
+            if (riseEvent && riseEvent.date) {
+                const riseDate = riseEvent.date;
+                const index = timeToChartIndex(riseDate);
+                annotations['moonrise'] = {
+                    type: 'line',
+                    mode: 'vertical',
+                    scaleID: 'x',
+                    value: index,
+                    borderColor: 'blue',
+                    borderWidth: 1,
+                    label: {
+                        content: ['Rise', formatTimeUTC(riseDate)],
+                        enabled: true,
+                        position: 'top',
+                        yAdjust: -40,
+                        font: { size: 11, weight: 'bold', family: 'Arial, sans-serif' },
+                        color: 'white',
+                        backgroundColor: 'rgba(0, 0, 255, 0.85)',
+                        padding: 2,
+                        cornerRadius: 6,
+                        boxShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+                        textAlign: 'center',
+                        borderColor: 'rgba(255, 255, 255, 0.7)',
+                        borderWidth: 1
+                    }
+                };
+            }
 
-                                                                        if (riseEvent && riseEvent.date) {
-                                                                            const riseDate = riseEvent.date;
-                                                                            const riseDateStr = riseDate.toISOString().slice(0, 10);
-                                                                            if (riseDateStr === targetDateStr) {
-                                                                                let index = timeToChartIndex(riseDate);
-                                                                                const isLate = riseDate.getUTCHours() >= 23 && riseDate.getUTCMinutes() >= 30;
-                                                                                annotations['moonrise'] = {
-                                                                                    type: 'line',
-                                                                                    mode: 'vertical',
-                                                                                    scaleID: 'x',
-                                                                                    value: isLate ? 47 : index, // Use 47 for times >= 23:30
-                                                                                    borderColor: 'blue',
-                                                                                    borderWidth: 1,
-                                                                                    label: {
-                                                                                        content: ['Rise', formatTimeUTC(riseDate)],
-                                                                                        enabled: true,
-                                                                                        position: 'top',
-                                                                                        yAdjust: isLate ? -50 : -40, // Adjust y-position for late times to avoid overlap
-                                                                                        font: { size: 11, weight: 'bold', family: 'Arial, sans-serif' },
-                                                                                        color: 'white',
-                                                                                        backgroundColor: 'rgba(0, 0, 255, 0.85)',
-                                                                                        padding: 2,
-                                                                                        cornerRadius: 6,
-                                                                                        boxShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-                                                                                        textAlign: 'center',
-                                                                                        borderColor: 'rgba(255, 255, 255, 0.7)',
-                                                                                        borderWidth: 1
-                                                                                    }
-                                                                                };
-                                                                            }
-                                                                        }
+            if (setEvent && setEvent.date) {
+                const setDate = setEvent.date;
+                const index = timeToChartIndex(setDate);
+                annotations['moonset'] = {
+                    type: 'line',
+                    mode: 'vertical',
+                    scaleID: 'x',
+                    value: index,
+                    borderColor: 'orange',
+                    borderWidth: 1,
+                    label: {
+                        content: ['Set', formatTimeUTC(setDate)],
+                        enabled: true,
+                        position: 'top',
+                        font: { size: 11, weight: 'bold', family: 'Arial, sans-serif' },
+                        color: 'white',
+                        backgroundColor: 'rgba(255, 165, 0, 0.85)',
+                        padding: 2,
+                        cornerRadius: 6,
+                        boxShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+                        textAlign: 'center',
+                        borderColor: 'rgba(255, 255, 255, 0.7)',
+                        borderWidth: 1
+                    }
+                };
+            }
+            return annotations;
+        }
 
-                                                                        if (setEvent && setEvent.date) {
-                                                                            const setDate = setEvent.date;
-                                                                            const setDateStr = setDate.toISOString().slice(0, 10);
-                                                                            if (setDateStr === targetDateStr) {
-                                                                                let index = timeToChartIndex(setDate);
-                                                                                const isLate = setDate.getUTCHours() >= 23 && setDate.getUTCMinutes() >= 30;
-                                                                                annotations['moonset'] = {
-                                                                                    type: 'line',
-                                                                                    mode: 'vertical',
-                                                                                    scaleID: 'x',
-                                                                                    value: isLate ? 47 : index, // Use 47 for times >= 23:30
-                                                                                    borderColor: 'orange',
-                                                                                    borderWidth: 1,
-                                                                                    label: {
-                                                                                        content: ['Set', formatTimeUTC(setDate)],
-                                                                                        enabled: true,
-                                                                                        position: 'top',
-                                                                                        yAdjust: isLate ? -30 : -40, // Adjust y-position for late times to avoid overlap
-                                                                                        font: { size: 11, weight: 'bold', family: 'Arial, sans-serif' },
-                                                                                        color: 'white',
-                                                                                        backgroundColor: 'rgba(255, 165, 0, 0.85)',
-                                                                                        padding: 2,
-                                                                                        cornerRadius: 6,
-                                                                                        boxShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-                                                                                        textAlign: 'center',
-                                                                                        borderColor: 'rgba(255, 255, 255, 0.7)',
-                                                                                        borderWidth: 1
-                                                                                    }
-                                                                                };
-                                                                            }
-                                                                        }
-
-                                                                        return annotations;
-                                                                    }
-
-                                                                    function timeToChartIndex(date) {
-                                                                        if (!(date instanceof Date)) throw new Error("Expected a Date object");
-                                                                        let hours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
-                                                                        // Clamp to index 47 (23:30) for times >= 23:30
-                                                                        if (hours >= 23.5) {
-                                                                            hours = 23.5; // Map to 23:30 (index 47)
-                                                                        }
-                                                                        return hours * 2;
-                                                                    }
+        function timeToChartIndex(date) {
+            if (!(date instanceof Date)) throw new Error("Expected a Date object");
+            return (date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600) * 2;
+        }
 
         document.getElementById("hour").addEventListener("input", () => {
             hourIndex = parseInt(document.getElementById("hour").value);
