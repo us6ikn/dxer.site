@@ -142,7 +142,7 @@
          const B92 = Math.sin(C91) * Math.cos(C80) * Math.cos(C90) - Math.sin(C80) * Math.sin(C90);
          const B93 = Math.cos(C91) * Math.cos(C80);
          const C94 = Math.atan2(B92, B93);
-         const B94 = (C94 * 180 / Math.PI) % 360;
+         const B94 = ((C94 * 180 / Math.PI) % 360 + 360) % 360;
          const Lo = B94 - B72;
 
          // Bo computation
