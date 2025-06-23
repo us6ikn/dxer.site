@@ -456,8 +456,7 @@
                 console.error(`Error converting locator ${locator} to lat/lon: ${e.message}`);
                 return [];
             }
-            const COS_LAT = Math.cos(lat * Math.PI / 180);
-
+            
             // Parse date
             const date = new Date(dateStr);
             if (isNaN(date.getTime())) {
@@ -509,8 +508,6 @@
                 // Compute dlat, dlon over 1 hour (i-1 to i+1, 30 min each side)
                 let dlat = (arr[i+1].lat - arr[i-1].lat) / 60; // Degrees per minute
                 let dlon = (arr[i+1].lon - arr[i-1].lon) / 60; // Degrees per minute
-                dlat *= COS_LAT;
-                dlon *= COS_LAT;
                 const rate = Math.sqrt(dlat * dlat + dlon * dlon);
 
                 // Log date, time, libration values, and rate
