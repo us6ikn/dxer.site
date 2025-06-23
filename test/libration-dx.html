@@ -1299,7 +1299,15 @@
                           `<span class="metric-label metric-libration">Libr:</span> ${rate != null ? rate + '°/min' : 'N/A'}` +
                           `<span class="metric-separator">|</span>` +
                           `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + ' Hz' : 'N/A'}`
-                        : ``;
+                        : `<span class="metric-locator">${qthInput}</span>` +
+                        `<span class="metric-separator"> - </span>` +
+                        `<span class="metric-label metric-elevation">El:</span> ${elev.toFixed(1)}°` +
+                        `<span class="metric-separator">|</span>` +
+                        `<span class="metric-label metric-azimuth">Az:</span> ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}` +
+                        `<span class="metric-separator">|</span>` +
+                        `<span class="metric-label metric-libration">Libr:</span> ${rate != null ? rate + '°/min' : 'N/A'}` +
+                        `<span class="metric-separator">|</span>` +
+                        `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + ' Hz' : 'N/A'}`;
                 
                 chart.update('none');
             } else {
