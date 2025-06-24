@@ -442,11 +442,13 @@
 
         // Function to compute libration rates for a day using EMEastroLib.topocentricLibration
         function computeLibrationForDay(locator, dateStr, type) {
+            // Validate locator
             if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
                 console.warn(`Invalid locator: ${locator}`);
                 return [];
             }
 
+            // Convert locator to lat/lon
             let lat, lon;
             try {
                 ({ lat, lon } = qthToLatLon(locator));
@@ -455,16 +457,18 @@
                 return [];
             }
 
+            // Parse date
             const date = new Date(dateStr);
             if (isNaN(date.getTime())) {
                 console.error(`Invalid date string: ${dateStr}`);
                 return [];
             }
             const year = date.getUTCFullYear();
-            const month = date.getUTCMonth() + 1;
+            const month = date.getUTCMonth() + 1; // 1-12
             const day = date.getUTCDate();
 
             const results = [];
+            // Compute for 48 half-hourly intervals (00:00 to 23:30 UTC)
             for (let i = 0; i < 48; i++) {
                 const hour = Math.floor(i / 2);
                 const minute = (i % 2) * 30;
@@ -472,10 +476,15 @@
                 const isoDate = dt.toISOString().replace('.000Z', '');
 
                 try {
+                    // Get libration lat/lon using EMEastroLib.topocentricLibration
                     const [libLat, libLon] = EMEastroLib.topocentricLibration(year, month, day, hour, minute, lat, lon);
+
+                    // Validate libration values
                     if (isNaN(libLat) || isNaN(libLon)) {
                         throw new Error(`Invalid libration values: lat=${libLat}, lon=${libLon}`);
                     }
+
+                    // Store current point
                     results.push({
                         date: isoDate,
                         lat: libLat,
@@ -491,43 +500,49 @@
                 }
             }
 
+            // Log results length
             console.log(`computeLibrationForDay: Generated ${results.length} entries for ${locator} on ${dateStr}`);
 
+            // Compute libration rates using finite differences
             const librationRates = results.map((curr, i, arr) => {
                 if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null || curr.lat === null) {
-                    return { date: curr.date, rate: null, dldt: null, dbdt: null };
+                    return { date: curr.date, rate: null };
                 }
-                const dlat = (arr[i+1].lat - arr[i-1].lat) / 60; // Degrees per minute
-                const dlon = (arr[i+1].lon - arr[i-1].lon) / 60; // Degrees per minute
+                let dlat = (arr[i+1].lat - arr[i-1].lat) / 60; // Degrees per minute
+                let dlon = (arr[i+1].lon - arr[i-1].lon) / 60; // Degrees per minute
                 const rate = Math.sqrt(dlat * dlat + dlon * dlon);
 
+                // Log date, time, libration values, and rate
                 console.log({
                     date: curr.date,
                     time: curr.date.slice(11, 16),
                     libLat: curr.lat != null ? curr.lat.toFixed(4) : 'N/A',
                     libLon: curr.lon != null ? curr.lon.toFixed(4) : 'N/A',
-                    dldt: dlat != null ? dlat.toFixed(6) : 'N/A',
-                    dbdt: dlon != null ? dlon.toFixed(6) : 'N/A',
                     librationRate: rate != null ? rate.toFixed(6) : 'N/A'
                 });
 
-                return { date: curr.date, rate, dldt: dlat, dbdt: dlon };
+                return { date: curr.date, rate };
             });
 
+            // Log and verify dates
             console.log(`computeLibrationForDay: Generated ${librationRates.length} rates for ${locator} on ${dateStr}`);
             const invalidDates = librationRates.filter(r => r.date.slice(0, 10) !== dateStr);
             if (invalidDates.length > 0) {
                 console.warn(`Date mismatch in librationRates for ${locator} on ${dateStr}:`, invalidDates.map(r => r.date));
             }
 
+            // Clear global variables before updating
             if (type === 'qth') {
-                rawData = librationRates.slice();
+                rawData = [];
+                rawData = librationRates.slice(); // Deep copy
                 document.getElementById("chartWrapper").style.display = "block";
             } else {
-                dxRawData = librationRates.slice();
+                dxRawData = [];
+                dxRawData = librationRates.slice(); // Deep copy
                 document.getElementById("dxChartWrapper").style.display = "block";
             }
 
+            // Log rawData for debugging
             console.log(`rawData after assignment (${type}):`, rawData.slice(0, 5));
 
             return librationRates;
@@ -1300,16 +1315,14 @@
             }
 
                                         // DX chart data calculation
-                                        // DX chart data calculation
                                         let dxMoonElevations = [];
                                         let dxMoonAzimuths = [];
                                         let dxVisibleRates = [];
                                         let dxDopplerSpreads = [];
-                                        let relativeLibrationRates = [];
-                                        let relativeDopplerSpreads = [];
                                         let dxDataForDay = Array(48).fill(null);
 
                                         if (dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
+                                            // Update dxLat and dxLon for the current DX locator
                                             try {
                                                 ({ lat: dxLat, lon: dxLon } = qthToLatLon(dxInput));
                                                 console.log(`Updated dxLat: ${dxLat}, dxLon: ${dxLon} for DX ${dxInput}`);
@@ -1351,22 +1364,6 @@
                                                 const elevationDeg = hor.altitude;
                                                 const azimuthDeg = hor.azimuth;
 
-                                                // Compute relative libration rate and Doppler spread
-                                                let relLibrationRate = null;
-                                                let relDopplerSpread = null;
-                                                if (
-                                                    qthInput && dxInput &&
-                                                    dataForDay[i]?.dldt != null && dataForDay[i]?.dbdt != null &&
-                                                    dxDataForDay[i]?.dldt != null && dxDataForDay[i]?.dbdt != null &&
-                                                    elevationDeg > 0 && moonElevations[i] > 0
-                                                ) {
-                                                    const dldt_sum = dataForDay[i].dldt + dxDataForDay[i].dldt;
-                                                    const dbdt_sum = dataForDay[i].dbdt + dxDataForDay[i].dbdt;
-                                                    relLibrationRate = Math.sqrt(dldt_sum * dldt_sum + dbdt_sum * dbdt_sum) * 1000; // Scale to ×10⁻³ °/min
-                                                    const omegaRadSec = relLibrationRate * (Math.PI / 180) / 60 / 1000; // Convert to rad/s
-                                                    relDopplerSpread = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
-                                                }
-
                                                 if (elevationDeg > 0) {
                                                     dxMoonElevations.push(elevationDeg);
                                                     dxMoonAzimuths.push(azimuthDeg);
@@ -1375,8 +1372,6 @@
                                                     const omegaRadSec = rate != null ? rate * (Math.PI / 180) / 60 : 0;
                                                     const dopplerHz = rate != null ? (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT : null;
                                                     dxDopplerSpreads.push(dopplerHz);
-                                                    relativeLibrationRates.push(relLibrationRate);
-                                                    relativeDopplerSpreads.push(relDopplerSpread);
 
                                                     if (i === hourIndex) {
                                                         console.log(`DX ${dxInput} at ${dt.toISOString()}:`, {
@@ -1385,8 +1380,6 @@
                                                             librationRate: rate != null ? rate.toFixed(6) : 'N/A',
                                                             visibleRate: dxVisibleRates[i] != null ? (dxVisibleRates[i] / 1000).toFixed(6) : 'N/A',
                                                             dopplerSpread: dopplerHz != null ? dopplerHz.toFixed(1) : 'N/A',
-                                                            relativeLibrationRate: relLibrationRate != null ? (relLibrationRate / 1000).toFixed(6) : 'N/A',
-                                                            relativeDopplerSpread: relDopplerSpread != null ? relDopplerSpread.toFixed(1) : 'N/A',
                                                             dxDataForDayEntry: dxDataForDay[i],
                                                             observerLat: dxLat.toFixed(4),
                                                             observerLon: dxLon.toFixed(4)
@@ -1397,8 +1390,6 @@
                                                     dxMoonAzimuths.push(null);
                                                     dxVisibleRates.push(null);
                                                     dxDopplerSpreads.push(null);
-                                                    relativeLibrationRates.push(null);
-                                                    relativeDopplerSpreads.push(null);
                                                 }
                                             }
                                             document.getElementById("dxChartWrapper").style.display = "block";
@@ -1471,24 +1462,6 @@
                                                             borderWidth: 1.5,
                                                             tension: 0.2,
                                                             yAxisID: "y3"
-                                                        },
-                                                        {
-                                                            label: "Relative Libration Rate (×10⁻³ °/min)",
-                                                            data: relativeLibrationRates,
-                                                            borderColor: "#8B008B", // Dark magenta
-                                                            pointRadius: 0,
-                                                            borderWidth: 1.5,
-                                                            tension: 0.2,
-                                                            yAxisID: "y1"
-                                                        },
-                                                        {
-                                                            label: "Relative Doppler Spread, Hz",
-                                                            data: relativeDopplerSpreads,
-                                                            borderColor: "#FFD700", // Gold
-                                                            pointRadius: 0,
-                                                            borderWidth: 1.5,
-                                                            tension: 0.2,
-                                                            yAxisID: "y3"
                                                         }
                                                     ]
                                                 },
@@ -1545,13 +1518,9 @@
                                             dxChart.data.datasets[0].data = dxVisibleRates;
                                             dxChart.data.datasets[1].data = dxMoonElevations;
                                             dxChart.data.datasets[2].data = dxDopplerSpreads;
-                                            dxChart.data.datasets[3].data = relativeLibrationRates;
-                                            dxChart.data.datasets[4].data = relativeDopplerSpreads;
                                             const elev = dxMoonElevations[hourIndex];
                                             const rate = dxVisibleRates[hourIndex] != null ? (dxVisibleRates[hourIndex] / 1000).toFixed(4) : null;
                                             const doppler = dxDopplerSpreads[hourIndex];
-                                            const relRate = relativeLibrationRates[hourIndex] != null ? (relativeLibrationRates[hourIndex] / 1000).toFixed(4) : null;
-                                            const relDoppler = relativeDopplerSpreads[hourIndex];
                                             const azimuth = dxMoonAzimuths[hourIndex];
                                             const labelText =
                                                 dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput) && dxDataForDay[hourIndex]
@@ -1563,11 +1532,7 @@
                                                       `<span class="metric-separator">|</span>` +
                                                       `<span class="metric-label metric-libration">Libr:</span> ${rate != null ? rate + '°/min' : 'N/A'}` +
                                                       `<span class="metric-separator">|</span>` +
-                                                      `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + ' Hz' : 'N/A'}` +
-                                                      `<span class="metric-separator">|</span>` +
-                                                      `<span class="metric-label metric-rel-libration">Rel Libr:</span> ${relRate != null ? relRate + '°/min' : 'N/A'}` +
-                                                      `<span class="metric-separator">|</span>` +
-                                                      `<span class="metric-label metric-rel-doppler">Rel Spread:</span> ${relDoppler != null ? relDoppler.toFixed(0) + ' Hz' : 'N/A'}`
+                                                      `<span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + ' Hz' : 'N/A'}`
                                                     : '<span class="metric-locator">Enter valid DX</span>';
                                             document.getElementById('dxchartLabel').innerHTML = labelText;
                                             if (dxAnnotation.timeMarker.label) {
