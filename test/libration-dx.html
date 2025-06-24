@@ -495,7 +495,6 @@
             console.log(`computeLibrationForDay: Generated ${results.length} entries for ${locator} on ${dateStr}`);
 
             const librationRates = results.map((curr, i, arr) => {
-                // Enhanced guard condition to check both lat and lon for all relevant indices
                 if (
                     i <= 0 ||
                     i >= arr.length - 1 ||
@@ -512,13 +511,13 @@
                 try {
                     const dlat = (arr[i+1].lat - arr[i-1].lat) / 60; // Degrees per minute
                     const dlon = (arr[i+1].lon - arr[i-1].lon) / 60; // Degrees per minute
-                    if (isNaN(dlat) || isNaN(dlon)) {
-                        console.warn(`Invalid dlat/dlon for ${curr.date}: dlat=${dlat}, dlon=${dlon}`);
+                    if (isNaN(dlat) || isNaN(dlon) || !isFinite(dlat) || !isFinite(dlon)) {
+                        console.warn(`Invalid dlat/dlon for ${curr.date} at ${locator}: dlat=${dlat}, dlon=${dlon}`);
                         return { date: curr.date, rate: null, dldt: null, dbdt: null };
                     }
                     const rate = Math.sqrt(dlat * dlat + dlon * dlon);
-                    if (isNaN(rate)) {
-                        console.warn(`Invalid rate for ${curr.date}: rate=${rate}, dlat=${dlat}, dlon=${dlon}`);
+                    if (isNaN(rate) || !isFinite(rate)) {
+                        console.warn(`Invalid rate for ${curr.date} at ${locator}: rate=${rate}, dlat=${dlat}, dlon=${dlon}`);
                         return { date: curr.date, rate: null, dldt: null, dbdt: null };
                     }
 
@@ -540,23 +539,24 @@
             });
 
             console.log(`computeLibrationForDay: Generated ${librationRates.length} rates for ${locator} on ${dateStr}`);
-            const invalidDates = librationRates.filter(r => r.date.slice(0, 10) !== dateStr);
-            if (invalidDates.length > 0) {
-                console.warn(`Date mismatch in librationRates for ${locator} on ${dateStr}:`, invalidDates.map(r => r.date));
+            const invalidRates = librationRates.filter(r => r.rate === undefined);
+            if (invalidRates.length > 0) {
+                console.warn(`Undefined rates detected for ${locator} on ${dateStr}:`, invalidRates);
             }
 
             if (type === 'qth') {
                 rawData = librationRates.slice();
-                document.getElementById("chartWrapper").style.display = "block";
+                document.getElementById("chartWrapper").style.display = rawData.some(r => r.rate != null) ? "block" : "none";
             } else {
                 dxRawData = librationRates.slice();
-                document.getElementById("dxChartWrapper").style.display = "block";
+                document.getElementById("dxChartWrapper").style.display = dxRawData.some(r => r.rate != null) ? "block" : "none";
             }
 
-            console.log(`rawData after assignment (${type}):`, rawData.slice(0, 5));
+            console.log(`rawData after assignment (${type}):`, (type === 'qth' ? rawData : dxRawData).slice(0, 5));
 
             return librationRates;
         }
+        
         function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 2,
