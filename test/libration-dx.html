@@ -450,6 +450,7 @@
             let lat, lon;
             try {
                 ({ lat, lon } = qthToLatLon(locator));
+                console.log(`Computing libration for ${type} ${locator} at lat: ${lat.toFixed(4)}, lon: ${lon.toFixed(4)} on ${dateStr}`);
             } catch (e) {
                 console.error(`Error converting locator ${locator} to lat/lon: ${e.message}`);
                 return [];
@@ -473,7 +474,7 @@
 
                 try {
                     const [libLat, libLon] = EMEastroLib.topocentricLibration(year, month, day, hour, minute, lat, lon);
-                    if (isNaN(libLat) || isNaN(libLon)) {
+                    if (isNaN(libLat) || isNaN(libLon) || libLat === null || libLon === null) {
                         throw new Error(`Invalid libration values: lat=${libLat}, lon=${libLon}`);
                     }
                     results.push({
@@ -482,7 +483,7 @@
                         lon: libLon
                     });
                 } catch (e) {
-                    console.warn(`Error computing libration for ${isoDate}: ${e.message}`);
+                    console.warn(`Error computing libration for ${isoDate} at ${locator}: ${e.message}`);
                     results.push({
                         date: isoDate,
                         lat: null,
@@ -494,24 +495,48 @@
             console.log(`computeLibrationForDay: Generated ${results.length} entries for ${locator} on ${dateStr}`);
 
             const librationRates = results.map((curr, i, arr) => {
-                if (i <= 0 || i >= arr.length - 1 || arr[i-1].lat === null || arr[i+1].lat === null || curr.lat === null) {
+                // Enhanced guard condition to check both lat and lon for all relevant indices
+                if (
+                    i <= 0 ||
+                    i >= arr.length - 1 ||
+                    arr[i-1].lat === null ||
+                    arr[i-1].lon === null ||
+                    arr[i+1].lat === null ||
+                    arr[i+1].lon === null ||
+                    curr.lat === null ||
+                    curr.lon === null
+                ) {
                     return { date: curr.date, rate: null, dldt: null, dbdt: null };
                 }
-                const dlat = (arr[i+1].lat - arr[i-1].lat) / 60; // Degrees per minute
-                const dlon = (arr[i+1].lon - arr[i-1].lon) / 60; // Degrees per minute
-                const rate = Math.sqrt(dlat * dlat + dlon * dlon);
 
-                console.log({
-                    date: curr.date,
-                    time: curr.date.slice(11, 16),
-                    libLat: curr.lat != null ? curr.lat.toFixed(4) : 'N/A',
-                    libLon: curr.lon != null ? curr.lon.toFixed(4) : 'N/A',
-                    dldt: dlat != null ? dlat.toFixed(6) : 'N/A',
-                    dbdt: dlon != null ? dlon.toFixed(6) : 'N/A',
-                    librationRate: rate != null ? rate.toFixed(6) : 'N/A'
-                });
+                try {
+                    const dlat = (arr[i+1].lat - arr[i-1].lat) / 60; // Degrees per minute
+                    const dlon = (arr[i+1].lon - arr[i-1].lon) / 60; // Degrees per minute
+                    if (isNaN(dlat) || isNaN(dlon)) {
+                        console.warn(`Invalid dlat/dlon for ${curr.date}: dlat=${dlat}, dlon=${dlon}`);
+                        return { date: curr.date, rate: null, dldt: null, dbdt: null };
+                    }
+                    const rate = Math.sqrt(dlat * dlat + dlon * dlon);
+                    if (isNaN(rate)) {
+                        console.warn(`Invalid rate for ${curr.date}: rate=${rate}, dlat=${dlat}, dlon=${dlon}`);
+                        return { date: curr.date, rate: null, dldt: null, dbdt: null };
+                    }
 
-                return { date: curr.date, rate, dldt: dlat, dbdt: dlon };
+                    console.log({
+                        date: curr.date,
+                        time: curr.date.slice(11, 16),
+                        libLat: curr.lat != null ? curr.lat.toFixed(4) : 'N/A',
+                        libLon: curr.lon != null ? curr.lon.toFixed(4) : 'N/A',
+                        dldt: dlat != null ? dlat.toFixed(6) : 'N/A',
+                        dbdt: dlon != null ? dlon.toFixed(6) : 'N/A',
+                        librationRate: rate != null ? rate.toFixed(6) : 'N/A'
+                    });
+
+                    return { date: curr.date, rate, dldt: dlat, dbdt: dlon };
+                } catch (e) {
+                    console.warn(`Error computing rate for ${curr.date} at ${locator}: ${e.message}`);
+                    return { date: curr.date, rate: null, dldt: null, dbdt: null };
+                }
             });
 
             console.log(`computeLibrationForDay: Generated ${librationRates.length} rates for ${locator} on ${dateStr}`);
@@ -532,7 +557,6 @@
 
             return librationRates;
         }
-
         function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 2,
