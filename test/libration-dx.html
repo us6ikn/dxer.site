@@ -478,14 +478,10 @@
                 let libLat = null, libLon = null;
                 try {
                     const libration = EMEastroLib.topocentricLibration(year, month, day, hour, minute, lat, lon);
-                    if (Array.isArray(libration) && libration.length >= 2) {
-                        [libLat, libLon] = libration;
-                        if (isNaN(libLat) || isNaN(libLon) || libLat == null || libLon == null) {
-                            throw new Error(`Invalid libration values: lat=${libLat}, lon=${libLon}`);
-                        }
-                    } else {
-                        throw new Error(`Invalid libration response: ${libration}`);
+                    if (!Array.isArray(libration) || libration.length < 2 || isNaN(libration[0]) || isNaN(libration[1])) {
+                        throw new Error(`Invalid libration response: ${JSON.stringify(libration)}`);
                     }
+                    [libLat, libLon] = libration;
                     results.push({
                         date: isoDate,
                         lat: libLat,
@@ -1112,31 +1108,44 @@
 
             console.log(`updateChart called with hourIndex: ${hourIndex}, UTC time: ${Math.floor(hourIndex / 2)}:${hourIndex % 2 === 0 ? '00' : '30'}`);
 
-            // Initialize dataForDay for QTH
+            // Initialize dataForDay at the top
             let dataForDay = Array(48).fill(null);
+
+            // Populate dataForDay for QTH
             if (qthInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
-                const rawDataDate = rawData.length ? rawData[0]?.date.slice(0, 10) : null;
+                const rawDataDate = rawData.length ? rawData[0]?.date?.slice(0, 10) : null;
                 if (rawDataDate !== dateStr || rawData.length !== 48) {
                     console.log(`Recomputing libration for QTH ${qthInput} on ${dateStr}`);
-                    rawData = [];
-                    computeLibrationForDay(qthInput, dateStr, 'qth');
+                    rawData = computeLibrationForDay(qthInput, dateStr, 'qth');
                 }
-                rawData.forEach((r, idx) => {
-                    const timeMatch = r.date.match(/T(\d{2}):(\d{2})/);
-                    if (!timeMatch) {
-                        console.warn(`Invalid date format in rawData[${idx}]: ${r.date}`);
-                        return;
-                    }
-                    const hour = parseInt(timeMatch[1], 10);
-                    const minute = parseInt(timeMatch[2], 10);
-                    const index = hour * 2 + (minute === 30 ? 1 : 0);
-                    if (index >= 0 && index < 48) {
-                        dataForDay[index] = r;
-                    } else {
-                        console.warn(`Invalid index ${index} for date ${r.date} in rawData[${idx}]`);
-                    }
-                });
-                console.log(`dataForDay valid entries: ${dataForDay.filter(r => r != null).length}, hourIndex[${hourIndex}]:`, dataForDay[hourIndex]);
+                if (rawData.length > 0) {
+                    rawData.forEach((r, idx) => {
+                        if (!r || !r.date) {
+                            console.warn(`Invalid rawData entry at index ${idx}:`, r);
+                            return;
+                        }
+                        const timeMatch = r.date.match(/T(\d{2}):(\d{2})/);
+                        if (!timeMatch) {
+                            console.warn(`Invalid date format in rawData[${idx}]: ${r.date}`);
+                            return;
+                        }
+                        const hour = parseInt(timeMatch[1], 10);
+                        const minute = parseInt(timeMatch[2], 10);
+                        const index = hour * 2 + (minute === 30 ? 1 : 0);
+                        if (index >= 0 && index < 48) {
+                            dataForDay[index] = r;
+                        } else {
+                            console.warn(`Invalid index ${index} for date ${r.date} in rawData[${idx}]`);
+                        }
+                    });
+                    console.log(`dataForDay valid entries: ${dataForDay.filter(r => r != null).length}, hourIndex[${hourIndex}]:`, dataForDay[hourIndex]);
+                } else {
+                    console.warn(`No valid rawData for QTH ${qthInput}`);
+                    document.getElementById("chartWrapper").style.display = "none";
+                }
+            } else {
+                console.log(`Invalid or missing QTH: ${qthInput}`);
+                document.getElementById("chartWrapper").style.display = "none";
             }
 
             let moonElevations = [];
