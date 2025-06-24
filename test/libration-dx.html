@@ -1795,7 +1795,6 @@
                                                                                     // Force updateChart to run after a microtask to ensure rawData is processed
                                                                                     setTimeout(() => {
                                                                                         updateChart(hourIndex);
-                                                                                        console.log(`Post-update rawData length: ${rawData.length}, dataForDay[${hourIndex}]:`, dataForDay[hourIndex]);
                                                                                     }, 0);
                                                                                 }
                                                                             } catch (e) {
