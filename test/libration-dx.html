@@ -440,7 +440,7 @@
         const SPEED_OF_LIGHT = 299792458; // m/s
         const FREQUENCY_HZ = 10.368e9; // 10.368 GHz
 
-        // NEW: Function to compute libration rates for a day using AstroLib.topocentricLibration
+        // Function to compute libration rates for a day using EMEastroLib.topocentricLibration
         function computeLibrationForDay(locator, dateStr, type) {
             // Validate locator
             if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
@@ -476,8 +476,8 @@
                 const isoDate = dt.toISOString().replace('.000Z', '');
 
                 try {
-                    // Get libration lat/lon using AstroLib.topocentricLibration
-                    const [libLat, libLon] = AstroLib.topocentricLibration(year, month, day, hour, minute, lat, lon);
+                    // Get libration lat/lon using EMEastroLib.topocentricLibration
+                    const [libLat, libLon] = EMEastroLib.topocentricLibration(year, month, day, hour, minute, lat, lon);
 
                     // Validate libration values
                     if (isNaN(libLat) || isNaN(libLon)) {
