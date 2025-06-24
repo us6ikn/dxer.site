@@ -372,6 +372,9 @@
       .gm-style > div {
         z-index: 50 !important; /* Ensure map controls are below showControlsPanel */
       }
+      .metric-dpol {
+          color: #00CED1; /* Cyan, matches dpol curve */
+      }
   </style>
 </head>
 <body>
@@ -1068,6 +1071,41 @@
             }
         }
 
+        // Calculate polarization offset for a given latitude, azimuth, and elevation
+        function calcPoloffset(latitude, azimuth, elevation) {
+            // Ensure inputs are valid numbers
+            if (isNaN(latitude) || isNaN(azimuth) || isNaN(elevation)) {
+                return null;
+            }
+
+            // Convert angles to radians
+            const latRad = latitude * Math.PI / 180;
+            const azRad = azimuth * Math.PI / 180;
+            const elRad = elevation * Math.PI / 180;
+
+            // Compute spatial polarization angle (simplified model, as per EME calculations)
+            const sinPol = Math.cos(latRad) * Math.sin(azRad) / Math.cos(elRad);
+            const cosPol = (Math.sin(latRad) - Math.sin(elRad) * Math.cos(azRad)) / (Math.cos(elRad) * Math.cos(latRad));
+            let polAngle = Math.atan2(sinPol, cosPol) * 180 / Math.PI;
+
+            // Normalize to [0, 180°]
+            polAngle = ((polAngle % 180) + 180) % 180;
+            return polAngle;
+        }
+
+        // Calculate the difference in polarization offset between two stations
+        function calcPoloffsetDiff(polMy, polDx) {
+            if (polMy == null || polDx == null) {
+                return null;
+            }
+            let diff = Math.abs(polMy - polDx);
+            // Ensure the difference is the smallest angle (between 0° and 90°)
+            if (diff > 90) {
+                diff = 180 - diff;
+            }
+            return diff;
+        }
+        
         function updateChart(hourIndex) {
             const qthInput = document.getElementById("qth").value.trim().toUpperCase();
             const dxInput = document.getElementById("dx").value.trim().toUpperCase();
@@ -1300,13 +1338,13 @@
             }
 
                                         // DX chart data calculation
-                                        // DX chart data calculation
                                         let dxMoonElevations = [];
                                         let dxMoonAzimuths = [];
                                         let dxVisibleRates = [];
                                         let dxDopplerSpreads = [];
                                         let relativeLibrationRates = [];
                                         let relativeDopplerSpreads = [];
+                                        let dpolValues = [];
                                         let dxDataForDay = Array(48).fill(null);
 
                                         if (dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
@@ -1345,11 +1383,26 @@
                                                 const hour = Math.floor(i / 2);
                                                 const minutes = (i % 2) * 30;
                                                 const dt = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}:00Z`);
+                                                
+                                                // Compute Moon position for QTH
+                                                const obsMy = new Astronomy.Observer(lat, lon, 0);
+                                                const moonEqMy = Astronomy.Equator(Astronomy.Body.Moon, dt, obsMy, true, false);
+                                                const horMy = Astronomy.Horizon(dt, obsMy, moonEqMy.ra, moonEqMy.dec, 'normal');
+                                                
+                                                // Compute Moon position for DX
                                                 const observer = new Astronomy.Observer(dxLat, dxLon, 0);
                                                 const moonEq = Astronomy.Equator(Astronomy.Body.Moon, dt, observer, true, false);
                                                 const hor = Astronomy.Horizon(dt, observer, moonEq.ra, moonEq.dec, 'normal');
                                                 const elevationDeg = hor.altitude;
                                                 const azimuthDeg = hor.azimuth;
+
+                                                // Compute polarization offset
+                                                let dpol = null;
+                                                if (elevationDeg > 0 && horMy.altitude > 0) {
+                                                    const polMy = calcPoloffset(lat, horMy.azimuth, horMy.altitude);
+                                                    const polDx = calcPoloffset(dxLat, azimuthDeg, elevationDeg);
+                                                    dpol = calcPoloffsetDiff(polMy, polDx);
+                                                }
 
                                                 // Compute relative libration rate and Doppler spread
                                                 let relLibrationRate = null;
@@ -1377,21 +1430,7 @@
                                                     dxDopplerSpreads.push(dopplerHz);
                                                     relativeLibrationRates.push(relLibrationRate);
                                                     relativeDopplerSpreads.push(relDopplerSpread);
-
-                                                    if (i === hourIndex) {
-                                                        console.log(`DX ${dxInput} at ${dt.toISOString()}:`, {
-                                                            elevation: elevationDeg?.toFixed(1),
-                                                            azimuth: azimuthDeg?.toFixed(1),
-                                                            librationRate: rate != null ? rate.toFixed(6) : 'N/A',
-                                                            visibleRate: dxVisibleRates[i] != null ? (dxVisibleRates[i] / 1000).toFixed(6) : 'N/A',
-                                                            dopplerSpread: dopplerHz != null ? dopplerHz.toFixed(1) : 'N/A',
-                                                            relativeLibrationRate: relLibrationRate != null ? (relLibrationRate / 1000).toFixed(6) : 'N/A',
-                                                            relativeDopplerSpread: relDopplerSpread != null ? relDopplerSpread.toFixed(1) : 'N/A',
-                                                            dxDataForDayEntry: dxDataForDay[i],
-                                                            observerLat: dxLat.toFixed(4),
-                                                            observerLon: dxLon.toFixed(4)
-                                                        });
-                                                    }
+                                                    dpolValues.push(dpol);
                                                 } else {
                                                     dxMoonElevations.push(null);
                                                     dxMoonAzimuths.push(null);
@@ -1399,6 +1438,23 @@
                                                     dxDopplerSpreads.push(null);
                                                     relativeLibrationRates.push(null);
                                                     relativeDopplerSpreads.push(null);
+                                                    dpolValues.push(null);
+                                                }
+
+                                                if (i === hourIndex) {
+                                                    console.log(`DX ${dxInput} at ${dt.toISOString()}:`, {
+                                                        elevation: elevationDeg?.toFixed(1),
+                                                        azimuth: azimuthDeg?.toFixed(1),
+                                                        librationRate: rate != null ? rate.toFixed(6) : 'N/A',
+                                                        visibleRate: dxVisibleRates[i] != null ? (dxVisibleRates[i] / 1000).toFixed(6) : 'N/A',
+                                                        dopplerSpread: dopplerHz != null ? dopplerHz.toFixed(1) : 'N/A',
+                                                        relativeLibrationRate: relLibrationRate != null ? (relLibrationRate / 1000).toFixed(6) : 'N/A',
+                                                        relativeDopplerSpread: relDopplerSpread != null ? relDopplerSpread.toFixed(1) : 'N/A',
+                                                        dpol: dpol != null ? dpol.toFixed(1) : 'N/A',
+                                                        dxDataForDayEntry: dxDataForDay[i],
+                                                        observerLat: dxLat.toFixed(4),
+                                                        observerLon: dxLon.toFixed(4)
+                                                    });
                                                 }
                                             }
                                             document.getElementById("dxChartWrapper").style.display = "block";
@@ -1489,6 +1545,15 @@
                                                             borderWidth: 1.5,
                                                             tension: 0.2,
                                                             yAxisID: "y3"
+                                                        },
+                                                        {
+                                                            label: "Polarization Offset (°)",
+                                                            data: dpolValues,
+                                                            borderColor: "#00CED1", // Cyan
+                                                            pointRadius: 0,
+                                                            borderWidth: 1.5,
+                                                            tension: 0.2,
+                                                            yAxisID: "y4"
                                                         }
                                                     ]
                                                 },
@@ -1529,6 +1594,17 @@
                                                             max: 300,
                                                             grid: { drawOnChartArea: false },
                                                             ticks: { stepSize: 50, color: "green", font: { size: 12 } }
+                                                        },
+                                                        y4: {
+                                                            type: "linear",
+                                                            display: true,
+                                                            position: "left",
+                                                            offset: true,
+                                                            title: { display: true, text: "Polarization Offset (°)", color: "#00CED1", font: { size: 12, family: 'Arial, sans-serif' } },
+                                                            min: 0,
+                                                            max: 90,
+                                                            grid: { drawOnChartArea: false },
+                                                            ticks: { stepSize: 15, callback: val => val + "°", color: "#00CED1", font: { size: 12 } }
                                                         }
                                                     },
                                                     plugins: {
@@ -1547,12 +1623,14 @@
                                             dxChart.data.datasets[2].data = dxDopplerSpreads;
                                             dxChart.data.datasets[3].data = relativeLibrationRates;
                                             dxChart.data.datasets[4].data = relativeDopplerSpreads;
+                                            dxChart.data.datasets[5].data = dpolValues;
                                             const elev = dxMoonElevations[hourIndex];
                                             const rate = dxVisibleRates[hourIndex] != null ? (dxVisibleRates[hourIndex] / 1000).toFixed(4) : null;
                                             const doppler = dxDopplerSpreads[hourIndex];
                                             const relRate = relativeLibrationRates[hourIndex] != null ? (relativeLibrationRates[hourIndex] / 1000).toFixed(4) : null;
                                             const relDoppler = relativeDopplerSpreads[hourIndex];
                                             const azimuth = dxMoonAzimuths[hourIndex];
+                                            const dpol = dpolValues[hourIndex];
                                             const labelText =
                                                 dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput) && dxDataForDay[hourIndex]
                                                     ? `<span class="metric-locator">${dxInput}</span>` +
@@ -1567,7 +1645,9 @@
                                                       `<span class="metric-separator">|</span>` +
                                                       `<span class="metric-label metric-rel-libration">Rel Libr:</span> ${relRate != null ? relRate + '°/min' : 'N/A'}` +
                                                       `<span class="metric-separator">|</span>` +
-                                                      `<span class="metric-label metric-rel-doppler">Rel Spread:</span> ${relDoppler != null ? relDoppler.toFixed(0) + ' Hz' : 'N/A'}`
+                                                      `<span class="metric-label metric-rel-doppler">Rel Spread:</span> ${relDoppler != null ? relDoppler.toFixed(0) + ' Hz' : 'N/A'}` +
+                                                      `<span class="metric-separator">|</span>` +
+                                                      `<span class="metric-label metric-dpol">DPol:</span> ${dpol != null ? dpol.toFixed(1) + '°' : 'N/A'}`
                                                     : '<span class="metric-locator">Enter valid DX</span>';
                                             document.getElementById('dxchartLabel').innerHTML = labelText;
                                             if (dxAnnotation.timeMarker.label) {
