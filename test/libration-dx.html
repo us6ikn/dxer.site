@@ -1362,7 +1362,7 @@
                                                 ) {
                                                     const dldt_sum = dataForDay[i].dldt + dxDataForDay[i].dldt;
                                                     const dbdt_sum = dataForDay[i].dbdt + dxDataForDay[i].dbdt;
-                                                    relLibrationRate = Math.sqrt(dldt_sum * dldt_sum + dbdt_sum * dbdt_sum) * 1000; // Scale to ×10⁻³ °/min
+                                                    relLibrationRate = Math.sqrt(dldt_sum * dldt_sum + dbdt_sum * dbdt_sum) / 2 * 1000; // Scale to ×10⁻³ °/min
                                                     const omegaRadSec = relLibrationRate * (Math.PI / 180) / 60 / 1000; // Convert to rad/s
                                                     relDopplerSpread = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
                                                 }
