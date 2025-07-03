@@ -350,6 +350,21 @@
       .gm-style > div {
         z-index: 50 !important; /* Ensure map controls are below showControlsPanel */
       }
+      .metric-rel-libration {
+          color: red;
+          font-weight: bold;
+      }
+
+      .metric-rel-doppler {
+          color: green;
+          font-weight: bold;
+      }
+
+      .metric-poloffset {
+          color: blue;
+          font-weight: bold;
+      }
+
   </style>
 </head>
 <body>
@@ -1589,7 +1604,7 @@
                                                                         {
                                                                             label: "Relative Libration (×10⁻³ °/min)",
                                                                             data: relativeLibrationRates,
-                                                                            borderColor: "#8B008B",
+                                                                            borderColor: "red",
                                                                             pointRadius: 0,
                                                                             borderWidth: 1.5,
                                                                             tension: 0.2,
@@ -1598,7 +1613,7 @@
                                                                         {
                                                                             label: "Relative Spread, Hz",
                                                                             data: relativeDopplerSpreads,
-                                                                            borderColor: "#FFD700",
+                                                                            borderColor: "green",
                                                                             pointRadius: 0,
                                                                             borderWidth: 1.5,
                                                                             tension: 0.2,
@@ -1607,7 +1622,7 @@
                                                                         {
                                                                             label: "Polarization Offset (°)",
                                                                             data: polOffsets,
-                                                                            borderColor: "#00CED1",
+                                                                            borderColor: "blue",
                                                                             pointRadius: 0,
                                                                             borderWidth: 1.5,
                                                                             tension: 0.2,
@@ -1627,10 +1642,10 @@
                                                                             type: "linear",
                                                                             display: true,
                                                                             position: "right",
-                                                                            title: { display: true, text: "Rel. Libration Rate (×10⁻³ °/min)", color: "#8B008B", font: { size: 10, family: 'Arial, sans-serif' } },
+                                                                            title: { display: true, text: "Rel. Libration (×10⁻³ °/min)", color: "red", font: { size: 10, family: 'Arial, sans-serif' } },
                                                                             min: 0,
                                                                             max: 5,
-                                                                            ticks: { stepSize: 1, color: "#8B008B", font: { size: 12 } },
+                                                                            ticks: { stepSize: 1, color: "red", font: { size: 12 } },
                                                                             grid: { drawTicks: true, drawBorder: true }
                                                                         },
                                                                         y2: {
@@ -1638,21 +1653,21 @@
                                                                             display: true,
                                                                             position: "right",
                                                                             offset: true,
-                                                                            title: { display: true, text: "Rel. Doppler Spread (Hz)", color: "#FFD700", font: { size: 12, family: 'Arial, sans-serif' } },
+                                                                            title: { display: true, text: "Rel. Spread (Hz)", color: "green", font: { size: 12, family: 'Arial, sans-serif' } },
                                                                             min: 0,
                                                                             max: 300,
                                                                             grid: { drawOnChartArea: false },
-                                                                            ticks: { stepSize: 50, color: "#FFD700", font: { size: 12 } }
+                                                                            ticks: { stepSize: 50, color: "green", font: { size: 12 } }
                                                                         },
                                                                         y3: {
                                                                             type: "linear",
                                                                             display: true,
                                                                             position: "left",
-                                                                            title: { display: true, text: "Polarization Offset (°)", color: "#00CED1", font: { size: 12, family: 'Arial, sans-serif' } },
+                                                                            title: { display: true, text: "Polarization Offset (°)", color: "blue", font: { size: 12, family: 'Arial, sans-serif' } },
                                                                             min: -90,
                                                                             max: 90,
                                                                             grid: { drawOnChartArea: false },
-                                                                            ticks: { stepSize: 30, callback: val => val + "°", color: "#00CED1", font: { size: 12 } }
+                                                                            ticks: { stepSize: 30, callback: val => val + "°", color: "blue", font: { size: 12 } }
                                                                         }
                                                                     },
                                                                     plugins: {
@@ -1675,15 +1690,16 @@
                                                         const relDoppler = relativeDopplerSpreads[hourIndex];
                                                         const polOffset = polOffsets[hourIndex];
                                                         document.getElementById('relativeChartLabel').innerHTML =
-                                                            qthInput && dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput) && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)
-                                                                ? `<span class="metric-locator">${qthInput} - ${dxInput}</span>` +
-                                                                  `<span class="metric-separator"> - </span>` +
-                                                                  `<span class="metric-label metric-rel-libration">Rel LR:</span> ${relRate != null ? relRate + '°/min' : 'N/A'}` +
-                                                                  `<span class="metric-separator">|</span>` +
-                                                                  `<span class="metric-label metric-rel-doppler">DX Width:</span> ${relDoppler != null ? relDoppler.toFixed(0) + ' Hz' : 'N/A'}` +
-                                                                  `<span class="metric-separator">|</span>` +
-                                                                  `<span class="metric-label metric-poloffset">Dpol:</span> ${polOffset != null ? polOffset.toFixed(1) + '°' : 'N/A'}`
-                                                                : '<span class="metric-locator">Enter valid QTH and DX</span>';
+                                                        qthInput && dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput) && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)
+                                                          ? `<span class="metric-locator">${qthInput} - ${dxInput}</span>` +
+                                                            `<span class="metric-separator"> - </span>` +
+                                                            `<span class="metric-label metric-rel-libration">Rel LR:</span> ${relRate != null ? relRate + '°/min' : 'N/A'}` +
+                                                            `<span class="metric-separator"> | </span>` +
+                                                            `<span class="metric-label metric-rel-doppler">DX Width:</span> ${relDoppler != null ? relDoppler.toFixed(0) + ' Hz' : 'N/A'}` +
+                                                            `<span class="metric-separator"> | </span>` +
+                                                            `<span class="metric-label metric-poloffset">Dpol:</span> ${polOffset != null ? polOffset.toFixed(1) + '°' : 'N/A'}`
+                                                          : '<span class="metric-locator">Enter valid QTH and DX</span>';
+
                                                     } else {
                                                         document.getElementById("relativeChartWrapper").style.display = "none";
                                                         if (relativeChart) {
