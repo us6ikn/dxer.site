@@ -1693,9 +1693,7 @@
                                                         const polOffset = polOffsets[hourIndex];
                                                         document.getElementById('relativeChartLabel').innerHTML =
                                                         qthInput && dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput) && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)
-                                                          ? `<span class="metric-locator">${qthInput} - ${dxInput}</span>` +
-                                                            `<span class="metric-separator"></span>` +
-                                                            `<span class="metric-label metric-rel-libration">Rel LR:</span> ${relRate != null ? relRate + '°/min' : 'N/A'}` +
+                                                          ? `<span class="metric-label metric-rel-libration">Rel LR:</span> ${relRate != null ? relRate + '°/min' : 'N/A'}` +
                                                             `<span class="metric-separator"> | </span>` +
                                                             `<span class="metric-label metric-rel-doppler">DX Width:</span> ${relDoppler != null ? relDoppler.toFixed(0) + ' Hz' : 'N/A'}` +
                                                             `<span class="metric-separator"> | </span>` +
