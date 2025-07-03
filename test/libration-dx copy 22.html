@@ -7,204 +7,151 @@
   <script src="astronomy.browser.min.js"></script>
 
   <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        overflow: hidden;
-        font-family: Arial, sans-serif;
-      }
-
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
       #chartWrapper, #dxChartWrapper, #relativeChartWrapper, #moonChartWrapper {
-        width: 100%;
-        max-width: 600px;
-        height: 180px;
-        margin-top: 6px;
-        background-color: rgba(255, 255, 255, 0.85);
-        border-radius: 6px;
-        box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        position: relative;
-        box-sizing: border-box;
-        display: none;
+          width: 100%;
+          max-width: 600px;
+          height: 180px;
+          margin-top: 6px;
+          background-color: rgba(255, 255, 255, 0.85);
+          border-radius: 6px;
+          box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
+          overflow: hidden;
+          position: relative;
+          box-sizing: border-box;
+          display: none;
       }
-
       #declinationChart, #dxDeclinationChart, #relativeDataChart, #moonDistanceChart {
-        width: 100%;
-        height: calc(100% - 20px);
-        box-sizing: border-box;
+          width: 100%;
+          height: calc(100% - 20px);
+          box-sizing: border-box;
       }
-
       #moonChartWrapper {
-        display: block;
+          display: block;
       }
-
       #moonDistanceChart {
-        height: calc(100% - 40px);
-        padding-bottom: 20px;
+          height: calc(100% - 40px);
+          padding-bottom: 20px;
       }
-
       #chartLabel, #dxchartLabel, #relativeChartLabel, #moonChartLabel {
-        text-align: center;
-        margin-bottom: 0px;
-        font-weight: normal;
-        font-size: 11px;
-        font-family: 'Arial, sans-serif';
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 100%;
-        padding: 2px 0;
+          text-align: center;
+          margin-bottom: 0px;
+          font-weight: normal;
+          font-size: 11px;
+          font-family: 'Arial, sans-serif';
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 100%;
+          padding: 2px 0;
       }
-
-      #map {
-        height: 100dvh;
-        width: 100%;
-        z-index: 0;
-      }
-
-      #controls {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        z-index: 5;
-        background-color: rgba(255, 255, 255, 0.95);
-        padding: 12px;
-        border-radius: 8px;
-        max-width: 95vw;
-        max-height: 90vh;
-        display: flex;
-        flex-direction: column;
-        box-sizing: border-box;
-        transition: transform 0.3s ease;
-      }
-
-      #fixed-controls {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        background-color: inherit;
-        padding-bottom: 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      #scrollable-controls {
-        flex: 1;
-        overflow-y: auto;
-        max-height: calc(90vh - 220px); /* Adjust based on fixed-controls height */
-        padding-right: 5px;
-      }
-
-      #scrollable-controls::-webkit-scrollbar {
-        width: 6px;
-      }
-
-      #scrollable-controls::-webkit-scrollbar-thumb {
-        background-color: rgba(0, 123, 255, 0.5);
-        border-radius: 3px;
-      }
-
-      #scrollable-controls::-webkit-scrollbar-track {
-        background: transparent;
-      }
-
-      label {
-        font-weight: bold;
-        font-size: 14px;
-      }
-
-      #hour-value {
-        margin-left: 10px;
-        font-weight: normal;
-      }
-
-      #hour {
-        width: 100%;
-        margin-top: 5px;
-        -webkit-appearance: none;
-        appearance: none;
-        height: 10px;
-        background: rgba(0, 0, 0, 0.1);
-        border-radius: 5px;
-        outline: none;
-        transition: background 0.3s ease;
-        padding: 0;
-      }
-
-      #hour::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 20px;
-        height: 20px;
-        background: #007bff;
-        border-radius: 50%;
-        cursor: pointer;
-      }
-
-      #hour::-moz-range-thumb {
-        width: 20px;
-        height: 20px;
-        background: #007bff;
-        border-radius: 50%;
-        cursor: pointer;
-      }
-
-      #hour:active {
-        background: rgba(0, 123, 255, 0.5);
-      }
-
-      #hour-container {
-        position: relative;
-        width: 100%;
-        height: 40px;
-        margin-top: 10px;
-        padding: 5px 0;
-      }
-
-      #date-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 5px;
-        margin-top: 10px;
-      }
-
-      input[type="date"] {
-        width: auto;
-        max-width: 200px;
-      }
-
-      .app-name-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        position: relative;
-      }
-
-      .creator-label {
-        font-size: 10px;
-        color: #555;
-        font-style: italic;
-        margin-bottom: -4px;
-      }
-
-      .app-name {
-        font-size: 1.0rem;
-        font-weight: bold;
-        color: #2c3e50;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      }
-
-      .ghz-label {
-        font-size: 10px;
-        font-weight: bold;
-        color: #2c3e50;
-        margin-top: -4px;
-      }
-
+    #map {
+      height: 100dvh;
+      width: 100%;
+      z-index: 0;
+    }
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 5;
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 12px;
+      border-radius: 8px;
+      max-width: 90vw;
+      box-sizing: border-box;
+      overflow: auto;
+      max-height: 90vh;
+      max-width: 95vw;
+    }
+    label {
+      font-weight: bold;
+      font-size: 14px;
+    }
+    #hour-value {
+      margin-left: 10px;
+      font-weight: normal;
+    }
+    #hour {
+      width: 100%;
+      margin-top: 5px;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 10px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+      outline: none;
+      transition: background 0.3s ease;
+      padding: 0;
+    }
+    #hour::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #007bff;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    #hour::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: #007bff;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    #hour:active {
+      background: rgba(0, 123, 255, 0.5);
+    }
+    #hour-container {
+      position: relative;
+      width: 100%;
+      height: 40px;
+      margin-top: 10px;
+      padding: 5px 0;
+    }
+    #date-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 10px;
+    }
+    input[type="date"] {
+      width: auto;
+      max-width: 200px;
+    }
+    .app-name-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      position: relative;
+    }
+    .creator-label {
+      font-size: 10px;
+      color: #555;
+      font-style: italic;
+      margin-bottom: -4px;
+    }
+    .app-name {
+      font-size: 1.0rem;
+      font-weight: bold;
+      color: #2c3e50;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .ghz-label {
+      font-size: 10px;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-top: -4px;
+    }
       #toggleMoonChart {
         font-size: 12px;
         padding: 4px 8px;
@@ -224,26 +171,17 @@
         outline: none;
         box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
       }
-
-      #toggleControlsPanel {
-        align-self: flex-end;
-        font-size: 12px;
-        padding: 4px 8px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-      }
-
-      #toggleControlsPanel:hover {
-        background-color: #0056b3;
-      }
-
-      #toggleControlsPanel:focus {
-        outline: none;
-        box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
+      #moonChartLabel, #chartLabel, #dxchartLabel {
+        text-align: center;
+        margin-bottom: 0px;
+        font-weight: normal;
+        font-size: 11px;
+        font-family: 'Arial, sans-serif';
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        padding: 2px 0;
       }
 
       .metric-label {
@@ -251,43 +189,37 @@
       }
 
       .metric-distance {
-        color: #800080;
+        color: #800080; /* Purple, matches y1 axis */
       }
 
       .metric-declination {
-        color: #FFA500;
+        color: #FFA500; /* Orange, matches y2 axis */
       }
 
       .metric-pathloss {
-        color: #800080;
+        color: #800080; /* Purple, matches y3 axis */
       }
 
       .metric-separator {
         color: #666;
         margin: 0 4px;
       }
-
       .metric-elevation {
-        color: rgba(0, 0, 255, 0.6);
+        color: rgba(0, 0, 255, 0.6); /* Blue, matches declination chart y2 */
       }
-
       .metric-azimuth {
-        color: #444;
+        color: #444; /* Dark gray, no axis but neutral */
       }
-
       .metric-libration {
-        color: #ff0000;
+        color: #ff0000; /* Red, matches declination chart y1 */
       }
-
       .metric-doppler {
-        color: green;
+        color: green; /* Green, matches declination chart y3 */
       }
-
       .metric-locator {
         color: #000;
         font-weight: bold;
       }
-
       .sked-button {
         font-size: 12px;
         padding: 2px 6px;
@@ -308,62 +240,64 @@
         outline: none;
         box-shadow: 0 0 3px rgba(40, 167, 69, 0.5);
       }
-
       .button-group {
         display: flex;
-        gap: 3px;
-        margin-top: 6px;
+        gap: 3px; /* Compact gap */
+        margin-top: 6px; /* Tight margin */
         flex-wrap: wrap;
         justify-content: center;
       }
 
       .nav-button {
-        padding: 2px 3px;
-        background-color: rgba(255, 255, 255, 0.3);
-        color: #2c3e50;
-        border: 1px solid rgba(0, 123, 255, 0.4);
-        border-radius: 2px;
-        font-size: 10px;
+        padding: 2px 3px; /* Compact padding for ~12px height */
+        background-color: rgba(255, 255, 255, 0.3); /* Semi-transparent white */
+        color: #2c3e50; /* Dark color, matches .app-name */
+        border: 1px solid rgba(0, 123, 255, 0.4); /* Subtle blue border */
+        border-radius: 2px; /* Small radius, matches provided example */
+        font-size: 10px; /* Small font size */
         cursor: pointer;
         transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         text-decoration: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        line-height: 1;
+        display: flex; /* Ensure centering */
+        align-items: center; /* Vertical centering */
+        justify-content: center; /* Horizontal centering */
+        line-height: 1; /* Minimize vertical space */
       }
 
       .nav-button:hover {
-        background-color: rgba(255, 255, 255, 0.5);
-        color: #0056b3;
-        border-color: rgba(0, 123, 255, 0.6);
+        background-color: rgba(255, 255, 255, 0.5); /* Slightly more opaque */
+        color: #0056b3; /* Blue on hover, matches provided example */
+        border-color: rgba(0, 123, 255, 0.6); /* Slightly darker border */
       }
 
       .nav-button:focus {
         outline: none;
-        box-shadow: 0 0 2px rgba(0, 123, 255, 0.5);
+        box-shadow: 0 0 2px rgba(0, 123, 255, 0.5); /* Subtle focus effect */
       }
 
       .nav-button.icon-button {
-        padding: 2px;
-        font-size: 12px;
-        width: 18px;
-        height: 18px;
+        padding: 2px; /* Same padding */
+        font-size: 12px; /* Slightly larger for emojis */
+        width: 18px; /* Compact square */
+        height: 18px; /* Matches text button height */
         display: flex;
-        align-items: center;
-        justify-content: center;
+        align-items: center; /* Center emoji vertically */
+        justify-content: center; /* Center emoji horizontally */
+      }
+      #controls {
+        transition: transform 0.3s ease; /* Smooth sliding animation */
       }
 
       #controls.folded {
         transform: translateX(calc(-100% + 30px));
-        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); /* Add shadow to visible strip */
       }
 
       #showControlsPanel {
         position: fixed;
         top: 30%;
         left: 35px;
-        transform: translateY(-50%) scale(1);
+        transform: translateY(-50%) scale(1); /* Added scale for hover effect */
         width: 24px;
         height: 24px;
         padding: 2px;
@@ -371,13 +305,14 @@
         color: #2c3e50;
         border: 1px solid rgba(0, 123, 255, 0.4);
         border-radius: 4px;
-        font-size: 12px;
-        font-weight: bold;
+        font-size: 12px; /* Slightly smaller for cleaner look */
+        font-weight: bold; /* Bolder arrow */
         cursor: pointer;
-        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease, opacity 0.3s ease;
         display: none;
         align-items: center;
         justify-content: center;
+        line-height: 1;
         z-index: 1000;
         box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
       }
@@ -390,7 +325,7 @@
         background-color: rgba(255, 255, 255, 1);
         color: #0056b3;
         border-color: rgba(0, 123, 255, 0.6);
-        transform: translateY(-50%) scale(1.1);
+        transform: translateY(-50%) scale(1.1); /* Slight scale on hover */
       }
 
       #showControlsPanel:focus {
@@ -410,90 +345,72 @@
           font-size: 10px;
           padding: 1px;
         }
-        #controls {
-          padding: 8px;
-        }
-        #fixed-controls {
-          padding-bottom: 8px;
-        }
-        #scrollable-controls {
-          max-height: calc(90vh - 200px); /* Adjust for smaller screens */
-        }
-        #toggleControlsPanel {
-          font-size: 10px;
-          padding: 3px 6px;
-        }
       }
-
+      }
       .gm-style > div {
-        z-index: 50 !important;
+        z-index: 50 !important; /* Ensure map controls are below showControlsPanel */
       }
-
       .metric-rel-libration {
-        color: red;
-        font-weight: bold;
+          color: red;
+          font-weight: bold;
       }
 
       .metric-rel-doppler {
-        color: green;
-        font-weight: bold;
+          color: green;
+          font-weight: bold;
       }
 
       .metric-poloffset {
-        color: blue;
-        font-weight: bold;
+          color: blue;
+          font-weight: bold;
       }
+
   </style>
 </head>
 <body>
     <div id="map"></div>
     <div id="controls">
-      <div id="fixed-controls">
         <div id="date-container">
-          <div class="app-name-wrapper">
-            <div class="creator-label">by SA5IKN</div>
-            <div class="app-name">EME Observer</div>
-            <div class="ghz-label">10GHz</div>
-          </div>
-          <button id="prevDay">←</button>
-          <input type="date" id="date" />
-          <button id="nextDay">→</button>
-          <span id="hour-value">Time (UTC): 00:00</span>
+            <div class="app-name-wrapper">
+                <div class="creator-label">by SA5IKN</div>
+                <div class="app-name">EME Observer</div>
+                <div class="ghz-label">10GHz</div>
+            </div>
+            <button id="prevDay">←</button>
+            <input type="date" id="date" />
+            <button id="nextDay">→</button>
+            <span id="hour-value">Time (UTC): 00:00</span>
         </div>
         <div class="button-group">
-          <a href="eme-observer-statistics.html" class="nav-button">Statistics</a>
-          <a href="eme-observer-table.html" class="nav-button">Table</a>
-          <a href="https://forms.gle/vLCqCySPEkH926AX8" class="nav-button">Add Station</a>
-          <a href="http://dxer.site" class="nav-button icon-button">🏠</a>
-          <a href="http://dxer.site/eme-observer-faq.html" class="nav-button icon-button">?</a>
+            <a href="eme-observer-statistics.html" class="nav-button">Statistics</a>
+            <a href="eme-observer-table.html" class="nav-button">Table</a>
+            <a href="https://forms.gle/vLCqCySPEkH926AX8" class="nav-button">Add Station</a>
+            <a href="http://dxer.site" class="nav-button icon-button">🏠</a>
+            <a href="http://dxer.site/eme-observer-faq.html" class="nav-button icon-button">?</a>
         </div>
         <input type="range" id="hour" min="0" max="47" value="0" step="1" />
         <label for="qth" style="font-size: 12px;">My Locator:</label>
         <input type="text" id="qth" maxlength="6" size="8" placeholder="eg JO89tt" />
-        <label for="dx" style="font-size: 12px;">DX Locator:</label>
+        <label for="dx"style="font-size: 12px;">DX Locator:</label>
         <input type="text" id="dx" maxlength="6" size="8" placeholder="eg JO88xx" />
-        <button id="toggleControlsPanel">Hide Panel</button>
-      </div>
-      <div id="scrollable-controls">
         <div id="chartWrapper" style="display: none;">
-          <div id="chartLabel"></div>
-          <canvas id="declinationChart"></canvas>
+            <div id="chartLabel" style="text-align: center; margin-bottom: 0px; font-weight: normal;"></div>
+            <canvas id="declinationChart"></canvas>
         </div>
         <div id="dxChartWrapper" style="display: none;">
-          <div id="dxchartLabel"></div>
-          <canvas id="dxDeclinationChart"></canvas>
+            <div id="dxchartLabel"></div>
+            <canvas id="dxDeclinationChart"></canvas>
         </div>
         <div id="relativeChartWrapper" style="display: none;">
-          <div id="relativeChartLabel"></div>
-          <canvas id="relativeDataChart"></canvas>
+            <div id="relativeChartLabel"></div>
+            <canvas id="relativeDataChart"></canvas>
         </div>
         <div id="moonChartWrapper" style="display: block;">
-          <div id="moonChartLabel"></div>
-          <canvas id="moonDistanceChart"></canvas>
+            <div id="moonChartLabel"></div>
+            <canvas id="moonDistanceChart"></canvas>
+            <button id="toggleControlsPanel" style="position: absolute; bottom: 5px; right: 5px; z-index: 10;">Hide Panel</button>
         </div>
-      </div>
     </div>
-    <button id="showControlsPanel" style="display: none;">→</button>
     <button id="showControlsPanel" style="display: none;">→</button>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
