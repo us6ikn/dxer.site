@@ -364,7 +364,25 @@
           color: blue;
           font-weight: bold;
       }
+      #toggleDxChart {
+          font-size: 12px;
+          padding: 4px 8px;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+      }
 
+      #toggleDxChart:hover {
+          background-color: #0056b3;
+      }
+
+      #toggleDxChart:focus {
+          outline: none;
+          box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
+      }
   </style>
 </head>
 <body>
@@ -389,10 +407,10 @@
             <a href="http://dxer.site/eme-observer-faq.html" class="nav-button icon-button">?</a>
         </div>
         <input type="range" id="hour" min="0" max="47" value="0" step="1" />
-        <label for="qth" style="font-size: 12px;">My Locator:</label>
-        <input type="text" id="qth" maxlength="6" size="8" placeholder="eg JO89tt" />
-        <label for="dx"style="font-size: 12px;">DX Locator:</label>
-        <input type="text" id="dx" maxlength="6" size="8" placeholder="eg JO88xx" />
+        <label for="qth">My Locator:</label>
+        <input type="text" id="qth" maxlength="6" size="9" placeholder="eg JO89tt" />
+        <label for="dx">DX Locator:</label>
+        <input type="text" id="dx" maxlength="6" size="9" placeholder="eg JO88xx" />
         <div id="chartWrapper" style="display: none;">
             <div id="chartLabel" style="text-align: center; margin-bottom: 0px; font-weight: normal;"></div>
             <canvas id="declinationChart"></canvas>
@@ -400,6 +418,7 @@
         <div id="dxChartWrapper" style="display: none;">
             <div id="dxchartLabel"></div>
             <canvas id="dxDeclinationChart"></canvas>
+            <button id="toggleDxChart" style="position: absolute; bottom: 5px; right: 5px; z-index: 10;">Hide DX Chart</button>
         </div>
         <div id="relativeChartWrapper" style="display: none;">
             <div id="relativeChartLabel"></div>
@@ -419,7 +438,7 @@
     <script>
         let chart;
         let dxChart;
-        let relativeChart; // New chart for relative data
+        let relativeChart;
         let moonChart;
         let rawData = [];
         let dxRawData = [];
@@ -433,6 +452,7 @@
         let footprintCircle;
         let currentInfoWindow = null;
         let map;
+        let isDxChartHidden = false; // Add this line
 
         const MOON_RADIUS = 1.7374e6; // meters
         const SPEED_OF_LIGHT = 299792458; // m/s
@@ -1426,7 +1446,13 @@
                         polOffsets.push(null);
                     }
                 }
-                document.getElementById("dxChartWrapper").style.display = dxDataForDay.some(r => r?.rate != null) ? "block" : "none";
+                                                    if (dxDataForDay.some(r => r?.rate != null) && !isDxChartHidden) {
+                                                        document.getElementById("dxChartWrapper").style.display = "block";
+                                                        document.getElementById("toggleDxChart").textContent = "Hide DX Chart";
+                                                    } else {
+                                                        document.getElementById("dxChartWrapper").style.display = "none";
+                                                        document.getElementById("toggleDxChart").textContent = "Show DX Chart";
+                                                    }
             } else {
                 document.getElementById("dxChartWrapper").style.display = "none";
             }
@@ -2073,47 +2099,51 @@
                                                                         }
                                                                     });
 
-                                                                    dxInput.addEventListener("input", () => {
-                                                                        const locator = dxInput.value.trim().toUpperCase();
-                                                                        const dxChartLabel = document.getElementById('dxchartLabel');
-                                                                        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-                                                                            console.log(`Processing DX input: ${locator}`);
-                                                                            dxChartLabel.innerHTML = '<span class="metric-locator">Computing...</span>';
-                                                                            try {
-                                                                                // Update dxLat and dxLon
-                                                                                ({ lat: dxLat, lon: dxLon } = qthToLatLon(locator));                                                                        console.log(`Set dxLat: ${dxLat}, dxLon: ${dxLon} for DX ${locator}`);
-                                                                                computeLibrationForDay(locator, document.getElementById("date").value, 'dx');
-                                                                                if (dxRawData.length === 0) {
-                                                                                    console.warn(`No data computed for DX ${locator}`);
-                                                                                    document.getElementById("dxChartWrapper").style.display = "none";
-                                                                                    if (dxChart) {
-                                                                                        dxChart.destroy();
-                                                                                        dxChart = null;
-                                                                                    }
-                                                                                    dxChartLabel.innerHTML = '<span class="metric-locator">No data for DX</span>';
-                                                                                } else {
-                                                                                    console.log(`DX rawData length: ${dxRawData.length}, sample:`, dxRawData.slice(0, 3));
-                                                                                    updateChart(hourIndex);
-                                                                                }
-                                                                            } catch (e) {
-                                                                                console.error(`Error computing libration for DX ${locator}: ${e.message}`);
-                                                                                document.getElementById("dxChartWrapper").style.display = "none";
-                                                                                if (dxChart) {
-                                                                                    dxChart.destroy();
-                                                                                    dxChart = null;
-                                                                                }
-                                                                                dxChartLabel.innerHTML = '<span class="metric-locator">Error computing DX data</span>';
-                                                                            }
-                                                                        } else {
-                                                                            console.log(`Invalid DX locator: ${locator}`);
-                                                                            document.getElementById("dxChartWrapper").style.display = "none";
-                                                                            if (dxChart) {
-                                                                                dxChart.destroy();
-                                                                                dxChart = null;
-                                                                            }
-                                                                            document.getElementById('dxchartLabel').innerHTML = '<span class="metric-locator">Enter valid DX</span>';
-                                                                        }
-                                                                    });
+                                                    dxInput.addEventListener("input", () => {
+                                                        const locator = dxInput.value.trim().toUpperCase();
+                                                        const dxChartLabel = document.getElementById('dxchartLabel');
+                                                        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
+                                                            console.log(`Processing DX input: ${locator}`);
+                                                            dxChartLabel.innerHTML = '<span class="metric-locator">Computing...</span>';
+                                                            try {
+                                                                ({ lat: dxLat, lon: dxLon } = qthToLatLon(locator));
+                                                                console.log(`Set dxLat: ${dxLat}, dxLon: ${dxLon} for DX ${locator}`);
+                                                                computeLibrationForDay(locator, document.getElementById("date").value, 'dx');
+                                                                if (dxRawData.length === 0) {
+                                                                    console.warn(`No data computed for DX ${locator}`);
+                                                                    document.getElementById("dxChartWrapper").style.display = "none";
+                                                                    document.getElementById("toggleDxChart").textContent = "Show DX Chart";
+                                                                    if (dxChart) {
+                                                                        dxChart.destroy();
+                                                                        dxChart = null;
+                                                                    }
+                                                                    dxChartLabel.innerHTML = '<span class="metric-locator">No data for DX</span>';
+                                                                } else {
+                                                                    console.log(`DX rawData length: ${dxRawData.length}, sample:`, dxRawData.slice(0, 3));
+                                                                    isDxChartHidden = false; // Reset to visible on valid input
+                                                                    updateChart(hourIndex);
+                                                                }
+                                                            } catch (e) {
+                                                                console.error(`Error computing libration for DX ${locator}: ${e.message}`);
+                                                                document.getElementById("dxChartWrapper").style.display = "none";
+                                                                document.getElementById("toggleDxChart").textContent = "Show DX Chart";
+                                                                if (dxChart) {
+                                                                    dxChart.destroy();
+                                                                    dxChart = null;
+                                                                }
+                                                                dxChartLabel.innerHTML = '<span class="metric-locator">Error computing DX data</span>';
+                                                            }
+                                                        } else {
+                                                            console.log(`Invalid DX locator: ${locator}`);
+                                                            document.getElementById("dxChartWrapper").style.display = "none";
+                                                            document.getElementById("toggleDxChart").textContent = "Show DX Chart";
+                                                            if (dxChart) {
+                                                                dxChart.destroy();
+                                                                dxChart = null;
+                                                            }
+                                                            document.getElementById('dxchartLabel').innerHTML = '<span class="metric-locator">Enter valid DX</span>';
+                                                        }
+                                                    });
 
         function qthToLatLon(locator) {
             if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
@@ -2174,6 +2204,24 @@
             }
         });
 
+                                                    // Toggle DX chart visibility
+                                                    document.getElementById("toggleDxChart").addEventListener("click", () => {
+                                                        const dxChartWrapper = document.getElementById("dxChartWrapper");
+                                                        const toggleButton = document.getElementById("toggleDxChart");
+
+                                                        if (dxChartWrapper.style.display !== "none") {
+                                                            dxChartWrapper.style.display = "none";
+                                                            toggleButton.textContent = "Show DX Chart";
+                                                            isDxChartHidden = true; // Set flag to hidden
+                                                        } else {
+                                                            dxChartWrapper.style.display = "block";
+                                                            toggleButton.textContent = "Hide DX Chart";
+                                                            isDxChartHidden = false; // Set flag to visible
+                                                            if (dxChart) {
+                                                                dxChart.resize();
+                                                            }
+                                                        }
+                                                    });
         // Show controls panel
                                                     document.getElementById("showControlsPanel").addEventListener("click", () => {
                                                         const controls = document.getElementById("controls");
