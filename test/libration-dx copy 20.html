@@ -16,7 +16,7 @@
     }
       #chartWrapper, #dxChartWrapper, #relativeChartWrapper, #moonChartWrapper {
           width: 100%;
-          max-width: 600px;
+          max-width: 600px; /* Consistent width for all charts */
           height: 180px;
           margin-top: 6px;
           background-color: rgba(255, 255, 255, 0.85);
@@ -33,10 +33,10 @@
           box-sizing: border-box;
       }
       #moonChartWrapper {
-          display: block;
+          display: block; /* Moon chart is visible by default */
       }
       #moonDistanceChart {
-          height: calc(100% - 40px);
+          height: calc(100% - 40px); /* Adjust for button */
           padding-bottom: 20px;
       }
       #chartLabel, #dxchartLabel, #relativeChartLabel, #moonChartLabel {
@@ -1556,142 +1556,134 @@
                 }
             }
 
-                                                    // Relative chart initialization/update
-                                                    const relativeAnnotation = {
-                                                        timeMarker: {
-                                                            type: 'line',
-                                                            mode: 'vertical',
-                                                            scaleID: 'x',
-                                                            value: hourIndex,
-                                                            borderColor: 'black',
-                                                            borderWidth: 2,
-                                                            label: { enabled: false }
-                                                        }
-                                                    };
+            // Relative chart initialization/update
+            const relativeAnnotation = {
+                timeMarker: {
+                    type: 'line',
+                    mode: 'vertical',
+                    scaleID: 'x',
+                    value: hourIndex,
+                    borderColor: 'black',
+                    borderWidth: 2,
+                    label: { enabled: false }
+                }
+            };
 
-                                                    if (qthInput && dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput) && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput) && relativeLibrationRates.some(r => r != null)) {
-                                                        document.getElementById("relativeChartWrapper").style.display = "block";
-                                                        // Add sked annotations
-                                                        try {
-                                                            const skedAnnotations = getSkedAnnotations(dateStr, lat, lon, dxLat, dxLon);
-                                                            Object.assign(relativeAnnotation, skedAnnotations);
-                                                        } catch (e) {
-                                                            console.warn(`Error getting sked annotations: ${e.message}`);
-                                                        }
+            if (qthInput && dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput) && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput) && relativeLibrationRates.some(r => r != null)) {
+                document.getElementById("relativeChartWrapper").style.display = "block";
+                if (!relativeChart) {
+                    console.log(`Initializing relativeChart for QTH ${qthInput} and DX ${dxInput}`);
+                    relativeChart = new Chart(document.getElementById("relativeDataChart"), {
+                        type: 'line',
+                        data: {
+                            labels,
+                            datasets: [
+                                {
+                                    label: "Relative Libration Rate (×10⁻³ °/min)",
+                                    data: relativeLibrationRates,
+                                    borderColor: "#8B008B",
+                                    pointRadius: 0,
+                                    borderWidth: 1.5,
+                                    tension: 0.2,
+                                    yAxisID: "y1"
+                                },
+                                {
+                                    label: "Relative Doppler Spread, Hz",
+                                    data: relativeDopplerSpreads,
+                                    borderColor: "#FFD700",
+                                    pointRadius: 0,
+                                    borderWidth: 1.5,
+                                    tension: 0.2,
+                                    yAxisID: "y2"
+                                },
+                                {
+                                    label: "Polarization Offset (°)",
+                                    data: polOffsets,
+                                    borderColor: "#00CED1",
+                                    pointRadius: 0,
+                                    borderWidth: 1.5,
+                                    tension: 0.2,
+                                    yAxisID: "y3"
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
+                                    ticks: { font: { size: 10 } }
+                                },
+                                y1: {
+                                    type: "linear",
+                                    display: true,
+                                    position: "right",
+                                    title: { display: true, text: "Rel. Libration Rate (×10⁻³ °/min)", color: "#8B008B", font: { size: 10, family: 'Arial, sans-serif' } },
+                                    min: 0,
+                                    max: 5,
+                                    ticks: { stepSize: 1, color: "#8B008B", font: { size: 12 } },
+                                    grid: { drawTicks: true, drawBorder: true }
+                                },
+                                y2: {
+                                    type: "linear",
+                                    display: true,
+                                    position: "right",
+                                    offset: true,
+                                    title: { display: true, text: "Rel. Doppler Spread (Hz)", color: "#FFD700", font: { size: 12, family: 'Arial, sans-serif' } },
+                                    min: 0,
+                                    max: 300,
+                                    grid: { drawOnChartArea: false },
+                                    ticks: { stepSize: 50, color: "#FFD700", font: { size: 12 } }
+                                },
+                                y3: {
+                                    type: "linear",
+                                    display: true,
+                                    position: "left",
+                                    title: { display: true, text: "Polarization Offset (°)", color: "#00CED1", font: { size: 12, family: 'Arial, sans-serif' } },
+                                    min: -90,
+                                    max: 90,
+                                    grid: { drawOnChartArea: false },
+                                    ticks: { stepSize: 30, callback: val => val + "°", color: "#00CED1", font: { size: 12 } }
+                                }
+                            },
+                            plugins: {
+                                legend: { display: false },
+                                annotation: { annotations: relativeAnnotation }
+                            }
+                        }
+                    });
+                } else {
+                    relativeChart.data.labels = labels;
+                    relativeChart.data.datasets[0].data = relativeLibrationRates;
+                    relativeChart.data.datasets[1].data = relativeDopplerSpreads;
+                    relativeChart.data.datasets[2].data = polOffsets;
+                    relativeChart.options.plugins.annotation.annotations = relativeAnnotation;
+                    relativeChart.options.plugins.annotation.annotations.timeMarker.value = hourIndex;
+                    relativeChart.update('none');
+                }
 
-                                                        if (!relativeChart) {
-                                                            console.log(`Initializing relativeChart for QTH ${qthInput} and DX ${dxInput}`);
-                                                            relativeChart = new Chart(document.getElementById("relativeDataChart"), {
-                                                                type: 'line',
-                                                                data: {
-                                                                    labels,
-                                                                    datasets: [
-                                                                        {
-                                                                            label: "Relative Libration (×10⁻³ °/min)",
-                                                                            data: relativeLibrationRates,
-                                                                            borderColor: "#8B008B",
-                                                                            pointRadius: 0,
-                                                                            borderWidth: 1.5,
-                                                                            tension: 0.2,
-                                                                            yAxisID: "y1"
-                                                                        },
-                                                                        {
-                                                                            label: "Relative Spread, Hz",
-                                                                            data: relativeDopplerSpreads,
-                                                                            borderColor: "#FFD700",
-                                                                            pointRadius: 0,
-                                                                            borderWidth: 1.5,
-                                                                            tension: 0.2,
-                                                                            yAxisID: "y2"
-                                                                        },
-                                                                        {
-                                                                            label: "Polarization Offset (°)",
-                                                                            data: polOffsets,
-                                                                            borderColor: "#00CED1",
-                                                                            pointRadius: 0,
-                                                                            borderWidth: 1.5,
-                                                                            tension: 0.2,
-                                                                            yAxisID: "y3"
-                                                                        }
-                                                                    ]
-                                                                },
-                                                                options: {
-                                                                    responsive: true,
-                                                                    maintainAspectRatio: false,
-                                                                    scales: {
-                                                                        x: {
-                                                                            title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
-                                                                            ticks: { font: { size: 10 } }
-                                                                        },
-                                                                        y1: {
-                                                                            type: "linear",
-                                                                            display: true,
-                                                                            position: "right",
-                                                                            title: { display: true, text: "Rel. Libration Rate (×10⁻³ °/min)", color: "#8B008B", font: { size: 10, family: 'Arial, sans-serif' } },
-                                                                            min: 0,
-                                                                            max: 5,
-                                                                            ticks: { stepSize: 1, color: "#8B008B", font: { size: 12 } },
-                                                                            grid: { drawTicks: true, drawBorder: true }
-                                                                        },
-                                                                        y2: {
-                                                                            type: "linear",
-                                                                            display: true,
-                                                                            position: "right",
-                                                                            offset: true,
-                                                                            title: { display: true, text: "Rel. Doppler Spread (Hz)", color: "#FFD700", font: { size: 12, family: 'Arial, sans-serif' } },
-                                                                            min: 0,
-                                                                            max: 300,
-                                                                            grid: { drawOnChartArea: false },
-                                                                            ticks: { stepSize: 50, color: "#FFD700", font: { size: 12 } }
-                                                                        },
-                                                                        y3: {
-                                                                            type: "linear",
-                                                                            display: true,
-                                                                            position: "left",
-                                                                            title: { display: true, text: "Polarization Offset (°)", color: "#00CED1", font: { size: 12, family: 'Arial, sans-serif' } },
-                                                                            min: -90,
-                                                                            max: 90,
-                                                                            grid: { drawOnChartArea: false },
-                                                                            ticks: { stepSize: 30, callback: val => val + "°", color: "#00CED1", font: { size: 12 } }
-                                                                        }
-                                                                    },
-                                                                    plugins: {
-                                                                        legend: { display: false },
-                                                                        annotation: { annotations: relativeAnnotation }
-                                                                    }
-                                                                }
-                                                            });
-                                                        } else {
-                                                            relativeChart.data.labels = labels;
-                                                            relativeChart.data.datasets[0].data = relativeLibrationRates;
-                                                            relativeChart.data.datasets[1].data = relativeDopplerSpreads;
-                                                            relativeChart.data.datasets[2].data = polOffsets;
-                                                            relativeChart.options.plugins.annotation.annotations = relativeAnnotation;
-                                                            relativeChart.options.plugins.annotation.annotations.timeMarker.value = hourIndex;
-                                                            relativeChart.update('none');
-                                                        }
-
-                                                        const relRate = relativeLibrationRates[hourIndex] != null ? (relativeLibrationRates[hourIndex] / 1000).toFixed(4) : null;
-                                                        const relDoppler = relativeDopplerSpreads[hourIndex];
-                                                        const polOffset = polOffsets[hourIndex];
-                                                        document.getElementById('relativeChartLabel').innerHTML =
-                                                            qthInput && dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput) && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)
-                                                                ? `<span class="metric-locator">${qthInput} - ${dxInput}</span>` +
-                                                                  `<span class="metric-separator"> - </span>` +
-                                                                  `<span class="metric-label metric-rel-libration">Rel LR:</span> ${relRate != null ? relRate + '°/min' : 'N/A'}` +
-                                                                  `<span class="metric-separator">|</span>` +
-                                                                  `<span class="metric-label metric-rel-doppler">DX Width:</span> ${relDoppler != null ? relDoppler.toFixed(0) + ' Hz' : 'N/A'}` +
-                                                                  `<span class="metric-separator">|</span>` +
-                                                                  `<span class="metric-label metric-poloffset">Dpol:</span> ${polOffset != null ? polOffset.toFixed(1) + '°' : 'N/A'}`
-                                                                : '<span class="metric-locator">Enter valid QTH and DX</span>';
-                                                    } else {
-                                                        document.getElementById("relativeChartWrapper").style.display = "none";
-                                                        if (relativeChart) {
-                                                            relativeChart.destroy();
-                                                            relativeChart = null;
-                                                        }
-                                                        document.getElementById('relativeChartLabel').innerHTML = '<span class="metric-locator">Enter valid QTH and DX</span>';
-                                                    }
+                const relRate = relativeLibrationRates[hourIndex] != null ? (relativeLibrationRates[hourIndex] / 1000).toFixed(4) : null;
+                const relDoppler = relativeDopplerSpreads[hourIndex];
+                const polOffset = polOffsets[hourIndex];
+                document.getElementById('relativeChartLabel').innerHTML =
+                    qthInput && dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput) && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)
+                        ? `<span class="metric-locator">${qthInput} - ${dxInput}</span>` +
+                          `<span class="metric-separator"> - </span>` +
+                          `<span class="metric-label metric-rel-libration">Rel Libr:</span> ${relRate != null ? relRate + '°/min' : 'N/A'}` +
+                          `<span class="metric-separator">|</span>` +
+                          `<span class="metric-label metric-rel-doppler">Rel Spread:</span> ${relDoppler != null ? relDoppler.toFixed(0) + ' Hz' : 'N/A'}` +
+                          `<span class="metric-separator">|</span>` +
+                          `<span class="metric-label metric-poloffset">Pol Offset:</span> ${polOffset != null ? polOffset.toFixed(1) + '°' : 'N/A'}`
+                        : '<span class="metric-locator">Enter valid QTH and DX</span>';
+            } else {
+                document.getElementById("relativeChartWrapper").style.display = "none";
+                if (relativeChart) {
+                    relativeChart.destroy();
+                    relativeChart = null;
+                }
+                document.getElementById('relativeChartLabel').innerHTML = '<span class="metric-locator">Enter valid QTH and DX</span>';
+            }
 
             updateMap();
             updateMoonChart();
@@ -1741,7 +1733,7 @@
                                                                                         content: ['Rise', formatTimeUTC(riseDate)],
                                                                                         enabled: true,
                                                                                         position: 'top',
-                                                                                        yAdjust: isLate ? -50 : -40, // Adjust y-position for late times to avoid overlap
+                                                                                        yAdjust: isLate ? -60 : -50, // Adjust y-position for late times to avoid overlap
                                                                                         font: { size: 11, weight: 'bold', family: 'Arial, sans-serif' },
                                                                                         color: 'white',
                                                                                         backgroundColor: 'rgba(0, 0, 255, 0.85)',
@@ -1773,7 +1765,7 @@
                                                                                         content: ['Set', formatTimeUTC(setDate)],
                                                                                         enabled: true,
                                                                                         position: 'top',
-                                                                                        yAdjust: isLate ? -10 : -20, // Adjust y-position for late times to avoid overlap
+                                                                                        yAdjust: isLate ? -20 : -30, // Adjust y-position for late times to avoid overlap
                                                                                         font: { size: 11, weight: 'bold', family: 'Arial, sans-serif' },
                                                                                         color: 'white',
                                                                                         backgroundColor: 'rgba(255, 165, 0, 0.85)',
@@ -1800,131 +1792,6 @@
                                                                         }
                                                                         return hours * 2;
                                                                     }
-
-                                                    function getSkedAnnotations(dateStr, qthLat, qthLon, dxLat, dxLon) {
-                                                        const annotations = {};
-                                                        const targetDateStr = dateStr.slice(0, 10); // e.g., "2025-07-03"
-                                                        const jsDate = new Date(`${dateStr}T00:00:00Z`);
-                                                        const astroTime = Astronomy.MakeTime(jsDate);
-
-                                                        // Initialize observers for QTH and DX
-                                                        const qthObserver = new Astronomy.Observer(qthLat, qthLon, 0);
-                                                        const dxObserver = new Astronomy.Observer(dxLat, dxLon, 0);
-
-                                                        // Calculate moonrise and moonset for QTH
-                                                        let qthRiseEvent = null, qthSetEvent = null, dxRiseEvent = null, dxSetEvent = null;
-                                                        try {
-                                                            qthRiseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObserver, +1, astroTime, 1.0);
-                                                            qthSetEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObserver, -1, astroTime, 1.0);
-                                                            dxRiseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObserver, +1, astroTime, 1.0);
-                                                            dxSetEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObserver, -1, astroTime, 1.0);
-                                                        } catch (e) {
-                                                            console.warn(`Error calculating moonrise/set: ${e.message}`);
-                                                            return annotations; // Return empty annotations if calculation fails
-                                                        }
-
-                                                        // Format time in HH:MM:SSz
-                                                        function formatTimeUTC(date) {
-                                                            if (!date) return 'N/A';
-                                                            return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}z`;
-                                                        }
-
-                                                        // Convert time to chart index (0 to 47, each representing 30 minutes)
-                                                        function timeToChartIndex(date) {
-                                                            if (!(date instanceof Date)) return null;
-                                                            const hours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
-                                                            // Map to chart index (0 to 47)
-                                                            let index = Math.round(hours * 2);
-                                                            // Clamp to valid range
-                                                            if (index < 0) index = 0;
-                                                            if (index > 47) index = 47;
-                                                            return index;
-                                                        }
-
-                                                        // Determine sked window (overlap of QTH and DX visibility)
-                                                        let skedStartTime = null, skedEndTime = null;
-                                                        if (qthRiseEvent && qthSetEvent && dxRiseEvent && dxSetEvent &&
-                                                            qthRiseEvent.date && qthSetEvent.date && dxRiseEvent.date && dxSetEvent.date) {
-                                                            const qthRise = qthRiseEvent.date;
-                                                            const qthSet = qthSetEvent.date;
-                                                            const dxRise = dxRiseEvent.date;
-                                                            const dxSet = dxSetEvent.date;
-
-                                                            // Check if events are on the target date
-                                                            const isSameDay = (date) => date.toISOString().slice(0, 10) === targetDateStr;
-
-                                                            if (isSameDay(qthRise) && isSameDay(qthSet) && isSameDay(dxRise) && isSameDay(dxSet)) {
-                                                                // Sked start is the later of the two rise times
-                                                                skedStartTime = qthRise > dxRise ? qthRise : dxRise;
-                                                                // Sked end is the earlier of the two set times
-                                                                skedEndTime = qthSet < dxSet ? qthSet : dxSet;
-
-                                                           
-                                                            } else {
-                                                                console.log(`Moonrise/set not on target date: QTH rise=${qthRise.toISOString()}, set=${qthSet.toISOString()}, DX rise=${dxRise.toISOString()}, set=${dxSet.toISOString()}`);
-                                                            }
-                                                        }
-
-                                                        // Add annotations if a valid sked window exists
-                                                        if (skedStartTime && skedEndTime) {
-                                                            const startIndex = timeToChartIndex(skedStartTime);
-                                                            const endIndex = timeToChartIndex(skedEndTime);
-
-                                                            // Add sked start annotation
-                                                            annotations.skedStart = {
-                                                                type: 'line',
-                                                                mode: 'vertical',
-                                                                scaleID: 'x',
-                                                                value: startIndex,
-                                                                borderColor: 'blue',
-                                                                borderWidth: 1,
-                                                                label: {
-                                                                    enabled: true,
-                                                                    content: `Sked Start ${formatTimeUTC(skedStartTime)}`,
-                                                                    position: 'start',
-                                                                    yAdjust: 10,
-                                                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                                                    color: 'black',
-                                                                    font: { size: 10, weight: 'bold', family: 'Arial, sans-serif' },
-                                                                    padding: 2,
-                                                                    cornerRadius: 6,
-                                                                    borderColor: 'rgba(0, 0, 255, 0.7)',
-                                                                    borderWidth: 1,
-                                                                    boxShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-                                                                    textAlign: 'center'
-                                                                }
-                                                            };
-
-                                                            // Add sked end annotation
-                                                            annotations.skedEnd = {
-                                                                type: 'line',
-                                                                mode: 'vertical',
-                                                                scaleID: 'x',
-                                                                value: endIndex,
-                                                                borderColor: 'green',
-                                                                borderWidth: 1,
-                                                                label: {
-                                                                    enabled: true,
-                                                                    content: `Sked End ${formatTimeUTC(skedEndTime)}`,
-                                                                    position: 'end',
-                                                                    yAdjust: -20,
-                                                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                                                    color: 'black',
-                                                                    font: { size: 10, weight: 'bold', family: 'Arial, sans-serif' },
-                                                                    padding: 2,
-                                                                    cornerRadius: 6,
-                                                                    borderColor: 'rgba(0, 128, 0, 0.7)',
-                                                                    borderWidth: 1,
-                                                                    boxShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-                                                                    textAlign: 'center'
-                                                                }
-                                                            };
-                                                        } else {
-                                                            console.log('No valid sked window found for annotations');
-                                                        }
-
-                                                        return annotations;
-                                                    }
 
         document.getElementById("hour").addEventListener("input", () => {
             hourIndex = parseInt(document.getElementById("hour").value);
