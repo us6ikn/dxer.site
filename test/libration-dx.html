@@ -550,7 +550,7 @@
     <script>
         let chart;
         let dxChart;
-        let relativeChart; // New chart for relative data
+        let relativeChart;
         let moonChart;
         let rawData = [];
         let dxRawData = [];
@@ -565,11 +565,10 @@
         let currentInfoWindow = null;
         let map;
 
-        const MOON_RADIUS = 1.7374e6; // meters
-        const SPEED_OF_LIGHT = 299792458; // m/s
-        const FREQUENCY_HZ = 10.368e9; // 10.368 GHz
+        const MOON_RADIUS = 1.7374e6;
+        const SPEED_OF_LIGHT = 299792458;
+        const FREQUENCY_HZ = 10.368e9;
 
-        // Function to compute libration rates for a day using EMEastroLib.topocentricLibration
         function computeLibrationForDay(locator, dateStr, type) {
             if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
                 console.warn(`Invalid locator: ${locator}`);
@@ -635,8 +634,8 @@
                 }
 
                 try {
-                    const dlat = (arr[i+1].lat - arr[i-1].lat) / 60; // Degrees per minute
-                    const dlon = (arr[i+1].lon - arr[i-1].lon) / 60; // Degrees per minute
+                    const dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
+                    const dlon = (arr[i+1].lon - arr[i-1].lon) / 60;
                     if (isNaN(dlat) || isNaN(dlon) || !isFinite(dlat) || !isFinite(dlon)) {
                         console.warn(`Invalid dlat/dlon for ${curr.date} at ${locator}: dlat=${dlat}, dlon=${dlon}`);
                         return { date: curr.date, rate: null, dldt: null, dbdt: null };
@@ -679,8 +678,7 @@
                 fullscreenControl: false
             });
 
-            // Fetch and process output_2_10GHz_with_DXCC.json
-            fetch('output_2_10GHz_with_DXCC.json')
+            fetch('stn_10GHz.json')
                 .then(response => response.json())
                 .then(data => {
                     data.forEach(station => {
@@ -761,13 +759,11 @@
                                         placeholder.style.display = 'block';
                                     });
 
-                                // Add event listener for Sked button
                                 const skedButton = document.getElementById(`sked-${callsign}`);
                                 if (skedButton) {
                                     skedButton.addEventListener('click', () => {
                                         const locator = skedButton.getAttribute('data-locator');
                                         document.getElementById('dx').value = locator;
-                                        // Trigger input event to update chart
                                         const inputEvent = new Event('input', { bubbles: true });
                                         document.getElementById('dx').dispatchEvent(inputEvent);
                                     });
@@ -778,8 +774,7 @@
                 })
                 .catch(() => { /* Handle error silently */ });
 
-            // Fetch and process output_2_10GHz_SK_with_DXCC.json
-            fetch('output_2_10GHz_SK_with_DXCC.json')
+            fetch('stn_10GHz_SK.json')
                 .then(response => response.json())
                 .then(data => {
                     data.forEach(station => {
@@ -856,13 +851,11 @@
                                         placeholder.style.display = 'block';
                                     });
 
-                                // Add event listener for Sked button
                                 const skedButton = document.getElementById(`sked-${callsign}`);
                                 if (skedButton) {
                                     skedButton.addEventListener('click', () => {
                                         const locator = skedButton.getAttribute('data-locator');
                                         document.getElementById('dx').value = locator;
-                                        // Trigger input event to update chart
                                         const inputEvent = new Event('input', { bubbles: true });
                                         document.getElementById('dx').dispatchEvent(inputEvent);
                                     });
@@ -889,7 +882,6 @@
             const minutes = index % 2 === 0 ? '00' : '30';
             const utcTimeString = `${selectedDate}T${hour}:${minutes}:00Z`;
 
-            // Validate date input
             if (!selectedDate || !/^\d{4}-\d{2}-\d{2}$/.test(selectedDate)) {
                 console.warn(`Invalid or missing date in updateMap: ${selectedDate}`);
                 return;
@@ -902,9 +894,8 @@
             }
 
             try {
-                // Calculate sublunar point
                 const time = Astronomy.MakeTime(utcDate);
-                const observer = new Astronomy.Observer(0, 0, 0); // Geocenter
+                const observer = new Astronomy.Observer(0, 0, 0);
                 const moon = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, true);
                 const libration = Astronomy.Libration(time);
 
@@ -913,36 +904,33 @@
                     return;
                 }
 
-                const raHours = moon.ra; // Right Ascension in sidereal HOURS
-                const decDeg = moon.dec; // Declination in DEGREES (latitude)
-                const raDeg = raHours * 15; // Convert RA to degrees
+                const raHours = moon.ra;
+                const decDeg = moon.dec;
+                const raDeg = raHours * 15;
 
-                let gastDeg = Astronomy.SiderealTime(time) * 15; // GAST in degrees
-                gastDeg = ((gastDeg % 360) + 360) % 360; // Normalize to [0, 360)
+                let gastDeg = Astronomy.SiderealTime(time) * 15;
+                gastDeg = ((gastDeg % 360) + 360) % 360;
 
                 let lonDeg = raDeg - gastDeg;
                 if (lonDeg > 180) lonDeg -= 360;
                 if (lonDeg < -180) lonDeg += 360;
 
-                const lat = decDeg; // Sublunar latitude
-                const lon = lonDeg; // Sublunar longitude
+                const lat = decDeg;
+                const lon = lonDeg;
 
-                // Calculate footprint radius
-                const earthRadius = 6371; // Earth's mean radius in km
-                const D_moon = libration.dist_km; // Moon's geocentric distance in km
+                const earthRadius = 6371;
+                const D_moon = libration.dist_km;
                 const theta_rad = Math.acos(earthRadius / (earthRadius + D_moon));
-                const footprintRadius = earthRadius * theta_rad * 1000; // Convert km to meters for Google Maps
+                const footprintRadius = earthRadius * theta_rad * 1000;
 
                 if (isNaN(lat) || isNaN(lon) || isNaN(footprintRadius)) {
                     console.warn(`Invalid sublunar point data for ${utcTimeString}: lat=${lat}, lon=${lon}, radius=${footprintRadius}`);
                     return;
                 }
 
-                // Remove existing marker and circle if they exist
                 if (moonMarker) moonMarker.setMap(null);
                 if (footprintCircle) footprintCircle.setMap(null);
 
-                // Create new Moon marker
                 moonMarker = new google.maps.Marker({
                     position: { lat, lng: lon },
                     map: map,
@@ -953,7 +941,6 @@
                     title: `Moon Sublunar Point (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
                 });
 
-                // Create new footprint circle
                 footprintCircle = new google.maps.Circle({
                     map: map,
                     center: { lat, lng: lon },
@@ -979,7 +966,6 @@
             const data = [];
             const labels = [];
 
-            // Use a default observer for declination calculations
             const observer = new Astronomy.Observer(0, 0, 0);
 
             for (let dt = new Date(startDate); dt <= endDate; dt.setUTCDate(dt.getUTCDate() + 1)) {
@@ -988,11 +974,9 @@
                     const time = `${dateString}T00:00:00Z`;
                     const astroTime = Astronomy.MakeTime(new Date(time));
                     
-                    // Calculate distance using Astronomy.Libration
                     const libration = Astronomy.Libration(astroTime);
                     const distanceKm = libration.dist_km;
 
-                    // Calculate declination using Astronomy.Equator
                     const moonEq = Astronomy.Equator(Astronomy.Body.Moon, astroTime, observer, true, true);
                     
                     if (!moonEq || distanceKm == null) {
@@ -1007,10 +991,9 @@
                             distance: distanceKm,
                             declination: declination
                         });
-                        // Format label as DD-MM
                         const day = String(dt.getUTCDate()).padStart(2, '0');
                         const month = String(dt.getUTCMonth() + 1).padStart(2, '0');
-                        labels.push(`${day}-${month}`); // e.g., "01-06" for June 1
+                        labels.push(`${day}-${month}`);
                     } else {
                         console.warn(`Missing data for ${dateString}: distance=${distanceKm}, declination=${declination}`);
                     }
@@ -1037,11 +1020,11 @@
             let currentDistance = null;
             let currentDeclination = null;
             let pathLoss = null;
-            const minDist = 356352.93; // Minimal Moon distance in km
+            const minDist = 356352.93;
 
             try {
                 const astroTime = Astronomy.MakeTime(selectedDateTime);
-                const observer = new Astronomy.Observer(0, 0, 0); // Default observer for declination
+                const observer = new Astronomy.Observer(0, 0, 0);
                 const libration = Astronomy.Libration(astroTime);
                 const moonEq = Astronomy.Equator(Astronomy.Body.Moon, astroTime, observer, true, true);
                 
@@ -1134,7 +1117,7 @@
                                     color: "#800080",
                                     font: { size: 12 },
                                     callback: function(value) {
-                                        return (value / 1000).toFixed(0); // Show thousands of km (e.g., 356)
+                                        return (value / 1000).toFixed(0);
                                     }
                                 },
                                 grid: { drawTicks: true, drawBorder: true }
@@ -1178,7 +1161,7 @@
                                     font: { size: 12 }
                                 },
                                 grid: { drawOnChartArea: false },
-                                offset: true // Prevent overlap with y2
+                                offset: true
                             }
                         },
                         plugins: {
@@ -1209,7 +1192,6 @@
             const dateInput = document.getElementById("date").value;
             const dateStr = new Date(dateInput).toISOString().slice(0, 10);
 
-            // Initialize dataForDay for QTH
             let dataForDay = Array(48).fill(null);
             if (qthInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
                 const rawDataDate = rawData.length ? rawData[0]?.date.slice(0, 10) : null;
@@ -1275,7 +1257,6 @@
                 document.getElementById("chartWrapper").style.display = "none";
             }
 
-            // QTH chart initialization/update
             const qthAnnotation = {
                 timeMarker: {
                     type: 'line',
@@ -1416,7 +1397,6 @@
                 document.getElementById('chartLabel').innerHTML = '<span class="metric-locator">Enter valid QTH</span>';
             }
 
-            // DX chart data calculation
             let dxMoonElevations = [];
             let dxMoonAzimuths = [];
             let dxVisibleRates = [];
@@ -1537,7 +1517,6 @@
                 document.getElementById("dxChartWrapper").style.display = "none";
             }
 
-            // DX chart initialization/update
             const dxAnnotation = {
                 timeMarker: {
                     type: 'line',
@@ -1677,7 +1656,6 @@
                 }
             }
 
-                                                    // Relative chart initialization/update
                                                     const relativeAnnotation = {
                                                         timeMarker: {
                                                             type: 'line',
@@ -1692,7 +1670,6 @@
 
                                                     if (qthInput && dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput) && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput) && relativeLibrationRates.some(r => r != null)) {
                                                         document.getElementById("relativeChartWrapper").style.display = "block";
-                                                        // Add sked annotations
                                                         try {
                                                             const skedAnnotations = getSkedAnnotations(dateStr, lat, lon, dxLat, dxLon);
                                                             Object.assign(relativeAnnotation, skedAnnotations);
@@ -1840,7 +1817,6 @@
                                                                             return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}z`;
                                                                         }
 
-                                                                        // Check if date is same as dateStr to avoid annotating events from the next day
                                                                         const targetDateStr = dateStr.slice(0, 10);
 
                                                                         if (riseEvent && riseEvent.date) {
@@ -1853,14 +1829,14 @@
                                                                                     type: 'line',
                                                                                     mode: 'vertical',
                                                                                     scaleID: 'x',
-                                                                                    value: isLate ? 47 : index, // Use 47 for times >= 23:30
+                                                                                    value: isLate ? 47 : index,
                                                                                     borderColor: 'blue',
                                                                                     borderWidth: 1,
                                                                                     label: {
                                                                                         content: ['Rise', formatTimeUTC(riseDate)],
                                                                                         enabled: true,
                                                                                         position: 'top',
-                                                                                        yAdjust: isLate ? -50 : -40, // Adjust y-position for late times to avoid overlap
+                                                                                        yAdjust: isLate ? -50 : -40,
                                                                                         font: { size: 11, weight: 'bold', family: 'Arial, sans-serif' },
                                                                                         color: 'white',
                                                                                         backgroundColor: 'rgba(0, 0, 255, 0.85)',
@@ -1885,14 +1861,14 @@
                                                                                     type: 'line',
                                                                                     mode: 'vertical',
                                                                                     scaleID: 'x',
-                                                                                    value: isLate ? 47 : index, // Use 47 for times >= 23:30
+                                                                                    value: isLate ? 47 : index,
                                                                                     borderColor: 'orange',
                                                                                     borderWidth: 1,
                                                                                     label: {
                                                                                         content: ['Set', formatTimeUTC(setDate)],
                                                                                         enabled: true,
                                                                                         position: 'top',
-                                                                                        yAdjust: isLate ? -10 : -20, // Adjust y-position for late times to avoid overlap
+                                                                                        yAdjust: isLate ? -10 : -20,
                                                                                         font: { size: 11, weight: 'bold', family: 'Arial, sans-serif' },
                                                                                         color: 'white',
                                                                                         backgroundColor: 'rgba(255, 165, 0, 0.85)',
@@ -1913,24 +1889,21 @@
                                                                     function timeToChartIndex(date) {
                                                                         if (!(date instanceof Date)) throw new Error("Expected a Date object");
                                                                         let hours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
-                                                                        // Clamp to index 47 (23:30) for times >= 23:30
                                                                         if (hours >= 23.5) {
-                                                                            hours = 23.5; // Map to 23:30 (index 47)
+                                                                            hours = 23.5;
                                                                         }
                                                                         return hours * 2;
                                                                     }
 
                                                     function getSkedAnnotations(dateStr, qthLat, qthLon, dxLat, dxLon) {
                                                         const annotations = {};
-                                                        const targetDateStr = dateStr.slice(0, 10); // e.g., "2025-07-03"
+                                                        const targetDateStr = dateStr.slice(0, 10);
                                                         const jsDate = new Date(`${dateStr}T00:00:00Z`);
                                                         const astroTime = Astronomy.MakeTime(jsDate);
 
-                                                        // Initialize observers for QTH and DX
                                                         const qthObserver = new Astronomy.Observer(qthLat, qthLon, 0);
                                                         const dxObserver = new Astronomy.Observer(dxLat, dxLon, 0);
 
-                                                        // Calculate moonrise and moonset for QTH
                                                         let qthRiseEvent = null, qthSetEvent = null, dxRiseEvent = null, dxSetEvent = null;
                                                         try {
                                                             qthRiseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObserver, +1, astroTime, 1.0);
@@ -1939,28 +1912,23 @@
                                                             dxSetEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObserver, -1, astroTime, 1.0);
                                                         } catch (e) {
                                                             console.warn(`Error calculating moonrise/set: ${e.message}`);
-                                                            return annotations; // Return empty annotations if calculation fails
+                                                            return annotations;
                                                         }
 
-                                                        // Format time in HH:MM:SSz
                                                         function formatTimeUTC(date) {
                                                             if (!date) return 'N/A';
                                                             return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}z`;
                                                         }
 
-                                                        // Convert time to chart index (0 to 47, each representing 30 minutes)
                                                         function timeToChartIndex(date) {
                                                             if (!(date instanceof Date)) return null;
                                                             const hours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
-                                                            // Map to chart index (0 to 47)
                                                             let index = Math.round(hours * 2);
-                                                            // Clamp to valid range
                                                             if (index < 0) index = 0;
                                                             if (index > 47) index = 47;
                                                             return index;
                                                         }
 
-                                                        // Determine sked window (overlap of QTH and DX visibility)
                                                         let skedStartTime = null, skedEndTime = null;
                                                         if (qthRiseEvent && qthSetEvent && dxRiseEvent && dxSetEvent &&
                                                             qthRiseEvent.date && qthSetEvent.date && dxRiseEvent.date && dxSetEvent.date) {
@@ -1969,7 +1937,6 @@
                                                             const dxRise = dxRiseEvent.date;
                                                             const dxSet = dxSetEvent.date;
 
-                                                            // Check if events are on the target date
                                                             const isSameDay = (date) => date.toISOString().slice(0, 10) === targetDateStr;
 
                                                             if (isSameDay(qthRise) && isSameDay(qthSet) && isSameDay(dxRise) && isSameDay(dxSet)) {
@@ -1980,12 +1947,10 @@
                                                             }
                                                         }
 
-                                                        // Add annotations if a valid sked window exists
                                                         if (skedStartTime && skedEndTime) {
                                                             const startIndex = timeToChartIndex(skedStartTime);
                                                             const endIndex = timeToChartIndex(skedEndTime);
 
-                                                            // Add sked start annotation
                                                             annotations.skedStart = {
                                                                 type: 'line',
                                                                 mode: 'vertical',
@@ -2010,7 +1975,6 @@
                                                                 }
                                                             };
 
-                                                            // Add sked end annotation
                                                             annotations.skedEnd = {
                                                                 type: 'line',
                                                                 mode: 'vertical',
@@ -2066,7 +2030,6 @@
         document.getElementById("date").addEventListener("change", () => {
             const qthInput = document.getElementById("qth").value.trim().toUpperCase();
             const dxInput = document.getElementById("dx").value.trim().toUpperCase();
-            // NEW: Compute libration for valid QTH or DX
             if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
                 computeLibrationForDay(qthInput, document.getElementById("date").value, 'qth');
             }
@@ -2084,31 +2047,25 @@
                                                                        const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
                                                                        document.getElementById("date").valueAsDate = utcDate;
 
-                                                                       // Round time to nearest half-hour (00 or 30 minutes)
                                                                        let roundedHour = utcHours;
                                                                        let roundedMinutes = utcMinutes >= 15 && utcMinutes < 45 ? 30 : 0;
                                                                        if (utcMinutes >= 45) {
                                                                            roundedHour += 1;
                                                                            roundedMinutes = 0;
                                                                        }
-                                                                       // Adjust for 24-hour overflow
                                                                        if (roundedHour >= 24) {
                                                                            roundedHour -= 24;
-                                                                           // Optionally advance date by one day
                                                                            utcDate.setUTCDate(utcDate.getUTCDate() + 1);
                                                                            document.getElementById("date").valueAsDate = utcDate;
                                                                        }
 
-                                                                       // Calculate hourIndex (0 to 47, where each step is 30 minutes)
                                                                        hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
                                                                        document.getElementById("hour").value = hourIndex;
                                                                        document.getElementById("hour-value").textContent =
                                                                            `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
 
-                                                                       // Ensure showControlsPanel is hidden on load
                                                                        document.getElementById("showControlsPanel").classList.remove("visible");
 
-                                                                       // Initialize libration data if QTH or DX exists
                                                                        const qthInput = document.getElementById("qth").value.trim().toUpperCase();
                                                                        const dxInput = document.getElementById("dx").value.trim().toUpperCase();
                                                                        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
@@ -2118,7 +2075,6 @@
                                                                            computeLibrationForDay(dxInput, document.getElementById("date").value, 'dx');
                                                                        }
 
-                                                                       // Call updates after setting date
                                                                        updateMap();
                                                                        updateMoonChart();
                                                                        updateChart(hourIndex);
@@ -2143,7 +2099,6 @@
                                                                                     }
                                                                                     chartLabel.innerHTML = '<span class="metric-locator">No data for QTH</span>';
                                                                                 } else {
-                                                                                    // Force updateChart to run after a microtask to ensure rawData is processed
                                                                                     setTimeout(() => {
                                                                                         updateChart(hourIndex);
                                                                                     }, 0);
@@ -2173,7 +2128,6 @@
                                                                         if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
                                                                             dxChartLabel.innerHTML = '<span class="metric-locator">Computing...</span>';
                                                                             try {
-                                                                                // Update dxLat and dxLon
                                                                                 ({ lat: dxLat, lon: dxLon } = qthToLatLon(locator));
                                                                                 computeLibrationForDay(locator, document.getElementById("date").value, 'dx');
                                                                                 if (dxRawData.length === 0) {
@@ -2217,7 +2171,6 @@
             return { lat, lon };
         }
 
-                                                                                                      // Convert degrees to radians and vice versa
                                                                                                       function degToRad(deg) {
                                                                                                           return deg * Math.PI / 180;
                                                                                                       }
@@ -2225,8 +2178,6 @@
                                                                                                       function radToDeg(rad) {
                                                                                                           return rad * 180 / Math.PI;
                                                                                                       }
-
-                                                                                                      // Calculate poloffset for one station given lat, moonAz, moonEl (all in degrees)
                                                                                                       function calcPoloffset(latDeg, azMoonDeg, elMoonDeg) {
                                                                                                           const lat = degToRad(latDeg);
                                                                                                           const az = degToRad(azMoonDeg);
@@ -2239,14 +2190,12 @@
                                                                                                           return radToDeg(angleRad);
                                                                                                       }
 
-                                                                                                      // Compute final poloffset difference between two stations
                                                                                                       function calcPoloffsetDiff(pol1, pol2) {
                                                                                                           let diff = (pol2 - pol1 + 720) % 180;
                                                                                                           if (diff > 90) diff -= 180;
                                                                                                           return diff;
                                                                                                       }
 
-        // Toggle controls panel folding
         document.getElementById("toggleControlsPanel").addEventListener("click", () => {
             const controls = document.getElementById("controls");
             const toggleButton = document.getElementById("toggleControlsPanel");
@@ -2256,16 +2205,14 @@
                 controls.classList.add("folded");
                 toggleButton.style.display = "none";
                 showButton.classList.add("visible");
-                // Force repaint
                 setTimeout(() => {
                     showButton.style.display = 'none';
-                    showButton.offsetHeight; // Trigger reflow
+                    showButton.offsetHeight;
                     showButton.style.display = 'flex';
                 }, 0);
             }
         });
 
-        // Show controls panel
                                                     document.getElementById("showControlsPanel").addEventListener("click", () => {
                                                         const controls = document.getElementById("controls");
                                                         const toggleButton = document.getElementById("toggleControlsPanel");
@@ -2277,9 +2224,8 @@
                                                             showButton.classList.remove("visible");
                                                             setTimeout(() => {
                                                                 showButton.style.display = 'none';
-                                                                showButton.offsetHeight; // Trigger reflow
+                                                                showButton.offsetHeight;
                                                             }, 0);
-                                                            // Resize charts if visible
                                                             if (chart) chart.resize();
                                                             if (dxChart) dxChart.resize();
                                                             if (relativeChart) relativeChart.resize();
