@@ -93,7 +93,7 @@
       #scrollable-controls {
         flex: 1;
         overflow-y: auto;
-        max-height: calc(90vh - 220px); /* Adjust based on fixed-controls height */
+        max-height: calc(90vh - 180px); /* Adjusted for inline locators */
         padding-right: 5px;
       }
 
@@ -226,24 +226,55 @@
       }
 
       #toggleControlsPanel {
-        align-self: flex-end;
-        font-size: 12px;
-        padding: 4px 8px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 4px;
+        padding: 2px 3px;
+        background-color: rgba(255, 255, 255, 0.3);
+        color: #2c3e50;
+        border: 1px solid rgba(0, 123, 255, 0.4);
+        border-radius: 2px;
+        font-size: 10px;
         cursor: pointer;
-        transition: background-color 0.3s ease;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
       }
 
       #toggleControlsPanel:hover {
-        background-color: #0056b3;
+        background-color: rgba(255, 255, 255, 0.5);
+        color: #0056b3;
+        border-color: rgba(0, 123, 255, 0.6);
       }
 
       #toggleControlsPanel:focus {
         outline: none;
-        box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
+        box-shadow: 0 0 2px rgba(0, 123, 255, 0.5);
+      }
+
+      .locator-group {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .locator-input {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .locator-input label {
+        font-size: 12px;
+        font-weight: normal;
+      }
+
+      .locator-input input {
+        font-size: 12px;
+        padding: 2px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
       }
 
       .metric-label {
@@ -417,11 +448,23 @@
           padding-bottom: 8px;
         }
         #scrollable-controls {
-          max-height: calc(90vh - 200px); /* Adjust for smaller screens */
+          max-height: calc(90vh - 160px); /* Adjusted for smaller screens */
         }
-        #toggleControlsPanel {
+        .locator-input label {
           font-size: 10px;
-          padding: 3px 6px;
+        }
+        .locator-input input {
+          font-size: 10px;
+          width: 80px;
+        }
+        .nav-button, #toggleControlsPanel {
+          font-size: 8px;
+          padding: 2px 3px;
+        }
+        .nav-button.icon-button {
+          font-size: 10px;
+          width: 16px;
+          height: 16px;
         }
       }
 
@@ -466,13 +509,19 @@
           <a href="https://forms.gle/vLCqCySPEkH926AX8" class="nav-button">Add Station</a>
           <a href="http://dxer.site" class="nav-button icon-button">🏠</a>
           <a href="http://dxer.site/eme-observer-faq.html" class="nav-button icon-button">?</a>
+          <button id="toggleControlsPanel" class="nav-button">Hide</button>
         </div>
         <input type="range" id="hour" min="0" max="47" value="0" step="1" />
-        <label for="qth" style="font-size: 12px;">My Locator:</label>
-        <input type="text" id="qth" maxlength="6" size="8" placeholder="eg JO89tt" />
-        <label for="dx" style="font-size: 12px;">DX Locator:</label>
-        <input type="text" id="dx" maxlength="6" size="8" placeholder="eg JO88xx" />
-        <button id="toggleControlsPanel">Hide Panel</button>
+        <div class="locator-group">
+          <div class="locator-input">
+            <label for="qth">My Locator:</label>
+            <input type="text" id="qth" maxlength="6" size="8" placeholder="eg JO89tt" />
+          </div>
+          <div class="locator-input">
+            <label for="dx">DX Locator:</label>
+            <input type="text" id="dx" maxlength="6" size="8" placeholder="eg JO88xx" />
+          </div>
+        </div>
       </div>
       <div id="scrollable-controls">
         <div id="chartWrapper" style="display: none;">
@@ -493,7 +542,6 @@
         </div>
       </div>
     </div>
-    <button id="showControlsPanel" style="display: none;">→</button>
     <button id="showControlsPanel" style="display: none;">→</button>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
