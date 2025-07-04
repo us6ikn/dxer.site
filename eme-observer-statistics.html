@@ -171,12 +171,11 @@
   </div>
 
   <script>
-    const FILE_URL_BASE = ''; // Set this if JSON files are hosted somewhere
+    const FILE_URL_BASE = ''; // Change if files are hosted externally
 
     const files = {
       antenna: FILE_URL_BASE + 'antenna_histogram.txt',
       power: FILE_URL_BASE + 'power_histogram.txt',
-      // erp removed
     };
 
     function parseHistogramData(text) {
@@ -184,13 +183,14 @@
       const labels = [];
       const counts = [];
       const percentages = [];
+
       for (const line of lines) {
         const parts = line.trim().split(/\t+/);
         if (parts.length >= 3) {
-          const label = parts[0];
+          const label = parts[0].trim().replace(/\s+/g, ' ');
           const count = parseInt(parts[1], 10);
           const percentage = parts[2];
-          if (count > 0) {
+          if (label && count > 0) {
             labels.push(label);
             counts.push(count);
             percentages.push(percentage);
@@ -200,84 +200,82 @@
       return { labels, counts, percentages };
     }
 
-      function plotChart(canvasId, labels, counts, percentages, title, xAxisTitle) {
-        new Chart(document.getElementById(canvasId), {
-          type: 'bar',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: title,
-              data: counts,
-              backgroundColor: 'rgba(54, 162, 235, 0.8)', // calm blue
-              borderColor: 'rgba(54, 162, 235, 1)',
-              borderWidth: 1,
-              borderRadius: 6, // rounded corners
-              hoverBackgroundColor: 'rgba(54, 162, 235, 1)',
-            }]
+    function plotChart(canvasId, labels, counts, percentages, title, xAxisTitle) {
+      const ctx = document.getElementById(canvasId).getContext('2d');
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: counts,
+            backgroundColor: 'rgba(33, 150, 243, 0.7)',
+            borderRadius: 6,
+            hoverBackgroundColor: 'rgba(33, 150, 243, 1)',
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          animation: {
+            duration: 800,
+            easing: 'easeOutQuart'
           },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                backgroundColor: 'rgba(0,0,0,0.75)',
-                titleFont: { size: 14, weight: '600' },
-                bodyFont: { size: 13 },
-                padding: 8,
-                callbacks: {
-                  label: function(tooltipItem) {
-                    const idx = tooltipItem.dataIndex;
-                    return `Count: ${counts[idx]} | ${percentages[idx]}`;
-                  }
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              padding: 10,
+              backgroundColor: '#333',
+              titleFont: { size: 14, weight: 'bold' },
+              bodyFont: { size: 13 },
+              callbacks: {
+                label: function(tooltipItem) {
+                  const idx = tooltipItem.dataIndex;
+                  return `Count: ${counts[idx]} | ${percentages[idx]}`;
                 }
               }
             },
-            layout: {
-              padding: { top: 10, bottom: 10 }
-            },
-            scales: {
-              x: {
-                title: {
-                  display: true,
-                  text: xAxisTitle,
-                  font: { size: 16, weight: '600' },
-                  color: '#333'
-                },
-                ticks: {
-                  font: { size: 13, weight: '500' },
-                  color: '#444',
-                  maxRotation: 45,
-                  minRotation: 30,
-                  autoSkipPadding: 10
-                },
-                grid: {
-                  display: false
-                }
+            title: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: xAxisTitle,
+                color: '#333',
+                font: { size: 14, weight: 'bold' }
               },
-              y: {
-                title: {
-                  display: true,
-                  text: 'Number of Stations',
-                  font: { size: 16, weight: '600' },
-                  color: '#333'
-                },
+              ticks: {
+                font: { size: window.innerWidth < 768 ? 10 : 13 },
+                color: '#444'
+              },
+              grid: {
+                display: false
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Number of Stations',
+                color: '#333',
+                font: { size: 14, weight: 'bold' }
+              },
+              ticks: {
+                font: { size: window.innerWidth < 768 ? 10 : 13 },
+                color: '#444',
                 beginAtZero: true,
-                ticks: {
-                  font: { size: 13, weight: '500' },
-                  color: '#444',
-                  stepSize: Math.ceil(Math.max(...counts) / 5) || 1
-                },
-                grid: {
-                  color: '#e0e0e0',
-                  borderColor: '#ccc',
-                  drawBorder: true,
-                  drawTicks: false
-                }
+                precision: 0
+              },
+              grid: {
+                color: 'rgba(0,0,0,0.05)'
               }
             }
           }
-        });
-      }
+        }
+      });
+    }
 
     async function loadAndPlot(fileUrl, canvasId, title, xAxisTitle) {
       try {
@@ -290,64 +288,10 @@
       }
     }
 
-    // Load Antenna and Power charts as before
-    loadAndPlot(files.antenna, 'antennaChart', 'Antenna Count', 'Antenna diameter (m)');
+    // Plot charts with new styles
+    loadAndPlot(files.antenna, 'antennaChart', 'Antenna Count', 'Antenna Diameter (m)');
     loadAndPlot(files.power, 'powerChart', 'Power Count', 'Power (W)');
-
-    // New function to load stn_10GHz.json and create DXCC pie chart
-    async function loadDXCCPieChart() {
-      try {
-        const response = await fetch(FILE_URL_BASE + 'stn_10GHz.json');
-        const stations = await response.json();
-
-        // Count stations per DXCC
-        const countryCounts = {};
-        stations.forEach(stn => {
-          const dxcc = stn.DXCC || "Unknown";
-          countryCounts[dxcc] = (countryCounts[dxcc] || 0) + 1;
-        });
-
-        const labels = Object.keys(countryCounts);
-        const data = Object.values(countryCounts);
-        document.getElementById('dxccTotal').textContent = `Total DXCCs: ${labels.length}`;
-
-        const backgroundColors = labels.map((_, i) => `hsl(${i * 360 / labels.length}, 70%, 60%)`);
-
-        new Chart(document.getElementById('countryChart'), {
-          type: 'pie',
-          data: {
-            labels: labels,
-            datasets: [{
-              data: data,
-              backgroundColor: backgroundColors,
-              borderColor: '#fff',
-              borderWidth: 1
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { position: 'bottom' },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    const val = context.raw;
-                    const label = context.label;
-                    return `${label}: ${val} stations`;
-                  }
-                }
-              }
-            }
-          }
-        });
-
-      } catch (err) {
-        console.error('Error loading DXCC pie chart:', err);
-      }
-    }
-
-    loadDXCCPieChart();
-
   </script>
+
 </body>
 </html>
