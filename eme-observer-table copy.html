@@ -182,61 +182,54 @@
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.3.0/js/dataTables.responsive.min.js"></script>
     <script>
-        // Fetch a single JSON file and render it in the table
+        // Fetch the data from both JSON files and merge them
         async function fetchData() {
             try {
-                const response = await fetch('stn_10GHz.json'); // Your unified file
-                const data = await response.json();
-                renderTable(data);
+                // Fetch both JSON files
+                const response1 = await fetch('output_2_10GHz_SK_with_DXCC.json');
+                const data1 = await response1.json();
+
+                const response2 = await fetch('output_2_10GHz_with_DXCC.json');
+                const data2 = await response2.json();
+
+                // Combine the data from both files
+                const combinedData = [...data1, ...data2];
+
+                renderTable(combinedData);
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
         }
 
-        // Function to render the table
+        // Function to render table rows
         function renderTable(data) {
             const tableBody = document.getElementById('stationsData');
             tableBody.innerHTML = '';
-
             data.forEach(station => {
                 const row = document.createElement('tr');
-
-                // Decide how to visually indicate SK or DXpedition in table (optional)
-                let noteDisplay = station.Note;
-                let rowClass = '';
-                if (/SK/i.test(station.Note)) {
-                    rowClass = 'style="color:gray;font-style:italic;"';
-                } else if (/DXpedition|Portable/i.test(station.Note)) {
-                    rowClass = 'style="font-weight:bold;"';
-                }
-
                 row.innerHTML = `
-                    <td ${rowClass}>${station.Call}</td>
+                    <td>${station.Call}</td>
                     <td>${station.Locator}</td>
                     <td>${station.DXCC}</td>
                     <td>${station.Antenna}</td>
                     <td>${station.Power}</td>
                     <td>${station.Website ? `<a href="${station.Website}" target="_blank">${station.Website}</a>` : 'N/A'}</td>
-                    <td>${noteDisplay}</td>
+                    <td>${station.Note}</td>
                 `;
-
                 tableBody.appendChild(row);
             });
 
-            // Initialize DataTable only once
-            if (!$.fn.DataTable.isDataTable('#stationsTable')) {
-                $('#stationsTable').DataTable({
-                    "order": [[0, 'asc']],
-                    "responsive": true
-                });
-            }
+            // Initialize DataTable after rendering the data
+            $('#stationsTable').DataTable({
+                "order": [[0, 'asc']], // Default sorting by Call alphabetically
+                "responsive": true // Enable responsiveness
+            });
         }
 
-        // On load
-        $(document).ready(() => {
+        // Initialize fetchData on page load
+        $(document).ready(function() {
             fetchData();
         });
     </script>
-
 </body>
 </html>
