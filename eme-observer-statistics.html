@@ -127,16 +127,25 @@
 
     /* Mobile-specific adjustments */
     @media (max-width: 768px) {
-      .button-container {
-        justify-content: center;
-      }
 
       .button-container button {
-        width: 120px;
-        font-size: 14px;
-        padding: 8px 12px;
+          width: 140px;
+          font-size: 14px;
+      }
+      .app-name {
+          font-size: 1.3rem;
       }
 
+      .creator-label,
+      .ghz-label {
+          font-size: 0.75rem;
+      }
+
+      .app-meta {
+          align-items: flex-end;
+          text-align: right;
+          margin-bottom: 12px;
+      }
       .container {
         width: 100%;
         padding: 10px;
@@ -255,9 +264,6 @@
 
     <h2>Power</h2>
     <canvas id="powerChart"></canvas>
-
-    <h2>Effective Radiated Power</h2>
-    <canvas id="erpChart"></canvas>
     
     <div class="chart-wrapper">
       <h2>Stations per DXCC</h2>
@@ -275,7 +281,6 @@
     const files = {
       antenna: FILE_URL_BASE + 'antenna_histogram.txt',
       power: FILE_URL_BASE + 'power_histogram.txt',
-      erp: FILE_URL_BASE + 'erp_histogram.txt',
     };
 
     function parseHistogramData(text) {
@@ -428,7 +433,6 @@
     // Load all charts with custom x-axis titles
     loadAndPlot(files.antenna, 'antennaChart', 'Antenna Count', 'Antenna diameter (m)');
     loadAndPlot(files.power, 'powerChart', 'Power Count', 'Power (W)');
-    loadAndPlot(files.erp, 'erpChart', 'ERP Count', 'ERP (MW)');
   </script>
 </body>
 </html>
