@@ -55,9 +55,11 @@
           justify-content: center;
           align-items: flex-start;
           flex-direction: column;
-          height: 100vh; /* use 100vh for fixed viewport height */
+          min-height: 100vh;
           overflow-x: hidden;
+          overflow-y: auto; /* allow vertical scrolling */
       }
+
 
       .top-bar {
           width: 100%;
@@ -139,8 +141,9 @@
           padding: 20px;
           border-radius: 8px;
           box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-          overflow: hidden;
+          overflow: visible; /* changed from hidden */
       }
+
 
       h1, h2 {
           text-align: center;
