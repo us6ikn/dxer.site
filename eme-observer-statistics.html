@@ -109,11 +109,11 @@
       display: block;
     }
     #antennaChart, #powerChart {
-      height: 800px !important; /* Ample space for horizontal bars */
+      height: 800px !important;
       min-height: 800px;
     }
     #countryChart {
-      height: 500px !important; /* Fixed height for circular pie */
+      height: 500px !important;
       max-height: 500px;
     }
     .chart-wrapper {
@@ -212,16 +212,16 @@
           datasets: [{
             label: title,
             data: counts,
-            backgroundColor: '#2d3748', // Dark slate for elegance
+            backgroundColor: '#2d3748',
             borderColor: '#4a5568',
             borderWidth: 1,
             borderRadius: 6,
-            barThickness: 16, // Slim bars for clarity
-            categoryPercentage: 0.6, // More spacing
+            barThickness: 16,
+            categoryPercentage: 0.6,
           }]
         },
         options: {
-          indexAxis: 'y', // Horizontal bars
+          indexAxis: 'y',
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
@@ -295,7 +295,7 @@
     }
 
     function plotPieChart(canvasId, labels, data) {
-      const ctx = document.getElement revisión: canvasId).getContext('2d');
+      const ctx = document.getElementById(canvasId).getContext('2d');
       new Chart(ctx, {
         type: 'pie',
         data: {
@@ -309,7 +309,7 @@
         },
         options: {
           responsive: true,
-          maintainAspectRatio: true, // Ensure circular shape
+          maintainAspectRatio: true,
           plugins: {
             legend: {
               position: 'bottom',
