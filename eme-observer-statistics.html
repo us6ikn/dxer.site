@@ -8,7 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
   <style>
     body {
-      font-family: 'Inter', Arial, sans-serif;
+      font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
       background-color: #f4f4f9;
@@ -52,7 +52,7 @@
       font-size: 1.8rem;
       font-weight: 600;
       color: #2c3e50;
-      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: Arial, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: -2px;
     }
     .ghz-label {
@@ -76,7 +76,7 @@
       font-size: 15px;
       cursor: pointer;
       border-radius: 6px;
-      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: Arial, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       transition: background-color 0.3s ease;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
@@ -96,7 +96,7 @@
     h1, h2 {
       text-align: center;
       color: #2c3e50;
-      font-family: 'Inter', Arial, sans-serif;
+      font-family: Arial, sans-serif;
       font-weight: 600;
     }
     h1 {
@@ -113,8 +113,8 @@
       max-width: 100%;
       margin: 20px auto;
       display: block;
-      height: 600px !important; /* Increased height for better label spacing */
-      min-height: 600px;
+      height: 800px !important; /* Increased for more label space */
+      min-height: 800px;
     }
     .chart-wrapper {
       width: 100%;
@@ -133,7 +133,7 @@
       color: #2c3e50;
       margin-top: -10px;
       margin-bottom: 15px;
-      font-family: 'Inter', Arial, sans-serif;
+      font-family: Arial, sans-serif;
     }
     .hover-hint {
       text-align: center;
@@ -141,7 +141,7 @@
       color: #666;
       margin-top: -10px;
       margin-bottom: 10px;
-      font-family: 'Inter', Arial, sans-serif;
+      font-family: Arial, sans-serif;
     }
   </style>
 </head>
@@ -199,7 +199,7 @@
           const label = parts[0];
           const count = parseInt(parts[1], 10);
           const percentage = parts[2];
-          if (count > 0) {
+          if (count > 0) { // Only include non-zero counts
             labels.push(label);
             counts.push(count);
             percentages.push(percentage);
@@ -222,8 +222,8 @@
             borderColor: '#1e40af',
             borderWidth: 1,
             borderRadius: 4,
-            barThickness: 20, // Fixed thickness for consistent bar size
-            categoryPercentage: 0.8, // Control spacing between bars
+            barThickness: 18, // Smaller bars to fit more categories
+            categoryPercentage: 0.7, // More space between bars
           }]
         },
         options: {
@@ -234,8 +234,8 @@
             legend: { display: false },
             tooltip: {
               backgroundColor: 'rgba(17, 24, 39, 0.9)',
-              titleFont: { family: 'Inter', size: 16, weight: '600' },
-              bodyFont: { family: 'Inter', size: 14 },
+              titleFont: { family: 'Arial', size: 18, weight: 'bold' },
+              bodyFont: { family: 'Arial', size: 16 },
               padding: 12,
               cornerRadius: 6,
               callbacks: {
@@ -251,11 +251,11 @@
             datalabels: {
               anchor: 'end',
               align: 'right',
-              offset: 8,
+              offset: 10,
               font: {
-                family: 'Inter',
-                size: 14, // Larger data labels
-                weight: '500'
+                family: 'Arial',
+                size: 18, // Larger data labels
+                weight: 'bold'
               },
               color: '#2c3e50',
               formatter: (value) => value > 0 ? value : '',
@@ -266,15 +266,15 @@
               title: {
                 display: true,
                 text: 'Number of Stations',
-                font: { family: 'Inter', size: 16, weight: '600' },
+                font: { family: 'Arial', size: 20, weight: 'bold' },
                 color: '#2c3e50',
-                padding: { top: 10 }
+                padding: { top: 15 }
               },
               grid: {
                 color: 'rgba(0, 0, 0, 0.05)',
               },
               ticks: {
-                font: { family: 'Inter', size: 14 }, // Larger x-axis ticks
+                font: { family: 'Arial', size: 18 }, // Larger x-axis ticks
                 color: '#2c3e50',
                 stepSize: 1,
               },
@@ -284,27 +284,26 @@
               title: {
                 display: true,
                 text: xAxisTitle,
-                font: { family: 'Inter', size: 16, weight: '600' },
+                font: { family: 'Arial', size: 20, weight: 'bold' },
                 color: '#2c3e50',
-                padding: { bottom: 10 }
+                padding: { bottom: 15 }
               },
               grid: { display: false },
               ticks: {
-                font: { family: 'Inter', size: 16 }, // Larger y-axis labels
+                font: { family: 'Arial', size: 20 }, // Much larger y-axis labels
                 color: '#2c3e50',
-                padding: 10, // More space between labels and bars
+                padding: 15, // More space between labels and bars
                 callback: function(value, index) {
-                  // Ensure labels are not truncated
                   const label = this.getLabelForValue(index);
-                  return label.length > 10 ? label.substring(0, 10) + '...' : label;
+                  return label.length > 8 ? label.substring(0, 8) + '...' : label; // Shorter truncation for safety
                 }
               }
             }
           },
           layout: {
             padding: {
-              right: 50, // More space for data labels
-              left: 20, // Space for y-axis labels
+              right: 60, // Space for data labels
+              left: 40, // Space for y-axis labels
               top: 20,
               bottom: 20
             }
@@ -362,14 +361,14 @@
               legend: {
                 position: 'bottom',
                 labels: {
-                  font: { family: 'Inter', size: 12 },
+                  font: { family: 'Arial', size: 12 },
                   color: '#2c3e50'
                 }
               },
               tooltip: {
                 backgroundColor: 'rgba(17, 24, 39, 0.9)',
-                titleFont: { family: 'Inter', size: 14, weight: '600' },
-                bodyFont: { family: 'Inter', size: 12 },
+                titleFont: { family: 'Arial', size: 14, weight: 'bold' },
+                bodyFont: { family: 'Arial', size: 12 },
                 callbacks: {
                   label: function(context) {
                     const val = context.raw;
