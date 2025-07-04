@@ -63,7 +63,19 @@
             }
 
             .app-meta {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                text-align: right;
                 margin-bottom: 15px;
+                line-height: 1.1;
+            }
+
+            .creator-label {
+                font-size: 0.9rem;
+                color: #555;
+                font-style: italic;
+                margin-bottom: -4px;
             }
 
             .app-name {
@@ -71,26 +83,14 @@
                 font-weight: 600;
                 color: #2c3e50;
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                margin-bottom: 5px;
-            }
-
-            .sub-info {
-                font-size: 0.9rem;
-                color: #777;
-                font-style: italic;
-                display: flex;
-                gap: 10px;
-                justify-content: center;
-                flex-wrap: wrap;
+                margin: -2px;
             }
 
             .ghz-label {
+                font-size: 0.9rem;
                 font-weight: bold;
                 color: #2c3e50;
-            }
-
-            .creator-label {
-                color: #555;
+                margin-top: 2px;
             }
 
             .button-container {
@@ -98,6 +98,7 @@
                 gap: 15px;
                 flex-wrap: wrap;
                 justify-content: center;
+                margin-top: 10px;
             }
 
             .button-container button {
@@ -176,13 +177,19 @@
                     font-size: 1.5rem;
                 }
 
-                .sub-info {
+                .creator-label,
+                .ghz-label {
                     font-size: 0.8rem;
                 }
 
                 .button-container button {
                     width: 140px;
                     font-size: 14px;
+                }
+
+                .app-meta {
+                    align-items: center;
+                    text-align: center;
                 }
             }
 
@@ -194,26 +201,25 @@
             }
         </style>
 
+
 </head>
 <body>
-    <!-- Top header bar with buttons and app name -->
     <div class="top-bar">
-        <div class="top-content">
-            <div class="app-meta">
-                <div class="app-name">EME Observer</div>
-                <div class="sub-info">
-                    <span class="ghz-label">10GHz</span>
-                    <span class="creator-label">by SA5IKN</span>
-                </div>
-            </div>
-            <div class="button-container">
-                <button onclick="window.location.href='eme-observer.html'">Map View</button>
-                <button onclick="window.location.href='eme-observer-statistics.html'">Statistics</button>
-                <button onclick="window.open('https://forms.gle/vLCqCySPEkH926AX8', '_blank')">Add/Edit</button>
-                <button onclick="window.location.href='http://dxer.site'">🏠</button>
-                <button onclick="window.location.href='http://dxer.site/eme-observer-faq.html'">?</button>
-            </div>
+      <div class="top-content">
+          <div class="app-meta">
+            <div class="creator-label">by SA5IKN</div>
+            <div class="app-name">EME Observer</div>
+            <div class="ghz-label">10GHz</div>
+          </div>
+
+        <div class="button-container">
+          <button onclick="window.location.href='eme-observer.html'">Map View</button>
+          <button onclick="window.location.href='eme-observer-statistics.html'">Statistics</button>
+          <button onclick="window.location.href='https://forms.gle/vLCqCySPEkH926AX8'">Add/Edit</button>
+          <button onclick="window.location.href='http://dxer.site'">🏠</button>
+          <button onclick="window.location.href='http://dxer.site/eme-observer-faq.html'">?</button>
         </div>
+      </div>
     </div>
 
     
