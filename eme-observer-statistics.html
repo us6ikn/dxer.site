@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>10GHz EME Stations Statistics</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
   <style>
-    /* (Keep your existing CSS as is, unchanged) */
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Inter', Arial, sans-serif;
       margin: 0;
       padding: 0;
       background-color: #f4f4f9;
@@ -20,7 +20,6 @@
       overflow-x: hidden;
       overflow-y: auto;
     }
-    /* ... rest of your CSS here unchanged ... */
     .top-bar {
       width: 100%;
       background-color: #ffffff;
@@ -53,7 +52,7 @@
       font-size: 1.8rem;
       font-weight: 600;
       color: #2c3e50;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: -2px;
     }
     .ghz-label {
@@ -77,7 +76,7 @@
       font-size: 15px;
       cursor: pointer;
       border-radius: 6px;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       transition: background-color 0.3s ease;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
@@ -96,15 +95,26 @@
     }
     h1, h2 {
       text-align: center;
-      color: #333;
+      color: #2c3e50;
+      font-family: 'Inter', Arial, sans-serif;
+      font-weight: 600;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+    h2 {
+      font-size: 1.5rem;
+      margin-top: 30px;
+      margin-bottom: 10px;
     }
     canvas {
       width: 100% !important;
       max-width: 100%;
       margin: 20px auto;
       display: block;
-      height: 350px !important;
-      min-height: 350px;
+      height: 400px !important;
+      min-height: 400px;
     }
     .chart-wrapper {
       width: 100%;
@@ -120,9 +130,10 @@
     .dxcc-total {
       text-align: center;
       font-size: 16px;
-      color: #333;
+      color: #2c3e50;
       margin-top: -10px;
       margin-bottom: 15px;
+      font-family: 'Inter', Arial, sans-serif;
     }
     .hover-hint {
       text-align: center;
@@ -130,6 +141,7 @@
       color: #666;
       margin-top: -10px;
       margin-bottom: 10px;
+      font-family: 'Inter', Arial, sans-serif;
     }
   </style>
 </head>
@@ -160,8 +172,6 @@
     <h2>Power</h2>
     <canvas id="powerChart"></canvas>
 
-    <!-- Removed ERP chart -->
-
     <div class="chart-wrapper">
       <h2>Stations per DXCC</h2>
       <p id="dxccTotal" class="dxcc-total"></p>
@@ -171,7 +181,7 @@
   </div>
 
   <script>
-    const FILE_URL_BASE = ''; // Change if files are hosted externally
+    const FILE_URL_BASE = ''; // Set this if JSON files are hosted somewhere
 
     const files = {
       antenna: FILE_URL_BASE + 'antenna_histogram.txt',
@@ -183,14 +193,13 @@
       const labels = [];
       const counts = [];
       const percentages = [];
-
       for (const line of lines) {
         const parts = line.trim().split(/\t+/);
         if (parts.length >= 3) {
-          const label = parts[0].trim().replace(/\s+/g, ' ');
+          const label = parts[0];
           const count = parseInt(parts[1], 10);
           const percentage = parts[2];
-          if (label && count > 0) {
+          if (count > 0) {
             labels.push(label);
             counts.push(count);
             percentages.push(percentage);
@@ -202,78 +211,95 @@
 
     function plotChart(canvasId, labels, counts, percentages, title, xAxisTitle) {
       const ctx = document.getElementById(canvasId).getContext('2d');
-
       new Chart(ctx, {
         type: 'bar',
         data: {
           labels: labels,
           datasets: [{
+            label: title,
             data: counts,
-            backgroundColor: 'rgba(33, 150, 243, 0.7)',
-            borderRadius: 6,
-            hoverBackgroundColor: 'rgba(33, 150, 243, 1)',
-            borderSkipped: false,
+            backgroundColor: '#1e3a8a', // Deep indigo for a professional look
+            borderColor: '#1e40af',
+            borderWidth: 1,
+            borderRadius: 4,
+            barThickness: 'flex',
+            maxBarThickness: 30,
           }]
         },
         options: {
+          indexAxis: 'y', // Horizontal bars for better label readability
           responsive: true,
-          animation: {
-            duration: 800,
-            easing: 'easeOutQuart'
-          },
+          maintainAspectRatio: false,
           plugins: {
             legend: { display: false },
             tooltip: {
+              backgroundColor: 'rgba(17, 24, 39, 0.9)',
+              titleFont: { family: 'Inter', size: 14, weight: '600' },
+              bodyFont: { family: 'Inter', size: 12 },
               padding: 10,
-              backgroundColor: '#333',
-              titleFont: { size: 14, weight: 'bold' },
-              bodyFont: { size: 13 },
+              cornerRadius: 6,
               callbacks: {
                 label: function(tooltipItem) {
                   const idx = tooltipItem.dataIndex;
-                  return `Count: ${counts[idx]} | ${percentages[idx]}`;
+                  return [
+                    `Stations: ${counts[idx]}`,
+                    `Percentage: ${percentages[idx]}`
+                  ];
                 }
               }
             },
-            title: {
-              display: false
+            datalabels: {
+              anchor: 'end',
+              align: 'right',
+              offset: 4,
+              font: {
+                family: 'Inter',
+                size: 12,
+                weight: '500'
+              },
+              color: '#2c3e50',
+              formatter: (value) => value > 0 ? value : '',
             }
           },
           scales: {
             x: {
               title: {
                 display: true,
-                text: xAxisTitle,
-                color: '#333',
-                font: { size: 14, weight: 'bold' }
-              },
-              ticks: {
-                font: { size: window.innerWidth < 768 ? 10 : 13 },
-                color: '#444'
+                text: 'Number of Stations',
+                font: { family: 'Inter', size: 14, weight: '600' },
+                color: '#2c3e50'
               },
               grid: {
-                display: false
-              }
+                color: 'rgba(0, 0, 0, 0.05)',
+              },
+              ticks: {
+                font: { family: 'Inter', size: 12 },
+                color: '#2c3e50',
+                stepSize: 1,
+              },
+              beginAtZero: true,
             },
             y: {
               title: {
                 display: true,
-                text: 'Number of Stations',
-                color: '#333',
-                font: { size: 14, weight: 'bold' }
+                text: xAxisTitle,
+                font: { family: 'Inter', size: 14, weight: '600' },
+                color: '#2c3e50'
               },
+              grid: { display: false },
               ticks: {
-                font: { size: window.innerWidth < 768 ? 10 : 13 },
-                color: '#444',
-                beginAtZero: true,
-                precision: 0
-              },
-              grid: {
-                color: 'rgba(0,0,0,0.05)'
+                font: { family: 'Inter', size: 12 },
+                color: '#2c3e50'
               }
             }
+          },
+          layout: {
+            padding: {
+              right: 40 // Space for datalabels
+            }
           }
-        }
+        },
+        plugins: [ChartDataLabels]
       });
     }
 
@@ -288,10 +314,68 @@
       }
     }
 
-    // Plot charts with new styles
-    loadAndPlot(files.antenna, 'antennaChart', 'Antenna Count', 'Antenna Diameter (m)');
-    loadAndPlot(files.power, 'powerChart', 'Power Count', 'Power (W)');
-  </script>
+    loadAndPlot(files.antenna, 'antennaChart', 'Antenna Size Distribution', 'Antenna Diameter (m)');
+    loadAndPlot(files.power, 'powerChart', 'Power Distribution', 'Power (W)');
 
+    async function loadDXCCPieChart() {
+      try {
+        const response = await fetch(FILE_URL_BASE + 'stn_10GHz.json');
+        const stations = await response.json();
+
+        const countryCounts = {};
+        stations.forEach(stn => {
+          const dxcc = stn.DXCC || "Unknown";
+          countryCounts[dxcc] = (countryCounts[dxcc] || 0) + 1;
+        });
+
+        const labels = Object.keys(countryCounts);
+        const data = Object.values(countryCounts);
+        document.getElementById('dxccTotal').textContent = `Total DXCCs: ${labels.length}`;
+
+        const backgroundColors = labels.map((_, i) => `hsl(${i * 360 / labels.length}, 70%, 60%)`);
+
+        new Chart(document.getElementById('countryChart'), {
+          type: 'pie',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: data,
+              backgroundColor: backgroundColors,
+              borderColor: '#fff',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  font: { family: 'Inter', size: 12 },
+                  color: '#2c3e50'
+                }
+              },
+              tooltip: {
+                backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                titleFont: { family: 'Inter', size: 14, weight: '600' },
+                bodyFont: { family: 'Inter', size: 12 },
+                callbacks: {
+                  label: function(context) {
+                    const val = context.raw;
+                    const label = context.label;
+                    return `${label}: ${val} stations`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      } catch (err) {
+        console.error('Error loading DXCC pie chart:', err);
+      }
+    }
+
+    loadDXCCPieChart();
+  </script>
 </body>
 </html>
