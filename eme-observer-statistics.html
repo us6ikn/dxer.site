@@ -178,8 +178,8 @@
           max-width: 100%;
           margin: 20px auto;
           display: block;
-          height: auto;
-          min-height: 350px; /* ensure graphs have decent height */
+          height: 350px !important;  /* force fixed height */
+          min-height: 350px; /* fallback */
       }
 
       /* Desktop-specific layout */
