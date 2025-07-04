@@ -199,6 +199,22 @@
                     display: none;
                 }
             }
+            @media (max-width: 600px) {
+              .button-container {
+                flex-wrap: nowrap;       /* Force one line */
+                overflow-x: auto;        /* Allow horizontal scroll if too wide */
+                gap: 8px;                /* Smaller gaps */
+              }
+
+              .button-container button {
+                flex-shrink: 0;          /* Prevent buttons from shrinking too small */
+                padding: 6px 12px;       /* Smaller padding */
+                font-size: 12px;         /* Smaller font */
+                width: auto;             /* Remove fixed width */
+                white-space: nowrap;     /* Prevent text wrapping inside button */
+              }
+            }
+
         </style>
 
 
