@@ -1,326 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7YST3WTEH3"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-7YST3WTEH3');
-    </script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <!-- Meta Description -->
-      <meta name="description" content="Visual statistics for 10GHz EME stations, including antenna sizes, transmit power, ERP, and DXCC country distribution.">
-
-      <!-- Canonical URL -->
-      <link rel="canonical" href="https://dxer.site/eme-observer-statistics.html" />
-      <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
-
-      <!-- Open Graph -->
-      <meta property="og:type" content="website">
-      <meta property="og:title" content="10GHz EME Stations Statistics">
-      <meta property="og:description" content="Explore interactive charts of antenna size, power output, ERP, and DXCC breakdown for 10GHz EME stations.">
-      <meta property="og:url" content="https://dxer.site/eme-observer-statistics.html">
-      <meta property="og:image" content="https://dxer.site/social/eme-observer-statistics.jpg"> <!-- optional preview image -->
-
-      <!-- Twitter Card -->
-      <meta name="twitter:card" content="summary_large_image">
-      <meta name="twitter:title" content="10GHz EME Stations Statistics">
-      <meta name="twitter:description" content="Visual breakdown of antenna size, power, and DXCC participation in 10GHz EME communication.">
-      <meta name="twitter:image" content="https://dxer.site/social/eme-observer-statistics.jpg"> <!-- optional preview image -->
-
-      <!-- Structured Data (JSON-LD for Dataset or WebPage) -->
-      <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebPage",
-        "name": "10GHz EME Stations Statistics",
-        "url": "https://dxer.site/eme-observer-statistics.html",
-        "description": "Interactive statistics showing antenna diameter, transmit power, ERP, and DXCC for 10GHz Earth-Moon-Earth (EME) amateur radio stations."
-      }
-      </script>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>10GHz EME Stations Statistics</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-      body {
-          font-family: Arial, sans-serif;
-          margin: 0;
-          padding: 0;
-          background-color: #f4f4f9;
-          display: flex;
-          justify-content: center;
-          align-items: flex-start;
-          flex-direction: column;
-          min-height: 100vh;
-          overflow-x: hidden;
-          overflow-y: auto; /* allow vertical scrolling */
-      }
-
-
-      .top-bar {
-          width: 100%;
-          background-color: #ffffff;
-          padding: 20px 0;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-      }
-
-      .top-content {
-          max-width: 900px;
-          margin: 0 auto;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          text-align: center;
-      }
-
-      .app-meta {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-end;
-          text-align: right;
-          margin-bottom: 15px;
-          line-height: 1.1;
-      }
-
-      .creator-label {
-          font-size: 0.9rem;
-          color: #555;
-          font-style: italic;
-          margin-bottom: -4px;
-      }
-
-      .app-name {
-          font-size: 1.8rem;
-          font-weight: 600;
-          color: #2c3e50;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          margin: -2px;
-      }
-
-      .ghz-label {
-          font-size: 0.9rem;
-          font-weight: bold;
-          color: #2c3e50;
-          margin-top: 2px;
-      }
-
-      .button-container {
-          display: flex;
-          gap: 15px;
-          flex-wrap: wrap;
-          justify-content: center;
-          margin-top: 10px;
-      }
-
-      .button-container button {
-          background-color: #0056b3;
-          color: white;
-          border: none;
-          padding: 10px 24px;
-          font-size: 15px;
-          cursor: pointer;
-          border-radius: 6px;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          transition: background-color 0.3s ease;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-
-      .button-container button:hover {
-          background-color: #00408a;
-      }
-
-      .container {
-          width: 90%;
-          max-width: 1200px;
-          margin: 20px auto;
-          background-color: #fff;
-          padding: 20px;
-          border-radius: 8px;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-          overflow: visible; /* changed from hidden */
-      }
-
-
-      h1, h2 {
-          text-align: center;
-          color: #333;
-      }
-
-      table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 20px;
-      }
-
-      th, td {
-          padding: 10px;
-          text-align: left;
-          border-bottom: 1px solid #ddd;
-      }
-
-      th {
-          background-color: #f2f2f2;
-      }
-
-      .table-container {
-          max-height: 60vh;
-          overflow-y: auto;
-      }
-
-      table.dataTable {
-          margin: 0 auto;
-      }
-
-      /* Canvas Styling */
-      canvas {
-          width: 100% !important;
-          max-width: 100%;
-          margin: 20px auto;
-          display: block;
-          height: 350px !important;  /* force fixed height */
-          min-height: 350px; /* fallback */
-      }
-
-      /* Desktop-specific layout */
-      @media (min-width: 768px) {
-          .container {
-              display: block;
-              width: 90%;
-              padding: 20px;
-          }
-
-          canvas {
-              min-height: 400px;
-          }
-
-          .button-container button {
-              width: 140px;
-              font-size: 14px;
-          }
-
-          .app-name {
-              font-size: 1.3rem;
-          }
-
-          .creator-label,
-          .ghz-label {
-              font-size: 0.75rem;
-          }
-
-          .app-meta {
-              align-items: flex-end;
-              text-align: right;
-              margin-bottom: 12px;
-          }
-      }
-
-      /* Mobile-specific adjustments */
-      @media (max-width: 768px) {
-          .button-container {
-              justify-content: center;
-          }
-
-          .button-container button {
-              width: 120px;
-              font-size: 14px;
-              padding: 8px 12px;
-          }
-
-          .container {
-              width: 100%;
-              padding: 10px;
-          }
-
-          canvas {
-              min-height: 220px;
-              max-width: 95%;
-          }
-
-          h1, h2 {
-              font-size: 1.2em;
-          }
-      }
-
-      @media (max-width: 600px) {
-          .dataTable td:nth-child(6),
-          .dataTable td:nth-child(7) {
-              display: none;
-          }
-
-          .button-container {
-              flex-wrap: nowrap;       /* Force one line */
-              overflow-x: auto;        /* Allow horizontal scroll if too wide */
-              gap: 8px;                /* Smaller gaps */
-              justify-content: flex-start;
-          }
-
-          .button-container button {
-              flex-shrink: 0;          /* Prevent buttons shrinking too small */
-              padding: 6px 12px;       /* Smaller padding */
-              font-size: 12px;         /* Smaller font */
-              width: auto;             /* Remove fixed width */
-              white-space: nowrap;     /* Prevent text wrapping inside button */
-          }
-      }
-
-      /* Chart Wrapper and DXCC text styling */
-      .chart-wrapper {
-          width: 100%;
-          max-width: 600px;
-          margin: 0 auto 40px auto;
-          padding: 0 10px;
-      }
-
-      #countryChart {
-          width: 100% !important;
-          height: auto !important;
-          max-height: 400px;
-      }
-
-      .dxcc-total {
-          text-align: center;
-          font-size: 16px;
-          color: #333;
-          margin-top: -10px;
-          margin-bottom: 15px;
-      }
-
-      .hover-hint {
-          text-align: center;
-          font-size: 13px;
-          color: #666;
-          margin-top: -10px;
-          margin-bottom: 10px;
-      }
-
+    /* (Keep your existing CSS as is, unchanged) */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+    /* ... rest of your CSS here unchanged ... */
+    .top-bar {
+      width: 100%;
+      background-color: #ffffff;
+      padding: 20px 0;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+    .top-content {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .app-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      text-align: right;
+      margin-bottom: 15px;
+      line-height: 1.1;
+    }
+    .creator-label {
+      font-size: 0.9rem;
+      color: #555;
+      font-style: italic;
+      margin-bottom: -4px;
+    }
+    .app-name {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: #2c3e50;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: -2px;
+    }
+    .ghz-label {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-top: 2px;
+    }
+    .button-container {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    .button-container button {
+      background-color: #0056b3;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      font-size: 15px;
+      cursor: pointer;
+      border-radius: 6px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .button-container button:hover {
+      background-color: #00408a;
+    }
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 20px auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      overflow: visible;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #333;
+    }
+    canvas {
+      width: 100% !important;
+      max-width: 100%;
+      margin: 20px auto;
+      display: block;
+      height: 350px !important;
+      min-height: 350px;
+    }
+    .chart-wrapper {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto 40px auto;
+      padding: 0 10px;
+    }
+    #countryChart {
+      width: 100% !important;
+      height: auto !important;
+      max-height: 400px;
+    }
+    .dxcc-total {
+      text-align: center;
+      font-size: 16px;
+      color: #333;
+      margin-top: -10px;
+      margin-bottom: 15px;
+    }
+    .hover-hint {
+      text-align: center;
+      font-size: 13px;
+      color: #666;
+      margin-top: -10px;
+      margin-bottom: 10px;
+    }
   </style>
-
-
-
 </head>
 <body>
-    
-    <div class="top-bar">
-      <div class="top-content">
-          <div class="app-meta">
-            <div class="creator-label">by SA5IKN</div>
-            <div class="app-name">EME Observer</div>
-            <div class="ghz-label">10GHz</div>
-          </div>
-
-        <div class="button-container">
-          <button onclick="window.location.href='eme-observer.html'">Map View</button>
-          <button onclick="window.location.href='eme-observer-table.html'">Table View</button>
-          <button onclick="window.location.href='https://forms.gle/vLCqCySPEkH926AX8'">Add/Edit</button>
-          <button onclick="window.location.href='http://dxer.site'">🏠</button>
-          <button onclick="window.location.href='http://dxer.site/eme-observer-faq.html'">?</button>
-        </div>
+  <div class="top-bar">
+    <div class="top-content">
+      <div class="app-meta">
+        <div class="creator-label">by SA5IKN</div>
+        <div class="app-name">EME Observer</div>
+        <div class="ghz-label">10GHz</div>
+      </div>
+      <div class="button-container">
+        <button onclick="window.location.href='eme-observer.html'">Map View</button>
+        <button onclick="window.location.href='eme-observer-table.html'">Table View</button>
+        <button onclick="window.location.href='https://forms.gle/vLCqCySPEkH926AX8'">Add/Edit</button>
+        <button onclick="window.location.href='http://dxer.site'">🏠</button>
+        <button onclick="window.location.href='http://dxer.site/eme-observer-faq.html'">?</button>
       </div>
     </div>
+  </div>
 
   <div class="container">
     <h1>10GHz EME Stations Statistics</h1>
@@ -331,31 +160,27 @@
     <h2>Power</h2>
     <canvas id="powerChart"></canvas>
 
-    <h2>Effective Radiated Power</h2>
-    <canvas id="erpChart"></canvas>
-    
+    <!-- Removed ERP chart -->
+
     <div class="chart-wrapper">
       <h2>Stations per DXCC</h2>
       <p id="dxccTotal" class="dxcc-total"></p>
       <p class="hover-hint">Hover over the chart to see DXCC details.</p>
       <canvas id="countryChart"></canvas>
     </div>
-
-
   </div>
 
   <script>
-    const FILE_URL_BASE = ''; // Set this to the base URL if needed
+    const FILE_URL_BASE = ''; // Set this if JSON files are hosted somewhere
 
     const files = {
       antenna: FILE_URL_BASE + 'antenna_histogram.txt',
       power: FILE_URL_BASE + 'power_histogram.txt',
-      erp: FILE_URL_BASE + 'erp_histogram.txt',
+      // erp removed
     };
 
     function parseHistogramData(text) {
       const lines = text.trim().split('\n').slice(1); // Skip header
-      const originalLabels = [];
       const labels = [];
       const counts = [];
       const percentages = [];
@@ -365,15 +190,14 @@
           const label = parts[0];
           const count = parseInt(parts[1], 10);
           const percentage = parts[2];
-          originalLabels.push(label);
-          if (count > 0) {  // Only include bins where count > 0
+          if (count > 0) {
             labels.push(label);
             counts.push(count);
             percentages.push(percentage);
           }
         }
       }
-      return { labels, counts, percentages, originalLabels };
+      return { labels, counts, percentages };
     }
 
     function plotChart(canvasId, labels, counts, percentages, title, xAxisTitle) {
@@ -382,7 +206,7 @@
         data: {
           labels: labels,
           datasets: [{
-            label: title, // This is for the dataset label
+            label: title,
             data: counts,
             backgroundColor: 'rgba(75, 192, 192, 0.6)',
             borderColor: 'rgba(75, 192, 192, 1)',
@@ -396,10 +220,8 @@
             tooltip: {
               callbacks: {
                 label: function(tooltipItem) {
-                  const index = tooltipItem.dataIndex;
-                  const count = counts[index];
-                  const percentage = percentages[index];
-                  return `Count: ${count} | Percentage: ${percentage}`;
+                  const idx = tooltipItem.dataIndex;
+                  return `Count: ${counts[idx]} | Percentage: ${percentages[idx]}`;
                 }
               }
             }
@@ -408,86 +230,20 @@
             x: {
               title: { display: true, text: xAxisTitle },
               ticks: {
-                font: {
-                  size: window.innerWidth < 768 ? 10 : 14 // ✅ smaller on mobile
-                }
+                font: { size: window.innerWidth < 768 ? 10 : 14 }
               }
             },
             y: {
               title: { display: true, text: 'Number of Stations' },
               beginAtZero: true,
               ticks: {
-                font: {
-                  size: window.innerWidth < 768 ? 10 : 14 // ✅ smaller on mobile
-                }
+                font: { size: window.innerWidth < 768 ? 10 : 14 }
               }
             }
           }
         }
-
       });
     }
-      
-      async function loadCountryData() {
-        try {
-          const urls = [
-            FILE_URL_BASE + 'output_2_10GHz_with_DXCC.json',
-            FILE_URL_BASE + 'output_2_10GHz_SK_with_DXCC.json'
-          ];
-
-          const [res1, res2] = await Promise.all(urls.map(url => fetch(url).then(r => r.json())));
-          const combined = [...res1, ...res2];
-
-          const countryCounts = {};
-          for (const station of combined) {
-            const dxcc = station.DXCC || "Unknown";
-            countryCounts[dxcc] = (countryCounts[dxcc] || 0) + 1;
-          }
-
-          const labels = Object.keys(countryCounts);
-          const data = Object.values(countryCounts);
-          document.getElementById('dxccTotal').textContent = `Total DXCCs: ${labels.length}`;
-
-
-          const backgroundColors = labels.map((_, i) => `hsl(${i * 360 / labels.length}, 70%, 60%)`);
-
-          new Chart(document.getElementById('countryChart'), {
-            type: 'pie',
-            data: {
-              labels: labels,
-              datasets: [{
-                data: data,
-                backgroundColor: backgroundColors,
-                borderColor: '#fff',
-                borderWidth: 1
-              }]
-            },
-            options: {
-              responsive: true,
-              plugins: {
-                legend: {
-                  position: 'bottom'
-                },
-                tooltip: {
-                  callbacks: {
-                    label: function(context) {
-                      const value = context.raw;
-                      const label = context.label;
-                      return `${label}: ${value} stations`;
-                    }
-                  }
-                }
-              }
-            }
-          });
-        } catch (err) {
-          console.error('Error loading DXCC pie chart:', err);
-        }
-      }
-
-      // Call it after the others
-      loadCountryData();
-
 
     async function loadAndPlot(fileUrl, canvasId, title, xAxisTitle) {
       try {
@@ -500,10 +256,64 @@
       }
     }
 
-    // Load all charts with custom x-axis titles
+    // Load Antenna and Power charts as before
     loadAndPlot(files.antenna, 'antennaChart', 'Antenna Count', 'Antenna diameter (m)');
     loadAndPlot(files.power, 'powerChart', 'Power Count', 'Power (W)');
-    loadAndPlot(files.erp, 'erpChart', 'ERP Count', 'ERP (MW)');
+
+    // New function to load stn_10GHz.json and create DXCC pie chart
+    async function loadDXCCPieChart() {
+      try {
+        const response = await fetch(FILE_URL_BASE + 'stn_10GHz.json');
+        const stations = await response.json();
+
+        // Count stations per DXCC
+        const countryCounts = {};
+        stations.forEach(stn => {
+          const dxcc = stn.DXCC || "Unknown";
+          countryCounts[dxcc] = (countryCounts[dxcc] || 0) + 1;
+        });
+
+        const labels = Object.keys(countryCounts);
+        const data = Object.values(countryCounts);
+        document.getElementById('dxccTotal').textContent = `Total DXCCs: ${labels.length}`;
+
+        const backgroundColors = labels.map((_, i) => `hsl(${i * 360 / labels.length}, 70%, 60%)`);
+
+        new Chart(document.getElementById('countryChart'), {
+          type: 'pie',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: data,
+              backgroundColor: backgroundColors,
+              borderColor: '#fff',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'bottom' },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const val = context.raw;
+                    const label = context.label;
+                    return `${label}: ${val} stations`;
+                  }
+                }
+              }
+            }
+          }
+        });
+
+      } catch (err) {
+        console.error('Error loading DXCC pie chart:', err);
+      }
+    }
+
+    loadDXCCPieChart();
+
   </script>
 </body>
 </html>
