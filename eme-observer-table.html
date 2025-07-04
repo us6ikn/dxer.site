@@ -32,182 +32,187 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
     <!-- DataTables Responsive CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.dataTables.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            height: 100vh;
-            flex-direction: column;
-            overflow-x: hidden;
-        }
-
-        /* Style for the buttons */
-        .button-container {
-            display: flex;
-            justify-content: center; /* Center the buttons horizontally */
-            gap: 10px; /* Space between buttons */
-            margin-top: 20px; /* Space above the buttons */
-            width: 100%; /* Ensure it takes full width to help with centering */
-            text-align: center;
-        }
-
-        .button-container button {
-            background-color: #0056b3; /* Button color */
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-            width: 200px; /* Standard width for desktop */
-            text-align: center;
-        }
-
-        .button-container button:hover {
-            background-color: #00408a; /* Darker shade on hover */
-        }
-
-        /* Responsive adjustments for mobile */
-        @media (max-width: 768px) {
-            .button-container button {
-                width: 150px; /* Smaller width for mobile */
-                font-size: 14px; /* Smaller font size for mobile */
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f9;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                height: 100vh;
+                flex-direction: column;
+                overflow-x: hidden;
             }
-        }
 
-        .container {
-            width: 90%; /* Width set to 90% to center the container */
-            max-width: 1200px; /* Max width to prevent it from getting too wide on large screens */
-            margin-left: auto; /* Centers the container */
-            margin-right: auto; /* Centers the container */
-            margin-top: 10px;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        /* Scrollable table */
-        .table-container {
-            max-height: 60vh;  /* Set max height for table */
-            overflow-y: auto;  /* Make it scrollable */
-        }
-
-        table.dataTable {
-            margin: 0 auto;
-        }
-
-        /* Responsive adjustments for small screens */
-        @media (max-width: 768px) {
-            .container {
+            .top-bar {
                 width: 100%;
-                padding: 10px;
+                background-color: #ffffff;
+                padding: 20px 0;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
             }
+
+            .top-content {
+                max-width: 900px;
+                margin: 0 auto;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .app-meta {
+                margin-bottom: 15px;
+            }
+
+            .app-name {
+                font-size: 1.8rem;
+                font-weight: 600;
+                color: #2c3e50;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin-bottom: 5px;
+            }
+
+            .sub-info {
+                font-size: 0.9rem;
+                color: #777;
+                font-style: italic;
+                display: flex;
+                gap: 10px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .ghz-label {
+                font-weight: bold;
+                color: #2c3e50;
+            }
+
+            .creator-label {
+                color: #555;
+            }
+
+            .button-container {
+                display: flex;
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .button-container button {
+                background-color: #0056b3;
+                color: white;
+                border: none;
+                padding: 10px 24px;
+                font-size: 15px;
+                cursor: pointer;
+                border-radius: 6px;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                transition: background-color 0.3s ease;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .button-container button:hover {
+                background-color: #00408a;
+            }
+
+            .container {
+                width: 90%;
+                max-width: 1200px;
+                margin: 20px auto;
+                background-color: #fff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
             h1 {
-                font-size: 1.5em;
+                text-align: center;
+                color: #333;
             }
+
             table {
-                font-size: 0.9em;
-                margin-left: 0; /* Reset margin on small screens */
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
             }
-        }
 
-        /* Hide less important columns on smaller screens */
-        @media (max-width: 600px) {
-            .dataTable td:nth-child(6), /* Website column */
-            .dataTable td:nth-child(7) { /* Note column */
-                display: none;
+            th, td {
+                padding: 10px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
             }
-        }
-        /* Container for top bar including buttons and app name */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            width: 100%;
-            padding: 10px 20px;
-            box-sizing: border-box;
-            flex-wrap: wrap; /* Handle mobile wrapping */
-        }
 
-        /* Reuse your app-name-wrapper styles */
-        .app-name-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            text-align: right;
-            margin-top: 4px;
-        }
+            th {
+                background-color: #f2f2f2;
+            }
 
-        .creator-label {
-            font-size: 10px;
-            color: #555;
-            font-style: italic;
-            margin-bottom: -4px;
-        }
+            .table-container {
+                max-height: 60vh;
+                overflow-y: auto;
+            }
 
-        .app-name {
-            font-size: 1.0rem;
-            font-weight: bold;
-            color: #2c3e50;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+            table.dataTable {
+                margin: 0 auto;
+            }
 
-        .ghz-label {
-            font-size: 10px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-top: -4px;
-        }
+            @media (max-width: 768px) {
+                .container {
+                    width: 100%;
+                    padding: 10px;
+                }
 
-        /* Adjust buttons to align left in top-bar */
-        .button-container {
-            display: flex;
-            gap: 10px;
-        }
+                h1 {
+                    font-size: 1.5em;
+                }
 
-    </style>
+                table {
+                    font-size: 0.9em;
+                }
+
+                .app-name {
+                    font-size: 1.5rem;
+                }
+
+                .sub-info {
+                    font-size: 0.8rem;
+                }
+
+                .button-container button {
+                    width: 140px;
+                    font-size: 14px;
+                }
+            }
+
+            @media (max-width: 600px) {
+                .dataTable td:nth-child(6),
+                .dataTable td:nth-child(7) {
+                    display: none;
+                }
+            }
+        </style>
+
 </head>
 <body>
     <!-- Top header bar with buttons and app name -->
     <div class="top-bar">
-        <div class="button-container">
-            <button onclick="window.location.href='eme-observer.html'">Map View</button>
-            <button onclick="window.location.href='eme-observer-statistics.html'">Statistics</button>
-        </div>
-        <div class="app-name-wrapper">
-            <div class="creator-label">by SA5IKN</div>
-            <div class="app-name">EME Observer</div>
-            <div class="ghz-label">10GHz</div>
+        <div class="top-content">
+            <div class="app-meta">
+                <div class="app-name">EME Observer</div>
+                <div class="sub-info">
+                    <span class="ghz-label">10GHz</span>
+                    <span class="creator-label">by SA5IKN</span>
+                </div>
+            </div>
+            <div class="button-container">
+                <button onclick="window.location.href='eme-observer.html'">Map View</button>
+                <button onclick="window.location.href='eme-observer-statistics.html'">Statistics</button>
+            </div>
         </div>
     </div>
+
     
     <div class="container">
         <h1>10GHz EME Stations</h1>
