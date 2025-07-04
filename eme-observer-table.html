@@ -174,22 +174,23 @@
                 }
 
                 .app-name {
-                    font-size: 1.5rem;
+                    font-size: 1.3rem;
                 }
 
                 .creator-label,
                 .ghz-label {
-                    font-size: 0.8rem;
+                    font-size: 0.75rem;
+                }
+
+                .app-meta {
+                    align-items: flex-end;
+                    text-align: right;
+                    margin-bottom: 12px;
                 }
 
                 .button-container button {
                     width: 140px;
                     font-size: 14px;
-                }
-
-                .app-meta {
-                    align-items: center;
-                    text-align: center;
                 }
             }
 
@@ -199,23 +200,25 @@
                     display: none;
                 }
             }
+
             @media (max-width: 600px) {
-              .button-container {
-                flex-wrap: nowrap;       /* Force one line */
-                overflow-x: auto;        /* Allow horizontal scroll if too wide */
-                gap: 8px;                /* Smaller gaps */
-              }
+                .button-container {
+                    flex-wrap: nowrap;       /* Force one line */
+                    overflow-x: auto;        /* Allow horizontal scroll if too wide */
+                    gap: 8px;                /* Smaller gaps */
+                    justify-content: flex-start;
+                }
 
-              .button-container button {
-                flex-shrink: 0;          /* Prevent buttons from shrinking too small */
-                padding: 6px 12px;       /* Smaller padding */
-                font-size: 12px;         /* Smaller font */
-                width: auto;             /* Remove fixed width */
-                white-space: nowrap;     /* Prevent text wrapping inside button */
-              }
+                .button-container button {
+                    flex-shrink: 0;          /* Prevent buttons shrinking too small */
+                    padding: 6px 12px;       /* Smaller padding */
+                    font-size: 12px;         /* Smaller font */
+                    width: auto;             /* Remove fixed width */
+                    white-space: nowrap;     /* Prevent text wrapping inside button */
+                }
             }
-
         </style>
+
 
 
 </head>
