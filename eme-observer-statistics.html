@@ -419,8 +419,6 @@
           console.error('Error loading DXCC pie chart:', err);
         }
       }
-
-
       // Call it after the others
       loadCountryData();
 
@@ -437,8 +435,8 @@
     }
 
     // Load all charts with custom x-axis titles
-    loadAndPlot(files.power, 'powerChart', 'Power Count', 'Power (W)');
     loadAndPlot(files.antenna, 'antennaChart', 'Antenna Count', 'Antenna diameter (m)');
+    loadAndPlot(files.power, 'powerChart', 'Power Count', 'Power (W)');
   </script>
 </body>
 </html>

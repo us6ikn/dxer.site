@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EME Observer - User Guide</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .top-bar {
+      width: 100%;
+      background-color: #ffffff;
+      padding: 20px 0;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .top-content {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .app-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      text-align: right;
+      margin-bottom: 15px;
+      line-height: 1.1;
+    }
+
+    .creator-label {
+      font-size: 0.9rem;
+      color: #555;
+      font-style: italic;
+      margin-bottom: -4px;
+    }
+
+    .app-name {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: #2c3e50;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: -2px;
+    }
+
+    .ghz-label {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-top: 2px;
+    }
+
+    .button-container {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .button-container button {
+      background-color: #0056b3;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      font-size: 15px;
+      cursor: pointer;
+      border-radius: 6px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .button-container button:hover {
+      background-color: #00408a;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 800px;
+      margin: 20px auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1, h2, h3 {
+      text-align: left;
+      color: #333;
+      margin-top: 30px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    nav ul {
+      list-style: none;
+      padding-left: 0;
+      line-height: 1.8;
+    }
+
+    nav ul a {
+      text-decoration: none;
+      color: #0056b3;
+    }
+
+    nav ul a:hover {
+      text-decoration: underline;
+    }
+
+    section p {
+      color: #333;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+      .button-container button {
+        width: 140px;
+        font-size: 14px;
+      }
+
+      .app-name {
+        font-size: 1.3rem;
+      }
+
+      .creator-label,
+      .ghz-label {
+        font-size: 0.75rem;
+      }
+
+      .app-meta {
+        align-items: flex-end;
+        text-align: right;
+        margin-bottom: 12px;
+      }
+
+      .container {
+        width: 100%;
+        padding: 10px;
+      }
+
+      h1, h2, h3 {
+        font-size: 1.2em;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .button-container {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 8px;
+        justify-content: flex-start;
+      }
+
+      .button-container button {
+        flex-shrink: 0;
+        padding: 6px 12px;
+        font-size: 12px;
+        width: auto;
+        white-space: nowrap;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="top-content">
+      <div class="app-meta">
+        <div class="creator-label">by SA5IKN</div>
+        <div class="app-name">EME Observer</div>
+        <div class="ghz-label">10GHz</div>
+      </div>
+      <div class="button-container">
+        <button onclick="location.href='eme-observer.html'">Map View</button>
+        <button onclick="location.href='eme-observer-table.html'">Table View</button>
+        <button onclick="location.href='https://forms.gle/vLCqCySPEkH926AX8'">Add/Edit</button>
+        <button onclick="location.href='http://dxer.site'">🏠</button>
+        <button onclick="location.href='http://dxer.site/eme-observer-faq.html'">?</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guide Content -->
+  <div class="container">
+    <h1>User Guide</h1>
+
+    <!-- Table of Contents -->
+    <nav>
+      <ul>
+        <li><a href="#about">About EME Observer</a></li>
+        <li><a href="#accuracy">Data and Accuracy</a></li>
+        <li><a href="#quickstart">Quick Start</a>
+          <ul style="padding-left: 1em;">
+            <li><a href="#map-view">– Map View</a></li>
+            <li><a href="#table-view">– Table View</a></li>
+            <li><a href="#statistics">– Statistics</a></li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Sections -->
+    <section id="about">
+      <h2>About EME Observer</h2>
+      <p>
+        EME Observer is a tool for visualizing Earth-Moon-Earth (EME) signal activity, providing real-time insights into propagation, signal paths, and observation data. It is designed for amateur radio operators and enthusiasts who are active on 10GHz moonbounce operations.
+      </p>
+      <img
+        src="images/main-screen-001.jpg"
+        alt="Screenshot of EME Observer main screen"
+        loading="lazy"
+        width="800"
+        height="450"
+        style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px;"
+      />
+    </section>
+
+    <section id="accuracy">
+      <h2>Data and Accuracy</h2>
+      <p>
+        The system relies on crowdsourced observation data, satellite prediction models, and propagation calculations. While designed for high accuracy, some variance may occur depending on data freshness, station reports, and propagation irregularities.
+      </p>
+    </section>
+
+    <section id="quickstart">
+      <h2>Quick Start</h2>
+
+      <h3 id="map-view">Map View</h3>
+      <p>
+        The map shows current EME signal detections and observer locations. Clicking a station icon reveals signal details and time of last detection.
+      </p>
+
+      <h3 id="table-view">Table View</h3>
+      <p>
+        The table lists all recent EME contacts, with options to sort or filter by time, callsign, or signal strength.
+      </p>
+
+      <h3 id="statistics">Statistics</h3>
+      <p>
+        View DXCC totals, country-based detection charts, and trends over time. Hover over a bar to see the station count per country.
+      </p>
+    </section>
+
+  </div>
+</body>
+</html>
