@@ -274,11 +274,22 @@
         <li><a href="#accuracy">Data and Accuracy</a></li>
         <li><a href="#quickstart">Quick Start</a>
           <ul style="padding-left: 1em;">
-            <li><a href="#map-view">– Map View</a></li>
+              <li>
+                <a href="#map-view">– Map View</a>
+                <ul style="padding-left: 1.2em;">
+                  <li><a href="#date-time-controls">Date and Time Controls</a></li>
+                  <li><a href="#daily-moon-data">Daily Moon Data Chart</a></li>
+                  <li><a href="#my-location-chart">My Location Chart</a></li>
+                  <li><a href="#dx-location-chart">DX Location Chart</a></li>
+                  <li><a href="#sked-chart">Sked Chart</a></li>
+                  <li><a href="#station-map">Station Map and Station Profiles</a></li>
+                </ul>
+              </li>
             <li><a href="#table-view">– Table View</a></li>
             <li><a href="#statistics">– Statistics</a></li>
           </ul>
         </li>
+        <li><a href="#mobile-experience">Mobile experience</a></li>
       </ul>
     </nav>
 
@@ -346,6 +357,36 @@
       <p>
         The map shows current EME signal detections and observer locations. Clicking a station icon reveals signal details and time of last detection.
       </p>
+      <h4 id="date-time-controls">Date and Time Controls</h4>
+      <p>
+        Adjust the displayed date and time to visualize the moon's path and station visibility for different moments. This control updates all map overlays dynamically.
+      </p>
+
+      <h4 id="daily-moon-data">Daily Moon Data Chart</h4>
+      <p>
+        This chart shows daily ephemeris data, including declination, distance, Doppler spread, and libration rate—essential for EME planning.
+      </p>
+
+      <h4 id="my-location-chart">My Location Chart</h4>
+      <p>
+        Displays elevation, azimuth, and moon visibility windows for your station. Helps you determine ideal transmit times.
+      </p>
+
+      <h4 id="dx-location-chart">DX Location Chart</h4>
+      <p>
+        Shows the same data as the "My Location" chart, but for a selected DX station—allowing comparison and sked alignment.
+      </p>
+
+      <h4 id="sked-chart">Sked Chart</h4>
+      <p>
+        A combined timeline for both your and the DX station's visibility. Use this to identify mutual moon windows for scheduling.
+      </p>
+
+      <h4 id="station-map">Station Map and Station Profiles</h4>
+      <p>
+        The interactive map displays EME-active stations. Clicking a station icon opens a profile with power, antenna details, website links, and moon stats.
+      </p>
+
 
       <h3 id="table-view">Table View</h3>
       <p>
@@ -357,6 +398,28 @@
         View DXCC totals, country-based detection charts, and trends over time. Hover over a bar to see the station count per country.
       </p>
     </section>
+    
+    <h3 id="mobile-experience">Mobile experience</h3>
+    <p>
+      The application works smoothly on mobile devices, presenting all relevant data in a compact layout. Below are example screenshots of the mobile interface.
+    </p>
+
+    <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 20px;">
+      <figure style="flex: 1; min-width: 100px; max-width: 32%; text-align: center;">
+        <img src="images/mobile-001.jpg" alt="Map view on mobile" style="width: 100%; height: auto; border-radius: 8px;" loading="lazy" />
+        <figcaption style="font-size: 0.85em; color: #555; margin-top: 6px;">Default Map View</figcaption>
+      </figure>
+      <figure style="flex: 1; min-width: 100px; max-width: 32%; text-align: center;">
+        <img src="images/mobile-002.jpg" alt="Moon data mobile view" style="width: 100%; height: auto; border-radius: 8px;" loading="lazy" />
+        <figcaption style="font-size: 0.85em; color: #555; margin-top: 6px;">Moon Data (Station and DX)</figcaption>
+      </figure>
+      <figure style="flex: 1; min-width: 100px; max-width: 32%; text-align: center;">
+        <img src="images/mobile-003.jpg" alt="Sked chart on mobile" style="width: 100%; height: auto; border-radius: 8px;" loading="lazy" />
+        <figcaption style="font-size: 0.85em; color: #555; margin-top: 6px;">Sked Chart View</figcaption>
+      </figure>
+    </div>
+
+  </section>
 
   </div>
   <button id="backToTop" title="Back to top">↑</button>
