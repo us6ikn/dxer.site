@@ -277,7 +277,7 @@
               <li>
                 <a href="#map-view">– Map View</a>
                 <ul style="padding-left: 1.2em;">
-                  <li><a href="#date-time-controls">Date and Time Controls</a></li>
+                  <li><a href="#date-time-controls">Control Panel</a></li>
                   <li><a href="#daily-moon-data">Daily Moon Data Chart</a></li>
                   <li><a href="#my-location-chart">My Location Chart</a></li>
                   <li><a href="#dx-location-chart">DX Location Chart</a></li>
@@ -297,22 +297,7 @@
     <section id="about">
       <h2>About EME Observer</h2>
       <p>
-        <strong>EME Observer</strong> is a web application designed to visualize 10&nbsp;GHz Earth-Moon-Earth (EME) station locations on an interactive map and support seamless, single-click sked planning. It delivers high-resolution lunar ephemeris data and displays key signal path parameters such as libration rate, Doppler spread, and polarization offset—along with detailed moon characteristics, station profiles, and statistical summaries.
-      </p>
-      <p><strong>Key features include:</strong></p>
-      <ul>
-        <li>Station locations with details on power, antennas, QRZ.com links, personal websites, and station images (if available)</li>
-        <li>One-click 10&nbsp;GHz EME planner with visualizations of common moon windows and path characteristics</li>
-        <li>Moon footprint and sublunar point plotting</li>
-        <li>Moon distance, declination, and extra path loss—available daily and in 30-minute intervals</li>
-        <li>Moon azimuth, elevation, libration rate, and Doppler spread at 10.368&nbsp;GHz for both your and DX locations</li>
-        <li>Relative libration rate, Doppler width (DXWidth), and spatial polarization offset (Dpol) between your and DX locations</li>
-        <li>Accurate moonrise and moonset times for both local and DX stations</li>
-        <li>Tabular station view with technical and contact details, including multi-field search</li>
-        <li>Summary statistics covering power levels, antenna sizes, and DXCC distribution</li>
-      </ul>
-      <p>
-        EME Observer was originally developed for personal use—tailored to the pace of my lifestyle and portable 10&nbsp;GHz EME operation, which I enjoy most. It is platform-independent and works equally well on desktop or mobile, making it easy to plan EME activity on the move. EME Observer is NOT a link budjet calculator. It will not tell you whether a QSO is possible but understanding the data it presents can significantly improve your chances.
+      <strong>EME Observer</strong> is a web application that provides an interactive map of 10 GHz Earth-Moon-Earth (EME) stations and enables seamless, single-click sked planning. It delivers high-resolution lunar ephemeris data and displays key signal path characteristics, such as libration rate, Doppler spread, and polarization offset, along with station profiles and statistical summaries.
       </p>
       <figure style="margin-top: 10px; text-align: center;">
         <a href="images/eme-observer-collage_s.png" target="_blank" rel="noopener">
@@ -329,12 +314,29 @@
           EME Observer collage showcasing its different modes
         </figcaption>
       </figure>
+     
+      <p><strong>Key features include:</strong></p>
+      <ul>
+        <li>Station locations with details on power, antennas, QRZ.com links, personal websites, and station images (if available)</li>
+        <li>One-click 10&nbsp;GHz EME planner with visualizations of common moon windows and path characteristics</li>
+        <li>Moon footprint and sublunar point plotting</li>
+        <li>Moon distance, declination, and extra path loss—available daily and in 30-minute intervals</li>
+        <li>Moon azimuth, elevation, topocentric libration rate, and Doppler spread at 10.368&nbsp;GHz for both your and DX locations</li>
+        <li>Relative libration rate, Doppler width (DXWidth), and spatial polarization offset (Dpol) between your and DX locations</li>
+        <li>Accurate moonrise and moonset times for both local and DX stations</li>
+        <li>Tabular station view with technical and contact details, including multi-field search</li>
+        <li>Summary statistics covering power levels, antenna sizes, and DXCC distribution</li>
+      </ul>
+      <p>
+        EME Observer was originally developed for personal use—tailored to the pace of my lifestyle and portable 10&nbsp;GHz EME operation, which I enjoy most. It is platform-independent and works equally well on desktop or mobile, making it easy to plan EME activity on the move. EME Observer is NOT a link budjet calculator. It will not tell you whether a QSO is possible but understanding the data it presents can significantly improve your chances.
+      </p>
+      
     </section>
 
     <section id="accuracy">
       <h2>Data and Accuracy</h2>
       <p>
-        EME Observer performs astronomical calculations using the <em>Astronomy Engine</em>, built on the VSOP87 and NOVAS C 3.1 models. In certain areas, an optimized version of the Meeus algorithm is used to improve performance without reduction in precision.
+        EME Observer performs astronomical calculations using the <em>Astronomy Engine</em>, built on the VSOP87 and NOVAS C 3.1 models. In certain areas, an optimized version of the Meeus algorithm is used to improve performance without noticeable reduction in precision.
       </p>
       <p>
         All computations have been thoroughly validated against the Skyfield Python library, using the DE421 ephemeris from NASA’s Jet Propulsion Laboratory. EME Observer achieves positional accuracy within 1 arcminute (0.017°), fully meeting the precision needs of 10&nbsp;GHz EME planning and analysis.
@@ -347,15 +349,12 @@
       </p>
     </section>
 
-
-
-
     <section id="quickstart">
       <h2>Quick Start</h2>
 
       <h3 id="map-view">Map View</h3>
       <p>
-        The map shows current EME signal detections and observer locations. Clicking a station icon reveals signal details and time of last detection.
+      Map View is the default view in EME Observer. When the page loads, "My Locator" and "DX Locator" fields are empty, and the date and time are set to the current UTC time, rounded to the nearest 30 minutes. You can adjust the date using the date picker or its arrow buttons, and change the time by moving the time slider. The plotted moon footprint updates dynamically in 30-minute intervals as the time slider is adjusted by the user. The position of the moon icon represents the sublunar point—the location on Earth where the moon is directly overhead.
       </p>
       <figure style="margin-top: 10px; text-align: center;">
         <a href="images/main-screen-001.jpg" target="_blank" rel="noopener">
@@ -372,17 +371,73 @@
           EME Observer map view
         </figcaption>
       </figure>
-      <h4 id="date-time-controls">Date and Time Controls</h4>
+      <h4 id="date-time-controls">Control Panel</h4>
       <p>
-        Adjust the displayed date and time to visualize the moon's path and station visibility for different moments. This control updates all map overlays dynamically.
+      The Control Panel in EME Observer includes time and date controls, QTH locator input fields for both your station and the DX station, and buttons to switch between Table View and Statistics View. It also provides access to the station data submission form, a link to this guide, and a Hide Panel button, which minimizes both the control panel and charts to improve map navigation on smaller screens.
       </p>
-
+      <figure style="margin-top: 10px; text-align: center;">
+        <a href="images/controls.jpg" target="_blank" rel="noopener">
+          <img
+            src="images/controls.jpg"
+            alt="Control panel of EME Observer"
+            loading="lazy"
+            width="800"
+            height="450"
+            style="max-width: 100%; height: auto; border-radius: 8px;"
+          />
+        </a>
+        <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+          Control panel of EME Observer
+        </figcaption>
+      </figure>
       <h4 id="daily-moon-data">Daily Moon Data Chart</h4>
       <p>
-        This chart shows daily ephemeris data, including declination, distance, Doppler spread, and libration rate—essential for EME planning.
+        When the page loads and no QTH Locator has been entered by the user, the <strong>Moon Data Chart</strong> is the only chart displayed. It shows <em>geocentric</em> (Earth-centered) moon data that does not depend on any station location. This chart covers a period of <strong>30 days</strong>, with the <strong>X-axis representing calendar dates</strong>.
+      </p>
+      <ul>
+        <li><strong>Moon Distance</strong></li>
+        <li><strong>Moon Declination</strong></li>
+        <li><strong>Extra Path Loss</strong> (relative to the minimum path loss at perigee)</li>
+      </ul>
+      <p>
+        The vertical <strong>black bar</strong> on the chart represents the current date and acts as a <strong>time marker</strong>. You can change the date using the <strong>date picker</strong> or its arrow buttons.
+      </p>
+      <p>
+        Each curve and its corresponding Y-axis are <strong>color-coded</strong>, as are the numerical values shown above the chart for the current moon distance, declination, and extra path loss. These values update in <strong>30-minute intervals</strong> as you move the time slider.
       </p>
 
+
+      <figure style="margin-top: 10px; text-align: center;">
+        <a href="images/moon-data-chart.jpg" target="_blank" rel="noopener">
+          <img
+            src="images/moon-data-chart.jpg"
+            alt="Moon data chart"
+            loading="lazy"
+            width="800"
+            height="450"
+            style="max-width: 100%; height: auto; border-radius: 8px;"
+          />
+        </a>
+        <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+          Moon data chart
+        </figcaption>
+      </figure>
       <h4 id="my-location-chart">My Location Chart</h4>
+      <figure style="margin-top: 10px; text-align: center;">
+        <a href="images/my-locator-chart.jpg" target="_blank" rel="noopener">
+          <img
+            src="images/my-locator-chart.jpg"
+            alt="My locator chart"
+            loading="lazy"
+            width="800"
+            height="450"
+            style="max-width: 100%; height: auto; border-radius: 8px;"
+          />
+        </a>
+        <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+          My locator chart
+        </figcaption>
+      </figure>
       <p>
         Displays elevation, azimuth, and moon visibility windows for your station. Helps you determine ideal transmit times.
       </p>
@@ -394,6 +449,21 @@
 
       <h4 id="sked-chart">Sked Chart</h4>
       <p>
+      <figure style="margin-top: 10px; text-align: center;">
+        <a href="images/sked-chart.jpg" target="_blank" rel="noopener">
+          <img
+            src="images/sked-chart.jpg"
+            alt="Sked data chart"
+            loading="lazy"
+            width="800"
+            height="450"
+            style="max-width: 100%; height: auto; border-radius: 8px;"
+          />
+        </a>
+        <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+          Sked data chart
+        </figcaption>
+      </figure>
         A combined timeline for both your and the DX station's visibility. Use this to identify mutual moon windows for scheduling.
       </p>
 
