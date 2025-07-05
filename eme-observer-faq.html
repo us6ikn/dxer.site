@@ -97,15 +97,23 @@
       background-color: #00408a;
     }
 
-    .container {
-      width: 90%;
-      max-width: 800px;
-      margin: 20px auto;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
+      .container {
+        width: 100%;
+        max-width: 800px;
+        margin: 20px auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+      }
+      img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+
 
     h1, h2, h3 {
       text-align: left;
@@ -227,6 +235,9 @@
         background-color: #00408a;
       }
       .button-container {
+        box-sizing: border-box;
+      }
+      *, *::before, *::after {
         box-sizing: border-box;
       }
 
