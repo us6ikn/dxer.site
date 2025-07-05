@@ -290,6 +290,7 @@
           </ul>
         </li>
         <li><a href="#mobile-experience">Mobile experience</a></li>
+        <li><a href="#other-bands">Use on Bands Other Than 10 GHz</a></li>
       </ul>
     </nav>
 
@@ -353,9 +354,6 @@
       <h2>Quick Start</h2>
 
       <h3 id="map-view">Map View</h3>
-      <p>
-      Map View is the default view in EME Observer. When the page loads, "My Locator" and "DX Locator" fields are empty, and the date and time are set to the current UTC time, rounded to the nearest 30 minutes. You can adjust the date using the date picker or its arrow buttons, and change the time by moving the time slider. The plotted moon footprint updates dynamically in 30-minute intervals as the time slider is adjusted by the user. The position of the moon icon represents the sublunar point—the location on Earth where the moon is directly overhead.
-      </p>
       <figure style="margin-top: 10px; text-align: center;">
         <a href="images/main-screen-001.jpg" target="_blank" rel="noopener">
           <img
@@ -371,10 +369,11 @@
           EME Observer map view
         </figcaption>
       </figure>
-      <h4 id="date-time-controls">Control Panel</h4>
       <p>
-      The Control Panel in EME Observer includes time and date controls, QTH locator input fields for both your station and the DX station, and buttons to switch between Table View and Statistics View. It also provides access to the station data submission form, a link to this guide, and a Hide Panel button, which minimizes both the control panel and charts to improve map navigation on smaller screens.
+      Map View is the default view in EME Observer. When the page loads, "My Locator" and "DX Locator" fields are empty, and the date and time are set to the current UTC time, rounded to the nearest 30 minutes. You can adjust the date using the date picker or its arrow buttons, and change the time by moving the time slider. The plotted moon footprint updates dynamically in 30-minute intervals as the time slider is adjusted by the user. The position of the moon icon represents the sublunar point—the location on Earth where the moon is directly overhead.
       </p>
+      
+      <h4 id="date-time-controls">Control Panel</h4>
       <figure style="margin-top: 10px; text-align: center;">
         <a href="images/controls.jpg" target="_blank" rel="noopener">
           <img
@@ -390,23 +389,11 @@
           Control panel of EME Observer
         </figcaption>
       </figure>
+      <p>
+      The Control Panel in EME Observer includes time and date controls, QTH locator input fields for both your station and the DX station, and buttons to switch between Table View and Statistics View. It also provides access to the station data submission form, a link to this guide, and a Hide Panel button, which minimizes both the control panel and charts to improve map navigation on smaller screens.
+      </p>
+      
       <h4 id="daily-moon-data">Daily Moon Data Chart</h4>
-      <p>
-        When the page loads and no QTH Locator has been entered by the user, the <strong>Moon Data Chart</strong> is the only chart displayed. It shows <em>geocentric</em> (Earth-centered) moon data that does not depend on any station location. This chart covers a period of <strong>30 days</strong>, with the <strong>X-axis representing calendar dates</strong>.
-      </p>
-      <ul>
-        <li><strong>Moon Distance</strong></li>
-        <li><strong>Moon Declination</strong></li>
-        <li><strong>Extra Path Loss</strong> (relative to the minimum path loss at perigee)</li>
-      </ul>
-      <p>
-        The vertical <strong>black bar</strong> on the chart represents the current date and acts as a <strong>time marker</strong>. You can change the date using the <strong>date picker</strong> or its arrow buttons.
-      </p>
-      <p>
-        Each curve and its corresponding Y-axis are <strong>color-coded</strong>, as are the numerical values shown above the chart for the current moon distance, declination, and extra path loss. These values update in <strong>30-minute intervals</strong> as you move the time slider.
-      </p>
-
-
       <figure style="margin-top: 10px; text-align: center;">
         <a href="images/moon-data-chart.jpg" target="_blank" rel="noopener">
           <img
@@ -422,6 +409,21 @@
           Moon data chart
         </figcaption>
       </figure>
+      <p>
+        When the page loads and no QTH Locator has been entered by the user, the <strong>Moon Data Chart</strong> is the only chart displayed. It shows <em>geocentric</em> (Earth-centered) moon data that does not depend on any station location. This chart covers a period of <strong>30 days</strong>, with the <strong>X-axis representing calendar dates</strong> and shows:
+      </p>
+      <ul>
+        <li><strong>Moon Distance</strong></li>
+        <li><strong>Moon Declination</strong></li>
+        <li><strong>Extra Path Loss</strong> (relative to the minimum path loss at perigee)</li>
+      </ul>
+      <p>
+        The vertical <strong>black bar</strong> on the chart represents the chosen date and acts as a <strong>time marker</strong>. You can change the date using the <strong>date picker</strong> or its arrow buttons.
+      </p>
+      <p>
+        Each curve and its corresponding Y-axis are <strong>color-coded</strong>, as are the numerical values shown above the chart for the current moon distance, declination, and extra path loss. These values update in <strong>30-minute intervals</strong> as you move the time slider.
+      </p>
+      
       <h4 id="my-location-chart">My Location Chart</h4>
       <figure style="margin-top: 10px; text-align: center;">
         <a href="images/my-locator-chart.jpg" target="_blank" rel="noopener">
@@ -439,16 +441,34 @@
         </figcaption>
       </figure>
       <p>
-        Displays elevation, azimuth, and moon visibility windows for your station. Helps you determine ideal transmit times.
+        The <strong>My Locator Chart</strong> becomes visible once the user enters a valid 6-character QTH locator in the <em>My Locator</em> field. This chart displays data specific to the user's location, including:
       </p>
+      <ul>
+        <li><strong>Moon Elevation</strong></li>
+        <li><strong>Moonrise and Moonset Times</strong></li>
+        <li><strong>Topocentric Libration Rate</strong></li>
+        <li><strong>Doppler Spread</strong> at 10.368&nbsp;GHz (equivalent to "Width" in the Astronomical data window of WSJT-X)</li>
+      </ul>
+      <p>
+        The X-axis represents time in <strong>30-minute intervals</strong>, and the <strong>black vertical line</strong> serves as a time marker that updates as the user moves the time slider.
+      </p>
+      <p>
+        Each curve on the chart is <strong>color-coded</strong> to match its corresponding Y-axis, and the current values for moon elevation, azimuth, libration rate, and full limb-to-limb Doppler spread are shown above the chart in matching colors for quick reference.
+      </p>
+
 
       <h4 id="dx-location-chart">DX Location Chart</h4>
       <p>
-        Shows the same data as the "My Location" chart, but for a selected DX station—allowing comparison and sked alignment.
+        The <strong>DX Locator Chart</strong> appears when a valid 6-character QTH locator is entered for the DX station. It shares the same layout and visual style as the <em>My Locator</em> chart.
+      </p>
+      <p>
+        When both charts are visible, users can compare Moon visibility for their own station and the DX station, helping to identify overlapping Moon windows for potential QSOs.
+        The DX locator can be entered manually, or automatically by clicking a station marker on the map and then selecting the green <strong>Sked</strong> button next to the station’s locator.
       </p>
 
+
+
       <h4 id="sked-chart">Sked Chart</h4>
-      <p>
       <figure style="margin-top: 10px; text-align: center;">
         <a href="images/sked-chart.jpg" target="_blank" rel="noopener">
           <img
@@ -464,13 +484,21 @@
           Sked data chart
         </figcaption>
       </figure>
-        A combined timeline for both your and the DX station's visibility. Use this to identify mutual moon windows for scheduling.
+      <p>
+        The <strong>Sked Chart</strong> becomes visible when valid 6-character QTH locators are entered in both the <em>My Locator</em> and <em>DX Locator</em> fields. It displays key signal path metrics for the common Moon window (sked) between the two stations (computed as vectors):
+        <strong>Relative Libration Rate</strong> (Rel&nbsp;LR), <strong>Relative Doppler Spread</strong> at 10.368&nbsp;GHz (DX&nbsp;Width), and <strong>Spatial Polarization Offset</strong> (Dpol).
       </p>
+      <p>
+        As with the other charts, each curve and its corresponding Y-axis are <strong>color-coded</strong>, as are the numerical values shown above the chart. These parameters are defined as follows:
+      </p>
+      <ul>
+        <li><strong>Rel LR</strong> – Relative libration rate between the two stations</li>
+        <li><strong>DX Width</strong> – Relative Doppler spread at 10.368&nbsp;GHz (equivalent to <em>DXWid</em> in WSJT-X)</li>
+        <li><strong>Dpol</strong> – Spatial polarization offset in degrees (equivalent to <em>Dpol</em> in WSJT-X)</li>
+      </ul>
+
 
       <h4 id="station-map">Station Map and Station Profiles</h4>
-      <p>
-        The interactive map displays EME-active stations. Clicking a station icon opens a profile with power, antenna details, website links, and moon stats.
-      </p>
       <figure style="margin-top: 10px; text-align: center;">
         <a href="images/main-screen-002.jpg" target="_blank" rel="noopener">
           <img
@@ -486,29 +514,29 @@
             Station and footprint view with a station profile
         </figcaption>
       </figure>
-      <h5 style="margin-top: 1em;">Station Markers</h5>
       <p>
-        There are three types of station markers:
+        The map displays 10&nbsp;GHz EME stations using three distinct marker types:
       </p>
       <ul style="list-style: none; padding-left: 0; font-size: 0.95em;">
         <li style="display: flex; align-items: center; margin-bottom: 8px;">
           <img src="img/EME_home.png" alt="Home station icon" style="width: 24px; height: 24px; margin-right: 10px;" />
-        10GHz EME home station
+          Home station – a fixed-location 10&nbsp;GHz EME station
         </li>
         <li style="display: flex; align-items: center; margin-bottom: 8px;">
           <img src="img/EME_dxped2.png" alt="DXpedition icon" style="width: 24px; height: 24px; margin-right: 10px;" />
-          DXpedition or portable operation outside the station's home locator
+          DXpedition – a portable station operating outside its home QTH locator
         </li>
         <li style="display: flex; align-items: center;">
           <img src="img/EME_SK.png" alt="Silent Key icon" style="width: 24px; height: 24px; margin-right: 10px;" />
-          Silent Key
+          Silent Key – a station formerly active, now marked in memoriam
         </li>
       </ul>
+      <p>
+        Clicking a marker opens an info window with the station's profile, including its callsign, QTH locator and a green <strong>Sked</strong> button for one-click sked planning. Additional details may include antenna size, transmit power, website and QRZ.com links, and a station photo if available.
+      </p>
+
 
       <h3 id="table-view">Table View</h3>
-      <p>
-        The table lists all recent EME contacts, with options to sort or filter by time, callsign, or signal strength.
-      </p>
       <figure style="margin-top: 10px; text-align: center;">
         <a href="images/table-view.jpg" target="_blank" rel="noopener">
           <img
@@ -524,11 +552,14 @@
             EME Observer's Table View containing station data
         </figcaption>
       </figure>
+      <p>
+        The <strong>Table View</strong> can be accessed by clicking the <em>Table View</em> button in the Control Panel. This view displays detailed data for 10&nbsp;GHz EME stations in a sortable, customizable table. Each row includes key station details: callsign, QTH locator, DXCC entity, antenna type, transmit power, website link, and any notes provided.
+      </p>
+      <p>
+        The table supports full-text search across all columns, making it easy to filter stations by criteria such as DXCC prefix, power level, antenna size or type, and more. You can sort by any column or narrow results with targeted queries to quickly find stations of interest.
+      </p>
 
       <h3 id="statistics">Statistics</h3>
-      <p>
-        View DXCC totals, country-based detection charts, and trends over time. Hover over a bar to see the station count per country.
-      </p>
       <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 20px;">
         <figure style="flex: 1; min-width: 100px; max-width: 32%; text-align: center;">
           <a href="images/statistics-001.jpg" target="_blank" rel="noopener">
@@ -543,13 +574,17 @@
           <figcaption style="font-size: 0.85em; color: #555; margin-top: 6px;">10GHz EME stations DXCC statistics</figcaption>
         </figure>
       </div>
+      <p>
+        The <strong>10&nbsp;GHz EME Statistics</strong> view can be accessed from the Control Panel. It currently displays dynamic charts showing the distribution of stations by antenna size, transmit power, and DXCC entities. These statistics are automatically updated whenever station data is added or modified.
+      </p>
+      
     </section>
     
     <section id="mobile-experience">
         <h2>Mobile experience</h2>
-    <p>
-      The application works smoothly on mobile devices, presenting all relevant data in a compact layout. Below are example screenshots of the mobile interface.
-    </p>
+        <p>
+          <strong>EME Observer</strong> features a responsive design optimized for mobile devices, presenting all essential data in a compact, touch-friendly layout. The screenshots below show the interface as displayed on an iPhone Pro. On smaller screens, vertical scrolling is enabled for charts, allowing users to explore data easily while key controls remain fixed for quick access. The control panel can be minimized using the <em>Hide Panel</em> button, making it easier to explore the map, Moon footprint, and station profiles. One-click sked planning functions identically to the desktop version.
+        </p>
 
     <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 20px;">
       <figure style="flex: 1; min-width: 100px; max-width: 32%; text-align: center;">
@@ -571,10 +606,6 @@
         <figcaption style="font-size: 0.85em; color: #555; margin-top: 6px;">Sked Chart View</figcaption>
       </figure>
     </div>
-
-    <p style="margin-top: 20px;">
-      On mobile, key planning views are fully accessible—from default map navigation and Moon data, to sked windows and visibility charts. Responsive layout ensures all elements remain legible, even on small screens.
-    </p>
 
     <!-- Second figure block: 4 mobile screenshots -->
     <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 30px;">
@@ -604,13 +635,18 @@
       </figure>
     </div>
 
-    <p style="margin-top: 20px;">
-      Other views—including moon-only footprints, individual station profiles, sortable table data, and DXCC statistics—are all optimized for mobile as well. This allows efficient planning and lookup from the field, with no loss of detail.
+  </section>
+    <section>
+    <h4 id="other-bands">Use on Bands Other Than 10 GHz</h4>
+    <p>
+      While <strong>EME Observer</strong> is primarily designed for planning 10 GHz EME QSOs, many of its metrics and tools are also valuable for planning and evaluating activity on other EME bands. These include the Moon footprint, Earth–Moon distance, additional path loss, lunar declination, elevation and azimuth charts, libration rate, moonrise and moonset times, and polarization offset.
+    </p>
+    <p>
+      Please note that Doppler spread is calculated specifically for 10.368 GHz and is not directly applicable to other frequencies. Additionally, the effects of lunar libration are frequency-dependent and vary both qualitatively and quantitatively with the operating band.
     </p>
 
 
-
-  </section>
+    </section>
 
   </div>
   <button id="backToTop" title="Back to top">↑</button>
@@ -631,6 +667,8 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
   </script>
-
+  <!-- Ko-Fi -->
+  <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+  <script src="kofi.js"></script>
 </body>
 </html>
