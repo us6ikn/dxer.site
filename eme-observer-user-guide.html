@@ -275,7 +275,7 @@
         <li><a href="#quickstart">Quick Start</a>
           <ul style="padding-left: 1em;">
               <li>
-                <a href="#map-view">– Map View</a>
+                <a href="#map-view">Map View</a>
                 <ul style="padding-left: 1.2em;">
                   <li><a href="#date-time-controls">Control Panel</a></li>
                   <li><a href="#daily-moon-data">Daily Moon Data Chart</a></li>
@@ -285,12 +285,13 @@
                   <li><a href="#station-map">Station Map and Station Profiles</a></li>
                 </ul>
               </li>
-            <li><a href="#table-view">– Table View</a></li>
-            <li><a href="#statistics">– Statistics</a></li>
+            <li><a href="#table-view">Table View</a></li>
+            <li><a href="#statistics">Statistics</a></li>
           </ul>
         </li>
         <li><a href="#mobile-experience">Mobile experience</a></li>
         <li><a href="#other-bands">Use on Bands Other Than 10 GHz</a></li>
+        <li><a href="#dpol">A note on Spatial Polarisation Offset (Dpol)</a></li>
       </ul>
     </nav>
 
@@ -312,7 +313,7 @@
           />
         </a>
         <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
-          EME Observer collage showcasing its different modes
+          EME Observer collage showcasing its different display views
         </figcaption>
       </figure>
      
@@ -340,10 +341,10 @@
         EME Observer performs astronomical calculations using the <em>Astronomy Engine</em>, built on the VSOP87 and NOVAS C 3.1 models. In certain areas, an optimized version of the Meeus algorithm is used to improve performance without noticeable reduction in precision.
       </p>
       <p>
-        All computations have been thoroughly validated against the Skyfield Python library, using the DE421 ephemeris from NASA’s Jet Propulsion Laboratory. EME Observer achieves positional accuracy within 1 arcminute (0.017°), fully meeting the precision needs of 10&nbsp;GHz EME planning and analysis.
+        All computations have been thoroughly validated against the Skyfield Python library, using the DE421 ephemeris from NASA Jet Propulsion Laboratory. EME Observer achieves positional accuracy within 1 arcminute (0.017°), fully meeting the precision needs of 10&nbsp;GHz EME planning and analysis.
       </p>
       <p>
-        Doppler spread calculations are based on methods described by <a href="https://wsjt.sourceforge.io/EME2010_K1JT.pdf" target="_blank" rel="noopener">J. Taylor (K1JT, 2010)</a>, and spatial polarization offset (Dpol) follows the WSJT-X algorithm.
+        Doppler spread calculations are based on methods described by <a href="https://wsjt.sourceforge.io/EME2010_K1JT.pdf" target="_blank" rel="noopener">(J. Taylor K1JT, 2010)</a>, and spatial polarization offset (Dpol) follows the WSJT-X algorithm.
       </p>
       <p>
         Station data is contributed by the community. To add or update a station, use <a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank" rel="noopener">this form</a>. Please only add stations that have TX capability and achieved at least one 10GHz EME QSO.
@@ -352,7 +353,10 @@
 
     <section id="quickstart">
       <h2>Quick Start</h2>
-
+      <p>
+      EME Observer offers three display modes: Map View, Table View, and Statistics View.
+      </p>
+      
       <h3 id="map-view">Map View</h3>
       <figure style="margin-top: 10px; text-align: center;">
         <a href="images/main-screen-001.jpg" target="_blank" rel="noopener">
@@ -465,8 +469,6 @@
         When both charts are visible, users can compare Moon visibility for their own station and the DX station, helping to identify overlapping Moon windows for potential QSOs.
         The DX locator can be entered manually, or automatically by clicking a station marker on the map and then selecting the green <strong>Sked</strong> button next to the station’s locator.
       </p>
-
-
 
       <h4 id="sked-chart">Sked Chart</h4>
       <figure style="margin-top: 10px; text-align: center;">
@@ -644,7 +646,29 @@
     <p>
       Please note that Doppler spread is calculated specifically for 10.368 GHz and is not directly applicable to other frequencies. Additionally, the effects of lunar libration are frequency-dependent and vary both qualitatively and quantitatively with the operating band.
     </p>
+    </section>
+    
+    <section>
+    <h4 id="dpol">A note on Spatial Polarisation Offset (Dpol)</h4>
+    <p>
+        For certain EME path geometries, the plot of the Spatial Polarization Offset may exhibit abrupt transitions, with the Dpol value rapidly changing sign near ±90 degrees (see the center and bottom plots in the figure below). The Dpol values displayed by EME Observer are consistent with those reported by WSJT-X. When instantaneous values from WSJT-X or the VK3UM EME Planner are plotted, similar abrupt transitions can be observed. For more details, see <a href="https://groups.io/g/wsjtgroup/topic/spatial_polarisation_offset/113906411" target="_blank" rel="noopener">this discussion</a>.
+    </p>
 
+    <figure style="margin-top: 10px; text-align: center;">
+      <a href="images/dpol.jpg" target="_blank" rel="noopener">
+        <img
+          src="images/dpol.jpg"
+          alt="Spatial Polarisation Offset (Dpol) behaviour under different EME path geometries"
+          loading="lazy"
+          width="800"
+          height="450"
+          style="max-width: 100%; height: auto; border-radius: 8px;"
+        />
+      </a>
+      <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+        Spatial Polarisation Offset (Dpol) behaviour under different EME path geometries
+      </figcaption>
+    </figure>
 
     </section>
 
