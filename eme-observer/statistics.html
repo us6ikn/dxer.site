@@ -16,14 +16,14 @@
       <meta name="description" content="Visual statistics for 10GHz EME stations, including antenna sizes, transmit power, ERP, and DXCC country distribution.">
 
       <!-- Canonical URL -->
-      <link rel="canonical" href="https://dxer.site/eme-observer-statistics.html" />
+      <link rel="canonical" href="https://dxer.site/eme-observer/statistics.html" />
       <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
 
       <!-- Open Graph -->
       <meta property="og:type" content="website">
       <meta property="og:title" content="10GHz EME Stations Statistics">
       <meta property="og:description" content="Explore interactive charts of antenna size, power output, ERP, and DXCC breakdown for 10GHz EME stations.">
-      <meta property="og:url" content="https://dxer.site/eme-observer-statistics.html">
+      <meta property="og:url" content="https://dxer.site/eme-observer/statistics.html">
       <meta property="og:image" content="https://dxer.site/social/eme-observer-statistics.jpg"> <!-- optional preview image -->
 
       <!-- Twitter Card -->
@@ -258,11 +258,11 @@
               </div>
 
             <div class="button-container">
-              <button onclick="window.location.href='eme-observer.html'">Map View</button>
-              <button onclick="window.location.href='eme-observer-table.html'">Table View</button>
+              <button onclick="window.location.href='/eme-observer/'">Map View</button>
+              <button onclick="window.location.href='table.html'">Table View</button>
               <button onclick="window.location.href='https://forms.gle/vLCqCySPEkH926AX8'">Add/Edit</button>
-              <button onclick="window.location.href='http://dxer.site'">🏠</button>
-              <button onclick="window.location.href='http://dxer.site/eme-observer-user-guide.html'">?</button>
+              <button onclick="window.location.href='/'">🏠</button>
+              <button onclick="window.location.href='user-guide.html'">?</button>
             </div>
           </div>
         </div>
@@ -290,8 +290,8 @@
     const FILE_URL_BASE = ''; // Set this to the base URL if needed
 
     const files = {
-      antenna: FILE_URL_BASE + 'antenna_histogram.txt',
-      power: FILE_URL_BASE + 'power_histogram.txt',
+      antenna: FILE_URL_BASE + 'hist_a.txt',
+      power: FILE_URL_BASE + 'hist_p.txt',
     };
 
     function parseHistogramData(text) {
@@ -438,5 +438,8 @@
     loadAndPlot(files.antenna, 'antennaChart', 'Antenna Count', 'Antenna diameter (m)');
     loadAndPlot(files.power, 'powerChart', 'Power Count', 'Power (W)');
   </script>
+  <!-- Ko-Fi -->
+  <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+  <script src="/kofi.js"></script>
 </body>
 </html>
