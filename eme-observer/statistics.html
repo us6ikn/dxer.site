@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7YST3WTEH3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-7YST3WTEH3');
+    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <!-- Meta Description -->
+      <meta name="description" content="Visual statistics for 10GHz EME stations, including antenna sizes, transmit power, ERP, and DXCC country distribution.">
+
+      <!-- Canonical URL -->
+      <link rel="canonical" href="https://dxer.site/eme-observer-statistics.html" />
+      <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+
+      <!-- Open Graph -->
+      <meta property="og:type" content="website">
+      <meta property="og:title" content="10GHz EME Stations Statistics">
+      <meta property="og:description" content="Explore interactive charts of antenna size, power output, ERP, and DXCC breakdown for 10GHz EME stations.">
+      <meta property="og:url" content="https://dxer.site/eme-observer-statistics.html">
+      <meta property="og:image" content="https://dxer.site/social/eme-observer-statistics.jpg"> <!-- optional preview image -->
+
+      <!-- Twitter Card -->
+      <meta name="twitter:card" content="summary_large_image">
+      <meta name="twitter:title" content="10GHz EME Stations Statistics">
+      <meta name="twitter:description" content="Visual breakdown of antenna size, power, and DXCC participation in 10GHz EME communication.">
+      <meta name="twitter:image" content="https://dxer.site/social/eme-observer-statistics.jpg"> <!-- optional preview image -->
+
+      <!-- Structured Data (JSON-LD for Dataset or WebPage) -->
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "10GHz EME Stations Statistics",
+        "url": "https://dxer.site/eme-observer-statistics.html",
+        "description": "Interactive statistics showing antenna diameter, transmit power, ERP, and DXCC for 10GHz Earth-Moon-Earth (EME) amateur radio stations."
+      }
+      </script>
+
+  <title>10GHz EME Stations Statistics</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f9;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        flex-direction: column;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      .button-container {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 10px;
+      }
+
+      .button-container button {
+        background-color: #0056b3;
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        font-size: 15px;
+        cursor: pointer;
+        border-radius: 6px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        transition: background-color 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .button-container button:hover {
+        background-color: #00408a;
+      }
+
+      .container {
+        width: 90%;
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      h1, h2 {
+        text-align: center;
+        color: #333;
+      }
+
+      canvas {
+        width: 100% !important;
+        max-width: 100%;
+        margin: 20px auto;
+        display: block;
+        height: auto;
+        min-height: 350px;
+      }
+
+      .chart-wrapper {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto 40px auto;
+        padding: 0 10px;
+      }
+
+      #countryChart {
+        width: 100% !important;
+        height: auto !important;
+        max-height: 400px;
+      }
+
+      .dxcc-total {
+        text-align: center;
+        font-size: 16px;
+        color: #333;
+        margin-top: -10px;
+        margin-bottom: 15px;
+      }
+
+      .hover-hint {
+        text-align: center;
+        font-size: 13px;
+        color: #666;
+        margin-top: -10px;
+        margin-bottom: 10px;
+      }
+
+      .top-bar {
+        width: 100%;
+        background-color: #ffffff;
+        padding: 20px 0;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .top-content {
+        max-width: 900px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .app-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        text-align: right;
+        margin-bottom: 15px;
+        line-height: 1.1;
+      }
+
+      .creator-label {
+        font-size: 0.9rem;
+        color: #555;
+        font-style: italic;
+        margin-bottom: -4px;
+      }
+
+      .app-name {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #2c3e50;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: -2px;
+      }
+
+      .ghz-label {
+        font-size: 0.9rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-top: 2px;
+      }
+
+      /* Responsive for tablets and down */
+      @media (max-width: 900px) {
+        .button-container {
+          flex-wrap: nowrap;
+          overflow-x: auto;
+          gap: 8px;
+          justify-content: flex-start;
+        }
+
+        .button-container button {
+          flex-shrink: 0;
+          padding: 6px 12px;
+          font-size: 13px;
+          white-space: nowrap;
+          width: auto;
+        }
+      }
+
+      /* Mobile-specific adjustments */
+      @media (max-width: 768px) {
+        .container {
+          width: 100%;
+          padding: 10px;
+        }
+
+        canvas {
+          min-height: 220px;
+          max-width: 95%;
+        }
+
+        h1, h2 {
+          font-size: 1.2em;
+        }
+
+        .app-name {
+          font-size: 1.3rem;
+        }
+
+        .creator-label,
+        .ghz-label {
+          font-size: 0.75rem;
+        }
+
+        .top-content {
+          align-items: center;
+          text-align: center;
+        }
+
+        .app-meta {
+          align-items: center;
+          text-align: center;
+          margin-bottom: 10px;
+        }
+      }
+
+  </style>
+
+
+
+</head>
+<body>
+    <body>
+        <div class="top-bar">
+          <div class="top-content">
+              <div class="app-meta">
+                <div class="creator-label">by SA5IKN</div>
+                <div class="app-name">EME Observer</div>
+                <div class="ghz-label">10GHz</div>
+              </div>
+
+            <div class="button-container">
+              <button onclick="window.location.href='eme-observer.html'">Map View</button>
+              <button onclick="window.location.href='eme-observer-table.html'">Table View</button>
+              <button onclick="window.location.href='https://forms.gle/vLCqCySPEkH926AX8'">Add/Edit</button>
+              <button onclick="window.location.href='http://dxer.site'">🏠</button>
+              <button onclick="window.location.href='http://dxer.site/eme-observer-user-guide.html'">?</button>
+            </div>
+          </div>
+        </div>
+
+  <div class="container">
+    <h1>10GHz EME Stations Statistics</h1>
+
+    <h2>Antenna Size</h2>
+    <canvas id="antennaChart"></canvas>
+
+    <h2>Power</h2>
+    <canvas id="powerChart"></canvas>
+    
+    <div class="chart-wrapper">
+      <h2>Stations per DXCC</h2>
+      <p id="dxccTotal" class="dxcc-total"></p>
+      <p class="hover-hint">Hover over the chart to see DXCC details.</p>
+      <canvas id="countryChart"></canvas>
+    </div>
+
+
+  </div>
+
+  <script>
+    const FILE_URL_BASE = ''; // Set this to the base URL if needed
+
+    const files = {
+      antenna: FILE_URL_BASE + 'antenna_histogram.txt',
+      power: FILE_URL_BASE + 'power_histogram.txt',
+    };
+
+    function parseHistogramData(text) {
+      const lines = text.trim().split('\n').slice(1); // Skip header
+      const originalLabels = [];
+      const labels = [];
+      const counts = [];
+      const percentages = [];
+      for (const line of lines) {
+        const parts = line.trim().split(/\t+/);
+        if (parts.length >= 3) {
+          const label = parts[0];
+          const count = parseInt(parts[1], 10);
+          const percentage = parts[2];
+          originalLabels.push(label);
+          if (count > 0) {  // Only include bins where count > 0
+            labels.push(label);
+            counts.push(count);
+            percentages.push(percentage);
+          }
+        }
+      }
+      return { labels, counts, percentages, originalLabels };
+    }
+
+    function plotChart(canvasId, labels, counts, percentages, title, xAxisTitle) {
+      new Chart(document.getElementById(canvasId), {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: title, // This is for the dataset label
+            data: counts,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(tooltipItem) {
+                  const index = tooltipItem.dataIndex;
+                  const count = counts[index];
+                  const percentage = percentages[index];
+                  return `Count: ${count} | Percentage: ${percentage}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              title: { display: true, text: xAxisTitle },
+              ticks: {
+                font: {
+                  size: window.innerWidth < 768 ? 10 : 14 // ✅ smaller on mobile
+                }
+              }
+            },
+            y: {
+              title: { display: true, text: 'Number of Stations' },
+              beginAtZero: true,
+              ticks: {
+                font: {
+                  size: window.innerWidth < 768 ? 10 : 14 // ✅ smaller on mobile
+                }
+              }
+            }
+          }
+        }
+
+      });
+    }
+      
+      async function loadCountryData() {
+        try {
+          const response = await fetch(FILE_URL_BASE + 'stn_10GHz.json');
+          const combined = await response.json();
+
+          const countryCounts = {};
+          for (const station of combined) {
+            const dxcc = station.DXCC || "Unknown";
+            countryCounts[dxcc] = (countryCounts[dxcc] || 0) + 1;
+          }
+
+          const labels = Object.keys(countryCounts);
+          const data = Object.values(countryCounts);
+          document.getElementById('dxccTotal').textContent = `Activated DXCC: ${labels.length}`;
+
+          const backgroundColors = labels.map((_, i) =>
+            `hsl(${i * 360 / labels.length}, 70%, 60%)`
+          );
+
+          new Chart(document.getElementById('countryChart'), {
+            type: 'pie',
+            data: {
+              labels: labels,
+              datasets: [{
+                data: data,
+                backgroundColor: backgroundColors,
+                borderColor: '#fff',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                  callbacks: {
+                    label: function (context) {
+                      const value = context.raw;
+                      const label = context.label;
+                      return `${label}: ${value} stations`;
+                    }
+                  }
+                }
+              }
+            }
+          });
+        } catch (err) {
+          console.error('Error loading DXCC pie chart:', err);
+        }
+      }
+      // Call it after the others
+      loadCountryData();
+
+
+    async function loadAndPlot(fileUrl, canvasId, title, xAxisTitle) {
+      try {
+        const response = await fetch(fileUrl);
+        const text = await response.text();
+        const data = parseHistogramData(text);
+        plotChart(canvasId, data.labels, data.counts, data.percentages, title, xAxisTitle);
+      } catch (err) {
+        console.error(`Error loading ${fileUrl}:`, err);
+      }
+    }
+
+    // Load all charts with custom x-axis titles
+    loadAndPlot(files.antenna, 'antennaChart', 'Antenna Count', 'Antenna diameter (m)');
+    loadAndPlot(files.power, 'powerChart', 'Power Count', 'Power (W)');
+  </script>
+</body>
+</html>
