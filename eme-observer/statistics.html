@@ -408,7 +408,7 @@
           );
 
           const chart = new Chart(document.getElementById('countryChart'), {
-            type: 'doughnut',
+            type: 'pie',
             data: {
               labels: labels,
               datasets: [{
@@ -421,7 +421,7 @@
             options: {
               responsive: true,
               plugins: {
-                legend: { display: false }, // ✅ disable built-in legend
+                legend: { display: false },
                 tooltip: {
                   callbacks: {
                     label: function (context) {
