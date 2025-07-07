@@ -404,6 +404,11 @@
           const backgroundColors = labels.map((_, i) =>
             `hsl(${i * 360 / labels.length}, 70%, 60%)`
           );
+          
+          const backgroundColors = Array.from({ length: labels.length }, (_, i) =>
+            baseColors[i % baseColors.length]
+          );
+
 
           new Chart(document.getElementById('countryChart'), {
             type: 'doughnut',
