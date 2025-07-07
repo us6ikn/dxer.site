@@ -17,7 +17,6 @@
     <meta name="description" content="View detailed statistics and charts from the 10GHz EME Observer. Analyze station activity, moonbounce trends, and other amateur radio metrics." />
     <meta name="keywords" content="EME Statistics, Moonbounce Stats, 10GHz, Ham Radio, Amateur Radio, EME Observer" />
     <meta name="author" content="SA5IKN" />
-    <meta name="theme-color" content="#000000" />
     <meta name="robots" content="index, follow" />
 
     <!-- Open Graph -->
@@ -408,7 +407,7 @@
           );
 
           const chart = new Chart(document.getElementById('countryChart'), {
-            type: 'pie',
+            type: 'doughnut',
             data: {
               labels: labels,
               datasets: [{
