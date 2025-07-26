@@ -829,22 +829,26 @@
 
                         const isLocatorValid = /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator);
                         const sanitizedCallsign = sanitizeCallsign(callsign);
+                        const skedButton = isLocatorValid ?
+                            `<button id="sked-${sanitizedCallsign}" class="sked-button" data-locator="${locator.toUpperCase()}">Sked</button>` :
+                            '';
                         const emailButton = email ?
                             `<a id="email-${sanitizedCallsign}" class="email-button" href="mailto:${email}">Email</a>` :
                             '';
+                        const qrzButton = `<a id="qrz-${sanitizedCallsign}" class="qrz-button" href="https://www.qrz.com/db/${callsign}" target="_blank">QRZ</a>`;
                         const callsignDisplay = callsign +
                             (/SK/i.test(Note) ? ' (SK)' : '') +
                             (/Inactive/i.test(Note) ? ' (not active)' : '');
                         const infoContent = `
                             <div>
                                 <div style="font-weight:bold; font-size: 16px;">${callsignDisplay}</div>
-                                <div>Locator: ${locator}${isLocatorValid ? ` <button id="sked-${sanitizedCallsign}" class="sked-button" data-locator="${locator.toUpperCase()}">Sked</button>${emailButton}` : ''}</div>
+                                <div class="button-group">
+                                    ${skedButton}${emailButton}${qrzButton}
+                                </div>
+                                <div>Locator: ${locator}</div>
                                 <div>Antenna: ${antenna}</div>
                                 <div>Power: ${power}</div>
                                 <div>Website: <a href="${website}" target="_blank">${website}</a></div>
-                                <div>
-                                    <a id="qrz-${sanitizedCallsign}" class="qrz-button" href="https://www.qrz.com/db/${callsign}" target="_blank">QRZ</a>
-                                </div>
                                 <div id="image-container-${sanitizedCallsign}">
                                     Station Picture (clickable):<br>
                                     <a href="db/${sanitizedCallsign}.jpg" target="_blank">
