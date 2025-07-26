@@ -407,6 +407,7 @@
           font-size: 12px;
           border-radius: 3px;
           margin-left: 5px;
+          text-decoration: none;
           transition: background-color 0.3s ease;
       }
 
@@ -757,7 +758,7 @@
                 fullscreenControl: false
             });
 
-            fetch('stn_10GHzt.json')
+            fetch('stn_10GHz.json')
                 .then(response => response.json())
                 .then(data => {
                     data.forEach(station => {
@@ -767,7 +768,7 @@
                             Antenna: antenna,
                             Power: power,
                             Website: website,
-                            Email: email = '', // Default to empty string if Email is missing
+                            Email: email = '',
                             Coordinates,
                             Note = ''
                         } = station;
@@ -784,8 +785,12 @@
                             lng: lng + (offsetLng / 10000)
                         };
 
-                        let iconUrl = "images/EME_home.png";
-                        if (/SK/i.test(Note)) {
+                        // Determine marker icon based on Note field
+                        let iconUrl = "指標
+                            "images/EME_home.png"; // Default icon
+                        if (/Inactive/i.test(Note)) {
+                            iconUrl = "images/EME_inactive.png"; // New icon for Inactive
+                        } else if (/SK/i.test(Note)) {
                             iconUrl = "images/EME_SK.png";
                         } else if (/DXpedition|Portable/i.test(Note)) {
                             iconUrl = "images/EME_dxped2.png";
@@ -863,12 +868,9 @@
                                     });
                                 }
 
-                                // Optional: Add event listener for email button if needed
                                 const emailButton = document.getElementById(`email-${sanitizedCallsign}`);
                                 if (emailButton) {
                                     emailButton.addEventListener('click', () => {
-                                        // The mailto: link handles opening the email client
-                                        // Add any additional behavior here if needed
                                         console.log(`Email button clicked for ${callsign}: ${email}`);
                                     });
                                 }
