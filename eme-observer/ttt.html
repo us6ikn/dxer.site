@@ -397,7 +397,29 @@
         outline: none;
         box-shadow: 0 0 3px rgba(40, 167, 69, 0.5);
       }
+      
+      .email-button {
+          background-color: #27A9F5;
+          color: white;
+          border: none;
+          padding: 2px 6px;
+          cursor: pointer;
+          font-size: 12px;
+          border-radius: 3px;
+          margin-left: 5px;
+          text-decoration: none;
+          transition: background-color 0.3s ease;
+      }
 
+      .email-button:hover {
+          background-color: #279CF5;
+      }
+
+      .email-button:focus {
+        outline: none;
+        box-shadow: 0 0 3px rgba(40, 167, 69, 0.5);
+      }
+      
       .button-group {
         display: flex;
         gap: 3px;
@@ -543,21 +565,6 @@
       .metric-poloffset {
         color: blue;
         font-weight: bold;
-      }
-      .email-button {
-          background-color: #28a745; /* Green to distinguish from Sked button */
-          color: white;
-          border: none;
-          padding: 5px 10px;
-          cursor: pointer;
-          font-size: 12px;
-          border-radius: 4px;
-          margin-left: 5px; /* Space between Sked and Email buttons */
-          text-decoration: none; /* For <a> tag to look like a button */
-      }
-
-      .email-button:hover {
-          background-color: #27CCF5; /* Darker green on hover */
       }
   </style>
 </head>
