@@ -789,7 +789,7 @@
                 fullscreenControl: false
             });
 
-            fetch('stn_10GHzt.json')
+            fetch('stn_10GHz.json')
                 .then(response => response.json())
                 .then(data => {
                     data.forEach(station => {
@@ -801,7 +801,8 @@
                             Website: website,
                             Email: email = '',
                             Coordinates,
-                            Note = ''
+                            Note = '',
+                            Name = '' // Default to empty string if Name is not present
                         } = station;
 
                         const [latStr, lngStr] = Coordinates.split(',');
@@ -847,11 +848,13 @@
                         const callsignDisplay = callsign +
                             (/SK/i.test(Note) ? ' (SK)' : '') +
                             (/Inactive/i.test(Note) ? ' (not active)' : '');
-                        // Truncate website to 30 characters, append ... if longer
                         const displayWebsite = website.length > 30 ? website.slice(0, 30) + '...' : website;
+                        // Conditionally include Name if non-empty
+                        const nameLine = Name ? `<div>Name: ${Name}</div>` : '';
                         const infoContent = `
                             <div>
                                 <div style="font-weight:bold; font-size: 16px;">${callsignDisplay}</div>
+                                ${nameLine}
                                 <div class="button-group-infowindow">
                                     ${skedButton}${emailButton}${qrzButton}
                                 </div>
@@ -883,7 +886,7 @@
                                 const placeholder = document.getElementById(`image-placeholder-${sanitizedCallsign}`);
                                 const imageUrl = `db/${sanitizedCallsign}_thumb.jpg`;
 
-                                fetch(imageUrl, { method: 'HEAD'})
+                                fetch(imageUrl, { method: 'HEAD' })
                                     .then(response => {
                                         if (!response.ok) {
                                             imageElement.remove();
