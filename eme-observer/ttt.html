@@ -566,6 +566,21 @@
         color: blue;
         font-weight: bold;
       }
+      .qrz-button {
+          background-color: #fd7e14; /* Orange to distinguish from Sked and Email */
+          color: white;
+          border: none;
+          padding: 5px 10px;
+          cursor: pointer;
+          font-size: 12px;
+          border-radius: 4px;
+          margin-left: 5px; /* Space if placed next to other buttons */
+          text-decoration: none; /* For <a> tag to look like a button */
+      }
+
+      .qrz-button:hover {
+          background-color: #e86c12; /* Darker orange on hover */
+      }
   </style>
 </head>
 <body>
@@ -758,7 +773,7 @@
                 fullscreenControl: false
             });
 
-            fetch('stn_10GHzt.json')
+            fetch('stn_10GHz.json')
                 .then(response => response.json())
                 .then(data => {
                     data.forEach(station => {
@@ -809,7 +824,6 @@
                         const emailButton = email ?
                             `<a id="email-${sanitizedCallsign}" class="email-button" href="mailto:${email}">Email</a>` :
                             '';
-                        // Append (SK) and/or (not active) based on Note field
                         const callsignDisplay = callsign +
                             (/SK/i.test(Note) ? ' (SK)' : '') +
                             (/Inactive/i.test(Note) ? ' (not active)' : '');
@@ -820,7 +834,9 @@
                                 <div>Antenna: ${antenna}</div>
                                 <div>Power: ${power}</div>
                                 <div>Website: <a href="${website}" target="_blank">${website}</a></div>
-                                <div><a href="https://www.qrz.com/db/${callsign}" target="_blank">QRZ.com lookup</a></div>
+                                <div>
+                                    <a id="qrz-${sanitizedCallsign}" class="qrz-button" href="https://www.qrz.com/db/${callsign}" target="_blank">QRZ</a>
+                                </div>
                                 <div id="image-container-${sanitizedCallsign}">
                                     Station Picture (clickable):<br>
                                     <a href="db/${sanitizedCallsign}.jpg" target="_blank">
@@ -874,6 +890,13 @@
                                 if (emailButton) {
                                     emailButton.addEventListener('click', () => {
                                         console.log(`Email button clicked for ${callsign}: ${email}`);
+                                    });
+                                }
+
+                                const qrzButton = document.getElementById(`qrz-${sanitizedCallsign}`);
+                                if (qrzButton) {
+                                    qrzButton.addEventListener('click', () => {
+                                        console.log(`QRZ button clicked for ${callsign}: https://www.qrz.com/db/${callsign}`);
                                     });
                                 }
                             }, 100);
