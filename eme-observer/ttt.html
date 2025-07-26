@@ -883,7 +883,7 @@
                                 const placeholder = document.getElementById(`image-placeholder-${sanitizedCallsign}`);
                                 const imageUrl = `db/${sanitizedCallsign}_thumb.jpg`;
 
-                                fetch(imageUrl, { method: 'HEAD' )
+                                fetch(imageUrl, { method: 'HEAD'
                                     .then(response => {
                                         if (!response.ok) {
                                             imageElement.remove();
