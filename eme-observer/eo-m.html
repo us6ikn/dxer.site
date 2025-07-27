@@ -850,7 +850,7 @@
                             (/Inactive/i.test(Note) ? ' (not active)' : '');
                         const displayWebsite = website.length > 30 ? website.slice(0, 30) + '...' : website;
                         // Conditionally include Name if non-empty
-                        const nameLine = Name ? `<div>Name: ${Name}</div>` : '';
+                        const nameLine = Name ? `<div><strong>${Name}</strong></div>` : '';
                         const infoContent = `
                             <div>
                                 <div style="font-weight:bold; font-size: 16px;">${callsignDisplay}</div>
