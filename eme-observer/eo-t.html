@@ -276,7 +276,7 @@
         <div style="margin: 10px 0;">
             <label>
                 <input type="checkbox" id="activeOnlyCheckbox" style="margin-right: 6px;">
-                Show only Active
+                Show only active
             </label>
         </div>
 
@@ -307,6 +307,15 @@
 
     <script>
         let allStations = [];
+
+        function decodeEmail(obfuscated) {
+            try {
+                const reversed = obfuscated.split('').reverse().join('');
+                return atob(reversed);
+            } catch (e) {
+                return '';
+            }
+        }
 
         async function fetchData() {
             try {
@@ -339,13 +348,22 @@
                     rowClass = 'style="font-weight:bold;"';
                 }
 
+                // If there's a valid email field, decode and wrap in mailto link
+                let callHtml = station.Call;
+                if (station.Email) {
+                    const decodedEmail = decodeEmail(station.Email);
+                    if (decodedEmail) {
+                        callHtml = `<a href="mailto:${decodedEmail}">${station.Call}</a>`;
+                    }
+                }
+
                 row.innerHTML = `
-                    <td ${rowClass}>${station.Call}</td>
+                    <td ${rowClass}>${callHtml}</td>
                     <td>${station.Locator}</td>
                     <td>${station.DXCC}</td>
                     <td>${station.Antenna}</td>
                     <td>${station.Power}</td>
-                    <td>${station.Website ? `<a href="${station.Website}" target="_blank">${station.Website}</a>` : 'N/A'}</td>
+                    <td>${station.Website ? `<a href="${station.Website}" target="_blank">${station.Website}</a>` : ''}</td>
                     <td>${noteDisplay}</td>
                 `;
                 tableBody.appendChild(row);
@@ -368,7 +386,6 @@
                 return !note.includes("dxpedition") && !note.includes("inactive") && !note.includes("sk");
             });
 
-            // Attach event handler to checkbox
             $('#activeOnlyCheckbox').on('change', function () {
                 table.draw();
             });
@@ -378,6 +395,7 @@
             fetchData();
         });
     </script>
+
 
 
     <!-- Ko-Fi -->
