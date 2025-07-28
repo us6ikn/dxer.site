@@ -248,6 +248,22 @@
                     white-space: nowrap;     /* Prevent text wrapping inside button */
                 }
             }
+            td button {
+                padding: 6px 10px;
+                font-size: 13px;
+                margin-right: 6px;
+                border: none;
+                background-color: #0056b3;
+                color: white;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+            td button:hover {
+                background-color: #003f80;
+            }
+
         </style>
 
 </head>
@@ -357,13 +373,25 @@
                     }
                 }
 
+                // Build buttons if available
+                let buttonHtml = '';
+                const decodedEmail = station.Email ? decodeEmail(station.Email) : null;
+
+                if (decodedEmail) {
+                    buttonHtml += `<button onclick="window.location.href='mailto:${decodedEmail}'" title="Send Email">📧 Email</button> `;
+                }
+
+                if (station.Website) {
+                    buttonHtml += `<button onclick="window.open('${station.Website}', '_blank')" title="Visit Website">🌐 Website</button>`;
+                }
+
                 row.innerHTML = `
                     <td ${rowClass}>${callHtml}</td>
                     <td>${station.Locator}</td>
                     <td>${station.DXCC}</td>
                     <td>${station.Antenna}</td>
                     <td>${station.Power}</td>
-                    <td>${station.Website ? `<a href="${station.Website}" target="_blank">${station.Website}</a>` : ''}</td>
+                    <td>${buttonHtml}</td>
                     <td>${noteDisplay}</td>
                 `;
                 tableBody.appendChild(row);
@@ -378,7 +406,6 @@
                 responsive: true
             });
 
-            // Add custom filtering logic
             $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
                 if (!document.getElementById('activeOnlyCheckbox')?.checked) return true;
 
@@ -390,6 +417,7 @@
                 table.draw();
             });
         }
+
 
         $(document).ready(() => {
             fetchData();
