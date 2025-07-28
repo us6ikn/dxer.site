@@ -248,6 +248,29 @@
                     white-space: nowrap;     /* Prevent text wrapping inside button */
                 }
             }
+            
+            .email-button {
+                background-color: #27A9F5;
+                color: white;
+                border: none;
+                padding: 2px 6px;
+                cursor: pointer;
+                font-size: 12px;
+                border-radius: 3px;
+                margin-left: 5px;
+                text-decoration: none;
+                transition: background-color 0.3s ease;
+            }
+
+            .email-button:hover {
+                background-color: #279CF5;
+            }
+
+            .email-button:focus {
+              outline: none;
+              box-shadow: 0 0 3px rgba(40, 167, 69, 0.5);
+            }
+            
             td button {
                 padding: 6px 10px;
                 font-size: 13px;
@@ -305,7 +328,7 @@
                         <th>DXCC</th>
                         <th>Antenna</th>
                         <th>Power</th>
-                        <th>Website</th>
+                        <th>Contact</th>
                         <th>Note</th>
                     </tr>
                 </thead>
@@ -372,7 +395,7 @@
                 const decodedEmail = station.CK ? decodeEmail(station.CK) : null;
 
                 if (decodedEmail) {
-                    buttonHtml += `<button onclick="window.location.href='mailto:${decodedEmail}'" title="Send Email">📧 Email</button> `;
+                    buttonHtml += `<button class="email-button" onclick="window.location.href='mailto:${decodedEmail}'" title="Send Email">📧 Email</button> `;
                 }
 
                 if (station.Website) {
