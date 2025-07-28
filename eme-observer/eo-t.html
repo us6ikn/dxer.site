@@ -271,12 +271,6 @@
     
     <div class="container">
         <h1>10GHz EME Stations</h1>
-        <div style="margin-bottom: 10px; display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
-            <label>
-                <input type="checkbox" id="showActiveOnly" />
-                Show only Active
-            </label>
-        </div>
 
         <div class="table-container">
             <table id="stationsTable" class="display responsive">
@@ -302,9 +296,8 @@
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.3.0/js/dataTables.responsive.min.js"></script>
     <script>
-        let allStations = []; // Store unfiltered data globally
+        let allStations = [];
 
-        // Fetch and render table
         async function fetchData() {
             try {
                 const response = await fetch('stn_10GHz_e.json');
@@ -316,13 +309,11 @@
             }
         }
 
-        // Check if station is active (Note does NOT contain DXpedition, Inactive, SK)
         function isActive(station) {
             const note = station.Note || "";
             return !/dxpedition|inactive|sk/i.test(note);
         }
 
-        // Render filtered table data
         function renderTable(data) {
             const tableBody = document.getElementById('stationsData');
             tableBody.innerHTML = '';
@@ -347,39 +338,41 @@
                     <td>${station.Website ? `<a href="${station.Website}" target="_blank">${station.Website}</a>` : 'N/A'}</td>
                     <td>${noteDisplay}</td>
                 `;
-
                 tableBody.appendChild(row);
             });
 
-            // Initialize or re-draw DataTable
-            if (!$.fn.DataTable.isDataTable('#stationsTable')) {
-                $('#stationsTable').DataTable({
-                    "order": [[0, 'asc']],
-                    "responsive": true
-                });
-            } else {
+            if ($.fn.DataTable.isDataTable('#stationsTable')) {
                 $('#stationsTable').DataTable().clear().destroy();
-                $('#stationsTable').DataTable({
-                    "order": [[0, 'asc']],
-                    "responsive": true
-                });
             }
-        }
 
-        // Toggle filtering when checkbox changes
-        function setupActiveFilter() {
-            const checkbox = document.getElementById('showActiveOnly');
-            checkbox.addEventListener('change', () => {
-                const filtered = checkbox.checked
-                    ? allStations.filter(isActive)
-                    : allStations;
-                renderTable(filtered);
+            const table = $('#stationsTable').DataTable({
+                order: [[0, 'asc']],
+                responsive: true,
+                dom: 'Bfltip',
+                buttons: [
+                    {
+                        text: `
+                            <label style="font-weight:normal;">
+                                <input type="checkbox" id="showActiveOnlyCheckbox" style="margin-right: 6px;" />
+                                Show only Active
+                            </label>
+                        `,
+                        className: 'dt-button-active-filter',
+                        action: function (e, dt, node, config) {
+                            const checkbox = document.getElementById('showActiveOnlyCheckbox');
+                            checkbox.checked = !checkbox.checked;
+                            const filtered = checkbox.checked
+                                ? allStations.filter(isActive)
+                                : allStations;
+                            renderTable(filtered);
+                        }
+                    }
+                ]
             });
         }
 
         $(document).ready(() => {
             fetchData();
-            setupActiveFilter();
         });
     </script>
 
