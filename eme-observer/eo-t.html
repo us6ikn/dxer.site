@@ -273,6 +273,12 @@
     
     <div class="container">
         <h1>10GHz EME Stations</h1>
+        <div style="margin: 10px 0;">
+            <label>
+                <input type="checkbox" id="activeOnlyCheckbox" style="margin-right: 6px;">
+                Show only Active
+            </label>
+        </div>
 
         <div class="table-container">
             <table id="stationsTable" class="display responsive">
@@ -314,8 +320,8 @@
         }
 
         function isActive(station) {
-            const note = station.Note || "";
-            return !/dxpedition|inactive|sk/i.test(note);
+            const note = (station.Note || "").toLowerCase();
+            return !note.includes("dxpedition") && !note.includes("inactive") && !note.includes("sk");
         }
 
         function renderTable(data) {
@@ -325,7 +331,7 @@
             data.forEach(station => {
                 const row = document.createElement('tr');
 
-                let noteDisplay = station.Note;
+                let noteDisplay = station.Note || '';
                 let rowClass = '';
                 if (/SK/i.test(station.Note)) {
                     rowClass = 'style="color:gray;font-style:italic;"';
@@ -351,27 +357,20 @@
 
             const table = $('#stationsTable').DataTable({
                 order: [[0, 'asc']],
-                responsive: true,
-                dom: 'Bfltip',
-                buttons: [
-                    {
-                        text: `
-                            <label style="font-weight:normal;">
-                                <input type="checkbox" id="showActiveOnlyCheckbox" style="margin-right: 6px;" />
-                                Show only Active
-                            </label>
-                        `,
-                        className: 'dt-button-active-filter',
-                        action: function (e, dt, node, config) {
-                            const checkbox = document.getElementById('showActiveOnlyCheckbox');
-                            checkbox.checked = !checkbox.checked;
-                            const filtered = checkbox.checked
-                                ? allStations.filter(isActive)
-                                : allStations;
-                            renderTable(filtered);
-                        }
-                    }
-                ]
+                responsive: true
+            });
+
+            // Add custom filtering logic
+            $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+                if (!document.getElementById('activeOnlyCheckbox')?.checked) return true;
+
+                const note = (data[6] || "").toLowerCase(); // Note column
+                return !note.includes("dxpedition") && !note.includes("inactive") && !note.includes("sk");
+            });
+
+            // Attach event handler to checkbox
+            $('#activeOnlyCheckbox').on('change', function () {
+                table.draw();
             });
         }
 
@@ -379,6 +378,7 @@
             fetchData();
         });
     </script>
+
 
     <!-- Ko-Fi -->
     <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
