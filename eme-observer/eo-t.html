@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7YST3WTEH3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-7YST3WTEH3');
+    </script>
+    <meta charset="UTF-8" />
+    <title>EME Observer – Table View | 10GHz Moonbounce Stations</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <meta name="description" content="Table view of active 10GHz Moonbounce (EME) stations with locator, DX data, and activity status. Part of the EME Observer tool for amateur radio." />
+    <meta name="keywords" content="EME, Moonbounce, 10GHz, Ham Radio, DX Table, Amateur Radio, Station Locator, Moonbounce Table" />
+    <meta name="author" content="SA5IKN" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="EME Observer – Table View" />
+    <meta property="og:type" content="website" />
+    <meta property="og:description" content="See a table of 10GHz EME stations with real-time location and activity info." />
+    <meta property="og:image" content="/social/eme-observer.jpg" />
+    <meta property="og:url" content="https://dxer.site/eme-observer/table.html" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="EME Observer – 10GHz Station Table" />
+    <meta name="twitter:description" content="Explore moonbounce stations by locator, DX info, and more in table format." />
+    <meta name="twitter:image" content="/social/eme-observer.jpg" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://dxer.site/eme-observer/table.html" />
+
+    <!-- Favicon & Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png" />
+    <link rel="manifest" href="/assets/site.webmanifest" />
+    <link rel="shortcut icon" href="/assets/favicon.ico" />
+
+    <!-- Optional Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "EME Observer – Table View",
+      "url": "https://dxer.site/eme-observer/table.html",
+      "description": "Table listing of active 10GHz Moonbounce (EME) stations, including locator, DX info, and sked data for ham radio enthusiasts.",
+      "inLanguage": "en",
+      "author": {
+        "@type": "Person",
+        "name": "SA5IKN"
+      }
+    }
+    </script>
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <!-- DataTables Responsive CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.dataTables.min.css">
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f9;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                height: 100vh;
+                flex-direction: column;
+                overflow-x: hidden;
+            }
+
+            .top-bar {
+                width: 100%;
+                background-color: #ffffff;
+                padding: 20px 0;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            }
+
+            .top-content {
+                max-width: 900px;
+                margin: 0 auto;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .app-meta {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                text-align: right;
+                margin-bottom: 15px;
+                line-height: 1.1;
+            }
+
+            .creator-label {
+                font-size: 0.9rem;
+                color: #555;
+                font-style: italic;
+                margin-bottom: -4px;
+            }
+
+            .app-name {
+                font-size: 1.8rem;
+                font-weight: 600;
+                color: #2c3e50;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: -2px;
+            }
+
+            .ghz-label {
+                font-size: 0.9rem;
+                font-weight: bold;
+                color: #2c3e50;
+                margin-top: 2px;
+            }
+
+            .button-container {
+                display: flex;
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-top: 10px;
+            }
+
+            .button-container button {
+                background-color: #0056b3;
+                color: white;
+                border: none;
+                padding: 10px 24px;
+                font-size: 15px;
+                cursor: pointer;
+                border-radius: 6px;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                transition: background-color 0.3s ease;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .button-container button:hover {
+                background-color: #00408a;
+            }
+
+            .container {
+                width: 90%;
+                max-width: 1200px;
+                margin: 20px auto;
+                background-color: #fff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            h1 {
+                text-align: center;
+                color: #333;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+
+            th, td {
+                padding: 10px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }
+
+            th {
+                background-color: #f2f2f2;
+            }
+
+            .table-container {
+                max-height: 60vh;
+                overflow-y: auto;
+            }
+
+            table.dataTable {
+                margin: 0 auto;
+            }
+
+            @media (max-width: 768px) {
+                .container {
+                    width: 100%;
+                    padding: 10px;
+                }
+
+                h1 {
+                    font-size: 1.5em;
+                }
+
+                table {
+                    font-size: 0.9em;
+                }
+
+                .app-name {
+                    font-size: 1.3rem;
+                }
+
+                .creator-label,
+                .ghz-label {
+                    font-size: 0.75rem;
+                }
+
+                .app-meta {
+                    align-items: flex-end;
+                    text-align: right;
+                    margin-bottom: 12px;
+                }
+
+                .button-container button {
+                    width: 140px;
+                    font-size: 14px;
+                }
+            }
+
+            @media (max-width: 600px) {
+                .dataTable td:nth-child(6),
+                .dataTable td:nth-child(7) {
+                    display: none;
+                }
+            }
+
+            @media (max-width: 600px) {
+                .button-container {
+                    flex-wrap: nowrap;       /* Force one line */
+                    overflow-x: auto;        /* Allow horizontal scroll if too wide */
+                    gap: 8px;                /* Smaller gaps */
+                    justify-content: flex-start;
+                }
+
+                .button-container button {
+                    flex-shrink: 0;          /* Prevent buttons shrinking too small */
+                    padding: 6px 12px;       /* Smaller padding */
+                    font-size: 12px;         /* Smaller font */
+                    width: auto;             /* Remove fixed width */
+                    white-space: nowrap;     /* Prevent text wrapping inside button */
+                }
+            }
+        </style>
+
+</head>
+<body>
+    <div class="top-bar">
+      <div class="top-content">
+          <div class="app-meta">
+            <div class="creator-label">by SA5IKN</div>
+            <div class="app-name">EME Observer</div>
+            <div class="ghz-label">10GHz</div>
+          </div>
+
+        <div class="button-container">
+          <button onclick="window.location.href='/eme-observer/'">Map View</button>
+          <button onclick="window.location.href='statistics.html'">Statistics</button>
+          <button onclick="window.location.href='https://forms.gle/vLCqCySPEkH926AX8'">Add/Edit</button>
+          <button onclick="window.location.href='/'">🏠</button>
+          <button onclick="window.location.href='user-guide.html'">?</button>
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="container">
+        <h1>10GHz EME Stations</h1>
+        
+        <div class="table-container">
+            <table id="stationsTable" class="display responsive">
+                <thead>
+                    <tr>
+                        <th>Call</th>
+                        <th>Locator</th>
+                        <th>DXCC</th>
+                        <th>Antenna</th>
+                        <th>Power</th>
+                        <th>Website</th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+                <tbody id="stationsData">
+                    <!-- Table data will be injected here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.3.0/js/dataTables.responsive.min.js"></script>
+    <script>
+        // Fetch a single JSON file and render it in the table
+        async function fetchData() {
+            try {
+                const response = await fetch('stn_10GHz_e.json'); // Your unified file
+                const data = await response.json();
+                renderTable(data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        // Function to render the table
+        function renderTable(data) {
+            const tableBody = document.getElementById('stationsData');
+            tableBody.innerHTML = '';
+
+            data.forEach(station => {
+                const row = document.createElement('tr');
+
+                // Decide how to visually indicate SK or DXpedition in table (optional)
+                let noteDisplay = station.Note;
+                let rowClass = '';
+                if (/SK/i.test(station.Note)) {
+                    rowClass = 'style="color:gray;font-style:italic;"';
+                } else if (/DXpedition|Portable/i.test(station.Note)) {
+                    rowClass = 'style="font-weight:bold;"';
+                }
+
+                row.innerHTML = `
+                    <td ${rowClass}>${station.Call}</td>
+                    <td>${station.Locator}</td>
+                    <td>${station.DXCC}</td>
+                    <td>${station.Antenna}</td>
+                    <td>${station.Power}</td>
+                    <td>${station.Website ? `<a href="${station.Website}" target="_blank">${station.Website}</a>` : 'N/A'}</td>
+                    <td>${noteDisplay}</td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+
+            // Initialize DataTable only once
+            if (!$.fn.DataTable.isDataTable('#stationsTable')) {
+                $('#stationsTable').DataTable({
+                    "order": [[0, 'asc']],
+                    "responsive": true
+                });
+            }
+        }
+
+        // On load
+        $(document).ready(() => {
+            fetchData();
+        });
+    </script>
+    <!-- Ko-Fi -->
+    <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+    <script src="/kofi.js"></script>
+</body>
+</html>
