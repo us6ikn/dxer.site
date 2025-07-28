@@ -366,8 +366,8 @@
 
                 // If there's a valid email field, decode and wrap in mailto link
                 let callHtml = station.Call;
-                if (station.Email) {
-                    const decodedEmail = decodeEmail(station.Email);
+                if (station.CK) {
+                    const decodedEmail = decodeEmail(station.CK);
                     if (decodedEmail) {
                         callHtml = `<a href="mailto:${decodedEmail}">${station.Call}</a>`;
                     }
@@ -375,7 +375,7 @@
 
                 // Build buttons if available
                 let buttonHtml = '';
-                const decodedEmail = station.Email ? decodeEmail(station.Email) : null;
+                const decodedEmail = station.CK ? decodeEmail(station.CK) : null;
 
                 if (decodedEmail) {
                     buttonHtml += `<button onclick="window.location.href='mailto:${decodedEmail}'" title="Send Email">📧 Email</button> `;
