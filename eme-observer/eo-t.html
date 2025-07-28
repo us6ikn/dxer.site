@@ -271,6 +271,28 @@
               box-shadow: 0 0 3px rgba(40, 167, 69, 0.5);
             }
             
+            .qrz-button {
+                background-color: #fd7e14; /* Orange to distinguish from Sked and Email */
+                color: white;
+                border: none;
+                padding: 2px 6px;
+                cursor: pointer;
+                font-size: 12px;
+                border-radius: 3px;
+                margin-left: 5px; /* Space if placed next to other buttons */
+                text-decoration: none; /* For <a> tag to look like a button */
+                transition: background-color 0.3s ease;
+            }
+
+            .qrz-button:hover {
+                background-color: #e86c12; /* Darker orange on hover */
+            }
+            
+            .qrz-button:focus {
+              outline: none;
+              box-shadow: 0 0 3px rgba(40, 167, 69, 0.5);
+            }
+            
             .website-button {
                 background-color: #27A9F5;
                 color: white;
@@ -404,6 +426,10 @@
                     buttonHtml += `<button class="email-button" onclick="window.location.href='mailto:${decodedEmail}'" title="Send Email">Email</button> `;
                 }
 
+                if (station.Call) {
+                    buttonHtml += `<button class="qrz-button" onclick="window.open('https://www.qrz.com/db/${station.Call}', '_blank')" title="View on QRZ">QRZ</button> `;
+                }
+                
                 if (station.Website) {
                     buttonHtml += `<button class="website-button" onclick="window.open('${station.Website}', '_blank')" title="Visit Website">Website</button>`;
                 }
