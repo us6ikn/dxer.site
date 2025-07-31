@@ -1,336 +1,375 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Azimuth Calculator</title>
+  <title>QRB Calculator</title>
   <style>
-    #map {
-      height: 500px;
-      width: 100%;
-    }
-    #elevation_chart {
-      width: 100%;
-      height: 200px;
-      margin-top: 1rem;
-    }
-    body {
+    html, body {
+      height: 100%;
+      margin: 0;
       font-family: Arial, sans-serif;
-      padding: 1rem;
     }
-    .controls {
-      margin-bottom: 1rem;
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
     }
-    #obstructionWarning {
-      color: red;
+
+    .widget-panel {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #ccc;
+      gap: 1rem;
+    }
+
+    .widget {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .widget label {
+      display: block;
+      margin-bottom: 0.3rem;
       font-weight: bold;
     }
-      #locator1 {
-        border: 2px solid #1e88e5;
-        background-color: #e3f2fd;
-      }
-      #locator2 {
-        border: 2px solid #43a047;
-        background-color: #e8f5e9;
-      }
 
+    .widget input {
+      width: 100%;
+      padding: 0.3rem;
+      font-size: 1rem;
+    }
+
+    #locator1 {
+      border: 2px solid #1e88e5;
+      background-color: #e3f2fd;
+    }
+
+    #locator2 {
+      border: 2px solid #43a047;
+      background-color: #e8f5e9;
+    }
+
+    #map {
+      flex-grow: 1;
+    }
+
+    #elevation_chart {
+      height: 200px;
+      background: white;
+      padding: 0.5rem;
+    }
+
+    #azimuthResult, #obstructionWarning {
+      margin-top: 0.5rem;
+      font-weight: bold;
+    }
+
+    #obstructionWarning {
+      color: red;
+    }
   </style>
 </head>
 <body>
-  <h2>Azimuth Calculator Between QTH Locators</h2>
-  <div class="controls">
-    <label for="locator1">QTH Locator 1:</label>
-    <input type="text" id="locator1" maxlength="10" placeholder="e.g. JN58td12AB" />
-    <label for="locator2">QTH Locator 2:</label>
-    <input type="text" id="locator2" maxlength="10" placeholder="e.g. IO91wm34CD" />
-    <button onclick="calculateAzimuth()">Calculate</button>
-    <p id="azimuthResult"></p>
-    <p id="obstructionWarning"></p>
+<div id="app">
+  <div class="widget-panel">
+    <div class="widget">
+      <label for="locator1">QTH Locator 1:</label>
+      <input type="text" id="locator1" maxlength="10" placeholder="e.g. JN58td12AB" />
+      <label for="locator2">QTH Locator 2:</label>
+      <input type="text" id="locator2" maxlength="10" placeholder="e.g. IO91wm34CD" />
+      <button onclick="calculateAzimuth()">Calculate</button>
+      <div id="azimuthResult"></div>
+      <div id="obstructionWarning"></div>
+    </div>
+    <div class="widget" id="elevation_chart"></div>
   </div>
   <div id="map"></div>
-  <div id="elevation_chart"></div>
+</div>
 
-  <!-- Load Google Charts -->
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-  <script>
-    let map;
-    let markers = [];
-    let line;
-    let elevator;
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
-    google.charts.load('current', { packages: ['corechart'] });
+<script>
+  let map;
+  let markers = [];
+  let line;
+  let elevator;
 
-    function locatorToLatLng(locator) {
-      locator = locator.toUpperCase();
+  google.charts.load('current', { packages: ['corechart'] });
+
+  function locatorToLatLng(locator) {
+    locator = locator.toUpperCase();
+    const A = 'A'.charCodeAt(0);
+
+    let lon = -180;
+    let lat = -90;
+
+    if (locator.length >= 2) {
+      lon += (locator.charCodeAt(0) - A) * 20;
+      lat += (locator.charCodeAt(1) - A) * 10;
+    }
+    if (locator.length >= 4) {
+      lon += parseInt(locator[2]) * 2;
+      lat += parseInt(locator[3]) * 1;
+    }
+    if (locator.length >= 6) {
+      lon += (locator.charCodeAt(4) - A) * 5 / 60;
+      lat += (locator.charCodeAt(5) - A) * 2.5 / 60;
+    }
+    if (locator.length >= 8) {
+      lon += parseInt(locator[6]) * (5 / 600);
+      lat += parseInt(locator[7]) * (2.5 / 600);
+    }
+    if (locator.length >= 10) {
+      lon += (locator.charCodeAt(8) - A) * (5 / 14400);
+      lat += (locator.charCodeAt(9) - A) * (2.5 / 14400);
+    }
+
+    // ✅ Add center offset based on precision level
+    const precision = locator.length;
+    if (precision === 2) {
+      lon += 10; lat += 5;
+    } else if (precision === 4) {
+      lon += 1; lat += 0.5;
+    } else if (precision === 6) {
+      lon += 2.5 / 60; lat += 1.25 / 60;
+    } else if (precision === 8) {
+      lon += 5 / 1200; lat += 2.5 / 1200; // midpoint of 5"/600
+    } else if (precision === 10) {
+      lon += 5 / 28800; lat += 2.5 / 28800; // midpoint of 5"/14400
+    }
+
+    return { lat, lng: lon };
+  }
+
+    function latLngToLocator(lat, lon, precision = 6) {
       const A = 'A'.charCodeAt(0);
+      lat += 90;
+      lon += 180;
 
-      let lon = -180;
-      let lat = -90;
+      let locator = '';
 
-      if (locator.length >= 2) {
-        lon += (locator.charCodeAt(0) - A) * 20;
-        lat += (locator.charCodeAt(1) - A) * 10;
-      }
-      if (locator.length >= 4) {
-        lon += parseInt(locator[2]) * 2;
-        lat += parseInt(locator[3]) * 1;
-      }
-      if (locator.length >= 6) {
-        lon += (locator.charCodeAt(4) - A) * 5 / 60;
-        lat += (locator.charCodeAt(5) - A) * 2.5 / 60;
-      }
-      if (locator.length >= 8) {
-        lon += parseInt(locator[6]) * (5 / 600);
-        lat += parseInt(locator[7]) * (2.5 / 600);
-      }
-      if (locator.length >= 10) {
-        lon += (locator.charCodeAt(8) - A) * (5 / 14400);
-        lat += (locator.charCodeAt(9) - A) * (2.5 / 14400);
+      locator += String.fromCharCode(Math.floor(lon / 20) + A);
+      locator += String.fromCharCode(Math.floor(lat / 10) + A);
+
+      lon = (lon % 20);
+      lat = (lat % 10);
+      locator += Math.floor(lon / 2);
+      locator += Math.floor(lat / 1);
+
+      if (precision >= 6) {
+        lon = (lon % 2);
+        lat = (lat % 1);
+        locator += String.fromCharCode(Math.floor(lon * 60 / 5) + A);
+        locator += String.fromCharCode(Math.floor(lat * 60 / 2.5) + A);
       }
 
-      // ✅ Add center offset based on precision level
-      const precision = locator.length;
-      if (precision === 2) {
-        lon += 10; lat += 5;
-      } else if (precision === 4) {
-        lon += 1; lat += 0.5;
-      } else if (precision === 6) {
-        lon += 2.5 / 60; lat += 1.25 / 60;
-      } else if (precision === 8) {
-        lon += 5 / 1200; lat += 2.5 / 1200; // midpoint of 5"/600
-      } else if (precision === 10) {
-        lon += 5 / 28800; lat += 2.5 / 28800; // midpoint of 5"/14400
+      if (precision >= 8) {
+        lon = (lon * 60 % 5);
+        lat = (lat * 60 % 2.5);
+        locator += Math.floor(lon / (5 / 10));
+        locator += Math.floor(lat / (2.5 / 10));
       }
 
-      return { lat, lng: lon };
+      if (precision >= 10) {
+        lon = (lon % (5 / 10));
+        lat = (lat % (2.5 / 10));
+        locator += String.fromCharCode(Math.floor(lon / (5 / 240)) + A);
+        locator += String.fromCharCode(Math.floor(lat / (2.5 / 240)) + A);
+      }
+
+      return locator.slice(0, precision);
     }
 
-      function latLngToLocator(lat, lon, precision = 6) {
-        const A = 'A'.charCodeAt(0);
-        lat += 90;
-        lon += 180;
+  function computeAzimuth(from, to) {
+    const lat1 = toRadians(from.lat);
+    const lat2 = toRadians(to.lat);
+    const dLon = toRadians(to.lng - from.lng);
+    const y = Math.sin(dLon) * Math.cos(lat2);
+    const x = Math.cos(lat1) * Math.sin(lat2) -
+              Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+    let brng = Math.atan2(y, x);
+    brng = (toDegrees(brng) + 360) % 360;
+    return brng.toFixed(2);
+  }
 
-        let locator = '';
+  function toRadians(deg) {
+    return deg * Math.PI / 180;
+  }
 
-        locator += String.fromCharCode(Math.floor(lon / 20) + A);
-        locator += String.fromCharCode(Math.floor(lat / 10) + A);
+  function toDegrees(rad) {
+    return rad * 180 / Math.PI;
+  }
 
-        lon = (lon % 20);
-        lat = (lat % 10);
-        locator += Math.floor(lon / 2);
-        locator += Math.floor(lat / 1);
+  function initMap() {
+    map = new google.maps.Map(document.getElementById('map'), {
+      center: { lat: 0, lng: 0 },
+      zoom: 2,
+    });
+    elevator = new google.maps.ElevationService();
+  }
 
-        if (precision >= 6) {
-          lon = (lon % 2);
-          lat = (lat % 1);
-          locator += String.fromCharCode(Math.floor(lon * 60 / 5) + A);
-          locator += String.fromCharCode(Math.floor(lat * 60 / 2.5) + A);
+  function calculateAzimuth() {
+    const loc1 = document.getElementById('locator1').value.trim();
+    const loc2 = document.getElementById('locator2').value.trim();
+    if (loc1.length < 4 || loc2.length < 4) {
+      alert("Please enter valid QTH locators (at least 4 characters).");
+      return;
+    }
+
+    const pos1 = locatorToLatLng(loc1);
+    const pos2 = locatorToLatLng(loc2);
+    const azimuth = computeAzimuth(pos1, pos2);
+
+    document.getElementById('azimuthResult').innerText =
+      `Azimuth from ${loc1} to ${loc2} is ${azimuth}°`;
+
+    updateMap(pos1, pos2);
+  }
+
+  function updateMap(pos1, pos2) {
+    markers.forEach(marker => marker.setMap(null));
+    markers = [];
+
+    if (line) line.setMap(null);
+
+    const marker1 = new google.maps.Marker({
+      position: pos1,
+      map: map,
+      draggable: true,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 8,
+        fillColor: '#1e88e5', // Modern blue
+        fillOpacity: 1,
+        strokeWeight: 1,
+        strokeColor: '#ffffff',
+      },
+    });
+
+    const marker2 = new google.maps.Marker({
+      position: pos2,
+      map: map,
+      draggable: true,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 8,
+        fillColor: '#43a047', // Muted green
+        fillOpacity: 1,
+        strokeWeight: 1,
+        strokeColor: '#ffffff',
+      },
+    });
+
+
+    marker1.addListener('dragend', () => onMarkerMoved(marker1, marker2));
+    marker2.addListener('dragend', () => onMarkerMoved(marker1, marker2));
+
+    markers.push(marker1, marker2);
+
+    line = new google.maps.Polyline({
+      path: [pos1, pos2],
+      geodesic: true,
+      strokeColor: "#FF0000",
+      strokeOpacity: 1.0,
+      strokeWeight: 2,
+    });
+    line.setMap(map);
+
+    const bounds = new google.maps.LatLngBounds();
+    bounds.extend(pos1);
+    bounds.extend(pos2);
+    map.fitBounds(bounds);
+
+    elevator.getElevationAlongPath({
+      path: [pos1, pos2],
+      samples: 256
+    }, function(results, status) {
+      if (status === 'OK') {
+        plotElevation(results);
+        checkObstruction(results, pos1, pos2);
+      } else {
+        document.getElementById('elevation_chart').innerText = 'Elevation service failed.';
+      }
+    });
+  }
+
+  function onMarkerMoved(marker1, marker2) {
+    const pos1 = marker1.getPosition();
+    const pos2 = marker2.getPosition();
+
+    const loc1 = latLngToLocator(pos1.lat(), pos1.lng(), 10);
+    const loc2 = latLngToLocator(pos2.lat(), pos2.lng(), 10);
+
+    document.getElementById('locator1').value = loc1;
+    document.getElementById('locator2').value = loc2;
+
+    const azimuth = computeAzimuth({ lat: pos1.lat(), lng: pos1.lng() }, { lat: pos2.lat(), lng: pos2.lng() });
+    document.getElementById('azimuthResult').innerText =
+      `Azimuth from ${loc1} to ${loc2} is ${azimuth}°`;
+
+    updateMap({ lat: pos1.lat(), lng: pos1.lng() }, { lat: pos2.lat(), lng: pos2.lng() });
+  }
+
+    function plotElevation(results) {
+      const data = new google.visualization.DataTable();
+      data.addColumn('number', 'Distance (km)');
+      data.addColumn('number', 'Elevation (m)');
+
+      let totalDistance = 0;
+      for (let i = 0; i < results.length; i++) {
+        if (i > 0) {
+          totalDistance += google.maps.geometry.spherical.computeDistanceBetween(
+            results[i - 1].location,
+            results[i].location
+          );
         }
-
-        if (precision >= 8) {
-          lon = (lon * 60 % 5);
-          lat = (lat * 60 % 2.5);
-          locator += Math.floor(lon / (5 / 10));
-          locator += Math.floor(lat / (2.5 / 10));
-        }
-
-        if (precision >= 10) {
-          lon = (lon % (5 / 10));
-          lat = (lat % (2.5 / 10));
-          locator += String.fromCharCode(Math.floor(lon / (5 / 240)) + A);
-          locator += String.fromCharCode(Math.floor(lat / (2.5 / 240)) + A);
-        }
-
-        return locator.slice(0, precision);
+        data.addRow([totalDistance / 1000, results[i].elevation]); // meters to km
       }
 
-    function computeAzimuth(from, to) {
-      const lat1 = toRadians(from.lat);
-      const lat2 = toRadians(to.lat);
-      const dLon = toRadians(to.lng - from.lng);
-      const y = Math.sin(dLon) * Math.cos(lat2);
-      const x = Math.cos(lat1) * Math.sin(lat2) -
-                Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
-      let brng = Math.atan2(y, x);
-      brng = (toDegrees(brng) + 360) % 360;
-      return brng.toFixed(2);
-    }
-
-    function toRadians(deg) {
-      return deg * Math.PI / 180;
-    }
-
-    function toDegrees(rad) {
-      return rad * 180 / Math.PI;
-    }
-
-    function initMap() {
-      map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: 0, lng: 0 },
-        zoom: 2,
+      const chart = new google.visualization.AreaChart(document.getElementById('elevation_chart'));
+      chart.draw(data, {
+        height: 200,
+        legend: 'none',
+        title: 'Elevation Profile',
+        hAxis: { title: 'Distance (km)', gridlines: { count: 6 }, format: '#.##' },
+        vAxis: { title: 'Elevation (m)', gridlines: { count: 6 } },
+        areaOpacity: 0.3,
+        colors: ['#1a73e8'],
       });
-      elevator = new google.maps.ElevationService();
     }
 
-    function calculateAzimuth() {
-      const loc1 = document.getElementById('locator1').value.trim();
-      const loc2 = document.getElementById('locator2').value.trim();
-      if (loc1.length < 4 || loc2.length < 4) {
-        alert("Please enter valid QTH locators (at least 4 characters).");
-        return;
+  function checkObstruction(results, pos1, pos2) {
+    const startElev = results[0].elevation;
+    const endElev = results[results.length - 1].elevation;
+
+    const totalDistance = google.maps.geometry.spherical.computeDistanceBetween(
+      new google.maps.LatLng(pos1.lat, pos1.lng),
+      new google.maps.LatLng(pos2.lat, pos2.lng)
+    );
+
+    let obstructed = false;
+    for (let i = 1; i < results.length - 1; i++) {
+      const fraction = i / (results.length - 1);
+      const expectedLineElev = startElev + fraction * (endElev - startElev);
+      if (results[i].elevation > expectedLineElev + 1) {
+        obstructed = true;
+        break;
       }
-
-      const pos1 = locatorToLatLng(loc1);
-      const pos2 = locatorToLatLng(loc2);
-      const azimuth = computeAzimuth(pos1, pos2);
-
-      document.getElementById('azimuthResult').innerText =
-        `Azimuth from ${loc1} to ${loc2} is ${azimuth}°`;
-
-      updateMap(pos1, pos2);
     }
 
-    function updateMap(pos1, pos2) {
-      markers.forEach(marker => marker.setMap(null));
-      markers = [];
+    const warning = document.getElementById('obstructionWarning');
+    warning.innerText = obstructed
+      ? "⚠️ Line of sight is obstructed by terrain!"
+      : "✅ Line of sight is clear.";
+  }
 
-      if (line) line.setMap(null);
+  window.onload = initMap;
+</script>
 
-      const marker1 = new google.maps.Marker({
-        position: pos1,
-        map: map,
-        draggable: true,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 8,
-          fillColor: '#1e88e5', // Modern blue
-          fillOpacity: 1,
-          strokeWeight: 1,
-          strokeColor: '#ffffff',
-        },
-      });
+<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&libraries=geometry&callback=initMap"></script>
 
-      const marker2 = new google.maps.Marker({
-        position: pos2,
-        map: map,
-        draggable: true,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 8,
-          fillColor: '#43a047', // Muted green
-          fillOpacity: 1,
-          strokeWeight: 1,
-          strokeColor: '#ffffff',
-        },
-      });
-
-
-      marker1.addListener('dragend', () => onMarkerMoved(marker1, marker2));
-      marker2.addListener('dragend', () => onMarkerMoved(marker1, marker2));
-
-      markers.push(marker1, marker2);
-
-      line = new google.maps.Polyline({
-        path: [pos1, pos2],
-        geodesic: true,
-        strokeColor: "#FF0000",
-        strokeOpacity: 1.0,
-        strokeWeight: 2,
-      });
-      line.setMap(map);
-
-      const bounds = new google.maps.LatLngBounds();
-      bounds.extend(pos1);
-      bounds.extend(pos2);
-      map.fitBounds(bounds);
-
-      elevator.getElevationAlongPath({
-        path: [pos1, pos2],
-        samples: 256
-      }, function(results, status) {
-        if (status === 'OK') {
-          plotElevation(results);
-          checkObstruction(results, pos1, pos2);
-        } else {
-          document.getElementById('elevation_chart').innerText = 'Elevation service failed.';
-        }
-      });
-    }
-
-    function onMarkerMoved(marker1, marker2) {
-      const pos1 = marker1.getPosition();
-      const pos2 = marker2.getPosition();
-
-      const loc1 = latLngToLocator(pos1.lat(), pos1.lng(), 10);
-      const loc2 = latLngToLocator(pos2.lat(), pos2.lng(), 10);
-
-      document.getElementById('locator1').value = loc1;
-      document.getElementById('locator2').value = loc2;
-
-      const azimuth = computeAzimuth({ lat: pos1.lat(), lng: pos1.lng() }, { lat: pos2.lat(), lng: pos2.lng() });
-      document.getElementById('azimuthResult').innerText =
-        `Azimuth from ${loc1} to ${loc2} is ${azimuth}°`;
-
-      updateMap({ lat: pos1.lat(), lng: pos1.lng() }, { lat: pos2.lat(), lng: pos2.lng() });
-    }
-
-      function plotElevation(results) {
-        const data = new google.visualization.DataTable();
-        data.addColumn('number', 'Distance (km)');
-        data.addColumn('number', 'Elevation (m)');
-
-        let totalDistance = 0;
-        for (let i = 0; i < results.length; i++) {
-          if (i > 0) {
-            totalDistance += google.maps.geometry.spherical.computeDistanceBetween(
-              results[i - 1].location,
-              results[i].location
-            );
-          }
-          data.addRow([totalDistance / 1000, results[i].elevation]); // meters to km
-        }
-
-        const chart = new google.visualization.AreaChart(document.getElementById('elevation_chart'));
-        chart.draw(data, {
-          height: 200,
-          legend: 'none',
-          title: 'Elevation Profile',
-          hAxis: { title: 'Distance (km)', gridlines: { count: 6 }, format: '#.##' },
-          vAxis: { title: 'Elevation (m)', gridlines: { count: 6 } },
-          areaOpacity: 0.3,
-          colors: ['#1a73e8'],
-        });
-      }
-
-    function checkObstruction(results, pos1, pos2) {
-      const startElev = results[0].elevation;
-      const endElev = results[results.length - 1].elevation;
-
-      const totalDistance = google.maps.geometry.spherical.computeDistanceBetween(
-        new google.maps.LatLng(pos1.lat, pos1.lng),
-        new google.maps.LatLng(pos2.lat, pos2.lng)
-      );
-
-      let obstructed = false;
-      for (let i = 1; i < results.length - 1; i++) {
-        const fraction = i / (results.length - 1);
-        const expectedLineElev = startElev + fraction * (endElev - startElev);
-        if (results[i].elevation > expectedLineElev + 1) {
-          obstructed = true;
-          break;
-        }
-      }
-
-      const warning = document.getElementById('obstructionWarning');
-      warning.innerText = obstructed
-        ? "⚠️ Line of sight is obstructed by terrain!"
-        : "✅ Line of sight is clear.";
-    }
-
-    window.onload = initMap;
-  </script>
-
-  <!-- Google Maps API -->
-  <script async
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&libraries=geometry&callback=initMap">
-  </script>
 </body>
 </html>
