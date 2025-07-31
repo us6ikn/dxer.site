@@ -69,17 +69,27 @@
         lat += (locator.charCodeAt(5) - A) * 2.5 / 60;
       }
       if (locator.length >= 8) {
-        lon += parseInt(locator[6]) * 5 / 600; // 0.008333...
-        lat += parseInt(locator[7]) * 2.5 / 600;
+        lon += parseInt(locator[6]) * (5 / 600);
+        lat += parseInt(locator[7]) * (2.5 / 600);
       }
       if (locator.length >= 10) {
-        lon += (locator.charCodeAt(8) - A) * 5 / 14400;
-        lat += (locator.charCodeAt(9) - A) * 2.5 / 14400;
+        lon += (locator.charCodeAt(8) - A) * (5 / 14400);
+        lat += (locator.charCodeAt(9) - A) * (2.5 / 14400);
       }
 
-      // center of the square
-      lon += 5 / Math.pow(60, Math.ceil(locator.length / 2));
-      lat += 2.5 / Math.pow(60, Math.ceil(locator.length / 2));
+      // ✅ Add center offset based on precision level
+      const precision = locator.length;
+      if (precision === 2) {
+        lon += 10; lat += 5;
+      } else if (precision === 4) {
+        lon += 1; lat += 0.5;
+      } else if (precision === 6) {
+        lon += 2.5 / 60; lat += 1.25 / 60;
+      } else if (precision === 8) {
+        lon += 5 / 1200; lat += 2.5 / 1200; // midpoint of 5"/600
+      } else if (precision === 10) {
+        lon += 5 / 28800; lat += 2.5 / 28800; // midpoint of 5"/14400
+      }
 
       return { lat, lng: lon };
     }
