@@ -24,12 +24,12 @@
       font-weight: bold;
     }
       #locator1 {
-        border: 2px solid blue;
-        background-color: #e6f0ff;
+        border: 2px solid #1e88e5;
+        background-color: #e3f2fd;
       }
       #locator2 {
-        border: 2px solid green;
-        background-color: #e6ffe6;
+        border: 2px solid #43a047;
+        background-color: #e8f5e9;
       }
 
   </style>
@@ -199,7 +199,12 @@
         map: map,
         draggable: true,
         icon: {
-          url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 8,
+          fillColor: '#1e88e5', // Modern blue
+          fillOpacity: 1,
+          strokeWeight: 1,
+          strokeColor: '#ffffff',
         },
       });
 
@@ -208,9 +213,15 @@
         map: map,
         draggable: true,
         icon: {
-          url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 8,
+          fillColor: '#43a047', // Muted green
+          fillOpacity: 1,
+          strokeWeight: 1,
+          strokeColor: '#ffffff',
         },
       });
+
 
       marker1.addListener('dragend', () => onMarkerMoved(marker1, marker2));
       marker2.addListener('dragend', () => onMarkerMoved(marker1, marker2));
