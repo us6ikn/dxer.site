@@ -76,7 +76,7 @@
 
       #obstructionWarning {
         color: #333; /* dark neutral gray */
-        font-size: 0.9em; /* smaller font */
+        font-size: 0.9; /* smaller font */
       }
 
     #elevation_chart {
@@ -223,17 +223,10 @@
   }
 
   function initMap() {
-      map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: 0, lng: 0 },
-        zoom: 2,
-        mapTypeControl: true,
-        mapTypeControlOptions: {
-          style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
-          position: google.maps.ControlPosition.TOP_RIGHT
-        },
-        mapTypeId: 'roadmap' // or 'satellite' to start in satellite mode
-      });
-
+    map = new google.maps.Map(document.getElementById('map'), {
+      center: { lat: 0, lng: 0 },
+      zoom: 2,
+    });
     elevator = new google.maps.ElevationService();
   }
 
