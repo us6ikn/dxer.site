@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>QRB Calculator</title>
+  <title>SA5IKN QRB Calculator - Azimuth Finder</title>
   <style>
     html, body {
       height: 100%;
@@ -97,15 +97,18 @@
       <button onclick="calculateAzimuth()">Calculate</button>
     </div>
     <div id="initialInstructions" style="margin-top: 1em; color: #444; font-size: 0.95em; line-height: 1.5;">
-      <h3 style="margin-top: 0; font-size: 1.2em;">How to use SA5IKN QRB Calculator</h3>
-      <p>Enter two Maidenhead locators above. Valid lengths are from <strong>4 to 10 characters</strong>.</p>
-      <ul style="padding-left: 1.2em; margin-top: 0.5em;">
-        <li><span style="color:#1e88e5;font-weight:bold;">Blue marker</span>: your QTH locator</li>
-        <li><span style="color:#43a047;font-weight:bold;">Green marker</span>: DX station locator</li>
-      </ul>
-      <p>Once both locators are set, the map will display markers and a connecting path. The terrain elevation graph will appear here.</p>
-      <p>You can also <strong>drag either marker</strong> directly on the map to adjust its position — the updated locator will appear in the input field automatically.</p>
-    </div>
+        <h3 style="margin-top: 0; font-size: 1.2em;">How to use SA5IKN QRB Calculator</h3>
+        <p>Enter two Maidenhead locators in the fields above. Valid locator lengths range from <strong>4 to 10 characters</strong>.</p>
+
+        <ul style="padding-left: 1.2em; margin-top: 0.5em;">
+          <li><span style="color:#1e88e5; font-weight:bold;">Blue marker</span>: Your QTH locator</li>
+          <li><span style="color:#43a047; font-weight:bold;">Green marker</span>: DX station locator</li>
+        </ul>
+
+        <p>Once both locators are entered, the map will show the azimuth, distance, and a line connecting the two markers. A terrain elevation profile between the points will appear below.</p>
+
+        <p>You can also <strong>drag either marker</strong> directly on the map to fine-tune its location. The corresponding locator input will update automatically.</p>
+
 
 
     <div id="azimuthResult"></div>
