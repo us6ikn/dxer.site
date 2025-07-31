@@ -333,15 +333,16 @@
         { lat: pos1.lat(), lng: pos1.lng() },
         { lat: pos2.lat(), lng: pos2.lng() }
       );
+
       const distance = google.maps.geometry.spherical.computeDistanceBetween(
-        new google.maps.LatLng(pos1.lat, pos1.lng),
-        new google.maps.LatLng(pos2.lat, pos2.lng)
+        pos1,
+        pos2
       ) / 1000;
 
       document.getElementById('azimuthResult').innerText =
-        `Azimuth: ${azimuth}°, Distance: ${distance.toFixed(2)} km`;
+        `Azimuth: ${azimuth}° | Distance: ${distance.toFixed(2)} km`;
 
-      // Only update line path
+      // Update line path
       line.setPath([pos1, pos2]);
 
       // Recalculate elevation
