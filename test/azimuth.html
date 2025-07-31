@@ -390,7 +390,13 @@
           height: '100%'
         },
         hAxis: { title: 'Distance (km)', format: '#.##', gridlines: { count: 5 } },
-        vAxis: { title: 'Elevation (m)', gridlines: { count: 5 } },
+        vAxis: {
+          title: 'Elevation (m)',
+          gridlines: { count: 5 },
+          viewWindow: {
+            min: 0
+          }
+        },
         areaOpacity: 0.3,
         colors: ['#1a73e8'],
       });
