@@ -23,6 +23,15 @@
       color: red;
       font-weight: bold;
     }
+      #locator1 {
+        border: 2px solid blue;
+        background-color: #e6f0ff;
+      }
+      #locator2 {
+        border: 2px solid green;
+        background-color: #e6ffe6;
+      }
+
   </style>
 </head>
 <body>
@@ -189,11 +198,18 @@
         position: pos1,
         map: map,
         draggable: true,
+        icon: {
+          url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+        },
       });
+
       const marker2 = new google.maps.Marker({
         position: pos2,
         map: map,
         draggable: true,
+        icon: {
+          url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+        },
       });
 
       marker1.addListener('dragend', () => onMarkerMoved(marker1, marker2));
