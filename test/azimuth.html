@@ -52,7 +52,9 @@
     function locatorToLatLng(locator) {
       locator = locator.toUpperCase();
       const A = 'A'.charCodeAt(0);
-      let lon = -180, lat = -90;
+
+      let lon = -180;
+      let lat = -90;
 
       if (locator.length >= 2) {
         lon += (locator.charCodeAt(0) - A) * 20;
@@ -63,56 +65,63 @@
         lat += parseInt(locator[3]) * 1;
       }
       if (locator.length >= 6) {
-        lon += (locator.charCodeAt(4) - A) * 5 / 60 + 2.5 / 60;
-        lat += (locator.charCodeAt(5) - A) * 2.5 / 60 + 1.25 / 60;
+        lon += (locator.charCodeAt(4) - A) * 5 / 60;
+        lat += (locator.charCodeAt(5) - A) * 2.5 / 60;
       }
       if (locator.length >= 8) {
-        lon += parseInt(locator[6]) * 0.208333 + 0.104167;
-        lat += parseInt(locator[7]) * 0.104167 + 0.052083;
+        lon += parseInt(locator[6]) * 5 / 600; // 0.008333...
+        lat += parseInt(locator[7]) * 2.5 / 600;
       }
       if (locator.length >= 10) {
-        lon += (locator.charCodeAt(8) - A) * 0.008333 + 0.004167;
-        lat += (locator.charCodeAt(9) - A) * 0.004167 + 0.002083;
+        lon += (locator.charCodeAt(8) - A) * 5 / 14400;
+        lat += (locator.charCodeAt(9) - A) * 2.5 / 14400;
       }
+
+      // center of the square
+      lon += 5 / Math.pow(60, Math.ceil(locator.length / 2));
+      lat += 2.5 / Math.pow(60, Math.ceil(locator.length / 2));
 
       return { lat, lng: lon };
     }
 
-    function latLngToLocator(lat, lon, precision = 10) {
-      const A = 'A'.charCodeAt(0);
-      lat += 90;
-      lon += 180;
+      function latLngToLocator(lat, lon, precision = 6) {
+        const A = 'A'.charCodeAt(0);
+        lat += 90;
+        lon += 180;
 
-      let locator = '';
-      locator += String.fromCharCode(Math.floor(lon / 20) + A);
-      locator += String.fromCharCode(Math.floor(lat / 10) + A);
+        let locator = '';
 
-      lon %= 20;
-      lat %= 10;
-      locator += Math.floor(lon / 2);
-      locator += Math.floor(lat);
+        locator += String.fromCharCode(Math.floor(lon / 20) + A);
+        locator += String.fromCharCode(Math.floor(lat / 10) + A);
 
-      lon %= 2;
-      lat %= 1;
-      locator += String.fromCharCode(Math.floor(lon * 60 / 5) + A);
-      locator += String.fromCharCode(Math.floor(lat * 60 / 2.5) + A);
+        lon = (lon % 20);
+        lat = (lat % 10);
+        locator += Math.floor(lon / 2);
+        locator += Math.floor(lat / 1);
 
-      if (precision >= 8) {
-        lon = lon * 60 % 5;
-        lat = lat * 60 % 2.5;
-        locator += Math.floor(lon / 0.208333);
-        locator += Math.floor(lat / 0.104167);
+        if (precision >= 6) {
+          lon = (lon % 2);
+          lat = (lat % 1);
+          locator += String.fromCharCode(Math.floor(lon * 60 / 5) + A);
+          locator += String.fromCharCode(Math.floor(lat * 60 / 2.5) + A);
+        }
+
+        if (precision >= 8) {
+          lon = (lon * 60 % 5);
+          lat = (lat * 60 % 2.5);
+          locator += Math.floor(lon / (5 / 10));
+          locator += Math.floor(lat / (2.5 / 10));
+        }
+
+        if (precision >= 10) {
+          lon = (lon % (5 / 10));
+          lat = (lat % (2.5 / 10));
+          locator += String.fromCharCode(Math.floor(lon / (5 / 240)) + A);
+          locator += String.fromCharCode(Math.floor(lat / (2.5 / 240)) + A);
+        }
+
+        return locator.slice(0, precision);
       }
-
-      if (precision >= 10) {
-        lon %= 0.208333;
-        lat %= 0.104167;
-        locator += String.fromCharCode(Math.floor(lon / 0.008333) + A);
-        locator += String.fromCharCode(Math.floor(lat / 0.004167) + A);
-      }
-
-      return locator;
-    }
 
     function computeAzimuth(from, to) {
       const lat1 = toRadians(from.lat);
