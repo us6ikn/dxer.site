@@ -241,8 +241,13 @@
     const pos2 = locatorToLatLng(loc2);
     const azimuth = computeAzimuth(pos1, pos2);
 
+    const distance = google.maps.geometry.spherical.computeDistanceBetween(
+      new google.maps.LatLng(pos1.lat, pos1.lng),
+      new google.maps.LatLng(pos2.lat, pos2.lng)
+    ) / 1000;
+
     document.getElementById('azimuthResult').innerText =
-      `Azimuth is ${azimuth}°`;
+      `Azimuth: ${azimuth}°, Distance: ${distance.toFixed(2)} km`;
 
     updateMap(pos1, pos2);
   }
