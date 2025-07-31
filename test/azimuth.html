@@ -344,16 +344,25 @@
             results[i].location
           );
         }
-        data.addRow([totalDistance / 1000, results[i].elevation]); // meters to km
+        data.addRow([totalDistance / 1000, results[i].elevation]);
       }
 
-      const chart = new google.visualization.AreaChart(document.getElementById('elevation_chart'));
+      const container = document.getElementById('elevation_chart');
+      const chart = new google.visualization.AreaChart(container);
       chart.draw(data, {
+        width: container.offsetWidth,
         height: 200,
         legend: 'none',
-        title: 'Elevation Profile',
-        hAxis: { title: 'Distance (km)', gridlines: { count: 6 }, format: '#.##' },
-        vAxis: { title: 'Elevation (m)', gridlines: { count: 6 } },
+        chartArea: {
+          left: 40,
+          right: 10,
+          top: 20,
+          bottom: 40,
+          width: '100%',
+          height: '100%'
+        },
+        hAxis: { title: 'Distance (km)', format: '#.##', gridlines: { count: 5 } },
+        vAxis: { title: 'Elevation (m)', gridlines: { count: 5 } },
         areaOpacity: 0.3,
         colors: ['#1a73e8'],
       });
