@@ -245,33 +245,24 @@
       updateMap({ lat: pos1.lat(), lng: pos1.lng() }, { lat: pos2.lat(), lng: pos2.lng() });
     }
 
-      function plotElevation(results) {
-        const data = new google.visualization.DataTable();
-        data.addColumn('number', 'Distance (km)');
-        data.addColumn('number', 'Elevation (m)');
+    function plotElevation(results) {
+      const data = new google.visualization.DataTable();
+      data.addColumn('number', 'Sample');
+      data.addColumn('number', 'Elevation (m)');
 
-        let totalDistance = 0;
-        for (let i = 0; i < results.length; i++) {
-          if (i > 0) {
-            totalDistance += google.maps.geometry.spherical.computeDistanceBetween(
-              results[i - 1].location,
-              results[i].location
-            );
-          }
-          data.addRow([totalDistance / 1000, results[i].elevation]); // meters to km
-        }
-
-        const chart = new google.visualization.AreaChart(document.getElementById('elevation_chart'));
-        chart.draw(data, {
-          height: 200,
-          legend: 'none',
-          title: 'Elevation Profile',
-          hAxis: { title: 'Distance (km)', gridlines: { count: 6 }, format: '#.##' },
-          vAxis: { title: 'Elevation (m)', gridlines: { count: 6 } },
-          areaOpacity: 0.3,
-          colors: ['#1a73e8'],
-        });
+      for (let i = 0; i < results.length; i++) {
+        data.addRow([i, results[i].elevation]);
       }
+
+      const chart = new google.visualization.AreaChart(document.getElementById('elevation_chart'));
+      chart.draw(data, {
+        height: 200,
+        legend: 'none',
+        title: 'Elevation Profile',
+        hAxis: { title: 'Distance Sample' },
+        vAxis: { title: 'Elevation (m)' },
+      });
+    }
 
     function checkObstruction(results, pos1, pos2) {
       const startElev = results[0].elevation;
