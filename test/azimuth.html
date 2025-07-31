@@ -395,6 +395,7 @@
 
       const container = document.getElementById('elevation_chart');
       const chart = new google.visualization.AreaChart(container);
+      document.getElementById('elevation_chart').style.height = '200px';
       chart.draw(data, {
         width: container.offsetWidth,
         height: 200,
