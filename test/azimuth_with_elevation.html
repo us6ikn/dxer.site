@@ -29,9 +29,9 @@
   <h2>Azimuth Calculator Between QTH Locators</h2>
   <div class="controls">
     <label for="locator1">QTH Locator 1:</label>
-    <input type="text" id="locator1" maxlength="10" placeholder="e.g. JN58td12AB" />
+    <input type="text" id="locator1" maxlength="6" placeholder="e.g. JN58td" />
     <label for="locator2">QTH Locator 2:</label>
-    <input type="text" id="locator2" maxlength="10" placeholder="e.g. IO91wm34CD" />
+    <input type="text" id="locator2" maxlength="6" placeholder="e.g. IO91wm" />
     <button onclick="calculateAzimuth()">Calculate</button>
     <p id="azimuthResult"></p>
     <p id="obstructionWarning"></p>
@@ -39,7 +39,7 @@
   <div id="map"></div>
   <div id="elevation_chart"></div>
 
-  <!-- Load Google Charts -->
+  <!-- Load Google Charts for elevation profile -->
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script>
     let map;
@@ -52,66 +52,13 @@
     function locatorToLatLng(locator) {
       locator = locator.toUpperCase();
       const A = 'A'.charCodeAt(0);
-      let lon = -180, lat = -90;
-
-      if (locator.length >= 2) {
-        lon += (locator.charCodeAt(0) - A) * 20;
-        lat += (locator.charCodeAt(1) - A) * 10;
-      }
-      if (locator.length >= 4) {
-        lon += parseInt(locator[2]) * 2;
-        lat += parseInt(locator[3]) * 1;
-      }
-      if (locator.length >= 6) {
-        lon += (locator.charCodeAt(4) - A) * 5 / 60 + 2.5 / 60;
-        lat += (locator.charCodeAt(5) - A) * 2.5 / 60 + 1.25 / 60;
-      }
-      if (locator.length >= 8) {
-        lon += parseInt(locator[6]) * 0.208333 + 0.104167;
-        lat += parseInt(locator[7]) * 0.104167 + 0.052083;
-      }
-      if (locator.length >= 10) {
-        lon += (locator.charCodeAt(8) - A) * 0.008333 + 0.004167;
-        lat += (locator.charCodeAt(9) - A) * 0.004167 + 0.002083;
-      }
-
-      return { lat, lng: lon };
-    }
-
-    function latLngToLocator(lat, lon, precision = 10) {
-      const A = 'A'.charCodeAt(0);
-      lat += 90;
-      lon += 180;
-
-      let locator = '';
-      locator += String.fromCharCode(Math.floor(lon / 20) + A);
-      locator += String.fromCharCode(Math.floor(lat / 10) + A);
-
-      lon %= 20;
-      lat %= 10;
-      locator += Math.floor(lon / 2);
-      locator += Math.floor(lat);
-
-      lon %= 2;
-      lat %= 1;
-      locator += String.fromCharCode(Math.floor(lon * 60 / 5) + A);
-      locator += String.fromCharCode(Math.floor(lat * 60 / 2.5) + A);
-
-      if (precision >= 8) {
-        lon = lon * 60 % 5;
-        lat = lat * 60 % 2.5;
-        locator += Math.floor(lon / 0.208333);
-        locator += Math.floor(lat / 0.104167);
-      }
-
-      if (precision >= 10) {
-        lon %= 0.208333;
-        lat %= 0.104167;
-        locator += String.fromCharCode(Math.floor(lon / 0.008333) + A);
-        locator += String.fromCharCode(Math.floor(lat / 0.004167) + A);
-      }
-
-      return locator;
+      const lon = (locator.charCodeAt(0) - A) * 20 - 180 +
+                  parseInt(locator[2]) * 2 +
+                  (locator.length > 4 ? (locator.charCodeAt(4) - A) * 5 / 60 + 2.5 / 60 : 1);
+      const lat = (locator.charCodeAt(1) - A) * 10 - 90 +
+                  parseInt(locator[3]) * 1 +
+                  (locator.length > 5 ? (locator.charCodeAt(5) - A) * 2.5 / 60 + 1.25 / 60 : 0.5);
+      return { lat: lat, lng: lon };
     }
 
     function computeAzimuth(from, to) {
@@ -146,7 +93,7 @@
       const loc1 = document.getElementById('locator1').value.trim();
       const loc2 = document.getElementById('locator2').value.trim();
       if (loc1.length < 4 || loc2.length < 4) {
-        alert("Please enter valid QTH locators (at least 4 characters).");
+        alert("Please enter valid 6-character QTH locators.");
         return;
       }
 
@@ -164,23 +111,12 @@
       markers.forEach(marker => marker.setMap(null));
       markers = [];
 
-      if (line) line.setMap(null);
+      if (line) {
+        line.setMap(null);
+      }
 
-      const marker1 = new google.maps.Marker({
-        position: pos1,
-        map: map,
-        draggable: true,
-      });
-      const marker2 = new google.maps.Marker({
-        position: pos2,
-        map: map,
-        draggable: true,
-      });
-
-      marker1.addListener('dragend', () => onMarkerMoved(marker1, marker2));
-      marker2.addListener('dragend', () => onMarkerMoved(marker1, marker2));
-
-      markers.push(marker1, marker2);
+      markers.push(new google.maps.Marker({ position: pos1, map: map }));
+      markers.push(new google.maps.Marker({ position: pos2, map: map }));
 
       line = new google.maps.Polyline({
         path: [pos1, pos2],
@@ -196,6 +132,7 @@
       bounds.extend(pos2);
       map.fitBounds(bounds);
 
+      // Request elevation profile
       elevator.getElevationAlongPath({
         path: [pos1, pos2],
         samples: 256
@@ -204,26 +141,9 @@
           plotElevation(results);
           checkObstruction(results, pos1, pos2);
         } else {
-          document.getElementById('elevation_chart').innerText = 'Elevation service failed.';
+          document.getElementById('elevation_chart').innerHTML = 'Elevation service failed.';
         }
       });
-    }
-
-    function onMarkerMoved(marker1, marker2) {
-      const pos1 = marker1.getPosition();
-      const pos2 = marker2.getPosition();
-
-      const loc1 = latLngToLocator(pos1.lat(), pos1.lng(), 10);
-      const loc2 = latLngToLocator(pos2.lat(), pos2.lng(), 10);
-
-      document.getElementById('locator1').value = loc1;
-      document.getElementById('locator2').value = loc2;
-
-      const azimuth = computeAzimuth({ lat: pos1.lat(), lng: pos1.lng() }, { lat: pos2.lat(), lng: pos2.lng() });
-      document.getElementById('azimuthResult').innerText =
-        `Azimuth from ${loc1} to ${loc2} is ${azimuth}°`;
-
-      updateMap({ lat: pos1.lat(), lng: pos1.lng() }, { lat: pos2.lat(), lng: pos2.lng() });
     }
 
     function plotElevation(results) {
@@ -248,32 +168,34 @@
     function checkObstruction(results, pos1, pos2) {
       const startElev = results[0].elevation;
       const endElev = results[results.length - 1].elevation;
-
       const totalDistance = google.maps.geometry.spherical.computeDistanceBetween(
         new google.maps.LatLng(pos1.lat, pos1.lng),
         new google.maps.LatLng(pos2.lat, pos2.lng)
       );
 
       let obstructed = false;
+
       for (let i = 1; i < results.length - 1; i++) {
         const fraction = i / (results.length - 1);
         const expectedLineElev = startElev + fraction * (endElev - startElev);
-        if (results[i].elevation > expectedLineElev + 1) {
+        if (results[i].elevation > expectedLineElev + 1) { // allow 1m tolerance
           obstructed = true;
           break;
         }
       }
 
       const warning = document.getElementById('obstructionWarning');
-      warning.innerText = obstructed
-        ? "⚠️ Line of sight is obstructed by terrain!"
-        : "✅ Line of sight is clear.";
+      if (obstructed) {
+        warning.innerText = "⚠️ Line of sight is obstructed by terrain!";
+      } else {
+        warning.innerText = "✅ Line of sight is clear.";
+      }
     }
 
     window.onload = initMap;
   </script>
 
-  <!-- Google Maps API -->
+  <!-- Google Maps API (include geometry library) -->
   <script async
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&libraries=geometry&callback=initMap">
   </script>
