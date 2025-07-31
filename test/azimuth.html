@@ -93,6 +93,16 @@
       <input type="text" id="locator2" maxlength="10" placeholder="e.g. IO91wm34CD" />
       <button onclick="calculateAzimuth()">Calculate</button>
     </div>
+    <div id="initialInstructions" style="margin-top: 1em; color: #444; font-size: 0.95em; line-height: 1.5;">
+      <h3 style="margin-top: 0; font-size: 1.2em;">How to use SA5IKN QRB Calculator</h3>
+      <p>Enter two Maidenhead locators above. Valid lengths are from <strong>4 to 10 characters</strong>.</p>
+      <ul style="padding-left: 1.2em; margin-top: 0.5em;">
+        <li><span style="color:#1e88e5;font-weight:bold;">Blue marker</span>: your QTH locator</li>
+        <li><span style="color:#43a047;font-weight:bold;">Green marker</span>: DX station locator</li>
+      </ul>
+      <p>Once both locators are set, the map will display markers and path, and the terrain elevation graph will appear here.</p>
+    </div>
+
     <div id="azimuthResult"></div>
     <div id="obstructionWarning"></div>
     <div id="elevation_chart"></div>
@@ -238,6 +248,8 @@
       return;
     }
 
+    document.getElementById('initialInstructions').style.display = 'none';
+    
     const pos1 = locatorToLatLng(loc1);
     const pos2 = locatorToLatLng(loc2);
     const azimuth = computeAzimuth(pos1, pos2);
