@@ -81,8 +81,8 @@
         padding: 10px;
         border-radius: 8px;
         box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-        width: 100%;
-        max-width: 600px;
+        width: auto;
+        max-width: 90%;
       }
       .input-row {
         display: flex;
@@ -112,6 +112,16 @@
         margin-top: 0.5rem;
         font-weight: bold;
       }
+      #initialInstructions {
+        margin-top: 1em;
+        color: #444;
+        font-size: 0.95em;
+        line-height: 1.5;
+        display: block;
+      }
+      #initialInstructions.hidden {
+        display: none;
+      }
     </style>
 </head>
 <body>
@@ -124,7 +134,7 @@
         <input type="text" id="locator2" maxlength="10" placeholder="e.g. IO91wm34CD" />
         <button onclick="calculateAzimuth()">Calculate</button>
       </div>
-      <div id="initialInstructions" style="margin-top: 1em; color: #444; font-size: 0.95em; line-height: 1.5;">
+      <div id="initialInstructions">
         <h3 style="margin-top: 0; font-size: 1.2em;">How to use SA5IKN QRB Calculator</h3>
         <p>Enter two Maidenhead locators in the fields above. Valid locator lengths are from <strong>4 to 10 characters</strong>.</p>
         <ul style="padding-left: 1.2em; margin-top: 0.5em;">
@@ -187,7 +197,7 @@
         lon += 5 / 28800; lat += 2.5 / 28800;
       }
 
-      return { lat, lng: lon };
+      return { lat, lng: lon, precision };
     }
 
     function latLngToLocator(lat, lon, precision = 6) {
@@ -255,7 +265,7 @@
       }).addTo(map);
     }
 
-    function addDraggableMarker(latlng, color, index) {
+    function addDraggableMarker(latlng, color, index, precision) {
       const marker = L.marker(latlng, {
         draggable: true,
         icon: L.divIcon({
@@ -266,7 +276,7 @@
 
       marker.on('dragend', () => {
         const pos = marker.getLatLng();
-        document.getElementById(`locator${index + 1}`).value = latLngToLocator(pos.lat, pos.lng);
+        document.getElementById(`locator${index + 1}`).value = latLngToLocator(pos.lat, pos.lng, precision);
         updateMap(markers[0].getLatLng(), markers[1].getLatLng());
       });
 
@@ -278,8 +288,12 @@
       markers = [];
       if (line) map.removeLayer(line);
 
-      addDraggableMarker(pos1, '#1e88e5', 0);
-      addDraggableMarker(pos2, '#43a047', 1);
+      // Use precision from input locators, default to 6 if not available
+      const precision1 = pos1.precision || 6;
+      const precision2 = pos2.precision || 6;
+
+      addDraggableMarker(pos1, '#1e88e5', 0, precision1);
+      addDraggableMarker(pos2, '#43a047', 1, precision2);
 
       line = L.polyline([pos1, pos2], { color: 'red' }).addTo(map);
       map.fitBounds(L.latLngBounds([pos1, pos2]));
@@ -287,14 +301,17 @@
       const distance = computeDistance(pos1, pos2).toFixed(1);
       const azimuth = computeAzimuth(pos1, pos2).toFixed(1);
       document.getElementById('azimuthResult').innerHTML = `Distance: ${distance} km, Azimuth: ${azimuth}°`;
+      document.getElementById('initialInstructions').classList.add('hidden');
     }
 
     function calculateAzimuth() {
       const locator1 = document.getElementById('locator1').value;
       const locator2 = document.getElementById('locator2').value;
 
+      const instructions = document.getElementById('initialInstructions');
       if (!locator1 || !locator2 || locator1.length < 4 || locator2.length < 4) {
         document.getElementById('azimuthResult').innerHTML = 'Please enter valid Maidenhead locators (4-10 characters).';
+        instructions.classList.remove('hidden');
         return;
       }
 
