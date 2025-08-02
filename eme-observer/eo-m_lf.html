@@ -988,7 +988,7 @@
                 let gastDeg = Astronomy.SiderealTime(time) * 15;
                 gastDeg = ((gastDeg % 360) + 360) % 360;
 
-                let lonDeg = raDeg - gastDeg; // Try gastDeg - raDeg if still incorrect
+                let lonDeg = raDeg - gastDeg; // Try gastDeg - raDeg if incorrect
                 lonDeg = ((lonDeg + 180) % 360) - 180; // Normalize to [-180, 180]
 
                 const lat = decDeg;
@@ -1005,8 +1005,8 @@
                     return;
                 }
 
-                console.log(`Sublunar point: lat=${lat.toFixed(2)}, lon=${lon.toFixed(2)}, RA=${raHours}, GAST=${gastDeg/15}`);
-                console.log(`Footprint radius: ${footprintRadius.toFixed(2)} meters, theta_rad: ${theta_rad.toFixed(4)} radians`);
+                console.log(`Sublunar point: lat=${lat.toFixed(2)}, lon=${lon.toFixed(2)}, RA=${raHours.toFixed(2)}h, Dec=${decDeg.toFixed(2)}°, GAST=${(gastDeg/15).toFixed(2)}h`);
+                console.log(`Moon distance: ${D_moon.toFixed(2)} km, theta_rad: ${theta_rad.toFixed(4)} radians, footprintRadius: ${footprintRadius.toFixed(2)} meters`);
 
                 // Remove existing moon marker and circle
                 if (moonMarker) moonMarker.remove();
@@ -1033,9 +1033,9 @@
                     weight: 2
                 }).addTo(map);
 
-                // Center map on sublunar point
+                // Center map on sublunar point and set zoom
                 map.panTo([lat, lon]);
-                map.setZoom(3); // Ensure footprint is visible
+                map.setZoom(2); // Zoom out to view entire footprint
 
             } catch (error) {
                 console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
