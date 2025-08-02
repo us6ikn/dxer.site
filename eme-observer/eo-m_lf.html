@@ -988,7 +988,7 @@
                 let gastDeg = Astronomy.SiderealTime(time) * 15;
                 gastDeg = ((gastDeg % 360) + 360) % 360;
 
-                let lonDeg = raDeg - gastDeg;
+                let lonDeg = raDeg - gastDeg; // Try gastDeg - raDeg if still incorrect
                 lonDeg = ((lonDeg + 180) % 360) - 180; // Normalize to [-180, 180]
 
                 const lat = decDeg;
@@ -998,15 +998,15 @@
                 const D_moon = libration.dist_km; // Moon distance in km
                 const cosTheta = earthRadius / (earthRadius + D_moon);
                 const theta_rad = Math.acos(cosTheta);
-                const footprintRadius = earthRadius * Math.sin(theta_rad) * 1000; // Surface distance in meters
+                const footprintRadius = earthRadius * (Math.PI / 2 - theta_rad) * 1000; // Surface distance in meters
 
                 if (isNaN(lat) || isNaN(lon) || isNaN(footprintRadius)) {
                     console.warn(`Invalid sublunar point data for ${utcTimeString}: lat=${lat}, lon=${lon}, radius=${footprintRadius}`);
                     return;
                 }
 
-                console.log(`Sublunar point: lat=${lat.toFixed(2)}, lon=${lon.toFixed(2)}`);
-                console.log(`Footprint radius: ${footprintRadius.toFixed(2)} meters`);
+                console.log(`Sublunar point: lat=${lat.toFixed(2)}, lon=${lon.toFixed(2)}, RA=${raHours}, GAST=${gastDeg/15}`);
+                console.log(`Footprint radius: ${footprintRadius.toFixed(2)} meters, theta_rad: ${theta_rad.toFixed(4)} radians`);
 
                 // Remove existing moon marker and circle
                 if (moonMarker) moonMarker.remove();
@@ -1032,6 +1032,10 @@
                     fillOpacity: 0.3,
                     weight: 2
                 }).addTo(map);
+
+                // Center map on sublunar point
+                map.panTo([lat, lon]);
+                map.setZoom(3); // Ensure footprint is visible
 
             } catch (error) {
                 console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
