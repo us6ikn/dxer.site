@@ -988,7 +988,8 @@
                 let gastDeg = Astronomy.SiderealTime(time) * 15;
                 gastDeg = ((gastDeg % 360) + 360) % 360;
 
-                let lonDeg = raDeg - gastDeg; // Try gastDeg - raDeg if incorrect
+                // Try alternative longitude calculation if position is incorrect
+                let lonDeg = gastDeg - raDeg; // Reversed to test
                 lonDeg = ((lonDeg + 180) % 360) - 180; // Normalize to [-180, 180]
 
                 const lat = decDeg;
@@ -997,8 +998,8 @@
                 const earthRadius = 6371; // km
                 const D_moon = libration.dist_km; // Moon distance in km
                 const cosTheta = earthRadius / (earthRadius + D_moon);
-                const theta_rad = Math.acos(cosTheta);
-                const footprintRadius = earthRadius * (Math.PI / 2 - theta_rad) * 1000; // Surface distance in meters
+                const theta_rad = Math.acos(cosTheta); // Angular radius to horizon
+                const footprintRadius = earthRadius * theta_rad * 1000; // Surface distance in meters
 
                 if (isNaN(lat) || isNaN(lon) || isNaN(footprintRadius)) {
                     console.warn(`Invalid sublunar point data for ${utcTimeString}: lat=${lat}, lon=${lon}, radius=${footprintRadius}`);
