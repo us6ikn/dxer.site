@@ -988,7 +988,7 @@
                 let gastDeg = Astronomy.SiderealTime(time) * 15;
                 gastDeg = ((gastDeg % 360) + 360) % 360;
 
-                // Correct longitude calculation
+                // Correct longitude calculation (from Google Maps version)
                 let lonDeg = raDeg - gastDeg;
                 lonDeg = ((lonDeg + 180) % 360) - 180; // Normalize to [-180, 180]
 
@@ -1025,23 +1025,74 @@
                     title: `Moon Sublunar Point (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
                 }).addTo(map);
 
-                // Add footprint circle with enhanced visibility
-                footprintCircle = L.circle([lat, lon], {
-                    radius: footprintRadius,
-                    color: '#FF0000', // Red for debugging
-                    fillColor: '#FF0000',
-                    fillOpacity: 0.5,
-                    weight: 2
+                // Generate geodesic circle points
+                const circlePoints = generateGeodesicCircle(lat, lon, footprintRadius / 1000); // Convert meters to km
+                footprintCircle = L.geoJSON({
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Polygon',
+                        coordinates: [circlePoints]
+                    },
+                    properties: {}
+                }, {
+                    style: {
+                        color: '#0000FF', // Blue stroke (match Google Maps)
+                        fillColor: '#0088FF',
+                        fillOpacity: 0.3,
+                        weight: 2
+                    }
                 }).addTo(map);
                 footprintCircle.bringToFront(); // Ensure circle is on top
 
                 // Center map on sublunar point and set zoom
                 map.panTo([lat, lon]);
-                map.setZoom(3); // Slightly closer zoom for better visibility
+                map.setZoom(2); // Global view to see full footprint
 
             } catch (error) {
                 console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
             }
+        }
+
+        // Helper function to generate geodesic circle points
+        function generateGeodesicCircle(centerLat, centerLon, radiusKm) {
+            const points = [];
+            const numPoints = 360; // Number of points to approximate the circle
+            const earthRadius = 6371; // km
+            const angularRadius = radiusKm / earthRadius; // Angular radius in radians
+
+            for (let i = 0; i < numPoints; i++) {
+                const bearing = (i * 360) / numPoints; // Bearing in degrees
+                const point = destinationPoint(centerLat, centerLon, angularRadius, bearing);
+                points.push([point.lon, point.lat]); // Leaflet expects [lon, lat]
+            }
+            points.push(points[0]); // Close the polygon
+            return points;
+        }
+
+        // Calculate destination point given a starting point, angular distance, and bearing
+        function destinationPoint(lat, lon, angularDist, bearing) {
+            const latRad = lat * Math.PI / 180;
+            const lonRad = lon * Math.PI / 180;
+            const bearingRad = bearing * Math.PI / 180;
+
+            const sinLat = Math.sin(latRad);
+            const cosLat = Math.cos(latRad);
+            const cosDist = Math.cos(angularDist);
+            const sinDist = Math.sin(angularDist);
+
+            const newLatRad = Math.asin(sinLat * cosDist + cosLat * sinDist * Math.cos(bearingRad));
+            const newLonRad = lonRad + Math.atan2(
+                Math.sin(bearingRad) * sinDist * cosLat,
+                cosDist - sinLat * Math.sin(newLatRad)
+            );
+
+            let newLon = newLonRad * 180 / Math.PI;
+            newLon = ((newLon + 180) % 360) - 180; // Normalize to [-180, 180]
+
+            return {
+                lat: newLatRad * 180 / Math.PI,
+                lon: newLon
+            };
         }
 
         function calculateMoonDataForMonth(dateStr) {
