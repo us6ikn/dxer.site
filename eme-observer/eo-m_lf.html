@@ -953,88 +953,90 @@
                     .catch(() => { /* Handle error silently */ });
             }
 
-            function updateMap() {
-                const selectedDate = document.getElementById('date').value;
-                const index = parseInt(document.getElementById('hour').value);
-                const hour = Math.floor(index / 2).toString().padStart(2, '0');
-                const minutes = index % 2 === 0 ? '00' : '30';
-                const utcTimeString = `${selectedDate}T${hour}:${minutes}:00Z`;
+        function updateMap() {
+            const selectedDate = document.getElementById('date').value;
+            const index = parseInt(document.getElementById('hour').value);
+            const hour = Math.floor(index / 2).toString().padStart(2, '0');
+            const minutes = index % 2 === 0 ? '00' : '30';
+            const utcTimeString = `${selectedDate}T${hour}:${minutes}:00Z`;
 
-                if (!selectedDate || !/^\d{4}-\d{2}-\d{2}$/.test(selectedDate)) {
-                    console.warn(`Invalid or missing date in updateMap: ${selectedDate}`);
-                    return;
-                }
-
-                const utcDate = new Date(utcTimeString);
-                if (isNaN(utcDate.getTime())) {
-                    console.error(`Invalid date string in updateMap: ${utcTimeString}`);
-                    return;
-                }
-
-                try {
-                    const time = Astronomy.MakeTime(utcDate);
-                    const observer = new Astronomy.Observer(0, 0, 0);
-                    const moon = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, true);
-                    const libration = Astronomy.Libration(time);
-
-                    if (!moon || !libration) {
-                        console.warn(`Failed to compute Moon data for ${utcTimeString}`);
-                        return;
-                    }
-
-                    const raHours = moon.ra;
-                    const decDeg = moon.dec;
-                    const raDeg = raHours * 15;
-
-                    let gastDeg = Astronomy.SiderealTime(time) * 15;
-                    gastDeg = ((gastDeg % 360) + 360) % 360;
-
-                    let lonDeg = raDeg - gastDeg;
-                    if (lonDeg > 180) lonDeg -= 360;
-                    if (lonDeg < -180) lonDeg += 360;
-
-                    const lat = decDeg;
-                    const lon = lonDeg;
-
-                    const earthRadius = 6371;
-                    const D_moon = libration.dist_km;
-                    const theta_rad = Math.acos(earthRadius / (earthRadius + D_moon));
-                    const footprintRadius = earthRadius * theta_rad * 1000;
-
-                    if (isNaN(lat) || isNaN(lon) || isNaN(footprintRadius)) {
-                        console.warn(`Invalid sublunar point data for ${utcTimeString}: lat=${lat}, lon=${lon}, radius=${footprintRadius}`);
-                        return;
-                    }
-
-                    // Remove existing moon marker and circle
-                    if (moonMarker) moonMarker.remove();
-                    if (footprintCircle) footprintCircle.remove();
-
-                    // Add new moon marker
-                    const moonIcon = L.icon({
-                        iconUrl: 'images/moon-icon.png',
-                        iconSize: [48, 48],
-                        iconAnchor: [24, 24]
-                    });
-
-                    moonMarker = L.marker([lat, lon], {
-                        icon: moonIcon,
-                        title: `Moon Sublunar Point (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
-                    }).addTo(map);
-
-                    // Add footprint circle
-                    footprintCircle = L.circle([lat, lon], {
-                        radius: footprintRadius,
-                        color: '#0000FF',
-                        fillColor: '#0088FF',
-                        fillOpacity: 0.3,
-                        weight: 2
-                    }).addTo(map);
-
-                } catch (error) {
-                    console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
-                }
+            if (!selectedDate || !/^\d{4}-\d{2}-\d{2}$/.test(selectedDate)) {
+                console.warn(`Invalid or missing date in updateMap: ${selectedDate}`);
+                return;
             }
+
+            const utcDate = new Date(utcTimeString);
+            if (isNaN(utcDate.getTime())) {
+                console.error(`Invalid date string in updateMap: ${utcTimeString}`);
+                return;
+            }
+
+            try {
+                const time = Astronomy.MakeTime(utcDate);
+                const observer = new Astronomy.Observer(0, 0, 0);
+                const moon = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, true);
+                const libration = Astronomy.Libration(time);
+
+                if (!moon || !libration) {
+                    console.warn(`Failed to compute Moon data for ${utcTimeString}`);
+                    return;
+                }
+
+                const raHours = moon.ra;
+                const decDeg = moon.dec;
+                const raDeg = raHours * 15;
+                let gastDeg = Astronomy.SiderealTime(time) * 15;
+                gastDeg = ((gastDeg % 360) + 360) % 360;
+
+                let lonDeg = raDeg - gastDeg;
+                lonDeg = ((lonDeg + 180) % 360) - 180; // Normalize to [-180, 180]
+
+                const lat = decDeg;
+                const lon = lonDeg;
+
+                const earthRadius = 6371; // km
+                const D_moon = libration.dist_km; // Moon distance in km
+                const cosTheta = earthRadius / (earthRadius + D_moon);
+                const theta_rad = Math.acos(cosTheta);
+                const footprintRadius = earthRadius * Math.sin(theta_rad) * 1000; // Surface distance in meters
+
+                if (isNaN(lat) || isNaN(lon) || isNaN(footprintRadius)) {
+                    console.warn(`Invalid sublunar point data for ${utcTimeString}: lat=${lat}, lon=${lon}, radius=${footprintRadius}`);
+                    return;
+                }
+
+                console.log(`Sublunar point: lat=${lat.toFixed(2)}, lon=${lon.toFixed(2)}`);
+                console.log(`Footprint radius: ${footprintRadius.toFixed(2)} meters`);
+
+                // Remove existing moon marker and circle
+                if (moonMarker) moonMarker.remove();
+                if (footprintCircle) footprintCircle.remove();
+
+                // Add new moon marker
+                const moonIcon = L.icon({
+                    iconUrl: 'images/moon-icon.png',
+                    iconSize: [48, 48],
+                    iconAnchor: [24, 24]
+                });
+
+                moonMarker = L.marker([lat, lon], {
+                    icon: moonIcon,
+                    title: `Moon Sublunar Point (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
+                }).addTo(map);
+
+                // Add footprint circle
+                footprintCircle = L.circle([lat, lon], {
+                    radius: footprintRadius,
+                    color: '#0000FF',
+                    fillColor: '#0088FF',
+                    fillOpacity: 0.3,
+                    weight: 2
+                }).addTo(map);
+
+            } catch (error) {
+                console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
+            }
+        }
 
         function calculateMoonDataForMonth(dateStr) {
             const startDate = new Date(dateStr);
