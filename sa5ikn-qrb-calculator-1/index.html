@@ -10,12 +10,11 @@
     </script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.min.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>SA5IKN QRB Calculator - Azimuth and Terrain Elevation Finder</title>
-    <meta name="description" content="SA5IKN QRB Calculator helps radio amateurs calculate azimuth, distance, and line-of-sight terrain profile between Maidenhead grid locators. Interactive map with draggable markers and elevation graph.">
-    <meta name="keywords" content="QRB calculator, azimuth finder, Maidenhead locator, grid square calculator, azimuth, ham radio, amateur radio, DX, terrain profile, elevation map, SA5IKN, line of sight, VHF, UHF, SHF, microwaves">
+    <title>SA5IKN QRB Calculator - Azimuth and Distance Finder</title>
+    <meta name="description" content="SA5IKN QRB Calculator helps radio amateurs calculate azimuth and distance between Maidenhead grid locators. Interactive map with draggable markers.">
+    <meta name="keywords" content="QRB calculator, azimuth finder, Maidenhead locator, grid square calculator, azimuth, ham radio, amateur radio, DX, SA5IKN, VHF, UHF, SHF, microwaves">
     <meta name="author" content="SA5IKN">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://dxer.site/sa5ikn-qrb-calculator/" />
@@ -28,13 +27,13 @@
     <!-- Open Graph Meta -->
     <meta property="og:title" content="SA5IKN QRB Calculator">
     <meta property="og:type" content="website">
-    <meta property="og:description" content="SA5IKN QRB Calculator helps radio amateurs calculate azimuth, distance, and line-of-sight terrain profile between Maidenhead grid locators. Interactive map with draggable markers and elevation graph.">
+    <meta property="og:description" content="SA5IKN QRB Calculator helps radio amateurs calculate azimuth and distance between Maidenhead grid locators. Interactive map with draggable markers.">
     <meta property="og:image" content="https://dxer.site/social/sa5ikn-qrb-calculator.jpg">
     <meta property="og:url" content="https://dxer.site/sa5ikn-qrb-calculator/">
     <!-- Twitter Meta -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="SA5IKN QRB Calculator" />
-    <meta name="twitter:description" content="SA5IKN QRB Calculator helps radio amateurs calculate azimuth, distance, and line-of-sight terrain profile between Maidenhead grid locators. Interactive map with draggable markers and elevation graph." />
+    <meta name="twitter:description" content="SA5IKN QRB Calculator helps radio amateurs calculate azimuth and distance between Maidenhead grid locators. Interactive map with draggable markers." />
     <meta name="twitter:image" content="https://dxer.site/social/sa5ikn-qrb-calculator.jpg" />
     <script type="application/ld+json">
       {
@@ -43,7 +42,7 @@
         "name": "SA5IKN QRB Calculator",
         "url": "https://dxer.site/sa5ikn-qrb-calculator/",
         "author": { "@type": "Person", "name": "SA5IKN" },
-        "description": "SA5IKN QRB Calculator helps radio amateurs calculate azimuth, distance, and line-of-sight terrain profile between Maidenhead grid locators. Interactive map with draggable markers and elevation graph.",
+        "description": "SA5IKN QRB Calculator helps radio amateurs calculate azimuth and distance between Maidenhead grid locators. Interactive map with draggable markers.",
         "applicationCategory": "Science",
         "operatingSystem": "All",
         "browserRequirements": "Requires JavaScript",
@@ -109,21 +108,9 @@
         border: 2px solid #43a047;
         background-color: #e8f5e9;
       }
-      #azimuthResult, #obstructionWarning {
+      #azimuthResult {
         margin-top: 0.5rem;
         font-weight: bold;
-      }
-      #obstructionWarning {
-        color: #333;
-        font-size: 0.7em;
-      }
-      #elevation_chart {
-        height: 0;
-        transition: height 0.3s ease;
-        overflow: hidden;
-      }
-      #elevation_chart.show {
-        height: 200px;
       }
     </style>
 </head>
@@ -144,17 +131,15 @@
           <li><span style="color:#1e88e5; font-weight:bold;">Blue marker</span>: Your QTH locator</li>
           <li><span style="color:#43a047; font-weight:bold;">Green marker</span>: DX station locator</li>
         </ul>
-        <p>Once both locators are entered, the map will show the azimuth, distance, and a line connecting the two markers. A terrain elevation profile between the points will appear below.</p>
+        <p>Once both locators are entered, the map will show the azimuth, distance, and a line connecting the two markers.</p>
         <p>You can also <strong>drag either marker</strong> directly on the map. The corresponding locator input will update dynamically.</p>
       </div>
       <div id="azimuthResult"></div>
-      <div id="obstructionWarning"></div>
-      <canvas id="elevation_chart"></canvas>
     </div>
   </div>
 
   <script>
-    let map, markers = [], line, elevationChart;
+    let map, markers = [], line;
 
     function setMapHeight() {
       const vh = window.innerHeight;
@@ -302,8 +287,6 @@
       const distance = computeDistance(pos1, pos2).toFixed(1);
       const azimuth = computeAzimuth(pos1, pos2).toFixed(1);
       document.getElementById('azimuthResult').innerHTML = `Distance: ${distance} km, Azimuth: ${azimuth}°`;
-
-      getElevationProfile(pos1, pos2);
     }
 
     function calculateAzimuth() {
@@ -318,62 +301,6 @@
       const pos1 = locatorToLatLng(locator1);
       const pos2 = locatorToLatLng(locator2);
       updateMap(pos1, pos2);
-    }
-
-    function getElevationProfile(start, end) {
-      const samples = 256;
-      const latlngs = [];
-
-      for (let i = 0; i <= samples; i++) {
-        const lat = start.lat + (end.lat - start.lat) * (i / samples);
-        const lng = start.lng + (end.lng - start.lng) * (i / samples);
-        latlngs.push({ latitude: lat, longitude: lng });
-      }
-
-      fetch('https://api.open-elevation.com/api/v1/lookup', {
-        method: 'POST',
-        body: JSON.stringify({ locations: latlngs }),
-        headers: { 'Content-Type': 'application/json' }
-      })
-      .then(response => response.json())
-      .then(data => plotElevation(data.results))
-      .catch(() => {
-        document.getElementById('azimuthResult').innerHTML += '<br>Elevation service failed.';
-      });
-    }
-
-    function plotElevation(results) {
-      const canvas = document.getElementById('elevation_chart');
-      canvas.classList.add('show');
-
-      const distance = computeDistance(results[0], results[results.length - 1]);
-      const labels = results.map((_, i) => (i * distance / results.length).toFixed(1));
-      const elevations = results.map(r => r.elevation);
-
-      if (elevationChart) elevationChart.destroy();
-      elevationChart = new Chart(canvas, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Elevation (m)',
-            data: elevations,
-            borderColor: '#1e88e5',
-            fill: true,
-            backgroundColor: 'rgba(30, 136, 229, 0.2)',
-            tension: 0.1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: { title: { display: true, text: 'Distance (km)' } },
-            y: { title: { display: true, text: 'Elevation (m)' }, beginAtZero: true }
-          },
-          plugins: { legend: { display: false } }
-        }
-      });
     }
 
     window.onload = initMap;
