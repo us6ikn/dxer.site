@@ -149,190 +149,27 @@
   </div>
 
   <script>
-    let map, markers = [], line, precisions = [6, 6]; // Track precision for initial input locators
-
-    function setMapHeight() {
-      const vh = window.innerHeight;
-      document.getElementById('map').style.height = vh + 'px';
-    }
-    window.addEventListener('load', setMapHeight);
-    window.addEventListener('resize', setMapHeight);
-
-    function locatorToLatLng(locator) {
-      locator = locator.toUpperCase();
-      const A = 'A'.charCodeAt(0);
-      let lon = -180, lat = -90;
-
-      if (locator.length >= 2) {
-        lon += (locator.charCodeAt(0) - A) * 20;
-        lat += (locator.charCodeAt(1) - A) * 10;
-      }
-      if (locator.length >= 4) {
-        lon += parseInt(locator[2]) * 2;
-        lat += parseInt(locator[3]) * 1;
-      }
-      if (locator.length >= 6) {
-        lon += (locator.charCodeAt(4) - A) * 5 / 60;
-        lat += (locator.charCodeAt(5) - A) * 2.5 / 60;
-      }
-      if (locator.length >= 8) {
-        lon += parseInt(locator[6]) * (5 / 600);
-        lat += parseInt(locator[7]) * (2.5 / 600);
-      }
-      if (locator.length >= 10) {
-        lon += (locator.charCodeAt(8) - A) * (5 / 14400);
-        lat += (locator.charCodeAt(9) - A) * (2.5 / 14400);
-      }
-
-      const precision = locator.length;
-      if (precision === 2) {
-        lon += 10; lat += 5;
-      } else if (precision === 4) {
-        lon += 1; lat += 0.5;
-      } else if (precision === 6) {
-        lon += 2.5 / 60; lat += 1.25 / 60;
-      } else if (precision === 8) {
-        lon += 5 / 1200; lat += 2.5 / 1200;
-      } else if (precision === 10) {
-        lon += 5 / 28800; lat += 2.5 / 28800;
-      }
-
-      return { lat, lng: lon, precision };
-    }
-
-    function latLngToLocator(lat, lon, precision = 6) {
-      const A = 'A'.charCodeAt(0);
-      lat += 90;
-      lon += 180;
-      let locator = '';
-
-      locator += String.fromCharCode(Math.floor(lon / 20) + A);
-      locator += String.fromCharCode(Math.floor(lat / 10) + A);
-      lon = (lon % 20);
-      lat = (lat % 10);
-      locator += Math.floor(lon / 2);
-      locator += Math.floor(lat / 1);
-
-      if (precision >= 6) {
-        lon = (lon % 2);
-        lat = (lat % 1);
-        locator += String.fromCharCode(Math.floor(lon * 60 / 5) + A);
-        locator += String.fromCharCode(Math.floor(lat * 60 / 2.5) + A);
-      }
-      if (precision >= 8) {
-        lon = (lon % (5 / 60));
-        lat = (lat % (2.5 / 60));
-        locator += Math.floor(lon / (5 / 600));
-        locator += Math.floor(lat / (2.5 / 600));
-      }
-      if (precision >= 10) {
-        lon = (lon % (5 / 600));
-        lat = (lat % (2.5 / 600));
-        locator += String.fromCharCode(Math.floor(lon / (5 / 14400)) + A);
-        locator += String.fromCharCode(Math.floor(lat / (2.5 / 14400)) + A);
-      }
-
-      return locator.slice(0, precision);
-    }
-
-    function toRadians(deg) {
-      return deg * Math.PI / 180;
-    }
-
-    function computeDistance(pos1, pos2) {
-      const R = 6371;
-      const dLat = toRadians(pos2.lat - pos1.lat);
-      const dLng = toRadians(pos2.lng - pos1.lng);
-      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRadians(pos1.lat)) * Math.cos(toRadians(pos2.lat)) * Math.sin(dLng / 2) ** 2;
-      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    }
-
-    function computeAzimuth(pos1, pos2) {
-      const lat1 = toRadians(pos1.lat);
-      const lat2 = toRadians(pos2.lat);
-      const dLng = toRadians(pos2.lng - pos1.lng);
-      const y = Math.sin(dLng) * Math.cos(lat2);
-      const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
-      let brng = Math.atan2(y, x);
-      brng = (brng * 180 / Math.PI + 360) % 360;
-      return brng;
-    }
-
-    function initMap() {
-      map = L.map('map').setView([0, 0], 2);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-      }).addTo(map);
-    }
-
-    function addDraggableMarker(latlng, color, index, precision) {
-      const marker = L.marker(latlng, {
-        draggable: true,
-        icon: L.divIcon({
-          className: 'custom-marker',
-          html: `<div style="width:14px;height:14px;background:${color};border-radius:50%;border:1px solid white;"></div>`
-        })
-      }).addTo(map);
-
-      marker.on('dragend', () => {
-        const pos = marker.getLatLng();
-        // Always use 10-character precision when updating input after dragging
-        document.getElementById(`locator${index + 1}`).value = latLngToLocator(pos.lat, pos.lng, 10);
-        // Update precisions array to reflect new 10-character input
-        precisions[index] = 10;
-        // Update map with current marker positions
-        const pos1 = markers[0] ? markers[0].getLatLng() : locatorToLatLng(document.getElementById('locator1').value);
-        const pos2 = markers[1] ? markers[1].getLatLng() : locatorToLatLng(document.getElementById('locator2').value);
-        pos1.precision = precisions[0];
-        pos2.precision = precisions[1];
-        updateMap(pos1, pos2);
-      });
-
-      markers[index] = marker;
-    }
-
-    function updateMap(pos1, pos2) {
-      markers.forEach(m => map.removeLayer(m));
-      markers = [];
-      if (line) map.removeLayer(line);
-
-      // Use precision from input locators or default to 6 for initial placement
-      precisions[0] = document.getElementById('locator1').value.length || 6;
-      precisions[1] = document.getElementById('locator2').value.length || 6;
-
-      addDraggableMarker(pos1, '#1e88e5', 0, precisions[0]);
-      addDraggableMarker(pos2, '#43a047', 1, precisions[1]);
-
-      line = L.polyline([pos1, pos2], { color: 'red' }).addTo(map);
-      map.fitBounds(L.latLngBounds([pos1, pos2]));
-
-      const distance = computeDistance(pos1, pos2).toFixed(1);
-      const azimuth = computeAzimuth(pos1, pos2).toFixed(1);
-      document.getElementById('azimuthResult').innerHTML = `Distance: ${distance} km, Azimuth: ${azimuth}°`;
-      document.getElementById('initialInstructions').classList.add('hidden');
-    }
-
-    function calculateAzimuth() {
-      const locator1 = document.getElementById('locator1').value;
-      const locator2 = document.getElementById('locator2').value;
-
-      const instructions = document.getElementById('initialInstructions');
-      if (!locator1 || !locator2 || locator1.length < 4 || locator2.length < 4) {
-        document.getElementById('azimuthResult').innerHTML = 'Please enter valid Maidenhead locators (4-10 characters).';
-        instructions.classList.remove('hidden');
-        return;
-      }
-
-      // Store precisions from input fields for initial placement
-      precisions[0] = locator1.length;
-      precisions[1] = locator2.length;
-
-      const pos1 = locatorToLatLng(locator1);
-      const pos2 = locatorToLatLng(locator2);
-      updateMap(pos1, pos2);
-    }
-
-    window.onload = initMap;
+      let map,markers=[],line,precisions=[6,6];function setMapHeight(){const vh=window.innerHeight;document.getElementById('map').style.height=vh+'px'}
+      window.addEventListener('load',setMapHeight);window.addEventListener('resize',setMapHeight);function locatorToLatLng(locator){locator=locator.toUpperCase();const A='A'.charCodeAt(0);let lon=-180,lat=-90;if(locator.length>=2){lon+=(locator.charCodeAt(0)-A)*20;lat+=(locator.charCodeAt(1)-A)*10}
+      if(locator.length>=4){lon+=parseInt(locator[2])*2;lat+=parseInt(locator[3])*1}
+      if(locator.length>=6){lon+=(locator.charCodeAt(4)-A)*5/60;lat+=(locator.charCodeAt(5)-A)*2.5/60}
+      if(locator.length>=8){lon+=parseInt(locator[6])*(5/600);lat+=parseInt(locator[7])*(2.5/600)}
+      if(locator.length>=10){lon+=(locator.charCodeAt(8)-A)*(5/14400);lat+=(locator.charCodeAt(9)-A)*(2.5/14400)}
+      const precision=locator.length;if(precision===2){lon+=10;lat+=5}else if(precision===4){lon+=1;lat+=0.5}else if(precision===6){lon+=2.5/60;lat+=1.25/60}else if(precision===8){lon+=5/1200;lat+=2.5/1200}else if(precision===10){lon+=5/28800;lat+=2.5/28800}
+      return{lat,lng:lon,precision}}
+      function latLngToLocator(lat,lon,precision=6){const A='A'.charCodeAt(0);lat+=90;lon+=180;let locator='';locator+=String.fromCharCode(Math.floor(lon/20)+A);locator+=String.fromCharCode(Math.floor(lat/10)+A);lon=(lon%20);lat=(lat%10);locator+=Math.floor(lon/2);locator+=Math.floor(lat/1);if(precision>=6){lon=(lon%2);lat=(lat%1);locator+=String.fromCharCode(Math.floor(lon*60/5)+A);locator+=String.fromCharCode(Math.floor(lat*60/2.5)+A)}
+      if(precision>=8){lon=(lon%(5/60));lat=(lat%(2.5/60));locator+=Math.floor(lon/(5/600));locator+=Math.floor(lat/(2.5/600))}
+      if(precision>=10){lon=(lon%(5/600));lat=(lat%(2.5/600));locator+=String.fromCharCode(Math.floor(lon/(5/14400))+A);locator+=String.fromCharCode(Math.floor(lat/(2.5/14400))+A)}
+      return locator.slice(0,precision)}
+      function toRadians(deg){return deg*Math.PI/180}
+      function computeDistance(pos1,pos2){const R=6371;const dLat=toRadians(pos2.lat-pos1.lat);const dLng=toRadians(pos2.lng-pos1.lng);const a=Math.sin(dLat/2)**2+Math.cos(toRadians(pos1.lat))*Math.cos(toRadians(pos2.lat))*Math.sin(dLng/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))}
+      function computeAzimuth(pos1,pos2){const lat1=toRadians(pos1.lat);const lat2=toRadians(pos2.lat);const dLng=toRadians(pos2.lng-pos1.lng);const y=Math.sin(dLng)*Math.cos(lat2);const x=Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLng);let brng=Math.atan2(y,x);brng=(brng*180/Math.PI+360)%360;return brng}
+      function initMap(){map=L.map('map').setView([0,0],2);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map)}
+      function addDraggableMarker(latlng,color,index,precision){const marker=L.marker(latlng,{draggable:!0,icon:L.divIcon({className:'custom-marker',html:`<div style="width:14px;height:14px;background:${color};border-radius:50%;border:1px solid white;"></div>`})}).addTo(map);marker.on('dragend',()=>{const pos=marker.getLatLng();document.getElementById(`locator${index + 1}`).value=latLngToLocator(pos.lat,pos.lng,10);precisions[index]=10;const pos1=markers[0]?markers[0].getLatLng():locatorToLatLng(document.getElementById('locator1').value);const pos2=markers[1]?markers[1].getLatLng():locatorToLatLng(document.getElementById('locator2').value);pos1.precision=precisions[0];pos2.precision=precisions[1];updateMap(pos1,pos2)});markers[index]=marker}
+      function updateMap(pos1,pos2){markers.forEach(m=>map.removeLayer(m));markers=[];if(line)map.removeLayer(line);precisions[0]=document.getElementById('locator1').value.length||6;precisions[1]=document.getElementById('locator2').value.length||6;addDraggableMarker(pos1,'#1e88e5',0,precisions[0]);addDraggableMarker(pos2,'#43a047',1,precisions[1]);line=L.polyline([pos1,pos2],{color:'red'}).addTo(map);map.fitBounds(L.latLngBounds([pos1,pos2]));const distance=computeDistance(pos1,pos2).toFixed(1);const azimuth=computeAzimuth(pos1,pos2).toFixed(1);document.getElementById('azimuthResult').innerHTML=`Distance: ${distance} km, Azimuth: ${azimuth}°`;document.getElementById('initialInstructions').classList.add('hidden')}
+      function calculateAzimuth(){const locator1=document.getElementById('locator1').value;const locator2=document.getElementById('locator2').value;const instructions=document.getElementById('initialInstructions');if(!locator1||!locator2||locator1.length<4||locator2.length<4){document.getElementById('azimuthResult').innerHTML='Please enter valid Maidenhead locators (4-10 characters).';instructions.classList.remove('hidden');return}
+      precisions[0]=locator1.length;precisions[1]=locator2.length;const pos1=locatorToLatLng(locator1);const pos2=locatorToLatLng(locator2);updateMap(pos1,pos2)}
+      window.onload=initMap
   </script>
 
   <!-- Ko-Fi -->
