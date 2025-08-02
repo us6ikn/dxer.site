@@ -12,8 +12,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>SA5IKN QRB Calculator - Azimuth and Distance Finder</title>
-    <meta name="description" content="SA5IKN QRB Calculator helps radio amateurs calculate azimuth and distance between Maidenhead grid locators. Interactive map with draggable markers.">
+    <title>SA5IKN QRB Calculator - QTH Locator Azimuth and Distance Finder</title>
+    <meta name="description" content="SA5IKN QRB Calculator helps radio amateurs calculate azimuth and distance between two Maidenhead grid locators. It provides an Interactive map with draggable markers for QTH locators.">
     <meta name="keywords" content="QRB calculator, azimuth finder, Maidenhead locator, grid square calculator, azimuth, ham radio, amateur radio, DX, SA5IKN, VHF, UHF, SHF, microwaves">
     <meta name="author" content="SA5IKN">
     <meta name="robots" content="index, follow">
@@ -25,15 +25,15 @@
     <link rel="manifest" href="https://dxer.site/assets/site.webmanifest">
     <link rel="shortcut icon" href="https://dxer.site/assets/favicon.ico">
     <!-- Open Graph Meta -->
-    <meta property="og:title" content="SA5IKN QRB Calculator">
+    <meta property="og:title" content="SA5IKN QRB Calculator - QTH Locator Azimuth and Distance Finder">
     <meta property="og:type" content="website">
     <meta property="og:description" content="SA5IKN QRB Calculator helps radio amateurs calculate azimuth and distance between Maidenhead grid locators. Interactive map with draggable markers.">
     <meta property="og:image" content="https://dxer.site/social/sa5ikn-qrb-calculator.jpg">
     <meta property="og:url" content="https://dxer.site/sa5ikn-qrb-calculator/">
     <!-- Twitter Meta -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="SA5IKN QRB Calculator" />
-    <meta name="twitter:description" content="SA5IKN QRB Calculator helps radio amateurs calculate azimuth and distance between Maidenhead grid locators. Interactive map with draggable markers." />
+    <meta name="twitter:title" content="SA5IKN QRB Calculator - QTH Locator Azimuth and Distance Finder" />
+    <meta name="twitter:description" content="SA5IKN QRB Calculator helps radio amateurs calculate azimuth and distance between two Maidenhead grid locators. It provides an Interactive map with draggable markers for QTH locators." />
     <meta name="twitter:image" content="https://dxer.site/social/sa5ikn-qrb-calculator.jpg" />
     <script type="application/ld+json">
       {
@@ -42,7 +42,7 @@
         "name": "SA5IKN QRB Calculator",
         "url": "https://dxer.site/sa5ikn-qrb-calculator/",
         "author": { "@type": "Person", "name": "SA5IKN" },
-        "description": "SA5IKN QRB Calculator helps radio amateurs calculate azimuth and distance between Maidenhead grid locators. Interactive map with draggable markers.",
+        "description": "SA5IKN QRB Calculator helps radio amateurs calculate azimuth and distance between two Maidenhead grid locators. It provides an Interactive map with draggable markers for QTH locators.",
         "applicationCategory": "Science",
         "operatingSystem": "All",
         "browserRequirements": "Requires JavaScript",
@@ -130,7 +130,7 @@
     <div class="widget">
       <div class="input-row">
         <a href="https://dxer.site" title="Back to Home" style="text-decoration: none; font-size: 1.4em; padding: 0.3em 0.5em;">🏠</a>
-        <input type="text" id="locator1" maxlength="10" placeholder="e.g. JO89TT64di" />
+        <input type="text" id="locator1" maxlength="10" placeholder="e.g. IO91wm34CD" />
         <input type="text" id="locator2" maxlength="10" placeholder="e.g. IO91wm34CD" />
         <button onclick="calculateAzimuth()">Calculate</button>
       </div>
