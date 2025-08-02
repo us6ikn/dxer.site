@@ -988,8 +988,8 @@
                 let gastDeg = Astronomy.SiderealTime(time) * 15;
                 gastDeg = ((gastDeg % 360) + 360) % 360;
 
-                // Try alternative longitude calculation if position is incorrect
-                let lonDeg = gastDeg - raDeg; // Reversed to test
+                // Correct longitude calculation
+                let lonDeg = raDeg - gastDeg;
                 lonDeg = ((lonDeg + 180) % 360) - 180; // Normalize to [-180, 180]
 
                 const lat = decDeg;
@@ -1025,18 +1025,19 @@
                     title: `Moon Sublunar Point (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
                 }).addTo(map);
 
-                // Add footprint circle
+                // Add footprint circle with enhanced visibility
                 footprintCircle = L.circle([lat, lon], {
                     radius: footprintRadius,
-                    color: '#0000FF',
-                    fillColor: '#0088FF',
-                    fillOpacity: 0.3,
+                    color: '#FF0000', // Red for debugging
+                    fillColor: '#FF0000',
+                    fillOpacity: 0.5,
                     weight: 2
                 }).addTo(map);
+                footprintCircle.bringToFront(); // Ensure circle is on top
 
                 // Center map on sublunar point and set zoom
                 map.panTo([lat, lon]);
-                map.setZoom(2); // Zoom out to view entire footprint
+                map.setZoom(3); // Slightly closer zoom for better visibility
 
             } catch (error) {
                 console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
