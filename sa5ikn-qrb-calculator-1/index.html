@@ -142,14 +142,14 @@
           <li><span style="color:#43a047; font-weight:bold;">Green marker</span>: DX station locator</li>
         </ul>
         <p>Once both locators are entered, the map will show the azimuth, distance, and a line connecting the two markers.</p>
-        <p>You can also <strong>drag either marker</strong> directly on the map. The corresponding locator input will update dynamically.</p>
+        <p>You can also <strong>drag either marker</strong> directly on the map. The corresponding locator input will update to a 10-character locator.</p>
       </div>
       <div id="azimuthResult"></div>
     </div>
   </div>
 
   <script>
-    let map, markers = [], line;
+    let map, markers = [], line, precisions = [6, 6]; // Track precision for initial input locators
 
     function setMapHeight() {
       const vh = window.innerHeight;
@@ -276,13 +276,15 @@
 
       marker.on('dragend', () => {
         const pos = marker.getLatLng();
-        // Use the stored precision for this marker
-        document.getElementById(`locator${index + 1}`).value = latLngToLocator(pos.lat, pos.lng, precision);
-        // Update map with current marker positions, preserving precisions
+        // Always use 10-character precision when updating input after dragging
+        document.getElementById(`locator${index + 1}`).value = latLngToLocator(pos.lat, pos.lng, 10);
+        // Update precisions array to reflect new 10-character input
+        precisions[index] = 10;
+        // Update map with current marker positions
         const pos1 = markers[0] ? markers[0].getLatLng() : locatorToLatLng(document.getElementById('locator1').value);
         const pos2 = markers[1] ? markers[1].getLatLng() : locatorToLatLng(document.getElementById('locator2').value);
-        pos1.precision = document.getElementById('locator1').value.length || 6;
-        pos2.precision = document.getElementById('locator2').value.length || 6;
+        pos1.precision = precisions[0];
+        pos2.precision = precisions[1];
         updateMap(pos1, pos2);
       });
 
@@ -294,12 +296,12 @@
       markers = [];
       if (line) map.removeLayer(line);
 
-      // Use precision from input locators or default to 6
-      const precision1 = pos1.precision || document.getElementById('locator1').value.length || 6;
-      const precision2 = pos2.precision || document.getElementById('locator2').value.length || 6;
+      // Use precision from input locators or default to 6 for initial placement
+      precisions[0] = document.getElementById('locator1').value.length || 6;
+      precisions[1] = document.getElementById('locator2').value.length || 6;
 
-      addDraggableMarker(pos1, '#1e88e5', 0, precision1);
-      addDraggableMarker(pos2, '#43a047', 1, precision2);
+      addDraggableMarker(pos1, '#1e88e5', 0, precisions[0]);
+      addDraggableMarker(pos2, '#43a047', 1, precisions[1]);
 
       line = L.polyline([pos1, pos2], { color: 'red' }).addTo(map);
       map.fitBounds(L.latLngBounds([pos1, pos2]));
@@ -320,6 +322,10 @@
         instructions.classList.remove('hidden');
         return;
       }
+
+      // Store precisions from input fields for initial placement
+      precisions[0] = locator1.length;
+      precisions[1] = locator2.length;
 
       const pos1 = locatorToLatLng(locator1);
       const pos2 = locatorToLatLng(locator2);
