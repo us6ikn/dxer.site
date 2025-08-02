@@ -130,7 +130,7 @@
     <div class="widget">
       <div class="input-row">
         <a href="https://dxer.site" title="Back to Home" style="text-decoration: none; font-size: 1.4em; padding: 0.3em 0.5em;">🏠</a>
-        <input type="text" id="locator1" maxlength="10" placeholder="e.g. JN58td12AB" />
+        <input type="text" id="locator1" maxlength="10" placeholder="e.g. JO89TT64di" />
         <input type="text" id="locator2" maxlength="10" placeholder="e.g. IO91wm34CD" />
         <button onclick="calculateAzimuth()">Calculate</button>
       </div>
@@ -276,8 +276,14 @@
 
       marker.on('dragend', () => {
         const pos = marker.getLatLng();
+        // Use the stored precision for this marker
         document.getElementById(`locator${index + 1}`).value = latLngToLocator(pos.lat, pos.lng, precision);
-        updateMap(markers[0].getLatLng(), markers[1].getLatLng());
+        // Update map with current marker positions, preserving precisions
+        const pos1 = markers[0] ? markers[0].getLatLng() : locatorToLatLng(document.getElementById('locator1').value);
+        const pos2 = markers[1] ? markers[1].getLatLng() : locatorToLatLng(document.getElementById('locator2').value);
+        pos1.precision = document.getElementById('locator1').value.length || 6;
+        pos2.precision = document.getElementById('locator2').value.length || 6;
+        updateMap(pos1, pos2);
       });
 
       markers[index] = marker;
@@ -288,9 +294,9 @@
       markers = [];
       if (line) map.removeLayer(line);
 
-      // Use precision from input locators, default to 6 if not available
-      const precision1 = pos1.precision || 6;
-      const precision2 = pos2.precision || 6;
+      // Use precision from input locators or default to 6
+      const precision1 = pos1.precision || document.getElementById('locator1').value.length || 6;
+      const precision2 = pos2.precision || document.getElementById('locator2').value.length || 6;
 
       addDraggableMarker(pos1, '#1e88e5', 0, precision1);
       addDraggableMarker(pos2, '#43a047', 1, precision2);
