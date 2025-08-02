@@ -186,7 +186,6 @@
 </script>
 
 <script>
-  let map;
   let markers = [];
   let line;
   let elevator;
@@ -276,22 +275,6 @@
 
       return locator.slice(0, precision);
     }
-
-  function computeAzimuth(from, to) {
-    const lat1 = toRadians(from.lat);
-    const lat2 = toRadians(to.lat);
-    const dLon = toRadians(to.lng - from.lng);
-    const y = Math.sin(dLon) * Math.cos(lat2);
-    const x = Math.cos(lat1) * Math.sin(lat2) -
-              Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
-    let brng = Math.atan2(y, x);
-    brng = (toDegrees(brng) + 360) % 360;
-    return brng.toFixed(2);
-  }
-
-  function toRadians(deg) {
-    return deg * Math.PI / 180;
-  }
 
   function toDegrees(rad) {
     return rad * 180 / Math.PI;
