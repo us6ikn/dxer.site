@@ -90,34 +90,23 @@
         gap: 10px;
         margin-bottom: 10px;
       }
-      .locator-input {
+      .input-row input[type="text"] {
         flex: 1;
         min-width: 60px;
         max-width: 160px;
         padding: 0.4em;
-        border: 2px solid;
-        background-color: #fff;
-        font-family: Arial, sans-serif;
-        font-size: 1em;
-        outline: none;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .locator-input:focus {
-        outline: 2px solid #000;
-      }
-      #locator1 {
-        border-color: #1e88e5;
-        background-color: #e3f2fd;
-      }
-      #locator2 {
-        border-color: #43a047;
-        background-color: #e8f5e9;
       }
       .input-row button {
         padding: 0.4em 1em;
         font-weight: bold;
+      }
+      #locator1 {
+        border: 2px solid #1e88e5;
+        background-color: #e3f2fd;
+      }
+      #locator2 {
+        border: 2px solid #43a047;
+        background-color: #e8f5e9;
       }
       #azimuthResult {
         margin-top: 0.5rem;
@@ -133,10 +122,6 @@
       #initialInstructions.hidden {
         display: none;
       }
-      .subgrid {
-        font-size: 0.8em;
-        color: #666;
-      }
     </style>
 </head>
 <body>
@@ -145,8 +130,8 @@
     <div class="widget">
       <div class="input-row">
         <a href="https://dxer.site" title="Back to Home" style="text-decoration: none; font-size: 1.4em; padding: 0.3em 0.5em;">🏠</a>
-        <div contenteditable="true" id="locator1" class="locator-input" data-placeholder="e.g. JO89TT64di"></div>
-        <div contenteditable="true" id="locator2" class="locator-input" data-placeholder="e.g. IO91wm34CD"></div>
+        <input type="text" id="locator1" maxlength="10" placeholder="e.g. JO89TT64di" />
+        <input type="text" id="locator2" maxlength="10" placeholder="e.g. IO91wm34CD" />
         <button onclick="calculateAzimuth()">Calculate</button>
       </div>
       <div id="initialInstructions">
@@ -157,7 +142,7 @@
           <li><span style="color:#43a047; font-weight:bold;">Green marker</span>: DX station locator</li>
         </ul>
         <p>Once both locators are entered, the map will show the azimuth, distance, and a line connecting the two markers.</p>
-        <p>You can also <strong>drag either marker</strong> directly on the map. The corresponding locator input will update to a 10-character locator, with characters beyond the first 6 shown smaller.</p>
+        <p>You can also <strong>drag either marker</strong> directly on the map. The corresponding locator input will update to a 10-character locator.</p>
       </div>
       <div id="azimuthResult"></div>
     </div>
@@ -172,41 +157,6 @@
     }
     window.addEventListener('load', setMapHeight);
     window.addEventListener('resize', setMapHeight);
-
-    // Format locator text: first 6 chars normal, beyond 6 smaller and lighter
-    function formatLocator(locator) {
-      if (locator.length <= 6) return locator;
-      return `${locator.slice(0, 6)}<span class="subgrid">${locator.slice(6)}</span>`;
-    }
-
-    // Get plain text from contenteditable div
-    function getPlainText(element) {
-      return element.textContent.replace(/[^A-Za-z0-9]/g, '');
-    }
-
-    // Set contenteditable div with formatted locator
-    function setLocatorInput(elementId, locator) {
-      document.getElementById(elementId).innerHTML = formatLocator(locator);
-    }
-
-    // Placeholder handling for contenteditable
-    document.querySelectorAll('.locator-input').forEach(input => {
-      input.addEventListener('focus', function() {
-        if (!this.textContent.trim()) {
-          this.innerHTML = '';
-        }
-      });
-      input.addEventListener('blur', function() {
-        if (!this.textContent.trim()) {
-          this.innerHTML = `<span style="color: #999;">${this.getAttribute('data-placeholder')}</span>`;
-        }
-      });
-      input.addEventListener('input', function() {
-        // Ensure input is uppercase and limited to 10 characters
-        const plainText = getPlainText(this).toUpperCase().slice(0, 10);
-        this.innerHTML = formatLocator(plainText);
-      });
-    });
 
     function locatorToLatLng(locator) {
       locator = locator.toUpperCase();
@@ -327,12 +277,12 @@
       marker.on('dragend', () => {
         const pos = marker.getLatLng();
         // Always use 10-character precision when updating input after dragging
-        setLocatorInput(`locator${index + 1}`, latLngToLocator(pos.lat, pos.lng, 10));
+        document.getElementById(`locator${index + 1}`).value = latLngToLocator(pos.lat, pos.lng, 10);
         // Update precisions array to reflect new 10-character input
         precisions[index] = 10;
         // Update map with current marker positions
-        const pos1 = markers[0] ? markers[0].getLatLng() : locatorToLatLng(getPlainText(document.getElementById('locator1')));
-        const pos2 = markers[1] ? markers[1].getLatLng() : locatorToLatLng(getPlainText(document.getElementById('locator2')));
+        const pos1 = markers[0] ? markers[0].getLatLng() : locatorToLatLng(document.getElementById('locator1').value);
+        const pos2 = markers[1] ? markers[1].getLatLng() : locatorToLatLng(document.getElementById('locator2').value);
         pos1.precision = precisions[0];
         pos2.precision = precisions[1];
         updateMap(pos1, pos2);
@@ -347,8 +297,8 @@
       if (line) map.removeLayer(line);
 
       // Use precision from input locators or default to 6 for initial placement
-      precisions[0] = getPlainText(document.getElementById('locator1')).length || 6;
-      precisions[1] = getPlainText(document.getElementById('locator2')).length || 6;
+      precisions[0] = document.getElementById('locator1').value.length || 6;
+      precisions[1] = document.getElementById('locator2').value.length || 6;
 
       addDraggableMarker(pos1, '#1e88e5', 0, precisions[0]);
       addDraggableMarker(pos2, '#43a047', 1, precisions[1]);
@@ -363,8 +313,8 @@
     }
 
     function calculateAzimuth() {
-      const locator1 = getPlainText(document.getElementById('locator1'));
-      const locator2 = getPlainText(document.getElementById('locator2'));
+      const locator1 = document.getElementById('locator1').value;
+      const locator2 = document.getElementById('locator2').value;
 
       const instructions = document.getElementById('initialInstructions');
       if (!locator1 || !locator2 || locator1.length < 4 || locator2.length < 4) {
@@ -382,13 +332,7 @@
       updateMap(pos1, pos2);
     }
 
-    window.onload = () => {
-      initMap();
-      // Initialize placeholders
-      document.querySelectorAll('.locator-input').forEach(input => {
-        input.innerHTML = `<span style="color: #999;">${input.getAttribute('data-placeholder')}</span>`;
-      });
-    };
+    window.onload = initMap;
   </script>
 
   <!-- Ko-Fi -->
