@@ -791,10 +791,11 @@
                 // Initialize Leaflet map
                 map = L.map('map', {
                     zoom: 2,
-                    center: [0, 0], // Latitude, Longitude
-                    zoomControl: false, // Disable default zoom control for custom handling
-                    scrollWheelZoom: true, // Enable scroll wheel zoom (similar to gestureHandling: 'greedy')
-                    attributionControl: true
+                    center: [0, 0],
+                    zoomControl: false,
+                    scrollWheelZoom: true,
+                    attributionControl: true,
+                    worldCopyJump: true // Required for greatCircle wrapping
                 });
 
                 // Add OpenStreetMap tile layer (or another provider)
@@ -1048,48 +1049,6 @@
             } catch (error) {
                 console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
             }
-        }
-
-        // Helper function to generate geodesic circle points
-        function generateGeodesicCircle(centerLat, centerLon, radiusKm) {
-            const points = [];
-            const numPoints = 360; // Number of points to approximate the circle
-            const earthRadius = 6371; // km
-            const angularRadius = radiusKm / earthRadius; // Angular radius in radians
-
-            for (let i = 0; i < numPoints; i++) {
-                const bearing = (i * 360) / numPoints; // Bearing in degrees
-                const point = destinationPoint(centerLat, centerLon, angularRadius, bearing);
-                points.push([point.lon, point.lat]); // Leaflet expects [lon, lat]
-            }
-            points.push(points[0]); // Close the polygon
-            return points;
-        }
-
-        // Calculate destination point given a starting point, angular distance, and bearing
-        function destinationPoint(lat, lon, angularDist, bearing) {
-            const latRad = lat * Math.PI / 180;
-            const lonRad = lon * Math.PI / 180;
-            const bearingRad = bearing * Math.PI / 180;
-
-            const sinLat = Math.sin(latRad);
-            const cosLat = Math.cos(latRad);
-            const cosDist = Math.cos(angularDist);
-            const sinDist = Math.sin(angularDist);
-
-            const newLatRad = Math.asin(sinLat * cosDist + cosLat * sinDist * Math.cos(bearingRad));
-            const newLonRad = lonRad + Math.atan2(
-                Math.sin(bearingRad) * sinDist * cosLat,
-                cosDist - sinLat * Math.sin(newLatRad)
-            );
-
-            let newLon = newLonRad * 180 / Math.PI;
-            newLon = ((newLon + 180) % 360) - 180; // Normalize to [-180, 180]
-
-            return {
-                lat: newLatRad * 180 / Math.PI,
-                lon: newLon
-            };
         }
 
         function calculateMoonDataForMonth(dateStr) {
