@@ -670,15 +670,29 @@
             let lon = 0;
             let dxLat = 0;
             let dxLon = 0;
+            let footprintLayerGroup;
             let moonMarker;
             let footprintCircle;
             let currentPopup = null;
             let map;
-            let markers = []; // Array to store station markers for easier management
+            let markers = [];
 
             const MOON_RADIUS = 1.7374e6;
             const SPEED_OF_LIGHT = 299792458;
             const FREQUENCY_HZ = 10.368e9;
+            
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+        const debouncedUpdateChart = debounce(updateChart, 100);
 
         function computeLibrationForDay(locator, dateStr, type) {
             if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
@@ -788,28 +802,29 @@
         }
         
         function initMap() {
-                // Initialize Leaflet map
-                map = L.map('map', {
-                    zoom: 2,
-                    center: [0, 0],
-                    zoomControl: false,
-                    scrollWheelZoom: true,
-                    attributionControl: true,
-                    worldCopyJump: true // Required for greatCircle wrapping
-                });
+            map = L.map('map', {
+                zoom: 2,
+                center: [0, 0],
+                zoomControl: false,
+                scrollWheelZoom: true,
+                attributionControl: true,
+                worldCopyJump: true
+            });
 
-                // Add OpenStreetMap tile layer (or another provider)
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                    maxZoom: 18,
-                    tileSize: 256
-                }).addTo(map);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 18,
+                tileSize: 256
+            }).addTo(map);
 
-                // Fetch and add station markers
-                fetch('stn_10GHz.json')
-                    .then(response => response.json())
-                    .then(data => {
-                        data.forEach(station => {
+            // Initialize footprint layer group
+            footprintLayerGroup = L.layerGroup().addTo(map);
+
+            // Fetch and add station markers
+            fetch('stn_10GHz.json')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(station => {
                             const {
                                 Call: callsign,
                                 Locator: locator,
@@ -990,18 +1005,17 @@
                 let gastDeg = Astronomy.SiderealTime(time) * 15;
                 gastDeg = ((gastDeg % 360) + 360) % 360;
 
-                // Correct longitude calculation
                 let lonDeg = raDeg - gastDeg;
-                lonDeg = ((lonDeg + 180) % 360) - 180; // Normalize to [-180, 180]
+                lonDeg = ((lonDeg + 180) % 360) - 180;
 
                 const lat = decDeg;
                 const lon = lonDeg;
 
-                const earthRadius = 6371; // km
-                const D_moon = libration.dist_km; // Moon distance in km
+                const earthRadius = 6371;
+                const D_moon = libration.dist_km;
                 const cosTheta = earthRadius / (earthRadius + D_moon);
-                const theta_rad = Math.acos(cosTheta); // Angular radius to horizon
-                const footprintRadius = earthRadius * theta_rad * 1000; // Surface distance in meters
+                const theta_rad = Math.acos(cosTheta);
+                const footprintRadius = earthRadius * theta_rad * 1000;
 
                 if (isNaN(lat) || isNaN(lon) || isNaN(footprintRadius)) {
                     console.warn(`Invalid sublunar point data for ${utcTimeString}: lat=${lat}, lon=${lon}, radius=${footprintRadius}`);
@@ -1011,14 +1025,14 @@
                 console.log(`Sublunar point: lat=${lat.toFixed(2)}, lon=${lon.toFixed(2)}, RA=${raHours.toFixed(2)}h, Dec=${decDeg.toFixed(2)}°, GAST=${(gastDeg/15).toFixed(2)}h`);
                 console.log(`Moon distance: ${D_moon.toFixed(2)} km, theta_rad: ${theta_rad.toFixed(4)} radians, footprintRadius: ${footprintRadius.toFixed(2)} meters`);
 
-                // Remove existing moon marker and circle
+                // Remove existing moon marker and clear footprint layer group
                 if (moonMarker) {
                     moonMarker.remove();
-                    moonMarker = null; // Reset to avoid stale references
+                    moonMarker = null;
                 }
-                if (footprintCircle) {
-                    footprintCircle.remove();
-                    footprintCircle = null; // Reset to avoid stale references
+                if (footprintLayerGroup) {
+                    footprintLayerGroup.clearLayers();
+                    console.log('Cleared footprintLayerGroup');
                 }
 
                 // Add new moon marker
@@ -1033,40 +1047,41 @@
                     title: `Moon Sublunar Point (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
                 }).addTo(map);
 
-                // Use Leaflet.greatCircle to render the footprint
+                // Create and add new footprint to layer group
                 footprintCircle = L.greatCircle([lat, lon], {
-                    radius: footprintRadius, // Radius in meters
-                    color: '#0000FF', // Blue stroke
+                    radius: footprintRadius,
+                    color: '#0000FF',
                     fillColor: '#0088FF',
                     fillOpacity: 0.3,
                     weight: 2,
-                    wrapElements: true, // Enable wrapping around the globe
-                    clipLat: 65, // Render as polygon near poles
-                    degStep: 0.5, // Smoothness of polygon rendering
-                    maxCopies: -1 // Automatic number of wrapped copies
-                }).addTo(map);
+                    wrapElements: true,
+                    clipLat: 65,
+                    degStep: 0.5,
+                    maxCopies: -1
+                });
 
-                // Ensure footprintCircle is valid before calling bringToFront
                 if (footprintCircle) {
-                    footprintCircle.bringToFront(); // Ensure circle is on top
+                    footprintLayerGroup.addLayer(footprintCircle);
+                    footprintCircle.bringToFront();
+                    console.log(`Added new footprintCircle at lat=${lat}, lon=${lon}, radius=${footprintRadius}`);
                 } else {
                     console.warn(`Failed to create footprintCircle for ${utcTimeString}`);
                 }
 
                 // Center map on sublunar point and set zoom
                 map.panTo([lat, lon]);
-                map.setZoom(2); // Global view to see full footprint
+                map.setZoom(2);
 
             } catch (error) {
                 console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
-                // Ensure footprintCircle and moonMarker are cleared on error
+                // Clear layers on error
                 if (moonMarker) {
                     moonMarker.remove();
                     moonMarker = null;
                 }
-                if (footprintCircle) {
-                    footprintCircle.remove();
-                    footprintCircle = null;
+                if (footprintLayerGroup) {
+                    footprintLayerGroup.clearLayers();
+                    console.log('Cleared footprintLayerGroup due to error');
                 }
             }
         }
@@ -2117,164 +2132,157 @@
                                                         return annotations;
                                                     }
 
-        document.getElementById("hour").addEventListener("input", () => {
-            hourIndex = parseInt(document.getElementById("hour").value);
-            const hour = Math.floor(hourIndex / 2);
-            const minutes = (hourIndex % 2) * 30;
-            document.getElementById("hour-value").textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}`;
-            updateChart(hourIndex);
-        });
+                                                    document.getElementById("hour").addEventListener("input", () => {
+                                                        hourIndex = parseInt(document.getElementById("hour").value);
+                                                        const hour = Math.floor(hourIndex / 2);
+                                                        const minutes = (hourIndex % 2) * 30;
+                                                        document.getElementById("hour-value").textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${minutes === 0 ? '00' : '30'}`;
+                                                        debouncedUpdateChart(hourIndex);
+                                                    });
 
-        function adjustDate(days) {
-            const dateInput = document.getElementById("date");
-            const currentDate = new Date(dateInput.value);
-            currentDate.setDate(currentDate.getDate() + days);
-            dateInput.valueAsDate = currentDate;
-            updateChart(hourIndex);
-        }
+                                                    function adjustDate(days) {
+                                                        const dateInput = document.getElementById("date");
+                                                        const currentDate = new Date(dateInput.value);
+                                                        currentDate.setDate(currentDate.getDate() + days);
+                                                        dateInput.valueAsDate = currentDate;
+                                                        // Trigger date change event manually to ensure consistency
+                                                        const changeEvent = new Event('change', { bubbles: true });
+                                                        dateInput.dispatchEvent(changeEvent);
+                                                    }
 
-        document.getElementById("prevDay").addEventListener("click", () => {
-            adjustDate(-1);
-        });
+                                                    document.getElementById("prevDay").addEventListener("click", () => {
+                                                        adjustDate(-1);
+                                                    });
 
-        document.getElementById("nextDay").addEventListener("click", () => {
-            adjustDate(1);
-        });
+                                                    document.getElementById("nextDay").addEventListener("click", () => {
+                                                        adjustDate(1);
+                                                    });
 
-        document.getElementById("date").addEventListener("change", () => {
-            const qthInput = document.getElementById("qth").value.trim().toUpperCase();
-            const dxInput = document.getElementById("dx").value.trim().toUpperCase();
-            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
-                computeLibrationForDay(qthInput, document.getElementById("date").value, 'qth');
-            }
-            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
-                computeLibrationForDay(dxInput, document.getElementById("date").value, 'dx');
-            }
-            updateChart(hourIndex);
-        });
+                                                    document.getElementById("date").addEventListener("change", () => {
+                                                        const qthInput = document.getElementById("qth").value.trim().toUpperCase();
+                                                        const dxInput = document.getElementById("dx").value.trim().toUpperCase();
+                                                        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
+                                                            computeLibrationForDay(qthInput, document.getElementById("date").value, 'qth');
+                                                        }
+                                                        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
+                                                            computeLibrationForDay(dxInput, document.getElementById("date").value, 'dx');
+                                                        }
+                                                        debouncedUpdateChart(hourIndex);
+                                                    });
 
+                                                    qthInput.addEventListener("input", () => {
+                                                        const locator = qthInput.value.trim().toUpperCase();
+                                                        const chartLabel = document.getElementById('chartLabel');
+                                                        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
+                                                            chartLabel.innerHTML = '<span class="metric-locator">Computing...</span>';
+                                                            try {
+                                                                computeLibrationForDay(locator, document.getElementById("date").value, 'qth');
+                                                                if (rawData.length === 0) {
+                                                                    console.warn(`No data computed for QTH ${locator}`);
+                                                                    document.getElementById("chartWrapper").style.display = "none";
+                                                                    if (chart) {
+                                                                        chart.destroy();
+                                                                        chart = null;
+                                                                    }
+                                                                    chartLabel.innerHTML = '<span class="metric-locator">No data for QTH</span>';
+                                                                } else {
+                                                                    debouncedUpdateChart(hourIndex);
+                                                                }
+                                                            } catch (e) {
+                                                                console.error(`Error computing libration for QTH ${locator}: ${e.message}`);
+                                                                document.getElementById("chartWrapper").style.display = "none";
+                                                                if (chart) {
+                                                                    chart.destroy();
+                                                                    chart = null;
+                                                                }
+                                                                chartLabel.innerHTML = '<span class="metric-locator">Error computing QTH data</span>';
+                                                            }
+                                                        } else {
+                                                            document.getElementById("chartWrapper").style.display = "none";
+                                                            if (chart) {
+                                                                chart.destroy();
+                                                                chart = null;
+                                                            }
+                                                            chartLabel.innerHTML = '<span class="metric-locator">Enter valid QTH</span>';
+                                                        }
+                                                    });
+
+                                                    dxInput.addEventListener("input", () => {
+                                                        const locator = dxInput.value.trim().toUpperCase();
+                                                        const dxChartLabel = document.getElementById('dxchartLabel');
+                                                        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
+                                                            dxChartLabel.innerHTML = '<span class="metric-locator">Computing...</span>';
+                                                            try {
+                                                                ({ lat: dxLat, lon: dxLon } = qthToLatLon(locator));
+                                                                computeLibrationForDay(locator, document.getElementById("date").value, 'dx');
+                                                                if (dxRawData.length === 0) {
+                                                                    console.warn(`No data computed for DX ${locator}`);
+                                                                    document.getElementById("dxChartWrapper").style.display = "none";
+                                                                    if (dxChart) {
+                                                                        dxChart.destroy();
+                                                                        dxChart = null;
+                                                                    }
+                                                                    dxChartLabel.innerHTML = '<span class="metric-locator">No data for DX</span>';
+                                                                } else {
+                                                                    debouncedUpdateChart(hourIndex);
+                                                                }
+                                                            } catch (e) {
+                                                                console.error(`Error computing libration for DX ${locator}: ${e.message}`);
+                                                                document.getElementById("dxChartWrapper").style.display = "none";
+                                                                if (dxChart) {
+                                                                    dxChart.destroy();
+                                                                    dxChart = null;
+                                                                }
+                                                                dxChartLabel.innerHTML = '<span class="metric-locator">Error computing DX data</span>';
+                                                            }
+                                                        } else {
+                                                            document.getElementById("dxChartWrapper").style.display = "none";
+                                                            if (dxChart) {
+                                                                dxChart.destroy();
+                                                                dxChart = null;
+                                                            }
+                                                            dxChartLabel.innerHTML = '<span class="metric-locator">Enter valid DX</span>';
+                                                        }
+                                                    });
                                                     window.onload = () => {
-                                                            const now = new Date();
-                                                            const utcHours = now.getUTCHours();
-                                                            const utcMinutes = now.getUTCMinutes();
+                                                        const now = new Date();
+                                                        const utcHours = now.getUTCHours();
+                                                        const utcMinutes = now.getUTCMinutes();
 
-                                                            const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+                                                        const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+                                                        document.getElementById("date").valueAsDate = utcDate;
+
+                                                        let roundedHour = utcHours;
+                                                        let roundedMinutes = utcMinutes >= 15 && utcMinutes < 45 ? 30 : 0;
+                                                        if (utcMinutes >= 45) {
+                                                            roundedHour += 1;
+                                                            roundedMinutes = 0;
+                                                        }
+                                                        if (roundedHour >= 24) {
+                                                            roundedHour -= 24;
+                                                            utcDate.setUTCDate(utcDate.getUTCDate() + 1);
                                                             document.getElementById("date").valueAsDate = utcDate;
+                                                        }
 
-                                                            let roundedHour = utcHours;
-                                                            let roundedMinutes = utcMinutes >= 15 && utcMinutes < 45 ? 30 : 0;
-                                                            if (utcMinutes >= 45) {
-                                                                roundedHour += 1;
-                                                                roundedMinutes = 0;
-                                                            }
-                                                            if (roundedHour >= 24) {
-                                                                roundedHour -= 24;
-                                                                utcDate.setUTCDate(utcDate.getUTCDate() + 1);
-                                                                document.getElementById("date").valueAsDate = utcDate;
-                                                            }
+                                                        hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
+                                                        document.getElementById("hour").value = hourIndex;
+                                                        document.getElementById("hour-value").textContent =
+                                                            `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
 
-                                                            hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
-                                                            document.getElementById("hour").value = hourIndex;
-                                                            document.getElementById("hour-value").textContent =
-                                                                `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
+                                                        document.getElementById("showControlsPanel").classList.remove("visible");
 
-                                                            document.getElementById("showControlsPanel").classList.remove("visible");
+                                                        const qthInput = document.getElementById("qth").value.trim().toUpperCase();
+                                                        const dxInput = document.getElementById("dx").value.trim().toUpperCase();
+                                                        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
+                                                            computeLibrationForDay(qthInput, document.getElementById("date").value, 'qth');
+                                                        }
+                                                        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
+                                                            computeLibrationForDay(dxInput, document.getElementById("date").value, 'dx');
+                                                        }
 
-                                                            const qthInput = document.getElementById("qth").value.trim().toUpperCase();
-                                                            const dxInput = document.getElementById("dx").value.trim().toUpperCase();
-                                                            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
-                                                                computeLibrationForDay(qthInput, document.getElementById("date").value, 'qth');
-                                                            }
-                                                            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
-                                                                computeLibrationForDay(dxInput, document.getElementById("date").value, 'dx');
-                                                            }
-
-                                                            initMap(); // Call Leaflet map initialization
-                                                            updateMap();
-                                                            updateMoonChart();
-                                                            updateChart(hourIndex);
-                                                        };
-
-
-        const qthInput = document.getElementById("qth");
-        const dxInput = document.getElementById("dx");
-
-                                                                    qthInput.addEventListener("input", () => {
-                                                                        const locator = qthInput.value.trim().toUpperCase();
-                                                                        const chartLabel = document.getElementById('chartLabel');
-                                                                        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-                                                                            chartLabel.innerHTML = '<span class="metric-locator">Computing...</span>';
-                                                                            try {
-                                                                                computeLibrationForDay(locator, document.getElementById("date").value, 'qth');
-                                                                                if (rawData.length === 0) {
-                                                                                    console.warn(`No data computed for QTH ${locator}`);
-                                                                                    document.getElementById("chartWrapper").style.display = "none";
-                                                                                    if (chart) {
-                                                                                        chart.destroy();
-                                                                                        chart = null;
-                                                                                    }
-                                                                                    chartLabel.innerHTML = '<span class="metric-locator">No data for QTH</span>';
-                                                                                } else {
-                                                                                    setTimeout(() => {
-                                                                                        updateChart(hourIndex);
-                                                                                    }, 0);
-                                                                                }
-                                                                            } catch (e) {
-                                                                                console.error(`Error computing libration for QTH ${locator}: ${e.message}`);
-                                                                                document.getElementById("chartWrapper").style.display = "none";
-                                                                                if (chart) {
-                                                                                    chart.destroy();
-                                                                                    chart = null;
-                                                                                }
-                                                                                chartLabel.innerHTML = '<span class="metric-locator">Error computing QTH data</span>';
-                                                                            }
-                                                                        } else {
-                                                                            document.getElementById("chartWrapper").style.display = "none";
-                                                                            if (chart) {
-                                                                                chart.destroy();
-                                                                                chart = null;
-                                                                            }
-                                                                            chartLabel.innerHTML = '<span class="metric-locator">Enter valid QTH</span>';
-                                                                        }
-                                                                    });
-
-                                                                    dxInput.addEventListener("input", () => {
-                                                                        const locator = dxInput.value.trim().toUpperCase();
-                                                                        const dxChartLabel = document.getElementById('dxchartLabel');
-                                                                        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-                                                                            dxChartLabel.innerHTML = '<span class="metric-locator">Computing...</span>';
-                                                                            try {
-                                                                                ({ lat: dxLat, lon: dxLon } = qthToLatLon(locator));
-                                                                                computeLibrationForDay(locator, document.getElementById("date").value, 'dx');
-                                                                                if (dxRawData.length === 0) {
-                                                                                    console.warn(`No data computed for DX ${locator}`);
-                                                                                    document.getElementById("dxChartWrapper").style.display = "none";
-                                                                                    if (dxChart) {
-                                                                                        dxChart.destroy();
-                                                                                        dxChart = null;
-                                                                                    }
-                                                                                    dxChartLabel.innerHTML = '<span class="metric-locator">No data for DX</span>';
-                                                                                } else {
-                                                                                    updateChart(hourIndex);
-                                                                                }
-                                                                            } catch (e) {
-                                                                                console.error(`Error computing libration for DX ${locator}: ${e.message}`);
-                                                                                document.getElementById("dxChartWrapper").style.display = "none";
-                                                                                if (dxChart) {
-                                                                                    dxChart.destroy();
-                                                                                    dxChart = null;
-                                                                                }
-                                                                                dxChartLabel.innerHTML = '<span class="metric-locator">Error computing DX data</span>';
-                                                                            }
-                                                                        } else {
-                                                                            document.getElementById("dxChartWrapper").style.display = "none";
-                                                                            if (dxChart) {
-                                                                                dxChart.destroy();
-                                                                                dxChart = null;
-                                                                            }
-                                                                            document.getElementById('dxchartLabel').innerHTML = '<span class="metric-locator">Enter valid DX</span>';
-                                                                        }
-                                                                    });
+                                                        initMap(); // Call Leaflet map initialization
+                                                        debouncedUpdateChart(hourIndex);
+                                                    };
 
         function qthToLatLon(locator) {
             if (!/^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator)) {
