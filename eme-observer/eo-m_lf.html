@@ -970,8 +970,6 @@
                     .catch(() => { /* Handle error silently */ });
             }
 
-        let mapUpdating = false; // Add this flag at the top of your script, just after other global variables
-
         function updateMap() {
             if (mapUpdating) {
                 console.log('updateMap skipped: previous call still processing');
