@@ -990,7 +990,6 @@
                 let gastDeg = Astronomy.SiderealTime(time) * 15;
                 gastDeg = ((gastDeg % 360) + 360) % 360;
 
-                // Correct longitude calculation
                 let lonDeg = raDeg - gastDeg;
                 lonDeg = ((lonDeg + 180) % 360) - 180; // Normalize to [-180, 180]
 
@@ -1011,14 +1010,14 @@
                 console.log(`Sublunar point: lat=${lat.toFixed(2)}, lon=${lon.toFixed(2)}, RA=${raHours.toFixed(2)}h, Dec=${decDeg.toFixed(2)}°, GAST=${(gastDeg/15).toFixed(2)}h`);
                 console.log(`Moon distance: ${D_moon.toFixed(2)} km, theta_rad: ${theta_rad.toFixed(4)} radians, footprintRadius: ${footprintRadius.toFixed(2)} meters`);
 
-                // Remove existing moon marker and circle
-                if (moonMarker) {
-                    moonMarker.remove();
-                    moonMarker = null; // Reset to avoid stale references
+                // Remove existing moon marker and footprint circle
+                if (moonMarker && map.hasLayer(moonMarker)) {
+                    map.removeLayer(moonMarker);
+                    moonMarker = null;
                 }
-                if (footprintCircle) {
-                    footprintCircle.remove();
-                    footprintCircle = null; // Reset to avoid stale references
+                if (footprintCircle && map.hasLayer(footprintCircle)) {
+                    map.removeLayer(footprintCircle);
+                    footprintCircle = null;
                 }
 
                 // Add new moon marker
@@ -1033,42 +1032,52 @@
                     title: `Moon Sublunar Point (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
                 }).addTo(map);
 
-                // Use Leaflet.greatCircle to render the footprint
-                footprintCircle = L.greatCircle([lat, lon], {
-                    radius: footprintRadius, // Radius in meters
-                    color: '#0000FF', // Blue stroke
-                    fillColor: '#0088FF',
-                    fillOpacity: 0.3,
-                    weight: 2,
-                    wrapElements: true, // Enable wrapping around the globe
-                    clipLat: 65, // Render as polygon near poles
-                    degStep: 0.5, // Smoothness of polygon rendering
-                    maxCopies: -1 // Automatic number of wrapped copies
-                }).addTo(map);
-                
-                console.log('footprintCircle:', footprintCircle);
-                console.log('Is on map:', footprintCircle._map ? true : false);
+                // Validate footprintRadius
+                if (footprintRadius > 0 && footprintRadius < earthRadius * Math.PI * 1000) {
+                    try {
+                        footprintCircle = L.greatCircle([lat, lon], {
+                            radius: footprintRadius, // Radius in meters
+                            color: '#0000FF',
+                            fillColor: '#0088FF',
+                            fillOpacity: 0.3,
+                            weight: 2,
+                            wrapElements: true,
+                            clipLat: 65,
+                            degStep: 0.5,
+                            maxCopies: -1
+                        }).addTo(map);
 
-                // Ensure footprintCircle is valid before calling bringToFront
-                if (footprintCircle) {
-                    footprintCircle.bringToFront(); // Ensure circle is on top
+                        console.log('footprintCircle created:', footprintCircle);
+                        console.log('Is on map:', map.hasLayer(footprintCircle));
+
+                        // Ensure the circle is brought to front only if valid
+                        if (footprintCircle && map.hasLayer(footprintCircle)) {
+                            footprintCircle.bringToFront();
+                        } else {
+                            console.warn(`footprintCircle not added to map for ${utcTimeString}`);
+                            footprintCircle = null;
+                        }
+                    } catch (e) {
+                        console.error(`Error creating footprintCircle for ${utcTimeString}: ${e.message}`);
+                        footprintCircle = null;
+                    }
                 } else {
-                    console.warn(`Failed to create footprintCircle for ${utcTimeString}`);
+                    console.warn(`Invalid footprintRadius for ${utcTimeString}: ${footprintRadius}`);
                 }
 
                 // Center map on sublunar point and set zoom
                 map.panTo([lat, lon]);
-                map.setZoom(2); // Global view to see full footprint
+                map.setZoom(2);
 
             } catch (error) {
                 console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
-                // Ensure footprintCircle and moonMarker are cleared on error
-                if (moonMarker) {
-                    moonMarker.remove();
+                // Clean up on error
+                if (moonMarker && map.hasLayer(moonMarker)) {
+                    map.removeLayer(moonMarker);
                     moonMarker = null;
                 }
-                if (footprintCircle) {
-                    footprintCircle.remove();
+                if (footprintCircle && map.hasLayer(footprintCircle)) {
+                    map.removeLayer(footprintCircle);
                     footprintCircle = null;
                 }
             }
