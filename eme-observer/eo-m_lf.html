@@ -1045,6 +1045,9 @@
                     degStep: 0.5, // Smoothness of polygon rendering
                     maxCopies: -1 // Automatic number of wrapped copies
                 }).addTo(map);
+                
+                console.log('footprintCircle:', footprintCircle);
+                console.log('Is on map:', footprintCircle._map ? true : false);
 
                 // Ensure footprintCircle is valid before calling bringToFront
                 if (footprintCircle) {
