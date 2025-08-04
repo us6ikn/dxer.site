@@ -1012,8 +1012,14 @@
                 console.log(`Moon distance: ${D_moon.toFixed(2)} km, theta_rad: ${theta_rad.toFixed(4)} radians, footprintRadius: ${footprintRadius.toFixed(2)} meters`);
 
                 // Remove existing moon marker and circle
-                if (moonMarker) moonMarker.remove();
-                if (footprintCircle) footprintCircle.remove();
+                if (moonMarker) {
+                    moonMarker.remove();
+                    moonMarker = null; // Reset to avoid stale references
+                }
+                if (footprintCircle) {
+                    footprintCircle.remove();
+                    footprintCircle = null; // Reset to avoid stale references
+                }
 
                 // Add new moon marker
                 const moonIcon = L.icon({
@@ -1040,7 +1046,12 @@
                     maxCopies: -1 // Automatic number of wrapped copies
                 }).addTo(map);
 
-                footprintCircle.bringToFront(); // Ensure circle is on top
+                // Ensure footprintCircle is valid before calling bringToFront
+                if (footprintCircle) {
+                    footprintCircle.bringToFront(); // Ensure circle is on top
+                } else {
+                    console.warn(`Failed to create footprintCircle for ${utcTimeString}`);
+                }
 
                 // Center map on sublunar point and set zoom
                 map.panTo([lat, lon]);
@@ -1048,6 +1059,15 @@
 
             } catch (error) {
                 console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
+                // Ensure footprintCircle and moonMarker are cleared on error
+                if (moonMarker) {
+                    moonMarker.remove();
+                    moonMarker = null;
+                }
+                if (footprintCircle) {
+                    footprintCircle.remove();
+                    footprintCircle = null;
+                }
             }
         }
 
