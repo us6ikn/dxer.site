@@ -1033,6 +1033,7 @@
                 }).addTo(map);
 
                 // Validate footprintRadius
+                const footprintRadius = 1000000;
                 if (footprintRadius > 0 && footprintRadius < earthRadius * Math.PI * 1000) {
                     try {
                         footprintCircle = L.greatCircle([lat, lon], {
