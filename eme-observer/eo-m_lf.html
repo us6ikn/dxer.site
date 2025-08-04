@@ -65,7 +65,6 @@
                 <link rel="stylesheet" href="/leaflet/leaflet.css" />
                 <script src="/leaflet/leaflet.js"></script>
                 <script src="/leaflet/Leaflet.greatCircle.js"></script>
-  <script src="a.ob.js"></script>
 
   <style>
       html, body {
@@ -656,6 +655,7 @@
     
     <script src="chart.js"></script>
     <script src="chartjs-plugin-annotation@1.4.0"></script>
+    <script src="a.ob.js"></script>
     <script src="l.ob.js"></script>
     <script>
         let chart;
@@ -1186,12 +1186,17 @@
                 }
             };
 
-            document.getElementById('moonChartLabel').innerHTML =
-                `<span class="metric-label metric-distance">Distance:</span> ${currentDistance != null ? currentDistance.toFixed(0) + ' km' : 'N/A'}` +
-                `<span class="metric-separator">|</span>` +
-                `<span class="metric-label metric-declination">Declination:</span> ${currentDeclination != null ? currentDeclination.toFixed(1) + '°' : 'N/A'}` +
-                `<span class="metric-separator">|</span>` +
-                `<span class="metric-label metric-pathloss">Extra Loss:</span> ${pathLoss != null ? pathLoss.toFixed(2) + ' dB' : 'N/A'}`;
+            document.getElementById('dxchartLabel').innerHTML = dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput) && dxDataForDay[hourIndex]
+                ? `<span class="metric-locator">${dxInput}</span>
+                   <span class="metric-separator"></span>
+                   <span class="metric-label metric-elevation">El:</span> ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}
+                   <span class="metric-separator">|</span>
+                   <span class="metric-label metric-azimuth">Az:</span> ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}
+                   <span class="metric-separator">|</span>
+                   <span class="metric-label metric-libration">Libr:</span> ${rate != null ? rate + '°/min' : 'N/A'}
+                   <span class="metric-separator">|</span>
+                   <span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + ' Hz' : 'N/A'}`
+                : '<span class="metric-locator">Enter valid DX</span>';
 
             if (!moonChart) {
                 moonChart = new Chart(document.getElementById("moonDistanceChart"), {
