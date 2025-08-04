@@ -63,8 +63,9 @@
                 }
               </script>
                 <link rel="stylesheet" href="/leaflet/leaflet.css" />
-                <script src="/leaflet/leaflet.js"></script>
-                <script src="/leaflet/Leaflet.greatCircle.js"></script>
+                    <script src="/leaflet/leaflet.js"></script>
+                    <script src="/leaflet/Leaflet.greatCircle.js"></script>
+  <script src="a.ob.js"></script>
 
   <style>
       html, body {
@@ -655,7 +656,6 @@
     
     <script src="chart.js"></script>
     <script src="chartjs-plugin-annotation@1.4.0"></script>
-    <script src="a.ob.js"></script>
     <script src="l.ob.js"></script>
     <script>
         let chart;
@@ -788,263 +788,267 @@
         }
         
         function initMap() {
-            // Initialize Leaflet map, assign to global 'map'
-            map = L.map('map', {
-                center: [0, 0], // Initial center (will be updated by updateMap)
-                zoom: 2, // Global view
-                worldCopyJump: true // Required for greatCircle wrapping
-            });
+                // Initialize Leaflet map
+                map = L.map('map', {
+                    zoom: 2,
+                    center: [0, 0], // Latitude, Longitude
+                    zoomControl: false, // Disable default zoom control for custom handling
+                    scrollWheelZoom: true, // Enable scroll wheel zoom (similar to gestureHandling: 'greedy')
+                    attributionControl: true
+                });
 
-            // Add OpenStreetMap tiles
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
+                // Add OpenStreetMap tile layer (or another provider)
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    maxZoom: 18,
+                    tileSize: 256
+                }).addTo(map);
 
-            // Fetch and add station markers (unchanged)
-            fetch('stn_10GHz.json')
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(station => {
-                        const {
-                            Call: callsign,
-                            Locator: locator,
-                            Antenna: antenna,
-                            Power: power,
-                            Website: website,
-                            CK: obfuscatedEmail = '',
-                            Coordinates,
-                            Note = '',
-                            Name = ''
-                        } = station;
+                // Fetch and add station markers
+                fetch('stn_10GHz.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(station => {
+                            const {
+                                Call: callsign,
+                                Locator: locator,
+                                Antenna: antenna,
+                                Power: power,
+                                Website: website,
+                                CK: obfuscatedEmail = '',
+                                Coordinates,
+                                Note = '',
+                                Name = ''
+                            } = station;
 
-                        const email = decodeEmail(obfuscatedEmail);
+                            const email = decodeEmail(obfuscatedEmail);
 
-                        const [latStr, lngStr] = Coordinates.split(',');
-                        const lat = parseFloat(latStr);
-                        const lng = parseFloat(lngStr);
-                        if (isNaN(lat) || isNaN(lng)) return;
+                            const [latStr, lngStr] = Coordinates.split(',');
+                            const lat = parseFloat(latStr);
+                            const lng = parseFloat(lngStr);
+                            if (isNaN(lat) || isNaN(lng)) return;
 
-                        const offsetLat = 0.1;
-                        const offsetLng = 0.1;
-                        const markerPosition = [lat + (offsetLat / 10000), lng + (offsetLng / 10000)];
+                            const offsetLat = 0.1;
+                            const offsetLng = 0.1;
+                            const markerPosition = [lat + (offsetLat / 10000), lng + (offsetLng / 10000)];
 
-                        let iconUrl = "images/EME_home.png";
-                        if (/Inactive/i.test(Note)) {
-                            iconUrl = "images/EME_inactive.png";
-                        } else if (/SK/i.test(Note)) {
-                            iconUrl = "images/EME_SK.png";
-                        } else if (/DXpedition|Portable/i.test(Note)) {
-                            iconUrl = "images/EME_dxped2.png";
-                        }
+                            let iconUrl = "images/EME_home.png";
+                            if (/Inactive/i.test(Note)) {
+                                iconUrl = "images/EME_inactive.png";
+                            } else if (/SK/i.test(Note)) {
+                                iconUrl = "images/EME_SK.png";
+                            } else if (/DXpedition|Portable/i.test(Note)) {
+                                iconUrl = "images/EME_dxped2.png";
+                            }
 
-                        const markerIcon = L.icon({
-                            iconUrl: iconUrl,
-                            iconSize: [20, 20],
-                            iconAnchor: [10, 10]
-                        });
+                            const markerIcon = L.icon({
+                                iconUrl: iconUrl,
+                                iconSize: [20, 20],
+                                iconAnchor: [10, 10] // Center the icon
+                            });
 
-                        const marker = L.marker(markerPosition, {
-                            icon: markerIcon,
-                            title: callsign
-                        }).addTo(map);
+                            const marker = L.marker(markerPosition, {
+                                icon: markerIcon,
+                                title: callsign
+                            }).addTo(map);
 
-                        markers.push(marker);
+                            markers.push(marker); // Store marker for potential future use
 
-                        const isLocatorValid = /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator);
-                        const sanitizedCallsign = sanitizeCallsign(callsign);
-                        const skedButton = isLocatorValid ?
-                            `<button id="sked-${sanitizedCallsign}" class="sked-button" data-locator="${locator.toUpperCase()}">Sked</button>` :
-                            '';
-                        const emailButton = email ?
-                            `<a id="email-${sanitizedCallsign}" class="email-button" href="mailto:${email}">Email</a>` :
-                            '';
-                        const qrzButton = `<a id="qrz-${sanitizedCallsign}" class="qrz-button" href="https://www.qrz.com/db/${callsign}" target="_blank">QRZ</a>`;
-                        const callsignDisplay = callsign +
-                            (/SK/i.test(Note) ? ' (SK)' : '') +
-                            (/Inactive/i.test(Note) ? ' (not active)' : '');
-                        const nameLine = Name ? `<div><strong>${Name}</strong></div>` : '';
-                        const displayWebsite = website.length > 30 ? website.slice(0, 30) + '...' : website;
-                        const infoContent = `
-                            <div>
-                                <div style="font-weight:bold; font-size: 16px;">${callsignDisplay}</div>
-                                ${nameLine}
-                                <div class="button-group-infowindow">
-                                    ${skedButton}${emailButton}${qrzButton}
-                                </div>
-                                <div>Locator: ${locator}</div>
-                                <div>Antenna: ${antenna}</div>
-                                <div>Power: ${power}</div>
-                                <div>Website: <a href="${website}" target="_blank">${displayWebsite}</a></div>
-                                <div id="image-container-${sanitizedCallsign}">
-                                    Station Picture (clickable):<br>
-                                    <a href="db/${sanitizedCallsign}.jpg" target="_blank">
-                                        <img id="station-image-${sanitizedCallsign}" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA" alt="${callsign} station"/>
-                                    </a>
-                                    <div id="image-placeholder-${sanitizedCallsign}" style="display:none;">
-                                        <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
+                            const isLocatorValid = /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator);
+                            const sanitizedCallsign = sanitizeCallsign(callsign);
+                            const skedButton = isLocatorValid ?
+                                `<button id="sked-${sanitizedCallsign}" class="sked-button" data-locator="${locator.toUpperCase()}">Sked</button>` :
+                                '';
+                            const emailButton = email ?
+                                `<a id="email-${sanitizedCallsign}" class="email-button" href="mailto:${email}">Email</a>` :
+                                '';
+                            const qrzButton = `<a id="qrz-${sanitizedCallsign}" class="qrz-button" href="https://www.qrz.com/db/${callsign}" target="_blank">QRZ</a>`;
+                            const callsignDisplay = callsign +
+                                (/SK/i.test(Note) ? ' (SK)' : '') +
+                                (/Inactive/i.test(Note) ? ' (not active)' : '');
+                            const nameLine = Name ? `<div><strong>${Name}</strong></div>` : '';
+                            const displayWebsite = website.length > 30 ? website.slice(0, 30) + '...' : website;
+                            const infoContent = `
+                                <div>
+                                    <div style="font-weight:bold; font-size: 16px;">${callsignDisplay}</div>
+                                    ${nameLine}
+                                    <div class="button-group-infowindow">
+                                        ${skedButton}${emailButton}${qrzButton}
+                                    </div>
+                                    <div>Locator: ${locator}</div>
+                                    <div>Antenna: ${antenna}</div>
+                                    <div>Power: ${power}</div>
+                                    <div>Website: <a href="${website}" target="_blank">${displayWebsite}</a></div>
+                                    <div id="image-container-${sanitizedCallsign}">
+                                        Station Picture (clickable):<br>
+                                        <a href="db/${sanitizedCallsign}.jpg" target="_blank">
+                                            <img id="station-image-${sanitizedCallsign}" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA" alt="${callsign} station"/>
+                                        </a>
+                                        <div id="image-placeholder-${sanitizedCallsign}" style="display:none;">
+                                            <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        `;
+                            `;
 
-                        marker.bindPopup(infoContent, {
-                            maxWidth: 300,
-                            closeOnClick: false,
-                            autoClose: false
-                        });
+                            marker.bindPopup(infoContent, {
+                                maxWidth: 300,
+                                closeOnClick: false,
+                                autoClose: false
+                            });
 
-                        marker.on('click', () => {
-                            if (currentPopup) {
-                                currentPopup.closePopup();
-                            }
-                            marker.openPopup();
-                            currentPopup = marker;
+                            marker.on('click', () => {
+                                if (currentPopup) {
+                                    currentPopup.closePopup();
+                                }
+                                marker.openPopup();
+                                currentPopup = marker;
 
-                            setTimeout(() => {
-                                const imageElement = document.getElementById(`station-image-${sanitizedCallsign}`);
-                                const placeholder = document.getElementById(`image-placeholder-${sanitizedCallsign}`);
-                                const imageUrl = `db/${sanitizedCallsign}_thumb.jpg`;
+                                setTimeout(() => {
+                                    const imageElement = document.getElementById(`station-image-${sanitizedCallsign}`);
+                                    const placeholder = document.getElementById(`image-placeholder-${sanitizedCallsign}`);
+                                    const imageUrl = `db/${sanitizedCallsign}_thumb.jpg`;
 
-                                fetch(imageUrl, { method: 'HEAD' })
-                                    .then(response => {
-                                        if (!response.ok) {
+                                    fetch(imageUrl, { method: 'HEAD' })
+                                        .then(response => {
+                                            if (!response.ok) {
+                                                imageElement.remove();
+                                                placeholder.style.display = 'block';
+                                            } else {
+                                                imageElement.src = imageUrl;
+                                                placeholder.style.display = 'none';
+                                            }
+                                        })
+                                        .catch(() => {
                                             imageElement.remove();
                                             placeholder.style.display = 'block';
-                                        } else {
-                                            imageElement.src = imageUrl;
-                                            placeholder.style.display = 'none';
-                                        }
-                                    })
-                                    .catch(() => {
-                                        imageElement.remove();
-                                        placeholder.style.display = 'block';
-                                    });
+                                        });
 
-                                const skedButton = document.getElementById(`sked-${sanitizedCallsign}`);
-                                if (skedButton) {
-                                    skedButton.addEventListener('click', () => {
-                                        const locator = skedButton.getAttribute('data-locator');
-                                        document.getElementById('dx').value = locator;
-                                        const inputEvent = new Event('input', { bubbles: true });
-                                        document.getElementById('dx').dispatchEvent(inputEvent);
-                                    });
-                                }
+                                    const skedButton = document.getElementById(`sked-${sanitizedCallsign}`);
+                                    if (skedButton) {
+                                        skedButton.addEventListener('click', () => {
+                                            const locator = skedButton.getAttribute('data-locator');
+                                            document.getElementById('dx').value = locator;
+                                            const inputEvent = new Event('input', { bubbles: true });
+                                            document.getElementById('dx').dispatchEvent(inputEvent);
+                                        });
+                                    }
 
-                                const emailButton = document.getElementById(`email-${sanitizedCallsign}`);
-                                if (emailButton) {
-                                    emailButton.addEventListener('click', () => {
-                                        console.log(`Email button clicked for ${callsign}: ${email}`);
-                                    });
-                                }
+                                    const emailButton = document.getElementById(`email-${sanitizedCallsign}`);
+                                    if (emailButton) {
+                                        emailButton.addEventListener('click', () => {
+                                            console.log(`Email button clicked for ${callsign}: ${email}`);
+                                        });
+                                    }
 
-                                const qrzButton = document.getElementById(`qrz-${sanitizedCallsign}`);
-                                if (qrzButton) {
-                                    qrzButton.addEventListener('click', () => {
-                                        console.log(`QRZ button clicked for ${callsign}: https://www.qrz.com/db/${callsign}`);
-                                    });
-                                }
-                            }, 100);
+                                    const qrzButton = document.getElementById(`qrz-${sanitizedCallsign}`);
+                                    if (qrzButton) {
+                                        qrzButton.addEventListener('click', () => {
+                                            console.log(`QRZ button clicked for ${callsign}: https://www.qrz.com/db/${callsign}`);
+                                        });
+                                    }
+                                }, 100);
+                            });
                         });
                     })
                     .catch(() => { /* Handle error silently */ });
+            }
+
+        function updateMap() {
+            const selectedDate = document.getElementById('date').value;
+            const index = parseInt(document.getElementById('hour').value);
+            const hour = Math.floor(index / 2).toString().padStart(2, '0');
+            const minutes = index % 2 === 0 ? '00' : '30';
+            const utcTimeString = `${selectedDate}T${hour}:${minutes}:00Z`;
+
+            if (!selectedDate || !/^\d{4}-\d{2}-\d{2}$/.test(selectedDate)) {
+                console.warn(`Invalid or missing date in updateMap: ${selectedDate}`);
+                return;
+            }
+
+            const utcDate = new Date(utcTimeString);
+            if (isNaN(utcDate.getTime())) {
+                console.error(`Invalid date string in updateMap: ${utcTimeString}`);
+                return;
+            }
+
+            try {
+                const time = Astronomy.MakeTime(utcDate);
+                const observer = new Astronomy.Observer(0, 0, 0);
+                const moon = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, true);
+                const libration = Astronomy.Libration(time);
+
+                if (!moon || !libration) {
+                    console.warn(`Failed to compute Moon data for ${utcTimeString}`);
+                    return;
+                }
+
+                const raHours = moon.ra;
+                const decDeg = moon.dec;
+                const raDeg = raHours * 15;
+                let gastDeg = Astronomy.SiderealTime(time) * 15;
+                gastDeg = ((gastDeg % 360) + 360) % 360;
+
+                // Correct longitude calculation
+                let lonDeg = raDeg - gastDeg;
+                lonDeg = ((lonDeg + 180) % 360) - 180; // Normalize to [-180, 180]
+
+                const lat = decDeg;
+                const lon = lonDeg;
+
+                const earthRadius = 6371; // km
+                const D_moon = libration.dist_km; // Moon distance in km
+                const cosTheta = earthRadius / (earthRadius + D_moon);
+                const theta_rad = Math.acos(cosTheta); // Angular radius to horizon
+                const footprintRadius = earthRadius * theta_rad * 1000; // Surface distance in meters
+
+                if (isNaN(lat) || isNaN(lon) || isNaN(footprintRadius)) {
+                    console.warn(`Invalid sublunar point data for ${utcTimeString}: lat=${lat}, lon=${lon}, radius=${footprintRadius}`);
+                    return;
+                }
+
+                console.log(`Sublunar point: lat=${lat.toFixed(2)}, lon=${lon.toFixed(2)}, RA=${raHours.toFixed(2)}h, Dec=${decDeg.toFixed(2)}°, GAST=${(gastDeg/15).toFixed(2)}h`);
+                console.log(`Moon distance: ${D_moon.toFixed(2)} km, theta_rad: ${theta_rad.toFixed(4)} radians, footprintRadius: ${footprintRadius.toFixed(2)} meters`);
+
+                // Remove existing moon marker and circle
+                if (moonMarker) moonMarker.remove();
+                if (footprintCircle) footprintCircle.remove();
+
+                // Add new moon marker
+                const moonIcon = L.icon({
+                    iconUrl: 'images/moon-icon.png',
+                    iconSize: [48, 48],
+                    iconAnchor: [24, 24]
+                });
+
+                moonMarker = L.marker([lat, lon], {
+                    icon: moonIcon,
+                    title: `Moon Sublunar Point (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
+                }).addTo(map);
+
+                // Use Leaflet.greatCircle to render the footprint
+                footprintCircle = L.greatCircle([lat, lon], {
+                    radius: footprintRadius, // Radius in meters
+                    color: '#0000FF', // Blue stroke
+                    fillColor: '#0088FF',
+                    fillOpacity: 0.3,
+                    weight: 2,
+                    wrapElements: true, // Enable wrapping around the globe
+                    clipLat: 65, // Render as polygon near poles
+                    degStep: 0.5, // Smoothness of polygon rendering
+                    maxCopies: -1 // Automatic number of wrapped copies
+                }).addTo(map);
+
+                footprintCircle.bringToFront(); // Ensure circle is on top
+
+                // Center map on sublunar point and set zoom
+                map.panTo([lat, lon]);
+                map.setZoom(2); // Global view to see full footprint
+
+            } catch (error) {
+                console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
+            }
         }
-
-                      function updateMap() {
-                          if (!map) {
-                              console.error('Map is not initialized. Ensure initMap is called before updateMap.');
-                              return;
-                          }
-
-                          const selectedDate = document.getElementById('date').value;
-                          const index = parseInt(document.getElementById('hour').value);
-                          const hour = Math.floor(index / 2).toString().padStart(2, '0');
-                          const minutes = index % 2 === 0 ? '00' : '30';
-                          const utcTimeString = `${selectedDate}T${hour}:${minutes}:00Z`;
-
-                          if (!selectedDate || !/^\d{4}-\d{2}-\d{2}$/.test(selectedDate)) {
-                              console.warn(`Invalid or missing date in updateMap: ${selectedDate}`);
-                              return;
-                          }
-
-                          const utcDate = new Date(utcTimeString);
-                          if (isNaN(utcDate.getTime())) {
-                              console.error(`Invalid date string in updateMap: ${utcTimeString}`);
-                              return;
-                          }
-
-                          try {
-                              const time = Astronomy.MakeTime(utcDate);
-                              const observer = new Astronomy.Observer(0, 0, 0);
-                              const moon = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, true);
-                              const libration = Astronomy.Libration(time);
-
-                              if (!moon || !libration) {
-                                  console.warn(`Failed to compute Moon data for ${utcTimeString}`);
-                                  return;
-                              }
-
-                              const raHours = moon.ra;
-                              const decDeg = moon.dec;
-                              const raDeg = raHours * 15;
-                              let gastDeg = Astronomy.SiderealTime(time) * 15;
-                              gastDeg = ((gastDeg % 360) + 360) % 360;
-
-                              let lonDeg = raDeg - gastDeg;
-                              lonDeg = ((lonDeg + 180) % 360) - 180;
-
-                              const lat = decDeg;
-                              const lon = lonDeg;
-
-                              const earthRadius = 6371; // km
-                              const D_moon = libration.dist_km; // Moon distance in km
-                              const cosTheta = earthRadius / (earthRadius + D_moon);
-                              const theta_rad = Math.acos(cosTheta);
-                              const footprintRadius = earthRadius * theta_rad * 1000; // Surface distance in meters
-
-                              if (isNaN(lat) || isNaN(lon) || isNaN(footprintRadius)) {
-                                  console.warn(`Invalid sublunar point data for ${utcTimeString}: lat=${lat}, lon=${lon}, radius=${footprintRadius}`);
-                                  return;
-                              }
-
-                              console.log(`Sublunar point: lat=${lat.toFixed(2)}, lon=${lon.toFixed(2)}, RA=${raHours.toFixed(2)}h, Dec=${decDeg.toFixed(2)}°, GAST=${(gastDeg/15).toFixed(2)}h`);
-                              console.log(`Moon distance: ${D_moon.toFixed(2)} km, theta_rad: ${theta_rad.toFixed(4)} radians, footprintRadius: ${footprintRadius.toFixed(2)} meters`);
-
-                              if (moonMarker) moonMarker.remove();
-                              if (footprintCircle) footprintCircle.remove();
-
-                              const moonIcon = L.icon({
-                                  iconUrl: 'images/moon-icon.png',
-                                  iconSize: [48, 48],
-                                  iconAnchor: [24, 24]
-                              });
-
-                              moonMarker = L.marker([lat, lon], {
-                                  icon: moonIcon,
-                                  title: `Moon Sublunar Point (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
-                              }).addTo(map);
-
-                              footprintCircle = L.greatCircle([lat, lon], {
-                                  radius: footprintRadius,
-                                  color: '#0000FF',
-                                  fillColor: '#0088FF',
-                                  fillOpacity: 0.3,
-                                  weight: 2,
-                                  clipLat: false,
-                                  clipRad: 0,
-                                  degStep: 0.5,
-                                  wrapElements: true,
-                                  maxCopies: -1,
-                                  wrapMarker: false
-                              }).addTo(map);
-                              footprintCircle.bringToFront();
-
-                              map.panTo([lat, lon]);
-                              map.setZoom(2);
-
-                          } catch (error) {
-                              console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
-                          }
-                      }
 
         // Helper function to generate geodesic circle points
         function generateGeodesicCircle(centerLat, centerLon, radiusKm) {
@@ -1186,17 +1190,12 @@
                 }
             };
 
-            document.getElementById('dxchartLabel').innerHTML = dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput) && dxDataForDay[hourIndex]
-                ? `<span class="metric-locator">${dxInput}</span>
-                   <span class="metric-separator"></span>
-                   <span class="metric-label metric-elevation">El:</span> ${elev != null ? elev.toFixed(1) + '°' : 'N/A'}
-                   <span class="metric-separator">|</span>
-                   <span class="metric-label metric-azimuth">Az:</span> ${azimuth != null ? azimuth.toFixed(1) + '°' : 'N/A'}
-                   <span class="metric-separator">|</span>
-                   <span class="metric-label metric-libration">Libr:</span> ${rate != null ? rate + '°/min' : 'N/A'}
-                   <span class="metric-separator">|</span>
-                   <span class="metric-label metric-doppler">Spread:</span> ${doppler != null ? doppler.toFixed(0) + ' Hz' : 'N/A'}`
-                : '<span class="metric-locator">Enter valid DX</span>';
+            document.getElementById('moonChartLabel').innerHTML =
+                `<span class="metric-label metric-distance">Distance:</span> ${currentDistance != null ? currentDistance.toFixed(0) + ' km' : 'N/A'}` +
+                `<span class="metric-separator">|</span>` +
+                `<span class="metric-label metric-declination">Declination:</span> ${currentDeclination != null ? currentDeclination.toFixed(1) + '°' : 'N/A'}` +
+                `<span class="metric-separator">|</span>` +
+                `<span class="metric-label metric-pathloss">Extra Loss:</span> ${pathLoss != null ? pathLoss.toFixed(2) + ' dB' : 'N/A'}`;
 
             if (!moonChart) {
                 moonChart = new Chart(document.getElementById("moonDistanceChart"), {
@@ -2176,46 +2175,46 @@
         });
 
                                                     window.onload = () => {
-                                                        const now = new Date();
-                                                        const utcHours = now.getUTCHours();
-                                                        const utcMinutes = now.getUTCMinutes();
+                                                            const now = new Date();
+                                                            const utcHours = now.getUTCHours();
+                                                            const utcMinutes = now.getUTCMinutes();
 
-                                                        const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-                                                        document.getElementById("date").valueAsDate = utcDate;
-
-                                                        let roundedHour = utcHours;
-                                                        let roundedMinutes = utcMinutes >= 15 && utcMinutes < 45 ? 30 : 0;
-                                                        if (utcMinutes >= 45) {
-                                                            roundedHour += 1;
-                                                            roundedMinutes = 0;
-                                                        }
-                                                        if (roundedHour >= 24) {
-                                                            roundedHour -= 24;
-                                                            utcDate.setUTCDate(utcDate.getUTCDate() + 1);
+                                                            const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
                                                             document.getElementById("date").valueAsDate = utcDate;
-                                                        }
 
-                                                        hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
-                                                        document.getElementById("hour").value = hourIndex;
-                                                        document.getElementById("hour-value").textContent =
-                                                            `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
+                                                            let roundedHour = utcHours;
+                                                            let roundedMinutes = utcMinutes >= 15 && utcMinutes < 45 ? 30 : 0;
+                                                            if (utcMinutes >= 45) {
+                                                                roundedHour += 1;
+                                                                roundedMinutes = 0;
+                                                            }
+                                                            if (roundedHour >= 24) {
+                                                                roundedHour -= 24;
+                                                                utcDate.setUTCDate(utcDate.getUTCDate() + 1);
+                                                                document.getElementById("date").valueAsDate = utcDate;
+                                                            }
 
-                                                        document.getElementById("showControlsPanel").classList.remove("visible");
+                                                            hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
+                                                            document.getElementById("hour").value = hourIndex;
+                                                            document.getElementById("hour-value").textContent =
+                                                                `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
 
-                                                        initMap(); // Initialize map first
-                                                        const qthInput = document.getElementById("qth").value.trim().toUpperCase();
-                                                        const dxInput = document.getElementById("dx").value.trim().toUpperCase();
-                                                        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
-                                                            computeLibrationForDay(qthInput, document.getElementById("date").value, 'qth');
-                                                        }
-                                                        if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
-                                                            computeLibrationForDay(dxInput, document.getElementById("date").value, 'dx');
-                                                        }
+                                                            document.getElementById("showControlsPanel").classList.remove("visible");
 
-                                                        updateMap(); // Call after initMap
-                                                        updateMoonChart();
-                                                        updateChart(hourIndex);
-                                                    };
+                                                            const qthInput = document.getElementById("qth").value.trim().toUpperCase();
+                                                            const dxInput = document.getElementById("dx").value.trim().toUpperCase();
+                                                            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
+                                                                computeLibrationForDay(qthInput, document.getElementById("date").value, 'qth');
+                                                            }
+                                                            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
+                                                                computeLibrationForDay(dxInput, document.getElementById("date").value, 'dx');
+                                                            }
+
+                                                            initMap(); // Call Leaflet map initialization
+                                                            updateMap();
+                                                            updateMoonChart();
+                                                            updateChart(hourIndex);
+                                                        };
 
 
         const qthInput = document.getElementById("qth");
