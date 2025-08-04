@@ -676,6 +676,7 @@
             let currentPopup = null;
             let map;
             let markers = [];
+            let mapUpdating = false;
 
             const MOON_RADIUS = 1.7374e6;
             const SPEED_OF_LIGHT = 299792458;
@@ -817,7 +818,6 @@
                 tileSize: 256
             }).addTo(map);
 
-            // Initialize footprint layer group
             footprintLayerGroup = L.layerGroup().addTo(map);
 
             // Fetch and add station markers
@@ -970,7 +970,15 @@
                     .catch(() => { /* Handle error silently */ });
             }
 
+        let mapUpdating = false; // Add this flag at the top of your script, just after other global variables
+
         function updateMap() {
+            if (mapUpdating) {
+                console.log('updateMap skipped: previous call still processing');
+                return;
+            }
+            mapUpdating = true;
+
             const selectedDate = document.getElementById('date').value;
             const index = parseInt(document.getElementById('hour').value);
             const hour = Math.floor(index / 2).toString().padStart(2, '0');
@@ -979,12 +987,14 @@
 
             if (!selectedDate || !/^\d{4}-\d{2}-\d{2}$/.test(selectedDate)) {
                 console.warn(`Invalid or missing date in updateMap: ${selectedDate}`);
+                mapUpdating = false;
                 return;
             }
 
             const utcDate = new Date(utcTimeString);
             if (isNaN(utcDate.getTime())) {
                 console.error(`Invalid date string in updateMap: ${utcTimeString}`);
+                mapUpdating = false;
                 return;
             }
 
@@ -996,6 +1006,7 @@
 
                 if (!moon || !libration) {
                     console.warn(`Failed to compute Moon data for ${utcTimeString}`);
+                    mapUpdating = false;
                     return;
                 }
 
@@ -1019,6 +1030,7 @@
 
                 if (isNaN(lat) || isNaN(lon) || isNaN(footprintRadius)) {
                     console.warn(`Invalid sublunar point data for ${utcTimeString}: lat=${lat}, lon=${lon}, radius=${footprintRadius}`);
+                    mapUpdating = false;
                     return;
                 }
 
@@ -1029,60 +1041,67 @@
                 if (moonMarker) {
                     moonMarker.remove();
                     moonMarker = null;
+                    console.log('Removed moonMarker');
                 }
                 if (footprintLayerGroup) {
                     footprintLayerGroup.clearLayers();
                     console.log('Cleared footprintLayerGroup');
                 }
 
-                // Add new moon marker
-                const moonIcon = L.icon({
-                    iconUrl: 'images/moon-icon.png',
-                    iconSize: [48, 48],
-                    iconAnchor: [24, 24]
-                });
+                // Ensure layers are fully cleared before proceeding
+                setTimeout(() => {
+                    // Add new moon marker
+                    const moonIcon = L.icon({
+                        iconUrl: 'images/moon-icon.png',
+                        iconSize: [48, 48],
+                        iconAnchor: [24, 24]
+                    });
 
-                moonMarker = L.marker([lat, lon], {
-                    icon: moonIcon,
-                    title: `Moon Sublunar Point (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
-                }).addTo(map);
+                    moonMarker = L.marker([lat, lon], {
+                        icon: moonIcon,
+                        title: `Moon Sublunar Point (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
+                    }).addTo(map);
+                    console.log(`Added new moonMarker at lat=${lat}, lon=${lon}`);
 
-                // Create and add new footprint to layer group
-                footprintCircle = L.greatCircle([lat, lon], {
-                    radius: footprintRadius,
-                    color: '#0000FF',
-                    fillColor: '#0088FF',
-                    fillOpacity: 0.3,
-                    weight: 2,
-                    wrapElements: true,
-                    clipLat: 65,
-                    degStep: 0.5,
-                    maxCopies: -1
-                });
+                    // Create and add new footprint to layer group
+                    footprintCircle = L.greatCircle([lat, lon], {
+                        radius: footprintRadius,
+                        color: '#0000FF',
+                        fillColor: '#0088FF',
+                        fillOpacity: 0.3,
+                        weight: 2,
+                        wrapElements: true,
+                        clipLat: 65,
+                        degStep: 0.5,
+                        maxCopies: -1
+                    });
 
-                if (footprintCircle) {
-                    footprintLayerGroup.addLayer(footprintCircle);
-                    footprintCircle.bringToFront();
-                    console.log(`Added new footprintCircle at lat=${lat}, lon=${lon}, radius=${footprintRadius}`);
-                } else {
-                    console.warn(`Failed to create footprintCircle for ${utcTimeString}`);
-                }
+                    if (footprintCircle) {
+                        footprintLayerGroup.addLayer(footprintCircle);
+                        footprintCircle.bringToFront();
+                        console.log(`Added new footprintCircle at lat=${lat}, lon=${lon}, radius=${footprintRadius}`);
+                    } else {
+                        console.warn(`Failed to create footprintCircle for ${utcTimeString}`);
+                    }
 
-                // Center map on sublunar point and set zoom
-                map.panTo([lat, lon]);
-                map.setZoom(2);
+                    // Center map on sublunar point and set zoom
+                    map.panTo([lat, lon]);
+                    map.setZoom(2);
 
+                    mapUpdating = false;
+                }, 0); // Use setTimeout to ensure layer clearing is processed
             } catch (error) {
                 console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
-                // Clear layers on error
                 if (moonMarker) {
                     moonMarker.remove();
                     moonMarker = null;
+                    console.log('Removed moonMarker due to error');
                 }
                 if (footprintLayerGroup) {
                     footprintLayerGroup.clearLayers();
                     console.log('Cleared footprintLayerGroup due to error');
                 }
+                mapUpdating = false;
             }
         }
 
