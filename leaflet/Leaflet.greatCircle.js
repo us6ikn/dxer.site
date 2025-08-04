@@ -157,24 +157,42 @@ L.GreatCircle = L.Circle.extend({
 	//returns destination lat/lon from a start point lat/lon of a giving bearing (degrees) and distance (km).
 	//round_off will round to a given precision. 
 	//based on the haversine formula implementation at: https://www.movable-type.co.uk/scripts/latlong.html
-	_destination_from_bearing: function(lat,lng,bearing,distance,round_off = undefined) {
-		var R = 6371; // mean radius of the Earth, in km
-		var d = distance;
-		var deg2rad = this._deg2rad; var rad2deg = this._rad2deg;
-		var lat1 = deg2rad*lat;
-		var lng1 = deg2rad*lng;
-		var brng = deg2rad*bearing;
-		//kind of a sad attempt at optimization of these costly trig functions
-		var sinLat1 = Math.sin(lat1); var cosLat1 = Math.cos(lat1);
-		var cosdR = Math.cos(d/R); var sindR = Math.sin(d/R);
-		var lat2 = Math.asin(sinLat1*cosdR+cosLat1*sindR*Math.cos(brng));
-		var lng2 = lng1+Math.atan2(Math.sin(brng)*sindR*cosLat1,cosdR-sinLat1*Math.sin(lat2));
-		if(typeof round_off != "undefined") {
-			return [this._round(rad2deg*lat2,round_off),this._round(rad2deg*lng2,round_off)];
-		} else {
-			return [(rad2deg*lat2),(rad2deg*lng2)];
-		}
-	},
+_destination_from_bearing: function(lat, lng, bearing, distance, round_off = undefined) {
+    var R = 6371; // Earth radius in km
+    var d = Math.min(distance, R * Math.PI); // Cap distance at Earth’s circumference
+    var deg2rad = this._deg2rad;
+    var rad2deg = this._rad2deg;
+    var lat1 = deg2rad * Math.max(-89.9, Math.min(89.9, lat)); // Clamp input latitude
+    var lng1 = deg2rad * ((lng + 180) % 360 - 180); // Normalize longitude
+    var brng = deg2rad * bearing;
+
+    var sinLat1 = Math.sin(lat1);
+    var cosLat1 = Math.cos(lat1);
+    var cosdR = Math.cos(d / R);
+    var sindR = Math.sin(d / R);
+
+    var lat2 = Math.asin(sinLat1 * cosdR + cosLat1 * sindR * Math.cos(brng));
+    if (isNaN(lat2)) {
+        console.warn(`NaN latitude in _destination_from_bearing: lat=${lat}, lng=${lng}, bearing=${bearing}, distance=${distance}`);
+        lat2 = lat1; // Fallback to input latitude
+    }
+    lat2 = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, lat2)); // Clamp to [-90°, 90°]
+
+    var lng2 = lng1 + Math.atan2(Math.sin(brng) * sindR * cosLat1, cosdR - sinLat1 * Math.sin(lat2));
+    if (isNaN(lng2)) {
+        console.warn(`NaN longitude in _destination_from_bearing: lat=${lat}, lng=${lng}, bearing=${bearing}, distance=${distance}`);
+        lng2 = lng1; // Fallback to input longitude
+    }
+
+    var resultLat = rad2deg * lat2;
+    var resultLng = ((rad2deg * lng2 + 180) % 360) - 180; // Normalize to [-180, 180]
+
+    if (typeof round_off != "undefined") {
+        return [this._round(resultLat, round_off), this._round(resultLng, round_off)];
+    } else {
+        return [resultLat, resultLng];
+    }
+}
 
 	//main render event -- the big show
 	redraw: function() {
