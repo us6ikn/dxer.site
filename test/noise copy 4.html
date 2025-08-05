@@ -227,11 +227,11 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/geometries/TextGeometry.js"></script>
 
     <script>
-      // Note: This code uses localStorage to persist user-uploaded CSV data and grid locator across sessions.
+      // Note: This code uses localStorage to persist user-uploaded CSV data across sessions.
       // The data is stored locally on the user's device and not sent to any server.
       // No privacy disclaimers are required unless the CSV contains personal data or your app
       // is subject to GDPR/CCPA. If needed, add a note to your FAQ page (e.g., at https://dxer.site/sky-observer-faq.html)
-      // stating: "Sky Observer stores user-uploaded CSV files and grid locator locally in your browser to restore them on future visits."
+      // stating: "Sky Observer stores user-uploaded CSV files locally in your browser to restore them on future visits."
 
       const scene = new THREE.Scene();
       const moonTrajectoryGroup = new THREE.Group();
@@ -319,7 +319,6 @@
         const grid = gridInput.value;
         if (isValidGrid(grid)) {
           gridInput.style.borderColor = '#fff';
-          localStorage.setItem('skyObserverGrid', grid); // Store valid grid
           const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
           addMoonTrajectory(dateVal);
         } else {
@@ -509,7 +508,6 @@
         if (!coords) {
           gridInput.style.borderColor = 'red';
           gridInput.value = 'JO89tt';
-          localStorage.setItem('skyObserverGrid', 'JO89tt'); // Store default grid
           return addMoonTrajectory(selectedDate);
         }
         const lat = coords.lat;
@@ -575,7 +573,7 @@
 
       window.addMoonTrajectory = addMoonTrajectory;
 
-      function parseCsvData(csvText, csvSource) {
+      function parseCsvData(csvText, isDemo = false) {
         Papa.parse(csvText, {
           header: true,
           delimiter: ";",
@@ -649,39 +647,21 @@
             controls.target.copy(center);
             controls.update();
             addAzimuthCompass();
+            addMoonTrajectory();
 
-            // Update demoStatus based on csvSource
-            if (csvSource === 'demo') {
-              demoStatus.textContent = 'Demo loaded!';
-              demoStatus.style.display = 'block';
-            } else if (csvSource === 'stored') {
-              demoStatus.textContent = 'Stored CSV loaded';
-              demoStatus.style.display = 'block';
-            } else {
-              demoStatus.style.display = 'none';
-            }
+            demoStatus.style.display = isDemo ? 'block' : 'none';
           }
         });
       }
 
-      // Initialize grid locator from localStorage
-      const storedGrid = localStorage.getItem('skyObserverGrid');
-      if (storedGrid && isValidGrid(storedGrid)) {
-        gridInput.value = storedGrid;
-        gridInput.style.borderColor = '#fff';
-      } else {
-        gridInput.value = 'JO89tt';
-        localStorage.setItem('skyObserverGrid', 'JO89tt');
-      }
-
-      // Initialize CSV from localStorage or demo
+      // Check for stored CSV on page load
       const storedCsv = localStorage.getItem('skyObserverCsv');
       if (storedCsv) {
-        parseCsvData(storedCsv, 'stored');
+        parseCsvData(storedCsv, false);
       } else {
         fetch('2025-05-29_20.44.04.csv')
           .then(response => response.text())
-          .then(csv => parseCsvData(csv, 'demo'))
+          .then(csv => parseCsvData(csv, true))
           .catch(error => {
             console.error('Error loading demo CSV:', error);
             addAzimuthCompass();
@@ -696,8 +676,8 @@
         const reader = new FileReader();
         reader.onload = function (event) {
           const csvText = event.target.result;
-          localStorage.setItem('skyObserverCsv', csvText); // Store CSV
-          parseCsvData(csvText, 'uploaded'); // Parse and hide demoStatus
+          localStorage.setItem('skyObserverCsv', csvText); // Store CSV in localStorage
+          parseCsvData(csvText, false); // Parse and display, hide demo status
         };
         reader.readAsText(file);
       });
