@@ -86,11 +86,8 @@
 
       /* Style for date picker buttons */
       #prevDate, #nextDate {
-          padding: 1px 6px; /* Reduced padding to make buttons less tall */
-          font-size: 10px; /* Slightly smaller font */
-          line-height: 1.2; /* Reduced line-height for compactness */
-          min-height: 20px; /* Smaller height, still touch-friendly */
-          width: 24px; /* Fixed width for consistency */
+          padding: 2px 6px;
+          font-size: 11px;
           border-radius: 4px;
           background: #444;
           color: white;
@@ -189,6 +186,10 @@
         <label for="gridInput">Grid:</label>
         <input type="text" id="gridInput" maxlength="6" placeholder="e.g. JO89tt"
                style="width: 60px; font-size: 11px; padding: 2px 4px; border-radius: 4px; border: none;">
+        <button id="applyGrid"
+                style="padding: 2px 6px; font-size: 11px; border-radius: 4px; background: #444; color: white; border: none; cursor: pointer;">
+          Go
+        </button>
       </div>
       <!-- CSV -->
       <div style="display: flex; flex-direction: column; gap: 2px;">
@@ -200,10 +201,10 @@
       </div>
       <!-- Date with Previous/Next Buttons -->
       <div style="display: flex; align-items: center; gap: 4px;">
-        <button id="prevDate">&lt;</button>
+        <button id="prevDate" style="padding: 2px 6px; font-size: 11px; border-radius: 4px; background: #444; color: white; border: none; cursor: pointer;">&lt;</button>
         <input type="date" id="datePicker"
                style="font-size: 11px; padding: 2px 4px; border-radius: 4px; border: none; width: 100px;">
-        <button id="nextDate">&gt;</button>
+        <button id="nextDate" style="padding: 2px 6px; font-size: 11px; border-radius: 4px; background: #444; color: white; border: none; cursor: pointer;">&gt;</button>
       </div>
       <div id="demoStatus" style="color: red; font-weight: bold; margin-top: 10px;">
         Demo loaded!
@@ -212,11 +213,11 @@
 
     <!-- Time Slider -->
     <div id="moonTimeControls" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+      <input type="range" id="timeSlider" min="0" max="0" value="0"
+             style="width: 200px; accent-color: #fff; cursor: pointer;">
       <span id="moonTimeDisplay" style="color: white; font-family: 'Courier New', monospace; font-size: 18px; padding: 8px 12px; border-radius: 8px; background-color: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.2);">
         --:-- UTC
       </span>
-      <input type="range" id="timeSlider" min="0" max="0" value="0" aria-label="Moon time selection"
-             style="width: 200px; accent-color: #fff; cursor: pointer;">
     </div>
 
     <script src="a.ob.js"></script>
@@ -258,6 +259,7 @@
 
         moonMarker.position.copy(pos.position);
 
+        // Update time display
         const time = pos.time;
         const hours = String(time.getUTCHours()).padStart(2, '0');
         const minutes = String(time.getUTCMinutes()).padStart(2, '0');
@@ -301,6 +303,7 @@
       prevDateBtn.addEventListener('click', () => changeDate(-1));
       nextDateBtn.addEventListener('click', () => changeDate(1));
 
+      // Validate grid locator
       function isValidGrid(locator) {
         if (!locator || locator.length < 4 || locator.length > 6) return false;
         locator = locator.toUpperCase();
@@ -308,7 +311,18 @@
         return regex.test(locator);
       }
 
+      // Update grid input handling
       gridInput.addEventListener('input', () => {
+        const grid = gridInput.value;
+        if (isValidGrid(grid)) {
+          gridInput.style.borderColor = '#fff';
+          addMoonTrajectory(datePicker.value);
+        } else {
+          gridInput.style.borderColor = 'red';
+        }
+      });
+
+      document.getElementById('applyGrid').addEventListener('click', () => {
         const grid = gridInput.value;
         if (isValidGrid(grid)) {
           gridInput.style.borderColor = '#fff';
@@ -316,6 +330,7 @@
           addMoonTrajectory(dateVal);
         } else {
           gridInput.style.borderColor = 'red';
+          alert('Invalid grid locator. Use format like JO89tt.');
         }
       });
 
@@ -500,6 +515,7 @@
         const coords = maidenheadToLatLon(grid);
         if (!coords) {
           gridInput.style.borderColor = 'red';
+          alert('Invalid grid locator. Using default JO89tt.');
           gridInput.value = 'JO89tt';
           return addMoonTrajectory(selectedDate); // Retry with default
         }
@@ -594,7 +610,7 @@
                 const r = 1;
 
                 const x = r * Math.cos(elRad) * Math.sin(azRad);
-                const y = r * Math.sin(elRad);
+                y = r * Math.sin(elRad);
                 const z = r * Math.cos(elRad) * Math.cos(azRad);
 
                 const geometry = new THREE.SphereGeometry(0.015);
@@ -679,7 +695,7 @@
               const geometry = new THREE.SphereGeometry(0.015, 8, 8);
               const material = new THREE.MeshBasicMaterial({ color: getColor(point.noise) });
 
-              const sphere = new THREE.Mesh(geometry, material);
+              sphere = new THREE.Mesh(geometry, material);
               sphere.position.set(x, y, z);
 
               sphere.userData = {
@@ -792,13 +808,14 @@
 
       animate();
 
+      // Initialize date picker
       const today = new Date();
       const year = today.getUTCFullYear();
       const month = String(today.getUTCMonth() + 1).padStart(2, '0');
       const day = String(today.getUTCDate()).padStart(2, '0');
       datePicker.value = `${year}-${month}-${day}`;
       addMoonTrajectory();
-
+      
       window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
