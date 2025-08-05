@@ -238,12 +238,10 @@
           const showSunCheckbox = document.getElementById('showSun');
           const demoStatus = document.getElementById('demoStatus');
 
-          // Initialize renderer
           const renderer = new THREE.WebGLRenderer({ antialias: true });
           renderer.setSize(window.innerWidth, window.innerHeight);
           document.body.appendChild(renderer.domElement);
 
-          // Initialize camera
           const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
           camera.position.set(0, 0, 2);
           camera.lookAt(0, 0, 0);
@@ -327,7 +325,6 @@
           function updateInfoBox() {
             let html = '';
 
-            // Moon data (always shown)
             if (moonPositions.length && moonPositions[currentTimeIndex]) {
               const moonData = moonPositions[currentTimeIndex];
               if (moonData.elevation > 0) {
@@ -348,7 +345,6 @@
               `;
             }
 
-            // Sun data (shown only if checkbox is ticked)
             if (showSunCheckbox.checked && sunPositions.length && sunPositions[currentTimeIndex]) {
               const sunData = sunPositions[currentTimeIndex];
               html += `<br>`;
@@ -748,8 +744,8 @@
 
                   sphere.userData = {
                     azimuth: point.az,
-                    elevation: el,
-                    noise: noise
+                    elevation: point.el, // Fixed: Changed 'el' to 'point.el'
+                    noise: point.noise
                   };
 
                   spheres.push(sphere);
