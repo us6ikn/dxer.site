@@ -144,6 +144,7 @@
     <!-- App Title + Author + Buttons -->
     <div style="position: absolute; top: 8px; left: 8px; z-index: 30; font-family: 'Segoe UI', sans-serif;">
       <div style="display: flex; flex-direction: row; align-items: flex-end; gap: 8px;">
+        <!-- Left side: Author + App Name -->
         <div style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1;">
           <div style="font-size: 10px; color: #aaa; padding-right: 2px;">
             by SA5IKN
@@ -152,6 +153,7 @@
             Sky Observer
           </div>
         </div>
+        <!-- Right side: Buttons -->
         <div style="display: flex; flex-direction: row; gap: 4px;">
           <a href="https://dxer.site" target="_blank" title="Go to homepage"
              style="text-decoration: none; font-size: 16px; background: rgba(255,255,255,0.1); color: white; padding: 2px 6px; border-radius: 4px;">
@@ -165,7 +167,7 @@
       </div>
     </div>
 
-    <!-- Control Panel -->
+    <!-- Ultra-Compact Control Panel -->
     <div id="controlPanel" style="
       position: absolute;
       top: 36px;
@@ -182,11 +184,13 @@
       color: white;
       max-width: 160px;
     ">
+      <!-- Grid -->
       <div style="display: flex; align-items: center; gap: 4px;">
         <label for="gridInput">Grid:</label>
         <input type="text" id="gridInput" maxlength="6" placeholder="e.g. JO89tt"
                style="width: 60px; font-size: 11px; padding: 2px 4px; border-radius: 4px; border: none;">
       </div>
+      <!-- CSV -->
       <div style="display: flex; flex-direction: column; gap: 2px;">
         <label for="csvUpload">
           CSV <span style="font-size: 9px; color: #ccc;">(e.g. from SkyScanner)</span>:
@@ -194,12 +198,14 @@
         <input type="file" id="csvUpload" accept=".csv"
                style="font-size: 10px; padding: 2px 0px; color: white;">
       </div>
+      <!-- Date with Previous/Next Buttons -->
       <div style="display: flex; align-items: center; gap: 4px;">
         <button id="prevDate">&lt;</button>
         <input type="date" id="datePicker"
                style="font-size: 11px; padding: 2px 4px; border-radius: 4px; border: none; width: 100px;">
         <button id="nextDate">&gt;</button>
       </div>
+      <!-- Show Sun Checkbox -->
       <div style="display: flex; align-items: center; gap: 4px;">
         <input type="checkbox" id="showSun" style="width: 14px; height: 14px;">
         <label for="showSun">Show sun</label>
@@ -226,20 +232,22 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/geometries/TextGeometry.js"></script>
 
     <script>
+      // Note: This code uses localStorage to persist user-uploaded CSV data and grid locator across sessions.
+      // The data is stored locally on the user's device and not sent to any server.
+      // No privacy disclaimers are required unless the CSV contains personal data or your app
+      // is subject to GDPR/CCPA. If needed, add a note to your FAQ page (e.g., at https://dxer.site/sky-observer-faq.html)
+      // stating: "Sky Observer stores user-uploaded CSV files and grid locator locally in your browser to restore them on future visits."
+
       const scene = new THREE.Scene();
       const moonTrajectoryGroup = new THREE.Group();
       const sunTrajectoryGroup = new THREE.Group();
-      const compassGroup = new THREE.Group();
-
+      
       let moonPositions = [];
       let sunPositions = [];
       let currentTimeIndex = 0;
       let moonMarker = null;
       let sunMarker = null;
-      let rawPoints = [];
-      let spheres = [];
-      let minNoise = Infinity, maxNoise = -Infinity;
-
+      
       const moonTimeDisplay = document.getElementById('moonTimeDisplay');
       const timeSlider = document.getElementById('timeSlider');
       const datePicker = document.getElementById('datePicker');
@@ -249,189 +257,66 @@
       const showSunCheckbox = document.getElementById('showSun');
       const demoStatus = document.getElementById('demoStatus');
 
-      // Initialize renderer
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setClearColor(0x000000);
-      document.body.appendChild(renderer.domElement);
-      console.log('Renderer initialized, canvas appended, WebGL available:', !!renderer.getContext());
-
-      // Initialize camera
-      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.001, 100000);
-      camera.position.set(0, 0, 2);
-      camera.lookAt(0, 0, 0);
-
-      const controls = new THREE.OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-      controls.target.set(0, 0, 0);
-      controls.update();
-
-      const raycaster = new THREE.Raycaster();
-      const mouse = new THREE.Vector2();
-
-      // Add groups to scene
-      scene.add(moonTrajectoryGroup);
-      scene.add(sunTrajectoryGroup);
-      scene.add(compassGroup);
-      console.log('Initial groups added to scene');
-
-      function interpolateNoise(azimuth, elevation) {
-        if (!rawPoints.length) {
-          console.log('interpolateNoise: No raw points available');
-          return null;
-        }
-
-        const maxDistance = THREE.MathUtils.degToRad(10);
-        let sumWeightedNoise = 0;
-        let sumWeights = 0;
-
-        rawPoints.forEach(point => {
-          if (point.noise <= 0 || isNaN(point.noise)) return;
-
-          const az1 = THREE.MathUtils.degToRad(point.az);
-          const el1 = THREE.MathUtils.degToRad(point.el);
-          const az2 = THREE.MathUtils.degToRad(azimuth);
-          const el2 = THREE.MathUtils.degToRad(elevation);
-
-          const cosDistance = Math.sin(el1) * Math.sin(el2) + Math.cos(el1) * Math.cos(el2) * Math.cos(az1 - az2);
-          const distance = Math.acos(Math.max(-1, Math.min(1, cosDistance)));
-
-          if (distance <= maxDistance) {
-            const weight = 1 / (distance * distance + 0.0001);
-            sumWeightedNoise += point.noise * weight;
-            sumWeights += weight;
-          }
-        });
-
-        if (sumWeights === 0) {
-          console.log(`interpolateNoise: No points within maxDistance at Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°`);
-          return null;
-        }
-        const interpolatedNoise = sumWeightedNoise / sumWeights;
-        console.log(`Interpolated noise at Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°: ${interpolatedNoise.toFixed(2)} dB`);
-        return interpolatedNoise;
-      }
-
       function updateMoonMarker() {
         if (!moonPositions.length || !moonPositions[currentTimeIndex]) {
           console.log(`updateMoonMarker: No moon position at index ${currentTimeIndex}`);
-          if (moonMarker) {
-            moonMarker.visible = false;
-            console.log('Moon marker hidden');
-          }
+          if (moonMarker) moonMarker.visible = false;
           return false;
         }
 
         const moonData = moonPositions[currentTimeIndex];
         if (moonData.elevation <= 0) {
           console.log(`updateMoonMarker: Moon below horizon at ${moonData.time.toUTCString()} (elevation=${moonData.elevation.toFixed(1)}°)`);
-          if (moonMarker) {
-            moonMarker.visible = false;
-            console.log('Moon marker hidden');
-          }
+          if (moonMarker) moonMarker.visible = false;
           return false;
         }
 
         if (!moonMarker) {
           console.log(`updateMoonMarker: Creating moon marker`);
-          const geom = new THREE.SphereGeometry(0.05, 16, 16);
-          const mat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+          const geom = new THREE.SphereGeometry(0.03);
+          const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
           moonMarker = new THREE.Mesh(geom, mat);
           scene.add(moonMarker);
-          console.log('Moon marker created and added to scene');
         }
 
-        console.log(`updateMoonMarker: Showing moon marker at ${moonData.time.toUTCString()}, Az=${moonData.azimuth.toFixed(1)}°, El=${moonData.elevation.toFixed(1)}°, Pos=${moonData.position.toArray().map(n => n.toFixed(2))}`);
+        console.log(`updateMoonMarker: Showing moon marker at ${moonData.time.toUTCString()}, Az=${moonData.azimuth.toFixed(1)}°, El=${moonData.elevation.toFixed(1)}°`);
         moonMarker.visible = true;
         moonMarker.position.copy(moonData.position);
-        renderer.render(scene, camera); // Force render
         return true;
       }
 
       function updateSunMarker() {
         if (!sunPositions.length || !showSunCheckbox.checked || !sunPositions[currentTimeIndex]) {
           console.log(`updateSunMarker: No sun position or sun not shown at index ${currentTimeIndex}`);
-          if (sunMarker) {
-            sunMarker.visible = false;
-            console.log('Sun marker hidden');
-          }
+          if (sunMarker) sunMarker.visible = false;
           return false;
         }
 
         const sunData = sunPositions[currentTimeIndex];
         if (sunData.elevation <= 0) {
           console.log(`updateSunMarker: Sun below horizon at ${sunData.time.toUTCString()} (elevation=${sunData.elevation.toFixed(1)}°)`);
-          if (sunMarker) {
-            sunMarker.visible = false;
-            console.log('Sun marker hidden');
-          }
+          if (sunMarker) sunMarker.visible = false;
           return false;
         }
 
         if (!sunMarker) {
           console.log(`updateSunMarker: Creating sun marker`);
-          const geom = new THREE.SphereGeometry(0.03, 16, 16);
-          const mat = new THREE.MeshStandardMaterial({ color: 0xffa500 });
+          const geom = new THREE.SphereGeometry(0.02);
+          const mat = new THREE.MeshBasicMaterial({ color: 0xffa500 });
           sunMarker = new THREE.Mesh(geom, mat);
           scene.add(sunMarker);
-          console.log('Sun marker created and added to scene');
         }
 
-        console.log(`updateSunMarker: Showing sun marker at ${sunData.time.toUTCString()}, Az=${sunData.azimuth.toFixed(1)}°, El=${sunData.elevation.toFixed(1)}°, Pos=${sunData.position.toArray().map(n => n.toFixed(2))}`);
+        console.log(`updateSunMarker: Showing sun marker at ${sunData.time.toUTCString()}, Az=${sunData.azimuth.toFixed(1)}°, El=${sunData.elevation.toFixed(1)}°`);
         sunMarker.visible = true;
         sunMarker.position.copy(sunData.position);
-        renderer.render(scene, camera); // Force render
         return true;
-      }
-
-      function updateInfoBox() {
-        if (!moonPositions.length || !moonPositions[currentTimeIndex]) {
-          infoBox.innerHTML = 'No data available';
-          infoBox.style.display = 'block';
-          return;
-        }
-
-        const moonData = moonPositions[currentTimeIndex];
-        const timeText = moonTimeDisplay.textContent;
-        let html = `
-          <b>Moon Data</b><br>
-          Azimuth: ${moonData.azimuth.toFixed(1)}°<br>
-          Elevation: ${moonData.elevation.toFixed(1)}°<br>
-          Time: ${timeText}
-        `;
-
-        const moonNoise = interpolateNoise(moonData.azimuth, moonData.elevation);
-        if (moonNoise !== null) {
-          html += `<br>Moon Noise: ${moonNoise.toFixed(2)} dB`;
-        } else {
-          html += `<br>Moon Noise: N/A`;
-        }
-
-        if (showSunCheckbox.checked && sunPositions[currentTimeIndex]) {
-          const sunData = sunPositions[currentTimeIndex];
-          html += `
-            <br><br><b>Sun Data</b><br>
-            Azimuth: ${sunData.azimuth.toFixed(1)}°<br>
-            Elevation: ${sunData.elevation.toFixed(1)}°<br>
-            Time: ${timeText}
-          `;
-          const sunNoise = interpolateNoise(sunData.azimuth, sunData.elevation);
-          if (sunNoise !== null) {
-            html += `<br>Sun Noise: ${sunNoise.toFixed(2)} dB`;
-          } else {
-            html += `<br>Sun Noise: N/A`;
-          }
-        }
-
-        infoBox.innerHTML = html;
-        infoBox.style.display = 'block';
       }
 
       function updateTimeDisplay() {
         if (!moonPositions.length || !moonPositions[currentTimeIndex]) {
           console.log(`updateTimeDisplay: No positions at index ${currentTimeIndex}`);
           moonTimeDisplay.textContent = '--:-- UTC';
-          updateInfoBox();
           return;
         }
 
@@ -446,9 +331,9 @@
           const minutes = String(time.getUTCMinutes()).padStart(2, '0');
           moonTimeDisplay.textContent = `${hours}:${minutes} UTC`;
         } else {
+          console.log(`updateTimeDisplay: Setting --:-- UTC (both moon and sun not visible)`);
           moonTimeDisplay.textContent = '--:-- UTC';
         }
-        updateInfoBox();
       }
 
       function updateTimeSlider() {
@@ -497,8 +382,6 @@
         sunTrajectoryGroup.visible = showSunCheckbox.checked;
         updateSunMarker();
         updateTimeDisplay();
-        console.log(`Sun visibility toggled: ${showSunCheckbox.checked}, sunTrajectoryGroup children: ${sunTrajectoryGroup.children.length}`);
-        renderer.render(scene, camera);
       });
 
       function isValidGrid(locator) {
@@ -522,20 +405,46 @@
 
       function maidenheadToLatLon(locator) {
         if (!locator || locator.length < 4) return null;
+
         locator = locator.toUpperCase();
         const A = 'A'.charCodeAt(0);
+
         let lon = (locator.charCodeAt(0) - A) * 20 - 180;
         let lat = (locator.charCodeAt(1) - A) * 10 - 90;
+
         lon += parseInt(locator[2]) * 2;
         lat += parseInt(locator[3]) * 1;
+
         if (locator.length >= 6) {
           lon += (locator.charCodeAt(4) - A) * 5 / 60;
           lat += (locator.charCodeAt(5) - A) * 2.5 / 60;
         }
+
         lon += 2.5 / 60;
         lat += 1.25 / 60;
+
         return { lat, lon };
       }
+
+      scene.add(moonTrajectoryGroup);
+      scene.add(sunTrajectoryGroup);
+
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 0, 2);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      let spheres = [];
+
+      let minNoise = Infinity, maxNoise = -Infinity;
+      const rawPoints = [];
 
       function getColor(noise) {
         const range = maxNoise - minNoise;
@@ -552,53 +461,14 @@
       infoBox.style.background = 'rgba(0,0,0,0.7)';
       infoBox.style.color = '#fff';
       infoBox.style.fontFamily = 'monospace';
-      infoBox.style.display = 'block';
+      infoBox.style.display = 'none';
       document.body.appendChild(infoBox);
 
       function addAzimuthCompass() {
-        compassGroup.clear();
         const compassRadius = 1.05;
         const labelDistance = 1.2;
+        const compassGroup = new THREE.Group();
 
-        // Add ring and ticks
-        const ringGeom = new THREE.RingGeometry(compassRadius - 0.002, compassRadius + 0.002, 256);
-        const ringMat = new THREE.MeshBasicMaterial({
-          color: 0xffffff,
-          side: THREE.DoubleSide,
-          transparent: true,
-          opacity: 0.9
-        });
-        const ring = new THREE.Mesh(ringGeom, ringMat);
-        ring.rotation.x = -Math.PI / 2;
-        ring.position.y = 0;
-        compassGroup.add(ring);
-
-        for (let i = 0; i < 360; i += 10) {
-          const angle = THREE.MathUtils.degToRad(360 - i);
-          const isMajor = i % 30 === 0;
-          const outer = compassRadius + 0.02;
-          const inner = compassRadius - (isMajor ? 0.05 : 0.02);
-
-          const x1 = inner * Math.cos(angle);
-          const z1 = inner * Math.sin(angle);
-          const x2 = outer * Math.cos(angle);
-          const z2 = outer * Math.sin(angle);
-
-          const tickGeom = new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(x1, 0, z1),
-            new THREE.Vector3(x2, 0, z2)
-          ]);
-          const tickMat = new THREE.LineBasicMaterial({
-            color: 0xffffff,
-            transparent: true,
-            opacity: isMajor ? 1.0 : 0.5,
-            linewidth: 2
-          });
-          const tick = new THREE.Line(tickGeom, tickMat);
-          compassGroup.add(tick);
-        }
-
-        // Add labels async
         const fontLoader = new THREE.FontLoader();
         fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
           const directions = [
@@ -619,6 +489,7 @@
               size: 0.1,
               height: 0.001
             });
+
             const textMat = new THREE.MeshBasicMaterial({ color: dir.color });
             const text = new THREE.Mesh(textGeom, textMat);
             text.position.set(x, y, z);
@@ -626,36 +497,87 @@
             compassGroup.add(text);
           });
 
-          for (let i = 0; i < 360; i += 30) {
-            if ([0, 90, 180, 270].includes(i)) continue;
-            const angle = THREE.MathUtils.degToRad(360 - i);
-            const labelDist = compassRadius + 0.1;
-            const lx = labelDist * Math.sin(angle);
-            const lz = labelDist * Math.cos(angle);
+          const ringGeom = new THREE.RingGeometry(compassRadius - 0.002, compassRadius + 0.002, 256);
+          const ringMat = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.9
+          });
+          const ring = new THREE.Mesh(ringGeom, ringMat);
+          ring.rotation.x = -Math.PI / 2;
+          ring.position.y = 0;
+          compassGroup.add(ring);
 
-            const degGeom = new THREE.TextGeometry(i.toString(), {
-              font: font,
-              size: 0.045,
-              height: 0.001
+          for (let i = 0; i < 360; i += 10) {
+            const angle = THREE.MathUtils.degToRad(360 - i);
+            const isMajor = i % 30 === 0;
+            const outer = compassRadius + 0.02;
+            const inner = compassRadius - (isMajor ? 0.05 : 0.02);
+
+            const x1 = inner * Math.cos(angle);
+            const z1 = inner * Math.sin(angle);
+            const x2 = outer * Math.cos(angle);
+            const z2 = outer * Math.sin(angle);
+
+            const tickGeom = new THREE.BufferGeometry().setFromPoints([
+              new THREE.Vector3(x1, 0, z1),
+              new THREE.Vector3(x2, 0, z2)
+            ]);
+            const tickMat = new THREE.LineBasicMaterial({
+              color: 0xffffff,
+              transparent: true,
+              opacity: isMajor ? 1.0 : 0.5
             });
-            const degMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-            const label = new THREE.Mesh(degGeom, degMat);
-            label.position.set(lx, 0, lz);
-            label.lookAt(0, 0, 0);
-            label.rotation.y += Math.PI;
-            compassGroup.add(label);
+            const tick = new THREE.Line(tickGeom, tickMat);
+            compassGroup.add(tick);
+
+            if (isMajor && ![0, 90, 180, 270].includes(i)) {
+              const labelDist = compassRadius + 0.1;
+              const lx = labelDist * Math.sin(angle);
+              const lz = labelDist * Math.cos(angle);
+
+              const degGeom = new THREE.TextGeometry(i.toString(), {
+                font: font,
+                size: 0.045,
+                height: 0.001
+              });
+
+              const degMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+              const label = new THREE.Mesh(degGeom, degMat);
+              label.position.set(lx, 0, lz);
+              label.lookAt(0, 0, 0);
+              label.rotation.y += Math.PI;
+              compassGroup.add(label);
+            }
           }
 
-          console.log(`Compass labels added, compassGroup children: ${compassGroup.children.length}`);
-          renderer.render(scene, camera);
-        }, undefined, (error) => {
-          console.error('Font loading failed:', error);
-          console.log(`Compass added without labels, compassGroup children: ${compassGroup.children.length}`);
-          renderer.render(scene, camera);
-        });
+          for (let i = 0; i < 360; i += 10) {
+            const angle = THREE.MathUtils.degToRad(i);
+            const isMajor = i % 30 === 0;
+            const outer = compassRadius + 0.02;
+            const inner = compassRadius - (isMajor ? 0.05 : 0.02);
 
-        scene.add(compassGroup);
-        console.log(`Compass group added to scene, total scene children: ${scene.children.length}`);
+            const x1 = inner * Math.sin(angle);
+            const z1 = inner * Math.cos(angle);
+            const x2 = outer * Math.sin(angle);
+            const z2 = outer * Math.cos(angle);
+
+            const tickGeom = new THREE.BufferGeometry().setFromPoints([
+              new THREE.Vector3(x1, 0, z1),
+              new THREE.Vector3(x2, 0, z2)
+            ]);
+            const tickMat = new THREE.LineBasicMaterial({
+              color: 0xffffff,
+              transparent: true,
+              opacity: isMajor ? 1.0 : 0.5
+            });
+            const tick = new THREE.Line(tickGeom, tickMat);
+            compassGroup.add(tick);
+          }
+
+          scene.add(compassGroup);
+        });
       }
 
       function addTrajectories(selectedDate) {
@@ -678,10 +600,6 @@
 
         moonTrajectoryGroup.clear();
         sunTrajectoryGroup.clear();
-        if (moonMarker) scene.remove(moonMarker);
-        if (sunMarker) scene.remove(sunMarker);
-        moonMarker = null;
-        sunMarker = null;
         moonPositions = [];
         sunPositions = [];
         currentTimeIndex = 0;
@@ -699,6 +617,7 @@
 
           if (time >= endOfDay) break;
 
+          // Moon calculations
           const moonEq = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, false);
           const moonHor = Astronomy.Horizon(time, observer, moonEq.ra, moonEq.dec, 'normal');
           const moonElevationDeg = moonHor.altitude;
@@ -721,6 +640,7 @@
           }
           moonPositions.push({ time, position: moonPoint, azimuth: moonAzimuthDeg, elevation: moonElevationDeg });
 
+          // Sun calculations
           const sunEq = Astronomy.Equator(Astronomy.Body.Sun, time, observer, true, false);
           const sunHor = Astronomy.Horizon(time, observer, sunEq.ra, sunEq.dec, 'normal');
           const sunElevationDeg = sunHor.altitude;
@@ -742,36 +662,36 @@
           }
           sunPositions.push({ time, position: sunPoint, azimuth: sunAzimuthDeg, elevation: sunElevationDeg });
 
+          // Debug logging for 12:00 UTC (720 minutes), 17:10 UTC (1030 minutes), and 19:00 UTC (1140 minutes)
           if (minutes === 720 || minutes === 1030 || minutes === 1140) {
             console.log(`At ${time.toUTCString()}:`);
-            console.log(`  Moon: Az=${moonAzimuthDeg.toFixed(1)}°, El=${moonElevationDeg.toFixed(1)}°, Pos=${[xMoon.toFixed(2), yMoon.toFixed(2), zMoon.toFixed(2)]}`);
-            console.log(`  Sun: Az=${sunAzimuthDeg.toFixed(1)}°, El=${sunElevationDeg.toFixed(1)}°, Pos=${[xSun.toFixed(2), ySun.toFixed(2), zSun.toFixed(2)]}`);
+            console.log(`  Moon: Azimuth = ${moonAzimuthDeg.toFixed(1)}°, Elevation = ${moonElevationDeg.toFixed(1)}°`);
+            console.log(`  Sun: Azimuth = ${sunAzimuthDeg.toFixed(1)}°, Elevation = ${sunElevationDeg.toFixed(1)}°`);
           }
         }
 
         if (moonSegment.length > 1) moonSegments.push(moonSegment);
         if (sunSegment.length > 1) sunSegments.push(sunSegment);
 
-        moonSegments.forEach((seg, i) => {
+        moonSegments.forEach(seg => {
           const geom = new THREE.BufferGeometry().setFromPoints(seg);
-          const mat = new THREE.LineBasicMaterial({ color: 0xffff00, linewidth: 2 });
+          const mat = new THREE.LineBasicMaterial({ color: 0xffff00 });
           const line = new THREE.Line(geom, mat);
           line.userData = { isMoonTrajectory: true };
           moonTrajectoryGroup.add(line);
-          console.log(`Moon segment ${i}: ${seg.length} points, first point=${seg[0].toArray().map(n => n.toFixed(2))}`);
         });
 
-        sunSegments.forEach((seg, i) => {
+        sunSegments.forEach(seg => {
           const geom = new THREE.BufferGeometry().setFromPoints(seg);
-          const mat = new THREE.LineBasicMaterial({ color: 0xffa500, linewidth: 2 });
+          const mat = new THREE.LineBasicMaterial({ color: 0xffa500 });
           const line = new THREE.Line(geom, mat);
           line.userData = { isSunTrajectory: true };
           sunTrajectoryGroup.add(line);
-          console.log(`Sun segment ${i}: ${seg.length} points, first point=${seg[0].toArray().map(n => n.toFixed(2))}`);
         });
 
         sunTrajectoryGroup.visible = showSunCheckbox.checked;
 
+        // Set initial time to first moon visible, first sun visible, or noon (720 minutes = 12:00 UTC)
         if (firstMoonVisibleIndex !== -1) {
           currentTimeIndex = firstMoonVisibleIndex;
         } else if (showSunCheckbox.checked && firstSunVisibleIndex !== -1) {
@@ -779,142 +699,103 @@
         } else {
           currentTimeIndex = 72;
         }
+        console.log(`Initial currentTimeIndex: ${currentTimeIndex} (Time: ${moonPositions[currentTimeIndex]?.time.toUTCString() || 'N/A'})`);
+        console.log(`moonPositions length: ${moonPositions.length}, sunPositions length: ${sunPositions.length}`);
 
-        console.log(`addTrajectories: moonSegments=${moonSegments.length}, sunSegments=${sunSegments.length}, currentTimeIndex=${currentTimeIndex}`);
-        console.log(`Scene children: ${scene.children.length}, moonTrajectoryGroup: ${moonTrajectoryGroup.children.length}, sunTrajectoryGroup: ${sunTrajectoryGroup.children.length}, compassGroup: ${compassGroup.children.length}`);
         updateTimeSlider();
-        renderer.render(scene, camera);
       }
 
       window.addTrajectories = addTrajectories;
 
       function parseCsvData(csvText, csvSource) {
-        console.log('parseCsvData: Starting CSV parsing, source=', csvSource);
-        console.log('CSV content (first 500 chars):', csvText.substring(0, 500));
-
-        // Try comma delimiter first, then semicolon
-        let parsed = Papa.parse(csvText, {
+        Papa.parse(csvText, {
           header: true,
-          delimiter: ",",
-          dynamicTyping: true,
-          skipEmptyLines: true
-        });
+          delimiter: ";",
+          complete: function (results) {
+            rawPoints.length = 0;
+            spheres.forEach(s => scene.remove(s));
+            spheres.length = 0;
+            minNoise = Infinity;
+            maxNoise = -Infinity;
 
-        if (parsed.errors.length || !parsed.data.length) {
-          console.warn('Comma delimiter failed, trying semicolon');
-          parsed = Papa.parse(csvText, {
-            header: true,
-            delimiter: ";",
-            dynamicTyping: true,
-            skipEmptyLines: true
-          });
-        }
+            results.data.forEach(row => {
+              if (!row.Valid || row.Valid !== "True") return;
 
-        console.log('Papa.parse results:', parsed.data.slice(0, 5), 'Errors:', parsed.errors);
+              const az = parseFloat(row.Azimuth?.replace(",", "."));
+              const el = parseFloat(row.Elevation?.replace(",", "."));
+              const noise = parseFloat(row.Noise?.replace(",", "."));
 
-        rawPoints.length = 0;
-        spheres.forEach(s => scene.remove(s));
-        spheres.length = 0;
-        minNoise = Infinity;
-        maxNoise = -Infinity;
+              if (isNaN(az) || isNaN(el) || isNaN(noise)) return;
 
-        parsed.data.forEach((row, i) => {
-          const valid = row.Valid === "True" || row.Valid === true || row.valid === "True" || row.valid === true;
-          if (!valid) {
-            console.log(`Row ${i} skipped: Invalid Valid field`, row);
-            return;
+              minNoise = Math.min(minNoise, noise);
+              maxNoise = Math.max(maxNoise, noise);
+
+              rawPoints.push({ az, el, noise });
+            });
+
+            rawPoints.forEach(point => {
+              const azRad = THREE.MathUtils.degToRad(360 - point.az);
+              const elRad = THREE.MathUtils.degToRad(point.el);
+              const r = 1;
+
+              const x = r * Math.cos(elRad) * Math.sin(azRad);
+              const y = r * Math.sin(elRad);
+              const z = r * Math.cos(elRad) * Math.cos(azRad);
+
+              const geometry = new THREE.SphereGeometry(0.015, 8, 8);
+              const material = new THREE.MeshBasicMaterial({ color: getColor(point.noise) });
+
+              const sphere = new THREE.Mesh(geometry, material);
+              sphere.position.set(x, y, z);
+
+              sphere.userData = {
+                azimuth: point.az,
+                elevation: point.el,
+                noise: point.noise
+              };
+
+              spheres.push(sphere);
+              scene.add(sphere);
+            });
+
+            const boundingBox = new THREE.Box3();
+            spheres.forEach(s => boundingBox.expandByPoint(s.position));
+
+            const center = new THREE.Vector3();
+            boundingBox.getCenter(center);
+
+            const size = new THREE.Vector3();
+            boundingBox.getSize(size);
+            const maxDim = Math.max(size.x, size.y, size.z);
+
+            let avgPosition = new THREE.Vector3();
+            spheres.forEach(s => avgPosition.add(s.position));
+            avgPosition.divideScalar(spheres.length);
+
+            const directionToData = avgPosition.clone().normalize();
+            const distance = maxDim * 2;
+            const cameraPos = directionToData.clone().multiplyScalar(distance);
+
+            camera.position.copy(cameraPos);
+            camera.lookAt(center);
+            controls.target.copy(center);
+            controls.update();
+            addAzimuthCompass();
+
+            if (csvSource === 'demo') {
+              demoStatus.textContent = 'Demo loaded!';
+              demoStatus.style.display = 'block';
+            } else if (csvSource === 'stored') {
+              demoStatus.textContent = 'Stored CSV loaded';
+              demoStatus.style.display = 'block';
+            } else {
+              demoStatus.style.display = 'none';
+            }
           }
-
-          // Flexible column names
-          const az = parseFloat((row.Azimuth || row.az || row.Az)?.toString().replace(",", "."));
-          const el = parseFloat((row.Elevation || row.el || row.El)?.toString().replace(",", "."));
-          const noise = parseFloat((row.Noise || row.noise)?.toString().replace(",", "."));
-
-          if (isNaN(az) || isNaN(el) || isNaN(noise) || noise <= 0 || el < 0 || el > 90 || az < 0 || az > 360) {
-            console.log(`Row ${i} skipped: Invalid data (Az=${az}, El=${el}, Noise=${noise})`, row);
-            return;
-          }
-
-          minNoise = Math.min(minNoise, noise);
-          maxNoise = Math.max(maxNoise, noise);
-          rawPoints.push({ az, el, noise });
         });
-
-        if (!rawPoints.length) {
-          console.warn('No valid points parsed from CSV');
-        }
-
-        rawPoints.forEach((point, i) => {
-          const azRad = THREE.MathUtils.degToRad(360 - point.az);
-          const elRad = THREE.MathUtils.degToRad(point.el);
-          const r = 1;
-          const x = r * Math.cos(elRad) * Math.sin(azRad);
-          const y = r * Math.sin(elRad);
-          const z = r * Math.cos(elRad) * Math.cos(azRad);
-
-          const geometry = new THREE.SphereGeometry(0.015, 16, 16);
-          const material = new THREE.MeshStandardMaterial({ color: getColor(point.noise) });
-          const sphere = new THREE.Mesh(geometry, material);
-          sphere.position.set(x, y, z);
-          sphere.userData = { azimuth: point.az, elevation: point.el, noise: point.noise };
-          spheres.push(sphere);
-          scene.add(sphere);
-          console.log(`Sphere ${i}: Az=${point.az.toFixed(1)}°, El=${point.el.toFixed(1)}°, Noise=${point.noise.toFixed(2)}, Pos=${[x.toFixed(2), y.toFixed(2), z.toFixed(2)]}`);
-        });
-
-        // Adjust camera only if spheres exist
-        if (spheres.length) {
-          const boundingBox = new THREE.Box3();
-          spheres.forEach(s => boundingBox.expandByPoint(s.position));
-          const center = new THREE.Vector3();
-          boundingBox.getCenter(center);
-          const size = new THREE.Vector3();
-          boundingBox.getSize(size);
-          const maxDim = Math.max(size.x, size.y, size.z) || 2;
-
-          const avgPosition = new THREE.Vector3();
-          spheres.forEach(s => avgPosition.add(s.position));
-          avgPosition.divideScalar(spheres.length);
-
-          const directionToData = avgPosition.clone().normalize();
-          const distance = maxDim * 2;
-          camera.position.copy(directionToData.clone().multiplyScalar(distance));
-          camera.lookAt(center);
-          controls.target.copy(center);
-          controls.update();
-        } else {
-          camera.position.set(0, 0, 2);
-          camera.lookAt(0, 0, 0);
-          controls.target.set(0, 0, 0);
-          controls.update();
-        }
-
-        console.log(`parseCsvData: Spheres added=${spheres.length}, Camera pos=${camera.position.toArray().map(n => n.toFixed(2))}, Controls target=${controls.target.toArray().map(n => n.toFixed(2))}`);
-        console.log(`Scene children after parseCsvData: ${scene.children.length}`);
-
-        addAzimuthCompass();
-        updateTimeDisplay();
-        if (csvSource === 'demo') {
-          demoStatus.textContent = 'Demo loaded!';
-          demoStatus.style.display = 'block';
-        } else if (csvSource === 'stored') {
-          demoStatus.textContent = 'Stored CSV loaded';
-          demoStatus.style.display = 'block';
-        } else {
-          demoStatus.style.display = 'none';
-        }
-        renderer.render(scene, camera);
       }
 
-      // Fallback sample CSV data
-      const sampleCsv = `
-Valid,Azimuth,Elevation,Noise
-True,0,45,10.5
-True,90,30,12.3
-True,180,60,15.7
-True,270,20,11.2
-`;
-
+      // Initialize grid locator from localStorage
       const storedGrid = localStorage.getItem('skyObserverGrid');
       if (storedGrid && isValidGrid(storedGrid)) {
         gridInput.value = storedGrid;
@@ -924,29 +805,25 @@ True,270,20,11.2
         localStorage.setItem('skyObserverGrid', 'JO89tt');
       }
 
+      // Initialize CSV from localStorage or demo
       const storedCsv = localStorage.getItem('skyObserverCsv');
       if (storedCsv) {
         parseCsvData(storedCsv, 'stored');
       } else {
         fetch('2025-05-29_20.44.04.csv')
-          .then(response => {
-            if (!response.ok) {
-              console.warn(`Demo CSV fetch failed (HTTP ${response.status}), using sample CSV`);
-              return sampleCsv;
-            }
-            return response.text();
-          })
+          .then(response => response.text())
           .then(csv => parseCsvData(csv, 'demo'))
           .catch(error => {
             console.error('Error loading demo CSV:', error);
-            console.log('Falling back to sample CSV');
-            parseCsvData(sampleCsv, 'demo');
+            addAzimuthCompass();
+            addTrajectories();
           });
       }
 
       document.getElementById('csvUpload').addEventListener('change', function (e) {
         const file = e.target.files[0];
         if (!file) return;
+
         const reader = new FileReader();
         reader.onload = function (event) {
           const csvText = event.target.result;
@@ -961,19 +838,46 @@ True,270,20,11.2
         mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
 
         raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(spheres);
+        const intersects = raycaster.intersectObjects([...spheres, moonMarker, sunMarker].filter(obj => obj !== null));
 
         if (intersects.length > 0) {
+          const clickedObject = intersects[0].object;
+
+          if (clickedObject === moonMarker && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0) {
+            const moonData = moonPositions[currentTimeIndex];
+            infoBox.innerHTML = `
+              <b>Moon Position</b><br>
+              <b>Azimuth:</b> ${moonData.azimuth.toFixed(1)}°<br>
+              <b>Elevation:</b> ${moonData.elevation.toFixed(1)}°<br>
+              <b>Time:</b> ${moonTimeDisplay.textContent}
+            `;
+            infoBox.style.display = 'block';
+            return;
+          }
+
+          if (clickedObject === sunMarker && showSunCheckbox.checked && sunPositions[currentTimeIndex] && sunPositions[currentTimeIndex].elevation > 0) {
+            const sunData = sunPositions[currentTimeIndex];
+            infoBox.innerHTML = `
+              <b>Sun Position</b><br>
+              <b>Azimuth:</b> ${sunData.azimuth.toFixed(1)}°<br>
+              <b>Elevation:</b> ${sunData.elevation.toFixed(1)}°<br>
+              <b>Time:</b> ${moonTimeDisplay.textContent}
+            `;
+            infoBox.style.display = 'block';
+            return;
+          }
+
           const sphere = intersects[0].object;
           const { azimuth, elevation, noise } = sphere.userData;
+
           infoBox.innerHTML = `
-            <b>Measurement</b><br>
-            Azimuth: ${azimuth.toFixed(1)}°<br>
-            Elevation: ${elevation.toFixed(1)}°<br>
-            Noise: ${noise.toFixed(2)} dB
+            <b>Azimuth:</b> ${azimuth.toFixed(1)}°<br>
+            <b>Elevation:</b> ${elevation.toFixed(1)}°<br>
+            <b>Noise:</b> ${noise.toFixed(2)} dB
           `;
+          infoBox.style.display = 'block';
         } else {
-          updateInfoBox();
+          infoBox.style.display = 'none';
         }
       });
 
@@ -985,19 +889,41 @@ True,270,20,11.2
         mouse.y = - (touch.clientY / window.innerHeight) * 2 + 1;
 
         raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(spheres);
+        const intersects = raycaster.intersectObjects([...spheres, moonMarker, sunMarker].filter(obj => obj !== null));
 
         if (intersects.length > 0) {
-          const sphere = intersects[0].object;
-          const { azimuth, elevation, noise } = sphere.userData;
-          infoBox.innerHTML = `
-            <b>Measurement</b><br>
-            Azimuth: ${azimuth.toFixed(1)}°<br>
-            Elevation: ${elevation.toFixed(1)}°<br>
-            Noise: ${noise.toFixed(2)} dB
-          `;
+          const clickedObject = intersects[0].object;
+
+          if (clickedObject === moonMarker && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0) {
+            const moonData = moonPositions[currentTimeIndex];
+            infoBox.innerHTML = `
+              <b>Moon Data</b><br>
+              Time: ${moonData.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} UTC<br>
+              Azimuth: ${moonData.azimuth.toFixed(2)}°<br>
+              Elevation: ${moonData.elevation.toFixed(2)}°
+            `;
+            infoBox.style.display = 'block';
+          } else if (clickedObject === sunMarker && showSunCheckbox.checked && sunPositions[currentTimeIndex] && sunPositions[currentTimeIndex].elevation > 0) {
+            const sunData = sunPositions[currentTimeIndex];
+            infoBox.innerHTML = `
+              <b>Sun Data</b><br>
+              Time: ${sunData.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} UTC<br>
+              Azimuth: ${sunData.azimuth.toFixed(2)}°<br>
+              Elevation: ${sunData.elevation.toFixed(2)}°
+            `;
+            infoBox.style.display = 'block';
+          } else if (clickedObject.userData.noise !== undefined) {
+            const { azimuth, elevation, noise } = clickedObject.userData;
+            infoBox.innerHTML = `
+              <b>Measurement</b><br>
+              Azimuth: ${azimuth.toFixed(2)}°<br>
+              Elevation: ${elevation.toFixed(2)}°<br>
+              Noise: ${noise.toFixed(2)} dB
+            `;
+            infoBox.style.display = 'block';
+          }
         } else {
-          updateInfoBox();
+          infoBox.style.display = 'none';
         }
       });
 
@@ -1005,15 +931,6 @@ True,270,20,11.2
         requestAnimationFrame(animate);
         controls.update();
         renderer.render(scene, camera);
-
-        const sceneInfo = scene.children.map(child => ({
-          type: child.type,
-          name: child.userData?.isMoonTrajectory ? 'MoonTrajectory' : child.userData?.isSunTrajectory ? 'SunTrajectory' : child === compassGroup ? 'CompassGroup' : child === moonMarker ? 'MoonMarker' : child === sunMarker ? 'SunMarker' : child.userData?.noise ? 'NoiseSphere' : 'Other',
-          visible: child.visible,
-          childrenCount: child.children ? child.children.length : 0,
-          position: child.position ? child.position.toArray().map(n => n.toFixed(2)) : null
-        }));
-        console.log(`Rendering frame, scene children: ${scene.children.length}`, sceneInfo);
       }
 
       animate();
