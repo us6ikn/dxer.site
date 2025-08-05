@@ -86,10 +86,13 @@
 
       /* Style for date picker buttons */
       #prevDate, #nextDate {
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.3);
+          padding: 2px 6px;
+          font-size: 11px;
           border-radius: 4px;
+          background: #444;
           color: white;
+          border: none;
+          cursor: pointer;
           transition: background 0.2s, transform 0.2s;
       }
       #prevDate:hover, #nextDate:hover {
@@ -135,12 +138,9 @@
 
 </head>
 <body>
-    
     <!-- App Title + Author + Buttons -->
     <div style="position: absolute; top: 8px; left: 8px; z-index: 30; font-family: 'Segoe UI', sans-serif;">
-      
       <div style="display: flex; flex-direction: row; align-items: flex-end; gap: 8px;">
-        
         <!-- Left side: Author + App Name -->
         <div style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1;">
           <div style="font-size: 10px; color: #aaa; padding-right: 2px;">
@@ -150,7 +150,6 @@
             Sky Observer
           </div>
         </div>
-
         <!-- Right side: Buttons -->
         <div style="display: flex; flex-direction: row; gap: 4px;">
           <a href="https://dxer.site" target="_blank" title="Go to homepage"
@@ -162,13 +161,8 @@
             ❓
           </a>
         </div>
-
       </div>
-
     </div>
-
-
-
 
     <!-- Ultra-Compact Control Panel -->
     <div id="controlPanel" style="
@@ -187,7 +181,6 @@
       color: white;
       max-width: 160px;
     ">
-
       <!-- Grid -->
       <div style="display: flex; align-items: center; gap: 4px;">
         <label for="gridInput">Grid:</label>
@@ -198,7 +191,6 @@
           Go
         </button>
       </div>
-
       <!-- CSV -->
       <div style="display: flex; flex-direction: column; gap: 2px;">
         <label for="csvUpload">
@@ -207,682 +199,628 @@
         <input type="file" id="csvUpload" accept=".csv"
                style="font-size: 10px; padding: 2px 0px; color: white;">
       </div>
-
-
-      <!-- Date -->
-      <div style="display: flex; flex-direction: column; gap: 2px;">
-        <label for="datePicker">Date (UTC):</label>
+      <!-- Date with Previous/Next Buttons -->
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <button id="prevDate" style="padding: 2px 6px; font-size: 11px; border-radius: 4px; background: #444; color: white; border: none; cursor: pointer;">&lt;</button>
         <input type="date" id="datePicker"
-               style="font-size: 11px; padding: 2px 4px; border-radius: 4px; border: none; width: 100%;">
+               style="font-size: 11px; padding: 2px 4px; border-radius: 4px; border: none; width: 100px;">
+        <button id="nextDate" style="padding: 2px 6px; font-size: 11px; border-radius: 4px; background: #444; color: white; border: none; cursor: pointer;">&gt;</button>
       </div>
-        
-        <div id="demoStatus" style="color: red; font-weight: bold; margin-top: 10px;">
-          Demo loaded!
-        </div>
-
-      
+      <div id="demoStatus" style="color: red; font-weight: bold; margin-top: 10px;">
+        Demo loaded!
+      </div>
     </div>
-        
-        <!-- Ultra-Compact Control Panel -->
-        <div id="controlPanel" style="
-          position: absolute;
-          top: 36px;
-          left: 8px;
-          z-index: 20;
-          background: rgba(0,0,0,0.6);
-          padding: 6px 8px;
-          border-radius: 8px;
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          font-family: 'Segoe UI', sans-serif;
-          font-size: 12px;
-          color: white;
-          max-width: 160px;
-        ">
-          <!-- Grid -->
-          <div style="display: flex; align-items: center; gap: 4px;">
-            <label for="gridInput">Grid:</label>
-            <input type="text" id="gridInput" maxlength="6" placeholder="e.g. JO89tt"
-                   style="width: 60px; font-size: 11px; padding: 2px 4px; border-radius: 4px; border: none;">
-            <button id="applyGrid"
-                    style="padding: 2px 6px; font-size: 11px; border-radius: 4px; background: #444; color: white; border: none; cursor: pointer;">
-              Go
-            </button>
-          </div>
-
-          <!-- CSV -->
-          <div style="display: flex; flex-direction: column; gap: 2px;">
-            <label for="csvUpload">
-              CSV <span style="font-size: 9px; color: #ccc;">(e.g. from SkyScanner)</span>:
-            </label>
-            <input type="file" id="csvUpload" accept=".csv"
-                   style="font-size: 10px; padding: 2px 0px; color: white;">
-          </div>
-
-          <!-- Date with Previous/Next Buttons -->
-          <div style="display: flex; align-items: center; gap: 4px;">
-            <button id="prevDate" style="padding: 2px 6px; font-size: 11px; border-radius: 4px; background: #444; color: white; border: none; cursor: pointer;">&lt;</button>
-            <input type="date" id="datePicker"
-                   style="font-size: 11px; padding: 2px 4px; border-radius: 4px; border: none; width: 100px;">
-            <button id="nextDate" style="padding: 2px 6px; font-size: 11px; border-radius: 4px; background: #444; color: white; border: none; cursor: pointer;">&gt;</button>
-          </div>
-
-          <div id="demoStatus" style="color: red; font-weight: bold; margin-top: 10px;">
-            Demo loaded!
-          </div>
-        </div>
-
-        <!-- Time Slider -->
-        <div id="moonTimeControls" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-          <input type="range" id="timeSlider" min="0" max="0" value="0"
-                 style="width: 200px; accent-color: #fff; cursor: pointer;">
-          <span id="moonTimeDisplay" style="color: white; font-family: 'Courier New', monospace; font-size: 18px; padding: 8px 12px; border-radius: 8px; background-color: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.2);">
-            --:-- UTC
-          </span>
-        </div>
-        <script src="a.ob.js"></script>
-<!-- THREE.js core -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.146.0/build/three.min.js"></script>
-
-<!-- OrbitControls (attached to global THREE) -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/controls/OrbitControls.js"></script>
-
-<!-- PapaParse for CSV parsing -->
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-<!-- Add these two lines for FontLoader and TextGeometry -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/loaders/FontLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/geometries/TextGeometry.js"></script>
-
-<script>
- const scene = new THREE.Scene();
- const moonTrajectoryGroup = new THREE.Group();
- 
- let moonPositions = [];
- let currentMoonIndex = 0;
- let moonMarker = null;
- 
- const moonTimeDisplay = document.getElementById('moonTimeDisplay');
- const timeSlider = document.getElementById('timeSlider');
- const datePicker = document.getElementById('datePicker');
- const prevDateBtn = document.getElementById('prevDate');
- const nextDateBtn = document.getElementById('nextDate');
-
- function updateMoonMarker() {
- if (!moonPositions.length) {
- moonTimeDisplay.textContent = '--:-- UTC';
- timeSlider.disabled = true;
- return;
- }
-
- const pos = moonPositions[currentMoonIndex];
- if (!moonMarker) {
- const geom = new THREE.SphereGeometry(0.03);
- const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
- moonMarker = new THREE.Mesh(geom, mat);
- scene.add(moonMarker);
- }
-
- moonMarker.position.copy(pos.position);
-
- // Update time display
- const time = pos.time;
- const hours = String(time.getUTCHours()).padStart(2, '0');
- const minutes = String(time.getUTCMinutes()).padStart(2, '0');
- moonTimeDisplay.textContent = `${hours}:${minutes} UTC`;
- }
-
- // Update slider range based on moonPositions
- function updateTimeSlider() {
- timeSlider.min = 0;
- timeSlider.max = moonPositions.length - 1 || 0;
- timeSlider.value = currentMoonIndex;
- timeSlider.disabled = moonPositions.length === 0;
- }
-
- // Change moon time based on slider input
- function changeMoonTime(index) {
- if (!moonPositions.length) return;
- currentMoonIndex = Math.max(0, Math.min(index, moonPositions.length - 1));
- updateMoonMarker();
- }
-
- // Change date by days (positive or negative)
- function changeDate(days) {
- const currentDate = new Date(datePicker.value || Date.now());
- currentDate.setUTCDate(currentDate.getUTCDate() + days);
- datePicker.valueAsDate = currentDate;
- addMoonTrajectory(datePicker.value);
- }
-
- // Slider event listener
- timeSlider.addEventListener('input', (e) => {
- changeMoonTime(parseInt(e.target.value));
- });
-
- // Date picker and button event listeners
- datePicker.addEventListener('change', (e) => {
- const selectedDate = e.target.value;
- if (selectedDate) {
- addMoonTrajectory(selectedDate);
- }
- });
-
- prevDateBtn.addEventListener('click', () => changeDate(-1));
- nextDateBtn.addEventListener('click', () => changeDate(1));
-
- function maidenheadToLatLon(locator) {
- if (!locator || locator.length < 4) return null;
-
- locator = locator.toUpperCase();
- const A = 'A'.charCodeAt(0);
- const a = 'a'.charCodeAt(0);
-
- let lon = (locator.charCodeAt(0) - A) * 20 - 180;
- let lat = (locator.charCodeAt(1) - A) * 10 - 90;
-
- lon += parseInt(locator[2]) * 2;
- lat += parseInt(locator[3]) * 1;
-
- if (locator.length >= 6) {
- lon += (locator.charCodeAt(4) - A) * 5 / 60;
- lat += (locator.charCodeAt(5) - A) * 2.5 / 60;
- }
-
- // Center of the grid square
- lon += 2.5 / 60;
- lat += 1.25 / 60;
-
- return { lat, lon };
- }
-
- scene.add(moonTrajectoryGroup);
-
- const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
- camera.position.set(0, 0, 2);
-
- const renderer = new THREE.WebGLRenderer({ antialias: true });
- renderer.setSize(window.innerWidth, window.innerHeight);
- document.body.appendChild(renderer.domElement);
-
- const controls = new THREE.OrbitControls(camera, renderer.domElement);
- controls.enableDamping = true;
-
- const raycaster = new THREE.Raycaster();
- const mouse = new THREE.Vector2();
- let spheres = [];
-
- let minNoise = Infinity, maxNoise = -Infinity;
- const rawPoints = [];
-
- function getColor(noise) {
- const range = maxNoise - minNoise;
- const norm = range === 0 ? 0.5 : (noise - minNoise) / range;
- return new THREE.Color().setHSL(0.7 - norm * 0.7, 1.0, 0.5);
- }
-
- // Create a floating info box
- const infoBox = document.createElement('div');
- infoBox.id = 'infoBox';
- infoBox.style.position = 'absolute';
- infoBox.style.top = '10px';
- infoBox.style.right = '10px';
- infoBox.style.padding = '10px';
- infoBox.style.background = 'rgba(0,0,0,0.7)';
- infoBox.style.color = '#fff';
- infoBox.style.fontFamily = 'monospace';
- infoBox.style.display = 'none';
- document.body.appendChild(infoBox);
-
- function addAzimuthCompass() {
- const compassRadius = 1.05;
- const labelDistance = 1.2;
- const compassGroup = new THREE.Group();
-
- const fontLoader = new THREE.FontLoader();
- fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
- // Cardinal directions
- const directions = [
- { label: 'N', az: 0, color: 0xff0000 }, // Red for North
- { label: 'E', az: 90, color: 0xffffff },
- { label: 'S', az: 180, color: 0xffffff },
- { label: 'W', az: 270, color: 0xffffff }
- ];
-
- directions.forEach(dir => {
- const azRad = THREE.MathUtils.degToRad(360 - dir.az);
- const x = labelDistance * Math.sin(azRad);
- const z = labelDistance * Math.cos(azRad);
- const y = 0;
-
- const textGeom = new THREE.TextGeometry(dir.label, {
- font: font,
- size: 0.1,
- height: 0.001
- });
-
- const textMat = new THREE.MeshBasicMaterial({ color: dir.color });
- const text = new THREE.Mesh(textGeom, textMat);
- text.position.set(x, y, z);
- text.lookAt(0, 0, 0);
- compassGroup.add(text);
- });
-
- // Draw the white ring
- const ringGeom = new THREE.RingGeometry(compassRadius - 0.002, compassRadius + 0.002, 256);
- const ringMat = new THREE.MeshBasicMaterial({
- color: 0xffffff,
- side: THREE.DoubleSide,
- transparent: true,
- opacity: 0.9
- });
- const ring = new THREE.Mesh(ringGeom, ringMat);
- ring.rotation.x = -Math.PI / 2;
- ring.position.y = 0;
- compassGroup.add(ring);
- 
- // Add tick marks and degree labels every 10°, with labels every 30°
- for (let i = 0; i < 360; i += 10) {
- const angle = THREE.MathUtils.degToRad(360 - i);
- const isMajor = i % 30 === 0;
- const outer = compassRadius + 0.02;
- const inner = compassRadius - (isMajor ? 0.05 : 0.02);
-
- const x1 = inner * Math.cos(angle);
- const z1 = inner * Math.sin(angle);
- const x2 = outer * Math.cos(angle);
- const z2 = outer * Math.sin(angle);
-
- // Tick mark
- const tickGeom = new THREE.BufferGeometry().setFromPoints([
- new THREE.Vector3(x1, 0, z1),
- new THREE.Vector3(x2, 0, z2)
- ]);
- const tickMat = new THREE.LineBasicMaterial({
- color: 0xffffff,
- transparent: true,
- opacity: isMajor ? 1.0 : 0.5
- });
- const tick = new THREE.Line(tickGeom, tickMat);
- compassGroup.add(tick);
-
- // Degree label (skip cardinal points)
- if (isMajor && ![0, 90, 180, 270].includes(i)) {
- const labelDist = compassRadius + 0.1;
- const lx = labelDist * Math.sin(angle);
- const lz = labelDist * Math.cos(angle);
-
- const degGeom = new THREE.TextGeometry(i.toString(), {
- font: font,
- size: 0.045,
- height: 0.001
- });
-
- const degMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
- const label = new THREE.Mesh(degGeom, degMat);
- label.position.set(lx, 0, lz);
- label.lookAt(0, 0, 0);
- label.rotation.y += Math.PI;
- compassGroup.add(label);
- }
- }
-
- // Add tick marks every 10°
- for (let i = 0; i < 360; i += 10) {
- const angle = THREE.MathUtils.degToRad(i);
- const isMajor = i % 30 === 0;
- const outer = compassRadius + 0.02;
- const inner = compassRadius - (isMajor ? 0.05 : 0.02);
-
- const x1 = inner * Math.sin(angle);
- const z1 = inner * Math.cos(angle);
- const x2 = outer * Math.sin(angle);
- const z2 = outer * Math.cos(angle);
-
- const tickGeom = new THREE.BufferGeometry().setFromPoints([
- new THREE.Vector3(x1, 0, z1),
- new THREE.Vector3(x2, 0, z2)
- ]);
- const tickMat = new THREE.LineBasicMaterial({
- color: 0xffffff,
- transparent: true,
- opacity: isMajor ? 1.0 : 0.5
- });
- const tick = new THREE.Line(tickGeom, tickMat);
- compassGroup.add(tick);
- }
-
- scene.add(compassGroup);
- });
- }
-
- function addMoonTrajectory(selectedDate) {
- const grid = document.getElementById("gridInput").value || "JO89tt";
- const coords = maidenheadToLatLon(grid);
- if (!coords) return;
- const lat = coords.lat;
- const lon = coords.lon;
-
- const observer = new Astronomy.Observer(lat, lon, 0);
-
- const date = selectedDate ? new Date(selectedDate) : new Date();
- const startOfDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
- const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
-
- moonTrajectoryGroup.clear();
- moonPositions = [];
- currentMoonIndex = 0;
-
- let segment = [];
- const segments = [];
-
- for (let minutes = 0; minutes < 1440; minutes += 10) {
- const time = new Date(startOfDay.getTime() + minutes * 60 * 1000);
-
- if (time >= endOfDay) break;
-
- const moonEq = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, false);
- const hor = Astronomy.Horizon(time, observer, moonEq.ra, moonEq.dec, 'normal');
-
- const elevationDeg = hor.altitude;
- const azimuthDeg = hor.azimuth;
-
- if (elevationDeg > 0) {
- const azRad = THREE.MathUtils.degToRad(360 - azimuthDeg);
- const elRad = THREE.MathUtils.degToRad(elevationDeg);
- const r = 1;
-
- const x = r * Math.cos(elRad) * Math.sin(azRad);
- const y = r * Math.sin(elRad);
- const z = r * Math.cos(elRad) * Math.cos(azRad);
-
- const point = new THREE.Vector3(x, y, z);
- segment.push(point);
-
- moonPositions.push({ time, position: point, azimuth: azimuthDeg, elevation: elevationDeg });
- } else {
- if (segment.length > 1) segments.push(segment);
- segment = [];
- }
- }
-
- if (segment.length > 1) segments.push(segment);
-
- segments.forEach(seg => {
- const geom = new THREE.BufferGeometry().setFromPoints(seg);
- const mat = new THREE.LineBasicMaterial({ color: 0xffff00 });
- const line = new THREE.Line(geom, mat);
- line.userData = { isMoonTrajectory: true };
- moonTrajectoryGroup.add(line);
- });
-
- currentMoonIndex = 0;
- updateMoonMarker();
- updateTimeSlider(); // Sync slider with new trajectory
- }
- 
- window.addMoonTrajectory = addMoonTrajectory;
-
- fetch('2025-05-29_20.44.04.csv')
- .then(response => response.text())
- .then(csv => {
- Papa.parse(csv, {
- header: true,
- delimiter: ";",
- complete: function (results) {
- results.data.forEach(row => {
- if (!row.Valid || row.Valid !== "True") return;
-
- const az = parseFloat(row.Azimuth?.replace(",", "."));
- const el = parseFloat(row.Elevation?.replace(",", "."));
- const noise = parseFloat(row.Noise?.replace(",", "."));
-
- if (isNaN(az) || isNaN(el) || isNaN(noise)) return;
-
- minNoise = Math.min(minNoise, noise);
- maxNoise = Math.max(maxNoise, noise);
-
- rawPoints.push({ az, el, noise });
- });
-
- rawPoints.forEach(p => {
- const azRad = THREE.MathUtils.degToRad(360 - p.az);
- const elRad = THREE.MathUtils.degToRad(p.el);
- const r = 1;
-
- const x = r * Math.cos(elRad) * Math.sin(azRad);
- const y = r * Math.sin(elRad);
- const z = r * Math.cos(elRad) * Math.cos(azRad);
-
- const geometry = new THREE.SphereGeometry(0.015);
- const material = new THREE.MeshBasicMaterial({ color: getColor(p.noise) });
- const sphere = new THREE.Mesh(geometry, material);
- sphere.position.set(x, y, z);
-
- sphere.userData = { azimuth: p.az, elevation: p.el, noise: p.noise };
-
- scene.add(sphere);
- spheres.push(sphere);
- });
- 
- const boundingBox = new THREE.Box3();
- spheres.forEach(s => boundingBox.expandByPoint(s.position));
-
- const center = new THREE.Vector3();
- boundingBox.getCenter(center);
-
- const size = new THREE.Vector3();
- boundingBox.getSize(size);
- const maxDim = Math.max(size.x, size.y, size.z);
-
- let avgPosition = new THREE.Vector3();
- spheres.forEach(s => avgPosition.add(s.position));
- avgPosition.divideScalar(spheres.length);
-
- const directionToData = avgPosition.clone().normalize();
- const distance = maxDim * 2;
- const cameraPos = directionToData.clone().multiplyScalar(distance);
-
- camera.position.copy(cameraPos);
- camera.lookAt(center);
- controls.target.copy(center);
- controls.update();
- addAzimuthCompass();
- 
- addMoonTrajectory();
- }
- });
- });
- 
- function parseCsvData(csvText) {
- Papa.parse(csvText, {
- header: true,
- delimiter: ";",
- complete: function (results) {
- rawPoints.length = 0;
- spheres.forEach(s => scene.remove(s));
- spheres.length = 0;
- minNoise = Infinity;
- maxNoise = -Infinity;
-
- results.data.forEach(row => {
- if (!row.Valid || row.Valid !== "True") return;
-
- const az = parseFloat(row.Azimuth?.replace(",", "."));
- const el = parseFloat(row.Elevation?.replace(",", "."));
- const noise = parseFloat(row.Noise?.replace(",", "."));
-
- if (isNaN(az) || isNaN(el) || isNaN(noise)) return;
-
- minNoise = Math.min(minNoise, noise);
- maxNoise = Math.max(maxNoise, noise);
-
- rawPoints.push({ az, el, noise });
- });
-
- rawPoints.forEach(point => {
- const azRad = THREE.MathUtils.degToRad(360 - point.az);
- const elRad = THREE.MathUtils.degToRad(point.el);
- const r = 1;
-
- const x = r * Math.cos(elRad) * Math.sin(azRad);
- const y = r * Math.sin(elRad);
- const z = r * Math.cos(elRad) * Math.cos(azRad);
-
- const geometry = new THREE.SphereGeometry(0.015, 8, 8);
- const material = new THREE.MeshBasicMaterial({ color: getColor(point.noise) });
-
- const sphere = new THREE.Mesh(geometry, material);
- sphere.position.set(x, y, z);
-
- sphere.userData = {
- azimuth: point.az,
- elevation: point.el,
- noise: point.noise
- };
-
- spheres.push(sphere);
- scene.add(sphere);
- });
- }
- });
- }
-
- document.getElementById('csvUpload').addEventListener('change', function (e) {
- const file = e.target.files[0];
- if (!file) return;
-
- const demoStatus = document.getElementById('demoStatus');
- if (demoStatus) {
- demoStatus.style.display = 'none';
- }
-
- const reader = new FileReader();
- reader.onload = function (event) {
- parseCsvData(event.target.result);
- };
- reader.readAsText(file);
- });
-
- window.addEventListener('click', (event) => {
- mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
- mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-
- raycaster.setFromCamera(mouse, camera);
- const intersects = raycaster.intersectObjects([...spheres, moonMarker]);
-
- if (intersects.length > 0) {
- const clickedObject = intersects[0].object;
-
- if (clickedObject === moonMarker) {
- const moonData = moonPositions[currentMoonIndex];
- infoBox.innerHTML = `
- <b>Moon Position</b><br>
- <b>Azimuth:</b> ${moonData.azimuth.toFixed(1)}°<br>
- <b>Elevation:</b> ${moonData.elevation.toFixed(1)}°<br>
- <b>Time:</b> ${moonTimeDisplay.textContent}
- `;
- infoBox.style.display = 'block';
- return;
- }
-
- const sphere = intersects[0].object;
- const { azimuth, elevation, noise } = sphere.userData;
-
- infoBox.innerHTML = `
- <b>Azimuth:</b> ${azimuth.toFixed(1)}°<br>
- <b>Elevation:</b> ${elevation.toFixed(1)}°<br >
- <b>Noise:</b> ${noise.toFixed(2)} dB
- `;
- infoBox.style.display = 'block';
- } else {
- infoBox.style.display = 'none';
- }
- });
-
- window.addEventListener('touchend', (event) => {
- const touch = event.changedTouches[0];
- if (!touch) return;
-
- mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
- mouse.y = - (touch.clientY / window.innerHeight) * 2 + 1;
-
- raycaster.setFromCamera(mouse, camera);
- const intersects = raycaster.intersectObjects([...spheres, moonMarker]);
-
- if (intersects.length > 0) {
- const clickedObject = intersects[0].object;
-
- if (clickedObject === moonMarker) {
- const moonData = moonPositions[currentMoonIndex];
- infoBox.innerHTML = `
- <b>Moon Data</b><br>
- Time: ${moonData.time.toLocaleTimeString()}<br>
- Azimuth: ${moonData.azimuth.toFixed(2)}°<br>
- Elevation: ${moonData.elevation.toFixed(2)}°
- `;
- infoBox.style.display = 'block';
- } else if (clickedObject.userData.noise !== undefined) {
- const { azimuth, elevation, noise } = clickedObject.userData;
- infoBox.innerHTML = `
- <b>Measurement</b><br>
- Azimuth: ${azimuth.toFixed(2)}°<br>
- Elevation: ${elevation.toFixed(2)}°<br>
- Noise: ${noise.toFixed(2)}
- `;
- infoBox.style.display = 'block';
- }
- } else {
- infoBox.style.display = 'none';
- }
- });
-
- window.addEventListener('touchend', (event) => {
- if (event.changedTouches.length === 0) return;
-
- const touch = event.changedTouches[0];
- mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
- mouse.y = - (touch.clientY / window.innerHeight) * 2 + 1;
-
- raycaster.setFromCamera(mouse, camera);
- const intersects = raycaster.intersectObjects(spheres);
-
- if (intersects.length > 0) {
- const sphere = intersects[0].object;
- const { azimuth, elevation, noise } = sphere.userData;
-
- infoBox.innerHTML = `
- <b>Azimuth:</b> ${azimuth.toFixed(1)}°<br>
- <b>Elevation:</b> ${elevation.toFixed(1)}°<br>
- <b>Noise:</b> ${noise.toFixed(2)} dB
- `;
- infoBox.style.display = 'block';
- } else {
- infoBox.style.display = 'none';
- }
- });
-
- function animate() {
- requestAnimationFrame(animate);
- controls.update();
- renderer.render(scene, camera);
- }
-
- animate();
- 
- datePicker.valueAsDate = new Date();
- addMoonTrajectory();
-
- window.addEventListener('resize', () => {
- camera.aspect = window.innerWidth / window.innerHeight;
- camera.updateProjectionMatrix();
- renderer.setSize(window.innerWidth, window.innerHeight);
- });
-
- document.getElementById("applyGrid").addEventListener("click", () => {
- const dateVal = document.getElementById("datePicker").value;
- addMoonTrajectory(dateVal);
- });
-</script>
+
+    <!-- Time Slider -->
+    <div id="moonTimeControls" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+      <input type="range" id="timeSlider" min="0" max="0" value="0"
+             style="width: 200px; accent-color: #fff; cursor: pointer;">
+      <span id="moonTimeDisplay" style="color: white; font-family: 'Courier New', monospace; font-size: 18px; padding: 8px 12px; border-radius: 8px; background-color: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.2);">
+        --:-- UTC
+      </span>
+    </div>
+
+    <script src="a.ob.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/loaders/FontLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/geometries/TextGeometry.js"></script>
+
+    <script>
+      const scene = new THREE.Scene();
+      const moonTrajectoryGroup = new THREE.Group();
+      
+      let moonPositions = [];
+      let currentMoonIndex = 0;
+      let moonMarker = null;
+      
+      const moonTimeDisplay = document.getElementById('moonTimeDisplay');
+      const timeSlider = document.getElementById('timeSlider');
+      const datePicker = document.getElementById('datePicker');
+      const prevDateBtn = document.getElementById('prevDate');
+      const nextDateBtn = document.getElementById('nextDate');
+      const gridInput = document.getElementById('gridInput');
+
+      function updateMoonMarker() {
+        if (!moonPositions.length) {
+          moonTimeDisplay.textContent = '--:-- UTC';
+          timeSlider.disabled = true;
+          return;
+        }
+
+        const pos = moonPositions[currentMoonIndex];
+        if (!moonMarker) {
+          const geom = new THREE.SphereGeometry(0.03);
+          const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+          moonMarker = new THREE.Mesh(geom, mat);
+          scene.add(moonMarker);
+        }
+
+        moonMarker.position.copy(pos.position);
+
+        // Update time display
+        const time = pos.time;
+        const hours = String(time.getUTCHours()).padStart(2, '0');
+        const minutes = String(time.getUTCMinutes()).padStart(2, '0');
+        moonTimeDisplay.textContent = `${hours}:${minutes} UTC`;
+      }
+
+      function updateTimeSlider() {
+        timeSlider.min = 0;
+        timeSlider.max = moonPositions.length - 1 || 0;
+        timeSlider.value = currentMoonIndex;
+        timeSlider.disabled = moonPositions.length === 0;
+      }
+
+      function changeMoonTime(index) {
+        if (!moonPositions.length) return;
+        currentMoonIndex = Math.max(0, Math.min(index, moonPositions.length - 1));
+        updateMoonMarker();
+      }
+
+      function changeDate(days) {
+        let currentDate = datePicker.value ? new Date(datePicker.value) : new Date();
+        currentDate.setUTCDate(currentDate.getUTCDate() + days);
+        const year = currentDate.getUTCFullYear();
+        const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(currentDate.getUTCDate()).padStart(2, '0');
+        datePicker.value = `${year}-${month}-${day}`;
+        addMoonTrajectory(datePicker.value);
+      }
+
+      timeSlider.addEventListener('input', (e) => {
+        changeMoonTime(parseInt(e.target.value));
+      });
+
+      datePicker.addEventListener('change', (e) => {
+        const selectedDate = e.target.value;
+        if (selectedDate) {
+          addMoonTrajectory(selectedDate);
+        }
+      });
+
+      prevDateBtn.addEventListener('click', () => changeDate(-1));
+      nextDateBtn.addEventListener('click', () => changeDate(1));
+
+      // Validate grid locator
+      function isValidGrid(locator) {
+        if (!locator || locator.length < 4 || locator.length > 6) return false;
+        locator = locator.toUpperCase();
+        const regex = /^[A-R]{2}[0-9]{2}([A-X]{2})?$/;
+        return regex.test(locator);
+      }
+
+      // Update grid input handling
+      gridInput.addEventListener('input', () => {
+        const grid = gridInput.value;
+        if (isValidGrid(grid)) {
+          gridInput.style.borderColor = '#fff';
+          addMoonTrajectory(datePicker.value);
+        } else {
+          gridInput.style.borderColor = 'red';
+        }
+      });
+
+      document.getElementById('applyGrid').addEventListener('click', () => {
+        const grid = gridInput.value;
+        if (isValidGrid(grid)) {
+          gridInput.style.borderColor = '#fff';
+          const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
+          addMoonTrajectory(dateVal);
+        } else {
+          gridInput.style.borderColor = 'red';
+          alert('Invalid grid locator. Use format like JO89tt.');
+        }
+      });
+
+      function maidenheadToLatLon(locator) {
+        if (!locator || locator.length < 4) return null;
+
+        locator = locator.toUpperCase();
+        const A = 'A'.charCodeAt(0);
+
+        let lon = (locator.charCodeAt(0) - A) * 20 - 180;
+        let lat = (locator.charCodeAt(1) - A) * 10 - 90;
+
+        lon += parseInt(locator[2]) * 2;
+        lat += parseInt(locator[3]) * 1;
+
+        if (locator.length >= 6) {
+          lon += (locator.charCodeAt(4) - A) * 5 / 60;
+          lat += (locator.charCodeAt(5) - A) * 2.5 / 60;
+        }
+
+        lon += 2.5 / 60;
+        lat += 1.25 / 60;
+
+        return { lat, lon };
+      }
+
+      scene.add(moonTrajectoryGroup);
+
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 0, 2);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      let spheres = [];
+
+      let minNoise = Infinity, maxNoise = -Infinity;
+      const rawPoints = [];
+
+      function getColor(noise) {
+        const range = maxNoise - minNoise;
+        const norm = range === 0 ? 0.5 : (noise - minNoise) / range;
+        return new THREE.Color().setHSL(0.7 - norm * 0.7, 1.0, 0.5);
+      }
+
+      const infoBox = document.createElement('div');
+      infoBox.id = 'infoBox';
+      infoBox.style.position = 'absolute';
+      infoBox.style.top = '10px';
+      infoBox.style.right = '10px';
+      infoBox.style.padding = '10px';
+      infoBox.style.background = 'rgba(0,0,0,0.7)';
+      infoBox.style.color = '#fff';
+      infoBox.style.fontFamily = 'monospace';
+      infoBox.style.display = 'none';
+      document.body.appendChild(infoBox);
+
+      function addAzimuthCompass() {
+        const compassRadius = 1.05;
+        const labelDistance = 1.2;
+        const compassGroup = new THREE.Group();
+
+        const fontLoader = new THREE.FontLoader();
+        fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+          const directions = [
+            { label: 'N', az: 0, color: 0xff0000 },
+            { label: 'E', az: 90, color: 0xffffff },
+            { label: 'S', az: 180, color: 0xffffff },
+            { label: 'W', az: 270, color: 0xffffff }
+          ];
+
+          directions.forEach(dir => {
+            const azRad = THREE.MathUtils.degToRad(360 - dir.az);
+            const x = labelDistance * Math.sin(azRad);
+            const z = labelDistance * Math.cos(azRad);
+            const y = 0;
+
+            const textGeom = new THREE.TextGeometry(dir.label, {
+              font: font,
+              size: 0.1,
+              height: 0.001
+            });
+
+            const textMat = new THREE.MeshBasicMaterial({ color: dir.color });
+            const text = new THREE.Mesh(textGeom, textMat);
+            text.position.set(x, y, z);
+            text.lookAt(0, 0, 0);
+            compassGroup.add(text);
+          });
+
+          const ringGeom = new THREE.RingGeometry(compassRadius - 0.002, compassRadius + 0.002, 256);
+          const ringMat = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.9
+          });
+          const ring = new THREE.Mesh(ringGeom, ringMat);
+          ring.rotation.x = -Math.PI / 2;
+          ring.position.y = 0;
+          compassGroup.add(ring);
+
+          for (let i = 0; i < 360; i += 10) {
+            const angle = THREE.MathUtils.degToRad(360 - i);
+            const isMajor = i % 30 === 0;
+            const outer = compassRadius + 0.02;
+            const inner = compassRadius - (isMajor ? 0.05 : 0.02);
+
+            const x1 = inner * Math.cos(angle);
+            const z1 = inner * Math.sin(angle);
+            const x2 = outer * Math.cos(angle);
+            const z2 = outer * Math.sin(angle);
+
+            const tickGeom = new THREE.BufferGeometry().setFromPoints([
+              new THREE.Vector3(x1, 0, z1),
+              new THREE.Vector3(x2, 0, z2)
+            ]);
+            const tickMat = new THREE.LineBasicMaterial({
+              color: 0xffffff,
+              transparent: true,
+              opacity: isMajor ? 1.0 : 0.5
+            });
+            const tick = new THREE.Line(tickGeom, tickMat);
+            compassGroup.add(tick);
+
+            if (isMajor && ![0, 90, 180, 270].includes(i)) {
+              const labelDist = compassRadius + 0.1;
+              const lx = labelDist * Math.sin(angle);
+              const lz = labelDist * Math.cos(angle);
+
+              const degGeom = new THREE.TextGeometry(i.toString(), {
+                font: font,
+                size: 0.045,
+                height: 0.001
+              });
+
+              const degMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+              const label = new THREE.Mesh(degGeom, degMat);
+              label.position.set(lx, 0, lz);
+              label.lookAt(0, 0, 0);
+              label.rotation.y += Math.PI;
+              compassGroup.add(label);
+            }
+          }
+
+          for (let i = 0; i < 360; i += 10) {
+            const angle = THREE.MathUtils.degToRad(i);
+            const isMajor = i % 30 === 0;
+            const outer = compassRadius + 0.02;
+            const inner = compassRadius - (isMajor ? 0.05 : 0.02);
+
+            const x1 = inner * Math.sin(angle);
+            const z1 = inner * Math.cos(angle);
+            const x2 = outer * Math.sin(angle);
+            const z2 = outer * Math.cos(angle);
+
+            const tickGeom = new THREE.BufferGeometry().setFromPoints([
+              new THREE.Vector3(x1, 0, z1),
+              new THREE.Vector3(x2, 0, z2)
+            ]);
+            const tickMat = new THREE.LineBasicMaterial({
+              color: 0xffffff,
+              transparent: true,
+              opacity: isMajor ? 1.0 : 0.5
+            });
+            const tick = new THREE.Line(tickGeom, tickMat);
+            compassGroup.add(tick);
+          }
+
+          scene.add(compassGroup);
+        });
+      }
+
+      function addMoonTrajectory(selectedDate) {
+        const grid = gridInput.value || 'JO89tt';
+        const coords = maidenheadToLatLon(grid);
+        if (!coords) {
+          gridInput.style.borderColor = 'red';
+          alert('Invalid grid locator. Using default JO89tt.');
+          gridInput.value = 'JO89tt';
+          return addMoonTrajectory(selectedDate); // Retry with default
+        }
+        const lat = coords.lat;
+        const lon = coords.lon;
+
+        const observer = new Astronomy.Observer(lat, lon, 0);
+
+        const date = selectedDate ? new Date(selectedDate) : new Date();
+        const startOfDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+        const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
+
+        moonTrajectoryGroup.clear();
+        moonPositions = [];
+        currentMoonIndex = 0;
+
+        let segment = [];
+        const segments = [];
+
+        for (let minutes = 0; minutes < 1440; minutes += 10) {
+          const time = new Date(startOfDay.getTime() + minutes * 60 * 1000);
+
+          if (time >= endOfDay) break;
+
+          const moonEq = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, false);
+          const hor = Astronomy.Horizon(time, observer, moonEq.ra, moonEq.dec, 'normal');
+
+          const elevationDeg = hor.altitude;
+          const azimuthDeg = hor.azimuth;
+
+          if (elevationDeg > 0) {
+            const azRad = THREE.MathUtils.degToRad(360 - azimuthDeg);
+            const elRad = THREE.MathUtils.degToRad(elevationDeg);
+            const r = 1;
+
+            const x = r * Math.cos(elRad) * Math.sin(azRad);
+            const y = r * Math.sin(elRad);
+            const z = r * Math.cos(elRad) * Math.cos(azRad);
+
+            const point = new THREE.Vector3(x, y, z);
+            segment.push(point);
+
+            moonPositions.push({ time, position: point, azimuth: azimuthDeg, elevation: elevationDeg });
+          } else {
+            if (segment.length > 1) segments.push(segment);
+            segment = [];
+          }
+        }
+
+        if (segment.length > 1) segments.push(segment);
+
+        segments.forEach(seg => {
+          const geom = new THREE.BufferGeometry().setFromPoints(seg);
+          const mat = new THREE.LineBasicMaterial({ color: 0xffff00 });
+          const line = new THREE.Line(geom, mat);
+          line.userData = { isMoonTrajectory: true };
+          moonTrajectoryGroup.add(line);
+        });
+
+        currentMoonIndex = 0;
+        updateMoonMarker();
+        updateTimeSlider();
+      }
+
+      window.addMoonTrajectory = addMoonTrajectory;
+
+      fetch('2025-05-29_20.44.04.csv')
+        .then(response => response.text())
+        .then(csv => {
+          Papa.parse(csv, {
+            header: true,
+            delimiter: ";",
+            complete: function (results) {
+              results.data.forEach(row => {
+                if (!row.Valid || row.Valid !== "True") return;
+
+                const az = parseFloat(row.Azimuth?.replace(",", "."));
+                const el = parseFloat(row.Elevation?.replace(",", "."));
+                const noise = parseFloat(row.Noise?.replace(",", "."));
+
+                if (isNaN(az) || isNaN(el) || isNaN(noise)) return;
+
+                minNoise = Math.min(minNoise, noise);
+                maxNoise = Math.max(maxNoise, noise);
+
+                rawPoints.push({ az, el, noise });
+              });
+
+              rawPoints.forEach(p => {
+                const azRad = THREE.MathUtils.degToRad(360 - p.az);
+                const elRad = THREE.MathUtils.degToRad(p.el);
+                const r = 1;
+
+                const x = r * Math.cos(elRad) * Math.sin(azRad);
+                y = r * Math.sin(elRad);
+                const z = r * Math.cos(elRad) * Math.cos(azRad);
+
+                const geometry = new THREE.SphereGeometry(0.015);
+                const material = new THREE.MeshBasicMaterial({ color: getColor(p.noise) });
+                const sphere = new THREE.Mesh(geometry, material);
+                sphere.position.set(x, y, z);
+
+                sphere.userData = { azimuth: p.az, elevation: p.el, noise: p.noise };
+
+                scene.add(sphere);
+                spheres.push(sphere);
+              });
+
+              const boundingBox = new THREE.Box3();
+              spheres.forEach(s => boundingBox.expandByPoint(s.position));
+
+              const center = new THREE.Vector3();
+              boundingBox.getCenter(center);
+
+              const size = new THREE.Vector3();
+              boundingBox.getSize(size);
+              const maxDim = Math.max(size.x, size.y, size.z);
+
+              let avgPosition = new THREE.Vector3();
+              spheres.forEach(s => avgPosition.add(s.position));
+              avgPosition.divideScalar(spheres.length);
+
+              const directionToData = avgPosition.clone().normalize();
+              const distance = maxDim * 2;
+              const cameraPos = directionToData.clone().multiplyScalar(distance);
+
+              camera.position.copy(cameraPos);
+              camera.lookAt(center);
+              controls.target.copy(center);
+              controls.update();
+              addAzimuthCompass();
+              addMoonTrajectory();
+            }
+          });
+        })
+        .catch(error => {
+          console.error('Error loading CSV:', error);
+          addAzimuthCompass();
+          addMoonTrajectory();
+        });
+
+      function parseCsvData(csvText) {
+        Papa.parse(csvText, {
+          header: true,
+          delimiter: ";",
+          complete: function (results) {
+            rawPoints.length = 0;
+            spheres.forEach(s => scene.remove(s));
+            spheres.length = 0;
+            minNoise = Infinity;
+            maxNoise = -Infinity;
+
+            results.data.forEach(row => {
+              if (!row.Valid || row.Valid !== "True") return;
+
+              const az = parseFloat(row.Azimuth?.replace(",", "."));
+              const el = parseFloat(row.Elevation?.replace(",", "."));
+              const noise = parseFloat(row.Noise?.replace(",", "."));
+
+              if (isNaN(az) || isNaN(el) || isNaN(noise)) return;
+
+              minNoise = Math.min(minNoise, noise);
+              maxNoise = Math.max(maxNoise, noise);
+
+              rawPoints.push({ az, el, noise });
+            });
+
+            rawPoints.forEach(point => {
+              const azRad = THREE.MathUtils.degToRad(360 - point.az);
+              const elRad = THREE.MathUtils.degToRad(point.el);
+              const r = 1;
+
+              const x = r * Math.cos(elRad) * Math.sin(azRad);
+              const y = r * Math.sin(elRad);
+              const z = r * Math.cos(elRad) * Math.cos(azRad);
+
+              const geometry = new THREE.SphereGeometry(0.015, 8, 8);
+              const material = new THREE.MeshBasicMaterial({ color: getColor(point.noise) });
+
+              sphere = new THREE.Mesh(geometry, material);
+              sphere.position.set(x, y, z);
+
+              sphere.userData = {
+                azimuth: point.az,
+                elevation: point.el,
+                noise: point.noise
+              };
+
+              spheres.push(sphere);
+              scene.add(sphere);
+            });
+          }
+        });
+      }
+
+      document.getElementById('csvUpload').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const demoStatus = document.getElementById('demoStatus');
+        if (demoStatus) {
+          demoStatus.style.display = 'none';
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          parseCsvData(event.target.result);
+        };
+        reader.readAsText(file);
+      });
+
+      window.addEventListener('click', (event) => {
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects([...spheres, moonMarker].filter(obj => obj !== null));
+
+        if (intersects.length > 0) {
+          const clickedObject = intersects[0].object;
+
+          if (clickedObject === moonMarker) {
+            const moonData = moonPositions[currentMoonIndex];
+            infoBox.innerHTML = `
+              <b>Moon Position</b><br>
+              <b>Azimuth:</b> ${moonData.azimuth.toFixed(1)}°<br>
+              <b>Elevation:</b> ${moonData.elevation.toFixed(1)}°<br>
+              <b>Time:</b> ${moonTimeDisplay.textContent}
+            `;
+            infoBox.style.display = 'block';
+            return;
+          }
+
+          const sphere = intersects[0].object;
+          const { azimuth, elevation, noise } = sphere.userData;
+
+          infoBox.innerHTML = `
+            <b>Azimuth:</b> ${azimuth.toFixed(1)}°<br>
+            <b>Elevation:</b> ${elevation.toFixed(1)}°<br>
+            <b>Noise:</b> ${noise.toFixed(2)} dB
+          `;
+          infoBox.style.display = 'block';
+        } else {
+          infoBox.style.display = 'none';
+        }
+      });
+
+      window.addEventListener('touchend', (event) => {
+        const touch = event.changedTouches[0];
+        if (!touch) return;
+
+        mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = - (touch.clientY / window.innerHeight) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects([...spheres, moonMarker].filter(obj => obj !== null));
+
+        if (intersects.length > 0) {
+          const clickedObject = intersects[0].object;
+
+          if (clickedObject === moonMarker) {
+            const moonData = moonPositions[currentMoonIndex];
+            infoBox.innerHTML = `
+              <b>Moon Data</b><br>
+              Time: ${moonData.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} UTC<br>
+              Azimuth: ${moonData.azimuth.toFixed(2)}°<br>
+              Elevation: ${moonData.elevation.toFixed(2)}°
+            `;
+            infoBox.style.display = 'block';
+          } else if (clickedObject.userData.noise !== undefined) {
+            const { azimuth, elevation, noise } = clickedObject.userData;
+            infoBox.innerHTML = `
+              <b>Measurement</b><br>
+              Azimuth: ${azimuth.toFixed(2)}°<br>
+              Elevation: ${elevation.toFixed(2)}°<br>
+              Noise: ${noise.toFixed(2)} dB
+            `;
+            infoBox.style.display = 'block';
+          }
+        } else {
+          infoBox.style.display = 'none';
+        }
+      });
+
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+
+      animate();
+
+      // Initialize date picker
+      const today = new Date();
+      const year = today.getUTCFullYear();
+      const month = String(today.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(today.getUTCDate()).padStart(2, '0');
+      datePicker.value = `${year}-${month}-${day}`;
+      addMoonTrajectory();
+      
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    </script>
 </body>
 </html>
