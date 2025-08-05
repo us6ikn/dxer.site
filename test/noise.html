@@ -258,38 +258,58 @@
       const demoStatus = document.getElementById('demoStatus');
 
       function updateMoonMarker() {
-        if (!moonPositions.length || !moonPositions[currentTimeIndex] || moonPositions[currentTimeIndex].elevation <= 0) {
+        if (!moonPositions.length || !moonPositions[currentTimeIndex]) {
+          console.log(`updateMoonMarker: No moon position at index ${currentTimeIndex}`);
+          if (moonMarker) moonMarker.visible = false;
+          return false;
+        }
+
+        const moonData = moonPositions[currentTimeIndex];
+        if (moonData.elevation <= 0) {
+          console.log(`updateMoonMarker: Moon below horizon at ${moonData.time.toUTCString()} (elevation=${moonData.elevation.toFixed(1)}°)`);
           if (moonMarker) moonMarker.visible = false;
           return false;
         }
 
         if (!moonMarker) {
+          console.log(`updateMoonMarker: Creating moon marker`);
           const geom = new THREE.SphereGeometry(0.03);
           const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
           moonMarker = new THREE.Mesh(geom, mat);
           scene.add(moonMarker);
         }
 
+        console.log(`updateMoonMarker: Showing moon marker at ${moonData.time.toUTCString()}, Az=${moonData.azimuth.toFixed(1)}°, El=${moonData.elevation.toFixed(1)}°`);
         moonMarker.visible = true;
-        moonMarker.position.copy(moonPositions[currentTimeIndex].position);
+        moonMarker.position.copy(moonData.position);
         return true;
       }
 
       function updateSunMarker() {
-        if (!sunPositions.length || !showSunCheckbox.checked || !sunPositions[currentTimeIndex] || sunPositions[currentTimeIndex].elevation <= 0) {
+        if (!sunPositions.length || !showSunCheckbox.checked || !sunPositions[currentTimeIndex]) {
+          console.log(`updateSunMarker: No sun position or sun not shown at index ${currentTimeIndex}`);
+          if (sunMarker) sunMarker.visible = false;
+          return false;
+        }
+
+        const sunData = sunPositions[currentTimeIndex];
+        if (sunData.elevation <= 0) {
+          console.log(`updateSunMarker: Sun below horizon at ${sunData.time.toUTCString()} (elevation=${sunData.elevation.toFixed(1)}°)`);
           if (sunMarker) sunMarker.visible = false;
           return false;
         }
 
         if (!sunMarker) {
+          console.log(`updateSunMarker: Creating sun marker`);
           const geom = new THREE.SphereGeometry(0.02);
           const mat = new THREE.MeshBasicMaterial({ color: 0xffa500 });
           sunMarker = new THREE.Mesh(geom, mat);
           scene.add(sunMarker);
         }
 
+        console.log(`updateSunMarker: Showing sun marker at ${sunData.time.toUTCString()}, Az=${sunData.azimuth.toFixed(1)}°, El=${sunData.elevation.toFixed(1)}°`);
         sunMarker.visible = true;
-        sunMarker.position.copy(sunPositions[currentTimeIndex].position);
+        sunMarker.position.copy(sunData.position);
         return true;
       }
 
@@ -603,7 +623,6 @@
           const moonElevationDeg = moonHor.altitude;
           const moonAzimuthDeg = moonHor.azimuth;
 
-          let moonPos = null;
           const azRadMoon = THREE.MathUtils.degToRad(360 - moonAzimuthDeg);
           const elRadMoon = THREE.MathUtils.degToRad(Math.max(moonElevationDeg, 0));
           const r = 1;
@@ -611,10 +630,9 @@
           const yMoon = r * Math.sin(elRadMoon);
           const zMoon = r * Math.cos(elRadMoon) * Math.cos(azRadMoon);
           const moonPoint = new THREE.Vector3(xMoon, yMoon, zMoon);
-          
+
           if (moonElevationDeg > 0) {
             moonSegment.push(moonPoint);
-            moonPos = { time, position: moonPoint, azimuth: moonAzimuthDeg, elevation: moonElevationDeg };
             if (firstMoonVisibleIndex === -1) firstMoonVisibleIndex = minutes / 10;
           } else {
             if (moonSegment.length > 1) moonSegments.push(moonSegment);
@@ -628,7 +646,6 @@
           const sunElevationDeg = sunHor.altitude;
           const sunAzimuthDeg = sunHor.azimuth;
 
-          let sunPos = null;
           const azRadSun = THREE.MathUtils.degToRad(360 - sunAzimuthDeg);
           const elRadSun = THREE.MathUtils.degToRad(Math.max(sunElevationDeg, 0));
           const xSun = r * Math.cos(elRadSun) * Math.sin(azRadSun);
@@ -638,7 +655,6 @@
 
           if (sunElevationDeg > 0) {
             sunSegment.push(sunPoint);
-            sunPos = { time, position: sunPoint, azimuth: sunAzimuthDeg, elevation: sunElevationDeg };
             if (firstSunVisibleIndex === -1) firstSunVisibleIndex = minutes / 10;
           } else {
             if (sunSegment.length > 1) sunSegments.push(sunSegment);
@@ -790,7 +806,7 @@
       }
 
       // Initialize CSV from localStorage or demo
-      const storedCsv = localStorage.getItem('skyObserverGrid');
+      const storedCsv = localStorage.getItem('skyObserverCsv');
       if (storedCsv) {
         parseCsvData(storedCsv, 'stored');
       } else {
