@@ -246,17 +246,22 @@
       const showSunCheckbox = document.getElementById('showSun');
       const demoStatus = document.getElementById('demoStatus');
 
+      // Initialize renderer early
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setClearColor(0x000000); // Ensure black background
+      document.body.appendChild(renderer.domElement);
+
       function interpolateNoise(azimuth, elevation) {
         if (!rawPoints.length) return null;
 
-        const maxDistance = THREE.MathUtils.degToRad(10); // Max angular distance for interpolation (10°)
+        const maxDistance = THREE.MathUtils.degToRad(10);
         let sumWeightedNoise = 0;
         let sumWeights = 0;
 
         rawPoints.forEach(point => {
-          if (point.noise <= 0 || isNaN(point.noise)) return; // Skip invalid noise values
+          if (point.noise <= 0 || isNaN(point.noise)) return;
 
-          // Angular distance in radians
           const az1 = THREE.MathUtils.degToRad(point.az);
           const el1 = THREE.MathUtils.degToRad(point.el);
           const az2 = THREE.MathUtils.degToRad(azimuth);
@@ -266,13 +271,13 @@
           const distance = Math.acos(Math.max(-1, Math.min(1, cosDistance)));
 
           if (distance <= maxDistance) {
-            const weight = 1 / (distance * distance + 0.0001); // Inverse distance squared, avoid division by zero
+            const weight = 1 / (distance * distance + 0.0001);
             sumWeightedNoise += point.noise * weight;
             sumWeights += weight;
           }
         });
 
-        if (sumWeights === 0) return null; // No valid points within range
+        if (sumWeights === 0) return null;
         const interpolatedNoise = sumWeightedNoise / sumWeights;
         console.log(`Interpolated noise at Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°: ${interpolatedNoise.toFixed(2)} dB`);
         return interpolatedNoise;
@@ -492,10 +497,6 @@
       const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
       camera.position.set(0, 0, 2);
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      document.body.appendChild(renderer.domElement);
-
       const controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
 
@@ -519,7 +520,7 @@
       infoBox.style.background = 'rgba(0,0,0,0.7)';
       infoBox.style.color = '#fff';
       infoBox.style.fontFamily = 'monospace';
-      infoBox.style.display = 'block'; // Always visible
+      infoBox.style.display = 'block';
       document.body.appendChild(infoBox);
 
       function addAzimuthCompass() {
@@ -574,7 +575,7 @@
             const inner = compassRadius - (isMajor ? 0.05 : 0.02);
 
             const x1 = inner * Math.cos(angle);
-            const z1 = inner * Math.sin(angle);
+            z1 = inner * Math.sin(angle);
             const x2 = outer * Math.cos(angle);
             const z2 = outer * Math.sin(angle);
 
@@ -611,6 +612,7 @@
           }
 
           scene.add(compassGroup);
+          console.log('Azimuth compass added to scene');
         });
       }
 
@@ -634,6 +636,10 @@
 
         moonTrajectoryGroup.clear();
         sunTrajectoryGroup.clear();
+        if (moonMarker) scene.remove(moonMarker);
+        if (sunMarker) scene.remove(sunMarker);
+        moonMarker = null;
+        sunMarker = null;
         moonPositions = [];
         sunPositions = [];
         currentTimeIndex = 0;
@@ -696,7 +702,6 @@
           }
           sunPositions.push({ time, position: sunPoint, azimuth: sunAzimuthDeg, elevation: sunElevationDeg });
 
-          // Debug logging for 12:00 UTC (720 minutes), 17:10 UTC (1030 minutes), and 19:00 UTC (1140 minutes)
           if (minutes === 720 || minutes === 1030 || minutes === 1140) {
             console.log(`At ${time.toUTCString()}:`);
             console.log(`  Moon: Az=${moonAzimuthDeg.toFixed(1)}°, El=${moonElevationDeg.toFixed(1)}°, Noise=${interpolateNoise(moonAzimuthDeg, moonElevationDeg)?.toFixed(2) || 'N/A'} dB`);
@@ -734,6 +739,7 @@
         }
         console.log(`Initial currentTimeIndex: ${currentTimeIndex} (Time: ${moonPositions[currentTimeIndex]?.time.toUTCString() || 'N/A'})`);
         console.log(`moonPositions length: ${moonPositions.length}, sunPositions length: ${sunPositions.length}`);
+        console.log(`Scene children after addTrajectories: ${scene.children.length} (moonTrajectoryGroup: ${moonTrajectoryGroup.children.length}, sunTrajectoryGroup: ${sunTrajectoryGroup.children.length})`);
 
         updateTimeSlider();
       }
@@ -792,16 +798,17 @@
 
             let avgPosition = new THREE.Vector3();
             spheres.forEach(s => avgPosition.add(s.position));
-            avgPosition.divideScalar(spheres.length);
+            avgPosition.divideScalar(spheres.length || 1); // Avoid division by zero
 
             const directionToData = avgPosition.clone().normalize();
-            const distance = maxDim * 2;
-            const cameraPos = directionToData.clone().multiplyScalar(distance);
-
-            camera.position.copy(cameraPos);
+            const distance = maxDim * 2 || 2; // Default distance if no spheres
+            camera.position.copy(directionToData.clone().multiplyScalar(distance));
             camera.lookAt(center);
             controls.target.copy(center);
             controls.update();
+
+            console.log(`After parseCsvData: Spheres added=${spheres.length}, Camera pos=${camera.position.toArray().map(n => n.toFixed(2))}, Controls target=${controls.target.toArray().map(n => n.toFixed(2))}`);
+
             addAzimuthCompass();
 
             if (csvSource === 'demo') {
@@ -813,7 +820,7 @@
             } else {
               demoStatus.style.display = 'none';
             }
-            updateTimeDisplay(); // Update infoBox after CSV load
+            updateTimeDisplay();
           }
         });
       }
@@ -870,7 +877,7 @@
             Noise: ${noise.toFixed(2)} dB
           `;
         } else {
-          updateInfoBox(); // Restore moon/sun data
+          updateInfoBox();
         }
       });
 
@@ -894,7 +901,7 @@
             Noise: ${noise.toFixed(2)} dB
           `;
         } else {
-          updateInfoBox(); // Restore moon/sun data
+          updateInfoBox();
         }
       });
 
@@ -902,6 +909,7 @@
         requestAnimationFrame(animate);
         controls.update();
         renderer.render(scene, camera);
+        console.log(`Rendering frame, scene children: ${scene.children.length}`);
       }
 
       animate();
@@ -912,6 +920,14 @@
       const day = String(today.getUTCDate()).padStart(2, '0');
       datePicker.value = `${year}-${month}-${day}`;
       addTrajectories();
+
+      // Handle window resize
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        console.log('Window resized, renderer updated');
+      });
     </script>
 </body>
 </html>
