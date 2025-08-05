@@ -182,7 +182,7 @@
           <span id="moonTimeDisplay" style="color: white; font-family: monospace; font-size: 18px;">--:--</span>
           <button id="increaseTime" style="font-size: 24px; padding: 10px 15px;">➡️</button>
         </div>
-        <script src="a.ob.js"></script>
+
 <!-- THREE.js core -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/build/three.min.js"></script>
 
@@ -194,6 +194,8 @@
 <!-- Add these two lines for FontLoader and TextGeometry -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/loaders/FontLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/geometries/TextGeometry.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
 
 <script>
   const scene = new THREE.Scene();
@@ -468,74 +470,62 @@
         const lat = coords.lat;
         const lon = coords.lon;
 
-        // Create observer for the given latitude and longitude
-        const observer = new Astronomy.Observer(lat, lon, 0); // Elevation set to 0 meters
+      const date = selectedDate ? new Date(selectedDate) : new Date();
 
-        const date = selectedDate ? new Date(selectedDate) : new Date();
+      const startOfDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+      const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
 
-        // Start and end of the selected day in UTC
-        const startOfDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
-        const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
+      moonTrajectoryGroup.clear();
+      moonPositions = [];
+      currentMoonIndex = 0;
 
-        // Clear previous moon trajectory
-        moonTrajectoryGroup.clear();
-        moonPositions = [];
-        currentMoonIndex = 0;
+      let segment = [];
+      const segments = [];
 
-        let segment = [];
-        const segments = [];
+      for (let minutes = 0; minutes < 1440; minutes += 10) {
+        const time = new Date(startOfDay.getTime() + minutes * 60 * 1000); // Proper UTC-based timestamp
 
-        // Iterate over the day in 10-minute increments
-        for (let minutes = 0; minutes < 1440; minutes += 10) {
-            const time = new Date(startOfDay.getTime() + minutes * 60 * 1000);
+        if (time >= endOfDay) break;
 
-            if (time >= endOfDay) break;
+        const moonPos = SunCalc.getMoonPosition(time, lat, lon);
 
-            // Calculate moon's equatorial coordinates
-            const moonEq = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, false);
+        if (moonPos.altitude > 0) {
+          const azimuthDeg = (moonPos.azimuth * 180 / Math.PI + 180) % 360;
+          const elevationDeg = moonPos.altitude * 180 / Math.PI;
 
-            // Convert to horizontal coordinates (azimuth and altitude)
-            const hor = Astronomy.Horizon(time, observer, moonEq.ra, moonEq.dec, 'normal');
+          const azRad = THREE.MathUtils.degToRad(360 - azimuthDeg);
+          const elRad = THREE.MathUtils.degToRad(elevationDeg);
+          const r = 1;
 
-            // Use altitude (elevation) and azimuth from Astronomy library
-            const elevationDeg = hor.altitude;
-            const azimuthDeg = (hor.azimuth + 180) % 360; // Adjust azimuth to match your convention
+          const x = r * Math.cos(elRad) * Math.sin(azRad);
+          const y = r * Math.sin(elRad);
+          const z = r * Math.cos(elRad) * Math.cos(azRad);
 
-            if (elevationDeg > 0) { // Only include positions above the horizon
-                const azRad = THREE.MathUtils.degToRad(360 - azimuthDeg); // Flip azimuth to match compass
-                const elRad = THREE.MathUtils.degToRad(elevationDeg);
-                const r = 1;
+          const point = new THREE.Vector3(x, y, z);
+          segment.push(point);
 
-                // Calculate 3D position for rendering
-                const x = r * Math.cos(elRad) * Math.sin(azRad);
-                const y = r * Math.sin(elRad);
-                const z = r * Math.cos(elRad) * Math.cos(azRad);
+          // Store only positions at exact hour steps
+          moonPositions.push({ time, position: point, azimuth: azimuthDeg, elevation: elevationDeg });
 
-                const point = new THREE.Vector3(x, y, z);
-                segment.push(point);
-
-                // Store position data
-                moonPositions.push({ time, position: point, azimuth: azimuthDeg, elevation: elevationDeg });
-            } else {
-                if (segment.length > 1) segments.push(segment);
-                segment = [];
-            }
+        } else {
+          if (segment.length > 1) segments.push(segment);
+          segment = [];
         }
+      }
 
-        if (segment.length > 1) segments.push(segment);
+      if (segment.length > 1) segments.push(segment);
 
-        // Render the trajectory segments
-        segments.forEach(seg => {
-            const geom = new THREE.BufferGeometry().setFromPoints(seg);
-            const mat = new THREE.LineBasicMaterial({ color: 0xffff00 });
-            const line = new THREE.Line(geom, mat);
-            line.userData = { isMoonTrajectory: true };
-            moonTrajectoryGroup.add(line);
-        });
+      segments.forEach(seg => {
+        const geom = new THREE.BufferGeometry().setFromPoints(seg);
+        const mat = new THREE.LineBasicMaterial({ color: 0xffff00 });
+        const line = new THREE.Line(geom, mat);
+        line.userData = { isMoonTrajectory: true };
+        moonTrajectoryGroup.add(line);
+      });
+      
 
-        // Update the moon marker to the first position
-        currentMoonIndex = 0;
-        updateMoonMarker();
+      currentMoonIndex = 0;
+      updateMoonMarker();
     }
     
     window.addMoonTrajectory = addMoonTrajectory;
