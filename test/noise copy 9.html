@@ -46,16 +46,6 @@
             max-width: 90vw;
             line-height: 1.4;
           }
-          #controlPanel {
-            max-width: 90vw; /* Responsive width for smaller screens */
-            left: 8px;
-            top: 36px;
-          }
-          #moonTimeControls {
-            bottom: 20px;
-            width: 90vw; /* Ensure time controls fit screen */
-            max-width: 300px;
-          }
         }
 
         #moonTimeControls button {
@@ -117,23 +107,23 @@
           -webkit-appearance: none;
           appearance: none;
           background: rgba(255, 255, 255, 0.3);
-          height: 12px;
+          height: 12px; /* Increased track height for better touch target */
           border-radius: 6px;
           outline: none;
-          width: 80vw;
-          max-width: 300px;
-          touch-action: pan-y;
-          z-index: 30;
+          width: 80vw; /* Wider on mobile for easier control */
+          max-width: 300px; /* Cap width for larger screens */
+          touch-action: pan-y; /* Allow vertical scrolling, prevent OrbitControls interference */
+          z-index: 30; /* Ensure slider is above canvas */
         }
         #timeSlider::-webkit-slider-thumb {
           -webkit-appearance: none;
           appearance: none;
-          width: 24px;
+          width: 24px; /* Larger thumb for touch */
           height: 24px;
           background: #fff;
           border-radius: 50%;
           cursor: pointer;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Add shadow for visibility */
         }
         #timeSlider::-moz-range-thumb {
           width: 24px;
@@ -264,9 +254,9 @@
           const controls = new THREE.OrbitControls(camera, renderer.domElement);
           controls.enableDamping = true;
           controls.target.set(0, 0, 0);
-          controls.rotateSpeed = 0.5;
-          controls.zoomSpeed = 0.5;
-          controls.panSpeed = 0.5;
+          controls.rotateSpeed = 0.5; // Reduced for touch
+          controls.zoomSpeed = 0.5; // Reduced for touch
+          controls.panSpeed = 0.5; // Reduced for touch
           controls.update();
 
           const raycaster = new THREE.Raycaster();
@@ -277,42 +267,6 @@
 
           scene.add(moonTrajectoryGroup);
           scene.add(sunTrajectoryGroup);
-
-          // Debounce function to limit resize event frequency
-          function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-              const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-              };
-              clearTimeout(timeout);
-              timeout = setTimeout(later, wait);
-            };
-          }
-
-          // Handle window resize and orientation change
-          function handleResize() {
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-
-            // Update camera aspect ratio
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-
-            // Update renderer size
-            renderer.setSize(width, height);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimize for high-DPI displays
-
-            // Force re-render
-            renderer.render(scene, camera);
-
-            console.log(`Resize handled: ${width}x${height}, aspect=${camera.aspect}`);
-          }
-
-          // Add event listeners for resize and orientation change
-          window.addEventListener('resize', debounce(handleResize, 100));
-          window.addEventListener('orientationchange', debounce(handleResize, 100));
 
           function getColor(noise) {
             const range = maxNoise - minNoise;
@@ -477,7 +431,7 @@
           }
 
           timeSlider.addEventListener('input', (e) => {
-            e.stopPropagation();
+            e.stopPropagation(); // Prevent event from reaching OrbitControls
             changeTime(parseInt(e.target.value));
           });
 
@@ -776,7 +730,7 @@
 
           function parseCsvData(csvText, csvSource) {
             Papa.parse(csvText, {
-              header: true;
+              header: true,
               delimiter: ";",
               complete: function (results) {
                 rawPoints.length = 0;
@@ -990,9 +944,6 @@
           const day = String(today.getUTCDate()).padStart(2, '0');
           datePicker.value = `${year}-${month}-${day}`;
           addTrajectories();
-
-          // Initial resize to ensure correct rendering
-          handleResize();
         </script>
     </body>
 </html>
