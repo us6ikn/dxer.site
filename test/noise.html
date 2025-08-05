@@ -229,7 +229,7 @@
       const scene = new THREE.Scene();
       const moonTrajectoryGroup = new THREE.Group();
       const sunTrajectoryGroup = new THREE.Group();
-      const compassGroup = new THREE.Group(); // Explicit compass group
+      const compassGroup = new THREE.Group();
 
       let moonPositions = [];
       let sunPositions = [];
@@ -254,14 +254,17 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setClearColor(0x000000);
       document.body.appendChild(renderer.domElement);
-      console.log('Renderer initialized, canvas appended');
+      console.log('Renderer initialized, canvas appended, WebGL available:', !!renderer.getContext());
 
-      // Initialize camera with wider clipping planes
-      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 10000);
+      // Initialize camera
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.001, 100000);
       camera.position.set(0, 0, 2);
+      camera.lookAt(0, 0, 0);
 
       const controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
+      controls.target.set(0, 0, 0);
+      controls.update();
 
       const raycaster = new THREE.Raycaster();
       const mouse = new THREE.Vector2();
@@ -273,7 +276,10 @@
       console.log('Initial groups added to scene');
 
       function interpolateNoise(azimuth, elevation) {
-        if (!rawPoints.length) return null;
+        if (!rawPoints.length) {
+          console.log('interpolateNoise: No raw points available');
+          return null;
+        }
 
         const maxDistance = THREE.MathUtils.degToRad(10);
         let sumWeightedNoise = 0;
@@ -297,7 +303,10 @@
           }
         });
 
-        if (sumWeights === 0) return null;
+        if (sumWeights === 0) {
+          console.log(`interpolateNoise: No points within maxDistance at Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°`);
+          return null;
+        }
         const interpolatedNoise = sumWeightedNoise / sumWeights;
         console.log(`Interpolated noise at Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°: ${interpolatedNoise.toFixed(2)} dB`);
         return interpolatedNoise;
@@ -332,7 +341,7 @@
           console.log('Moon marker created and added to scene');
         }
 
-        console.log(`updateMoonMarker: Showing moon marker at ${moonData.time.toUTCString()}, Az=${moonData.azimuth.toFixed(1)}°, El=${moonData.elevation.toFixed(1)}°`);
+        console.log(`updateMoonMarker: Showing moon marker at ${moonData.time.toUTCString()}, Az=${moonData.azimuth.toFixed(1)}°, El=${moonData.elevation.toFixed(1)}°, Pos=${moonData.position.toArray().map(n => n.toFixed(2))}`);
         moonMarker.visible = true;
         moonMarker.position.copy(moonData.position);
         return true;
@@ -367,7 +376,7 @@
           console.log('Sun marker created and added to scene');
         }
 
-        console.log(`updateSunMarker: Showing sun marker at ${sunData.time.toUTCString()}, Az=${sunData.azimuth.toFixed(1)}°, El=${sunData.elevation.toFixed(1)}°`);
+        console.log(`updateSunMarker: Showing sun marker at ${sunData.time.toUTCString()}, Az=${sunData.azimuth.toFixed(1)}°, El=${sunData.elevation.toFixed(1)}°, Pos=${sunData.position.toArray().map(n => n.toFixed(2))}`);
         sunMarker.visible = true;
         sunMarker.position.copy(sunData.position);
         return true;
@@ -435,7 +444,6 @@
           const minutes = String(time.getUTCMinutes()).padStart(2, '0');
           moonTimeDisplay.textContent = `${hours}:${minutes} UTC`;
         } else {
-          console.log(`updateTimeDisplay: Setting --:-- UTC (both moon and sun not visible)`);
           moonTimeDisplay.textContent = '--:-- UTC';
         }
         updateInfoBox();
@@ -545,11 +553,11 @@
       document.body.appendChild(infoBox);
 
       function addAzimuthCompass() {
-        compassGroup.clear(); // Clear previous compass
+        compassGroup.clear();
         const compassRadius = 1.05;
         const labelDistance = 1.2;
 
-        // Add ring and ticks first (no font dependency)
+        // Add ring and ticks
         const ringGeom = new THREE.RingGeometry(compassRadius - 0.002, compassRadius + 0.002, 256);
         const ringMat = new THREE.MeshBasicMaterial({
           color: 0xffffff,
@@ -580,13 +588,14 @@
           const tickMat = new THREE.LineBasicMaterial({
             color: 0xffffff,
             transparent: true,
-            opacity: isMajor ? 1.0 : 0.5
+            opacity: isMajor ? 1.0 : 0.5,
+            linewidth: 2
           });
           const tick = new THREE.Line(tickGeom, tickMat);
           compassGroup.add(tick);
         }
 
-        // Add font-dependent labels
+        // Add labels async
         const fontLoader = new THREE.FontLoader();
         fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
           const directions = [
@@ -635,9 +644,11 @@
           }
 
           console.log(`Compass labels added, compassGroup children: ${compassGroup.children.length}`);
+          renderer.render(scene, camera); // Force render
         }, undefined, (error) => {
           console.error('Font loading failed:', error);
           console.log(`Compass added without labels, compassGroup children: ${compassGroup.children.length}`);
+          renderer.render(scene, camera); // Force render
         });
 
         scene.add(compassGroup);
@@ -730,28 +741,30 @@
 
           if (minutes === 720 || minutes === 1030 || minutes === 1140) {
             console.log(`At ${time.toUTCString()}:`);
-            console.log(`  Moon: Az=${moonAzimuthDeg.toFixed(1)}°, El=${moonElevationDeg.toFixed(1)}°, Noise=${interpolateNoise(moonAzimuthDeg, moonElevationDeg)?.toFixed(2) || 'N/A'} dB`);
-            console.log(`  Sun: Az=${sunAzimuthDeg.toFixed(1)}°, El=${sunElevationDeg.toFixed(1)}°, Noise=${interpolateNoise(sunAzimuthDeg, sunElevationDeg)?.toFixed(2) || 'N/A'} dB`);
+            console.log(`  Moon: Az=${moonAzimuthDeg.toFixed(1)}°, El=${moonElevationDeg.toFixed(1)}°, Pos=${[xMoon.toFixed(2), yMoon.toFixed(2), zMoon.toFixed(2)]}`);
+            console.log(`  Sun: Az=${sunAzimuthDeg.toFixed(1)}°, El=${sunElevationDeg.toFixed(1)}°, Pos=${[xSun.toFixed(2), ySun.toFixed(2), zSun.toFixed(2)]}`);
           }
         }
 
         if (moonSegment.length > 1) moonSegments.push(moonSegment);
         if (sunSegment.length > 1) sunSegments.push(sunSegment);
 
-        moonSegments.forEach(seg => {
+        moonSegments.forEach((seg, i) => {
           const geom = new THREE.BufferGeometry().setFromPoints(seg);
-          const mat = new THREE.LineBasicMaterial({ color: 0xffff00 });
+          const mat = new THREE.LineBasicMaterial({ color: 0xffff00, linewidth: 2 });
           const line = new THREE.Line(geom, mat);
           line.userData = { isMoonTrajectory: true };
           moonTrajectoryGroup.add(line);
+          console.log(`Moon segment ${i}: ${seg.length} points, first point=${seg[0].toArray().map(n => n.toFixed(2))}`);
         });
 
-        sunSegments.forEach(seg => {
+        sunSegments.forEach((seg, i) => {
           const geom = new THREE.BufferGeometry().setFromPoints(seg);
-          const mat = new THREE.LineBasicMaterial({ color: 0xffa500 });
+          const mat = new THREE.LineBasicMaterial({ color: 0xffa500, linewidth: 2 });
           const line = new THREE.Line(geom, mat);
           line.userData = { isSunTrajectory: true };
           sunTrajectoryGroup.add(line);
+          console.log(`Sun segment ${i}: ${seg.length} points, first point=${seg[0].toArray().map(n => n.toFixed(2))}`);
         });
 
         sunTrajectoryGroup.visible = showSunCheckbox.checked;
@@ -767,36 +780,48 @@
         console.log(`addTrajectories: moonSegments=${moonSegments.length}, sunSegments=${sunSegments.length}, currentTimeIndex=${currentTimeIndex}`);
         console.log(`Scene children: ${scene.children.length}, moonTrajectoryGroup: ${moonTrajectoryGroup.children.length}, sunTrajectoryGroup: ${sunTrajectoryGroup.children.length}, compassGroup: ${compassGroup.children.length}`);
         updateTimeSlider();
+        renderer.render(scene, camera); // Force render
       }
 
       window.addTrajectories = addTrajectories;
 
       function parseCsvData(csvText, csvSource) {
+        console.log('parseCsvData: Starting CSV parsing, source=', csvSource);
+        console.log('CSV content (first 500 chars):', csvText.substring(0, 500));
         Papa.parse(csvText, {
           header: true,
           delimiter: ";",
+          dynamicTyping: true,
+          skipEmptyLines: true,
           complete: function (results) {
+            console.log('Papa.parse results:', results.data.slice(0, 5), 'Errors:', results.errors);
             rawPoints.length = 0;
             spheres.forEach(s => scene.remove(s));
             spheres.length = 0;
             minNoise = Infinity;
             maxNoise = -Infinity;
 
-            results.data.forEach(row => {
-              if (!row.Valid || row.Valid !== "True") return;
+            results.data.forEach((row, i) => {
+              if (!row.Valid || row.Valid !== "True" && row.Valid !== true) {
+                console.log(`Row ${i} skipped: Invalid Valid field`, row);
+                return;
+              }
 
-              const az = parseFloat(row.Azimuth?.replace(",", "."));
-              const el = parseFloat(row.Elevation?.replace(",", "."));
-              const noise = parseFloat(row.Noise?.replace(",", "."));
+              const az = parseFloat(row.Azimuth?.toString().replace(",", "."));
+              const el = parseFloat(row.Elevation?.toString().replace(",", "."));
+              const noise = parseFloat(row.Noise?.toString().replace(",", "."));
 
-              if (isNaN(az) || isNaN(el) || isNaN(noise) || noise <= 0) return;
+              if (isNaN(az) || isNaN(el) || isNaN(noise) || noise <= 0) {
+                console.log(`Row ${i} skipped: Invalid data (Az=${az}, El=${el}, Noise=${noise})`, row);
+                return;
+              }
 
               minNoise = Math.min(minNoise, noise);
               maxNoise = Math.max(maxNoise, noise);
               rawPoints.push({ az, el, noise });
             });
 
-            rawPoints.forEach(point => {
+            rawPoints.forEach((point, i) => {
               const azRad = THREE.MathUtils.degToRad(360 - point.az);
               const elRad = THREE.MathUtils.degToRad(point.el);
               const r = 1;
@@ -811,6 +836,7 @@
               sphere.userData = { azimuth: point.az, elevation: point.el, noise: point.noise };
               spheres.push(sphere);
               scene.add(sphere);
+              console.log(`Sphere ${i}: Az=${point.az.toFixed(1)}°, El=${point.el.toFixed(1)}°, Noise=${point.noise.toFixed(2)}, Pos=${[x.toFixed(2), y.toFixed(2), z.toFixed(2)]}`);
             });
 
             const boundingBox = new THREE.Box3();
@@ -827,17 +853,10 @@
 
             const directionToData = avgPosition.clone().normalize();
             const distance = maxDim * 2;
-            camera.position.copy(directionToData.clone().multiplyScalar(distance));
+            camera.position.copy(spheres.length ? directionToData.clone().multiplyScalar(distance) : new THREE.Vector3(0, 0, 2));
             camera.lookAt(center);
-            controls.target.copy(center);
+            controls.target.copy(spheres.length ? center : new THREE.Vector3(0, 0, 0));
             controls.update();
-
-            if (!spheres.length) {
-              camera.position.set(0, 0, 2);
-              camera.lookAt(0, 0, 0);
-              controls.target.set(0, 0, 0);
-              controls.update();
-            }
 
             console.log(`parseCsvData: Spheres added=${spheres.length}, Camera pos=${camera.position.toArray().map(n => n.toFixed(2))}, Controls target=${controls.target.toArray().map(n => n.toFixed(2))}`);
             console.log(`Scene children after parseCsvData: ${scene.children.length}`);
@@ -853,11 +872,14 @@
             } else {
               demoStatus.style.display = 'none';
             }
+            renderer.render(scene, camera); // Force render
           },
           error: (error) => {
             console.error('CSV parsing error:', error);
+            rawPoints.length = 0;
             addAzimuthCompass();
             updateTimeDisplay();
+            renderer.render(scene, camera);
           }
         });
       }
@@ -876,12 +898,16 @@
         parseCsvData(storedCsv, 'stored');
       } else {
         fetch('2025-05-29_20.44.04.csv')
-          .then(response => response.text())
+          .then(response => {
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.text();
+          })
           .then(csv => parseCsvData(csv, 'demo'))
           .catch(error => {
             console.error('Error loading demo CSV:', error);
             addAzimuthCompass();
             addTrajectories();
+            renderer.render(scene, camera);
           });
       }
 
@@ -947,12 +973,12 @@
         controls.update();
         renderer.render(scene, camera);
 
-        // Detailed scene children log
         const sceneInfo = scene.children.map(child => ({
           type: child.type,
-          name: child.userData?.isMoonTrajectory ? 'MoonTrajectory' : child.userData?.isSunTrajectory ? 'SunTrajectory' : child === compassGroup ? 'CompassGroup' : child === moonMarker ? 'MoonMarker' : child === sunMarker ? 'SunMarker' : 'Other',
+          name: child.userData?.isMoonTrajectory ? 'MoonTrajectory' : child.userData?.isSunTrajectory ? 'SunTrajectory' : child === compassGroup ? 'CompassGroup' : child === moonMarker ? 'MoonMarker' : child === sunMarker ? 'SunMarker' : child.userData?.noise ? 'NoiseSphere' : 'Other',
           visible: child.visible,
-          childrenCount: child.children ? child.children.length : 0
+          childrenCount: child.children ? child.children.length : 0,
+          position: child.position ? child.position.toArray().map(n => n.toFixed(2)) : null
         }));
         console.log(`Rendering frame, scene children: ${scene.children.length}`, sceneInfo);
       }
@@ -965,13 +991,6 @@
       const day = String(today.getUTCDate()).padStart(2, '0');
       datePicker.value = `${year}-${month}-${day}`;
       addTrajectories();
-
-      window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        console.log('Window resized, renderer updated');
-      });
     </script>
 </body>
 </html>
