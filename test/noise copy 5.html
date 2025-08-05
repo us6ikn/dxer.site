@@ -205,11 +205,6 @@
                style="font-size: 11px; padding: 2px 4px; border-radius: 4px; border: none; width: 100px;">
         <button id="nextDate">&gt;</button>
       </div>
-      <!-- Show Sun Checkbox -->
-      <div style="display: flex; align-items: center; gap: 4px;">
-        <input type="checkbox" id="showSun" style="width: 14px; height: 14px;">
-        <label for="showSun">Show sun</label>
-      </div>
       <div id="demoStatus" style="color: red; font-weight: bold; margin-top: 10px;">
         Demo loaded!
       </div>
@@ -220,7 +215,7 @@
       <span id="moonTimeDisplay" style="color: white; font-family: 'Courier New', monospace; font-size: 18px; padding: 8px 12px; border-radius: 8px; background-color: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.2);">
         --:-- UTC
       </span>
-      <input type="range" id="timeSlider" min="0" max="0" value="0" aria-label="Time selection"
+      <input type="range" id="timeSlider" min="0" max="0" value="0" aria-label="Moon time selection"
              style="width: 200px; accent-color: #fff; cursor: pointer;">
     </div>
 
@@ -240,13 +235,10 @@
 
       const scene = new THREE.Scene();
       const moonTrajectoryGroup = new THREE.Group();
-      const sunTrajectoryGroup = new THREE.Group();
       
       let moonPositions = [];
-      let sunPositions = [];
       let currentMoonIndex = 0;
       let moonMarker = null;
-      let sunMarker = null;
       
       const moonTimeDisplay = document.getElementById('moonTimeDisplay');
       const timeSlider = document.getElementById('timeSlider');
@@ -254,7 +246,6 @@
       const prevDateBtn = document.getElementById('prevDate');
       const nextDateBtn = document.getElementById('nextDate');
       const gridInput = document.getElementById('gridInput');
-      const showSunCheckbox = document.getElementById('showSun');
       const demoStatus = document.getElementById('demoStatus');
 
       function updateMoonMarker() {
@@ -280,24 +271,6 @@
         moonTimeDisplay.textContent = `${hours}:${minutes} UTC`;
       }
 
-      function updateSunMarker() {
-        if (!sunPositions.length || !showSunCheckbox.checked) {
-          if (sunMarker) sunMarker.visible = false;
-          return;
-        }
-
-        if (!sunMarker) {
-          const geom = new THREE.SphereGeometry(0.02); // Smaller than moon
-          const mat = new THREE.MeshBasicMaterial({ color: 0xffa500 }); // Orange
-          sunMarker = new THREE.Mesh(geom, mat);
-          scene.add(sunMarker);
-        }
-
-        sunMarker.visible = true;
-        const pos = sunPositions[currentMoonIndex];
-        sunMarker.position.copy(pos.position);
-      }
-
       function updateTimeSlider() {
         timeSlider.min = 0;
         timeSlider.max = moonPositions.length - 1 || 0;
@@ -309,7 +282,6 @@
         if (!moonPositions.length) return;
         currentMoonIndex = Math.max(0, Math.min(index, moonPositions.length - 1));
         updateMoonMarker();
-        updateSunMarker();
       }
 
       function changeDate(days) {
@@ -319,7 +291,7 @@
         const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0');
         const day = String(currentDate.getUTCDate()).padStart(2, '0');
         datePicker.value = `${year}-${month}-${day}`;
-        addTrajectories(datePicker.value);
+        addMoonTrajectory(datePicker.value);
       }
 
       timeSlider.addEventListener('input', (e) => {
@@ -329,17 +301,12 @@
       datePicker.addEventListener('change', (e) => {
         const selectedDate = e.target.value;
         if (selectedDate) {
-          addTrajectories(selectedDate);
+          addMoonTrajectory(selectedDate);
         }
       });
 
       prevDateBtn.addEventListener('click', () => changeDate(-1));
       nextDateBtn.addEventListener('click', () => changeDate(1));
-
-      showSunCheckbox.addEventListener('change', () => {
-        sunTrajectoryGroup.visible = showSunCheckbox.checked;
-        updateSunMarker();
-      });
 
       function isValidGrid(locator) {
         if (!locator || locator.length < 4 || locator.length > 6) return false;
@@ -352,9 +319,9 @@
         const grid = gridInput.value;
         if (isValidGrid(grid)) {
           gridInput.style.borderColor = '#fff';
-          localStorage.setItem('skyObserverGrid', grid);
+          localStorage.setItem('skyObserverGrid', grid); // Store valid grid
           const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
-          addTrajectories(dateVal);
+          addMoonTrajectory(dateVal);
         } else {
           gridInput.style.borderColor = 'red';
         }
@@ -384,7 +351,6 @@
       }
 
       scene.add(moonTrajectoryGroup);
-      scene.add(sunTrajectoryGroup);
 
       const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
       camera.position.set(0, 0, 2);
@@ -537,14 +503,14 @@
         });
       }
 
-      function addTrajectories(selectedDate) {
+      function addMoonTrajectory(selectedDate) {
         const grid = gridInput.value || 'JO89tt';
         const coords = maidenheadToLatLon(grid);
         if (!coords) {
           gridInput.style.borderColor = 'red';
           gridInput.value = 'JO89tt';
-          localStorage.setItem('skyObserverGrid', 'JO89tt');
-          return addTrajectories(selectedDate);
+          localStorage.setItem('skyObserverGrid', 'JO89tt'); // Store default grid
+          return addMoonTrajectory(selectedDate);
         }
         const lat = coords.lat;
         const lon = coords.lon;
@@ -555,32 +521,27 @@
         const startOfDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
         const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
 
-        // Clear existing trajectories
         moonTrajectoryGroup.clear();
-        sunTrajectoryGroup.clear();
         moonPositions = [];
-        sunPositions = [];
         currentMoonIndex = 0;
 
-        let moonSegment = [];
-        let sunSegment = [];
-        const moonSegments = [];
-        const sunSegments = [];
+        let segment = [];
+        const segments = [];
 
         for (let minutes = 0; minutes < 1440; minutes += 10) {
           const time = new Date(startOfDay.getTime() + minutes * 60 * 1000);
 
           if (time >= endOfDay) break;
 
-          // Moon calculations
           const moonEq = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, false);
-          const moonHor = Astronomy.Horizon(time, observer, moonEq.ra, moonEq.dec, 'normal');
-          const moonElevationDeg = moonHor.altitude;
-          const moonAzimuthDeg = moonHor.azimuth;
+          const hor = Astronomy.Horizon(time, observer, moonEq.ra, moonEq.dec, 'normal');
 
-          if (moonElevationDeg > 0) {
-            const azRad = THREE.MathUtils.degToRad(360 - moonAzimuthDeg);
-            const elRad = THREE.MathUtils.degToRad(moonElevationDeg);
+          const elevationDeg = hor.altitude;
+          const azimuthDeg = hor.azimuth;
+
+          if (elevationDeg > 0) {
+            const azRad = THREE.MathUtils.degToRad(360 - azimuthDeg);
+            const elRad = THREE.MathUtils.degToRad(elevationDeg);
             const r = 1;
 
             const x = r * Math.cos(elRad) * Math.sin(azRad);
@@ -588,69 +549,31 @@
             const z = r * Math.cos(elRad) * Math.cos(azRad);
 
             const point = new THREE.Vector3(x, y, z);
-            moonSegment.push(point);
+            segment.push(point);
 
-            moonPositions.push({ time, position: point, azimuth: moonAzimuthDeg, elevation: moonElevationDeg });
+            moonPositions.push({ time, position: point, azimuth: azimuthDeg, elevation: elevationDeg });
           } else {
-            if (moonSegment.length > 1) moonSegments.push(moonSegment);
-            moonSegment = [];
-          }
-
-          // Sun calculations
-          const sunEq = Astronomy.Equator(Astronomy.Body.Sun, time, observer, true, false);
-          const sunHor = Astronomy.Horizon(time, observer, sunEq.ra, sunEq.dec, 'normal');
-          const sunElevationDeg = sunHor.altitude;
-          const sunAzimuthDeg = sunHor.azimuth;
-
-          if (sunElevationDeg > 0) {
-            const azRad = THREE.MathUtils.degToRad(360 - sunAzimuthDeg);
-            const elRad = THREE.MathUtils.degToRad(sunElevationDeg);
-            const r = 1;
-
-            const x = r * Math.cos(elRad) * Math.sin(azRad);
-            const y = r * Math.sin(elRad);
-            const z = r * Math.cos(elRad) * Math.cos(azRad);
-
-            const point = new THREE.Vector3(x, y, z);
-            sunSegment.push(point);
-
-            sunPositions.push({ time, position: point, azimuth: sunAzimuthDeg, elevation: sunElevationDeg });
-          } else {
-            if (sunSegment.length > 1) sunSegments.push(sunSegment);
-            sunSegment = [];
+            if (segment.length > 1) segments.push(segment);
+            segment = [];
           }
         }
 
-        if (moonSegment.length > 1) moonSegments.push(moonSegment);
-        if (sunSegment.length > 1) sunSegments.push(sunSegment);
+        if (segment.length > 1) segments.push(segment);
 
-        // Render moon trajectory
-        moonSegments.forEach(seg => {
+        segments.forEach(seg => {
           const geom = new THREE.BufferGeometry().setFromPoints(seg);
-          const mat = new THREE.LineBasicMaterial({ color: 0xffff00 }); // Yellow for moon
+          const mat = new THREE.LineBasicMaterial({ color: 0xffff00 });
           const line = new THREE.Line(geom, mat);
           line.userData = { isMoonTrajectory: true };
           moonTrajectoryGroup.add(line);
         });
 
-        // Render sun trajectory
-        sunSegments.forEach(seg => {
-          const geom = new THREE.BufferGeometry().setFromPoints(seg);
-          const mat = new THREE.LineBasicMaterial({ color: 0xffa500 }); // Orange for sun
-          const line = new THREE.Line(geom, mat);
-          line.userData = { isSunTrajectory: true };
-          sunTrajectoryGroup.add(line);
-        });
-
-        sunTrajectoryGroup.visible = showSunCheckbox.checked;
-
         currentMoonIndex = 0;
         updateMoonMarker();
-        updateSunMarker();
         updateTimeSlider();
       }
 
-      window.addTrajectories = addTrajectories;
+      window.addMoonTrajectory = addMoonTrajectory;
 
       function parseCsvData(csvText, csvSource) {
         Papa.parse(csvText, {
@@ -727,6 +650,7 @@
             controls.update();
             addAzimuthCompass();
 
+            // Update demoStatus based on csvSource
             if (csvSource === 'demo') {
               demoStatus.textContent = 'Demo loaded!';
               demoStatus.style.display = 'block';
@@ -761,7 +685,7 @@
           .catch(error => {
             console.error('Error loading demo CSV:', error);
             addAzimuthCompass();
-            addTrajectories();
+            addMoonTrajectory();
           });
       }
 
@@ -772,8 +696,8 @@
         const reader = new FileReader();
         reader.onload = function (event) {
           const csvText = event.target.result;
-          localStorage.setItem('skyObserverCsv', csvText);
-          parseCsvData(csvText, 'uploaded');
+          localStorage.setItem('skyObserverCsv', csvText); // Store CSV
+          parseCsvData(csvText, 'uploaded'); // Parse and hide demoStatus
         };
         reader.readAsText(file);
       });
@@ -783,7 +707,7 @@
         mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
 
         raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects([...spheres, moonMarker, sunMarker].filter(obj => obj !== null));
+        const intersects = raycaster.intersectObjects([...spheres, moonMarker].filter(obj => obj !== null));
 
         if (intersects.length > 0) {
           const clickedObject = intersects[0].object;
@@ -794,18 +718,6 @@
               <b>Moon Position</b><br>
               <b>Azimuth:</b> ${moonData.azimuth.toFixed(1)}°<br>
               <b>Elevation:</b> ${moonData.elevation.toFixed(1)}°<br>
-              <b>Time:</b> ${moonTimeDisplay.textContent}
-            `;
-            infoBox.style.display = 'block';
-            return;
-          }
-
-          if (clickedObject === sunMarker && showSunCheckbox.checked) {
-            const sunData = sunPositions[currentMoonIndex];
-            infoBox.innerHTML = `
-              <b>Sun Position</b><br>
-              <b>Azimuth:</b> ${sunData.azimuth.toFixed(1)}°<br>
-              <b>Elevation:</b> ${sunData.elevation.toFixed(1)}°<br>
               <b>Time:</b> ${moonTimeDisplay.textContent}
             `;
             infoBox.style.display = 'block';
@@ -834,7 +746,7 @@
         mouse.y = - (touch.clientY / window.innerHeight) * 2 + 1;
 
         raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects([...spheres, moonMarker, sunMarker].filter(obj => obj !== null));
+        const intersects = raycaster.intersectObjects([...spheres, moonMarker].filter(obj => obj !== null));
 
         if (intersects.length > 0) {
           const clickedObject = intersects[0].object;
@@ -846,15 +758,6 @@
               Time: ${moonData.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} UTC<br>
               Azimuth: ${moonData.azimuth.toFixed(2)}°<br>
               Elevation: ${moonData.elevation.toFixed(2)}°
-            `;
-            infoBox.style.display = 'block';
-          } else if (clickedObject === sunMarker && showSunCheckbox.checked) {
-            const sunData = sunPositions[currentMoonIndex];
-            infoBox.innerHTML = `
-              <b>Sun Data</b><br>
-              Time: ${sunData.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} UTC<br>
-              Azimuth: ${sunData.azimuth.toFixed(2)}°<br>
-              Elevation: ${sunData.elevation.toFixed(2)}°
             `;
             infoBox.style.display = 'block';
           } else if (clickedObject.userData.noise !== undefined) {
@@ -885,7 +788,7 @@
       const month = String(today.getUTCMonth() + 1).padStart(2, '0');
       const day = String(today.getUTCDate()).padStart(2, '0');
       datePicker.value = `${year}-${month}-${day}`;
-      addTrajectories();
+      addMoonTrajectory();
     </script>
 </body>
 </html>
