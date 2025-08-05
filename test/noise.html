@@ -258,9 +258,8 @@
       const demoStatus = document.getElementById('demoStatus');
 
       function updateMoonMarker() {
-        if (!moonPositions.length || !moonPositions[currentTimeIndex]) {
+        if (!moonPositions.length || !moonPositions[currentTimeIndex] || moonPositions[currentTimeIndex].elevation <= 0) {
           moonTimeDisplay.textContent = '--:-- UTC';
-          timeSlider.disabled = true;
           if (moonMarker) moonMarker.visible = false;
           return;
         }
@@ -283,7 +282,7 @@
       }
 
       function updateSunMarker() {
-        if (!sunPositions.length || !showSunCheckbox.checked || !sunPositions[currentTimeIndex]) {
+        if (!sunPositions.length || !showSunCheckbox.checked || !sunPositions[currentTimeIndex] || sunPositions[currentTimeIndex].elevation <= 0) {
           if (sunMarker) sunMarker.visible = false;
           return;
         }
@@ -305,6 +304,10 @@
         timeSlider.max = moonPositions.length - 1 || 0;
         timeSlider.value = currentTimeIndex;
         timeSlider.disabled = moonPositions.length === 0;
+        if (moonPositions.length && moonPositions[currentTimeIndex]) {
+          updateMoonMarker();
+          updateSunMarker();
+        }
       }
 
       function changeTime(index) {
@@ -568,6 +571,8 @@
         const moonSegments = [];
         const sunSegments = [];
 
+        let firstMoonVisibleIndex = -1;
+
         for (let minutes = 0; minutes < 1440; minutes += 10) {
           const time = new Date(startOfDay.getTime() + minutes * 60 * 1000);
 
@@ -592,6 +597,7 @@
             const point = new THREE.Vector3(x, y, z);
             moonSegment.push(point);
             moonPos = { time, position: point, azimuth: moonAzimuthDeg, elevation: moonElevationDeg };
+            if (firstMoonVisibleIndex === -1) firstMoonVisibleIndex = minutes / 10;
           } else {
             if (moonSegment.length > 1) moonSegments.push(moonSegment);
             moonSegment = [];
@@ -623,14 +629,9 @@
           }
           sunPositions.push(sunPos);
 
-          // Debug logging for 19:00 UTC (1140 minutes) and first visible moon position
-          if (minutes === 1140) {
+          // Debug logging for 17:10 UTC (1030 minutes) and 19:00 UTC (1140 minutes)
+          if (minutes === 1030 || minutes === 1140) {
             console.log(`At ${time.toUTCString()}:`);
-            console.log(`  Moon: Azimuth = ${moonAzimuthDeg.toFixed(1)}°, Elevation = ${moonElevationDeg.toFixed(1)}°`);
-            console.log(`  Sun: Azimuth = ${sunAzimuthDeg.toFixed(1)}°, Elevation = ${sunElevationDeg.toFixed(1)}°`);
-          }
-          if (minutes === 1030 && moonPos) { // Approx 17:10 UTC (17 * 60 + 10 = 1030 minutes)
-            console.log(`First moonrise at ${time.toUTCString()}:`);
             console.log(`  Moon: Azimuth = ${moonAzimuthDeg.toFixed(1)}°, Elevation = ${moonElevationDeg.toFixed(1)}°`);
             console.log(`  Sun: Azimuth = ${sunAzimuthDeg.toFixed(1)}°, Elevation = ${sunElevationDeg.toFixed(1)}°`);
           }
@@ -657,9 +658,11 @@
 
         sunTrajectoryGroup.visible = showSunCheckbox.checked;
 
-        currentTimeIndex = 0;
-        updateMoonMarker();
-        updateSunMarker();
+        // Set initial time to first moon visible or noon (720 minutes = 12:00 UTC)
+        currentTimeIndex = firstMoonVisibleIndex !== -1 ? firstMoonVisibleIndex : 72;
+        console.log(`Initial currentTimeIndex: ${currentTimeIndex} (Time: ${moonPositions[currentTimeIndex]?.time.toUTCString() || 'N/A'})`);
+        console.log(`moonPositions length: ${moonPositions.length}, sunPositions length: ${sunPositions.length}`);
+
         updateTimeSlider();
       }
 
@@ -801,7 +804,7 @@
         if (intersects.length > 0) {
           const clickedObject = intersects[0].object;
 
-          if (clickedObject === moonMarker && moonPositions[currentTimeIndex]) {
+          if (clickedObject === moonMarker && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0) {
             const moonData = moonPositions[currentTimeIndex];
             infoBox.innerHTML = `
               <b>Moon Position</b><br>
@@ -813,7 +816,7 @@
             return;
           }
 
-          if (clickedObject === sunMarker && showSunCheckbox.checked && sunPositions[currentTimeIndex]) {
+          if (clickedObject === sunMarker && showSunCheckbox.checked && sunPositions[currentTimeIndex] && sunPositions[currentTimeIndex].elevation > 0) {
             const sunData = sunPositions[currentTimeIndex];
             infoBox.innerHTML = `
               <b>Sun Position</b><br>
@@ -852,7 +855,7 @@
         if (intersects.length > 0) {
           const clickedObject = intersects[0].object;
 
-          if (clickedObject === moonMarker && moonPositions[currentTimeIndex]) {
+          if (clickedObject === moonMarker && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0) {
             const moonData = moonPositions[currentTimeIndex];
             infoBox.innerHTML = `
               <b>Moon Data</b><br>
@@ -861,7 +864,7 @@
               Elevation: ${moonData.elevation.toFixed(2)}°
             `;
             infoBox.style.display = 'block';
-          } else if (clickedObject === sunMarker && showSunCheckbox.checked && sunPositions[currentTimeIndex]) {
+          } else if (clickedObject === sunMarker && showSunCheckbox.checked && sunPositions[currentTimeIndex] && sunPositions[currentTimeIndex].elevation > 0) {
             const sunData = sunPositions[currentTimeIndex];
             infoBox.innerHTML = `
               <b>Sun Data</b><br>
