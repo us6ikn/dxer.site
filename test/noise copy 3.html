@@ -227,12 +227,6 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/geometries/TextGeometry.js"></script>
 
     <script>
-      // Note: This code uses localStorage to persist user-uploaded CSV data across sessions.
-      // The data is stored locally on the user's device and not sent to any server.
-      // No privacy disclaimers are required unless the CSV contains personal data or your app
-      // is subject to GDPR/CCPA. If needed, add a note to your FAQ page (e.g., at https://dxer.site/sky-observer-faq.html)
-      // stating: "Sky Observer stores user-uploaded CSV files locally in your browser to restore them on future visits."
-
       const scene = new THREE.Scene();
       const moonTrajectoryGroup = new THREE.Group();
       
@@ -246,7 +240,6 @@
       const prevDateBtn = document.getElementById('prevDate');
       const nextDateBtn = document.getElementById('nextDate');
       const gridInput = document.getElementById('gridInput');
-      const demoStatus = document.getElementById('demoStatus');
 
       function updateMoonMarker() {
         if (!moonPositions.length) {
@@ -508,7 +501,7 @@
         if (!coords) {
           gridInput.style.borderColor = 'red';
           gridInput.value = 'JO89tt';
-          return addMoonTrajectory(selectedDate);
+          return addMoonTrajectory(selectedDate); // Retry with default
         }
         const lat = coords.lat;
         const lon = coords.lon;
@@ -573,7 +566,82 @@
 
       window.addMoonTrajectory = addMoonTrajectory;
 
-      function parseCsvData(csvText, isDemo = false) {
+      fetch('2025-05-29_20.44.04.csv')
+        .then(response => response.text())
+        .then(csv => {
+          Papa.parse(csv, {
+            header: true,
+            delimiter: ";",
+            complete: function (results) {
+              results.data.forEach(row => {
+                if (!row.Valid || row.Valid !== "True") return;
+
+                const az = parseFloat(row.Azimuth?.replace(",", "."));
+                const el = parseFloat(row.Elevation?.replace(",", "."));
+                const noise = parseFloat(row.Noise?.replace(",", "."));
+
+                if (isNaN(az) || isNaN(el) || isNaN(noise)) return;
+
+                minNoise = Math.min(minNoise, noise);
+                maxNoise = Math.max(maxNoise, noise);
+
+                rawPoints.push({ az, el, noise });
+              });
+
+              rawPoints.forEach(p => {
+                const azRad = THREE.MathUtils.degToRad(360 - p.az);
+                const elRad = THREE.MathUtils.degToRad(p.el);
+                const r = 1;
+
+                const x = r * Math.cos(elRad) * Math.sin(azRad);
+                const y = r * Math.sin(elRad);
+                const z = r * Math.cos(elRad) * Math.cos(azRad);
+
+                const geometry = new THREE.SphereGeometry(0.015);
+                const material = new THREE.MeshBasicMaterial({ color: getColor(p.noise) });
+                const sphere = new THREE.Mesh(geometry, material);
+                sphere.position.set(x, y, z);
+
+                sphere.userData = { azimuth: p.az, elevation: p.el, noise: p.noise };
+
+                scene.add(sphere);
+                spheres.push(sphere);
+              });
+
+              const boundingBox = new THREE.Box3();
+              spheres.forEach(s => boundingBox.expandByPoint(s.position));
+
+              const center = new THREE.Vector3();
+              boundingBox.getCenter(center);
+
+              const size = new THREE.Vector3();
+              boundingBox.getSize(size);
+              const maxDim = Math.max(size.x, size.y, size.z);
+
+              let avgPosition = new THREE.Vector3();
+              spheres.forEach(s => avgPosition.add(s.position));
+              avgPosition.divideScalar(spheres.length);
+
+              const directionToData = avgPosition.clone().normalize();
+              const distance = maxDim * 2;
+              const cameraPos = directionToData.clone().multiplyScalar(distance);
+
+              camera.position.copy(cameraPos);
+              camera.lookAt(center);
+              controls.target.copy(center);
+              controls.update();
+              addAzimuthCompass();
+              addMoonTrajectory();
+            }
+          });
+        })
+        .catch(error => {
+          console.error('Error loading CSV:', error);
+          addAzimuthCompass();
+          addMoonTrajectory();
+        });
+
+      function parseCsvData(csvText) {
         Papa.parse(csvText, {
           header: true,
           delimiter: ";",
@@ -623,61 +691,22 @@
               spheres.push(sphere);
               scene.add(sphere);
             });
-
-            const boundingBox = new THREE.Box3();
-            spheres.forEach(s => boundingBox.expandByPoint(s.position));
-
-            const center = new THREE.Vector3();
-            boundingBox.getCenter(center);
-
-            const size = new THREE.Vector3();
-            boundingBox.getSize(size);
-            const maxDim = Math.max(size.x, size.y, size.z);
-
-            let avgPosition = new THREE.Vector3();
-            spheres.forEach(s => avgPosition.add(s.position));
-            avgPosition.divideScalar(spheres.length);
-
-            const directionToData = avgPosition.clone().normalize();
-            const distance = maxDim * 2;
-            const cameraPos = directionToData.clone().multiplyScalar(distance);
-
-            camera.position.copy(cameraPos);
-            camera.lookAt(center);
-            controls.target.copy(center);
-            controls.update();
-            addAzimuthCompass();
-            addMoonTrajectory();
-
-            demoStatus.style.display = isDemo ? 'block' : 'none';
           }
         });
-      }
-
-      // Check for stored CSV on page load
-      const storedCsv = localStorage.getItem('skyObserverCsv');
-      if (storedCsv) {
-        parseCsvData(storedCsv, false);
-      } else {
-        fetch('2025-05-29_20.44.04.csv')
-          .then(response => response.text())
-          .then(csv => parseCsvData(csv, true))
-          .catch(error => {
-            console.error('Error loading demo CSV:', error);
-            addAzimuthCompass();
-            addMoonTrajectory();
-          });
       }
 
       document.getElementById('csvUpload').addEventListener('change', function (e) {
         const file = e.target.files[0];
         if (!file) return;
 
+        const demoStatus = document.getElementById('demoStatus');
+        if (demoStatus) {
+          demoStatus.style.display = 'none';
+        }
+
         const reader = new FileReader();
         reader.onload = function (event) {
-          const csvText = event.target.result;
-          localStorage.setItem('skyObserverCsv', csvText); // Store CSV in localStorage
-          parseCsvData(csvText, false); // Parse and display, hide demo status
+          parseCsvData(event.target.result);
         };
         reader.readAsText(file);
       });
@@ -769,6 +798,12 @@
       const day = String(today.getUTCDate()).padStart(2, '0');
       datePicker.value = `${year}-${month}-${day}`;
       addMoonTrajectory();
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
     </script>
 </body>
 </html>
