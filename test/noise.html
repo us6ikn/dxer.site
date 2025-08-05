@@ -499,7 +499,7 @@
 
             // Use altitude (elevation) and azimuth from Astronomy library
             const elevationDeg = hor.altitude;
-            const azimuthDeg = (hor.azimuth + 180) % 360; // Adjust azimuth to match your convention
+            const azimuthDeg = hor.azimuth; // Remove the +180 adjustment
 
             if (elevationDeg > 0) { // Only include positions above the horizon
                 const azRad = THREE.MathUtils.degToRad(360 - azimuthDeg); // Flip azimuth to match compass
