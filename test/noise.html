@@ -295,25 +295,23 @@
 
       function updateTimeDisplay() {
         if (!moonPositions.length || !moonPositions[currentTimeIndex]) {
+          console.log(`updateTimeDisplay: No positions at index ${currentTimeIndex}`);
           moonTimeDisplay.textContent = '--:-- UTC';
           return;
         }
 
-        let time = null;
+        const time = moonPositions[currentTimeIndex].time;
         const moonVisible = moonPositions[currentTimeIndex].elevation > 0;
         const sunVisible = showSunCheckbox.checked && sunPositions[currentTimeIndex]?.elevation > 0;
 
-        if (moonVisible) {
-          time = moonPositions[currentTimeIndex].time;
-        } else if (sunVisible) {
-          time = sunPositions[currentTimeIndex].time;
-        }
+        console.log(`updateTimeDisplay at ${time.toUTCString()}: moonVisible=${moonVisible}, sunVisible=${sunVisible}`);
 
-        if (time) {
+        if (moonVisible || sunVisible) {
           const hours = String(time.getUTCHours()).padStart(2, '0');
           const minutes = String(time.getUTCMinutes()).padStart(2, '0');
           moonTimeDisplay.textContent = `${hours}:${minutes} UTC`;
         } else {
+          console.log(`updateTimeDisplay: Setting --:-- UTC (both moon and sun not visible)`);
           moonTimeDisplay.textContent = '--:-- UTC';
         }
       }
@@ -592,6 +590,7 @@
         const sunSegments = [];
 
         let firstMoonVisibleIndex = -1;
+        let firstSunVisibleIndex = -1;
 
         for (let minutes = 0; minutes < 1440; minutes += 10) {
           const time = new Date(startOfDay.getTime() + minutes * 60 * 1000);
@@ -605,24 +604,23 @@
           const moonAzimuthDeg = moonHor.azimuth;
 
           let moonPos = null;
+          const azRadMoon = THREE.MathUtils.degToRad(360 - moonAzimuthDeg);
+          const elRadMoon = THREE.MathUtils.degToRad(Math.max(moonElevationDeg, 0));
+          const r = 1;
+          const xMoon = r * Math.cos(elRadMoon) * Math.sin(azRadMoon);
+          const yMoon = r * Math.sin(elRadMoon);
+          const zMoon = r * Math.cos(elRadMoon) * Math.cos(azRadMoon);
+          const moonPoint = new THREE.Vector3(xMoon, yMoon, zMoon);
+          
           if (moonElevationDeg > 0) {
-            const azRad = THREE.MathUtils.degToRad(360 - moonAzimuthDeg);
-            const elRad = THREE.MathUtils.degToRad(moonElevationDeg);
-            const r = 1;
-
-            const x = r * Math.cos(elRad) * Math.sin(azRad);
-            const y = r * Math.sin(elRad);
-            const z = r * Math.cos(elRad) * Math.cos(azRad);
-
-            const point = new THREE.Vector3(x, y, z);
-            moonSegment.push(point);
-            moonPos = { time, position: point, azimuth: moonAzimuthDeg, elevation: moonElevationDeg };
+            moonSegment.push(moonPoint);
+            moonPos = { time, position: moonPoint, azimuth: moonAzimuthDeg, elevation: moonElevationDeg };
             if (firstMoonVisibleIndex === -1) firstMoonVisibleIndex = minutes / 10;
           } else {
             if (moonSegment.length > 1) moonSegments.push(moonSegment);
             moonSegment = [];
           }
-          moonPositions.push(moonPos);
+          moonPositions.push({ time, position: moonPoint, azimuth: moonAzimuthDeg, elevation: moonElevationDeg });
 
           // Sun calculations
           const sunEq = Astronomy.Equator(Astronomy.Body.Sun, time, observer, true, false);
@@ -631,23 +629,22 @@
           const sunAzimuthDeg = sunHor.azimuth;
 
           let sunPos = null;
+          const azRadSun = THREE.MathUtils.degToRad(360 - sunAzimuthDeg);
+          const elRadSun = THREE.MathUtils.degToRad(Math.max(sunElevationDeg, 0));
+          const xSun = r * Math.cos(elRadSun) * Math.sin(azRadSun);
+          const ySun = r * Math.sin(elRadSun);
+          const zSun = r * Math.cos(elRadSun) * Math.cos(azRadSun);
+          const sunPoint = new THREE.Vector3(xSun, ySun, zSun);
+
           if (sunElevationDeg > 0) {
-            const azRad = THREE.MathUtils.degToRad(360 - sunAzimuthDeg);
-            const elRad = THREE.MathUtils.degToRad(sunElevationDeg);
-            const r = 1;
-
-            const x = r * Math.cos(elRad) * Math.sin(azRad);
-            const y = r * Math.sin(elRad);
-            const z = r * Math.cos(elRad) * Math.cos(azRad);
-
-            const point = new THREE.Vector3(x, y, z);
-            sunSegment.push(point);
-            sunPos = { time, position: point, azimuth: sunAzimuthDeg, elevation: sunElevationDeg };
+            sunSegment.push(sunPoint);
+            sunPos = { time, position: sunPoint, azimuth: sunAzimuthDeg, elevation: sunElevationDeg };
+            if (firstSunVisibleIndex === -1) firstSunVisibleIndex = minutes / 10;
           } else {
             if (sunSegment.length > 1) sunSegments.push(sunSegment);
             sunSegment = [];
           }
-          sunPositions.push(sunPos);
+          sunPositions.push({ time, position: sunPoint, azimuth: sunAzimuthDeg, elevation: sunElevationDeg });
 
           // Debug logging for 12:00 UTC (720 minutes), 17:10 UTC (1030 minutes), and 19:00 UTC (1140 minutes)
           if (minutes === 720 || minutes === 1030 || minutes === 1140) {
@@ -678,12 +675,11 @@
 
         sunTrajectoryGroup.visible = showSunCheckbox.checked;
 
-        // Set initial time to first moon visible or first sun visible or noon (720 minutes = 12:00 UTC)
+        // Set initial time to first moon visible, first sun visible, or noon (720 minutes = 12:00 UTC)
         if (firstMoonVisibleIndex !== -1) {
           currentTimeIndex = firstMoonVisibleIndex;
-        } else if (showSunCheckbox.checked) {
-          const firstSunVisibleIndex = sunPositions.findIndex(pos => pos && pos.elevation > 0);
-          currentTimeIndex = firstSunVisibleIndex !== -1 ? firstSunVisibleIndex : 72;
+        } else if (showSunCheckbox.checked && firstSunVisibleIndex !== -1) {
+          currentTimeIndex = firstSunVisibleIndex;
         } else {
           currentTimeIndex = 72;
         }
@@ -794,7 +790,7 @@
       }
 
       // Initialize CSV from localStorage or demo
-      const storedCsv = localStorage.getItem('skyObserverCsv');
+      const storedCsv = localStorage.getItem('skyObserverGrid');
       if (storedCsv) {
         parseCsvData(storedCsv, 'stored');
       } else {
