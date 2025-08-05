@@ -334,8 +334,8 @@
 
         if (!moonMarker) {
           console.log(`updateMoonMarker: Creating moon marker`);
-          const geom = new THREE.SphereGeometry(0.03, 16, 16);
-          const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+          const geom = new THREE.SphereGeometry(0.05, 16, 16);
+          const mat = new THREE.MeshStandardMaterial({ color: 0xffffff });
           moonMarker = new THREE.Mesh(geom, mat);
           scene.add(moonMarker);
           console.log('Moon marker created and added to scene');
@@ -344,6 +344,7 @@
         console.log(`updateMoonMarker: Showing moon marker at ${moonData.time.toUTCString()}, Az=${moonData.azimuth.toFixed(1)}°, El=${moonData.elevation.toFixed(1)}°, Pos=${moonData.position.toArray().map(n => n.toFixed(2))}`);
         moonMarker.visible = true;
         moonMarker.position.copy(moonData.position);
+        renderer.render(scene, camera); // Force render
         return true;
       }
 
@@ -369,8 +370,8 @@
 
         if (!sunMarker) {
           console.log(`updateSunMarker: Creating sun marker`);
-          const geom = new THREE.SphereGeometry(0.02, 16, 16);
-          const mat = new THREE.MeshBasicMaterial({ color: 0xffa500 });
+          const geom = new THREE.SphereGeometry(0.03, 16, 16);
+          const mat = new THREE.MeshStandardMaterial({ color: 0xffa500 });
           sunMarker = new THREE.Mesh(geom, mat);
           scene.add(sunMarker);
           console.log('Sun marker created and added to scene');
@@ -379,6 +380,7 @@
         console.log(`updateSunMarker: Showing sun marker at ${sunData.time.toUTCString()}, Az=${sunData.azimuth.toFixed(1)}°, El=${sunData.elevation.toFixed(1)}°, Pos=${sunData.position.toArray().map(n => n.toFixed(2))}`);
         sunMarker.visible = true;
         sunMarker.position.copy(sunData.position);
+        renderer.render(scene, camera); // Force render
         return true;
       }
 
@@ -496,6 +498,7 @@
         updateSunMarker();
         updateTimeDisplay();
         console.log(`Sun visibility toggled: ${showSunCheckbox.checked}, sunTrajectoryGroup children: ${sunTrajectoryGroup.children.length}`);
+        renderer.render(scene, camera);
       });
 
       function isValidGrid(locator) {
@@ -644,11 +647,11 @@
           }
 
           console.log(`Compass labels added, compassGroup children: ${compassGroup.children.length}`);
-          renderer.render(scene, camera); // Force render
+          renderer.render(scene, camera);
         }, undefined, (error) => {
           console.error('Font loading failed:', error);
           console.log(`Compass added without labels, compassGroup children: ${compassGroup.children.length}`);
-          renderer.render(scene, camera); // Force render
+          renderer.render(scene, camera);
         });
 
         scene.add(compassGroup);
@@ -780,7 +783,7 @@
         console.log(`addTrajectories: moonSegments=${moonSegments.length}, sunSegments=${sunSegments.length}, currentTimeIndex=${currentTimeIndex}`);
         console.log(`Scene children: ${scene.children.length}, moonTrajectoryGroup: ${moonTrajectoryGroup.children.length}, sunTrajectoryGroup: ${sunTrajectoryGroup.children.length}, compassGroup: ${compassGroup.children.length}`);
         updateTimeSlider();
-        renderer.render(scene, camera); // Force render
+        renderer.render(scene, camera);
       }
 
       window.addTrajectories = addTrajectories;
@@ -788,101 +791,129 @@
       function parseCsvData(csvText, csvSource) {
         console.log('parseCsvData: Starting CSV parsing, source=', csvSource);
         console.log('CSV content (first 500 chars):', csvText.substring(0, 500));
-        Papa.parse(csvText, {
+
+        // Try comma delimiter first, then semicolon
+        let parsed = Papa.parse(csvText, {
           header: true,
-          delimiter: ";",
+          delimiter: ",",
           dynamicTyping: true,
-          skipEmptyLines: true,
-          complete: function (results) {
-            console.log('Papa.parse results:', results.data.slice(0, 5), 'Errors:', results.errors);
-            rawPoints.length = 0;
-            spheres.forEach(s => scene.remove(s));
-            spheres.length = 0;
-            minNoise = Infinity;
-            maxNoise = -Infinity;
-
-            results.data.forEach((row, i) => {
-              if (!row.Valid || row.Valid !== "True" && row.Valid !== true) {
-                console.log(`Row ${i} skipped: Invalid Valid field`, row);
-                return;
-              }
-
-              const az = parseFloat(row.Azimuth?.toString().replace(",", "."));
-              const el = parseFloat(row.Elevation?.toString().replace(",", "."));
-              const noise = parseFloat(row.Noise?.toString().replace(",", "."));
-
-              if (isNaN(az) || isNaN(el) || isNaN(noise) || noise <= 0) {
-                console.log(`Row ${i} skipped: Invalid data (Az=${az}, El=${el}, Noise=${noise})`, row);
-                return;
-              }
-
-              minNoise = Math.min(minNoise, noise);
-              maxNoise = Math.max(maxNoise, noise);
-              rawPoints.push({ az, el, noise });
-            });
-
-            rawPoints.forEach((point, i) => {
-              const azRad = THREE.MathUtils.degToRad(360 - point.az);
-              const elRad = THREE.MathUtils.degToRad(point.el);
-              const r = 1;
-              const x = r * Math.cos(elRad) * Math.sin(azRad);
-              const y = r * Math.sin(elRad);
-              const z = r * Math.cos(elRad) * Math.cos(azRad);
-
-              const geometry = new THREE.SphereGeometry(0.015, 8, 8);
-              const material = new THREE.MeshBasicMaterial({ color: getColor(point.noise) });
-              const sphere = new THREE.Mesh(geometry, material);
-              sphere.position.set(x, y, z);
-              sphere.userData = { azimuth: point.az, elevation: point.el, noise: point.noise };
-              spheres.push(sphere);
-              scene.add(sphere);
-              console.log(`Sphere ${i}: Az=${point.az.toFixed(1)}°, El=${point.el.toFixed(1)}°, Noise=${point.noise.toFixed(2)}, Pos=${[x.toFixed(2), y.toFixed(2), z.toFixed(2)]}`);
-            });
-
-            const boundingBox = new THREE.Box3();
-            spheres.forEach(s => boundingBox.expandByPoint(s.position));
-            const center = new THREE.Vector3();
-            boundingBox.getCenter(center);
-            const size = new THREE.Vector3();
-            boundingBox.getSize(size);
-            const maxDim = Math.max(size.x, size.y, size.z) || 2;
-
-            const avgPosition = new THREE.Vector3();
-            spheres.forEach(s => avgPosition.add(s.position));
-            avgPosition.divideScalar(spheres.length || 1);
-
-            const directionToData = avgPosition.clone().normalize();
-            const distance = maxDim * 2;
-            camera.position.copy(spheres.length ? directionToData.clone().multiplyScalar(distance) : new THREE.Vector3(0, 0, 2));
-            camera.lookAt(center);
-            controls.target.copy(spheres.length ? center : new THREE.Vector3(0, 0, 0));
-            controls.update();
-
-            console.log(`parseCsvData: Spheres added=${spheres.length}, Camera pos=${camera.position.toArray().map(n => n.toFixed(2))}, Controls target=${controls.target.toArray().map(n => n.toFixed(2))}`);
-            console.log(`Scene children after parseCsvData: ${scene.children.length}`);
-
-            addAzimuthCompass();
-            updateTimeDisplay();
-            if (csvSource === 'demo') {
-              demoStatus.textContent = 'Demo loaded!';
-              demoStatus.style.display = 'block';
-            } else if (csvSource === 'stored') {
-              demoStatus.textContent = 'Stored CSV loaded';
-              demoStatus.style.display = 'block';
-            } else {
-              demoStatus.style.display = 'none';
-            }
-            renderer.render(scene, camera); // Force render
-          },
-          error: (error) => {
-            console.error('CSV parsing error:', error);
-            rawPoints.length = 0;
-            addAzimuthCompass();
-            updateTimeDisplay();
-            renderer.render(scene, camera);
-          }
+          skipEmptyLines: true
         });
+
+        if (parsed.errors.length || !parsed.data.length) {
+          console.warn('Comma delimiter failed, trying semicolon');
+          parsed = Papa.parse(csvText, {
+            header: true,
+            delimiter: ";",
+            dynamicTyping: true,
+            skipEmptyLines: true
+          });
+        }
+
+        console.log('Papa.parse results:', parsed.data.slice(0, 5), 'Errors:', parsed.errors);
+
+        rawPoints.length = 0;
+        spheres.forEach(s => scene.remove(s));
+        spheres.length = 0;
+        minNoise = Infinity;
+        maxNoise = -Infinity;
+
+        parsed.data.forEach((row, i) => {
+          const valid = row.Valid === "True" || row.Valid === true || row.valid === "True" || row.valid === true;
+          if (!valid) {
+            console.log(`Row ${i} skipped: Invalid Valid field`, row);
+            return;
+          }
+
+          // Flexible column names
+          const az = parseFloat((row.Azimuth || row.az || row.Az)?.toString().replace(",", "."));
+          const el = parseFloat((row.Elevation || row.el || row.El)?.toString().replace(",", "."));
+          const noise = parseFloat((row.Noise || row.noise)?.toString().replace(",", "."));
+
+          if (isNaN(az) || isNaN(el) || isNaN(noise) || noise <= 0 || el < 0 || el > 90 || az < 0 || az > 360) {
+            console.log(`Row ${i} skipped: Invalid data (Az=${az}, El=${el}, Noise=${noise})`, row);
+            return;
+          }
+
+          minNoise = Math.min(minNoise, noise);
+          maxNoise = Math.max(maxNoise, noise);
+          rawPoints.push({ az, el, noise });
+        });
+
+        if (!rawPoints.length) {
+          console.warn('No valid points parsed from CSV');
+        }
+
+        rawPoints.forEach((point, i) => {
+          const azRad = THREE.MathUtils.degToRad(360 - point.az);
+          const elRad = THREE.MathUtils.degToRad(point.el);
+          const r = 1;
+          const x = r * Math.cos(elRad) * Math.sin(azRad);
+          const y = r * Math.sin(elRad);
+          const z = r * Math.cos(elRad) * Math.cos(azRad);
+
+          const geometry = new THREE.SphereGeometry(0.015, 16, 16);
+          const material = new THREE.MeshStandardMaterial({ color: getColor(point.noise) });
+          const sphere = new THREE.Mesh(geometry, material);
+          sphere.position.set(x, y, z);
+          sphere.userData = { azimuth: point.az, elevation: point.el, noise: point.noise };
+          spheres.push(sphere);
+          scene.add(sphere);
+          console.log(`Sphere ${i}: Az=${point.az.toFixed(1)}°, El=${point.el.toFixed(1)}°, Noise=${point.noise.toFixed(2)}, Pos=${[x.toFixed(2), y.toFixed(2), z.toFixed(2)]}`);
+        });
+
+        // Adjust camera only if spheres exist
+        if (spheres.length) {
+          const boundingBox = new THREE.Box3();
+          spheres.forEach(s => boundingBox.expandByPoint(s.position));
+          const center = new THREE.Vector3();
+          boundingBox.getCenter(center);
+          const size = new THREE.Vector3();
+          boundingBox.getSize(size);
+          const maxDim = Math.max(size.x, size.y, size.z) || 2;
+
+          const avgPosition = new THREE.Vector3();
+          spheres.forEach(s => avgPosition.add(s.position));
+          avgPosition.divideScalar(spheres.length);
+
+          const directionToData = avgPosition.clone().normalize();
+          const distance = maxDim * 2;
+          camera.position.copy(directionToData.clone().multiplyScalar(distance));
+          camera.lookAt(center);
+          controls.target.copy(center);
+          controls.update();
+        } else {
+          camera.position.set(0, 0, 2);
+          camera.lookAt(0, 0, 0);
+          controls.target.set(0, 0, 0);
+          controls.update();
+        }
+
+        console.log(`parseCsvData: Spheres added=${spheres.length}, Camera pos=${camera.position.toArray().map(n => n.toFixed(2))}, Controls target=${controls.target.toArray().map(n => n.toFixed(2))}`);
+        console.log(`Scene children after parseCsvData: ${scene.children.length}`);
+
+        addAzimuthCompass();
+        updateTimeDisplay();
+        if (csvSource === 'demo') {
+          demoStatus.textContent = 'Demo loaded!';
+          demoStatus.style.display = 'block';
+        } else if (csvSource === 'stored') {
+          demoStatus.textContent = 'Stored CSV loaded';
+          demoStatus.style.display = 'block';
+        } else {
+          demoStatus.style.display = 'none';
+        }
+        renderer.render(scene, camera);
       }
+
+      // Fallback sample CSV data
+      const sampleCsv = `
+Valid,Azimuth,Elevation,Noise
+True,0,45,10.5
+True,90,30,12.3
+True,180,60,15.7
+True,270,20,11.2
+`;
 
       const storedGrid = localStorage.getItem('skyObserverGrid');
       if (storedGrid && isValidGrid(storedGrid)) {
@@ -899,15 +930,17 @@
       } else {
         fetch('2025-05-29_20.44.04.csv')
           .then(response => {
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            if (!response.ok) {
+              console.warn(`Demo CSV fetch failed (HTTP ${response.status}), using sample CSV`);
+              return sampleCsv;
+            }
             return response.text();
           })
           .then(csv => parseCsvData(csv, 'demo'))
           .catch(error => {
             console.error('Error loading demo CSV:', error);
-            addAzimuthCompass();
-            addTrajectories();
-            renderer.render(scene, camera);
+            console.log('Falling back to sample CSV');
+            parseCsvData(sampleCsv, 'demo');
           });
       }
 
