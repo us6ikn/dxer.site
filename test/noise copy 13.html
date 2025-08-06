@@ -142,23 +142,24 @@
           width: 20px !important;
           height: 200px !important;
         }
-        @media (max-width: 600px), (orientation: portrait) {
-          #colorBar {
-            width: 20px !important;
-            height: 120px !important;
+          /* Existing styles remain unchanged, add this to the <style> section */
+          @media (max-width: 600px), (orientation: portrait) {
+            #colorBar {
+              width: 20px !important;
+              height: 120px !important; /* Reduced from 200px */
+            }
+            #colorBarContainer {
+              bottom: 100px; /* Move up to avoid time slider */
+              right: 10px; /* Slightly closer to edge for space */
+              font-size: 10px; /* Smaller labels for compactness */
+            }
+            #moonTimeControls {
+              bottom: 10px; /* Slightly lower to maximize space */
+            }
+            #maxNoiseLabel, #minNoiseLabel {
+              font-size: 10px; /* Match container font-size */
+            }
           }
-          #colorBarContainer {
-            bottom: 100px;
-            right: 10px;
-            font-size: 10px;
-          }
-          #moonTimeControls {
-            bottom: 10px;
-          }
-          #maxNoiseLabel, #minNoiseLabel {
-            font-size: 10px;
-          }
-        }
       </style>
     </head>
     <body>
@@ -206,11 +207,6 @@
           <div style="display: flex; align-items: center; gap: 4px;">
             <label for="gridInput">Grid:</label>
             <input type="text" id="gridInput" maxlength="6" placeholder="e.g. JO89tt"
-                   style="width: 60px; font-size: 11px; padding: 2px 4px; border-radius: 4px; border: none;">
-          </div>
-          <div style="display: flex; align-items: center; gap: 4px;">
-            <label for="dxGridInput">DX Grid:</label>
-            <input type="text" id="dxGridInput" maxlength="6" placeholder="e.g. FN20as"
                    style="width: 60px; font-size: 11px; padding: 2px 4px; border-radius: 4px; border: none;">
           </div>
           <div style="display: flex; flex-direction: column; gap: 2px;">
@@ -272,18 +268,15 @@
         <script>
           const scene = new THREE.Scene();
           const moonTrajectoryGroup = new THREE.Group();
-          const dxMoonTrajectoryGroup = new THREE.Group();
           const sunTrajectoryGroup = new THREE.Group();
           
           let moonPositions = [];
-          let dxMoonPositions = [];
           let sunPositions = [];
-          let commonMoonWindow = [];
           let currentTimeIndex = 0;
           let moonMarker = null;
           let sunMarker = null;
-          let azStep = 5;
-          let elStep = 5;
+          let azStep = 5; // Default step size
+          let elStep = 5; // Default step size
           
           const moonTimeDisplay = document.getElementById('moonTimeDisplay');
           const timeSlider = document.getElementById('timeSlider');
@@ -291,7 +284,6 @@
           const prevDateBtn = document.getElementById('prevDate');
           const nextDateBtn = document.getElementById('nextDate');
           const gridInput = document.getElementById('gridInput');
-          const dxGridInput = document.getElementById('dxGridInput');
           const showSunCheckbox = document.getElementById('showSun');
           const demoStatus = document.getElementById('demoStatus');
           const colorBarCanvas = document.getElementById('colorBar');
@@ -323,7 +315,6 @@
           const rawPoints = [];
 
           scene.add(moonTrajectoryGroup);
-          scene.add(dxMoonTrajectoryGroup);
           scene.add(sunTrajectoryGroup);
 
           function getColor(noise) {
@@ -357,8 +348,8 @@
               return null;
             }
 
-            const maxDistance = Math.max(azStep, elStep) * 1.0;
-            const maxClosestDistance = 6;
+            const maxDistance = Math.max(azStep, elStep) * 1.0; // 15° for 5° steps
+            const maxClosestDistance = 6; // Maximum distance for closest point
             const minPoints = 1;
 
             const pointsWithDistance = rawPoints.map(point => {
@@ -413,88 +404,91 @@
             }
           }
 
-          function drawColorBar() {
-            if (minNoise === Infinity || maxNoise === -Infinity) {
-              console.log('drawColorBar: No valid noise data, hiding color bar');
-              colorBarContainer.style.display = 'none';
-              return;
-            }
-            colorBarContainer.style.display = 'flex';
-
-            minNoiseLabel.textContent = `${minNoise.toFixed(2)} dB`;
-            maxNoiseLabel.textContent = `${maxNoise.toFixed(2)} dB`;
-
-            const dpr = window.devicePixelRatio || 1;
-            const computedStyle = getComputedStyle(colorBarCanvas);
-            const canvasWidth = parseFloat(computedStyle.width);
-            const canvasHeight = parseFloat(computedStyle.height);
-            colorBarCanvas.width = canvasWidth * dpr;
-            colorBarCanvas.height = canvasHeight * dpr;
-            colorBarContext.scale(dpr, dpr);
-
-            colorBarContext.save();
-            colorBarContext.setTransform(1, 0, 0, 1, 0, 0);
-            colorBarContext.clearRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
-
-            console.log(`drawColorBar: Canvas width=${colorBarCanvas.width}, height=${colorBarCanvas.height}, computedStyle=${computedStyle.width}x${computedStyle.height}, DPR=${dpr}`);
-
-            const gradient = colorBarContext.createLinearGradient(0, colorBarCanvas.height, 0, 0);
-            for (let i = 0; i <= 1; i += 0.1) {
-              const norm = i;
-              const color = new THREE.Color().setHSL(0.7 - norm * 0.7, 1.0, 0.5);
-              gradient.addColorStop(i, `#${color.getHexString()}`);
-            }
-            colorBarContext.fillStyle = gradient;
-            colorBarContext.fillRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
-
-            if (moonPositions.length && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0 && rawPoints.length) {
-              const moonData = moonPositions[currentTimeIndex];
-              const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
-              if (noisePoint) {
-                const noise = noisePoint.noise;
-                const norm = (maxNoise - minNoise) === 0 ? 0.5 : (noise - minNoise) / (maxNoise - minNoise);
-                let y = colorBarCanvas.height * (1 - norm);
-                y = Math.max(2 * dpr, Math.min(colorBarCanvas.height - 2 * dpr, y));
-
-                console.log(`drawColorBar: Drawing Moon noise marker at Noise=${noise.toFixed(2)} dB, y=${y.toFixed(2)}, norm=${norm.toFixed(4)}`);
-
-                const isMobile = window.innerWidth <= 600 || window.matchMedia("(orientation: portrait)").matches;
-                const triangleSize = isMobile ? 12 : 18;
-                const textOffset = isMobile ? 14 : 22;
-                const fontSize = isMobile ? 12 : 14;
-
-                colorBarContext.strokeStyle = '#000000';
-                colorBarContext.lineWidth = 2 * dpr;
-                colorBarContext.beginPath();
-                colorBarContext.moveTo(colorBarCanvas.width, y);
-                colorBarContext.lineTo(colorBarCanvas.width + triangleSize * dpr, y - (triangleSize / 2) * dpr);
-                colorBarContext.lineTo(colorBarCanvas.width + triangleSize * dpr, y + (triangleSize / 2) * dpr);
-                colorBarContext.closePath();
-                colorBarContext.stroke();
-
-                colorBarContext.fillStyle = '#ffffff';
-                colorBarContext.fill();
-
-                colorBarContext.fillStyle = '#ffffff';
-                colorBarContext.strokeStyle = '#000000';
-                colorBarContext.lineWidth = 1 * dpr;
-                colorBarContext.font = `bold ${fontSize * dpr}px Segoe UI`;
-                colorBarContext.textAlign = 'left';
-                colorBarContext.textBaseline = 'middle';
-                colorBarContext.strokeText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + textOffset * dpr, y);
-                colorBarContext.fillText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + textOffset * dpr, y);
-
-                colorBarContext.fillStyle = '#ff0000';
-                colorBarContext.fillRect(0, y - 2 * dpr, 5 * dpr, 4 * dpr);
-              } else {
-                console.log(`drawColorBar: No valid noise point for Moon at Az=${moonData.azimuth.toFixed(1)}°, El=${moonData.elevation.toFixed(1)}°`);
+            function drawColorBar() {
+              if (minNoise === Infinity || maxNoise === -Infinity) {
+                console.log('drawColorBar: No valid noise data, hiding color bar');
+                colorBarContainer.style.display = 'none';
+                return;
               }
-            } else {
-              console.log('drawColorBar: Moon below horizon or no data, skipping marker');
-            }
+              colorBarContainer.style.display = 'flex';
 
-            colorBarContext.restore();
-          }
+              minNoiseLabel.textContent = `${minNoise.toFixed(2)} dB`;
+              maxNoiseLabel.textContent = `${maxNoise.toFixed(2)} dB`;
+
+              // Adjust for device pixel ratio
+              const dpr = window.devicePixelRatio || 1;
+              const computedStyle = getComputedStyle(colorBarCanvas);
+              const canvasWidth = parseFloat(computedStyle.width);
+              const canvasHeight = parseFloat(computedStyle.height);
+              colorBarCanvas.width = canvasWidth * dpr;
+              colorBarCanvas.height = canvasHeight * dpr;
+              colorBarContext.scale(dpr, dpr);
+
+              colorBarContext.save();
+              colorBarContext.setTransform(1, 0, 0, 1, 0, 0);
+              colorBarContext.clearRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
+
+              console.log(`drawColorBar: Canvas width=${colorBarCanvas.width}, height=${colorBarCanvas.height}, computedStyle=${computedStyle.width}x${computedStyle.height}, DPR=${dpr}`);
+
+              const gradient = colorBarContext.createLinearGradient(0, colorBarCanvas.height, 0, 0);
+              for (let i = 0; i <= 1; i += 0.1) {
+                const norm = i;
+                const color = new THREE.Color().setHSL(0.7 - norm * 0.7, 1.0, 0.5);
+                gradient.addColorStop(i, `#${color.getHexString()}`);
+              }
+              colorBarContext.fillStyle = gradient;
+              colorBarContext.fillRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
+
+              if (moonPositions.length && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0 && rawPoints.length) {
+                const moonData = moonPositions[currentTimeIndex];
+                const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
+                if (noisePoint) {
+                  const noise = noisePoint.noise;
+                  const norm = (maxNoise - minNoise) === 0 ? 0.5 : (noise - minNoise) / (maxNoise - minNoise);
+                  let y = colorBarCanvas.height * (1 - norm);
+                  y = Math.max(2 * dpr, Math.min(colorBarCanvas.height - 2 * dpr, y));
+
+                  console.log(`drawColorBar: Drawing Moon noise marker at Noise=${noise.toFixed(2)} dB, y=${y.toFixed(2)}, norm=${norm.toFixed(4)}`);
+
+                  // Adjust triangle size for mobile
+                  const isMobile = window.innerWidth <= 600 || window.matchMedia("(orientation: portrait)").matches;
+                  const triangleSize = isMobile ? 12 : 18;
+                  const textOffset = isMobile ? 14 : 22;
+                  const fontSize = isMobile ? 12 : 14;
+
+                  colorBarContext.strokeStyle = '#000000';
+                  colorBarContext.lineWidth = 2 * dpr;
+                  colorBarContext.beginPath();
+                  colorBarContext.moveTo(colorBarCanvas.width, y);
+                  colorBarContext.lineTo(colorBarCanvas.width + triangleSize * dpr, y - (triangleSize / 2) * dpr);
+                  colorBarContext.lineTo(colorBarCanvas.width + triangleSize * dpr, y + (triangleSize / 2) * dpr);
+                  colorBarContext.closePath();
+                  colorBarContext.stroke();
+
+                  colorBarContext.fillStyle = '#ffffff';
+                  colorBarContext.fill();
+
+                  colorBarContext.fillStyle = '#ffffff';
+                  colorBarContext.strokeStyle = '#000000';
+                  colorBarContext.lineWidth = 1 * dpr;
+                  colorBarContext.font = `bold ${fontSize * dpr}px Segoe UI`;
+                  colorBarContext.textAlign = 'left';
+                  colorBarContext.textBaseline = 'middle';
+                  colorBarContext.strokeText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + textOffset * dpr, y);
+                  colorBarContext.fillText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + textOffset * dpr, y);
+
+                  // Optional: Comment out or remove the red rectangle if not needed
+                  colorBarContext.fillStyle = '#ff0000';
+                  colorBarContext.fillRect(0, y - 2 * dpr, 5 * dpr, 4 * dpr);
+                } else {
+                  console.log(`drawColorBar: No valid noise point for Moon at Az=${moonData.azimuth.toFixed(1)}°, El=${moonData.elevation.toFixed(1)}°`);
+                }
+              } else {
+                console.log('drawColorBar: Moon below horizon or no data, skipping marker');
+              }
+
+              colorBarContext.restore();
+            }
 
           function updateMoonMarker() {
             if (!moonPositions.length || !moonPositions[currentTimeIndex]) {
@@ -578,22 +572,6 @@
               `;
             }
 
-            if (dxMoonPositions.length && dxMoonPositions[currentTimeIndex]) {
-              const dxMoonData = dxMoonPositions[currentTimeIndex];
-              html += `<br>`;
-              if (dxMoonData.elevation > 0) {
-                html += `
-                  <b>DX Moon</b><br>
-                  Az: ${dxMoonData.azimuth.toFixed(1)}° El: ${dxMoonData.elevation.toFixed(1)}°
-                `;
-              } else {
-                html += `
-                  <b>DX Moon</b><br>
-                  DX Moon below horizon
-                `;
-              }
-            }
-
             if (showSunCheckbox.checked && sunPositions.length && sunPositions[currentTimeIndex]) {
               const sunData = sunPositions[currentTimeIndex];
               html += `<br>`;
@@ -612,13 +590,6 @@
               html += `
                 <br><b>Sun</b><br>
                 Sun below horizon
-              `;
-            }
-
-            if (commonMoonWindow.length && commonMoonWindow.some(w => w.index === currentTimeIndex)) {
-              html += `
-                <br><b>Common Moon</b><br>
-                Moon visible at both locations
               `;
             }
 
@@ -739,19 +710,6 @@
             }
           });
 
-          dxGridInput.addEventListener('input', () => {
-            const dxGrid = dxGridInput.value;
-            if (dxGrid && isValidGrid(dxGrid)) {
-              dxGridInput.style.borderColor = '#fff';
-            } else if (dxGrid) {
-              dxGridInput.style.borderColor = 'red';
-            } else {
-              dxGridInput.style.borderColor = '#fff';
-            }
-            const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
-            addTrajectories(dateVal);
-          });
-
           function maidenheadToLatLon(locator) {
             if (!locator || locator.length < 4) return null;
             locator = locator.toUpperCase();
@@ -868,64 +826,43 @@
 
           function addTrajectories(selectedDate) {
             const grid = gridInput.value || 'JO89tt';
-            const dxGrid = dxGridInput.value;
             const coords = maidenheadToLatLon(grid);
-            let dxCoords = null;
-            if (dxGrid && isValidGrid(dxGrid)) {
-              dxCoords = maidenheadToLatLon(dxGrid);
-              dxGridInput.style.borderColor = '#fff';
-            } else if (dxGrid) {
-              dxGridInput.style.borderColor = 'red';
-            } else {
-              dxGridInput.style.borderColor = '#fff';
-            }
-
             if (!coords) {
               gridInput.style.borderColor = 'red';
               gridInput.value = 'JO89tt';
               localStorage.setItem('skyObserverGrid', 'JO89tt');
               return addTrajectories(selectedDate);
             }
-
             const lat = coords.lat;
             const lon = coords.lon;
+
             const observer = new Astronomy.Observer(lat, lon, 0);
-            let dxObserver = null;
-            if (dxCoords) {
-              dxObserver = new Astronomy.Observer(dxCoords.lat, dxCoords.lon, 0);
-            }
 
             const date = selectedDate ? new Date(selectedDate) : new Date();
             const startOfDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
             const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
 
             moonTrajectoryGroup.clear();
-            dxMoonTrajectoryGroup.clear();
             sunTrajectoryGroup.clear();
             if (moonMarker) scene.remove(moonMarker);
             if (sunMarker) scene.remove(sunMarker);
             moonMarker = null;
             sunMarker = null;
             moonPositions = [];
-            dxMoonPositions = [];
             sunPositions = [];
-            commonMoonWindow = [];
             currentTimeIndex = 0;
 
             let moonSegment = [];
-            let dxMoonSegment = [];
             let sunSegment = [];
-            let commonMoonSegment = [];
             const moonSegments = [];
-            const dxMoonSegments = [];
             const sunSegments = [];
-            const commonMoonSegments = [];
 
             let firstMoonVisibleIndex = -1;
             let firstSunVisibleIndex = -1;
 
             for (let minutes = 0; minutes < 1440; minutes += 10) {
               const time = new Date(startOfDay.getTime() + minutes * 60 * 1000);
+
               if (time >= endOfDay) break;
 
               const moonEq = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, false);
@@ -950,42 +887,6 @@
               }
               moonPositions.push({ time, position: moonPoint, azimuth: moonAzimuthDeg, elevation: moonElevationDeg });
 
-              let dxMoonPoint = null;
-              let isCommon = false;
-              if (dxObserver) {
-                const dxMoonEq = Astronomy.Equator(Astronomy.Body.Moon, time, dxObserver, true, false);
-                const dxMoonHor = Astronomy.Horizon(time, dxObserver, dxMoonEq.ra, dxMoonEq.dec, 'normal');
-                const dxMoonElevationDeg = dxMoonHor.altitude;
-                const dxMoonAzimuthDeg = dxMoonHor.azimuth;
-
-                const dxAzRadMoon = THREE.MathUtils.degToRad(360 - dxMoonAzimuthDeg);
-                const dxElRadMoon = THREE.MathUtils.degToRad(Math.max(dxMoonElevationDeg, 0));
-                dxMoonPoint = new THREE.Vector3(
-                  r * Math.cos(dxElRadMoon) * Math.sin(dxAzRadMoon),
-                  r * Math.sin(dxElRadMoon),
-                  r * Math.cos(dxElRadMoon) * Math.cos(dxAzRadMoon)
-                );
-
-                if (dxMoonElevationDeg > 0) {
-                  dxMoonSegment.push(dxMoonPoint);
-                  if (moonElevationDeg > 0) {
-                    commonMoonSegment.push(moonPoint);
-                    isCommon = true;
-                  }
-                } else {
-                  if (dxMoonSegment.length > 1) dxMoonSegments.push(dxMoonSegment);
-                  dxMoonSegment = [];
-                }
-                dxMoonPositions.push({ time, position: dxMoonPoint, azimuth: dxMoonAzimuthDeg, elevation: dxMoonElevationDeg });
-              }
-
-              if (isCommon) {
-                commonMoonWindow.push({ time, index: minutes / 10 });
-              } else if (commonMoonSegment.length > 1) {
-                commonMoonSegments.push(commonMoonSegment);
-                commonMoonSegment = [];
-              }
-
               const sunEq = Astronomy.Equator(Astronomy.Body.Sun, time, observer, true, false);
               const sunHor = Astronomy.Horizon(time, observer, sunEq.ra, sunEq.dec, 'normal');
               const sunElevationDeg = sunHor.altitude;
@@ -1009,40 +910,19 @@
 
               if (minutes === 720 || minutes === 1030 || minutes === 1140) {
                 console.log(`At ${time.toUTCString()}:`);
-                console.log(`  Station Moon: Az=${moonAzimuthDeg.toFixed(1)}°, El=${moonElevationDeg.toFixed(1)}°`);
-                if (dxObserver) {
-                  console.log(`  DX Moon: Az=${dxMoonPositions[dxMoonPositions.length-1].azimuth.toFixed(1)}°, El=${dxMoonPositions[dxMoonPositions.length-1].elevation.toFixed(1)}°`);
-                }
+                console.log(`  Moon: Az=${moonAzimuthDeg.toFixed(1)}°, El=${moonElevationDeg.toFixed(1)}°`);
                 console.log(`  Sun: Az=${sunAzimuthDeg.toFixed(1)}°, El=${sunElevationDeg.toFixed(1)}°`);
               }
             }
 
             if (moonSegment.length > 1) moonSegments.push(moonSegment);
-            if (dxMoonSegment.length > 1) dxMoonSegments.push(dxMoonSegment);
             if (sunSegment.length > 1) sunSegments.push(sunSegment);
-            if (commonMoonSegment.length > 1) commonMoonSegments.push(commonMoonSegment);
 
             moonSegments.forEach(seg => {
               const geom = new THREE.BufferGeometry().setFromPoints(seg);
               const mat = new THREE.LineBasicMaterial({ color: 0xffff00 });
               const line = new THREE.Line(geom, mat);
               line.userData = { isMoonTrajectory: true };
-              moonTrajectoryGroup.add(line);
-            });
-
-            dxMoonSegments.forEach(seg => {
-              const geom = new THREE.BufferGeometry().setFromPoints(seg);
-              const mat = new THREE.LineBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 });
-              const line = new THREE.Line(geom, mat);
-              line.userData = { isDxMoonTrajectory: true };
-              dxMoonTrajectoryGroup.add(line);
-            });
-
-            commonMoonSegments.forEach(seg => {
-              const geom = new THREE.BufferGeometry().setFromPoints(seg);
-              const mat = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 });
-              const line = new THREE.Line(geom, mat);
-              line.userData = { isCommonMoonTrajectory: true };
               moonTrajectoryGroup.add(line);
             });
 
@@ -1055,7 +935,6 @@
             });
 
             sunTrajectoryGroup.visible = showSunCheckbox.checked;
-            dxMoonTrajectoryGroup.visible = dxGrid && isValidGrid(dxGrid);
 
             if (firstMoonVisibleIndex !== -1) {
               currentTimeIndex = firstMoonVisibleIndex;
@@ -1064,7 +943,7 @@
             } else {
               currentTimeIndex = 72;
             }
-            console.log(`addTrajectories: moonSegments=${moonSegments.length}, dxMoonSegments=${dxMoonSegments.length}, commonMoonSegments=${commonMoonSegments.length}, sunSegments=${sunSegments.length}, currentTimeIndex=${currentTimeIndex}`);
+            console.log(`addTrajectories: moonSegments=${moonSegments.length}, sunSegments=${sunSegments.length}, currentTimeIndex=${currentTimeIndex}`);
             updateTimeSlider();
           }
 
@@ -1206,12 +1085,7 @@
             mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
 
             raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects([
-              ...spheres,
-              moonMarker,
-              sunMarker,
-              ...dxMoonTrajectoryGroup.children
-            ].filter(obj => obj !== null));
+            const intersects = raycaster.intersectObjects([...spheres, moonMarker, sunMarker].filter(obj => obj !== null));
 
             if (intersects.length > 0) {
               const clickedObject = intersects[0].object;
@@ -1233,14 +1107,7 @@
                   Az: ${sunData.azimuth.toFixed(1)}° El: ${sunData.elevation.toFixed(1)}°
                 `;
                 infoBox.style.display = 'block';
-              } else if (clickedObject.userData?.isDxMoonTrajectory && dxMoonPositions[currentTimeIndex] && dxMoonPositions[currentTimeIndex].elevation > 0) {
-                const dxMoonData = dxMoonPositions[currentTimeIndex];
-                infoBox.innerHTML = `
-                  <b>DX Moon</b><br>
-                  Az: ${dxMoonData.azimuth.toFixed(1)}° El: ${dxMoonData.elevation.toFixed(1)}°
-                `;
-                infoBox.style.display = 'block';
-              } else if (clickedObject.userData?.noise !== undefined) {
+              } else if (clickedObject.userData.noise !== undefined) {
                 const { azimuth, elevation, noise } = clickedObject.userData;
                 infoBox.innerHTML = `
                   <b>Measurement</b><br>
@@ -1262,12 +1129,7 @@
             mouse.y = - (touch.clientY / window.innerHeight) * 2 + 1;
 
             raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects([
-              ...spheres,
-              moonMarker,
-              sunMarker,
-              ...dxMoonTrajectoryGroup.children
-            ].filter(obj => obj !== null));
+            const intersects = raycaster.intersectObjects([...spheres, moonMarker, sunMarker].filter(obj => obj !== null));
 
             if (intersects.length > 0) {
               const clickedObject = intersects[0].object;
@@ -1289,14 +1151,7 @@
                   Az: ${sunData.azimuth.toFixed(1)}° El: ${sunData.elevation.toFixed(1)}°
                 `;
                 infoBox.style.display = 'block';
-              } else if (clickedObject.userData?.isDxMoonTrajectory && dxMoonPositions[currentTimeIndex] && dxMoonPositions[currentTimeIndex].elevation > 0) {
-                const dxMoonData = dxMoonPositions[currentTimeIndex];
-                infoBox.innerHTML = `
-                  <b>DX Moon</b><br>
-                  Az: ${dxMoonData.azimuth.toFixed(1)}° El: ${dxMoonData.elevation.toFixed(1)}°
-                `;
-                infoBox.style.display = 'block';
-              } else if (clickedObject.userData?.noise !== undefined) {
+              } else if (clickedObject.userData.noise !== undefined) {
                 const { azimuth, elevation, noise } = clickedObject.userData;
                 infoBox.innerHTML = `
                   <b>Measurement</b><br>
