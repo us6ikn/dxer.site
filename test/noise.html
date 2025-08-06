@@ -861,185 +861,179 @@
             });
           }
 
-            function addTrajectories(selectedDate) {
-              const grid = gridInput.value || 'JO89tt';
-              const dxGrid = dxGridInput.value;
-              const coords = maidenheadToLatLon(grid);
-              let dxCoords = null;
-              if (dxGrid && isValidGrid(dxGrid)) {
-                dxCoords = maidenheadToLatLon(dxGrid);
-                dxGridInput.style.borderColor = '#fff';
-              } else if (dxGrid) {
-                dxGridInput.style.borderColor = 'red';
-              } else {
-                dxGridInput.style.borderColor = '#fff';
-              }
-
-              if (!coords) {
-                gridInput.style.borderColor = 'red';
-                gridInput.value = 'JO89tt';
-                localStorage.setItem('skyObserverGrid', 'JO89tt');
-                return addTrajectories(selectedDate);
-              }
-
-              const lat = coords.lat;
-              const lon = coords.lon;
-              const observer = new Astronomy.Observer(lat, lon, 0);
-              let dxObserver = null;
-              if (dxCoords) {
-                dxObserver = new Astronomy.Observer(dxCoords.lat, dxCoords.lon, 0);
-              }
-
-              const date = selectedDate ? new Date(selectedDate) : new Date();
-              const startOfDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
-              const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
-
-              moonTrajectoryGroup.clear();
-              sunTrajectoryGroup.clear();
-              if (moonMarker) scene.remove(moonMarker);
-              if (sunMarker) scene.remove(sunMarker);
-              moonMarker = null;
-              sunMarker = null;
-              moonPositions = [];
-              dxMoonPositions = [];
-              sunPositions = [];
-              commonMoonWindow = [];
-              currentTimeIndex = 0;
-
-              let moonSegment = [];
-              let sunSegment = [];
-              let commonMoonSegment = [];
-              const moonSegments = [];
-              const sunSegments = [];
-              const commonMoonSegments = [];
-
-              let firstMoonVisibleIndex = -1;
-              let firstSunVisibleIndex = -1;
-
-              for (let minutes = 0; minutes < 1440; minutes += 10) {
-                const time = new Date(startOfDay.getTime() + minutes * 60 * 1000);
-                if (time >= endOfDay) break;
-
-                const moonEq = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, false);
-                const moonHor = Astronomy.Horizon(time, observer, moonEq.ra, moonEq.dec, 'normal');
-                const moonElevationDeg = moonHor.altitude;
-                const moonAzimuthDeg = moonHor.azimuth;
-
-                const azRadMoon = THREE.MathUtils.degToRad(360 - moonAzimuthDeg);
-                const elRadMoon = THREE.MathUtils.degToRad(Math.max(moonElevationDeg, 0));
-                const r = 1;
-                const xMoon = r * Math.cos(elRadMoon) * Math.sin(azRadMoon);
-                const yMoon = r * Math.sin(elRadMoon);
-                const zMoon = r * Math.cos(elRadMoon) * Math.cos(azRadMoon);
-                const moonPoint = new THREE.Vector3(xMoon, yMoon, zMoon);
-
-                if (moonElevationDeg > 0) {
-                  moonSegment.push(moonPoint);
-                  if (firstMoonVisibleIndex === -1) firstMoonVisibleIndex = minutes / 10;
-                } else {
-                  if (moonSegment.length > 1) moonSegments.push(moonSegment);
-                  moonSegment = [];
-                }
-                moonPositions.push({ time, position: moonPoint, azimuth: moonAzimuthDeg, elevation: moonElevationDeg });
-
-                let isCommon = false;
-                if (dxObserver) {
-                  const dxMoonEq = Astronomy.Equator(Astronomy.Body.Moon, time, dxObserver, true, false);
-                  const dxMoonHor = Astronomy.Horizon(time, dxObserver, dxMoonEq.ra, dxMoonEq.dec, 'normal');
-                  const dxMoonElevationDeg = dxMoonHor.altitude;
-                  const dxMoonAzimuthDeg = dxMoonHor.azimuth;
-
-                  if (dxMoonElevationDeg > 0 && moonElevationDeg > 0) {
-                    commonMoonSegment.push(moonPoint);
-                    isCommon = true;
-                  }
-                  dxMoonPositions.push({ time, azimuth: dxMoonAzimuthDeg, elevation: dxMoonElevationDeg });
-                }
-
-                if (isCommon) {
-                  commonMoonWindow.push({ time, index: minutes / 10 });
-                } else if (commonMoonSegment.length > 1) {
-                  commonMoonSegments.push(commonMoonSegment);
-                  commonMoonSegment = [];
-                }
-
-                const sunEq = Astronomy.Equator(Astronomy.Body.Sun, time, observer, true, false);
-                const sunHor = Astronomy.Horizon(time, observer, sunEq.ra, sunEq.dec, 'normal');
-                const sunElevationDeg = sunHor.altitude;
-                const sunAzimuthDeg = sunHor.azimuth;
-
-                const azRadSun = THREE.MathUtils.degToRad(360 - sunAzimuthDeg);
-                const elRadSun = THREE.MathUtils.degToRad(Math.max(sunElevationDeg, 0));
-                const xSun = r * Math.cos(elRadSun) * Math.sin(azRadSun);
-                const ySun = r * Math.sin(elRadSun);
-                const zSun = r * Math.cos(elRadSun) * Math.cos(azRadSun);
-                const sunPoint = new THREE.Vector3(xSun, ySun, zSun);
-
-                if (sunElevationDeg > 0) {
-                  sunSegment.push(sunPoint);
-                  if (firstSunVisibleIndex === -1) firstSunVisibleIndex = minutes / 10;
-                } else {
-                  if (sunSegment.length > 1) sunSegments.push(sunSegment);
-                  sunSegment = [];
-                }
-                sunPositions.push({ time, position: sunPoint, azimuth: sunAzimuthDeg, elevation: sunElevationDeg });
-
-                if (minutes === 720 || minutes === 1030 || minutes === 1140) {
-                  console.log(`At ${time.toUTCString()}:`);
-                  console.log(`  Station Moon: Az=${moonAzimuthDeg.toFixed(1)}°, El=${moonElevationDeg.toFixed(1)}°`);
-                  if (dxObserver) {
-                    console.log(`  DX Moon: Az=${dxMoonPositions[dxMoonPositions.length-1].azimuth.toFixed(1)}°, El=${dxMoonPositions[dxMoonPositions.length-1].elevation.toFixed(1)}°`);
-                  }
-                  console.log(`  Sun: Az=${sunAzimuthDeg.toFixed(1)}°, El=${sunElevationDeg.toFixed(1)}°`);
-                }
-              }
-
-              if (moonSegment.length > 1) moonSegments.push(moonSegment);
-              if (sunSegment.length > 1) sunSegments.push(sunSegment);
-              if (commonMoonSegment.length > 1) commonMoonSegments.push(commonMoonSegment);
-
-              moonSegments.forEach(seg => {
-                const geom = new THREE.BufferGeometry().setFromPoints(seg);
-                const mat = new THREE.LineBasicMaterial({ color: 0xffff00 });
-                const line = new THREE.Line(geom, mat);
-                line.userData = { isMoonTrajectory: true };
-                moonTrajectoryGroup.add(line);
-              });
-
-              commonMoonSegments.forEach(seg => {
-                const geom = new THREE.BufferGeometry().setFromPoints(seg);
-                const mat = new THREE.LineDashedMaterial({
-                  color: 0x00ff00,
-                  dashSize: 0.05,
-                  gapSize: 0.025,
-                  scale: 1
-                });
-                const line = new THREE.Line(geom, mat);
-                line.computeLineDistances(); // Required for dashed lines
-                line.userData = { isCommonMoonTrajectory: true };
-                moonTrajectoryGroup.add(line);
-              });
-
-              sunSegments.forEach(seg => {
-                const geom = new THREE.BufferGeometry().setFromPoints(seg);
-                const mat = new THREE.LineBasicMaterial({ color: 0xffa500 });
-                const line = new THREE.Line(geom, mat);
-                line.userData = { isSunTrajectory: true };
-                sunTrajectoryGroup.add(line);
-              });
-
-              sunTrajectoryGroup.visible = showSunCheckbox.checked;
-
-              if (firstMoonVisibleIndex !== -1) {
-                currentTimeIndex = firstMoonVisibleIndex;
-              } else if (showSunCheckbox.checked && firstSunVisibleIndex !== -1) {
-                currentTimeIndex = firstSunVisibleIndex;
-              } else {
-                currentTimeIndex = 72;
-              }
-              console.log(`addTrajectories: moonSegments=${moonSegments.length}, commonMoonSegments=${commonMoonSegments.length}, sunSegments=${sunSegments.length}, currentTimeIndex=${currentTimeIndex}`);
-              updateTimeSlider();
+          function addTrajectories(selectedDate) {
+            const grid = gridInput.value || 'JO89tt';
+            const dxGrid = dxGridInput.value;
+            const coords = maidenheadToLatLon(grid);
+            let dxCoords = null;
+            if (dxGrid && isValidGrid(dxGrid)) {
+              dxCoords = maidenheadToLatLon(dxGrid);
+              dxGridInput.style.borderColor = '#fff';
+            } else if (dxGrid) {
+              dxGridInput.style.borderColor = 'red';
+            } else {
+              dxGridInput.style.borderColor = '#fff';
             }
+
+            if (!coords) {
+              gridInput.style.borderColor = 'red';
+              gridInput.value = 'JO89tt';
+              localStorage.setItem('skyObserverGrid', 'JO89tt');
+              return addTrajectories(selectedDate);
+            }
+
+            const lat = coords.lat;
+            const lon = coords.lon;
+            const observer = new Astronomy.Observer(lat, lon, 0);
+            let dxObserver = null;
+            if (dxCoords) {
+              dxObserver = new Astronomy.Observer(dxCoords.lat, dxCoords.lon, 0);
+            }
+
+            const date = selectedDate ? new Date(selectedDate) : new Date();
+            const startOfDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+            const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
+
+            moonTrajectoryGroup.clear();
+            sunTrajectoryGroup.clear();
+            if (moonMarker) scene.remove(moonMarker);
+            if (sunMarker) scene.remove(sunMarker);
+            moonMarker = null;
+            sunMarker = null;
+            moonPositions = [];
+            dxMoonPositions = [];
+            sunPositions = [];
+            commonMoonWindow = [];
+            currentTimeIndex = 0;
+
+            let moonSegment = [];
+            let sunSegment = [];
+            let commonMoonSegment = [];
+            const moonSegments = [];
+            const sunSegments = [];
+            const commonMoonSegments = [];
+
+            let firstMoonVisibleIndex = -1;
+            let firstSunVisibleIndex = -1;
+
+            for (let minutes = 0; minutes < 1440; minutes += 10) {
+              const time = new Date(startOfDay.getTime() + minutes * 60 * 1000);
+              if (time >= endOfDay) break;
+
+              const moonEq = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, false);
+              const moonHor = Astronomy.Horizon(time, observer, moonEq.ra, moonEq.dec, 'normal');
+              const moonElevationDeg = moonHor.altitude;
+              const moonAzimuthDeg = moonHor.azimuth;
+
+              const azRadMoon = THREE.MathUtils.degToRad(360 - moonAzimuthDeg);
+              const elRadMoon = THREE.MathUtils.degToRad(Math.max(moonElevationDeg, 0));
+              const r = 1;
+              const xMoon = r * Math.cos(elRadMoon) * Math.sin(azRadMoon);
+              const yMoon = r * Math.sin(elRadMoon);
+              const zMoon = r * Math.cos(elRadMoon) * Math.cos(azRadMoon);
+              const moonPoint = new THREE.Vector3(xMoon, yMoon, zMoon);
+
+              if (moonElevationDeg > 0) {
+                moonSegment.push(moonPoint);
+                if (firstMoonVisibleIndex === -1) firstMoonVisibleIndex = minutes / 10;
+              } else {
+                if (moonSegment.length > 1) moonSegments.push(moonSegment);
+                moonSegment = [];
+              }
+              moonPositions.push({ time, position: moonPoint, azimuth: moonAzimuthDeg, elevation: moonElevationDeg });
+
+              let isCommon = false;
+              if (dxObserver) {
+                const dxMoonEq = Astronomy.Equator(Astronomy.Body.Moon, time, dxObserver, true, false);
+                const dxMoonHor = Astronomy.Horizon(time, dxObserver, dxMoonEq.ra, dxMoonEq.dec, 'normal');
+                const dxMoonElevationDeg = dxMoonHor.altitude;
+                const dxMoonAzimuthDeg = dxMoonHor.azimuth;
+
+                if (dxMoonElevationDeg > 0 && moonElevationDeg > 0) {
+                  commonMoonSegment.push(moonPoint);
+                  isCommon = true;
+                }
+                dxMoonPositions.push({ time, azimuth: dxMoonAzimuthDeg, elevation: dxMoonElevationDeg });
+              }
+
+              if (isCommon) {
+                commonMoonWindow.push({ time, index: minutes / 10 });
+              } else if (commonMoonSegment.length > 1) {
+                commonMoonSegments.push(commonMoonSegment);
+                commonMoonSegment = [];
+              }
+
+              const sunEq = Astronomy.Equator(Astronomy.Body.Sun, time, observer, true, false);
+              const sunHor = Astronomy.Horizon(time, observer, sunEq.ra, sunEq.dec, 'normal');
+              const sunElevationDeg = sunHor.altitude;
+              const sunAzimuthDeg = sunHor.azimuth;
+
+              const azRadSun = THREE.MathUtils.degToRad(360 - sunAzimuthDeg);
+              const elRadSun = THREE.MathUtils.degToRad(Math.max(sunElevationDeg, 0));
+              const xSun = r * Math.cos(elRadSun) * Math.sin(azRadSun);
+              const ySun = r * Math.sin(elRadSun);
+              const zSun = r * Math.cos(elRadSun) * Math.cos(azRadSun);
+              const sunPoint = new THREE.Vector3(xSun, ySun, zSun);
+
+              if (sunElevationDeg > 0) {
+                sunSegment.push(sunPoint);
+                if (firstSunVisibleIndex === -1) firstSunVisibleIndex = minutes / 10;
+              } else {
+                if (sunSegment.length > 1) sunSegments.push(sunSegment);
+                sunSegment = [];
+              }
+              sunPositions.push({ time, position: sunPoint, azimuth: sunAzimuthDeg, elevation: sunElevationDeg });
+
+              if (minutes === 720 || minutes === 1030 || minutes === 1140) {
+                console.log(`At ${time.toUTCString()}:`);
+                console.log(`  Station Moon: Az=${moonAzimuthDeg.toFixed(1)}°, El=${moonElevationDeg.toFixed(1)}°`);
+                if (dxObserver) {
+                  console.log(`  DX Moon: Az=${dxMoonPositions[dxMoonPositions.length-1].azimuth.toFixed(1)}°, El=${dxMoonPositions[dxMoonPositions.length-1].elevation.toFixed(1)}°`);
+                }
+                console.log(`  Sun: Az=${sunAzimuthDeg.toFixed(1)}°, El=${sunElevationDeg.toFixed(1)}°`);
+              }
+            }
+
+            if (moonSegment.length > 1) moonSegments.push(moonSegment);
+            if (sunSegment.length > 1) sunSegments.push(sunSegment);
+            if (commonMoonSegment.length > 1) commonMoonSegments.push(commonMoonSegment);
+
+            moonSegments.forEach(seg => {
+              const geom = new THREE.BufferGeometry().setFromPoints(seg);
+              const mat = new THREE.LineBasicMaterial({ color: 0xffff00 });
+              const line = new THREE.Line(geom, mat);
+              line.userData = { isMoonTrajectory: true };
+              moonTrajectoryGroup.add(line);
+            });
+
+            commonMoonSegments.forEach(seg => {
+              const geom = new THREE.BufferGeometry().setFromPoints(seg);
+              const mat = new THREE.LineBasicMaterial({ color: 0x00ff00, linewidth: 1 });
+              const line = new THREE.Line(geom, mat);
+              line.userData = { isCommonMoonTrajectory: true };
+              moonTrajectoryGroup.add(line);
+            });
+
+            sunSegments.forEach(seg => {
+              const geom = new THREE.BufferGeometry().setFromPoints(seg);
+              const mat = new THREE.LineBasicMaterial({ color: 0xffa500 });
+              const line = new THREE.Line(geom, mat);
+              line.userData = { isSunTrajectory: true };
+              sunTrajectoryGroup.add(line);
+            });
+
+            sunTrajectoryGroup.visible = showSunCheckbox.checked;
+
+            if (firstMoonVisibleIndex !== -1) {
+              currentTimeIndex = firstMoonVisibleIndex;
+            } else if (showSunCheckbox.checked && firstSunVisibleIndex !== -1) {
+              currentTimeIndex = firstSunVisibleIndex;
+            } else {
+              currentTimeIndex = 72;
+            }
+            console.log(`addTrajectories: moonSegments=${moonSegments.length}, commonMoonSegments=${commonMoonSegments.length}, sunSegments=${sunSegments.length}, currentTimeIndex=${currentTimeIndex}`);
+            updateTimeSlider();
+          }
 
           window.addTrajectories = addTrajectories;
 
