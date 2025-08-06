@@ -36,7 +36,7 @@
 
         @media (max-width: 600px), (orientation: portrait) {
           #infoBox {
-            font-size: 14px;
+            font-size: 14px; /* Reduced from 16px for Moon, DX Moon, Sun details */
             padding: 16px;
             top: 15px;
             right: 15px;
@@ -308,13 +308,14 @@
           document.body.appendChild(renderer.domElement);
 
           const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+          // Initial camera position: side view from south (az=180°, el=30°, distance=2)
           const defaultDistance = 2;
-          const defaultAzRad = THREE.MathUtils.degToRad(180);
-          const defaultElRad = THREE.MathUtils.degToRad(30);
+          const defaultAzRad = THREE.MathUtils.degToRad(180); // South
+          const defaultElRad = THREE.MathUtils.degToRad(30); // 30° elevation
           camera.position.set(
-            defaultDistance * Math.cos(defaultElRad) * Math.sin(defaultAzRad),
-            defaultDistance * Math.sin(defaultElRad),
-            defaultDistance * Math.cos(defaultElRad) * Math.cos(defaultAzRad)
+            defaultDistance * Math.cos(defaultElRad) * Math.sin(defaultAzRad), // x = -1.732
+            defaultDistance * Math.sin(defaultElRad), // y = 1
+            defaultDistance * Math.cos(defaultElRad) * Math.cos(defaultAzRad) // z = 0
           );
           camera.lookAt(0, 0, 0);
 
@@ -343,6 +344,7 @@
 
           function calculateStepSizes() {
             if (!rawPoints.length) {
+              console.log('calculateStepSizes: No points available, using defaults azStep=5°, elStep=5°');
               return { azStep: 5, elStep: 5 };
             }
 
@@ -355,11 +357,13 @@
             const azStep = azDiffs.length ? Math.min(...azDiffs) : 5;
             const elStep = elDiffs.length ? Math.min(...elDiffs) : 5;
 
+            console.log(`calculateStepSizes: azStep=${azStep.toFixed(2)}°, elStep=${elStep.toFixed(2)}°, azValues=${azValues.length}, elValues=${elValues.length}, azDiffs=[${azDiffs.map(d => d.toFixed(2)).join(', ')}], elDiffs=[${elDiffs.map(d => d.toFixed(2)).join(', ')}]`);
             return { azStep, elStep };
           }
 
           function interpolateNoiseAtPosition(azimuth, elevation) {
             if (!rawPoints.length) {
+              console.log('interpolateNoiseAtPosition: No noise data available');
               return null;
             }
 
@@ -374,11 +378,20 @@
               return { ...point, distance };
             });
 
+            console.log(`interpolateNoiseAtPosition: All points for Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°:`);
+            pointsWithDistance.forEach(p => {
+              console.log(`  Az=${p.az.toFixed(1)}°, El=${p.el.toFixed(1)}°, Noise=${p.noise.toFixed(2)} dB, Distance=${p.distance.toFixed(2)}°`);
+            });
+
             const nearbyPoints = pointsWithDistance.filter(p => p.distance <= maxDistance);
+
+            console.log(`interpolateNoiseAtPosition: Found ${nearbyPoints.length} points within maxDistance=${maxDistance.toFixed(2)}°`);
 
             if (nearbyPoints.length >= minPoints) {
               if (nearbyPoints.length === 1) {
-                return { noise: nearbyPoints[0].noise };
+                const point = nearbyPoints[0];
+                console.log(`interpolateNoiseAtPosition: Using single point Az=${point.az.toFixed(1)}°, El=${point.el.toFixed(1)}°, Noise=${point.noise.toFixed(2)} dB, Distance=${point.distance.toFixed(2)}°`);
+                return { noise: point.noise };
               }
 
               let totalWeight = 0;
@@ -387,25 +400,32 @@
                 const weight = 1 / (point.distance * point.distance + 1e-6);
                 weightedNoise += weight * point.noise;
                 totalWeight += weight;
+                console.log(`Point used: Az=${point.az.toFixed(1)}°, El=${point.el.toFixed(1)}°, Noise=${point.noise.toFixed(2)} dB, Distance=${point.distance.toFixed(2)}°, Weight=${weight.toFixed(4)}`);
               });
 
               if (totalWeight === 0) {
+                console.log(`interpolateNoiseAtPosition: Zero total weight for Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°`);
                 return null;
               }
 
               const interpolatedNoise = weightedNoise / totalWeight;
+              console.log(`interpolateNoiseAtPosition: Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°, Interpolated Noise=${interpolatedNoise.toFixed(2)} dB, Points used=${nearbyPoints.length}`);
               return { noise: Math.max(minNoise, Math.min(maxNoise, interpolatedNoise)) };
             }
 
             const closestPoint = pointsWithDistance.reduce((min, p) => p.distance < min.distance ? p : min, pointsWithDistance[0]);
             if (closestPoint.distance <= maxClosestDistance) {
+              console.log(`interpolateNoiseAtPosition: No points within maxDistance=${maxDistance.toFixed(2)}°, using closest point Az=${closestPoint.az.toFixed(1)}°, El=${closestPoint.el.toFixed(1)}°, Noise=${closestPoint.noise.toFixed(2)} dB, Distance=${closestPoint.distance.toFixed(2)}°`);
               return { noise: closestPoint.noise };
+            } else {
+              console.log(`interpolateNoiseAtPosition: Closest point too far at Distance=${closestPoint.distance.toFixed(2)}° (> ${maxClosestDistance}°), skipping interpolation`);
+              return null;
             }
-            return null;
           }
 
           function drawColorBar() {
             if (minNoise === Infinity || maxNoise === -Infinity) {
+              console.log('drawColorBar: No valid noise data, hiding color bar');
               colorBarContainer.style.display = 'none';
               return;
             }
@@ -426,6 +446,8 @@
             colorBarContext.setTransform(1, 0, 0, 1, 0, 0);
             colorBarContext.clearRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
 
+            console.log(`drawColorBar: Canvas width=${colorBarCanvas.width}, height=${colorBarCanvas.height}, computedStyle=${computedStyle.width}x${computedStyle.height}, DPR=${dpr}`);
+
             const gradient = colorBarContext.createLinearGradient(0, colorBarCanvas.height, 0, 0);
             for (let i = 0; i <= 1; i += 0.1) {
               const norm = i;
@@ -443,6 +465,8 @@
                 const norm = (maxNoise - minNoise) === 0 ? 0.5 : (noise - minNoise) / (maxNoise - minNoise);
                 let y = colorBarCanvas.height * (1 - norm);
                 y = Math.max(2 * dpr, Math.min(colorBarCanvas.height - 2 * dpr, y));
+
+                console.log(`drawColorBar: Drawing Moon noise marker at Noise=${noise.toFixed(2)} dB, y=${y.toFixed(2)}, norm=${norm.toFixed(4)}`);
 
                 const isMobile = window.innerWidth <= 600 || window.matchMedia("(orientation: portrait)").matches;
                 const triangleSize = isMobile ? 12 : 18;
@@ -472,7 +496,11 @@
 
                 colorBarContext.fillStyle = '#ff0000';
                 colorBarContext.fillRect(0, y - 2 * dpr, 5 * dpr, 4 * dpr);
+              } else {
+                console.log(`drawColorBar: No valid noise point for Moon at Az=${moonData.azimuth.toFixed(1)}°, El=${moonData.elevation.toFixed(1)}°`);
               }
+            } else {
+              console.log('drawColorBar: Moon below horizon or no data, skipping marker');
             }
 
             colorBarContext.restore();
@@ -480,23 +508,27 @@
 
           function updateMoonMarker() {
             if (!moonPositions.length || !moonPositions[currentTimeIndex]) {
+              console.log(`updateMoonMarker: No moon position at index ${currentTimeIndex}`);
               if (moonMarker) moonMarker.visible = false;
               return false;
             }
 
             const moonData = moonPositions[currentTimeIndex];
             if (moonData.elevation <= 0) {
+              console.log(`updateMoonMarker: Moon below horizon at ${moonData.time.toUTCString()} (elevation=${moonData.elevation.toFixed(1)}°)`);
               if (moonMarker) moonMarker.visible = false;
               return false;
             }
 
             if (!moonMarker) {
+              console.log(`updateMoonMarker: Creating moon marker`);
               const geom = new THREE.SphereGeometry(0.03);
               const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
               moonMarker = new THREE.Mesh(geom, mat);
               scene.add(moonMarker);
             }
 
+            console.log(`updateMoonMarker: Showing moon marker at ${moonData.time.toUTCString()}, Az=${moonData.azimuth.toFixed(1)}°, El=${moonData.elevation.toFixed(1)}°`);
             moonMarker.visible = true;
             moonMarker.position.copy(moonData.position);
             return true;
@@ -504,23 +536,27 @@
 
           function updateSunMarker() {
             if (!sunPositions.length || !showSunCheckbox.checked || !sunPositions[currentTimeIndex]) {
+              console.log(`updateSunMarker: No sun position or sun not shown at index ${currentTimeIndex}`);
               if (sunMarker) sunMarker.visible = false;
               return false;
             }
 
             const sunData = sunPositions[currentTimeIndex];
             if (sunData.elevation <= 0) {
+              console.log(`updateSunMarker: Sun below horizon at ${sunData.time.toUTCString()} (elevation=${sunData.elevation.toFixed(1)}°)`);
               if (sunMarker) sunMarker.visible = false;
               return false;
             }
 
             if (!sunMarker) {
+              console.log(`updateSunMarker: Creating sun marker`);
               const geom = new THREE.SphereGeometry(0.02);
               const mat = new THREE.MeshBasicMaterial({ color: 0xffa500 });
               sunMarker = new THREE.Mesh(geom, mat);
               scene.add(sunMarker);
             }
 
+            console.log(`updateSunMarker: Showing sun marker at ${sunData.time.toUTCString()}, Az=${sunData.azimuth.toFixed(1)}°, El=${sunData.elevation.toFixed(1)}°`);
             sunMarker.visible = true;
             sunMarker.position.copy(sunData.position);
             return true;
@@ -595,6 +631,7 @@
 
           function updateTimeDisplay() {
             if (!moonPositions.length || !moonPositions[currentTimeIndex]) {
+              console.log(`updateTimeDisplay: No positions at index ${currentTimeIndex}`);
               moonTimeDisplay.textContent = '--:-- UTC';
               updateInfoBox();
               drawColorBar();
@@ -604,6 +641,8 @@
             const time = moonPositions[currentTimeIndex].time;
             const moonVisible = moonPositions[currentTimeIndex].elevation > 0;
             const sunVisible = showSunCheckbox.checked && sunPositions[currentTimeIndex]?.elevation > 0;
+
+            console.log(`updateTimeDisplay at ${time.toUTCString()}: moonVisible=${moonVisible}, sunVisible=${sunVisible}`);
 
             if (moonVisible || sunVisible) {
               const hours = String(time.getUTCHours()).padStart(2, '0');
@@ -652,16 +691,19 @@
           timeSlider.addEventListener('touchstart', (e) => {
             e.stopPropagation();
             controls.enabled = false;
+            console.log('Slider touchstart: OrbitControls disabled');
           });
 
           timeSlider.addEventListener('touchend', (e) => {
             e.stopPropagation();
             controls.enabled = true;
+            console.log('Slider touchend: OrbitControls enabled');
           });
 
           timeSlider.addEventListener('touchcancel', (e) => {
             e.stopPropagation();
             controls.enabled = true;
+            console.log('Slider touchcancel: OrbitControls enabled');
           });
 
           datePicker.addEventListener('change', (e) => {
@@ -678,6 +720,7 @@
             sunTrajectoryGroup.visible = showSunCheckbox.checked;
             updateSunMarker();
             updateTimeDisplay();
+            console.log(`Sun visibility toggled: ${showSunCheckbox.checked}`);
           });
 
           function isValidGrid(locator) {
@@ -820,7 +863,10 @@
               }
 
               scene.add(compassGroup);
-            }, undefined, (error) => {});
+              console.log(`Compass added, children: ${compassGroup.children.length}`);
+            }, undefined, (error) => {
+              console.error('Font loading failed:', error);
+            });
           }
 
           function addTrajectories(selectedDate) {
@@ -945,6 +991,15 @@
                 sunSegment = [];
               }
               sunPositions.push({ time, position: sunPoint, azimuth: sunAzimuthDeg, elevation: sunElevationDeg });
+
+              if (minutes === 720 || minutes === 1030 || minutes === 1140) {
+                console.log(`At ${time.toUTCString()}:`);
+                console.log(`  Station Moon: Az=${moonAzimuthDeg.toFixed(1)}°, El=${moonElevationDeg.toFixed(1)}°`);
+                if (dxObserver) {
+                  console.log(`  DX Moon: Az=${dxMoonPositions[dxMoonPositions.length-1].azimuth.toFixed(1)}°, El=${dxMoonPositions[dxMoonPositions.length-1].elevation.toFixed(1)}°`);
+                }
+                console.log(`  Sun: Az=${sunAzimuthDeg.toFixed(1)}°, El=${sunElevationDeg.toFixed(1)}°`);
+              }
             }
 
             if (moonSegment.length > 1) moonSegments.push(moonSegment);
@@ -984,6 +1039,7 @@
             } else {
               currentTimeIndex = 72;
             }
+            console.log(`addTrajectories: moonSegments=${moonSegments.length}, commonMoonSegments=${commonMoonSegments.length}, sunSegments=${sunSegments.length}, currentTimeIndex=${currentTimeIndex}`);
             updateTimeSlider();
           }
 
@@ -1019,6 +1075,9 @@
                 azStep = steps.azStep;
                 elStep = steps.elStep;
 
+                console.log(`parseCsvData: minNoise=${minNoise.toFixed(2)} dB, maxNoise=${maxNoise.toFixed(2)} dB`);
+                console.log('Noise points:', rawPoints.map(p => `Az=${p.az.toFixed(1)}°, El=${p.el.toFixed(1)}°, Noise=${p.noise.toFixed(2)} dB`));
+
                 rawPoints.forEach(point => {
                   const azRad = THREE.MathUtils.degToRad(360 - point.az);
                   const elRad = THREE.MathUtils.degToRad(point.el);
@@ -1044,27 +1103,33 @@
                   scene.add(sphere);
                 });
 
+                // Determine if the dome is complete
                 let isCompleteDome = false;
                 if (rawPoints.length > 0) {
                   const azValues = [...new Set(rawPoints.map(p => p.az))].sort((a, b) => a - b);
                   const elValues = [...new Set(rawPoints.map(p => p.el))].sort((a, b) => a - b);
                   const azRange = azValues[azValues.length - 1] - azValues[0];
                   const elRange = elValues[elValues.length - 1] - elValues[0];
+                  // Consider the dome complete if azimuth covers >300° and elevation covers >80°
                   isCompleteDome = azRange > 300 && elRange > 80;
+                  console.log(`parseCsvData: azRange=${azRange.toFixed(1)}°, elRange=${elRange.toFixed(1)}°, isCompleteDome=${isCompleteDome}`);
                 }
 
                 if (!rawPoints.length || isCompleteDome) {
+                  // Use default side view from south for empty or complete dome
                   const distance = 2;
-                  const azRad = THREE.MathUtils.degToRad(180);
-                  const elRad = THREE.MathUtils.degToRad(30);
+                  const azRad = THREE.MathUtils.degToRad(180); // South
+                  const elRad = THREE.MathUtils.degToRad(30); // 30° elevation
                   camera.position.set(
-                    distance * Math.cos(elRad) * Math.sin(azRad),
-                    distance * Math.sin(elRad),
-                    distance * Math.cos(elRad) * Math.cos(azRad)
+                    distance * Math.cos(elRad) * Math.sin(azRad), // x = -1.732
+                    distance * Math.sin(elRad), // y = 1
+                    distance * Math.cos(elRad) * Math.cos(azRad) // z = 0
                   );
                   camera.lookAt(0, 0, 0);
                   controls.target.set(0, 0, 0);
+                  console.log(`parseCsvData: Set default camera view from south (az=180°, el=30°, distance=${distance})`);
                 } else {
+                  // Existing logic for incomplete dome: center on average position
                   const boundingBox = new THREE.Box3();
                   spheres.forEach(s => boundingBox.expandByPoint(s.position));
 
@@ -1084,6 +1149,7 @@
                   camera.position.copy(directionToData.clone().multiplyScalar(distance));
                   camera.lookAt(center);
                   controls.target.copy(center);
+                  console.log(`parseCsvData: Set camera to center on incomplete dome, center=${center.x.toFixed(2)},${center.y.toFixed(2)},${center.z.toFixed(2)}, distance=${distance.toFixed(2)}`);
                 }
 
                 controls.update();
@@ -1102,6 +1168,7 @@
                 } else {
                   demoStatus.style.display = 'none';
                 }
+                console.log(`parseCsvData: Spheres added=${spheres.length}`);
               }
             });
           }
@@ -1123,9 +1190,11 @@
               .then(response => response.text())
               .then(csv => parseCsvData(csv, 'demo'))
               .catch(error => {
+                console.error('Error loading demo CSV:', error);
+                // Set default camera view for no data
                 const distance = 2;
-                const azRad = THREE.MathUtils.degToRad(180);
-                const elRad = THREE.MathUtils.degToRad(30);
+                const azRad = THREE.MathUtils.degToRad(180); // South
+                const elRad = THREE.MathUtils.degToRad(30); // 30° elevation
                 camera.position.set(
                   distance * Math.cos(elRad) * Math.sin(azRad),
                   distance * Math.sin(elRad),
