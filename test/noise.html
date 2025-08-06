@@ -330,8 +330,8 @@
               return null;
             }
 
-            const maxDistance = Math.max(azStep, elStep) * 3.0; // 15° for 5° steps
-            const maxClosestDistance = 2; // Maximum distance for closest point
+            const maxDistance = Math.max(azStep, elStep) * 1.0; // 15° for 5° steps
+            const maxClosestDistance = 10; // Maximum distance for closest point
             const minPoints = 1;
 
             const pointsWithDistance = rawPoints.map(point => {
