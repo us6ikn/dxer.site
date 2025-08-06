@@ -5,25 +5,11 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
       <title>Sky Observer</title>
       <style>
-        body {
-          margin: 0;
-          overflow: hidden;
-          width: 100%;
-          height: 100vh;
-        }
-        canvas {
-          display: block;
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-        }
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
         
         html, body {
           touch-action: none;
-          width: 100%;
-          height: 100%;
         }
 
         button {
@@ -339,17 +325,6 @@
           controls.zoomSpeed = 0.5;
           controls.panSpeed = 0.5;
           controls.update();
-
-          // Handle window resize and orientation change
-          function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            drawColorBar(); // Redraw color bar to adjust for new canvas size
-          }
-
-          window.addEventListener('resize', onWindowResize);
-          window.addEventListener('orientationchange', onWindowResize);
 
           const raycaster = new THREE.Raycaster();
           const mouse = new THREE.Vector2();
@@ -884,7 +859,7 @@
             moonTrajectoryGroup.clear();
             sunTrajectoryGroup.clear();
             if (moonMarker) scene.remove(moonMarker);
-            if (sunMarker) scene.remove(sunMarker);
+            if (sunMarker) scene.remove(moonMarker);
             moonMarker = null;
             sunMarker = null;
             moonPositions = [];
