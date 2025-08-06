@@ -478,8 +478,8 @@
                   colorBarContext.fillText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + textOffset * dpr, y);
 
                   // Optional: Comment out or remove the red rectangle if not needed
-                  // colorBarContext.fillStyle = '#ff0000';
-                  // colorBarContext.fillRect(0, y - 2 * dpr, 5 * dpr, 4 * dpr);
+                  colorBarContext.fillStyle = '#ff0000';
+                  colorBarContext.fillRect(0, y - 2 * dpr, 5 * dpr, 4 * dpr);
                 } else {
                   console.log(`drawColorBar: No valid noise point for Moon at Az=${moonData.azimuth.toFixed(1)}°, El=${moonData.elevation.toFixed(1)}°`);
                 }
