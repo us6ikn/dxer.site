@@ -298,6 +298,33 @@
             return new THREE.Color().setHSL(0.7 - norm * 0.7, 1.0, 0.5);
           }
 
+          function interpolateNoiseAtPosition(azimuth, elevation) {
+            if (!rawPoints.length) return null;
+
+            // Collect nearby points with inverse distance weighting
+            let totalWeight = 0;
+            let weightedNoise = 0;
+            const maxDistance = 30; // Maximum distance in degrees for interpolation
+
+            rawPoints.forEach(point => {
+              const dAz = Math.abs(point.az - azimuth);
+              const dEl = Math.abs(point.el - elevation);
+              const distance = Math.sqrt(dAz * dAz + dEl * dEl);
+
+              if (distance < maxDistance) {
+                // Use inverse distance squared for weighting
+                const weight = 1 / (distance * distance + 1e-6); // Avoid division by zero
+                weightedNoise += weight * point.noise;
+                totalWeight += weight;
+              }
+            });
+
+            if (totalWeight === 0) return null; // No points close enough
+
+            const interpolatedNoise = weightedNoise / totalWeight;
+            return { noise: interpolatedNoise };
+          }
+
           function drawColorBar() {
             if (minNoise === Infinity || maxNoise === -Infinity) {
               colorBarContainer.style.display = 'none';
@@ -322,9 +349,9 @@
 
             if (moonPositions.length && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0) {
               const moonData = moonPositions[currentTimeIndex];
-              const closestPoint = findClosestNoisePoint(moonData.azimuth, moonData.elevation);
-              if (closestPoint) {
-                const noise = closestPoint.noise;
+              const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
+              if (noisePoint && noisePoint.noise >= minNoise && noisePoint.noise <= maxNoise) {
+                const noise = noisePoint.noise;
                 const norm = (maxNoise - minNoise) === 0 ? 0.5 : (noise - minNoise) / (maxNoise - minNoise);
                 const y = colorBarCanvas.height * (1 - norm);
 
@@ -342,26 +369,6 @@
                 colorBarContext.fillText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + 12, y + 4);
               }
             }
-          }
-
-          function findClosestNoisePoint(azimuth, elevation) {
-            if (!rawPoints.length) return null;
-
-            let closestPoint = null;
-            let minDistance = Infinity;
-
-            rawPoints.forEach(point => {
-              const dAz = Math.abs(point.az - azimuth);
-              const dEl = Math.abs(point.el - elevation);
-              const distance = Math.sqrt(dAz * dAz + dEl * dEl);
-
-              if (distance < minDistance && distance < 5) {
-                minDistance = distance;
-                closestPoint = point;
-              }
-            });
-
-            return closestPoint;
           }
 
           function updateMoonMarker() {
