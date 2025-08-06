@@ -477,18 +477,15 @@
                   colorBarContext.strokeText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + textOffset * dpr, y);
                   colorBarContext.fillText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + textOffset * dpr, y);
 
-                  colorBarContext.fillStyle = '#ff0000';
-                  colorBarContext.fillRect(0, y - 2 * dpr, 5 * dpr, 4 * dpr);
+                  // Optional: Comment out or remove the red rectangle if not needed
+                  // colorBarContext.fillStyle = '#ff0000';
+                  // colorBarContext.fillRect(0, y - 2 * dpr, 5 * dpr, 4 * dpr);
                 } else {
                   console.log(`drawColorBar: No valid noise point for Moon at Az=${moonData.azimuth.toFixed(1)}°, El=${moonData.elevation.toFixed(1)}°`);
                 }
               } else {
                 console.log('drawColorBar: Moon below horizon or no data, skipping marker');
               }
-
-              colorBarContext.fillStyle = '#00ff00';
-              colorBarContext.fillRect(0, 100 * dpr, 5 * dpr, 5 * dpr);
-              console.log('drawColorBar: Drew test green square at y=100');
 
               colorBarContext.restore();
             }
