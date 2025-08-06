@@ -859,7 +859,7 @@
             moonTrajectoryGroup.clear();
             sunTrajectoryGroup.clear();
             if (moonMarker) scene.remove(moonMarker);
-            if (sunMarker) scene.remove(sunMarker);
+            if (sunMarker) scene.remove(moonMarker);
             moonMarker = null;
             sunMarker = null;
             moonPositions = [];
@@ -993,6 +993,7 @@
             Papa.parse(csvText, {
               header: true,
               delimiter: ";",
+              skipEmptyLines: true,
               complete: function (results) {
                 rawPoints.length = 0;
                 spheres.forEach(s => scene.remove(s));
@@ -1000,13 +1001,27 @@
                 minNoise = Infinity;
                 maxNoise = -Infinity;
 
-                results.data.forEach(row => {
-                  if (!row.Valid || row.Valid !== "True") return;
+                // Check if required columns are present
+                const headers = results.meta.fields;
+                const requiredColumns = ['Azimuth', 'Elevation', 'Noise'];
+                const hasRequiredColumns = requiredColumns.every(col => headers.includes(col));
+                if (!hasRequiredColumns) {
+                  demoStatus.textContent = 'Error: CSV must contain Azimuth, Elevation, and Noise columns';
+                  demoStatus.style.color = 'red';
+                  demoStatus.style.display = 'block';
+                  return;
+                }
 
+                results.data.forEach(row => {
+                  // Skip if Valid column exists and is not "True"
+                  if (row.Valid !== undefined && row.Valid !== "True") return;
+
+                  // Parse required columns
                   const az = parseFloat(row.Azimuth?.replace(",", "."));
                   const el = parseFloat(row.Elevation?.replace(",", "."));
                   const noise = parseFloat(row.Noise?.replace(",", "."));
 
+                  // Validate parsed values
                   if (isNaN(az) || isNaN(el) || isNaN(noise)) return;
 
                   minNoise = Math.min(minNoise, noise);
@@ -1014,6 +1029,14 @@
 
                   rawPoints.push({ az, el, noise });
                 });
+
+                // If no valid points were found, show error
+                if (rawPoints.length === 0) {
+                  demoStatus.textContent = 'Error: No valid data points in CSV';
+                  demoStatus.style.color = 'red';
+                  demoStatus.style.display = 'block';
+                  return;
+                }
 
                 const steps = calculateStepSizes();
                 azStep = steps.azStep;
@@ -1100,8 +1123,15 @@
                   demoStatus.style.color = 'blue';
                   demoStatus.style.display = 'block';
                 } else {
-                  demoStatus.style.display = 'none';
+                  demoStatus.textContent = 'CSV loaded!';
+                  demoStatus.style.color = 'blue';
+                  demoStatus.style.display = 'block';
                 }
+              },
+              error: function (error) {
+                demoStatus.textContent = 'Error: Invalid CSV format';
+                demoStatus.style.color = 'red';
+                demoStatus.style.display = 'block';
               }
             });
           }
@@ -1123,6 +1153,7 @@
               .then(response => response.text())
               .then(csv => parseCsvData(csv, 'demo'))
               .catch(error => {
+                console.error('Error loading demo CSV:', error);
                 const distance = 2;
                 const azRad = THREE.MathUtils.degToRad(180);
                 const elRad = THREE.MathUtils.degToRad(30);
