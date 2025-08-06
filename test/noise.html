@@ -142,6 +142,24 @@
           width: 20px !important;
           height: 200px !important;
         }
+          /* Existing styles remain unchanged, add this to the <style> section */
+          @media (max-width: 600px), (orientation: portrait) {
+            #colorBar {
+              width: 20px !important;
+              height: 120px !important; /* Reduced from 200px */
+            }
+            #colorBarContainer {
+              bottom: 100px; /* Move up to avoid time slider */
+              right: 10px; /* Slightly closer to edge for space */
+              font-size: 10px; /* Smaller labels for compactness */
+            }
+            #moonTimeControls {
+              bottom: 10px; /* Slightly lower to maximize space */
+            }
+            #maxNoiseLabel, #minNoiseLabel {
+              font-size: 10px; /* Match container font-size */
+            }
+          }
       </style>
     </head>
     <body>
