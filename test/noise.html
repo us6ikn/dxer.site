@@ -397,11 +397,20 @@
               minNoiseLabel.textContent = `${minNoise.toFixed(2)} dB`;
               maxNoiseLabel.textContent = `${maxNoise.toFixed(2)} dB`;
 
+              // Adjust for device pixel ratio
+              const dpr = window.devicePixelRatio || 1;
+              if (colorBarCanvas.width !== 20 * dpr || colorBarCanvas.height !== 200 * dpr) {
+                colorBarCanvas.width = 20 * dpr;
+                colorBarCanvas.height = 200 * dpr;
+                colorBarContext.scale(dpr, dpr);
+                console.log(`drawColorBar: Adjusted for DPR=${dpr}, new width=${colorBarCanvas.width}, height=${colorBarCanvas.height}`);
+              }
+
               colorBarContext.save();
               colorBarContext.setTransform(1, 0, 0, 1, 0, 0);
               colorBarContext.clearRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
 
-              console.log(`drawColorBar: Canvas width=${colorBarCanvas.width}, height=${colorBarCanvas.height}, computedStyle=${getComputedStyle(colorBarCanvas).width}x${getComputedStyle(colorBarCanvas).height}`);
+              console.log(`drawColorBar: Canvas width=${colorBarCanvas.width}, height=${colorBarCanvas.height}, computedStyle=${getComputedStyle(colorBarCanvas).width}x${getComputedStyle(colorBarCanvas).height}, DPR=${dpr}`);
 
               const gradient = colorBarContext.createLinearGradient(0, colorBarCanvas.height, 0, 0);
               for (let i = 0; i <= 1; i += 0.1) {
@@ -412,6 +421,19 @@
               colorBarContext.fillStyle = gradient;
               colorBarContext.fillRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
 
+              // Test triangle at fixed position
+              console.log('drawColorBar: Drawing test triangle at y=100');
+              colorBarContext.beginPath();
+              colorBarContext.moveTo(colorBarCanvas.width, 100);
+              colorBarContext.lineTo(colorBarCanvas.width + 10 * dpr, 95);
+              colorBarContext.lineTo(colorBarCanvas.width + 10 * dpr, 105);
+              colorBarContext.closePath();
+              colorBarContext.strokeStyle = '#ff0000'; // Red for visibility
+              colorBarContext.lineWidth = 1 * dpr;
+              colorBarContext.stroke();
+              colorBarContext.fillStyle = '#ffffff';
+              colorBarContext.fill();
+
               if (moonPositions.length && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0 && rawPoints.length) {
                 const moonData = moonPositions[currentTimeIndex];
                 const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
@@ -419,19 +441,27 @@
                   const noise = noisePoint.noise;
                   const norm = (maxNoise - minNoise) === 0 ? 0.5 : (noise - minNoise) / (maxNoise - minNoise);
                   let y = colorBarCanvas.height * (1 - norm);
-                  y = Math.max(2, Math.min(colorBarCanvas.height - 2, y));
+                  y = Math.max(2 * dpr, Math.min(colorBarCanvas.height - 2 * dpr, y));
 
                   console.log(`drawColorBar: Attempting to draw marker at Noise=${noise.toFixed(2)} dB, norm=${norm.toFixed(4)}, y=${y.toFixed(2)}, canvasWidth=${colorBarCanvas.width}, canvasHeight=${colorBarCanvas.height}`);
+
+                  // Draw fallback line across bar
+                  colorBarContext.beginPath();
+                  colorBarContext.moveTo(0, y);
+                  colorBarContext.lineTo(colorBarCanvas.width, y);
+                  colorBarContext.strokeStyle = '#ff0000';
+                  colorBarContext.lineWidth = 1 * dpr;
+                  colorBarContext.stroke();
 
                   // Draw white triangle outside the bar
                   colorBarContext.beginPath();
                   colorBarContext.moveTo(colorBarCanvas.width, y); // Vertex at bar's right edge
-                  colorBarContext.lineTo(colorBarCanvas.width + 10, y - 5); // Top of base
-                  colorBarContext.lineTo(colorBarCanvas.width + 10, y + 5); // Bottom of base
+                  colorBarContext.lineTo(colorBarCanvas.width + 12 * dpr, y - 6 * dpr); // Top of base
+                  colorBarContext.lineTo(colorBarCanvas.width + 12 * dpr, y + 6 * dpr); // Bottom of base
                   colorBarContext.closePath();
 
                   colorBarContext.strokeStyle = '#000000';
-                  colorBarContext.lineWidth = 1;
+                  colorBarContext.lineWidth = 1 * dpr;
                   colorBarContext.stroke();
 
                   colorBarContext.fillStyle = '#ffffff';
@@ -440,13 +470,13 @@
                   // Draw noise value text
                   colorBarContext.fillStyle = '#ffffff';
                   colorBarContext.strokeStyle = '#000000';
-                  colorBarContext.lineWidth = 1;
-                  colorBarContext.font = 'bold 14px Segoe UI';
+                  colorBarContext.lineWidth = 1 * dpr;
+                  colorBarContext.font = `bold ${14 * dpr}px Segoe UI`;
                   colorBarContext.textAlign = 'left';
                   colorBarContext.textBaseline = 'middle';
-                  const textX = colorBarCanvas.width + 12; // Adjusted for smaller triangle
+                  const textX = colorBarCanvas.width + 14 * dpr; // Adjusted for larger triangle
                   const textY = y;
-                  console.log(`drawColorBar: Drawing text '${noise.toFixed(2)} dB' at x=${textX}, y=${textY}`);
+                  console.log(`drawColorBar: Drawing text '${noise.toFixed(2)} dB' at x=${textX.toFixed(2)}, y=${textY.toFixed(2)}`);
                   colorBarContext.strokeText(`${noise.toFixed(2)} dB`, textX, textY);
                   colorBarContext.fillText(`${noise.toFixed(2)} dB`, textX, textY);
                 } else {
@@ -458,7 +488,7 @@
 
               // Draw test green square for reference
               colorBarContext.fillStyle = '#00ff00';
-              colorBarContext.fillRect(0, 100, 5, 5);
+              colorBarContext.fillRect(0, 100, 5 * dpr, 5 * dpr);
               console.log('drawColorBar: Drew test green square at y=100');
 
               colorBarContext.restore();
