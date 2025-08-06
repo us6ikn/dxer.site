@@ -334,38 +334,27 @@
             }
 
             // Use dynamic maxDistance based on step sizes
-            const maxDistance = Math.max(azStep, elStep) * 3.0; // Increased to 3x step size
+            const maxDistance = Math.max(azStep, elStep) * 2.0; // Increased to 2x step size
             const minPoints = 1; // Allow single point for sparse data
 
-            // Collect points with distances
+            // Collect points within maxDistance
             const pointsWithDistance = rawPoints.map(point => {
               const dAz = Math.abs(point.az - azimuth);
               const dEl = Math.abs(point.el - elevation);
               const distance = Math.sqrt(dAz * dAz + dEl * dEl);
               return { ...point, distance };
-            });
+            }).filter(p => p.distance <= maxDistance);
 
-            // Log all points for debugging
-            console.log(`interpolateNoiseAtPosition: All points for Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°:`);
-            pointsWithDistance.forEach(p => {
-              console.log(`  Az=${p.az.toFixed(1)}°, El=${p.el.toFixed(1)}°, Noise=${p.noise.toFixed(2)} dB, Distance=${p.distance.toFixed(2)}°`);
-            });
+            console.log(`interpolateNoiseAtPosition: Found ${pointsWithDistance.length} points within maxDistance=${maxDistance.toFixed(2)}° for Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°`);
 
-            // Filter points within maxDistance
-            const nearbyPoints = pointsWithDistance.filter(p => p.distance <= maxDistance);
-
-            console.log(`interpolateNoiseAtPosition: Found ${nearbyPoints.length} points within maxDistance=${maxDistance.toFixed(2)}°`);
-
-            if (nearbyPoints.length < minPoints) {
-              // Fallback to closest point
-              const closestPoint = pointsWithDistance.reduce((min, p) => p.distance < min.distance ? p : min, pointsWithDistance[0]);
-              console.log(`interpolateNoiseAtPosition: No points within maxDistance=${maxDistance.toFixed(2)}°, using closest point Az=${closestPoint.az.toFixed(1)}°, El=${closestPoint.el.toFixed(1)}°, Noise=${closestPoint.noise.toFixed(2)} dB, Distance=${closestPoint.distance.toFixed(2)}°`);
-              return { noise: closestPoint.noise };
+            if (pointsWithDistance.length < minPoints) {
+              console.log(`interpolateNoiseAtPosition: Insufficient points (${pointsWithDistance.length}) within maxDistance=${maxDistance.toFixed(2)}°`);
+              return null;
             }
 
             // Use single point if only one is available
-            if (nearbyPoints.length === 1) {
-              const point = nearbyPoints[0];
+            if (pointsWithDistance.length === 1) {
+              const point = pointsWithDistance[0];
               console.log(`interpolateNoiseAtPosition: Using single point Az=${point.az.toFixed(1)}°, El=${point.el.toFixed(1)}°, Noise=${point.noise.toFixed(2)} dB, Distance=${point.distance.toFixed(2)}°`);
               return { noise: point.noise };
             }
@@ -373,7 +362,7 @@
             // Inverse distance weighting
             let totalWeight = 0;
             let weightedNoise = 0;
-            nearbyPoints.forEach(point => {
+            pointsWithDistance.forEach(point => {
               const weight = 1 / (point.distance * point.distance + 1e-6);
               weightedNoise += weight * point.noise;
               totalWeight += weight;
@@ -386,7 +375,7 @@
             }
 
             const interpolatedNoise = weightedNoise / totalWeight;
-            console.log(`interpolateNoiseAtPosition: Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°, Interpolated Noise=${interpolatedNoise.toFixed(2)} dB, Points used=${nearbyPoints.length}`);
+            console.log(`interpolateNoiseAtPosition: Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°, Interpolated Noise=${interpolatedNoise.toFixed(2)} dB, Points used=${pointsWithDistance.length}`);
             
             return { noise: Math.max(minNoise, Math.min(maxNoise, interpolatedNoise)) };
           }
@@ -432,34 +421,21 @@
 
                 console.log(`drawColorBar: Drawing Moon noise marker at Noise=${noise.toFixed(2)} dB, y=${y.toFixed(2)}, norm=${norm.toFixed(4)}`);
 
-                // Draw black outline for better contrast
-                colorBarContext.strokeStyle = '#000000';
-                colorBarContext.lineWidth = 2;
-                colorBarContext.beginPath();
-                colorBarContext.moveTo(colorBarCanvas.width, y);
-                colorBarContext.lineTo(colorBarCanvas.width + 18, y - 9); // Increased size
-                colorBarContext.lineTo(colorBarCanvas.width + 18, y + 9);
-                colorBarContext.closePath();
-                colorBarContext.stroke();
-
-                // Draw white triangle
+                // Draw marker
                 colorBarContext.fillStyle = '#ffffff';
                 colorBarContext.beginPath();
                 colorBarContext.moveTo(colorBarCanvas.width, y);
-                colorBarContext.lineTo(colorBarCanvas.width + 18, y - 9);
-                colorBarContext.lineTo(colorBarCanvas.width + 18, y + 9);
+                colorBarContext.lineTo(colorBarCanvas.width + 15, y - 7);
+                colorBarContext.lineTo(colorBarCanvas.width + 15, y + 7);
                 colorBarContext.closePath();
                 colorBarContext.fill();
 
                 // Draw text label
                 colorBarContext.fillStyle = '#ffffff';
-                colorBarContext.strokeStyle = '#000000';
-                colorBarContext.lineWidth = 1;
                 colorBarContext.font = 'bold 14px Segoe UI';
                 colorBarContext.textAlign = 'left';
                 colorBarContext.textBaseline = 'middle';
-                colorBarContext.strokeText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + 22, y);
-                colorBarContext.fillText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + 22, y);
+                colorBarContext.fillText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + 18, y);
 
                 // Fallback: Draw a red rectangle for debugging
                 colorBarContext.fillStyle = '#ff0000';
@@ -981,7 +957,7 @@
                   const y = r * Math.sin(elRad);
                   const z = r * Math.cos(elRad) * Math.cos(azRad);
 
-                  const geometry = new THREE.SphereGeometry(0.02, 8, 8); // Increased for visibility
+                  const geometry = new THREE.SphereGeometry(0.015, 8, 8);
                   const material = new THREE.MeshBasicMaterial({ color: getColor(point.noise) });
 
                   const sphere = new THREE.Mesh(geometry, material);
