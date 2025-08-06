@@ -311,15 +311,12 @@
               return { azStep: 5, elStep: 5 };
             }
 
-            // Collect unique azimuth and elevation values
             const azValues = [...new Set(rawPoints.map(p => p.az))].sort((a, b) => a - b);
             const elValues = [...new Set(rawPoints.map(p => p.el))].sort((a, b) => a - b);
 
-            // Calculate differences
             const azDiffs = azValues.slice(1).map((v, i) => v - azValues[i]).filter(d => d > 0);
             const elDiffs = elValues.slice(1).map((v, i) => v - elValues[i]).filter(d => d > 0);
 
-            // Use minimum non-zero difference or default to 5°
             const azStep = azDiffs.length ? Math.min(...azDiffs) : 5;
             const elStep = elDiffs.length ? Math.min(...elDiffs) : 5;
 
@@ -333,11 +330,10 @@
               return null;
             }
 
-            // Use dynamic maxDistance based on step sizes
-            const maxDistance = Math.max(azStep, elStep) * 3.0; // Increased to 3x step size
-            const minPoints = 1; // Allow single point for sparse data
+            const maxDistance = Math.max(azStep, elStep) * 3.0; // 15° for 5° steps
+            const maxClosestDistance = 30; // Maximum distance for closest point
+            const minPoints = 1;
 
-            // Collect points with distances
             const pointsWithDistance = rawPoints.map(point => {
               const dAz = Math.abs(point.az - azimuth);
               const dEl = Math.abs(point.el - elevation);
@@ -345,50 +341,49 @@
               return { ...point, distance };
             });
 
-            // Log all points for debugging
             console.log(`interpolateNoiseAtPosition: All points for Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°:`);
             pointsWithDistance.forEach(p => {
               console.log(`  Az=${p.az.toFixed(1)}°, El=${p.el.toFixed(1)}°, Noise=${p.noise.toFixed(2)} dB, Distance=${p.distance.toFixed(2)}°`);
             });
 
-            // Filter points within maxDistance
             const nearbyPoints = pointsWithDistance.filter(p => p.distance <= maxDistance);
 
             console.log(`interpolateNoiseAtPosition: Found ${nearbyPoints.length} points within maxDistance=${maxDistance.toFixed(2)}°`);
 
-            if (nearbyPoints.length < minPoints) {
-              // Fallback to closest point
-              const closestPoint = pointsWithDistance.reduce((min, p) => p.distance < min.distance ? p : min, pointsWithDistance[0]);
+            if (nearbyPoints.length >= minPoints) {
+              if (nearbyPoints.length === 1) {
+                const point = nearbyPoints[0];
+                console.log(`interpolateNoiseAtPosition: Using single point Az=${point.az.toFixed(1)}°, El=${point.el.toFixed(1)}°, Noise=${point.noise.toFixed(2)} dB, Distance=${point.distance.toFixed(2)}°`);
+                return { noise: point.noise };
+              }
+
+              let totalWeight = 0;
+              let weightedNoise = 0;
+              nearbyPoints.forEach(point => {
+                const weight = 1 / (point.distance * point.distance + 1e-6);
+                weightedNoise += weight * point.noise;
+                totalWeight += weight;
+                console.log(`Point used: Az=${point.az.toFixed(1)}°, El=${point.el.toFixed(1)}°, Noise=${point.noise.toFixed(2)} dB, Distance=${point.distance.toFixed(2)}°, Weight=${weight.toFixed(4)}`);
+              });
+
+              if (totalWeight === 0) {
+                console.log(`interpolateNoiseAtPosition: Zero total weight for Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°`);
+                return null;
+              }
+
+              const interpolatedNoise = weightedNoise / totalWeight;
+              console.log(`interpolateNoiseAtPosition: Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°, Interpolated Noise=${interpolatedNoise.toFixed(2)} dB, Points used=${nearbyPoints.length}`);
+              return { noise: Math.max(minNoise, Math.min(maxNoise, interpolatedNoise)) };
+            }
+
+            const closestPoint = pointsWithDistance.reduce((min, p) => p.distance < min.distance ? p : min, pointsWithDistance[0]);
+            if (closestPoint.distance <= maxClosestDistance) {
               console.log(`interpolateNoiseAtPosition: No points within maxDistance=${maxDistance.toFixed(2)}°, using closest point Az=${closestPoint.az.toFixed(1)}°, El=${closestPoint.el.toFixed(1)}°, Noise=${closestPoint.noise.toFixed(2)} dB, Distance=${closestPoint.distance.toFixed(2)}°`);
               return { noise: closestPoint.noise };
-            }
-
-            // Use single point if only one is available
-            if (nearbyPoints.length === 1) {
-              const point = nearbyPoints[0];
-              console.log(`interpolateNoiseAtPosition: Using single point Az=${point.az.toFixed(1)}°, El=${point.el.toFixed(1)}°, Noise=${point.noise.toFixed(2)} dB, Distance=${point.distance.toFixed(2)}°`);
-              return { noise: point.noise };
-            }
-
-            // Inverse distance weighting
-            let totalWeight = 0;
-            let weightedNoise = 0;
-            nearbyPoints.forEach(point => {
-              const weight = 1 / (point.distance * point.distance + 1e-6);
-              weightedNoise += weight * point.noise;
-              totalWeight += weight;
-              console.log(`Point used: Az=${point.az.toFixed(1)}°, El=${point.el.toFixed(1)}°, Noise=${point.noise.toFixed(2)} dB, Distance=${point.distance.toFixed(2)}°, Weight=${weight.toFixed(4)}`);
-            });
-
-            if (totalWeight === 0) {
-              console.log(`interpolateNoiseAtPosition: Zero total weight for Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°`);
+            } else {
+              console.log(`interpolateNoiseAtPosition: Closest point too far at Distance=${closestPoint.distance.toFixed(2)}° (> ${maxClosestDistance}°), skipping interpolation`);
               return null;
             }
-
-            const interpolatedNoise = weightedNoise / totalWeight;
-            console.log(`interpolateNoiseAtPosition: Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°, Interpolated Noise=${interpolatedNoise.toFixed(2)} dB, Points used=${nearbyPoints.length}`);
-            
-            return { noise: Math.max(minNoise, Math.min(maxNoise, interpolatedNoise)) };
           }
 
           function drawColorBar() {
@@ -402,15 +397,12 @@
             minNoiseLabel.textContent = `${minNoise.toFixed(2)} dB`;
             maxNoiseLabel.textContent = `${maxNoise.toFixed(2)} dB`;
 
-            // Reset canvas context
             colorBarContext.save();
             colorBarContext.setTransform(1, 0, 0, 1, 0, 0);
             colorBarContext.clearRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
 
-            // Log canvas state
             console.log(`drawColorBar: Canvas width=${colorBarCanvas.width}, height=${colorBarCanvas.height}, computedStyle=${getComputedStyle(colorBarCanvas).width}x${getComputedStyle(colorBarCanvas).height}`);
 
-            // Draw gradient
             const gradient = colorBarContext.createLinearGradient(0, colorBarCanvas.height, 0, 0);
             for (let i = 0; i <= 1; i += 0.1) {
               const norm = i;
@@ -420,7 +412,6 @@
             colorBarContext.fillStyle = gradient;
             colorBarContext.fillRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
 
-            // Draw Moon noise marker if applicable
             if (moonPositions.length && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0 && rawPoints.length) {
               const moonData = moonPositions[currentTimeIndex];
               const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
@@ -432,17 +423,15 @@
 
                 console.log(`drawColorBar: Drawing Moon noise marker at Noise=${noise.toFixed(2)} dB, y=${y.toFixed(2)}, norm=${norm.toFixed(4)}`);
 
-                // Draw black outline for better contrast
                 colorBarContext.strokeStyle = '#000000';
                 colorBarContext.lineWidth = 2;
                 colorBarContext.beginPath();
                 colorBarContext.moveTo(colorBarCanvas.width, y);
-                colorBarContext.lineTo(colorBarCanvas.width + 18, y - 9); // Increased size
+                colorBarContext.lineTo(colorBarCanvas.width + 18, y - 9);
                 colorBarContext.lineTo(colorBarCanvas.width + 18, y + 9);
                 colorBarContext.closePath();
                 colorBarContext.stroke();
 
-                // Draw white triangle
                 colorBarContext.fillStyle = '#ffffff';
                 colorBarContext.beginPath();
                 colorBarContext.moveTo(colorBarCanvas.width, y);
@@ -451,7 +440,6 @@
                 colorBarContext.closePath();
                 colorBarContext.fill();
 
-                // Draw text label
                 colorBarContext.fillStyle = '#ffffff';
                 colorBarContext.strokeStyle = '#000000';
                 colorBarContext.lineWidth = 1;
@@ -461,7 +449,6 @@
                 colorBarContext.strokeText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + 22, y);
                 colorBarContext.fillText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + 22, y);
 
-                // Fallback: Draw a red rectangle for debugging
                 colorBarContext.fillStyle = '#ff0000';
                 colorBarContext.fillRect(0, y - 2, 5, 4);
               } else {
@@ -471,9 +458,8 @@
               console.log('drawColorBar: Moon below horizon or no data, skipping marker');
             }
 
-            // Test marker to confirm canvas rendering
             colorBarContext.fillStyle = '#00ff00';
-            colorBarContext.fillRect(0, 100, 5, 5); // Green square at y=100
+            colorBarContext.fillRect(0, 100, 5, 5);
             console.log('drawColorBar: Drew test green square at y=100');
 
             colorBarContext.restore();
@@ -542,7 +528,7 @@
               const moonData = moonPositions[currentTimeIndex];
               if (moonData.elevation > 0) {
                 const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
-                const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A';
+                const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A (Outside Dome)';
                 html += `
                   <b>Moon</b><br>
                   Az: ${moonData.azimuth.toFixed(1)}° El: ${moonData.elevation.toFixed(1)}°<br>
@@ -964,7 +950,6 @@
                   rawPoints.push({ az, el, noise });
                 });
 
-                // Calculate step sizes for interpolation
                 const steps = calculateStepSizes();
                 azStep = steps.azStep;
                 elStep = steps.elStep;
@@ -981,7 +966,7 @@
                   const y = r * Math.sin(elRad);
                   const z = r * Math.cos(elRad) * Math.cos(azRad);
 
-                  const geometry = new THREE.SphereGeometry(0.02, 8, 8); // Increased for visibility
+                  const geometry = new THREE.SphereGeometry(0.02, 8, 8);
                   const material = new THREE.MeshBasicMaterial({ color: getColor(point.noise) });
 
                   const sphere = new THREE.Mesh(geometry, material);
@@ -1083,7 +1068,7 @@
               if (clickedObject === moonMarker && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0) {
                 const moonData = moonPositions[currentTimeIndex];
                 const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
-                const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A';
+                const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A (Outside Dome)';
                 infoBox.innerHTML = `
                   <b>Moon</b><br>
                   Az: ${moonData.azimuth.toFixed(1)}° El: ${moonData.elevation.toFixed(1)}°<br>
@@ -1127,7 +1112,7 @@
               if (clickedObject === moonMarker && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0) {
                 const moonData = moonPositions[currentTimeIndex];
                 const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
-                const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A';
+                const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A (Outside Dome)';
                 infoBox.innerHTML = `
                   <b>Moon</b><br>
                   Az: ${moonData.azimuth.toFixed(1)}° El: ${moonData.elevation.toFixed(1)}°<br>
