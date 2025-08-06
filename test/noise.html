@@ -404,84 +404,94 @@
             }
           }
 
-          function drawColorBar() {
-            if (minNoise === Infinity || maxNoise === -Infinity) {
-              console.log('drawColorBar: No valid noise data, hiding color bar');
-              colorBarContainer.style.display = 'none';
-              return;
-            }
-            colorBarContainer.style.display = 'flex';
-
-            minNoiseLabel.textContent = `${minNoise.toFixed(2)} dB`;
-            maxNoiseLabel.textContent = `${maxNoise.toFixed(2)} dB`;
-
-            colorBarContext.save();
-            colorBarContext.setTransform(1, 0, 0, 1, 0, 0);
-            colorBarContext.clearRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
-
-            console.log(`drawColorBar: Canvas width=${colorBarCanvas.width}, height=${colorBarCanvas.height}, computedStyle=${getComputedStyle(colorBarCanvas).width}x${getComputedStyle(colorBarCanvas).height}`);
-
-            const gradient = colorBarContext.createLinearGradient(0, colorBarCanvas.height, 0, 0);
-            for (let i = 0; i <= 1; i += 0.1) {
-              const norm = i;
-              const color = new THREE.Color().setHSL(0.7 - norm * 0.7, 1.0, 0.5);
-              gradient.addColorStop(i, `#${color.getHexString()}`);
-            }
-            colorBarContext.fillStyle = gradient;
-            colorBarContext.fillRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
-
-            if (moonPositions.length && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0 && rawPoints.length) {
-              const moonData = moonPositions[currentTimeIndex];
-              const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
-              if (noisePoint) {
-                const noise = noisePoint.noise;
-                const norm = (maxNoise - minNoise) === 0 ? 0.5 : (noise - minNoise) / (maxNoise - minNoise);
-                let y = colorBarCanvas.height * (1 - norm);
-                y = Math.max(2, Math.min(colorBarCanvas.height - 2, y));
-
-                console.log(`drawColorBar: Drawing Moon noise marker at Noise=${noise.toFixed(2)} dB, y=${y.toFixed(2)}, norm=${norm.toFixed(4)}`);
-
-                colorBarContext.strokeStyle = '#000000';
-                colorBarContext.lineWidth = 2;
-                colorBarContext.beginPath();
-                colorBarContext.moveTo(colorBarCanvas.width, y);
-                colorBarContext.lineTo(colorBarCanvas.width + 18, y - 9);
-                colorBarContext.lineTo(colorBarCanvas.width + 18, y + 9);
-                colorBarContext.closePath();
-                colorBarContext.stroke();
-
-                colorBarContext.fillStyle = '#ffffff';
-                colorBarContext.beginPath();
-                colorBarContext.moveTo(colorBarCanvas.width, y);
-                colorBarContext.lineTo(colorBarCanvas.width + 18, y - 9);
-                colorBarContext.lineTo(colorBarCanvas.width + 18, y + 9);
-                colorBarContext.closePath();
-                colorBarContext.fill();
-
-                colorBarContext.fillStyle = '#ffffff';
-                colorBarContext.strokeStyle = '#000000';
-                colorBarContext.lineWidth = 1;
-                colorBarContext.font = 'bold 14px Segoe UI';
-                colorBarContext.textAlign = 'left';
-                colorBarContext.textBaseline = 'middle';
-                colorBarContext.strokeText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + 22, y);
-                colorBarContext.fillText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + 22, y);
-
-                colorBarContext.fillStyle = '#ff0000';
-                colorBarContext.fillRect(0, y - 2, 5, 4);
-              } else {
-                console.log(`drawColorBar: No valid noise point for Moon at Az=${moonData.azimuth.toFixed(1)}°, El=${moonData.elevation.toFixed(1)}°`);
+            function drawColorBar() {
+              if (minNoise === Infinity || maxNoise === -Infinity) {
+                console.log('drawColorBar: No valid noise data, hiding color bar');
+                colorBarContainer.style.display = 'none';
+                return;
               }
-            } else {
-              console.log('drawColorBar: Moon below horizon or no data, skipping marker');
+              colorBarContainer.style.display = 'flex';
+
+              minNoiseLabel.textContent = `${minNoise.toFixed(2)} dB`;
+              maxNoiseLabel.textContent = `${maxNoise.toFixed(2)} dB`;
+
+              // Adjust for device pixel ratio
+              const dpr = window.devicePixelRatio || 1;
+              const computedStyle = getComputedStyle(colorBarCanvas);
+              const canvasWidth = parseFloat(computedStyle.width);
+              const canvasHeight = parseFloat(computedStyle.height);
+              colorBarCanvas.width = canvasWidth * dpr;
+              colorBarCanvas.height = canvasHeight * dpr;
+              colorBarContext.scale(dpr, dpr);
+
+              colorBarContext.save();
+              colorBarContext.setTransform(1, 0, 0, 1, 0, 0);
+              colorBarContext.clearRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
+
+              console.log(`drawColorBar: Canvas width=${colorBarCanvas.width}, height=${colorBarCanvas.height}, computedStyle=${computedStyle.width}x${computedStyle.height}, DPR=${dpr}`);
+
+              const gradient = colorBarContext.createLinearGradient(0, colorBarCanvas.height, 0, 0);
+              for (let i = 0; i <= 1; i += 0.1) {
+                const norm = i;
+                const color = new THREE.Color().setHSL(0.7 - norm * 0.7, 1.0, 0.5);
+                gradient.addColorStop(i, `#${color.getHexString()}`);
+              }
+              colorBarContext.fillStyle = gradient;
+              colorBarContext.fillRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
+
+              if (moonPositions.length && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0 && rawPoints.length) {
+                const moonData = moonPositions[currentTimeIndex];
+                const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
+                if (noisePoint) {
+                  const noise = noisePoint.noise;
+                  const norm = (maxNoise - minNoise) === 0 ? 0.5 : (noise - minNoise) / (maxNoise - minNoise);
+                  let y = colorBarCanvas.height * (1 - norm);
+                  y = Math.max(2 * dpr, Math.min(colorBarCanvas.height - 2 * dpr, y));
+
+                  console.log(`drawColorBar: Drawing Moon noise marker at Noise=${noise.toFixed(2)} dB, y=${y.toFixed(2)}, norm=${norm.toFixed(4)}`);
+
+                  // Adjust triangle size for mobile
+                  const isMobile = window.innerWidth <= 600 || window.matchMedia("(orientation: portrait)").matches;
+                  const triangleSize = isMobile ? 12 : 18;
+                  const textOffset = isMobile ? 14 : 22;
+                  const fontSize = isMobile ? 12 : 14;
+
+                  colorBarContext.strokeStyle = '#000000';
+                  colorBarContext.lineWidth = 2 * dpr;
+                  colorBarContext.beginPath();
+                  colorBarContext.moveTo(colorBarCanvas.width, y);
+                  colorBarContext.lineTo(colorBarCanvas.width + triangleSize * dpr, y - (triangleSize / 2) * dpr);
+                  colorBarContext.lineTo(colorBarCanvas.width + triangleSize * dpr, y + (triangleSize / 2) * dpr);
+                  colorBarContext.closePath();
+                  colorBarContext.stroke();
+
+                  colorBarContext.fillStyle = '#ffffff';
+                  colorBarContext.fill();
+
+                  colorBarContext.fillStyle = '#ffffff';
+                  colorBarContext.strokeStyle = '#000000';
+                  colorBarContext.lineWidth = 1 * dpr;
+                  colorBarContext.font = `bold ${fontSize * dpr}px Segoe UI`;
+                  colorBarContext.textAlign = 'left';
+                  colorBarContext.textBaseline = 'middle';
+                  colorBarContext.strokeText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + textOffset * dpr, y);
+                  colorBarContext.fillText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + textOffset * dpr, y);
+
+                  colorBarContext.fillStyle = '#ff0000';
+                  colorBarContext.fillRect(0, y - 2 * dpr, 5 * dpr, 4 * dpr);
+                } else {
+                  console.log(`drawColorBar: No valid noise point for Moon at Az=${moonData.azimuth.toFixed(1)}°, El=${moonData.elevation.toFixed(1)}°`);
+                }
+              } else {
+                console.log('drawColorBar: Moon below horizon or no data, skipping marker');
+              }
+
+              colorBarContext.fillStyle = '#00ff00';
+              colorBarContext.fillRect(0, 100 * dpr, 5 * dpr, 5 * dpr);
+              console.log('drawColorBar: Drew test green square at y=100');
+
+              colorBarContext.restore();
             }
-
-            colorBarContext.fillStyle = '#00ff00';
-            colorBarContext.fillRect(0, 100, 5, 5);
-            console.log('drawColorBar: Drew test green square at y=100');
-
-            colorBarContext.restore();
-          }
 
           function updateMoonMarker() {
             if (!moonPositions.length || !moonPositions[currentTimeIndex]) {
