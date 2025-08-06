@@ -308,15 +308,7 @@
           document.body.appendChild(renderer.domElement);
 
           const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-          // Initial camera position: side view from south (az=180°, el=30°, distance=2)
-          const defaultDistance = 2;
-          const defaultAzRad = THREE.MathUtils.degToRad(180); // South
-          const defaultElRad = THREE.MathUtils.degToRad(30); // 30° elevation
-          camera.position.set(
-            defaultDistance * Math.cos(defaultElRad) * Math.sin(defaultAzRad), // x = -1.732
-            defaultDistance * Math.sin(defaultElRad), // y = 1
-            defaultDistance * Math.cos(defaultElRad) * Math.cos(defaultAzRad) // z = 0
-          );
+          camera.position.set(0, 0, 2);
           camera.lookAt(0, 0, 0);
 
           const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -1103,55 +1095,25 @@
                   scene.add(sphere);
                 });
 
-                // Determine if the dome is complete
-                let isCompleteDome = false;
-                if (rawPoints.length > 0) {
-                  const azValues = [...new Set(rawPoints.map(p => p.az))].sort((a, b) => a - b);
-                  const elValues = [...new Set(rawPoints.map(p => p.el))].sort((a, b) => a - b);
-                  const azRange = azValues[azValues.length - 1] - azValues[0];
-                  const elRange = elValues[elValues.length - 1] - elValues[0];
-                  // Consider the dome complete if azimuth covers >300° and elevation covers >80°
-                  isCompleteDome = azRange > 300 && elRange > 80;
-                  console.log(`parseCsvData: azRange=${azRange.toFixed(1)}°, elRange=${elRange.toFixed(1)}°, isCompleteDome=${isCompleteDome}`);
-                }
+                const boundingBox = new THREE.Box3();
+                spheres.forEach(s => boundingBox.expandByPoint(s.position));
 
-                if (!rawPoints.length || isCompleteDome) {
-                  // Use default side view from south for empty or complete dome
-                  const distance = 2;
-                  const azRad = THREE.MathUtils.degToRad(180); // South
-                  const elRad = THREE.MathUtils.degToRad(30); // 30° elevation
-                  camera.position.set(
-                    distance * Math.cos(elRad) * Math.sin(azRad), // x = -1.732
-                    distance * Math.sin(elRad), // y = 1
-                    distance * Math.cos(elRad) * Math.cos(azRad) // z = 0
-                  );
-                  camera.lookAt(0, 0, 0);
-                  controls.target.set(0, 0, 0);
-                  console.log(`parseCsvData: Set default camera view from south (az=180°, el=30°, distance=${distance})`);
-                } else {
-                  // Existing logic for incomplete dome: center on average position
-                  const boundingBox = new THREE.Box3();
-                  spheres.forEach(s => boundingBox.expandByPoint(s.position));
+                const center = new THREE.Vector3();
+                boundingBox.getCenter(center);
 
-                  const center = new THREE.Vector3();
-                  boundingBox.getCenter(center);
+                const size = new THREE.Vector3();
+                boundingBox.getSize(size);
+                const maxDim = Math.max(size.x, size.y, size.z) || 2;
 
-                  const size = new THREE.Vector3();
-                  boundingBox.getSize(size);
-                  const maxDim = Math.max(size.x, size.y, size.z) || 2;
+                let avgPosition = new THREE.Vector3();
+                spheres.forEach(s => avgPosition.add(s.position));
+                avgPosition.divideScalar(spheres.length);
 
-                  let avgPosition = new THREE.Vector3();
-                  spheres.forEach(s => avgPosition.add(s.position));
-                  avgPosition.divideScalar(spheres.length);
-
-                  const directionToData = avgPosition.clone().normalize();
-                  const distance = maxDim * 2;
-                  camera.position.copy(directionToData.clone().multiplyScalar(distance));
-                  camera.lookAt(center);
-                  controls.target.copy(center);
-                  console.log(`parseCsvData: Set camera to center on incomplete dome, center=${center.x.toFixed(2)},${center.y.toFixed(2)},${center.z.toFixed(2)}, distance=${distance.toFixed(2)}`);
-                }
-
+                const directionToData = avgPosition.clone().normalize();
+                const distance = maxDim * 2;
+                camera.position.copy(directionToData.clone().multiplyScalar(distance));
+                camera.lookAt(center);
+                controls.target.copy(center);
                 controls.update();
                 addAzimuthCompass();
                 updateTimeDisplay();
@@ -1191,18 +1153,6 @@
               .then(csv => parseCsvData(csv, 'demo'))
               .catch(error => {
                 console.error('Error loading demo CSV:', error);
-                // Set default camera view for no data
-                const distance = 2;
-                const azRad = THREE.MathUtils.degToRad(180); // South
-                const elRad = THREE.MathUtils.degToRad(30); // 30° elevation
-                camera.position.set(
-                  distance * Math.cos(elRad) * Math.sin(azRad),
-                  distance * Math.sin(elRad),
-                  distance * Math.cos(elRad) * Math.cos(azRad)
-                );
-                camera.lookAt(0, 0, 0);
-                controls.target.set(0, 0, 0);
-                controls.update();
                 addAzimuthCompass();
                 addTrajectories();
               });
