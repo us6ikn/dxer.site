@@ -301,32 +301,49 @@
           function interpolateNoiseAtPosition(azimuth, elevation) {
             if (!rawPoints.length) return null;
 
-            // Collect nearby points with inverse distance weighting
-            let totalWeight = 0;
-            let weightedNoise = 0;
-            const maxDistance = 30; // Maximum distance in degrees for interpolation
-
-            rawPoints.forEach(point => {
+            // Collect closest points for interpolation
+            const maxPoints = 5; // Use up to 5 nearest points
+            const pointsWithDistance = rawPoints.map(point => {
               const dAz = Math.abs(point.az - azimuth);
               const dEl = Math.abs(point.el - elevation);
               const distance = Math.sqrt(dAz * dAz + dEl * dEl);
-
-              if (distance < maxDistance) {
-                // Use inverse distance squared for weighting
-                const weight = 1 / (distance * distance + 1e-6); // Avoid division by zero
-                weightedNoise += weight * point.noise;
-                totalWeight += weight;
-              }
+              return { ...point, distance };
             });
 
-            if (totalWeight === 0) return null; // No points close enough
+            // Sort by distance and take the closest points
+            pointsWithDistance.sort((a, b) => a.distance - b.distance);
+            const closestPoints = pointsWithDistance.slice(0, maxPoints);
+
+            if (closestPoints.length === 0) {
+              console.log(`interpolateNoiseAtPosition: No points found for Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°`);
+              return null;
+            }
+
+            // Inverse distance weighting
+            let totalWeight = 0;
+            let weightedNoise = 0;
+            closestPoints.forEach(point => {
+              const weight = 1 / (point.distance * point.distance + 1e-6); // Inverse distance squared
+              weightedNoise += weight * point.noise;
+              totalWeight += weight;
+              console.log(`Point used: Az=${point.az.toFixed(1)}°, El=${point.el.toFixed(1)}°, Noise=${point.noise.toFixed(2)} dB, Distance=${point.distance.toFixed(2)}°, Weight=${weight.toFixed(4)}`);
+            });
+
+            if (totalWeight === 0) {
+              console.log(`interpolateNoiseAtPosition: Zero total weight for Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°`);
+              return null;
+            }
 
             const interpolatedNoise = weightedNoise / totalWeight;
-            return { noise: interpolatedNoise };
+            console.log(`interpolateNoiseAtPosition: Az=${azimuth.toFixed(1)}°, El=${elevation.toFixed(1)}°, Interpolated Noise=${interpolatedNoise.toFixed(2)} dB, Points used=${closestPoints.length}`);
+            
+            // Clamp noise to minNoise and maxNoise to ensure valid display
+            return { noise: Math.max(minNoise, Math.min(maxNoise, interpolatedNoise)) };
           }
 
           function drawColorBar() {
             if (minNoise === Infinity || maxNoise === -Infinity) {
+              console.log('drawColorBar: No valid noise data, hiding color bar');
               colorBarContainer.style.display = 'none';
               return;
             }
@@ -347,13 +364,15 @@
             colorBarContext.fillStyle = gradient;
             colorBarContext.fillRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
 
-            if (moonPositions.length && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0) {
+            if (moonPositions.length && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0 && rawPoints.length) {
               const moonData = moonPositions[currentTimeIndex];
               const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
-              if (noisePoint && noisePoint.noise >= minNoise && noisePoint.noise <= maxNoise) {
+              if (noisePoint) {
                 const noise = noisePoint.noise;
                 const norm = (maxNoise - minNoise) === 0 ? 0.5 : (noise - minNoise) / (maxNoise - minNoise);
                 const y = colorBarCanvas.height * (1 - norm);
+
+                console.log(`drawColorBar: Drawing Moon noise marker at Noise=${noise.toFixed(2)} dB, y=${y.toFixed(2)}`);
 
                 colorBarContext.fillStyle = '#ffffff';
                 colorBarContext.beginPath();
@@ -367,7 +386,11 @@
                 colorBarContext.font = '12px Segoe UI';
                 colorBarContext.textAlign = 'left';
                 colorBarContext.fillText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + 12, y + 4);
+              } else {
+                console.log(`drawColorBar: No valid noise point for Moon at Az=${moonData.azimuth.toFixed(1)}°, El=${moonData.elevation.toFixed(1)}°`);
               }
+            } else {
+              console.log('drawColorBar: Moon below horizon or no data, skipping marker');
             }
           }
 
@@ -963,9 +986,12 @@
 
               if (clickedObject === moonMarker && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0) {
                 const moonData = moonPositions[currentTimeIndex];
+                const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
+                const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A';
                 infoBox.innerHTML = `
                   <b>Moon</b><br>
-                  Az: ${moonData.azimuth.toFixed(1)}° El: ${moonData.elevation.toFixed(1)}°
+                  Az: ${moonData.azimuth.toFixed(1)}° El: ${moonData.elevation.toFixed(1)}°<br>
+                  ${noiseText}
                 `;
                 infoBox.style.display = 'block';
               } else if (clickedObject === sunMarker && showSunCheckbox.checked && sunPositions[currentTimeIndex] && sunPositions[currentTimeIndex].elevation > 0) {
@@ -1004,9 +1030,12 @@
 
               if (clickedObject === moonMarker && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0) {
                 const moonData = moonPositions[currentTimeIndex];
+                const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
+                const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A';
                 infoBox.innerHTML = `
                   <b>Moon</b><br>
-                  Az: ${moonData.azimuth.toFixed(1)}° El: ${moonData.elevation.toFixed(1)}°
+                  Az: ${moonData.azimuth.toFixed(1)}° El: ${moonData.elevation.toFixed(1)}°<br>
+                  ${noiseText}
                 `;
                 infoBox.style.display = 'block';
               } else if (clickedObject === sunMarker && showSunCheckbox.checked && sunPositions[currentTimeIndex] && sunPositions[currentTimeIndex].elevation > 0) {
