@@ -165,107 +165,109 @@
           cursor: not-allowed;
         }
 
+        #colorBarContainer {
+          position: absolute;
+          bottom: 180px;
+          right: 10px;
+          z-index: 30;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          font-family: 'Segoe UI', sans-serif;
+          font-size: 12px;
+          color: white;
+          width: 40px;
+          height: auto;
+          top: auto;
+          left: auto;
+        }
+
+        #colorBar {
+          width: 20px !important;
+          height: 100px !important;
+          border: 1px solid rgba(255,255,255,0.3);
+          z-index: 30;
+        }
+
+        #maxNoiseLabel {
+          position: absolute;
+          top: -18px;
+          left: 50%;
+          transform: translateX(-50%);
+          text-align: center;
+          width: 100%;
+          z-index: 31;
+          background: rgba(0,0,0,0.6);
+          padding: 2px 4px;
+          border-radius: 2px;
+          line-height: 1.2;
+        }
+
+        #minNoiseLabel {
+          position: absolute;
+          bottom: -18px;
+          left: 50%;
+          transform: translateX(-50%);
+          text-align: center;
+          width: 100%;
+          z-index: 31;
+          background: rgba(0,0,0,0.6);
+          padding: 2px 4px;
+          border-radius: 2px;
+          line-height: 1.2;
+        }
+
+        @media (max-width: 600px), (orientation: portrait) {
           #colorBarContainer {
             position: absolute;
-            bottom: 150px; /* Fallback value for desktop */
+            bottom: 90px;
             right: 10px;
-            z-index: 30;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-family: 'Segoe UI', sans-serif;
-            font-size: 12px;
-            color: white;
+            font-size: 10px;
             width: 40px;
             height: auto;
             top: auto;
             left: auto;
           }
-
           #colorBar {
             width: 20px !important;
-            height: 200px !important;
-            border: 1px solid rgba(255,255,255,0.3);
-            z-index: 30;
+            height: 120px !important;
           }
-
           #maxNoiseLabel {
-            position: absolute;
-            top: -22px; /* Increased offset to avoid overlap */
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            width: 100%;
-            z-index: 31;
-            background: rgba(0,0,0,0.6);
-            padding: 2px 4px;
-            border-radius: 2px;
-            line-height: 1.2;
+            top: -16px;
+            font-size: 10px;
+            padding: 1px 3px;
           }
-
           #minNoiseLabel {
+            bottom: -16px;
+            font-size: 10px;
+            padding: 1px 3px;
+          }
+        }
+
+        @media (max-height: 500px) {
+          #colorBarContainer {
             position: absolute;
-            bottom: -22px; /* Increased offset to avoid overlap */
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            width: 100%;
-            z-index: 31;
-            background: rgba(0,0,0,0.6);
-            padding: 2px 4px;
-            border-radius: 2px;
-            line-height: 1.2;
+            bottom: 80px;
+            right: 10px;
+            width: 40px;
+            height: auto;
+            top: auto;
+            left: auto;
           }
-
-          @media (max-width: 600px), (orientation: portrait) {
-            #colorBarContainer {
-              bottom: 100px; /* Fallback for mobile, adjusted dynamically by JS */
-              right: 10px;
-              font-size: 10px;
-              width: 40px;
-              height: auto;
-              top: auto;
-              left: auto;
-            }
-            #colorBar {
-              width: 20px !important;
-              height: 120px !important;
-            }
-            #maxNoiseLabel {
-              top: -20px; /* Adjusted for mobile */
-              font-size: 10px;
-              padding: 1px 3px;
-            }
-            #minNoiseLabel {
-              bottom: -20px; /* Adjusted for mobile */
-              font-size: 10px;
-              padding: 1px 3px;
-            }
+          #colorBar {
+            height: 100px !important;
           }
-
-          @media (max-height: 500px) {
-            #colorBarContainer {
-              bottom: 80px; /* Fallback for low-height screens */
-              right: 10px;
-              width: 40px;
-              height: auto;
-              top: auto;
-              left: auto;
-            }
-            #colorBar {
-              height: 100px !important;
-            }
-            #maxNoiseLabel {
-              top: -18px;
-              font-size: 10px;
-              padding: 1px 3px;
-            }
-            #minNoiseLabel {
-              bottom: -18px;
-              font-size: 10px;
-              padding: 1px 3px;
-            }
+          #maxNoiseLabel {
+            top: -16px;
+            font-size: 10px;
+            padding: 1px 3px;
           }
+          #minNoiseLabel {
+            bottom: -16px;
+            font-size: 10px;
+            padding: 1px 3px;
+          }
+        }
       </style>
     </head>
     <body>
@@ -441,22 +443,6 @@
 
           window.addEventListener('resize', onWindowResize);
           window.addEventListener('orientationchange', onWindowResize);
-          
-          function adjustColorBarPosition() {
-            const moonTimeControls = document.getElementById('moonTimeControls');
-            const colorBarContainer = document.getElementById('colorBarContainer');
-            const controlsRect = moonTimeControls.getBoundingClientRect();
-            const isMobile = window.innerWidth <= 600 || window.matchMedia("(orientation: portrait)").matches;
-            const offset = isMobile ? 20 : 30; // Smaller offset for mobile, larger for desktop
-            const minBottom = isMobile ? 80 : 120; // Minimum bottom value to prevent overlap
-            const newBottom = controlsRect.height + offset;
-            colorBarContainer.style.bottom = `${Math.max(minBottom, newBottom)}px`;
-          }
-
-          // Run on load and on resize/orientation change
-          window.addEventListener('resize', adjustColorBarPosition);
-          window.addEventListener('orientationchange', adjustColorBarPosition);
-          adjustColorBarPosition();
 
           const raycaster = new THREE.Raycaster();
           const mouse = new THREE.Vector2();
@@ -536,83 +522,79 @@
             return null;
           }
 
-            function drawColorBar() {
-              if (minNoise === Infinity || maxNoise === -Infinity) {
-                colorBarContainer.style.display = 'none';
-                return;
-              }
-              colorBarContainer.style.display = 'flex';
-
-              minNoiseLabel.textContent = `${minNoise.toFixed(2)} dB`;
-              maxNoiseLabel.textContent = `${maxNoise.toFixed(2)} dB`;
-
-              // Ensure labels are not overlapping
-              minNoiseLabel.style.bottom = '-20px'; // Reinforce CSS value
-              maxNoiseLabel.style.top = '-20px'; // Reinforce CSS value
-
-              const dpr = window.devicePixelRatio || 1;
-              const computedStyle = getComputedStyle(colorBarCanvas);
-              const canvasWidth = parseFloat(computedStyle.width);
-              const canvasHeight = parseFloat(computedStyle.height);
-              colorBarCanvas.width = canvasWidth * dpr;
-              colorBarCanvas.height = canvasHeight * dpr;
-              colorBarContext.scale(dpr, dpr);
-
-              colorBarContext.save();
-              colorBarContext.setTransform(1, 0, 0, 1, 0, 0);
-              colorBarContext.clearRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
-
-              const gradient = colorBarContext.createLinearGradient(0, colorBarCanvas.height, 0, 0);
-              for (let i = 0; i <= 1; i += 0.1) {
-                const norm = i;
-                const color = new THREE.Color().setHSL(0.7 - norm * 0.7, 1.0, 0.5);
-                gradient.addColorStop(i, `#${color.getHexString()}`);
-              }
-              colorBarContext.fillStyle = gradient;
-              colorBarContext.fillRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
-
-              if (moonPositions.length && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0 && rawPoints.length) {
-                const moonData = moonPositions[currentTimeIndex];
-                const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
-                if (noisePoint) {
-                  const noise = noisePoint.noise;
-                  const norm = (maxNoise - minNoise) === 0 ? 0.5 : (noise - minNoise) / (maxNoise - minNoise);
-                  let y = colorBarCanvas.height * (1 - norm);
-                  y = Math.max(2 * dpr, Math.min(colorBarCanvas.height - 2 * dpr, y));
-
-                  const isMobile = window.innerWidth <= 600 || window.matchMedia("(orientation: portrait)").matches;
-                  const triangleSize = isMobile ? 12 : 18;
-                  const textOffset = isMobile ? 14 : 22;
-                  const fontSize = isMobile ? 12 : 14;
-
-                  colorBarContext.strokeStyle = '#000000';
-                  colorBarContext.lineWidth = 2 * dpr;
-                  colorBarContext.beginPath();
-                  colorBarContext.moveTo(colorBarCanvas.width, y);
-                  colorBarContext.lineTo(colorBarCanvas.width + triangleSize * dpr, y - (triangleSize / 2) * dpr);
-                  colorBarContext.lineTo(colorBarCanvas.width + triangleSize * dpr, y + (triangleSize / 2) * dpr);
-                  colorBarContext.closePath();
-                  colorBarContext.stroke();
-
-                  colorBarContext.fillStyle = '#ffffff';
-                  colorBarContext.fill();
-
-                  colorBarContext.fillStyle = '#ffffff';
-                  colorBarContext.strokeStyle = '#000000';
-                  colorBarContext.lineWidth = 1 * dpr;
-                  colorBarContext.font = `bold ${fontSize * dpr}px Segoe UI`;
-                  colorBarContext.textAlign = 'left';
-                  colorBarContext.textBaseline = 'middle';
-                  colorBarContext.strokeText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + textOffset * dpr, y);
-                  colorBarContext.fillText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + textOffset * dpr, y);
-
-                  colorBarContext.fillStyle = '#ff0000';
-                  colorBarContext.fillRect(0, y - 2 * dpr, 5 * dpr, 4 * dpr);
-                }
-              }
-
-              colorBarContext.restore();
+          function drawColorBar() {
+            if (minNoise === Infinity || maxNoise === -Infinity) {
+              colorBarContainer.style.display = 'none';
+              return;
             }
+            colorBarContainer.style.display = 'flex';
+
+            minNoiseLabel.textContent = `${minNoise.toFixed(2)} dB`;
+            maxNoiseLabel.textContent = `${maxNoise.toFixed(2)} dB`;
+
+            const dpr = window.devicePixelRatio || 1;
+            const computedStyle = getComputedStyle(colorBarCanvas);
+            const canvasWidth = parseFloat(computedStyle.width);
+            const canvasHeight = parseFloat(computedStyle.height);
+            colorBarCanvas.width = canvasWidth * dpr;
+            colorBarCanvas.height = canvasHeight * dpr;
+            colorBarContext.scale(dpr, dpr);
+
+            colorBarContext.save();
+            colorBarContext.setTransform(1, 0, 0, 1, 0, 0);
+            colorBarContext.clearRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
+
+            const gradient = colorBarContext.createLinearGradient(0, colorBarCanvas.height, 0, 0);
+            for (let i = 0; i <= 1; i += 0.1) {
+              const norm = i;
+              const color = new THREE.Color().setHSL(0.7 - norm * 0.7, 1.0, 0.5);
+              gradient.addColorStop(i, `#${color.getHexString()}`);
+            }
+            colorBarContext.fillStyle = gradient;
+            colorBarContext.fillRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
+
+            if (moonPositions.length && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0 && rawPoints.length) {
+              const moonData = moonPositions[currentTimeIndex];
+              const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
+              if (noisePoint) {
+                const noise = noisePoint.noise;
+                const norm = (maxNoise - minNoise) === 0 ? 0.5 : (noise - minNoise) / (maxNoise - minNoise);
+                let y = colorBarCanvas.height * (1 - norm);
+                y = Math.max(2 * dpr, Math.min(colorBarCanvas.height - 2 * dpr, y));
+
+                const isMobile = window.innerWidth <= 600 || window.matchMedia("(orientation: portrait)").matches;
+                const triangleSize = isMobile ? 12 : 18;
+                const textOffset = isMobile ? 14 : 22;
+                const fontSize = isMobile ? 12 : 14;
+
+                colorBarContext.strokeStyle = '#000000';
+                colorBarContext.lineWidth = 2 * dpr;
+                colorBarContext.beginPath();
+                colorBarContext.moveTo(colorBarCanvas.width, y);
+                colorBarContext.lineTo(colorBarCanvas.width + triangleSize * dpr, y - (triangleSize / 2) * dpr);
+                colorBarContext.lineTo(colorBarCanvas.width + triangleSize * dpr, y + (triangleSize / 2) * dpr);
+                colorBarContext.closePath();
+                colorBarContext.stroke();
+
+                colorBarContext.fillStyle = '#ffffff';
+                colorBarContext.fill();
+
+                colorBarContext.fillStyle = '#ffffff';
+                colorBarContext.strokeStyle = '#000000';
+                colorBarContext.lineWidth = 1 * dpr;
+                colorBarContext.font = `bold ${fontSize * dpr}px Segoe UI`;
+                colorBarContext.textAlign = 'left';
+                colorBarContext.textBaseline = 'middle';
+                colorBarContext.strokeText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + textOffset * dpr, y);
+                colorBarContext.fillText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + textOffset * dpr, y);
+
+                colorBarContext.fillStyle = '#ff0000';
+                colorBarContext.fillRect(0, y - 2 * dpr, 5 * dpr, 4 * dpr);
+              }
+            }
+
+            colorBarContext.restore();
+          }
 
           function updateMoonMarker() {
             if (!moonPositions.length || !moonPositions[currentTimeIndex]) {
