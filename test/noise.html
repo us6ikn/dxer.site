@@ -452,8 +452,8 @@
 
                   // Adjust triangle size for mobile
                   const isMobile = window.innerWidth <= 600 || window.matchMedia("(orientation: portrait)").matches;
-                  const triangleSize = isMobile ? 16 : 24; // Increased from 12/18
-                  const textOffset = isMobile ? 18 : 28; // Adjusted to avoid overlap
+                  const triangleSize = isMobile ? 12 : 18;
+                  const textOffset = isMobile ? 14 : 22;
                   const fontSize = isMobile ? 12 : 14;
 
                   colorBarContext.strokeStyle = '#000000';
@@ -476,6 +476,10 @@
                   colorBarContext.textBaseline = 'middle';
                   colorBarContext.strokeText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + textOffset * dpr, y);
                   colorBarContext.fillText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + textOffset * dpr, y);
+
+                  // Optional: Comment out or remove the red rectangle if not needed
+                  colorBarContext.fillStyle = '#ff0000';
+                  colorBarContext.fillRect(0, y - 2 * dpr, 5 * dpr, 4 * dpr);
                 } else {
                   console.log(`drawColorBar: No valid noise point for Moon at Az=${moonData.azimuth.toFixed(1)}°, El=${moonData.elevation.toFixed(1)}°`);
                 }
