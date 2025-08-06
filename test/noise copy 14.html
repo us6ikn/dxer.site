@@ -36,7 +36,7 @@
 
         @media (max-width: 600px), (orientation: portrait) {
           #infoBox {
-            font-size: 14px; /* Reduced from 16px for Moon, DX Moon, Sun details */
+            font-size: 16px;
             padding: 16px;
             top: 15px;
             right: 15px;
@@ -178,10 +178,6 @@
                  style="text-decoration: none; font-size: 16px; background: rgba(255,255,255,0.1); color: white; padding: 2px 6px; border-radius: 4px;">
                 🏠
               </a>
-              <a href="https://dxer.site/eme-observer/" target="_blank" title="Go to EME Observer"
-                 style="text-decoration: none; font-size: 16px; background: rgba(255,255,255,0.1); color: white; padding: 2px 6px; border-radius: 4px;">
-                🗺️
-              </a>
               <a href="https://dxer.site/sky-observer-faq.html" target="_blank" title="Open FAQ"
                  style="text-decoration: none; font-size: 16px; background: rgba(255,255,255,0.1); color: white; padding: 2px 6px; border-radius: 4px;">
                 ❓
@@ -208,12 +204,12 @@
           max-width: 160px;
         ">
           <div style="display: flex; align-items: center; gap: 4px;">
-            <label for="gridInput">My locator:</label>
+            <label for="gridInput">Grid:</label>
             <input type="text" id="gridInput" maxlength="6" placeholder="e.g. JO89tt"
                    style="width: 60px; font-size: 11px; padding: 2px 4px; border-radius: 4px; border: none;">
           </div>
           <div style="display: flex; align-items: center; gap: 4px;">
-            <label for="dxGridInput">DX locator:</label>
+            <label for="dxGridInput">DX Grid:</label>
             <input type="text" id="dxGridInput" maxlength="6" placeholder="e.g. FN20as"
                    style="width: 60px; font-size: 11px; padding: 2px 4px; border-radius: 4px; border: none;">
           </div>
@@ -1121,11 +1117,9 @@
 
                 if (csvSource === 'demo') {
                   demoStatus.textContent = 'Demo loaded!';
-                  demoStatus.style.color = 'red';
                   demoStatus.style.display = 'block';
                 } else if (csvSource === 'stored') {
                   demoStatus.textContent = 'Stored CSV loaded';
-                  demoStatus.style.color = 'blue';
                   demoStatus.style.display = 'block';
                 } else {
                   demoStatus.style.display = 'none';
