@@ -176,27 +176,28 @@
           font-family: 'Segoe UI', sans-serif;
           font-size: 12px;
           color: white;
-          position: relative; /* Make container the positioning context */
-          width: 40px; /* Ensure enough width for labels */
-          height: 208px; /* Match canvas height + label margins */
+          width: 40px;
+          height: auto;
+          top: auto;
+          left: auto;
         }
 
         #colorBar {
           width: 20px !important;
           height: 200px !important;
           border: 1px solid rgba(255,255,255,0.3);
-          z-index: 30; /* Match container z-index */
+          z-index: 30;
         }
 
         #maxNoiseLabel {
           position: absolute;
-          top: -18px; /* Position above canvas */
+          top: -18px;
           left: 50%;
           transform: translateX(-50%);
           text-align: center;
           width: 100%;
-          z-index: 31; /* Above canvas */
-          background: rgba(0,0,0,0.6); /* Improve readability */
+          z-index: 31;
+          background: rgba(0,0,0,0.6);
           padding: 2px 4px;
           border-radius: 2px;
           line-height: 1.2;
@@ -204,13 +205,13 @@
 
         #minNoiseLabel {
           position: absolute;
-          bottom: -18px; /* Position below canvas */
+          bottom: -18px;
           left: 50%;
           transform: translateX(-50%);
           text-align: center;
           width: 100%;
-          z-index: 31; /* Above canvas */
-          background: rgba(0,0,0,0.6); /* Improve readability */
+          z-index: 31;
+          background: rgba(0,0,0,0.6);
           padding: 2px 4px;
           border-radius: 2px;
           line-height: 1.2;
@@ -218,42 +219,58 @@
 
         @media (max-width: 600px), (orientation: portrait) {
           #colorBarContainer {
+            position: absolute;
             bottom: 90px;
             right: 10px;
             font-size: 10px;
-            height: 124px; /* Match canvas height + label margins */
+            width: 40px;
+            height: auto;
+            top: auto;
+            left: auto;
           }
           #colorBar {
             width: 20px !important;
             height: 120px !important;
           }
-          #maxNoiseLabel, #minNoiseLabel {
+          #maxNoiseLabel {
+            top: -16px;
             font-size: 10px;
-            top: -16px; /* Adjusted for smaller canvas */
-            bottom: -16px; /* Adjusted for smaller canvas */
+            padding: 1px 3px;
+          }
+          #minNoiseLabel {
+            bottom: -16px;
+            font-size: 10px;
             padding: 1px 3px;
           }
         }
 
         @media (max-height: 500px) {
           #colorBarContainer {
+            position: absolute;
             bottom: 80px;
-            height: 104px; /* Match canvas height + label margins */
+            right: 10px;
+            width: 40px;
+            height: auto;
+            top: auto;
+            left: auto;
           }
           #colorBar {
             height: 100px !important;
           }
           #maxNoiseLabel {
             top: -16px;
+            font-size: 10px;
+            padding: 1px 3px;
           }
           #minNoiseLabel {
             bottom: -16px;
+            font-size: 10px;
+            padding: 1px 3px;
           }
         }
       </style>
     </head>
     <body>
-        <!-- App Title + Author + Buttons -->
         <div style="position: absolute; top: 8px; left: 8px; z-index: 30; font-family: 'Segoe UI', sans-serif;">
           <div style="display: flex; flex-direction: row; align-items: flex-end; gap: 8px;">
             <div style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1;">
@@ -281,7 +298,6 @@
           </div>
         </div>
 
-        <!-- Ultra-Compact Control Panel -->
         <div id="controlPanel" style="
           position: absolute;
           top: 36px;
@@ -330,7 +346,6 @@
           </div>
         </div>
 
-        <!-- Time Slider -->
         <div id="moonTimeControls" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 10px;">
           <span id="moonTimeDisplay" style="color: white; font-family: 'Courier New', monospace; font-size: 18px; padding: 8px 12px; border-radius: 8px; background-color: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.2);">
             --:-- UTC
@@ -338,7 +353,6 @@
           <input type="range" id="timeSlider" min="0" max="0" value="0" aria-label="Select time for moon and sun position" role="slider" tabindex="0" style="width: 80vw; max-width: 300px; accent-color: #fff; cursor: pointer;">
         </div>
 
-        <!-- Color-Bar for Noise Levels -->
         <div id="colorBarContainer" style="
           position: absolute;
           bottom: 180px;
@@ -350,9 +364,10 @@
           font-family: 'Segoe UI', sans-serif;
           font-size: 12px;
           color: white;
-          position: relative;
           width: 40px;
-          height: 208px;
+          height: auto;
+          top: auto;
+          left: auto;
         ">
           <div id="maxNoiseLabel" style="position: absolute; top: -18px; left: 50%; transform: translateX(-50%); text-align: center; width: 100%; z-index: 31; background: rgba(0,0,0,0.6); padding: 2px 4px; border-radius: 2px; line-height: 1.2;">-- dB</div>
           <canvas id="colorBar" width="20" height="200" style="border: 1px solid rgba(255,255,255,0.3); z-index: 30;"></canvas>
@@ -419,12 +434,11 @@
           controls.panSpeed = 0.5;
           controls.update();
 
-          // Handle window resize and orientation change
           function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-            drawColorBar(); // Redraw color bar to adjust for new canvas size
+            drawColorBar();
           }
 
           window.addEventListener('resize', onWindowResize);
@@ -1105,7 +1119,6 @@
                 minNoise = Infinity;
                 maxNoise = -Infinity;
 
-                // Check if required columns are present
                 const headers = results.meta.fields;
                 const requiredColumns = ['Azimuth', 'Elevation', 'Noise'];
                 const hasRequiredColumns = requiredColumns.every(col => headers.includes(col));
@@ -1117,15 +1130,12 @@
                 }
 
                 results.data.forEach(row => {
-                  // Skip if Valid column exists and is not "True"
                   if (row.Valid !== undefined && row.Valid !== "True") return;
 
-                  // Parse required columns
                   const az = parseFloat(row.Azimuth?.replace(",", "."));
                   const el = parseFloat(row.Elevation?.replace(",", "."));
                   const noise = parseFloat(row.Noise?.replace(",", "."));
 
-                  // Validate parsed values
                   if (isNaN(az) || isNaN(el) || isNaN(noise)) return;
 
                   minNoise = Math.min(minNoise, noise);
@@ -1134,7 +1144,6 @@
                   rawPoints.push({ az, el, noise });
                 });
 
-                // If no valid points were found, show error
                 if (rawPoints.length === 0) {
                   demoStatus.textContent = 'Error: No valid data points in CSV';
                   demoStatus.style.color = 'red';
