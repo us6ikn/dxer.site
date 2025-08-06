@@ -421,16 +421,17 @@
                   let y = colorBarCanvas.height * (1 - norm);
                   y = Math.max(2, Math.min(colorBarCanvas.height - 2, y));
 
-                  console.log(`drawColorBar: Drawing Moon noise marker at Noise=${noise.toFixed(2)} dB, y=${y.toFixed(2)}, norm=${norm.toFixed(4)}`);
+                  console.log(`drawColorBar: Attempting to draw marker at Noise=${noise.toFixed(2)} dB, norm=${norm.toFixed(4)}, y=${y.toFixed(2)}, canvasWidth=${colorBarCanvas.width}, canvasHeight=${colorBarCanvas.height}`);
 
-                  // Draw white triangle outside the bar, pointing to the value
-                  colorBarContext.strokeStyle = '#000000';
-                  colorBarContext.lineWidth = 1;
+                  // Draw white triangle outside the bar
                   colorBarContext.beginPath();
                   colorBarContext.moveTo(colorBarCanvas.width, y); // Vertex at bar's right edge
-                  colorBarContext.lineTo(colorBarCanvas.width + 12, y - 6); // Top of base
-                  colorBarContext.lineTo(colorBarCanvas.width + 12, y + 6); // Bottom of base
+                  colorBarContext.lineTo(colorBarCanvas.width + 10, y - 5); // Top of base
+                  colorBarContext.lineTo(colorBarCanvas.width + 10, y + 5); // Bottom of base
                   colorBarContext.closePath();
+
+                  colorBarContext.strokeStyle = '#000000';
+                  colorBarContext.lineWidth = 1;
                   colorBarContext.stroke();
 
                   colorBarContext.fillStyle = '#ffffff';
@@ -443,8 +444,11 @@
                   colorBarContext.font = 'bold 14px Segoe UI';
                   colorBarContext.textAlign = 'left';
                   colorBarContext.textBaseline = 'middle';
-                  colorBarContext.strokeText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + 16, y);
-                  colorBarContext.fillText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + 16, y);
+                  const textX = colorBarCanvas.width + 12; // Adjusted for smaller triangle
+                  const textY = y;
+                  console.log(`drawColorBar: Drawing text '${noise.toFixed(2)} dB' at x=${textX}, y=${textY}`);
+                  colorBarContext.strokeText(`${noise.toFixed(2)} dB`, textX, textY);
+                  colorBarContext.fillText(`${noise.toFixed(2)} dB`, textX, textY);
                 } else {
                   console.log(`drawColorBar: No valid noise point for Moon at Az=${moonData.azimuth.toFixed(1)}°, El=${moonData.elevation.toFixed(1)}°`);
                 }
@@ -452,7 +456,7 @@
                 console.log('drawColorBar: Moon below horizon or no data, skipping marker');
               }
 
-              // Optional: Keep test green square for debugging
+              // Draw test green square for reference
               colorBarContext.fillStyle = '#00ff00';
               colorBarContext.fillRect(0, 100, 5, 5);
               console.log('drawColorBar: Drew test green square at y=100');
