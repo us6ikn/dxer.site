@@ -829,7 +829,7 @@
                         coordinateMap.set(coordKey, offsetIndex + 1);
 
                         // Apply a small offset based on the number of markers at this coordinate
-                        const offset = 0.0001; // Small offset (~10 meters)
+                        const offset = 0.001; // Small offset (~10 meters)
                         const angle = (offsetIndex * 2 * Math.PI) / 8; // Spread up to 8 markers in a circle
                         const offsetLat = lat + offset * Math.cos(angle);
                         const offsetLng = lng + offset * Math.sin(angle);
