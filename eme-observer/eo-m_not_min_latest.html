@@ -798,9 +798,9 @@
                 fullscreenControl: false
             });
 
-            const markers = []; // Array to store all markers
+            const coordinateMap = new Map(); // Track coordinates and their counts
 
-            fetch('stn_10GHz.json')
+            fetch('stn_10GHz_e.json')
                 .then(response => response.json())
                 .then(data => {
                     data.forEach(station => {
@@ -823,8 +823,18 @@
                         const lng = parseFloat(lngStr);
                         if (isNaN(lat) || isNaN(lng)) return;
 
-                        // Use exact coordinates from data (remove manual offset)
-                        const markerPosition = { lat, lng };
+                        // Generate a key for coordinates
+                        const coordKey = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+                        let offsetIndex = coordinateMap.get(coordKey) || 0;
+                        coordinateMap.set(coordKey, offsetIndex + 1);
+
+                        // Apply a small offset based on the number of markers at this coordinate
+                        const offset = 0.1; // Small offset (~10 meters)
+                        const angle = (offsetIndex * 2 * Math.PI) / 8; // Spread up to 8 markers in a circle
+                        const offsetLat = lat + offset * Math.cos(angle);
+                        const offsetLng = lng + offset * Math.sin(angle);
+
+                        const markerPosition = { lat: offsetLat, lng: offsetLng };
 
                         let iconUrl = "images/EME_home.png";
                         if (/Inactive/i.test(Note)) {
@@ -837,6 +847,7 @@
 
                         const marker = new google.maps.Marker({
                             position: markerPosition,
+                            map: map,
                             icon: {
                                 url: iconUrl,
                                 scaledSize: new google.maps.Size(20, 20)
@@ -844,6 +855,7 @@
                             title: callsign
                         });
 
+                        // Rest of the marker setup (infoWindow, event listeners) remains the same
                         const isLocatorValid = /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator);
                         const sanitizedCallsign = sanitizeCallsign(callsign);
                         const skedButton = isLocatorValid ?
@@ -933,35 +945,6 @@
                                 }
                             }, 100);
                         });
-
-                        markers.push(marker); // Add marker to array
-                    });
-
-                    // Initialize MarkerClusterer
-                    new MarkerClusterer({
-                        map: map,
-                        markers: markers,
-                        renderer: {
-                            render: ({ count, position }) => {
-                                return new google.maps.Marker({
-                                    position: position,
-                                    icon: {
-                                        url: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m1.png',
-                                        scaledSize: new google.maps.Size(50, 50)
-                                    },
-                                    label: {
-                                        text: String(count),
-                                        color: 'white',
-                                        fontSize: '12px',
-                                        fontWeight: 'bold'
-                                    },
-                                    zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count
-                                });
-                            }
-                        },
-                        algorithmOptions: {
-                            maxZoom: 15 // Cluster until zoom level 15
-                        }
                     });
                 })
                 .catch(() => { /* Handle error silently */ });
@@ -2337,7 +2320,6 @@
                                                     });
     </script>
     <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap"></script>
-    <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
     <!-- Ko-Fi -->
     <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
     <script src="/kofi.js"></script>
