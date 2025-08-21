@@ -859,7 +859,7 @@
                         // Apply offset only if there are multiple stations at this coordinate
                         let markerPosition = { lat, lng };
                         if (count > 1) {
-                            const offset = 0.001; // Small offset (~10 meters)
+                            const offset = 0.01; // Small offset (~10 meters)
                             const angle = (offsetIndex * 2 * Math.PI) / count; // Spread markers evenly in a circle
                             markerPosition = {
                                 lat: lat + offset * Math.cos(angle),
