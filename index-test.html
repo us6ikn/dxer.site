@@ -14,7 +14,7 @@
   <!-- Standard favicon -->
   <link rel="icon" type="image/png" sizes="32x32" href="https://dxer.site/assets/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="https://dxer.site/assets/favicon-16x16.png">
-  <link rel="shortcut icon" href="https://dxer.site/assets/favicon"));
+  <link rel="shortcut icon" href="https://dxer.site/assets/favicon.ico">
   <!-- Apple Touch Icon -->
   <link rel="apple-touch-icon" href="https://dxer.site/assets/apple-touch-icon.png">
   <!-- Android/Chrome Icons -->
@@ -23,11 +23,22 @@
   <!-- Web App Manifest -->
   <link rel="manifest" href="https://dxer.site/assets/site.webmanifest">
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Enhanced CSS to hide header elements in reader mode -->
+  <!-- CSS to hide header in reader mode and stabilize layout -->
   <style>
     @media screen and (prefers-reduced-data: reduce), print {
       .header-content {
         display: none !important;
+      }
+    }
+    /* Ensure consistent title size across viewports */
+    .site-title {
+      font-size: 1.125rem; /* Matches text-lg */
+      line-height: 1.75rem;
+      font-weight: 700;
+    }
+    @media (min-width: 768px) {
+      .site-title {
+        font-size: 1.25rem; /* Matches text-xl */
       }
     }
   </style>
@@ -36,12 +47,11 @@
     
     <header class="bg-white shadow relative" role="banner">
       <div class="container mx-auto p-4 flex flex-col md:flex-row md:items-center md:justify-between relative header-content" data-reader-exclude>
-        <!-- Site Title -->
-        <h1 class="text-lg md:text-xl font-bold leading-tight">SA5IKN – Amateur Radio Station</h1>
-        <!-- Profile Info -->
-        <div class="flex items-start space-x-4 mt-4 md:mt-0" aria-hidden="true">
+        <!-- Profile Info (restored to original structure with aria-hidden) -->
+        <div class="flex items-start space-x-4" aria-hidden="true">
           <img src="https://dxer.site/img/profile.jpg" alt="Profile" class="w-20 h-20 rounded-lg flex-shrink-0" />
           <div class="flex flex-col">
+            <h1 class="site-title leading-tight">SA5IKN – Amateur Radio Station</h1>
             <p class="text-sm text-gray-600">a.k.a MØSKN, US6IKN, EI6KC</p>
             <div class="flex flex-wrap gap-1 mt-1">
               <span class="text-xs font-semibold bg-blue-100 text-blue-800 px-2 py-0.5 rounded">EME</span>
@@ -54,7 +64,7 @@
             <div class="flex items-center space-x-4 mt-2">
               <a href="https://x.com/M0SKN_SA5IKN" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-sm text-blue-600 hover:underline">
                 <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M20.87 4.13c-.7.31-1.46.52-2.26.61a4.03 4.03 0 0 0 1.78-2.22 8.1 8.1 0 0 1-2.56.98 4.02 4.02 0 0 0-6.84 3.66A11.43 11.43 0 0 1 3.15 3.1a4 4 0 0 0 1.24 5.37 3.99 3.99 0 0 1-1.83-.5v.05a4.03 4.03 0 0 0 3.23 3.94 4.02 4.02 0 0 1-1.82.07 4.03 4.03 0 0 0 3.76 2.8A8.09 8.09 0 0 1 2 18.57 11.4 11.4 0 0 0 8.29w0.5c7.55 0 11.68-6.26 11.68-11.68 0-.18-.01-.36-.02-.53a8.35 8.35 0 0 0 2.05-2.13l-.01-.03z"/>
+                  <path d="M20.87 4.13c-.7.31-1.46.52-2.26.61a4.03 4.03 0 0 0 1.78-2.22 8.1 8.1 0 0 1-2.56.98 4.02 4.02 0 0 0-6.84 3.66A11.43 11.43 0 0 1 3.15 3.1a4 4 0 0 0 1.24 5.37 3.99 3.99 0 0 1-1.83-.5v.05a4.03 4.03 0 0 0 3.23 3.94 4.02 4.02 0 0 1-1.82.07 4.03 4.03 0 0 0 3.76 2.8A8.09 8.09 0 0 1 2 18.57 11.4 11.4 0 0 0 8.29 20.5c7.55 0 11.68-6.26 11.68-11.68 0-.18-.01-.36-.02-.53a8.35 8.35 0 0 0 2.05-2.13l-.01-.03z"/>
                 </svg>
                 Follow on X
               </a>
@@ -80,7 +90,7 @@
           <a href="https://dxer.site/eme-observer/">EME Map - 10GHz</a>
           <a href="https://dxer.site/greencube-observer.html">Satellite Maps</a>
           <div class="relative group">
-            <div class="text-sm font-semibold focus:outline-none cursor-pointer">Tools ▾</div>
+            <div class="text-sm font-semibold focus-outline-none cursor-pointer">Tools ▾</div>
             <div class="absolute left-0 mt-2 w-56 bg-white shadow-lg rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50" onmouseenter="this.classList.add('opacity-100','visible')" onmouseleave="this.classList.remove('opacity-100','visible')">
               <a href="https://dxer.site/eme-observer/" class="block px-4 py-2 hover:bg-gray-100">EME Observer - 10GHz</a>
               <a href="https://dxer.site/sa5ikn-qrb-calculator/" class="block px-4 py-2 hover:bg-gray-100">QRB Calculator - Azimuth Finder</a>
