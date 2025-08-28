@@ -45,32 +45,13 @@
             pointer-events: none;
             user-select: none;
           }
-    /* Table styling for consistency */
-    .qso-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-      margin-bottom: 1rem;
-    }
-    .qso-table th, .qso-table td {
-      border: 1px solid #e5e7eb;
-      padding: 0.5rem;
-      text-align: left;
-    }
-    .qso-table th {
-      background-color: #f3f4f6;
-      font-weight: 600;
-    }
-    .qso-table tr:nth-child(even) {
-      background-color: #f9fafb;
-    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
     
     <header class="bg-white shadow relative" role="banner">
       <div class="container mx-auto p-4 flex flex-col md:flex-row md:items-center md:justify-between relative header-content" data-reader-exclude>
-        <!-- Profile Info -->
+        <!-- Profile Info (restored to original structure with aria-hidden) -->
         <div class="flex items-start space-x-4" aria-hidden="true">
             <img src="https://dxer.site/img/profile.jpg" alt="Profile" class="profile-image w-20 h-20 rounded-lg flex-shrink-0" />
           <div class="flex flex-col">
@@ -190,64 +171,25 @@
             <p class="text-base text-gray-600 mt-1">
             During the weekend of 16–17 August I joined the ARRL EME Contest on 10 GHz, operating fully portable and battery powered. Despite the limitations of my small station, the results were very satisfying: 27 QSOs and 15 DXCC.
             </p>
-            <p class="text-base text-gray-600 mt-4">
-            Below is a list of all QSOs completed during the contest:
-            </p>
-            <table class="qso-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Time UTC</th>
-                  <th>Call</th>
-                  <th>Report TX</th>
-                  <th>Report RX</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>2025-08-16</td><td>06:16</td><td>OK1DFC</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>06:25</td><td>OZ1LPR</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>06:33</td><td>OH3LWP</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>06:39</td><td>OZ1FF</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>06:45</td><td>IW2FZR</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>06:47</td><td>DL4DTU</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>06:53</td><td>ON5TA</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>07:03</td><td>ON4CDU</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>07:09</td><td>DJ7FJ</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>07:15</td><td>PE1MMP</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>07:21</td><td>SO5AZ</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>07:25</td><td>F5JWF</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>07:39</td><td>OM4XA</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>07:47</td><td>IK0HWJ</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>07:57</td><td>LZ4OC</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>08:01</td><td>HB9Q</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>08:13</td><td>YO2LAM</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>10:02</td><td>F2CT</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>10:13</td><td>IK6CAK</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>10:23</td><td>KM0T</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>10:47</td><td>KN0WS</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>10:55</td><td>OK2AQ</td><td></td><td></td></tr>
-                <tr><td>2025-08-16</td><td>11:01</td><td>N1AV</td><td></td><td></td></tr>
-                <tr><td>2025-08-17</td><td>06:35</td><td>W3SZ</td><td></td><td></td></tr>
-                <tr><td>2025-08-17</td><td>06:51</td><td>G4YTL</td><td></td><td></td></tr>
-                <tr><td>2025-08-17</td><td>09:07</td><td>PE9GHZ</td><td></td><td></td></tr>
-                <tr><td>2025-08-17</td><td>11:19</td><td>VE6TA</td><td></td><td></td></tr>
-              </tbody>
-            </table>
+            
             <p class="text-base text-gray-600 mt-4">
             The portable setup imposed some constraints. My battery capacity prevented me from staying on longer and working a few more stations. Still, I was pleasantly surprised by how well the station performed. Most contacts were completed with ease, and at times I even found myself in "mini-pileups", with three or four stations calling simultaneously.
             </p>
-            <p class="text-base text-gray-600 mt-4">
             I could not complete only with Petros SV3AAF, who had his equipment overheating in the hot weather. I also copied Ric CX2SC, but he was busy with the big guns, leaving me no window to call. Those will be challenges to revisit next time.
+            <p class="text-base text-gray-600 mt-4">
+            
             </p>
+            
             <p class="text-base text-gray-600 mt-4">
             All in all, it was an enjoyable and rewarding weekend, proving once again how much can be achieved on 10 GHz EME with a modest, battery-powered station.
             </p>
+            
             <div class="only-full-news mt-3 space-y-2">
               <img src="https://dxer.site/img/works/SA5IKN_portable_10GHz_EME_station.jpg" alt="SA5IKN portable, battery powered 10GHz EME station in ARRL EME Contest 2025"
                   class="w-full rounded shadow-sm" loading="lazy">
             </div>
           </li>
-          <!-- Other news items remain unchanged -->
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -258,20 +200,25 @@
             <p class="text-base text-gray-600 mt-1">
             I am delighted to share a rather unusual 10 GHz EME QSO between Bruno, I6YPK (1 m dish / 25 W), and myself, SA5IKN (0.9 m dish / 27 W). What makes this contact special is not only the very small stations involved, but also the circumstances: both antennas were on balconies with restricted sky view. Bruno’s dish was mounted to balcony railings with a reasonably clear takeoff to the Moon, while my setup was completely indoors on a glazed balcony, beaming through an open window.
             </p>
+            
             <p class="text-base text-gray-600 mt-4">
             Attached is a collage showing photos of both stations and screenshots from the QSO. On my side, averaging was needed to complete the contact. I am fairly sure scattering and reflections shaved off a dB or two. Out portable I normally copy much better (as many of you saw during the contest), and I suspect I could have managed this one without averaging.
             </p>
+            
             <p class="text-base text-gray-600 mt-4">
             Bruno’s station is well optimised. He has also previously completed with Ivan, I0JNY, who uses a 1 m dish. Our contact was not scheduled and happened right after my random QSO with Hans, ON4CDU, who also runs a relatively small setup (1.2 m).
             </p>
+            
             <p class="text-base text-gray-600 mt-4">
             When I designed my 0.9 m / 27 W portable station, the goal was to build a station that could work its “twin” under normal conditions. This QSO confirms the design target has been met. The performance matches also theory very well (and I do love formulas and equations). If anyone out there is running an optimised station with a dish smaller than 90 cm, I am looking for you! My next challenge awaits.
             </p>
+            
             <div class="only-full-news mt-3 space-y-2">
               <img src="https://dxer.site/img/works/news_SA5IKN-I6YPK_balcony-moon-balcony_10GHz_EME.jpg" alt="0.9m-1m dish balcony-moon-balcony 10 GHz EME QSO: SA5IKN - I6YPK"
                   class="w-full rounded shadow-sm" loading="lazy">
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -282,9 +229,11 @@
             <p class="text-base text-gray-600 mt-1">
               I had a very memorable 10 GHz EME QSO with IS0/HB9COG - both of us operating fully portable setups. Portable-to-portable microwave moonbounce contacts are rare, and this one was particularly special: it was the first-ever 10 GHz QSO between Sweden (SM) and Sardinia (IS0).
             </p>
+            
             <p class="text-base text-gray-600 mt-4">
               My station was battery-powered, using a 90 cm dish and just 27 W at the feed. Automatic spatial polarisation offset tracking kept DPOL perfectly aligned throughout the QSO. Everything came together seamlessly. Huge thanks to the Q-Team and Dan HB9Q, for switching to Mode E for me.
             </p>
+            
             <p class="text-base text-gray-600 mt-4">
               On the same day, I also had the pleasure of working 18 other stations on 10 GHz EME. Not bad for a compact setup with a 90 cm dish, 0.6 dB NF LNA, and modest output power. See also the <a href="https://eme.radio/432-and-above-newsletter/432-and-above-2025-06" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">432 and Above EME Newsletter</a>.
             </p>
@@ -293,6 +242,7 @@
                   class="w-full rounded shadow-sm" loading="lazy">
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -307,6 +257,7 @@
             <p class="text-base text-gray-600 mt-4">
               The remaining ones are confirmed with paper QSLs that still need to be double-checked and submitted to ARRL, so the chase is very much alive. Hitting the 200 confirmed mark feels both close and just out of reach.
             </p>
+
             <p class="text-base text-gray-600 mt-4">
               That said, I am happy with the progress so far, especially as this is my second Satellite DXCC Award (I already hold one as M0SKN).
             </p>
@@ -314,6 +265,7 @@
               <img src="https://dxer.site/img/works/news_184_sat_dxcc.jpg" alt="ARRL Satellite DXCC update for SA5IKN - 184 SAT DXCC" class="w-full rounded shadow-sm" loading="lazy">
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -328,6 +280,7 @@
               <img src="https://dxer.site/img/works/news_sa5ikn_ja1wqf.jpg" alt="Easy and smooth 10GHz Moonbounce QSO with JA1WQF" class="w-full rounded shadow-sm" loading="lazy">
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -356,6 +309,7 @@
               </div>
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -384,6 +338,7 @@
               </div>
             </div>
           </li>
+
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -401,6 +356,7 @@
               <img src="https://dxer.site/img/works/news_sa5ikn_10ghz_eme_progress.jpg" alt="The 10GHz EME project progresses well" loading="lazy">
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -411,16 +367,20 @@
             <p class="text-base text-gray-600 mt-1">
               In August, the GreenCube (IO-117) satellite experienced a series of reboots before its digipeater finally went silent, most likely due to prolonged radiation exposure in the Van Allen belts.
             </p>
+
             <p class="text-base text-gray-600 mt-4">
               Originally intended for a short mission of just a few months, GreenCube far exceeded expectations by remaining operational for nearly two years. During its extended lifetime, it enabled over 1,500 amateur radio operators worldwide to make long-distance QSOs thanks to its unique Medium Earth Orbit, the first of its kind used by the amateur radio community (though some Highly Elliptical Orbit satellites existed in the past).
             </p>
+
             <p class="text-base text-gray-600 mt-4">
               Personally, I found GreenCube to be a fantastic satellite to operate. I made over a thousand QSOs via IO-117, including contacts with DXCCs that would have been out of reach via other orbits. Chasing rare DX at 4 a.m. became an oddly enjoyable ritual (hi hi). The photo shows my portable IO-117 setup during one of those early-morning sessions.
             </p>
+
             <div class="only-full-news mt-3 space-y-2">
               <img src="https://dxer.site/img/works/news_greencube_io117_qrt.jpg" alt="Portable GreenCube IO-117 operation" loading="lazy">
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -431,10 +391,12 @@
             <p class="text-base text-gray-600 mt-1">
               Successfully completed testing of my portable, battery-powered EME system. The setup uses 2×9-element Yagis stacked for a maximum gain of 17.1 dBi while maintaining excellent G/T performance. Total deployment time is under one hour, and the entire system, including transceiver, batteries, antennas, and all accessories, weighs under 30 kg.
             </p>
+
             <div class="only-full-news mt-3 space-y-2">
               <img src="https://dxer.site/img/works/news_2x9_144MHz.jpg" alt="Portable EME 144MHz 2x9el Yagi" loading="lazy">
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -445,10 +407,12 @@
             <p class="text-base text-gray-600 mt-1">
               Just received my third SAT WAZ Award — this time as <strong>EI6KC</strong>, marking the first SAT WAZ ever distributed in Ireland. I already hold a special WAZ plaque for being the first globally to earn two SAT WAZ Awards, as <strong>SA5IKN</strong> (#40) and <strong>M0SKN</strong> (#92). Should I order another plaque now? <em>Hi-hi</em>.
             </p>
+
             <div class="only-full-news mt-3 space-y-2">
               <img src="https://dxer.site/img/works/news_worlds1st_tripple_sat_waz.jpg" alt="1st tripple SAT WAZ in the World and 1st SAt WAZ in Ireland" loading="lazy">
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -463,6 +427,7 @@
               <img src="https://dxer.site/img/works/news_greencube_timelaps.webp" alt="1.5 years of IO-117 as captured by GreenCube Observer" loading="lazy">
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -476,10 +441,12 @@
             <p class="text-base text-gray-600 mt-1">
               Then, to my surprise, the next morning brought two beautiful QSL cards straight from the mailbox, confirming two other memorable QRP EME contacts: one with Allan, VK4EME, on 432 MHz, and the other with Bernie, ZS4TX, on 144 MHz. Both were made using the same FT-818, with single Yagis (8.3 WL & 2.3 WL), fully portable and battery-powered.
             </p>
+
             <div class="only-full-news mt-3 space-y-2">
               <img src="https://dxer.site/img/works/news_JA6AHB_SA5IKN_70cm_eme_QSO.jpg" alt="Earth-Moon-Earth contact with JA6AHB" loading="lazy">
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -490,10 +457,12 @@
             <p class="text-base text-gray-600 mt-1">
               The first Australia–Sweden satellite QSO since the days of AO-10, AO-13, and AO-40 took place tonight via IO-117 (GreenCube). Mark, VK6PY, overcame a series of technical challenges, including a damaged antenna that was run over by a truck, and still managed to complete the contact successfully. A great example of persistence and dedication in our hobby. It was a pleasure to work Mark.
             </p>
+
             <div class="only-full-news mt-3 space-y-2">
               <img src="https://dxer.site/img/works/news_sa5ikn-vk6py_io117.jpg" alt="1st Australia-Sweden satellite QSO since the AO-10, AO-13 & AO-40 era" loading="lazy">
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -506,6 +475,7 @@
               <img src="https://dxer.site/img/works/news_sa5ikn_was.jpg" alt="1st WAS Satellite in Sweden" loading="lazy">
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -518,6 +488,7 @@
               <img src="https://dxer.site/img/works/news_world1st_double_waz_sa5ikn.jpg" alt="SA5IKN receives World's 1st double Satellite WAZ" loading="lazy">
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -530,6 +501,7 @@
               <img src="https://dxer.site/img/works/news_SA5IKN_KH6WI_Hawaii_io117.jpg" alt="Hawaii are finally in my satellite log" loading="lazy">
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -546,6 +518,7 @@
               <img src="https://dxer.site/img/works/news_leo_satellite_observer.jpg" alt="LEO Satellite Observer is here" loading="lazy">
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -556,10 +529,13 @@
             <p class="text-base text-gray-600 mt-1">
               Pushing the limits on 70 cm EME: I first worked Bernd DL7APV using my regular GreenCube setup, which uses a short (2.3WL) 15-element Yagi and 30 W of power. On another day, feeling adventurous, I decided to challenge the system further by switching to my LEO setup. This normally uses a 7-element Arrow antenna on 70 cm, but for this test, I reduced it to just 3 elements. Despite the minimal configuration, I successfully completed a QSO with DL7APV on 60 and then 30W, and even managed to work UA3PTW using the same stripped-down setup. It is worth noting that while I am not the smallest station DL7APV has ever worked (he once completed a QSO with a dipole), I am the smallest station known to have worked UA3PTW.
             </p>
+
+
             <div class="only-full-news mt-3 space-y-2">
               <img src="https://dxer.site/img/works/news_sa5ikn_432mhz_eme_3el_15el.jpg" alt="70cm EME QSOs with DL7APV and UA3PTW using 3el Yagi and 15 el Yagi" loading="lazy">
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -574,6 +550,7 @@
               <img src="https://dxer.site/img/works/news_m0skn_sa5ikn_double_sat_dxcc.jpg" alt="2 Satellite DXCC received" loading="lazy">
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -588,6 +565,7 @@
               <img src="https://dxer.site/img/works/news_sa5ikn_satellite_waz.jpg" alt="WAZ Satellite Award #40 and 1st in Sweden" loading="lazy">
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -602,6 +580,7 @@
               <img src="https://dxer.site/img/works/news_qo-100_setup_without_dish_sa5ikn_m0skn.jpg" alt="QO-100 setup without a dish" loading="lazy">
             </div>
           </li>
+          
           <li class="news-item bg-white shadow rounded-lg p-4 hover:shadow-md transition border border-gray-200">
             <h2 class="flex items-center gap-2 text-base font-semibold text-gray-800">
               <span class="text-sm text-gray-500 flex items-center gap-1">
@@ -614,6 +593,7 @@
               <img src="https://dxer.site/img/works/news_m0skn_satellite_dxcc.jpg" alt="M0SKN Satellite DXCC Award" loading="lazy">
             </div>
           </li>
+          
       </ul>
       <div class="text-center mt-6">
         <button id="load-more" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition hidden">Load More</button>
