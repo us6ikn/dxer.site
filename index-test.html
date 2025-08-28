@@ -41,6 +41,10 @@
         font-size: 1.25rem; /* Matches text-xl */
       }
     }
+      .profile-image {
+            pointer-events: none;
+            user-select: none;
+          }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -49,7 +53,7 @@
       <div class="container mx-auto p-4 flex flex-col md:flex-row md:items-center md:justify-between relative header-content" data-reader-exclude>
         <!-- Profile Info (restored to original structure with aria-hidden) -->
         <div class="flex items-start space-x-4" aria-hidden="true">
-          <img src="https://dxer.site/img/profile.jpg" alt="Profile" class="w-20 h-20 rounded-lg flex-shrink-0" />
+            <img src="https://dxer.site/img/profile.jpg" alt="Profile" class="profile-image w-20 h-20 rounded-lg flex-shrink-0" />
           <div class="flex flex-col">
             <h1 class="site-title leading-tight">SA5IKN – Amateur Radio Station</h1>
             <p class="text-sm text-gray-600">a.k.a MØSKN, US6IKN, EI6KC</p>
@@ -132,6 +136,14 @@
         </ul>
       </nav>
       <script>
+          document.addEventListener('DOMContentLoaded', function() {
+                    const profileImage = document.querySelector('.profile-image');
+                    if (profileImage) {
+                      profileImage.addEventListener('contextmenu', function(e) {
+                        e.preventDefault();
+                      });
+                    }
+                  });
         document.getElementById("menu-toggle").addEventListener("click", function () {
           const menu = document.getElementById("mobile-menu");
           menu.classList.toggle("hidden");
