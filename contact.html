@@ -24,6 +24,12 @@
       <!-- Web App Manifest -->
       <link rel="manifest" href="https://dxer.site/assets/site.webmanifest">
       <script src="https://cdn.tailwindcss.com"></script>
+      <style>
+          .profile-image {
+                pointer-events: none;
+                user-select: none;
+              }
+      </style>
     </head>
     <body class="bg-gray-50 text-gray-800">
         
@@ -32,7 +38,7 @@
           <div class="container mx-auto p-4 flex flex-col md:flex-row md:items-center md:justify-between relative">
             <!-- Profile Info -->
             <div class="flex items-start space-x-4">
-              <img src="https://dxer.site/img/profile.jpg" alt="Profile" class="w-20 h-20 rounded-lg flex-shrink-0" />
+                <img src="https://dxer.site/img/profile.jpg" alt="Profile" class="profile-image w-20 h-20 rounded-lg flex-shrink-0" />
               <div class="flex flex-col">
                 <h1 class="text-lg md:text-xl font-bold leading-tight">SA5IKN – Amateur Radio Station</h1>
                 <p class="text-sm text-gray-600">a.k.a MØSKN, US6IKN, EI6KC</p>
@@ -70,7 +76,7 @@
             <nav class="hidden md:flex md:ml-auto space-x-4 text-sm font-semibold mt-4 md:mt-0">
               <a href="index.html">Home</a>
               <a href="about.html">About</a>
-              <a href="https://dxer.site/eme-observer/">EME Map - 10GHz</a>
+              <a href="https://dxer.site/eme-observer/">EME Planner - 10GHz EME Map</a>
               <a href="https://dxer.site/greencube-observer.html">Satellite Maps</a>
               <div class="relative group">
                 <div class="text-sm font-semibold focus:outline-none cursor-pointer">Tools ▾</div>
@@ -92,7 +98,7 @@
             <ul class="flex flex-col space-y-2 p-4 text-sm font-semibold">
               <li><a href="index.html">Home</a></li>
               <li><a href="about.html">About</a></li>
-              <li><a href="https://dxer.site/eme-observer/">EME Map - 10GHz</a></li>
+              <li><a href="https://dxer.site/eme-observer/">EME Planner - 10GHz EME Map</a></li>
               <li><a href="https://dxer.site/greencube-observer.html">Satellite Maps</a></li>
               <li class="relative">
                 <button onclick="toggleMobileSubmenu()" class="w-full text-left text-gray-800 font-semibold flex items-center justify-between">
@@ -115,6 +121,14 @@
             </ul>
           </nav>
           <script>
+              document.addEventListener('DOMContentLoaded', function() {
+                        const profileImage = document.querySelector('.profile-image');
+                        if (profileImage) {
+                          profileImage.addEventListener('contextmenu', function(e) {
+                            e.preventDefault();
+                          });
+                        }
+                      });
             document.getElementById("menu-toggle").addEventListener("click", function () {
               const menu = document.getElementById("mobile-menu");
               menu.classList.toggle("hidden");
@@ -130,6 +144,7 @@
         <body class="bg-gray-50 text-gray-800">
           <main class="max-w-3xl mx-auto p-4">
               <h1 class="text-2xl font-bold mb-6">Contact Details</h1>
+              <div itemprop="articleBody">
               <p class="mb-4">
                 If you would like to contact me via email, please use the address listed on my
                 <a href="https://www.qrz.com/db/sa5ikn" target="_blank" class="text-blue-600 hover:underline">QRZ.com page</a>.
@@ -162,6 +177,7 @@
               <p class="mb-6">
               I continue to upload my log to eQSL on a regular basis, although this may change in the future. Any electronic "QSL cards" received via email will be treated as spam.
               </p>
+              </div>
           </main>
 
           <footer class="bg-gray-100 text-center p-4 mt-10 text-sm text-gray-600">
