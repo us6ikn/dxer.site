@@ -61,262 +61,272 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
     <!-- DataTables Responsive CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.dataTables.min.css">
-        <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 0;
-                background-color: #f4f4f9;
-                display: flex;
-                justify-content: center;
-                align-items: flex-start;
-                height: 100vh;
-                flex-direction: column;
-                overflow-x: hidden;
-            }
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
 
-            .top-bar {
-                width: 100%;
-                background-color: #ffffff;
-                padding: 20px 0;
-                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-            }
+        .top-bar {
+            width: 100%;
+            background-color: #ffffff;
+            padding: 20px 0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
 
-            .top-content {
-                max-width: 900px;
-                margin: 0 auto;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
+        .top-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
 
-            .app-meta {
-                display: flex;
-                flex-direction: column;
-                align-items: flex-end;
-                text-align: right;
-                margin-bottom: 15px;
-                line-height: 1.1;
-            }
+        .app-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            text-align: right;
+            margin-bottom: 15px;
+            line-height: 1.1;
+        }
 
-            .creator-label {
-                font-size: 0.9rem;
-                color: #555;
-                font-style: italic;
-                margin-bottom: -4px;
-            }
+        .creator-label {
+            font-size: 0.9rem;
+            color: #555;
+            font-style: italic;
+            margin-bottom: -4px;
+        }
 
-            .app-name {
-                font-size: 1.8rem;
-                font-weight: 600;
-                color: #2c3e50;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                margin: -2px;
-            }
+        .app-name {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #2c3e50;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: -2px;
+        }
 
-            .ghz-label {
-                font-size: 0.9rem;
-                font-weight: bold;
-                color: #2c3e50;
-                margin-top: 2px;
-            }
+        .ghz-label {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-top: 2px;
+        }
 
-            .button-container {
-                display: flex;
-                gap: 15px;
-                flex-wrap: wrap;
-                justify-content: center;
-                margin-top: 10px;
-            }
+        .button-container {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 10px;
+        }
 
-            .button-container button {
-                background-color: #0056b3;
-                color: white;
-                border: none;
-                padding: 10px 24px;
-                font-size: 15px;
-                cursor: pointer;
-                border-radius: 6px;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                transition: background-color 0.3s ease;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            }
+        .button-container button {
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            font-size: 15px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
-            .button-container button:hover {
-                background-color: #00408a;
-            }
+        .button-container button:hover {
+            background-color: #00408a;
+        }
 
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .table-container {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        table.dataTable {
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
             .container {
-                width: 90%;
-                max-width: 1200px;
-                margin: 20px auto;
-                background-color: #fff;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-                overflow: hidden;
+                width: 100%;
+                padding: 10px;
             }
 
             h1 {
-                text-align: center;
-                color: #333;
+                font-size: 1.5em;
             }
 
             table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 20px;
+                font-size: 0.9em;
             }
 
-            th, td {
-                padding: 10px;
-                text-align: left;
-                border-bottom: 1px solid #ddd;
+            .app-name {
+                font-size: 1.3rem;
             }
 
-            th {
-                background-color: #f2f2f2;
+            .creator-label,
+            .ghz-label {
+                font-size: 0.75rem;
             }
 
-            .table-container {
-                max-height: 60vh;
-                overflow-y: auto;
+            .app-meta {
+                align-items: flex-end;
+                text-align: right;
+                margin-bottom: 12px;
             }
 
-            table.dataTable {
-                margin: 0 auto;
+            .button-container button {
+                width: 140px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .dataTable td:nth-child(6),
+            .dataTable td:nth-child(7) {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .button-container {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                gap: 8px;
+                justify-content: flex-start;
             }
 
-            @media (max-width: 768px) {
-                .container {
-                    width: 100%;
-                    padding: 10px;
-                }
-
-                h1 {
-                    font-size: 1.5em;
-                }
-
-                table {
-                    font-size: 0.9em;
-                }
-
-                .app-name {
-                    font-size: 1.3rem;
-                }
-
-                .creator-label,
-                .ghz-label {
-                    font-size: 0.75rem;
-                }
-
-                .app-meta {
-                    align-items: flex-end;
-                    text-align: right;
-                    margin-bottom: 12px;
-                }
-
-                .button-container button {
-                    width: 140px;
-                    font-size: 14px;
-                }
-            }
-
-            @media (max-width: 600px) {
-                .dataTable td:nth-child(6),
-                .dataTable td:nth-child(7) {
-                    display: none;
-                }
-            }
-
-            @media (max-width: 600px) {
-                .button-container {
-                    flex-wrap: nowrap;       /* Force one line */
-                    overflow-x: auto;        /* Allow horizontal scroll if too wide */
-                    gap: 8px;                /* Smaller gaps */
-                    justify-content: flex-start;
-                }
-
-                .button-container button {
-                    flex-shrink: 0;          /* Prevent buttons shrinking too small */
-                    padding: 6px 12px;       /* Smaller padding */
-                    font-size: 12px;         /* Smaller font */
-                    width: auto;             /* Remove fixed width */
-                    white-space: nowrap;     /* Prevent text wrapping inside button */
-                }
-            }
-            
-            .email-button {
-                background-color: #27A9F5;
-                color: white;
-                border: none;
-                padding: 2px 6px;
-                cursor: pointer;
+            .button-container button {
+                flex-shrink: 0;
+                padding: 6px 12px;
                 font-size: 12px;
-                border-radius: 3px;
-                margin-left: 5px;
-                text-decoration: none;
-                transition: background-color 0.3s ease;
+                width: auto;
+                white-space: nowrap;
             }
+        }
+        
+        .email-button {
+            background-color: #27A9F5;
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            cursor: pointer;
+            font-size: 12px;
+            border-radius: 3px;
+            margin-left: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
 
-            .email-button:hover {
-                background-color: #279CF5;
-            }
+        .email-button:hover {
+            background-color: #279CF5;
+        }
 
-            .email-button:focus {
-              outline: none;
-              box-shadow: 0 0 3px rgba(40, 167, 69, 0.5);
-            }
-            
-            .qrz-button {
-                background-color: #fd7e14; /* Orange to distinguish from Sked and Email */
-                color: white;
-                border: none;
-                padding: 2px 6px;
-                cursor: pointer;
-                font-size: 12px;
-                border-radius: 3px;
-                margin-left: 5px; /* Space if placed next to other buttons */
-                text-decoration: none; /* For <a> tag to look like a button */
-                transition: background-color 0.3s ease;
-            }
+        .email-button:focus {
+            outline: none;
+            box-shadow: 0 0 3px rgba(40, 167, 69, 0.5);
+        }
+        
+        .qrz-button {
+            background-color: #fd7e14;
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            cursor: pointer;
+            font-size: 12px;
+            border-radius: 3px;
+            margin-left: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
 
-            .qrz-button:hover {
-                background-color: #e86c12; /* Darker orange on hover */
-            }
-            
-            .qrz-button:focus {
-              outline: none;
-              box-shadow: 0 0 3px rgba(40, 167, 69, 0.5);
-            }
-            
-            .website-button {
-                background-color: #c034eb;
-                color: white;
-                border: none;
-                padding: 2px 6px;
-                cursor: pointer;
-                font-size: 12px;
-                border-radius: 3px;
-                margin-left: 5px;
-                text-decoration: none;
-                transition: background-color 0.3s ease;
-            }
+        .qrz-button:hover {
+            background-color: #e86c12;
+        }
+        
+        .qrz-button:focus {
+            outline: none;
+            box-shadow: 0 0 3px rgba(40, 167, 69, 0.5);
+        }
+        
+        .website-button {
+            background-color: #c034eb;
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            cursor: pointer;
+            font-size: 12px;
+            border-radius: 3px;
+            margin-left: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
 
-            .website-button:hover {
-                background-color: #9c34eb;
-            }
+        .website-button:hover {
+            background-color: #9c34eb;
+        }
 
-            .website-button:focus {
-              outline: none;
-              box-shadow: 0 0 3px rgba(40, 167, 69, 0.5);
-            }
-            
-        </style>
+        .website-button:focus {
+            outline: none;
+            box-shadow: 0 0 3px rgba(40, 167, 69, 0.5);
+        }
 
+        .pa0ply-link {
+            font-size: 12px;
+            color: #555;
+            text-decoration: none;
+            margin-left: 10px;
+            transition: color 0.3s ease;
+        }
+
+        .pa0ply-link:hover {
+            color: #333;
+        }
+    </style>
 </head>
 <body>
     <div class="top-bar">
@@ -337,14 +347,14 @@
       </div>
     </div>
 
-    
     <div class="container">
         <h1>10GHz EME Stations</h1>
-        <div style="margin: 10px 0;">
+        <div style="margin: 10px 0; display: flex; align-items: center;">
             <label>
                 <input type="checkbox" id="activeOnlyCheckbox" style="margin-right: 6px;">
                 Show only active
             </label>
+            <a href="https://www.pa0ply.nl/eme-directory/" class="pa0ply-link" target="_blank">(see also PA0PLY EME Directory)</a>
         </div>
 
         <div class="table-container">
@@ -415,10 +425,8 @@
                     rowClass = 'style="font-weight:bold;"';
                 }
 
-                // If there's a valid email field, decode and wrap in mailto link
                 let callHtml = station.Call;
 
-                // Build buttons if available
                 let buttonHtml = '';
                 const decodedEmail = station.CK ? decodeEmail(station.CK) : null;
 
@@ -458,7 +466,7 @@
             $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
                 if (!document.getElementById('activeOnlyCheckbox')?.checked) return true;
 
-                const note = (data[6] || "").toLowerCase(); // Note column
+                const note = (data[6] || "").toLowerCase();
                 return !note.includes("dxpedition") && !note.includes("inactive") && !note.includes("sk");
             });
 
@@ -467,13 +475,10 @@
             });
         }
 
-
         $(document).ready(() => {
             fetchData();
         });
     </script>
-
-
 
     <!-- Ko-Fi -->
     <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
