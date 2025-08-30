@@ -386,7 +386,7 @@
 
         async function fetchData() {
             try {
-                const response = await fetch('stn_10GHz_e.json');
+                const response = await fetch('stn_10GHz.json');
                 const data = await response.json();
                 allStations = data;
                 renderTable(data);
