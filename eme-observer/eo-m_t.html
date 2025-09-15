@@ -596,44 +596,61 @@
         color: blue;
         font-weight: bold;
       }
-      
+      .locator-input input[type="checkbox"] {
+        margin-right: 5px;
+        cursor: pointer;
+      }
+
+      .locator-input label[for="activeStations"] {
+        font-size: 12px;
+        font-weight: normal;
+        cursor: pointer;
+      }
   </style>
 </head>
 <body>
     <div id="map"></div>
     <div id="controls">
-      <div id="fixed-controls">
-        <div id="date-container">
-          <div class="app-name-wrapper">
-            <div class="creator-label">by SA5IKN</div>
-            <div class="app-name">EME Observer</div>
-            <div class="ghz-label">10GHz</div>
+        <div id="fixed-controls">
+          <div id="date-container">
+              <div class="app-name-wrapper">
+                <div class="creator-label">by SA5IKN</div>
+                <div class="app-name">EME Observer</div>
+                <select id="bandSelect" class="band-select">
+                  <option value="10GHz" selected>10GHz (3cm)</option>
+                  <option value="23cm">23cm (1296MHz)</option>
+                </select>
+              </div>
+            <button id="prevDay">←</button>
+            <input type="date" id="date" />
+            <button id="nextDay">→</button>
+            <span id="hour-value">Time (UTC): 00:00</span>
           </div>
-          <button id="prevDay">←</button>
-          <input type="date" id="date" />
-          <button id="nextDay">→</button>
-          <span id="hour-value">Time (UTC): 00:00</span>
-        </div>
-        <div class="button-group">
-          <a href="statistics.html" class="nav-button">Statistics</a>
-          <a href="table.html" class="nav-button">Table</a>
-          <a href="https://forms.gle/vLCqCySPEkH926AX8" class="nav-button">Add Station</a>
-          <a href="/" class="nav-button icon-button">🏠</a>
-          <a href="user-guide.html" class="nav-button icon-button">?</a>
-          <button id="toggleControlsPanel" class="nav-button">Hide Panel</button>
-        </div>
-        <input type="range" id="hour" min="0" max="47" value="0" step="1" />
-        <div class="locator-group">
+          <div class="button-group">
+            <a href="statistics.html" class="nav-button">Statistics</a>
+            <a href="table.html" class="nav-button">Table</a>
+            <a href="https://forms.gle/vLCqCySPEkH926AX8" class="nav-button">Add Station</a>
+            <a href="/" class="nav-button icon-button">🏠</a>
+            <a href="user-guide.html" class="nav-button icon-button">?</a>
+            <button id="toggleControlsPanel" class="nav-button">Hide Panel</button>
+          </div>
+          <!-- Add Active Stations Checkbox -->
           <div class="locator-input">
-            <label for="qth">My Locator:</label>
-            <input type="text" id="qth" maxlength="6" size="8" placeholder="eg JO89tt" />
+            <input type="checkbox" id="activeStations" checked>
+            <label for="activeStations">Show Active Stations Only</label>
           </div>
-          <div class="locator-input">
-            <label for="dx">DX Locator:</label>
-            <input type="text" id="dx" maxlength="6" size="8" placeholder="eg IO91vm" />
+          <input type="range" id="hour" min="0" max="47" value="0" step="1" />
+          <div class="locator-group">
+            <div class="locator-input">
+              <label for="qth">My Locator:</label>
+              <input type="text" id="qth" maxlength="6" size="8" placeholder="eg JO89tt" />
+            </div>
+            <div class="locator-input">
+              <label for="dx">DX Locator:</label>
+              <input type="text" id="dx" maxlength="6" size="8" placeholder="eg IO91vm" />
+            </div>
           </div>
         </div>
-      </div>
       <div id="scrollable-controls">
         <div id="chartWrapper" style="display: none;">
           <div id="chartLabel"></div>
@@ -787,198 +804,211 @@
             }
         }
         
-        function initMap() {
-            map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 2,
-                center: { lat: 0, lng: 0 },
-                mapTypeId: 'terrain',
-                gestureHandling: 'greedy',
-                mapTypeControl: false,
-                streetViewControl: false,
-                fullscreenControl: false
+        let markers = []; // Store markers globally for filtering
+
+        function updateMarkers(data, showActiveOnly) {
+          // Clear existing markers
+          markers.forEach(marker => marker.setMap(null));
+          markers = [];
+
+          const coordinateMap = new Map();
+
+          // First pass: Count stations per coordinate
+          data.forEach(station => {
+            const { Coordinates, Note = '' } = station;
+            if (showActiveOnly && (Note.includes('DXpedition') || Note.includes('SK'))) {
+              return; // Skip stations with DXpedition or SK in Note
+            }
+            const [latStr, lngStr] = Coordinates.split(',');
+            const lat = parseFloat(latStr);
+            const lng = parseFloat(lngStr);
+            if (isNaN(lat) || isNaN(lng)) return;
+            const coordKey = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+            coordinateMap.set(coordKey, (coordinateMap.get(coordKey) || 0) + 1);
+          });
+
+          // Second pass: Create markers with conditional offsets
+          data.forEach(station => {
+            const {
+              Call: callsign,
+              Locator: locator,
+              Antenna: antenna,
+              Power: power,
+              Website: website,
+              CK: obfuscatedEmail = '',
+              Coordinates,
+              Note = '',
+              Name = ''
+            } = station;
+
+            if (showActiveOnly && (Note.includes('DXpedition') || Note.includes('SK'))) {
+              return; // Skip stations with DXpedition or SK in Note
+            }
+
+            const email = decodeEmail(obfuscatedEmail);
+            const [latStr, lngStr] = Coordinates.split(',');
+            const lat = parseFloat(latStr);
+            const lng = parseFloat(lngStr);
+            if (isNaN(lat) || isNaN(lng)) return;
+
+            const coordKey = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+            let offsetIndex = coordinateMap.get(coordKey + '_index') || 0;
+            coordinateMap.set(coordKey + '_index', offsetIndex + 1);
+
+            let markerPosition = { lat, lng };
+            const count = coordinateMap.get(coordKey);
+            if (count > 1) {
+              const offset = 0.01;
+              const angle = (offsetIndex * 2 * Math.PI) / count;
+              markerPosition = {
+                lat: lat + offset * Math.cos(angle),
+                lng: lng + offset * Math.sin(angle)
+              };
+            }
+
+            let iconUrl = "images/EME_home.png";
+            if (/Inactive/i.test(Note)) {
+              iconUrl = "images/EME_inactive.png";
+            } else if (/SK/i.test(Note)) {
+              iconUrl = "images/EME_SK.png";
+            } else if (/DXpedition|Portable/i.test(Note)) {
+              iconUrl = "images/EME_dxped2.png";
+            }
+
+            const marker = new google.maps.Marker({
+              position: markerPosition,
+              map: map,
+              icon: {
+                url: iconUrl,
+                scaledSize: new google.maps.Size(20, 20)
+              },
+              title: callsign
             });
 
-            const coordinateMap = new Map(); // Track coordinates and their counts
-            const stations = []; // Store station data for second pass
+            markers.push(marker);
 
-            // First pass: Count stations per coordinate and collect station data
-            fetch('stn_1296MHz.json')
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(station => {
-                        const {
-                            Call: callsign,
-                            Locator: locator,
-                            Antenna: antenna,
-                            Power: power,
-                            Website: website,
-                            CK: obfuscatedEmail = '',
-                            Coordinates,
-                            Note = '',
-                            Name = ''
-                        } = station;
+            const isLocatorValid = /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator);
+            const sanitizedCallsign = sanitizeCallsign(callsign);
+            const skedButton = isLocatorValid ?
+              `<button id="sked-${sanitizedCallsign}" class="sked-button" data-locator="${locator.toUpperCase()}">Sked</button>` :
+              '';
+            const emailButton = email ?
+              `<a id="email-${sanitizedCallsign}" class="email-button" href="mailto:${email}">Email</a>` :
+              '';
+            const qrzButton = `<a id="qrz-${sanitizedCallsign}" class="qrz-button" href="https://www.qrz.com/db/${callsign}" target="_blank">QRZ</a>`;
+            const callsignDisplay = callsign +
+              (/SK/i.test(Note) ? ' (SK)' : '') +
+              (/Inactive/i.test(Note) ? ' (not active)' : '');
+            const displayWebsite = website.length > 30 ? website.slice(0, 30) + '...' : website;
+            const nameLine = Name ? `<div><strong>${Name}</strong></div>` : '';
+            const infoContent = `
+              <div>
+                <div style="font-weight:bold; font-size: 16px;">${callsignDisplay}</div>
+                ${nameLine}
+                <div class="button-group-infowindow">
+                  ${skedButton}${emailButton}${qrzButton}
+                </div>
+                <div>Locator: ${locator}</div>
+                <div>Antenna: ${antenna}</div>
+                <div>Power: ${power}</div>
+                <div>Website: <a href="${website}" target="_blank">${displayWebsite}</a></div>
+                <div id="image-container-${sanitizedCallsign}">
+                  Station Picture (clickable):<br>
+                  <a href="db/${sanitizedCallsign}.jpg" target="_blank">
+                    <img id="station-image-${sanitizedCallsign}" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA" alt="${callsign} station"/>
+                  </a>
+                  <div id="image-placeholder-${sanitizedCallsign}" style="display:none;">
+                    <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
+                  </div>
+                </div>
+              </div>
+            `;
 
-                        const [latStr, lngStr] = Coordinates.split(',');
-                        const lat = parseFloat(latStr);
-                        const lng = parseFloat(lngStr);
-                        if (isNaN(lat) || isNaN(lng)) return;
+            const infoWindow = new google.maps.InfoWindow({ content: infoContent });
 
-                        // Generate a key for coordinates
-                        const coordKey = `${lat.toFixed(6)},${lng.toFixed(6)}`;
-                        coordinateMap.set(coordKey, (coordinateMap.get(coordKey) || 0) + 1);
-                        stations.push({ callsign, locator, antenna, power, website, obfuscatedEmail, Coordinates, Note, Name });
-                    });
+            marker.addListener('click', () => {
+              if (currentInfoWindow) currentInfoWindow.close();
+              infoWindow.open(map, marker);
+              currentInfoWindow = infoWindow;
 
-                    // Second pass: Create markers with conditional offsets
-                    stations.forEach(station => {
-                        const {
-                            callsign,
-                            locator,
-                            antenna,
-                            power,
-                            website,
-                            obfuscatedEmail,
-                            Coordinates,
-                            Note,
-                            Name
-                        } = station;
+              setTimeout(() => {
+                const imageElement = document.getElementById(`station-image-${sanitizedCallsign}`);
+                const placeholder = document.getElementById(`image-placeholder-${sanitizedCallsign}`);
+                const imageUrl = `db/${sanitizedCallsign}_thumb.jpg`;
 
-                        const email = decodeEmail(obfuscatedEmail);
+                fetch(imageUrl, { method: 'HEAD' })
+                  .then(response => {
+                    if (!response.ok) {
+                      imageElement.remove();
+                      placeholder.style.display = 'block';
+                    } else {
+                      imageElement.src = imageUrl;
+                      placeholder.style.display = 'none';
+                    }
+                  })
+                  .catch(() => {
+                    imageElement.remove();
+                    placeholder.style.display = 'block';
+                  });
 
-                        const [latStr, lngStr] = Coordinates.split(',');
-                        const lat = parseFloat(latStr);
-                        const lng = parseFloat(lngStr);
-                        if (isNaN(lat) || isNaN(lng)) return;
+                const skedButton = document.getElementById(`sked-${sanitizedCallsign}`);
+                if (skedButton) {
+                  skedButton.addEventListener('click', () => {
+                    const locator = skedButton.getAttribute('data-locator');
+                    document.getElementById('dx').value = locator;
+                    const inputEvent = new Event('input', { bubbles: true });
+                    document.getElementById('dx').dispatchEvent(inputEvent);
+                  });
+                }
 
-                        // Generate coordinate key
-                        const coordKey = `${lat.toFixed(6)},${lng.toFixed(6)}`;
-                        const count = coordinateMap.get(coordKey);
-                        let offsetIndex = coordinateMap.get(coordKey + '_index') || 0;
-                        coordinateMap.set(coordKey + '_index', offsetIndex + 1);
+                const emailButton = document.getElementById(`email-${sanitizedCallsign}`);
+                if (emailButton) {
+                  emailButton.addEventListener('click', () => {
+                    console.log(`Email button clicked for ${callsign}: ${email}`);
+                  });
+                }
 
-                        // Apply offset only if there are multiple stations at this coordinate
-                        let markerPosition = { lat, lng };
-                        if (count > 1) {
-                            const offset = 0.01; // Small offset (~10 meters)
-                            const angle = (offsetIndex * 2 * Math.PI) / count; // Spread markers evenly in a circle
-                            markerPosition = {
-                                lat: lat + offset * Math.cos(angle),
-                                lng: lng + offset * Math.sin(angle)
-                            };
-                        }
-
-                        let iconUrl = "images/EME_home.png";
-                        if (/Inactive/i.test(Note)) {
-                            iconUrl = "images/EME_inactive.png";
-                        } else if (/SK/i.test(Note)) {
-                            iconUrl = "images/EME_SK.png";
-                        } else if (/DXpedition|Portable/i.test(Note)) {
-                            iconUrl = "images/EME_dxped2.png";
-                        }
-
-                        const marker = new google.maps.Marker({
-                            position: markerPosition,
-                            map: map,
-                            icon: {
-                                url: iconUrl,
-                                scaledSize: new google.maps.Size(20, 20)
-                            },
-                            title: callsign
-                        });
-
-                        const isLocatorValid = /^[A-Ra-r]{2}[0-9]{2}[A-Xa-x]{2}$/.test(locator);
-                        const sanitizedCallsign = sanitizeCallsign(callsign);
-                        const skedButton = isLocatorValid ?
-                            `<button id="sked-${sanitizedCallsign}" class="sked-button" data-locator="${locator.toUpperCase()}">Sked</button>` :
-                            '';
-                        const emailButton = email ?
-                            `<a id="email-${sanitizedCallsign}" class="email-button" href="mailto:${email}">Email</a>` :
-                            '';
-                        const qrzButton = `<a id="qrz-${sanitizedCallsign}" class="qrz-button" href="https://www.qrz.com/db/${callsign}" target="_blank">QRZ</a>`;
-                        const callsignDisplay = callsign +
-                            (/SK/i.test(Note) ? ' (SK)' : '') +
-                            (/Inactive/i.test(Note) ? ' (not active)' : '');
-                        const displayWebsite = website.length > 30 ? website.slice(0, 30) + '...' : website;
-                        const nameLine = Name ? `<div><strong>${Name}</strong></div>` : '';
-                        const infoContent = `
-                            <div>
-                                <div style="font-weight:bold; font-size: 16px;">${callsignDisplay}</div>
-                                ${nameLine}
-                                <div class="button-group-infowindow">
-                                    ${skedButton}${emailButton}${qrzButton}
-                                </div>
-                                <div>Locator: ${locator}</div>
-                                <div>Antenna: ${antenna}</div>
-                                <div>Power: ${power}</div>
-                                <div>Website: <a href="${website}" target="_blank">${displayWebsite}</a></div>
-                                <div id="image-container-${sanitizedCallsign}">
-                                    Station Picture (clickable):<br>
-                                    <a href="db/${sanitizedCallsign}.jpg" target="_blank">
-                                        <img id="station-image-${sanitizedCallsign}" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA" alt="${callsign} station"/>
-                                    </a>
-                                    <div id="image-placeholder-${sanitizedCallsign}" style="display:none;">
-                                        <p><a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank">Add Image</a></p>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-
-                        const infoWindow = new google.maps.InfoWindow({ content: infoContent });
-
-                        marker.addListener('click', () => {
-                            if (currentInfoWindow) currentInfoWindow.close();
-                            infoWindow.open(map, marker);
-                            currentInfoWindow = infoWindow;
-
-                            setTimeout(() => {
-                                const imageElement = document.getElementById(`station-image-${sanitizedCallsign}`);
-                                const placeholder = document.getElementById(`image-placeholder-${sanitizedCallsign}`);
-                                const imageUrl = `db/${sanitizedCallsign}_thumb.jpg`;
-
-                                fetch(imageUrl, { method: 'HEAD' })
-                                    .then(response => {
-                                        if (!response.ok) {
-                                            imageElement.remove();
-                                            placeholder.style.display = 'block';
-                                        } else {
-                                            imageElement.src = imageUrl;
-                                            placeholder.style.display = 'none';
-                                        }
-                                    })
-                                    .catch(() => {
-                                        imageElement.remove();
-                                        placeholder.style.display = 'block';
-                                    });
-
-                                const skedButton = document.getElementById(`sked-${sanitizedCallsign}`);
-                                if (skedButton) {
-                                    skedButton.addEventListener('click', () => {
-                                        const locator = skedButton.getAttribute('data-locator');
-                                        document.getElementById('dx').value = locator;
-                                        const inputEvent = new Event('input', { bubbles: true });
-                                        document.getElementById('dx').dispatchEvent(inputEvent);
-                                    });
-                                }
-
-                                const emailButton = document.getElementById(`email-${sanitizedCallsign}`);
-                                if (emailButton) {
-                                    emailButton.addEventListener('click', () => {
-                                        console.log(`Email button clicked for ${callsign}: ${email}`);
-                                    });
-                                }
-
-                                const qrzButton = document.getElementById(`qrz-${sanitizedCallsign}`);
-                                if (qrzButton) {
-                                    qrzButton.addEventListener('click', () => {
-                                        console.log(`QRZ button clicked for ${callsign}: https://www.qrz.com/db/${callsign}`);
-                                    });
-                                }
-                            }, 100);
-                        });
-                    });
-                })
-                .catch(() => { /* Handle error silently */ });
+                const qrzButton = document.getElementById(`qrz-${sanitizedCallsign}`);
+                if (qrzButton) {
+                  qrzButton.addEventListener('click', () => {
+                    console.log(`QRZ button clicked for ${callsign}: https://www.qrz.com/db/${callsign}`);
+                  });
+                }
+              }, 100);
+            });
+          });
         }
+
+        function initMap() {
+          map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 2,
+            center: { lat: 0, lng: 0 },
+            mapTypeId: 'terrain',
+            gestureHandling: 'greedy',
+            mapTypeControl: false,
+            streetViewControl: false,
+            fullscreenControl: false
+          });
+
+          const showActiveOnly = document.getElementById('activeStations').checked;
+          fetch('stn_10GHz.json')
+            .then(response => response.json())
+            .then(data => {
+              updateMarkers(data, showActiveOnly);
+            })
+            .catch(() => { /* Handle error silently */ });
+        }
+
+        // Add event listener for active stations checkbox
+        document.getElementById('activeStations').addEventListener('change', () => {
+          const showActiveOnly = document.getElementById('activeStations').checked;
+          fetch('stn_10GHz.json')
+            .then(response => response.json())
+            .then(data => {
+              updateMarkers(data, showActiveOnly);
+            })
+            .catch(() => { /* Handle error silently */ });
+        });
 
         function parseCoordinates(coordinates) {
             const [latStr, lngStr] = coordinates.split(',');
