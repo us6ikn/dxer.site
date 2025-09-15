@@ -626,8 +626,8 @@
                 <div class="creator-label">by SA5IKN</div>
                 <div class="app-name">EME Observer</div>
                 <select id="bandSelect" class="band-select">
-                  <option value="10GHz" selected>10GHz (3cm)</option>
-                  <option value="23cm">23cm (1296MHz)</option>
+                  <option value="10GHz" selected>10GHz</option>
+                  <option value="1296MHz">1296MHz</option>
                 </select>
               </div>
             <button id="prevDay">←</button>
@@ -711,7 +711,7 @@
           FREQUENCY_HZ = band === '10GHz' ? 10.368e9 : 1.296e9;
 
           // Update page title and meta tags
-          const bandDisplay = band === '10GHz' ? '10GHz (3cm)' : '23cm (1296MHz)';
+          const bandDisplay = band === '10GHz' ? '10GHz' : '1296MHz';
           document.getElementById('pageTitle').textContent = `EME Observer – ${bandDisplay} Moonbounce Station Map, Moon Data & Sked Planner`;
           document.getElementById('metaDescription').content = `EME Observer is a ${bandDisplay} Moonbounce station map and QSO planner with moon tracking, Dpol, libration, moonrise and moonset times, signal loss chart, and tools for ham radio EME.`;
           document.getElementById('ogTitle').content = `EME Observer – ${bandDisplay}`;
