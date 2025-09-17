@@ -694,6 +694,7 @@
                 <div class="button-band-group">
                   <button id="realTimeButton" class="auto-track-button">Track</button>
                   <select id="bandSelect" class="band-select">
+                    <option value="144MHz">144MHz</option>
                     <option value="432MHz">432MHz</option>
                     <option value="1296MHz">1296MHz</option>
                     <option value="2320MHz">2320MHz</option>
@@ -776,7 +777,8 @@
         
         // Define band frequencies and display names
         const bandConfig = {
-          '432MHz': { frequency: 0.432e9, display: '432 MHz', jsonFile: 'stn_432MHz.json' },
+        '144MHz': { frequency: 0.144e9, display: '144 MHz', jsonFile: 'stn_144MHz.json' },
+        '432MHz': { frequency: 0.432e9, display: '432 MHz', jsonFile: 'stn_432MHz.json' },
           '1296MHz': { frequency: 1.296e9, display: '1296 MHz', jsonFile: 'stn_1296MHz.json' },
           '2320MHz': { frequency: 2.320e9, display: '2320 MHz', jsonFile: 'stn_2320MHz.json' },
           '10GHz': { frequency: 10.368e9, display: '10 GHz', jsonFile: 'stn_10GHz.json' }
