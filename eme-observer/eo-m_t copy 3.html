@@ -452,8 +452,6 @@
 
       .nav-button {
         padding: 2px 3px;
-        width: 60px; /* Fixed width to accommodate "Active" and "Statistics" */
-        text-align: center; /* Center text to prevent layout shift */
         background-color: rgba(255, 255, 255, 0.3);
         color: #2c3e50;
         border: 1px solid rgba(0, 123, 255, 0.4);
@@ -479,16 +477,10 @@
         box-shadow: 0 0 2px rgba(0, 123, 255, 0.5);
       }
 
-      .nav-button.active {
-        background-color: rgba(0, 123, 255, 0.2);
-        font-weight: bold;
-        border-color: rgba(0, 123, 255, 0.8);
-      }
-
       .nav-button.icon-button {
         padding: 2px;
         font-size: 12px;
-        width: 18px; /* Smaller width for icon buttons */
+        width: 18px;
         height: 18px;
         display: flex;
         align-items: center;
@@ -558,7 +550,7 @@
           padding-bottom: 8px;
         }
         #scrollable-controls {
-          max-height: calc(90vh - 160px);
+          max-height: calc(90vh - 160px); /* Adjusted for smaller screens */
         }
         .locator-input label {
           font-size: 10px;
@@ -570,7 +562,6 @@
         .nav-button, #toggleControlsPanel {
           font-size: 8px;
           padding: 2px 3px;
-          width: 50px; /* Slightly smaller width for mobile */
         }
         .nav-button.icon-button {
           font-size: 10px;
@@ -680,7 +671,36 @@
         background-color: #138496;
         font-weight: bold;
       }
-      
+
+      .active-stations-button {
+        font-size: 12px;
+        padding: 2px 6px;
+        width: 80px; /* Fixed width to match Auto-Track button */
+        text-align: center; /* Center text to maintain alignment */
+        background-color: transparent;
+        color: #2c3e50;
+        border: 1px solid rgba(0, 123, 255, 0.4);
+        border-radius: 3px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+
+      .active-stations-button:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+        color: #0056b3;
+        border-color: rgba(0, 123, 255, 0.6);
+      }
+
+      .active-stations-button:focus {
+        outline: none;
+        box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
+      }
+
+      .active-stations-button.active {
+        background-color: rgba(0, 123, 255, 0.2);
+        font-weight: bold;
+        border-color: rgba(0, 123, 255, 0.8);
+      }
   </style>
 </head>
 <body>
@@ -705,13 +725,15 @@
             <span id="hour-value">Time (UTC): 00:00</span>
           </div>
           <div class="button-group">
-            <button id="activeStationsButton" class="nav-button active">Active</button>
             <a href="statistics.html" class="nav-button">Statistics</a>
             <a href="table.html" class="nav-button">Table</a>
             <a href="https://forms.gle/vLCqCySPEkH926AX8" class="nav-button">Add Station</a>
             <a href="/" class="nav-button icon-button">🏠</a>
             <a href="user-guide.html" class="nav-button icon-button">?</a>
             <button id="toggleControlsPanel" class="nav-button">Hide Panel</button>
+          </div>
+          <div class="locator-input">
+            <button id="activeStationsButton" class="active-stations-button active">Active Only</button>
           </div>
           <input type="range" id="hour" min="0" max="47" value="0" step="1" />
           <div class="locator-group">
@@ -788,7 +810,7 @@
 
           // Update JSON file and markers
           const jsonFile = band === '10GHz' ? 'stn_10GHz.json' : 'stn_1296MHz.json';
-          const showActiveOnly = isActiveStationsOnly; // Updated to use variable
+          const showActiveOnly = isActiveStationsOnly;
           // Clear existing markers to prevent overlap
           markers.forEach(marker => marker.setMap(null));
           markers = [];
@@ -1113,7 +1135,7 @@
 
           const band = document.getElementById('bandSelect').value;
           const jsonFile = band === '10GHz' ? 'stn_10GHz.json' : 'stn_1296MHz.json';
-          const showActiveOnly = isActiveStationsOnly; // Updated to use variable
+          const showActiveOnly = document.getElementById('activeStations').checked;
           fetch(jsonFile)
             .then(response => {
               if (!response.ok) {
@@ -1135,7 +1157,6 @@
         document.getElementById('activeStationsButton').addEventListener('click', () => {
           isActiveStationsOnly = !isActiveStationsOnly; // Toggle state
           const activeButton = document.getElementById('activeStationsButton');
-          activeButton.textContent = isActiveStationsOnly ? 'Active' : 'All';
           if (isActiveStationsOnly) {
             activeButton.classList.add('active');
           } else {
