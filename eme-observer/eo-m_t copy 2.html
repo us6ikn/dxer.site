@@ -663,64 +663,6 @@
         cursor: not-allowed;
         opacity: 0.6;
       }
-      .active-stations-button {
-        font-size: 12px;
-        padding: 2px 6px;
-        background-color: transparent;
-        color: #2c3e50;
-        border: 1px solid rgba(0, 123, 255, 0.4);
-        border-radius: 3px;
-        cursor: pointer;
-        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-      }
-
-      .active-stations-button:hover {
-        background-color: rgba(0, 123, 255, 0.1);
-        color: #0056b3;
-        border-color: rgba(0, 123, 255, 0.6);
-      }
-
-      .active-stations-button:focus {
-        outline: none;
-        box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
-      }
-
-      .active-stations-button.active {
-        background-color: rgba(0, 123, 255, 0.2);
-        font-weight: bold;
-        border-color: rgba(0, 123, 255, 0.8);
-      }
-      .button-band-group {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        margin-top: -2px;
-      }
-
-      .auto-track-button {
-        font-size: 10px; /* Smaller font size */
-        padding: 1px 4px; /* Reduced padding */
-        background-color: #17a2b8;
-        color: white;
-        border: none;
-        border-radius: 3px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-      }
-
-      .auto-track-button:hover {
-        background-color: #138496;
-      }
-
-      .auto-track-button:focus {
-        outline: none;
-        box-shadow: 0 0 3px rgba(23, 162, 184, 0.5);
-      }
-
-      .auto-track-button.active {
-        background-color: #138496;
-        font-weight: bold;
-      }
   </style>
 </head>
 <body>
@@ -731,13 +673,10 @@
               <div class="app-name-wrapper">
                 <div class="creator-label">by SA5IKN</div>
                 <div class="app-name">EME Observer</div>
-                <div class="button-band-group">
-                  <button id="realTimeButton" class="auto-track-button">Auto-Track</button>
-                  <select id="bandSelect" class="band-select">
-                    <option value="10GHz" selected>10GHz</option>
-                    <option value="1296MHz">1296MHz</option>
-                  </select>
-                </div>
+                <select id="bandSelect" class="band-select">
+                  <option value="10GHz" selected>10GHz</option>
+                  <option value="1296MHz">1296MHz</option>
+                </select>
               </div>
             <button id="prevDay">←</button>
             <input type="date" id="date" />
@@ -753,7 +692,9 @@
             <button id="toggleControlsPanel" class="nav-button">Hide Panel</button>
           </div>
           <div class="locator-input">
-            <button id="activeStationsButton" class="active-stations-button active">Active Only</button>
+            <input type="checkbox" id="activeStations" checked>
+            <label for="activeStations">Show Active Stations Only</label>
+            <button id="realTimeButton" class="real-time-button">Real-Time</button>
           </div>
           <input type="range" id="hour" min="0" max="47" value="0" step="1" />
           <div class="locator-group">
@@ -830,7 +771,7 @@
 
           // Update JSON file and markers
           const jsonFile = band === '10GHz' ? 'stn_10GHz.json' : 'stn_1296MHz.json';
-          const showActiveOnly = isActiveStationsOnly;
+          const showActiveOnly = document.getElementById('activeStations').checked;
           // Clear existing markers to prevent overlap
           markers.forEach(marker => marker.setMap(null));
           markers = [];
@@ -1172,22 +1113,15 @@
             });
         }
         
-        let isActiveStationsOnly = true; // Default state (equivalent to checkbox checked)
-
-        document.getElementById('activeStationsButton').addEventListener('click', () => {
-          isActiveStationsOnly = !isActiveStationsOnly; // Toggle state
-          const activeButton = document.getElementById('activeStationsButton');
-          if (isActiveStationsOnly) {
-            activeButton.classList.add('active');
-          } else {
-            activeButton.classList.remove('active');
-          }
+        // Add event listener for active stations checkbox
+        document.getElementById('activeStations').addEventListener('change', () => {
+          const showActiveOnly = document.getElementById('activeStations').checked;
           const band = document.getElementById('bandSelect').value;
           const jsonFile = band === '10GHz' ? 'stn_10GHz.json' : 'stn_1296MHz.json';
           fetch(jsonFile)
             .then(response => response.json())
             .then(data => {
-              updateMarkers(data, isActiveStationsOnly);
+              updateMarkers(data, showActiveOnly);
             })
             .catch(error => {
               console.error(`Error fetching ${jsonFile}:`, error);
@@ -1196,28 +1130,35 @@
         
         document.getElementById('realTimeButton').addEventListener('click', () => {
           isRealTimeMode = !isRealTimeMode;
-          const autoTrackButton = document.getElementById('realTimeButton');
+          const realTimeButton = document.getElementById('realTimeButton');
           const hourSlider = document.getElementById('hour');
           const dateInput = document.getElementById('date');
           const prevDayButton = document.getElementById('prevDay');
           const nextDayButton = document.getElementById('nextDay');
 
           if (isRealTimeMode) {
-            autoTrackButton.classList.add('active');
-            autoTrackButton.textContent = 'Stop Auto-Track';
+            // Enter real-time mode
+            realTimeButton.classList.add('active');
+            realTimeButton.textContent = 'Stop Real-Time';
+            // Disable time slider and date controls
             hourSlider.disabled = true;
             dateInput.disabled = true;
             prevDayButton.disabled = true;
             nextDayButton.disabled = true;
+            // Start real-time updates
             startRealTimeUpdates();
           } else {
-            autoTrackButton.classList.remove('active');
-            autoTrackButton.textContent = 'Auto-Track';
+            // Exit real-time mode
+            realTimeButton.classList.remove('active');
+            realTimeButton.textContent = 'Real-Time';
+            // Re-enable time slider and date controls
             hourSlider.disabled = false;
             dateInput.disabled = false;
             prevDayButton.disabled = false;
             nextDayButton.disabled = false;
+            // Stop real-time updates
             stopRealTimeUpdates();
+            // Restore manual mode with current slider value
             updateChart(hourIndex);
           }
         });
