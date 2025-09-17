@@ -615,31 +615,6 @@
         border-color: #007bff;
         box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
       }
-      .real-time-button {
-        font-size: 12px;
-        padding: 2px 6px;
-        margin-left: 5px;
-        background-color: #17a2b8; /* Distinct cyan color */
-        color: white;
-        border: none;
-        border-radius: 3px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-      }
-
-      .real-time-button:hover {
-        background-color: #138496; /* Darker cyan on hover */
-      }
-
-      .real-time-button:focus {
-        outline: none;
-        box-shadow: 0 0 3px rgba(23, 162, 184, 0.5);
-      }
-
-      .real-time-button.active {
-        background-color: #138496; /* Darker when active */
-        font-weight: bold;
-      }
 
       /* Disabled styles for time slider and date controls */
       #hour:disabled {
@@ -2523,7 +2498,7 @@
                                                       // Ensure real-time mode is off initially
                                                       isRealTimeMode = false;
                                                       document.getElementById('realTimeButton').classList.remove('active');
-                                                      document.getElementById('realTimeButton').textContent = 'Real-Time';
+                                                      document.getElementById('realTimeButton').textContent = 'Auto-Track';
 
                                                       const qthInput = document.getElementById('qth').value.trim().toUpperCase();
                                                       const dxInput = document.getElementById('dx').value.trim().toUpperCase();
