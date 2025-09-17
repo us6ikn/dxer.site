@@ -692,7 +692,7 @@
                 <div class="creator-label">by SA5IKN</div>
                 <div class="app-name">EME Observer</div>
                 <div class="button-band-group">
-                  <button id="realTimeButton" class="auto-track-button">Auto-Track</button>
+                  <button id="realTimeButton" class="auto-track-button">Track</button>
                   <select id="bandSelect" class="band-select">
                     <option value="10GHz" selected>10GHz</option>
                     <option value="1296MHz">1296MHz</option>
@@ -1163,7 +1163,7 @@
 
           if (isRealTimeMode) {
             autoTrackButton.classList.add('active');
-            autoTrackButton.textContent = 'Stop Auto';
+            autoTrackButton.textContent = 'Stop';
             hourSlider.disabled = true;
             dateInput.disabled = true;
             prevDayButton.disabled = true;
@@ -1171,7 +1171,7 @@
             startRealTimeUpdates();
           } else {
             autoTrackButton.classList.remove('active');
-            autoTrackButton.textContent = 'Auto-Track';
+            autoTrackButton.textContent = 'Track';
             hourSlider.disabled = false;
             dateInput.disabled = false;
             prevDayButton.disabled = false;
@@ -2450,7 +2450,7 @@
                                                       // Ensure real-time mode is off initially
                                                       isRealTimeMode = false;
                                                       document.getElementById('realTimeButton').classList.remove('active');
-                                                      document.getElementById('realTimeButton').textContent = 'Auto-Track';
+                                                      document.getElementById('realTimeButton').textContent = 'Track';
 
                                                       const qthInput = document.getElementById('qth').value.trim().toUpperCase();
                                                       const dxInput = document.getElementById('dx').value.trim().toUpperCase();
