@@ -700,6 +700,8 @@
       .auto-track-button {
         font-size: 10px; /* Smaller font size */
         padding: 1px 4px; /* Reduced padding */
+        width: 80px; /* Fixed width to accommodate longest text */
+        text-align: center; /* Center text to maintain alignment */
         background-color: #17a2b8;
         color: white;
         border: none;
@@ -720,6 +722,36 @@
       .auto-track-button.active {
         background-color: #138496;
         font-weight: bold;
+      }
+
+      .active-stations-button {
+        font-size: 12px;
+        padding: 2px 6px;
+        width: 80px; /* Fixed width to match Auto-Track button */
+        text-align: center; /* Center text to maintain alignment */
+        background-color: transparent;
+        color: #2c3e50;
+        border: 1px solid rgba(0, 123, 255, 0.4);
+        border-radius: 3px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+
+      .active-stations-button:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+        color: #0056b3;
+        border-color: rgba(0, 123, 255, 0.6);
+      }
+
+      .active-stations-button:focus {
+        outline: none;
+        box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
+      }
+
+      .active-stations-button.active {
+        background-color: rgba(0, 123, 255, 0.2);
+        font-weight: bold;
+        border-color: rgba(0, 123, 255, 0.8);
       }
   </style>
 </head>
