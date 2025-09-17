@@ -941,7 +941,7 @@
               Name = ''
             } = station;
 
-            if (showActiveOnly && (Note.includes('DXpedition') || Note.includes('SK'))) {
+            if (showActiveOnly && (Note.includes('DXpedition') || Note.includes('SK') || Note.includes('Inactive'))) {
               return; // Skip stations with DXpedition or SK in Note
             }
 
