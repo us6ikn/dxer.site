@@ -998,12 +998,6 @@
                 return { libration: null, doppler: null, pol: null };
             }
 
-            const qthElev = qthData.elevations[idx];
-            const dxElev = dxData.elevations[idx];
-            if (qthElev <= 0 || dxElev <= 0) {
-                return { libration: null, doppler: null, pol: null };
-            }
-
             const dldt_sum = qthL.dldt + dxL.dldt;
             const dbdt_sum = qthL.dbdt + dxL.dbdt;
             const relLibration = Math.sqrt(dldt_sum * dldt_sum + dbdt_sum * dbdt_sum) / 2;
@@ -1012,10 +1006,12 @@
             const relDoppler = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
 
             // Pol offset
+            const qthElev = qthData.elevations[idx];
             const qthAz = qthData.azimuths[idx];
+            const dxElev = dxData.elevations[idx];
             const dxAz = dxData.azimuths[idx];
             let pol = null;
-            if (qthAz != null && dxAz != null) {
+            if (qthElev > 0 && dxElev > 0 && qthAz != null && dxAz != null) {
                 const polQth = calcPoloffset(lat, qthAz, qthElev);
                 const polDx = calcPoloffset(dxLat, dxAz, dxElev);
                 pol = calcPoloffsetDiff(polQth, polDx);
@@ -1327,13 +1323,7 @@
           const qthInput = document.getElementById("qth").value.trim().toUpperCase();
           const dxInput = document.getElementById("dx").value.trim().toUpperCase();
           const dateInput = document.getElementById("date").value;
-          let dateStr;
-          try {
-            dateStr = new Date(dateInput).toISOString().slice(0, 10);
-          } catch (e) {
-            console.error('Invalid date input, using current date');
-            dateStr = new Date().toISOString().slice(0, 10);
-          }
+          const dateStr = new Date(dateInput).toISOString().slice(0, 10);
           const band = document.getElementById('bandSelect').value;
           const maxDoppler = (FREQUENCY_HZ / bandConfig['10GHz'].frequency) * 300;
 
@@ -1852,8 +1842,8 @@
           // Update immediately
           updateRealTime();
 
-          // Set interval to update every minute (60000 ms)
-          realTimeInterval = setInterval(updateRealTime, 60000);
+          // Set interval to update every 30 seconds for better sync
+          realTimeInterval = setInterval(updateRealTime, 30000);
         }
 
         function stopRealTimeUpdates() {
@@ -1867,7 +1857,6 @@
           const now = new Date();
           const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
           document.getElementById('date').valueAsDate = utcDate;
-          document.getElementById('date').value = utcDate.toISOString().slice(0,10);
 
           const hour = now.getUTCHours();
           const minute = now.getUTCMinutes();
@@ -2336,7 +2325,59 @@
                 }
             }
 
-            // No annotations for sked start/end as per user request
+            if (skedStartTime && skedEndTime) {
+                const startIndex = timeToChartIndex(skedStartTime);
+                const endIndex = timeToChartIndex(skedEndTime);
+
+                annotations.skedStart = {
+                    type: 'line',
+                    mode: 'vertical',
+                    scaleID: 'x',
+                    value: startIndex,
+                    borderColor: 'blue',
+                    borderWidth: 1,
+                    label: {
+                        enabled: true,
+                        content: `Sked Start ${formatTimeUTC(skedStartTime)}`,
+                        position: 'start',
+                        yAdjust: 10,
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        color: 'black',
+                        font: { size: 10, weight: 'bold', family: 'Arial, sans-serif' },
+                        padding: 2,
+                        cornerRadius: 6,
+                        borderColor: 'rgba(0, 0, 255, 0.7)',
+                        borderWidth: 1,
+                        boxShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+                        textAlign: 'center'
+                    }
+                };
+
+                annotations.skedEnd = {
+                    type: 'line',
+                    mode: 'vertical',
+                    scaleID: 'x',
+                    value: endIndex,
+                    borderColor: 'green',
+                    borderWidth: 1,
+                    label: {
+                        enabled: true,
+                        content: `Sked End ${formatTimeUTC(skedEndTime)}`,
+                        position: 'end',
+                        yAdjust: -20,
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        color: 'black',
+                        font: { size: 10, weight: 'bold', family: 'Arial, sans-serif' },
+                        padding: 2,
+                        cornerRadius: 6,
+                        borderColor: 'rgba(0, 128, 0, 0.7)',
+                        borderWidth: 1,
+                        boxShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+                        textAlign: 'center'
+                    }
+                };
+            }
+
             return annotations;
         }
 
@@ -2353,7 +2394,6 @@
             const currentDate = new Date(dateInput.value);
             currentDate.setDate(currentDate.getDate() + days);
             dateInput.valueAsDate = currentDate;
-            dateInput.value = currentDate.toISOString().slice(0,10);
             updateChart(hourIndex, false);
         }
 
@@ -2386,7 +2426,6 @@
 
           const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
           document.getElementById('date').valueAsDate = utcDate;
-          document.getElementById('date').value = utcDate.toISOString().slice(0,10);
 
           let roundedHour = utcHours;
           let roundedMinutes = utcMinutes >= 15 && utcMinutes < 45 ? 30 : 0;
@@ -2398,7 +2437,6 @@
             roundedHour -= 24;
             utcDate.setUTCDate(utcDate.getUTCDate() + 1);
             document.getElementById('date').valueAsDate = utcDate;
-            document.getElementById('date').value = utcDate.toISOString().slice(0,10);
           }
 
           hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
@@ -2427,9 +2465,10 @@
           // Initialize band
           updateBand(document.getElementById('bandSelect').value);
 
-          const currentNow = new Date();
-          updateMap(currentNow);
-          updateMoonChart(currentNow);
+          const initialTimeStr = `${document.getElementById('date').value}T${String(Math.floor(hourIndex / 2)).padStart(2, '0')}:${String((hourIndex % 2) * 30).padStart(2, '0')}:00Z`;
+          const initialTime = new Date(initialTimeStr);
+          updateMap(initialTime);
+          updateMoonChart(initialTime);
           updateChart(hourIndex, false);
         };
                                                     
