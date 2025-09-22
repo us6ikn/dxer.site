@@ -1543,7 +1543,14 @@
                       min: 0,
                       max: maxDoppler,
                       grid: { drawOnChartArea: false },
-                      ticks: { stepSize: Math.ceil(maxDoppler / 6), color: "green", font: { size: 12 } }
+                      ticks: {
+                        stepSize: Math.ceil(maxDoppler / 6),
+                        color: "green",
+                        font: { size: 12 },
+                        callback: function(value) {
+                          return Math.round(value); // Format as integer
+                        }
+                      }
                     }
                   },
                   plugins: {
@@ -1681,7 +1688,14 @@
                       min: 0,
                       max: maxDoppler,
                       grid: { drawOnChartArea: false },
-                      ticks: { stepSize: Math.ceil(maxDoppler / 6), color: "green", font: { size: 12 } }
+                      ticks: {
+                        stepSize: Math.ceil(maxDoppler / 6),
+                        color: "green",
+                        font: { size: 12 },
+                        callback: function(value) {
+                          return Math.round(value); // Format as integer
+                        }
+                      }
                     }
                   },
                   plugins: {
@@ -1808,7 +1822,14 @@
                       min: 0,
                       max: maxDoppler,
                       grid: { drawOnChartArea: false },
-                      ticks: { stepSize: Math.ceil(maxDoppler / 6), color: "green", font: { size: 12 } }
+                      ticks: {
+                        stepSize: Math.ceil(maxDoppler / 6),
+                        color: "green",
+                        font: { size: 12 },
+                        callback: function(value) {
+                          return Math.round(value); // Format as integer
+                        }
+                      }
                     },
                     y3: {
                       type: "linear",
