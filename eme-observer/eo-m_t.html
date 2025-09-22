@@ -829,7 +829,6 @@
               return response.json();
             })
             .then(data => {
-              console.log(`Loaded ${jsonFile} with ${data.length} stations`);
               updateMarkers(data, showActiveOnly);
               // Recalculate charts to reflect new frequency
               updateChart(hourIndex, isRealTimeMode);
@@ -1908,7 +1907,6 @@
         let markers = []; // Store markers globally for filtering
 
         function updateMarkers(data, showActiveOnly) {
-          console.log(`Updating markers with ${data.length} stations, showActiveOnly: ${showActiveOnly}`);
           // Clear existing markers
           markers.forEach(marker => marker.setMap(null));
           markers = [];
@@ -2072,14 +2070,12 @@
                 const emailButton = document.getElementById(`email-${sanitizedCallsign}`);
                 if (emailButton) {
                   emailButton.addEventListener('click', () => {
-                    console.log(`Email button clicked for ${callsign}: ${email}`);
                   });
                 }
 
                 const qrzButton = document.getElementById(`qrz-${sanitizedCallsign}`);
                 if (qrzButton) {
                   qrzButton.addEventListener('click', () => {
-                    console.log(`QRZ button clicked for ${callsign}: https://www.qrz.com/db/${callsign}`);
                   });
                 }
               }, 100);
@@ -2109,7 +2105,6 @@
               return response.json();
             })
             .then(data => {
-              console.log(`Loaded ${jsonFile} with ${data.length} stations in initMap`);
               updateMarkers(data, showActiveOnly);
             })
             .catch(error => {
