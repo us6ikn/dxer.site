@@ -451,22 +451,21 @@
       }
 
       .nav-button {
-        padding: 4px 6px; /* Increased padding for better touch targets */
-        min-width: 60px; /* Ensure enough width for text */
-        text-align: center;
+        padding: 2px 3px;
+        width: 60px; /* Fixed width to accommodate "Active" and "Statistics" */
+        text-align: center; /* Center text to prevent layout shift */
         background-color: rgba(255, 255, 255, 0.3);
         color: #2c3e50;
         border: 1px solid rgba(0, 123, 255, 0.4);
-        border-radius: 4px; /* Slightly larger for smoother appearance */
-        font-size: 12px; /* Base font size for desktop */
-        font-weight: 500; /* Medium weight for better readability */
+        border-radius: 2px;
+        font-size: 10px;
         cursor: pointer;
         transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         text-decoration: none;
         display: flex;
         align-items: center;
         justify-content: center;
-        line-height: 1.2; /* Improved line height for readability */
+        line-height: 1;
       }
 
       .nav-button:hover {
@@ -477,20 +476,20 @@
 
       .nav-button:focus {
         outline: none;
-        box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
+        box-shadow: 0 0 2px rgba(0, 123, 255, 0.5);
       }
 
       .nav-button.active {
         background-color: rgba(0, 123, 255, 0.2);
-        font-weight: 600; /* Slightly bolder for active state */
+        font-weight: bold;
         border-color: rgba(0, 123, 255, 0.8);
       }
 
       .nav-button.icon-button {
-        padding: 4px;
-        font-size: 14px; /* Larger font for icons */
-        min-width: 28px; /* Larger touch target for icons */
-        height: 28px;
+        padding: 2px;
+        font-size: 12px;
+        width: 18px; /* Smaller width for icon buttons */
+        height: 18px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -542,23 +541,6 @@
 
       #showControlsPanel:not(.visible) {
         display: none !important;
-      }
-      
-      /* Mobile-specific adjustments */
-      @media (max-width: 600px) {
-        .nav-button {
-          font-size: 10px; /* Slightly smaller but readable font for mobile */
-          padding: 3px 5px; /* Adjusted padding for mobile */
-          min-width: 50px; /* Slightly smaller width */
-          line-height: 1.3;
-        }
-
-        .nav-button.icon-button {
-          font-size: 12px;
-          min-width: 24px;
-          height: 24px;
-          padding: 3px;
-        }
       }
 
       @media (max-width: 600px) {
