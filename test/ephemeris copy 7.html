@@ -11,7 +11,7 @@
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         h1 { text-align: center; font-size: 16px; font-weight: bold; color: black; }
-        .chart-container { position: relative; margin-bottom: 20px; width: 800px; height: 200px; }
+        .chart-container { position: relative; margin-bottom: 20px; width: 800px; height: 250px; }
         .y-label-left { position: absolute; left: 10px; top: 10px; color: #fa4d56; font-weight: bold; font-size: 12px; }
         .y-label-right { position: absolute; right: 10px; top: 10px; color: #1192e8; font-weight: bold; font-size: 12px; }
         .we-label { position: absolute; left: 10px; top: 30px; color: black; font-size: 10px; }
@@ -226,7 +226,6 @@
             }
 
             // Weekend dashed lines and labels
-            // Weekend dashed lines and labels
             let current = new Date(start.getTime());
             while (current < end) {
                 const wd = current.getUTCDay();
@@ -241,8 +240,6 @@
                         borderWidth: 0.8,
                         borderDash: [5, 5]
                     });
-
-                    // Add the "26/27" style label above the graph on Saturdays
                     if (wd === 6) {
                         const sunday = new Date(current.getTime());
                         sunday.setUTCDate(sunday.getUTCDate() + 1);
