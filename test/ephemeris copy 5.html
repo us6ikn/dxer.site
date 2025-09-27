@@ -227,7 +227,7 @@
 
             // Weekend dashed lines and labels
             let current = new Date(start.getTime());
-            while (current < end) {
+            while (current <= end) {
                 const wd = current.getUTCDay();
                 if (wd === 0 || wd === 6) {
                     annotations.push({
