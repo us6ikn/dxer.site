@@ -11,7 +11,7 @@
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         h1 { text-align: center; font-size: 16px; font-weight: bold; color: black; }
-        .chart-container { position: relative; margin-bottom: 20px; width: 800px; height: 250px; }
+        .chart-container { position: relative; margin-bottom: 20px; width: 800px; height: 350px; }
         .y-label-left { position: absolute; left: 10px; top: 10px; color: #fa4d56; font-weight: bold; font-size: 12px; }
         .y-label-right { position: absolute; right: 10px; top: 10px; color: #1192e8; font-weight: bold; font-size: 12px; }
         .we-label { position: absolute; left: -20px; top: 30px; color: black; font-size: 10px; }
@@ -67,10 +67,10 @@
         const GC_DEC = -(29 + 0/60 + 28/3600); // Galactic Center Dec in degrees
 
         const quarters = [
-            { start: new Date(Date.UTC(YEAR, 0, 1)), end: new Date(Date.UTC(YEAR, 3, 0)) },
-            { start: new Date(Date.UTC(YEAR, 3, 1)), end: new Date(Date.UTC(YEAR, 6, 0)) },
-            { start: new Date(Date.UTC(YEAR, 6, 1)), end: new Date(Date.UTC(YEAR, 9, 0)) },
-            { start: new Date(Date.UTC(YEAR, 9, 1)), end: new Date(Date.UTC(YEAR + 1, 0, 0)) }
+            { start: new Date(Date.UTC(YEAR, 0, 1)), end: new Date(Date.UTC(YEAR, 3, 1)) },
+            { start: new Date(Date.UTC(YEAR, 3, 1)), end: new Date(Date.UTC(YEAR, 6, 1)) },
+            { start: new Date(Date.UTC(YEAR, 6, 1)), end: new Date(Date.UTC(YEAR, 9, 1)) },
+            { start: new Date(Date.UTC(YEAR, 9, 1)), end: new Date(Date.UTC(YEAR + 1, 0, 1)) }
         ];
 
         // Function to compute angular separation between two equatorial coordinates
@@ -89,7 +89,7 @@
         function computeMoonData(start, end) {
             const data = [];
             const observer = new Astronomy.Observer(0, 0, 0); // Observer at origin
-            for (let dt = new Date(start); dt <= end; dt.setUTCDate(dt.getUTCDate() + 1)) {
+            for (let dt = new Date(start); dt < end; dt.setUTCDate(dt.getUTCDate() + 1)) {
                 try {
                     const astroTime = Astronomy.MakeTime(dt);
                     const libration = Astronomy.Libration(astroTime);
@@ -98,8 +98,9 @@
                     const sunEq = Astronomy.Equator(Astronomy.Body.Sun, astroTime, observer, true, true);
                     const dec = moonEq.dec;
                     const moon_ra = moonEq.ra; // RA in hours
+                    const sun_ra = sunEq.ra;
                     const extra_loss = 40 * Math.log10(dist_km / PERIGEE_DISTANCE_KM);
-                    const sun_sep = angularSeparation(moon_ra, moonEq.dec, sunEq.ra, sunEq.dec);
+                    const sun_sep = Astronomy.AngleBetween(Astronomy.Body.Moon, Astronomy.Body.Sun, astroTime);
                     const gc_sep = angularSeparation(moon_ra, dec, GC_RA_HOURS, GC_DEC);
 
                     if (dist_km != null && dec != null && sun_sep != null && gc_sep != null) {
@@ -199,21 +200,19 @@
                 });
             }
 
-            // Month separators and labels, skipping chart boundaries
-            let month_start = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1));
+            // Month separators and labels
+            let month_start = new Date(start.getUTCFullYear(), start.getUTCMonth(), 1);
             while (month_start < end) {
-                // Skip lines at exact start or end of the quarter
-                if (month_start.getTime() !== start.getTime() && month_start.getTime() !== end.getTime()) {
-                    annotations.push({
-                        type: 'line',
-                        xMin: month_start,
-                        xMax: month_start,
-                        borderColor: 'gray',
-                        borderWidth: 1.5
-                    });
-                }
-                const ndays = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth() + 1, 0)).getUTCDate();
-                const mid_month = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth(), Math.floor(ndays / 2)));
+                annotations.push({
+                    type: 'line',
+                    xMin: month_start,
+                    xMax: month_start,
+                    borderColor: 'gray',
+                    borderWidth: 1.5
+                });
+                const ndays = new Date(month_start.getUTCFullYear(), month_start.getUTCMonth() + 1, 0).getUTCDate();
+                const mid_month = new Date(month_start);
+                mid_month.setUTCDate(Math.floor(ndays / 2));
                 annotations.push({
                     type: 'label',
                     xValue: mid_month,
@@ -222,12 +221,12 @@
                     font: { size: 8, weight: 'bold' },
                     color: 'black'
                 });
-                month_start = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth() + 1, 1));
+                month_start.setUTCMonth(month_start.getUTCMonth() + 1);
             }
 
             // Weekend dashed lines and labels
-            let current = new Date(start.getTime());
-            while (current <= end) {
+            let current = new Date(start);
+            while (current < end) {
                 const wd = current.getUTCDay();
                 if (wd === 0 || wd === 6) {
                     annotations.push({
@@ -239,10 +238,10 @@
                         borderDash: [5, 5]
                     });
                     if (wd === 6) {
-                        const sunday = new Date(current.getTime());
+                        const sunday = new Date(current);
                         sunday.setUTCDate(sunday.getUTCDate() + 1);
                         const label = `${current.getUTCDate()}/${sunday.getUTCDate()}`;
-                        const mid = new Date(current.getTime());
+                        const mid = new Date(current);
                         mid.setUTCHours(12);
                         annotations.push({
                             type: 'label',
@@ -306,7 +305,7 @@
                             position: 'top',
                             ticks: { display: false },
                             grid: { display: false },
-                            border: { display: false }
+                            border: { display: true, color: 'rgba(128, 128, 128, 0.9)', width: 1.2 }
                         },
                         yDec: {
                             min: -30,
@@ -359,7 +358,7 @@
                             top: 50,
                             bottom: 10,
                             left: 20,
-                            right: 30
+                            right: 20
                         }
                     },
                     elements: {
