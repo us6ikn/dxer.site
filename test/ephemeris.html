@@ -54,10 +54,7 @@
         <p><span style="color: #fa4d56;">―</span> The declination is plotted as red curve and weekends (WE) are marked at the top of the ephemeris graph.</p>
     </div>
     <script>
-        // Register the annotation plugin
-        if (typeof annotationPlugin !== 'undefined') {
-            Chart.register(annotationPlugin);
-        }
+        // The annotation plugin auto-registers when loaded via CDN
 
         const YEAR = 2026;
         const PERIGEE_DISTANCE_KM = 356352.93;
@@ -141,6 +138,7 @@
                         xMax: barEnd,
                         yMin: -30,
                         yMax: 30,
+                        yScaleID: 'yDec',
                         backgroundColor: 'rgba(255, 165, 0, 0.4)',
                         borderWidth: 0
                     });
@@ -157,6 +155,7 @@
                     xMax: barEnd,
                     yMin: -30,
                     yMax: 30,
+                    yScaleID: 'yDec',
                     backgroundColor: 'rgba(255, 165, 0, 0.4)',
                     borderWidth: 0
                 });
@@ -178,6 +177,7 @@
                         xMax: barEnd,
                         yMin: -30,
                         yMax: 30,
+                        yScaleID: 'yDec',
                         backgroundColor: 'rgba(128, 128, 128, 0.4)',
                         borderWidth: 0
                     });
@@ -194,6 +194,7 @@
                     xMax: barEnd,
                     yMin: -30,
                     yMax: 30,
+                    yScaleID: 'yDec',
                     backgroundColor: 'rgba(128, 128, 128, 0.4)',
                     borderWidth: 0
                 });
@@ -208,6 +209,7 @@
                         type: 'line',
                         xMin: month_start,
                         xMax: month_start,
+                        yScaleID: 'yDec',
                         borderColor: 'gray',
                         borderWidth: 1.5
                     });
@@ -216,6 +218,7 @@
                 const mid_month = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth(), Math.floor(ndays / 2)));
                 annotations.push({
                     type: 'label',
+                    yScaleID: 'yDec',
                     xValue: mid_month,
                     yValue: 38,
                     content: month_start.toLocaleString('default', { month: 'long' }),
@@ -234,10 +237,9 @@
                         type: 'line',
                         xMin: current,
                         xMax: current,
-                        yMin: -30,
-                        yMax: 30,
-                        borderColor: 'rgba(128, 128, 128, 0.7)',
-                        borderWidth: 0.8,
+                        yScaleID: 'yDec',
+                        borderColor: 'gray',
+                        borderWidth: 1.5,
                         borderDash: [5, 5]
                     });
 
@@ -250,6 +252,7 @@
                         mid.setUTCHours(12);
                         annotations.push({
                             type: 'label',
+                            yScaleID: 'yDec',
                             xValue: mid,
                             yValue: 33,
                             content: label,
