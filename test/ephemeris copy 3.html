@@ -199,19 +199,16 @@
                 });
             }
 
-            // Month separators and labels, skipping chart boundaries
+            // Month separators and labels
             let month_start = new Date(start.getUTCFullYear(), start.getUTCMonth(), 1);
             while (month_start < end) {
-                // Skip lines at exact start or end of the quarter
-                if (month_start.getTime() !== start.getTime() && month_start.getTime() !== end.getTime()) {
-                    annotations.push({
-                        type: 'line',
-                        xMin: month_start,
-                        xMax: month_start,
-                        borderColor: 'gray',
-                        borderWidth: 1.5
-                    });
-                }
+                annotations.push({
+                    type: 'line',
+                    xMin: month_start,
+                    xMax: month_start,
+                    borderColor: 'gray',
+                    borderWidth: 1.5
+                });
                 const ndays = new Date(month_start.getUTCFullYear(), month_start.getUTCMonth() + 1, 0).getUTCDate();
                 const mid_month = new Date(month_start);
                 mid_month.setUTCDate(Math.floor(ndays / 2));
