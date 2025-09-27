@@ -54,10 +54,7 @@
         <p><span style="color: #fa4d56;">―</span> The declination is plotted as red curve and weekends (WE) are marked at the top of the ephemeris graph.</p>
     </div>
     <script>
-        // Register the annotation plugin
-        if (typeof annotationPlugin !== 'undefined') {
-            Chart.register(annotationPlugin);
-        }
+        // The annotation plugin auto-registers when loaded via CDN
 
         const YEAR = 2026;
         const PERIGEE_DISTANCE_KM = 356352.93;
@@ -139,8 +136,7 @@
                         type: 'box',
                         xMin: barStart,
                         xMax: barEnd,
-                        yMin: -30,
-                        yMax: 30,
+                        // yMin and yMax omitted to span full height
                         backgroundColor: 'rgba(255, 165, 0, 0.4)',
                         borderWidth: 0
                     });
@@ -155,8 +151,7 @@
                     type: 'box',
                     xMin: barStart,
                     xMax: barEnd,
-                    yMin: -30,
-                    yMax: 30,
+                    // yMin and yMax omitted to span full height
                     backgroundColor: 'rgba(255, 165, 0, 0.4)',
                     borderWidth: 0
                 });
@@ -176,8 +171,7 @@
                         type: 'box',
                         xMin: barStart,
                         xMax: barEnd,
-                        yMin: -30,
-                        yMax: 30,
+                        // yMin and yMax omitted to span full height
                         backgroundColor: 'rgba(128, 128, 128, 0.4)',
                         borderWidth: 0
                     });
@@ -192,8 +186,7 @@
                     type: 'box',
                     xMin: barStart,
                     xMax: barEnd,
-                    yMin: -30,
-                    yMax: 30,
+                    // yMin and yMax omitted to span full height
                     backgroundColor: 'rgba(128, 128, 128, 0.4)',
                     borderWidth: 0
                 });
@@ -227,17 +220,16 @@
 
             // Weekend dashed lines and labels
             let current = new Date(start.getTime());
-            while (current < end) {
+            while (current <= end) {  // Changed to <= to include end date if it's a weekend
                 const wd = current.getUTCDay();
                 if (wd === 0 || wd === 6) {
                     annotations.push({
                         type: 'line',
                         xMin: current,
                         xMax: current,
-                        yMin: -30,
-                        yMax: 30,
-                        borderColor: 'rgba(128, 128, 128, 0.7)',
-                        borderWidth: 0.8,
+                        // yMin and yMax omitted to span full height like month lines
+                        borderColor: 'gray',
+                        borderWidth: 1.5,
                         borderDash: [5, 5]
                     });
 
