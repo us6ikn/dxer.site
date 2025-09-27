@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1"></script>
     <style>
-        
         body { font-family: Arial, sans-serif; margin: 20px; }
         h1 { text-align: center; font-size: 16px; font-weight: bold; color: black; }
         .chart-container { position: relative; margin-bottom: 20px; width: 800px; height: 350px; }
@@ -58,10 +57,8 @@
         const PERIGEE_DISTANCE_KM = 356352.93;
         const COLOR_DECLINATION = '#fa4d56';
         const COLOR_LOSS = '#1192e8';
-        const GC_RA_HOURS = 17 + 45/60 + 40/3600;
-        const GC_DEC = - (29 + 0/60 + 28/3600);
-
-        Astronomy.DefineStar(Astronomy.Body.GC, GC_RA_HOURS, GC_DEC, 1e9);
+        const GC_RA_HOURS = 17 + 45/60 + 40/3600; // Galactic Center RA in hours
+        const GC_DEC = -(29 + 0/60 + 28/3600); // Galactic Center Dec in degrees
 
         const quarters = [
             { start: new Date(Date.UTC(YEAR, 0, 1)), end: new Date(Date.UTC(YEAR, 3, 1)) },
@@ -70,26 +67,52 @@
             { start: new Date(Date.UTC(YEAR, 9, 1)), end: new Date(Date.UTC(YEAR + 1, 0, 1)) }
         ];
 
+        // Function to compute angular separation between two equatorial coordinates
+        function angularSeparation(ra1, dec1, ra2, dec2) {
+            const ra1Rad = ra1 * Math.PI / 12; // Convert hours to radians
+            const dec1Rad = dec1 * Math.PI / 180; // Convert degrees to radians
+            const ra2Rad = ra2 * Math.PI / 12;
+            const dec2Rad = dec2 * Math.PI / 180;
+
+            const cosSep = Math.sin(dec1Rad) * Math.sin(dec2Rad) +
+                           Math.cos(dec1Rad) * Math.cos(dec2Rad) * Math.cos(ra1Rad - ra2Rad);
+            const sepRad = Math.acos(Math.min(Math.max(cosSep, -1), 1));
+            return sepRad * 180 / Math.PI; // Convert to degrees
+        }
+
         function computeMoonData(start, end) {
             const data = [];
+            const observer = new Astronomy.Observer(0, 0, 0); // Observer at origin
             for (let dt = new Date(start); dt < end; dt.setUTCDate(dt.getUTCDate() + 1)) {
-                const astroTime = Astronomy.MakeTime(dt);
-                const libration = Astronomy.Libration(astroTime);
-                const dist_km = libration.dist_km;
-                const moonEq = Astronomy.Equator(Astronomy.Body.Moon, astroTime, null, true, true);
-                const dec = moonEq.dec;
-                const sun_sep = Astronomy.AngleBetween(Astronomy.Body.Moon, Astronomy.Body.Sun, astroTime);
-                const gc_sep = Astronomy.AngleBetween(Astronomy.Body.Moon, Astronomy.Body.GC, astroTime);
-                const extra_loss = 40 * Math.log10(dist_km / PERIGEE_DISTANCE_KM);
-                data.push({
-                    date: new Date(dt),
-                    dateStr: dt.toISOString().slice(0, 10),
-                    dec,
-                    dist: dist_km,
-                    extra_loss,
-                    sun_sep,
-                    gc_sep
-                });
+                try {
+                    const astroTime = Astronomy.MakeTime(dt);
+                    const libration = Astronomy.Libration(astroTime);
+                    const dist_km = libration.dist_km;
+                    const moonEq = Astronomy.Equator(Astronomy.Body.Moon, astroTime, observer, true, true);
+                    const sunEq = Astronomy.Equator(Astronomy.Body.Sun, astroTime, observer, true, true);
+                    const dec = moonEq.dec;
+                    const moon_ra = moonEq.ra; // RA in hours
+                    const sun_ra = sunEq.ra;
+                    const extra_loss = 40 * Math.log10(dist_km / PERIGEE_DISTANCE_KM);
+                    const sun_sep = Astronomy.AngleBetween(Astronomy.Body.Moon, Astronomy.Body.Sun, astroTime);
+                    const gc_sep = angularSeparation(moon_ra, dec, GC_RA_HOURS, GC_DEC);
+
+                    if (dist_km != null && dec != null && sun_sep != null && gc_sep != null) {
+                        data.push({
+                            date: new Date(dt),
+                            dateStr: dt.toISOString().slice(0, 10),
+                            dec,
+                            dist: dist_km,
+                            extra_loss,
+                            sun_sep,
+                            gc_sep
+                        });
+                    } else {
+                        console.warn(`Missing data for ${dt.toISOString().slice(0, 10)}`);
+                    }
+                } catch (e) {
+                    console.warn(`Error computing data for ${dt.toISOString().slice(0, 10)}: ${e.message}`);
+                }
             }
             return data;
         }
@@ -198,8 +221,8 @@
             // Weekend dashed lines and labels
             let current = new Date(start);
             while (current < end) {
-                const wd = current.getUTCDay(); // 0 = Sunday, 6 = Saturday
-                if (wd === 6 || wd === 0) {
+                const wd = current.getUTCDay();
+                if (wd === 0 || wd === 6) {
                     annotations.push({
                         type: 'line',
                         xMin: current,
@@ -208,7 +231,7 @@
                         borderWidth: 0.8,
                         borderDash: [5, 5]
                     });
-                    if (wd === 6) { // Saturday, label Sat/Sun
+                    if (wd === 6) {
                         const sunday = new Date(current);
                         sunday.setUTCDate(sunday.getUTCDate() + 1);
                         const label = `${current.getUTCDate()}/${sunday.getUTCDate()}`;
@@ -232,8 +255,12 @@
 
         quarters.forEach((quarter, index) => {
             const data = computeMoonData(quarter.start, quarter.end);
+            if (!data || data.length === 0) {
+                console.warn(`No data for quarter ${index + 1}`);
+                return;
+            }
             const annotations = createAnnotations(data, quarter.start, quarter.end);
-            const ctx = document.getElementById(`chart${index + 1}`);
+            const ctx = document.getElementById(`chart${index + 1}`).getContext('2d');
             new Chart(ctx, {
                 type: 'line',
                 data: {
