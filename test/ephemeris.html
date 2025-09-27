@@ -134,11 +134,12 @@
                     barEnd.setUTCDate(barEnd.getUTCDate() + 1);
                     annotations.push({
                         type: 'box',
+                        xScaleID: 'x',
                         xMin: barStart,
                         xMax: barEnd,
+                        yScaleID: 'yDec',
                         yMin: -30,
                         yMax: 30,
-                        yScaleID: 'yDec',
                         backgroundColor: 'rgba(255, 165, 0, 0.4)',
                         borderWidth: 0
                     });
@@ -151,11 +152,12 @@
                 barEnd.setUTCDate(barEnd.getUTCDate() + 1);
                 annotations.push({
                     type: 'box',
+                    xScaleID: 'x',
                     xMin: barStart,
                     xMax: barEnd,
+                    yScaleID: 'yDec',
                     yMin: -30,
                     yMax: 30,
-                    yScaleID: 'yDec',
                     backgroundColor: 'rgba(255, 165, 0, 0.4)',
                     borderWidth: 0
                 });
@@ -173,11 +175,12 @@
                     barEnd.setUTCDate(barEnd.getUTCDate() + 1);
                     annotations.push({
                         type: 'box',
+                        xScaleID: 'x',
                         xMin: barStart,
                         xMax: barEnd,
+                        yScaleID: 'yDec',
                         yMin: -30,
                         yMax: 30,
-                        yScaleID: 'yDec',
                         backgroundColor: 'rgba(128, 128, 128, 0.4)',
                         borderWidth: 0
                     });
@@ -190,11 +193,12 @@
                 barEnd.setUTCDate(barEnd.getUTCDate() + 1);
                 annotations.push({
                     type: 'box',
+                    xScaleID: 'x',
                     xMin: barStart,
                     xMax: barEnd,
+                    yScaleID: 'yDec',
                     yMin: -30,
                     yMax: 30,
-                    yScaleID: 'yDec',
                     backgroundColor: 'rgba(128, 128, 128, 0.4)',
                     borderWidth: 0
                 });
@@ -207,9 +211,12 @@
                 if (month_start.getTime() !== start.getTime() && month_start.getTime() !== end.getTime()) {
                     annotations.push({
                         type: 'line',
+                        xScaleID: 'x',
                         xMin: month_start,
                         xMax: month_start,
                         yScaleID: 'yDec',
+                        yMin: -30,
+                        yMax: 30,
                         borderColor: 'gray',
                         borderWidth: 1.5
                     });
@@ -218,6 +225,7 @@
                 const mid_month = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth(), Math.floor(ndays / 2)));
                 annotations.push({
                     type: 'label',
+                    xScaleID: 'x',
                     yScaleID: 'yDec',
                     xValue: mid_month,
                     yValue: 38,
@@ -235,12 +243,16 @@
                 if (wd === 0 || wd === 6) {
                     annotations.push({
                         type: 'line',
+                        xScaleID: 'x',
                         xMin: current,
                         xMax: current,
                         yScaleID: 'yDec',
+                        yMin: -30,
+                        yMax: 30,
                         borderColor: 'gray',
                         borderWidth: 1.5,
-                        borderDash: [5, 5]
+                        borderDash: [5, 5],
+                        borderDashOffset: 0
                     });
 
                     // Add the "26/27" style label above the graph on Saturdays
@@ -252,6 +264,7 @@
                         mid.setUTCHours(12);
                         annotations.push({
                             type: 'label',
+                            xScaleID: 'x',
                             yScaleID: 'yDec',
                             xValue: mid,
                             yValue: 33,
