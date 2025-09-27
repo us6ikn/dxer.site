@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Moon Ephemeris Overview for 2026</title>
     <script src="https://dxer.site/eme-observer/a.ob.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         h1 { text-align: center; font-size: 16px; font-weight: bold; color: black; }
@@ -54,8 +54,12 @@
         <p><span style="color: #fa4d56;">―</span> The declination is plotted as red curve and weekends (WE) are marked at the top of the ephemeris graph.</p>
     </div>
     <script>
-        // Register the annotation plugin
-        Chart.register(ChartjsPluginAnnotation);
+        // Register the annotation plugin (if needed)
+        if (typeof ChartAnnotation !== 'undefined') {
+            Chart.register(ChartAnnotation);
+        } else {
+            console.warn('ChartAnnotation not found; assuming auto-registration by chartjs-plugin-annotation');
+        }
 
         const YEAR = 2026;
         const PERIGEE_DISTANCE_KM = 356352.93;
@@ -295,7 +299,7 @@
                             type: 'time',
                             time: {
                                 unit: 'day',
-                                parser: 'yyyy-MM-dd', // Optional: specify format for safety
+                                parser: 'yyyy-MM-dd', // Ensures dates are parsed correctly
                                 displayFormats: { day: 'MMM d' }
                             },
                             min: quarter.start,
