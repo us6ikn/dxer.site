@@ -122,6 +122,11 @@
         function createAnnotations(data, start, end) {
             const annotations = [];
 
+            // Helper to get YYYY-MM-DD string
+            function dateToStr(date) {
+                return date.toISOString().slice(0, 10);
+            }
+
             // Orange bars: Moon-Sun <10°
             let is_close_sun = data.map(d => d.sun_sep < 10);
             let startIdx = null;
@@ -129,9 +134,10 @@
                 if (is_close_sun[i] && startIdx === null) {
                     startIdx = i;
                 } else if (!is_close_sun[i] && startIdx !== null) {
-                    const barStart = data[startIdx].date;
-                    const barEnd = new Date(data[i - 1].date);
-                    barEnd.setUTCDate(barEnd.getUTCDate() + 1);
+                    const barStart = dateToStr(data[startIdx].date);
+                    const barEndDate = new Date(data[i - 1].date);
+                    barEndDate.setUTCDate(barEndDate.getUTCDate() + 1);
+                    const barEnd = dateToStr(barEndDate);
                     annotations.push({
                         type: 'box',
                         xScaleID: 'x',
@@ -147,9 +153,10 @@
                 }
             }
             if (startIdx !== null) {
-                const barStart = data[startIdx].date;
-                const barEnd = new Date(data[data.length - 1].date);
-                barEnd.setUTCDate(barEnd.getUTCDate() + 1);
+                const barStart = dateToStr(data[startIdx].date);
+                const barEndDate = new Date(data[data.length - 1].date);
+                barEndDate.setUTCDate(barEndDate.getUTCDate() + 1);
+                const barEnd = dateToStr(barEndDate);
                 annotations.push({
                     type: 'box',
                     xScaleID: 'x',
@@ -170,9 +177,10 @@
                 if (is_high_temp[i] && startIdx === null) {
                     startIdx = i;
                 } else if (!is_high_temp[i] && startIdx !== null) {
-                    const barStart = data[startIdx].date;
-                    const barEnd = new Date(data[i - 1].date);
-                    barEnd.setUTCDate(barEnd.getUTCDate() + 1);
+                    const barStart = dateToStr(data[startIdx].date);
+                    const barEndDate = new Date(data[i - 1].date);
+                    barEndDate.setUTCDate(barEndDate.getUTCDate() + 1);
+                    const barEnd = dateToStr(barEndDate);
                     annotations.push({
                         type: 'box',
                         xScaleID: 'x',
@@ -188,9 +196,10 @@
                 }
             }
             if (startIdx !== null) {
-                const barStart = data[startIdx].date;
-                const barEnd = new Date(data[data.length - 1].date);
-                barEnd.setUTCDate(barEnd.getUTCDate() + 1);
+                const barStart = dateToStr(data[startIdx].date);
+                const barEndDate = new Date(data[data.length - 1].date);
+                barEndDate.setUTCDate(barEndDate.getUTCDate() + 1);
+                const barEnd = dateToStr(barEndDate);
                 annotations.push({
                     type: 'box',
                     xScaleID: 'x',
@@ -207,13 +216,14 @@
             // Month separators and labels, skipping chart boundaries
             let month_start = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1));
             while (month_start < end) {
+                const monthStr = dateToStr(month_start);
                 // Skip lines at exact start or end of the quarter
                 if (month_start.getTime() !== start.getTime() && month_start.getTime() !== end.getTime()) {
                     annotations.push({
                         type: 'line',
                         xScaleID: 'x',
-                        xMin: month_start,
-                        xMax: month_start,
+                        xMin: monthStr,
+                        xMax: monthStr,
                         yScaleID: 'yDec',
                         yMin: -30,
                         yMax: 30,
@@ -223,11 +233,12 @@
                 }
                 const ndays = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth() + 1, 0)).getUTCDate();
                 const mid_month = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth(), Math.floor(ndays / 2)));
+                const midStr = dateToStr(mid_month);
                 annotations.push({
                     type: 'label',
                     xScaleID: 'x',
                     yScaleID: 'yDec',
-                    xValue: mid_month,
+                    xValue: midStr,
                     yValue: 38,
                     content: month_start.toLocaleString('default', { month: 'long' }),
                     font: { size: 8, weight: 'bold' },
@@ -240,12 +251,13 @@
             let current = new Date(start.getTime());
             while (current < end) {
                 const wd = current.getUTCDay();
+                const currentStr = dateToStr(current);
                 if (wd === 0 || wd === 6) {
                     annotations.push({
                         type: 'line',
                         xScaleID: 'x',
-                        xMin: current,
-                        xMax: current,
+                        xMin: currentStr,
+                        xMax: currentStr,
                         yScaleID: 'yDec',
                         yMin: -30,
                         yMax: 30,
@@ -262,11 +274,12 @@
                         const label = `${current.getUTCDate()}/${sunday.getUTCDate()}`;
                         const mid = new Date(current.getTime());
                         mid.setUTCHours(12);
+                        const midStr = dateToStr(mid);
                         annotations.push({
                             type: 'label',
                             xScaleID: 'x',
                             yScaleID: 'yDec',
-                            xValue: mid,
+                            xValue: midStr,
                             yValue: 33,
                             content: label,
                             font: { size: 8 },
