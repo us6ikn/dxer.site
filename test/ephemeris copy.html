@@ -11,7 +11,7 @@
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         h1 { text-align: center; font-size: 16px; font-weight: bold; color: black; }
-        .chart-container { position: relative; margin-bottom: 20px; width: 800px; height: 300px; }
+        .chart-container { position: relative; margin-bottom: 20px; width: 800px; height: 350px; }
         .y-label-left { position: absolute; left: 10px; top: 10px; color: #fa4d56; font-weight: bold; font-size: 12px; }
         .y-label-right { position: absolute; right: 10px; top: 10px; color: #1192e8; font-weight: bold; font-size: 12px; }
         .we-label { position: absolute; left: -20px; top: 30px; color: black; font-size: 10px; }
@@ -98,8 +98,9 @@
                     const sunEq = Astronomy.Equator(Astronomy.Body.Sun, astroTime, observer, true, true);
                     const dec = moonEq.dec;
                     const moon_ra = moonEq.ra; // RA in hours
+                    const sun_ra = sunEq.ra;
                     const extra_loss = 40 * Math.log10(dist_km / PERIGEE_DISTANCE_KM);
-                    const sun_sep = Astronomy.AngleFromSun(Astronomy.Body.Moon, astroTime);
+                    const sun_sep = Astronomy.AngleBetween(Astronomy.Body.Moon, Astronomy.Body.Sun, astroTime);
                     const gc_sep = angularSeparation(moon_ra, dec, GC_RA_HOURS, GC_DEC);
 
                     if (dist_km != null && dec != null && sun_sep != null && gc_sep != null) {
@@ -317,6 +318,7 @@
                         yLoss: {
                             min: 0,
                             max: 2.4,
+                            reverse: true,
                             position: 'right',
                             ticks: { color: COLOR_LOSS, font: { size: 9 } },
                             grid: { display: false, drawBorder: false },
