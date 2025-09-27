@@ -200,7 +200,7 @@
             }
 
             // Month separators and labels, skipping chart boundaries
-            let month_start = new Date(start.getUTCFullYear(), start.getUTCMonth(), 1);
+            let month_start = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1));
             while (month_start < end) {
                 // Skip lines at exact start or end of the quarter
                 if (month_start.getTime() !== start.getTime() && month_start.getTime() !== end.getTime()) {
@@ -212,9 +212,8 @@
                         borderWidth: 1.5
                     });
                 }
-                const ndays = new Date(month_start.getUTCFullYear(), month_start.getUTCMonth() + 1, 0).getUTCDate();
-                const mid_month = new Date(month_start);
-                mid_month.setUTCDate(Math.floor(ndays / 2));
+                const ndays = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth() + 1, 0)).getUTCDate();
+                const mid_month = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth(), Math.floor(ndays / 2)));
                 annotations.push({
                     type: 'label',
                     xValue: mid_month,
@@ -223,11 +222,11 @@
                     font: { size: 8, weight: 'bold' },
                     color: 'black'
                 });
-                month_start.setUTCMonth(month_start.getUTCMonth() + 1);
+                month_start = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth() + 1, 1));
             }
 
             // Weekend dashed lines and labels
-            let current = new Date(start);
+            let current = new Date(start.getTime());
             while (current < end) {
                 const wd = current.getUTCDay();
                 if (wd === 0 || wd === 6) {
@@ -240,10 +239,10 @@
                         borderDash: [5, 5]
                     });
                     if (wd === 6) {
-                        const sunday = new Date(current);
+                        const sunday = new Date(current.getTime());
                         sunday.setUTCDate(sunday.getUTCDate() + 1);
                         const label = `${current.getUTCDate()}/${sunday.getUTCDate()}`;
-                        const mid = new Date(current);
+                        const mid = new Date(current.getTime());
                         mid.setUTCHours(12);
                         annotations.push({
                             type: 'label',
@@ -267,6 +266,8 @@
                 console.warn(`No data for quarter ${index + 1}`);
                 return;
             }
+            const lastDataDate = data[data.length - 1].date;
+            const xMax = new Date(lastDataDate.getTime() + (24 * 60 * 60 * 1000));
             const annotations = createAnnotations(data, quarter.start, quarter.end);
             const ctx = document.getElementById(`chart${index + 1}`).getContext('2d');
             new Chart(ctx, {
@@ -303,7 +304,7 @@
                                 displayFormats: { day: 'MMM d' }
                             },
                             min: quarter.start,
-                            max: quarter.end,
+                            max: xMax,
                             position: 'top',
                             ticks: { display: false },
                             grid: { display: false },
