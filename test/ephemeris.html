@@ -234,6 +234,8 @@
                         type: 'line',
                         xMin: current,
                         xMax: current,
+                        yMin: -30,
+                        yMax: 30,
                         borderColor: 'rgba(128, 128, 128, 0.7)',
                         borderWidth: 0.8,
                         borderDash: [5, 5]
@@ -312,8 +314,13 @@
                             min: -30,
                             max: 30,
                             position: 'left',
-                            ticks: { color: COLOR_DECLINATION, font: { size: 9 } },
-                            grid: { display: true, color: 'rgba(0, 0, 0, 0.3)', borderDash: [2, 2], drawBorder: false, drawTicks: true, tickMarkLength: 10 },
+                            ticks: {
+                                color: COLOR_DECLINATION,
+                                font: { size: 9 },
+                                drawTicks: true,
+                                tickMarkLength: 10
+                            },
+                            grid: { display: true, color: 'rgba(0, 0, 0, 0.3)', borderDash: [2, 2], drawBorder: false },
                             border: { display: true, color: COLOR_DECLINATION, width: 1.2 }
                         },
                         yLoss: {
@@ -321,8 +328,13 @@
                             max: 2.4,
                             reverse: true,
                             position: 'right',
-                            ticks: { color: COLOR_LOSS, font: { size: 9 } },
-                            grid: { display: false, drawBorder: false, drawTicks: true, tickMarkLength: 10 },
+                            ticks: {
+                                color: COLOR_LOSS,
+                                font: { size: 9 },
+                                drawTicks: true,
+                                tickMarkLength: 10
+                            },
+                            grid: { display: false, drawBorder: false },
                             border: { display: true, color: COLOR_LOSS, width: 1.2 }
                         }
                     },
