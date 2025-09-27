@@ -136,13 +136,13 @@
                     const barEnd = new Date(data[i - 1].date);
                     barEnd.setUTCDate(barEnd.getUTCDate() + 1);
                     annotations.push({
-                        type: 'box',
-                        xMin: barStart,
-                        xMax: barEnd,
-                        yMin: -30,
-                        yMax: 30,
-                        backgroundColor: 'rgba(255, 165, 0, 0.4)',
-                        borderWidth: 0
+                        type: 'line',
+                        xMin: current,
+                        xMax: current,
+                        scaleID: 'x',
+                        borderColor: 'rgba(128, 128, 128, 0.7)',
+                        borderWidth: 0.8,
+                        borderDash: [5, 5]
                     });
                     startIdx = null;
                 }
