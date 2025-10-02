@@ -9,142 +9,26 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 2vw;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            max-width: 100%;
-            box-sizing: border-box;
-        }
-        header {
-            text-align: center;
-            margin-bottom: 1rem;
-            width: 100%;
-            max-width: 1200px;
-        }
-        h1 {
-            font-size: clamp(12px, 3vw, 16px);
-            font-weight: bold;
-            color: black;
-            margin: 0.5rem 0;
-        }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 1200px;
-            height: clamp(150px, 25vw, 200px);
-            margin-bottom: 10px;
-        }
-        .y-label-left {
-            position: absolute;
-            left: clamp(5px, 2vw, 15px);
-            top: clamp(10px, 3vw, 20px);
-            color: #fa4d56;
-            font-weight: bold;
-            font-size: clamp(8px, 2vw, 12px);
-        }
-        .y-label-right {
-            position: absolute;
-            right: clamp(5px, 2vw, 15px);
-            top: clamp(10px, 3vw, 20px);
-            color: #1192e8;
-            font-weight: bold;
-            font-size: clamp(8px, 2vw, 12px);
-        }
-        .we-label {
-            position: absolute;
-            left: clamp(10px, 3vw, 20px);
-            top: clamp(25px, 5vw, 40px);
-            color: black;
-            font-size: clamp(6px, 1.5vw, 8px);
-        }
-        #explanation {
-            margin-top: 1rem;
-            font-size: clamp(10px, 2vw, 12px);
-            max-width: 90%;
-        }
-        #explanation p {
-            margin: 5px 0;
-        }
-        #explanation span {
-            font-size: clamp(10px, 2.5vw, 14px);
-            margin-right: 5px;
-        }
-        #year-selector {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 0.5rem;
-        }
-        #year-selector label {
-            font-size: clamp(12px, 2.5vw, 14px);
-            color: #333;
-            font-weight: 500;
-        }
-        #year-selector select {
-            width: clamp(100px, 20vw, 150px);
-            padding: clamp(5px, 1.5vw, 8px);
-            font-size: clamp(12px, 2.5vw, 14px);
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: border-color 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-            max-height: 300px; /* Limit dropdown height on mobile */
-            overflow-y: auto; /* Enable scrolling for long dropdown */
-            appearance: none;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="#333" d="M2 4l4 4 4-4z"/></svg>');
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            padding-right: 30px;
-        }
-        #year-selector select:focus {
-            outline: none;
-            border-color: #1192e8;
-            box-shadow: 0 0 0 2px rgba(17, 146, 232, 0.2);
-        }
-        #year-selector select:hover {
-            border-color: #999;
-        }
-        #error-message {
-            display: none;
-            color: #fa4d56;
-            font-size: clamp(10px, 2vw, 12px);
-            margin-top: 5px;
-        }
-        @media (max-width: 600px) {
-            .chart-container {
-                height: clamp(120px, 30vw, 180px);
-            }
-            .y-label-left, .y-label-right {
-                top: clamp(5px, 2vw, 10px);
-            }
-            .we-label {
-                top: clamp(20px, 4vw, 30px);
-            }
-            #year-selector {
-                flex-direction: column;
-                gap: 5px;
-            }
-            #year-selector select {
-                max-height: 200px; /* Smaller dropdown height on mobile */
-            }
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { text-align: center; font-size: 16px; font-weight: bold; color: black; }
+        .chart-container { position: relative; margin-bottom: 5px; width: 800px; height: 200px; }
+        .y-label-left { position: absolute; left: 20px; top: 25px; color: #fa4d56; font-weight: bold; font-size: 12px; }
+        .y-label-right { position: absolute; right: 20px; top: 25px; color: #1192e8; font-weight: bold; font-size: 12px; }
+        .we-label { position: absolute; left: 30px; top: 46px; color: black; font-size: 8px; }
+        #explanation { margin-top: 20px; font-size: 12px; }
+        #explanation p { margin: 5px 0; }
+        #explanation span { font-size: 14px; margin-right: 5px; }
+        #year-selector { text-align: center; margin-bottom: 20px; }
+        #year-selector label { font-size: 14px; margin-right: 10px; }
+        #year-selector input { width: 100px; padding: 5px; font-size: 14px; }
     </style>
 </head>
 <body>
-    <header>
-        <div id="year-selector">
-            <label for="year-input">Select Year:</label>
-            <select id="year-input"></select>
-            <div id="error-message"></div>
-        </div>
-        <h1 id="chart-title">MOON EPHEMERIS OVERVIEW FOR THE YEAR 2025, by SA5IKN</h1>
-    </header>
+    <div id="year-selector">
+        <label for="year-input">Select Year:</label>
+        <input type="number" id="year-input" value="2026" min="1900" max="2100">
+    </div>
+    <h1 id="chart-title">MOON EPHEMERIS OVERVIEW FOR THE YEAR 2026, by SA5IKN</h1>
     <div class="chart-container">
         <span class="y-label-left">Declination (°)</span>
         <span class="y-label-right">Extra-Loss (dB)</span>
@@ -180,29 +64,13 @@
         const PERIGEE_DISTANCE_KM = 356352.93;
         const COLOR_DECLINATION = '#fa4d56';
         const COLOR_LOSS = '#1192e8';
-        const GC_RA_HOURS = 17 + 45/60 + 40/3600;
-        const GC_DEC = -(29 + 0/60 + 28/3600);
+        const GC_RA_HOURS = 17 + 45/60 + 40/3600; // Galactic Center RA in hours
+        const GC_DEC = -(29 + 0/60 + 28/3600); // Galactic Center Dec in degrees
 
+        // Store Chart.js instances to destroy them when updating
         let charts = [null, null, null, null];
 
-        // Populate year dropdown
-        function populateYearDropdown() {
-            const select = document.getElementById('year-input');
-            const currentYear = new Date().getUTCFullYear(); // 2025 based on current date
-            for (let year = 1900; year <= 2100; year++) {
-                const option = document.createElement('option');
-                option.value = year;
-                option.textContent = year;
-                if (year === currentYear) {
-                    option.selected = true;
-                }
-                select.appendChild(option);
-            }
-        }
-
-        // Call on page load
-        document.addEventListener('DOMContentLoaded', populateYearDropdown);
-
+        // Function to compute angular separation between two equatorial coordinates
         function angularSeparation(ra1, dec1, ra2, dec2) {
             const ra1Rad = ra1 * Math.PI / 12;
             const dec1Rad = dec1 * Math.PI / 180;
@@ -273,6 +141,7 @@
                 return new Date(interpolatedTime);
             }
 
+            // Orange bars: Moon-Sun <10°
             let is_close_sun = data.map(d => d.sun_sep < 10);
             let startIdx = null;
             for (let i = 0; i < data.length; i++) {
@@ -324,6 +193,7 @@
                 });
             }
 
+            // Grey bars: Moon-GC <10°
             let is_high_temp = data.map(d => d.gc_sep < 10);
             startIdx = null;
             for (let i = 0; i < data.length; i++) {
@@ -375,6 +245,7 @@
                 });
             }
 
+            // Month separators and labels
             let month_start = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1));
             while (month_start < end) {
                 const monthStr = dateToStrWithHours(month_start);
@@ -401,12 +272,13 @@
                     xValue: midStr,
                     yValue: 38,
                     content: month_start.toLocaleString('default', { month: 'long' }),
-                    font: { size: clamp(6, 1.5 * window.innerWidth / 100, 8), weight: 'bold' },
+                    font: { size: 8, weight: 'bold' },
                     color: 'black'
                 });
                 month_start = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth() + 1, 1));
             }
 
+            // Weekend dashed lines and labels
             let current = new Date(start.getTime());
             while (current < end) {
                 const wd = current.getUTCDay();
@@ -439,7 +311,7 @@
                             xValue: midStr,
                             yValue: 33,
                             content: label,
-                            font: { size: clamp(6, 1.5 * window.innerWidth / 100, 8) },
+                            font: { size: 8 },
                             color: 'black'
                         });
                     }
@@ -450,7 +322,10 @@
         }
 
         function createCharts(year) {
+            // Update the title
             document.getElementById('chart-title').textContent = `MOON EPHEMERIS OVERVIEW FOR THE YEAR ${year}, by SA5IKN`;
+
+            // Define quarters for the selected year
             const quarters = [
                 { start: new Date(Date.UTC(year, 0, 1)), end: new Date(Date.UTC(year, 3, 0)) },
                 { start: new Date(Date.UTC(year, 3, 1)), end: new Date(Date.UTC(year, 6, 0)) },
@@ -459,6 +334,7 @@
             ];
 
             quarters.forEach((quarter, index) => {
+                // Destroy existing chart if it exists
                 if (charts[index]) {
                     charts[index].destroy();
                     charts[index] = null;
@@ -485,7 +361,7 @@
                                 label: 'Declination',
                                 data: data.map(d => ({ x: d.date, y: d.dec })),
                                 borderColor: COLOR_DECLINATION,
-                                borderWidth: clamp(1, 0.3 * window.innerWidth / 100, 1.5),
+                                borderWidth: 1.5,
                                 pointRadius: 0,
                                 yAxisID: 'yDec'
                             },
@@ -493,7 +369,7 @@
                                 label: 'Extra Loss',
                                 data: data.map(d => ({ x: d.date, y: d.extra_loss })),
                                 borderColor: COLOR_LOSS,
-                                borderWidth: clamp(1, 0.3 * window.innerWidth / 100, 1.5),
+                                borderWidth: 1.5,
                                 pointRadius: 0,
                                 yAxisID: 'yLoss'
                             }
@@ -517,14 +393,9 @@
                                 min: -30,
                                 max: 30,
                                 position: 'left',
-                                ticks: {
-                                    color: COLOR_DECLINATION,
-                                    font: { size: clamp(7, 2 * window.innerWidth / 100, 9) },
-                                    drawTicks: true,
-                                    tickLength: clamp(5, 2 * window.innerWidth / 100, 10)
-                                },
+                                ticks: { color: COLOR_DECLINATION, font: { size: 9 }, drawTicks: true, tickLength: 10 },
                                 grid: { display: true, color: 'rgba(0,0,0,0.3)', borderDash: [2,2], drawBorder: false },
-                                border: { display: true, color: COLOR_DECLINATION, width: clamp(0.8, 0.3 * window.innerWidth / 100, 1.2) }
+                                border: { display: true, color: COLOR_DECLINATION, width: 1.2 }
                             },
                             yLoss: {
                                 min: 0,
@@ -533,9 +404,9 @@
                                 position: 'right',
                                 ticks: {
                                     color: COLOR_LOSS,
-                                    font: { size: clamp(7, 2 * window.innerWidth / 100, 9) },
+                                    font: { size: 9 },
                                     drawTicks: true,
-                                    tickLength: clamp(5, 2 * window.innerWidth / 100, 10),
+                                    tickLength: 10,
                                     stepSize: 0.4,
                                     callback: function(value) {
                                         const allowedTicks = [0, 0.4, 0.8, 1.2, 1.6, 2, 2.4];
@@ -546,7 +417,7 @@
                                     }
                                 },
                                 grid: { display: false, drawBorder: false },
-                                border: { display: true, color: COLOR_LOSS, width: clamp(0.8, 0.3 * window.innerWidth / 100, 1.2) }
+                                border: { display: true, color: COLOR_LOSS, width: 1.2 }
                             }
                         },
                         interaction: {
@@ -575,8 +446,8 @@
                                         tooltipEl.style.background = 'rgba(255,255,255,0.98)';
                                         tooltipEl.style.border = '1px solid #ccc';
                                         tooltipEl.style.borderRadius = '4px';
-                                        tooltipEl.style.padding = clamp(4, 1.5 * window.innerWidth / 100, 6) + 'px ' + clamp(6, 2 * window.innerWidth / 100, 8) + 'px';
-                                        tooltipEl.style.fontSize = clamp(9, 2 * window.innerWidth / 100, 11) + 'px';
+                                        tooltipEl.style.padding = '6px 8px';
+                                        tooltipEl.style.fontSize = '11px';
                                         tooltipEl.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)';
                                         tooltipEl.style.transition = 'opacity 0.04s ease';
                                         tooltipEl.style.whiteSpace = 'nowrap';
@@ -595,12 +466,12 @@
                                     }
                                     const d = data[dataIndex];
                                     tooltipEl.innerHTML = `
-                                        <div style="font-weight:700;margin-bottom:${clamp(2, 1 * window.innerWidth / 100, 4)}px">${d.dateStr}</div>
-                                        <div style="color:${COLOR_DECLINATION};margin-bottom:2px">Declination: ${d.dec.toFixed(2)}°</div>
-                                        <div style="color:${COLOR_LOSS};margin-bottom:2px">Extra Loss: ${d.extra_loss.toFixed(2)} dB</div>
-                                        <div style="color:#000;margin-bottom:2px">Distance: ${d.dist.toFixed(0)} km</div>
-                                        <div style="color:orange;margin-bottom:2px">Moon-Sun Sep: ${d.sun_sep.toFixed(2)}°</div>
-                                        <div style="color:gray">Moon-GC Sep: ${d.gc_sep.toFixed(2)}°</div>
+                                        <div style="font-weight:700;margin-bottom:4px;">${d.dateStr}</div>
+                                        <div style="color:${COLOR_DECLINATION};margin-bottom:2px;">Declination: ${d.dec.toFixed(2)}°</div>
+                                        <div style="color:${COLOR_LOSS};margin-bottom:2px;">Extra Loss: ${d.extra_loss.toFixed(2)} dB</div>
+                                        <div style="color:#000;margin-bottom:2px;">Distance: ${d.dist.toFixed(0)} km</div>
+                                        <div style="color:orange;margin-bottom:2px;">Moon-Sun Sep: ${d.sun_sep.toFixed(2)}°</div>
+                                        <div style="color:gray;">Moon-GC Sep: ${d.gc_sep.toFixed(2)}°</div>
                                     `;
                                     const caretX = tooltipModel.caretX;
                                     const caretY = tooltipModel.caretY;
@@ -616,12 +487,7 @@
                             }
                         },
                         layout: {
-                            padding: {
-                                top: clamp(30, 8 * window.innerWidth / 100, 50),
-                                bottom: clamp(5, 2 * window.innerWidth / 100, 10),
-                                left: clamp(10, 3 * window.innerWidth / 100, 20),
-                                right: clamp(15, 4 * window.innerWidth / 100, 30)
-                            }
+                            padding: { top: 50, bottom: 10, left: 20, right: 30 }
                         },
                         elements: { line: { tension: 0 } }
                     }
@@ -629,38 +495,19 @@
             });
         }
 
-        // Clamp function for dynamic sizing
-        function clamp(min, val, max) {
-            return Math.min(Math.max(val, min), max);
-        }
-
-        // Initialize charts with current year
-        createCharts(new Date().getUTCFullYear());
+        // Initialize charts with default year
+        createCharts(2026);
 
         // Add event listener for year input
         document.getElementById('year-input').addEventListener('change', (event) => {
-            const errorEl = document.getElementById('error-message');
             const year = parseInt(event.target.value);
             if (year >= 1900 && year <= 2100) {
-                errorEl.style.display = 'none';
-                errorEl.textContent = '';
                 createCharts(year);
             } else {
-                errorEl.style.display = 'block';
-                errorEl.textContent = 'Please select a year between 1900 and 2100';
-                event.target.value = new Date().getUTCFullYear();
-                createCharts(new Date().getUTCFullYear());
+                alert('Please enter a year between 1900 and 2100');
+                event.target.value = 2026;
+                createCharts(2026);
             }
-        });
-
-        // Redraw charts on window resize with debouncing
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                const year = parseInt(document.getElementById('year-input').value) || new Date().getUTCFullYear();
-                createCharts(year);
-            }, 200);
         });
     </script>
 </body>

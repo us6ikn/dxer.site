@@ -18,23 +18,18 @@
             max-width: 100%;
             box-sizing: border-box;
         }
-        header {
-            text-align: center;
-            margin-bottom: 1rem;
-            width: 100%;
-            max-width: 1200px;
-        }
         h1 {
+            text-align: center;
             font-size: clamp(12px, 3vw, 16px);
             font-weight: bold;
             color: black;
-            margin: 0.5rem 0;
+            margin-bottom: 1rem;
         }
         .chart-container {
             position: relative;
             width: 100%;
-            max-width: 1200px;
-            height: clamp(150px, 25vw, 200px);
+            max-width: 1200px; /* Upper limit for large screens */
+            height: clamp(150px, 25vw, 200px); /* Scales height based on viewport */
             margin-bottom: 10px;
         }
         .y-label-left {
@@ -73,52 +68,21 @@
             margin-right: 5px;
         }
         #year-selector {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 0.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
         }
         #year-selector label {
             font-size: clamp(12px, 2.5vw, 14px);
-            color: #333;
-            font-weight: 500;
+            margin-right: 10px;
         }
-        #year-selector select {
-            width: clamp(100px, 20vw, 150px);
-            padding: clamp(5px, 1.5vw, 8px);
+        #year-selector input {
+            width: clamp(80px, 15vw, 100px);
+            padding: 5px;
             font-size: clamp(12px, 2.5vw, 14px);
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: border-color 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-            max-height: 300px; /* Limit dropdown height on mobile */
-            overflow-y: auto; /* Enable scrolling for long dropdown */
-            appearance: none;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="#333" d="M2 4l4 4 4-4z"/></svg>');
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            padding-right: 30px;
-        }
-        #year-selector select:focus {
-            outline: none;
-            border-color: #1192e8;
-            box-shadow: 0 0 0 2px rgba(17, 146, 232, 0.2);
-        }
-        #year-selector select:hover {
-            border-color: #999;
-        }
-        #error-message {
-            display: none;
-            color: #fa4d56;
-            font-size: clamp(10px, 2vw, 12px);
-            margin-top: 5px;
         }
         @media (max-width: 600px) {
             .chart-container {
-                height: clamp(120px, 30vw, 180px);
+                height: clamp(120px, 30vw, 180px); /* Slightly taller on small screens */
             }
             .y-label-left, .y-label-right {
                 top: clamp(5px, 2vw, 10px);
@@ -126,25 +90,15 @@
             .we-label {
                 top: clamp(20px, 4vw, 30px);
             }
-            #year-selector {
-                flex-direction: column;
-                gap: 5px;
-            }
-            #year-selector select {
-                max-height: 200px; /* Smaller dropdown height on mobile */
-            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div id="year-selector">
-            <label for="year-input">Select Year:</label>
-            <select id="year-input"></select>
-            <div id="error-message"></div>
-        </div>
-        <h1 id="chart-title">MOON EPHEMERIS OVERVIEW FOR THE YEAR 2025, by SA5IKN</h1>
-    </header>
+    <div id="year-selector">
+        <label for="year-input">Select Year:</label>
+        <input type="number" id="year-input" value="2026" min="1900" max="2100">
+    </div>
+    <h1 id="chart-title">MOON EPHEMERIS OVERVIEW FOR THE YEAR 2026, by SA5IKN</h1>
     <div class="chart-container">
         <span class="y-label-left">Declination (°)</span>
         <span class="y-label-right">Extra-Loss (dB)</span>
@@ -184,24 +138,6 @@
         const GC_DEC = -(29 + 0/60 + 28/3600);
 
         let charts = [null, null, null, null];
-
-        // Populate year dropdown
-        function populateYearDropdown() {
-            const select = document.getElementById('year-input');
-            const currentYear = new Date().getUTCFullYear(); // 2025 based on current date
-            for (let year = 1900; year <= 2100; year++) {
-                const option = document.createElement('option');
-                option.value = year;
-                option.textContent = year;
-                if (year === currentYear) {
-                    option.selected = true;
-                }
-                select.appendChild(option);
-            }
-        }
-
-        // Call on page load
-        document.addEventListener('DOMContentLoaded', populateYearDropdown);
 
         function angularSeparation(ra1, dec1, ra2, dec2) {
             const ra1Rad = ra1 * Math.PI / 12;
@@ -634,33 +570,25 @@
             return Math.min(Math.max(val, min), max);
         }
 
-        // Initialize charts with current year
-        createCharts(new Date().getUTCFullYear());
+        // Initialize charts with default year
+        createCharts(2026);
 
         // Add event listener for year input
         document.getElementById('year-input').addEventListener('change', (event) => {
-            const errorEl = document.getElementById('error-message');
             const year = parseInt(event.target.value);
             if (year >= 1900 && year <= 2100) {
-                errorEl.style.display = 'none';
-                errorEl.textContent = '';
                 createCharts(year);
             } else {
-                errorEl.style.display = 'block';
-                errorEl.textContent = 'Please select a year between 1900 and 2100';
-                event.target.value = new Date().getUTCFullYear();
-                createCharts(new Date().getUTCFullYear());
+                alert('Please enter a year between 1900 and 2100');
+                event.target.value = 2026;
+                createCharts(2026);
             }
         });
 
-        // Redraw charts on window resize with debouncing
-        let resizeTimeout;
+        // Redraw charts on window resize
         window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                const year = parseInt(document.getElementById('year-input').value) || new Date().getUTCFullYear();
-                createCharts(year);
-            }, 200);
+            const year = parseInt(document.getElementById('year-input').value) || 2026;
+            createCharts(year);
         });
     </script>
 </body>
