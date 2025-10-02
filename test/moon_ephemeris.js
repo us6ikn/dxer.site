@@ -310,158 +310,165 @@ function createAnnotations(data, start, end) {
     return annotations;
 }
 
-quarters.forEach((quarter, index) => {
-    const data = computeMoonData(quarter.start, quarter.end);
-    if (!data || data.length === 0) {
-        console.warn(`No data for quarter ${index + 1}`);
-        return;
-    }
-    const annotations = createAnnotations(data, quarter.start, quarter.end);
-    const canvas = document.getElementById(`chart${index + 1}`);
-    const ctx = canvas.getContext('2d');
+// Wait for DOM to load before accessing canvas elements
+document.addEventListener('DOMContentLoaded', () => {
+    quarters.forEach((quarter, index) => {
+        const data = computeMoonData(quarter.start, quarter.end);
+        if (!data || data.length === 0) {
+            console.warn(`No data for quarter ${index + 1}`);
+            return;
+        }
+        const annotations = createAnnotations(data, quarter.start, quarter.end);
+        const canvas = document.getElementById(`chart${index + 1}`);
+        if (!canvas) {
+            console.error(`Canvas element chart${index + 1} not found`);
+            return;
+        }
+        const ctx = canvas.getContext('2d');
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            datasets: [
-                {
-                    label: 'Declination',
-                    data: data.map(d => ({ x: d.date, y: d.dec })),
-                    borderColor: COLOR_DECLINATION,
-                    borderWidth: 1.5,
-                    pointRadius: 0,
-                    yAxisID: 'yDec'
-                },
-                {
-                    label: 'Extra Loss',
-                    data: data.map(d => ({ x: d.date, y: d.extra_loss })),
-                    borderColor: COLOR_LOSS,
-                    borderWidth: 1.5,
-                    pointRadius: 0,
-                    yAxisID: 'yLoss'
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    type: 'time',
-                    time: { unit: 'day', parser: 'yyyy-MM-dd\'T\'HH:mm', displayFormats: { day: 'MMM d' } },
-                    min: quarter.start,
-                    max: quarter.end,
-                    position: 'top',
-                    ticks: { display: false },
-                    grid: { display: false },
-                    border: { display: false }
-                },
-                yDec: {
-                    min: -30,
-                    max: 30,
-                    position: 'left',
-                    ticks: { color: COLOR_DECLINATION, font: { size: 9 }, drawTicks: true, tickLength: 10 },
-                    grid: { display: true, color: 'rgba(0,0,0,0.3)', borderDash: [2,2], drawBorder: false },
-                    border: { display: true, color: COLOR_DECLINATION, width: 1.2 }
-                },
-                yLoss: {
-                    min: 0,
-                    max: 2.4,
-                    reverse: true,
-                    position: 'right',
-                    ticks: {
-                        color: COLOR_LOSS,
-                        font: { size: 9 },
-                        drawTicks: true,
-                        tickLength: 10,
-                        stepSize: 0.4,
-                        callback: function(value) {
-                            const allowedTicks = [0, 0.4, 0.8, 1.2, 1.6, 2, 2.4];
-                            if (allowedTicks.includes(Number(value.toFixed(1)))) {
-                                return value.toFixed(1);
-                            }
-                            return null;
-                        }
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [
+                    {
+                        label: 'Declination',
+                        data: data.map(d => ({ x: d.date, y: d.dec })),
+                        borderColor: COLOR_DECLINATION,
+                        borderWidth: 1.5,
+                        pointRadius: 0,
+                        yAxisID: 'yDec'
                     },
-                    grid: { display: false, drawBorder: false },
-                    border: { display: true, color: COLOR_LOSS, width: 1.2 }
-                }
+                    {
+                        label: 'Extra Loss',
+                        data: data.map(d => ({ x: d.date, y: d.extra_loss })),
+                        borderColor: COLOR_LOSS,
+                        borderWidth: 1.5,
+                        pointRadius: 0,
+                        yAxisID: 'yLoss'
+                    }
+                ]
             },
-            interaction: {
-                mode: 'index',
-                intersect: false,
-                axis: 'x'
-            },
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    enabled: false,
-                    displayColors: false,
-                    external: function(context) {
-                        const tooltipModel = context.tooltip;
-                        const chart = context.chart;
-                        const canvas = chart.canvas;
-                        const container = canvas.parentNode;
-                        const tooltipId = 'chartjs-tooltip-' + canvas.id;
-
-                        let tooltipEl = container.querySelector('#' + tooltipId);
-                        if (!tooltipEl) {
-                            tooltipEl = document.createElement('div');
-                            tooltipEl.id = tooltipId;
-                            tooltipEl.className = 'chartjs-tooltip';
-                            tooltipEl.style.position = 'absolute';
-                            tooltipEl.style.pointerEvents = 'none';
-                            tooltipEl.style.background = 'rgba(255,255,255,0.98)';
-                            tooltipEl.style.border = '1px solid #ccc';
-                            tooltipEl.style.borderRadius = '4px';
-                            tooltipEl.style.padding = '6px 8px';
-                            tooltipEl.style.fontSize = '11px';
-                            tooltipEl.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)';
-                            tooltipEl.style.transition = 'opacity 0.04s ease';
-                            tooltipEl.style.whiteSpace = 'nowrap';
-                            tooltipEl.style.zIndex = 1000;
-                            tooltipEl.style.opacity = '0';
-                            container.appendChild(tooltipEl);
-                        }
-
-                        if (tooltipModel.opacity === 0 || !tooltipModel.dataPoints || tooltipModel.dataPoints.length === 0) {
-                            tooltipEl.style.opacity = '0';
-                            return;
-                        }
-
-                        const dataIndex = tooltipModel.dataPoints[0].dataIndex;
-                        if (dataIndex == null || !data[dataIndex]) {
-                            tooltipEl.style.opacity = '0';
-                            return;
-                        }
-                        const d = data[dataIndex];
-
-                        tooltipEl.innerHTML = `
-                            <div style="font-weight:700;margin-bottom:4px;">${d.dateStr}</div>
-                            <div style="color:${COLOR_DECLINATION};margin-bottom:2px;">Declination: ${d.dec.toFixed(2)}°</div>
-                            <div style="color:${COLOR_LOSS};margin-bottom:2px;">Extra Loss: ${d.extra_loss.toFixed(2)} dB</div>
-                            <div style="color:#000;margin-bottom:2px;">Distance: ${d.dist.toFixed(0)} km</div>
-                            <div style="color:orange;margin-bottom:2px;">Moon-Sun Sep: ${d.sun_sep.toFixed(2)}°</div>
-                            <div style="color:gray;">Moon-GC Sep: ${d.gc_sep.toFixed(2)}°</div>
-                        `;
-
-                        const caretX = tooltipModel.caretX;
-                        const caretY = tooltipModel.caretY;
-                        tooltipEl.style.left = caretX + 'px';
-                        tooltipEl.style.top = caretY + 'px';
-                        tooltipEl.style.transform = 'translate(-50%, -120%)';
-                        tooltipEl.style.opacity = '1';
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: { unit: 'day', parser: 'yyyy-MM-dd\'T\'HH:mm', displayFormats: { day: 'MMM d' } },
+                        min: quarter.start,
+                        max: quarter.end,
+                        position: 'top',
+                        ticks: { display: false },
+                        grid: { display: false },
+                        border: { display: false }
+                    },
+                    yDec: {
+                        min: -30,
+                        max: 30,
+                        position: 'left',
+                        ticks: { color: COLOR_DECLINATION, font: { size: 9 }, drawTicks: true, tickLength: 10 },
+                        grid: { display: true, color: 'rgba(0,0,0,0.3)', borderDash: [2,2], drawBorder: false },
+                        border: { display: true, color: COLOR_DECLINATION, width: 1.2 }
+                    },
+                    yLoss: {
+                        min: 0,
+                        max: 2.4,
+                        reverse: true,
+                        position: 'right',
+                        ticks: {
+                            color: COLOR_LOSS,
+                            font: { size: 9 },
+                            drawTicks: true,
+                            tickLength: 10,
+                            stepSize: 0.4,
+                            callback: function(value) {
+                                const allowedTicks = [0, 0.4, 0.8, 1.2, 1.6, 2, 2.4];
+                                if (allowedTicks.includes(Number(value.toFixed(1)))) {
+                                    return value.toFixed(1);
+                                }
+                                return null;
+                            }
+                        },
+                        grid: { display: false, drawBorder: false },
+                        border: { display: true, color: COLOR_LOSS, width: 1.2 }
                     }
                 },
-                annotation: {
-                    clip: false,
-                    annotations: annotations
-                }
-            },
-            layout: {
-                padding: { top: 50, bottom: 10, left: 20, right: 30 }
-            },
-            elements: { line: { tension: 0 } }
-        }
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                    axis: 'x'
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: false,
+                        displayColors: false,
+                        external: function(context) {
+                            const tooltipModel = context.tooltip;
+                            const chart = context.chart;
+                            const canvas = chart.canvas;
+                            const container = canvas.parentNode;
+                            const tooltipId = 'chartjs-tooltip-' + canvas.id;
+
+                            let tooltipEl = container.querySelector('#' + tooltipId);
+                            if (!tooltipEl) {
+                                tooltipEl = document.createElement('div');
+                                tooltipEl.id = tooltipId;
+                                tooltipEl.className = 'chartjs-tooltip';
+                                tooltipEl.style.position = 'absolute';
+                                tooltipEl.style.pointerEvents = 'none';
+                                tooltipEl.style.background = 'rgba(255,255,255,0.98)';
+                                tooltipEl.style.border = '1px solid #ccc';
+                                tooltipEl.style.borderRadius = '4px';
+                                tooltipEl.style.padding = '6px 8px';
+                                tooltipEl.style.fontSize = '11px';
+                                tooltipEl.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)';
+                                tooltipEl.style.transition = 'opacity 0.04s ease';
+                                tooltipEl.style.whiteSpace = 'nowrap';
+                                tooltipEl.style.zIndex = 1000;
+                                tooltipEl.style.opacity = '0';
+                                container.appendChild(tooltipEl);
+                            }
+
+                            if (tooltipModel.opacity === 0 || !tooltipModel.dataPoints || tooltipModel.dataPoints.length === 0) {
+                                tooltipEl.style.opacity = '0';
+                                return;
+                            }
+
+                            const dataIndex = tooltipModel.dataPoints[0].dataIndex;
+                            if (dataIndex == null || !data[dataIndex]) {
+                                tooltipEl.style.opacity = '0';
+                                return;
+                            }
+                            const d = data[dataIndex];
+
+                            tooltipEl.innerHTML = `
+                                <div style="font-weight:700;margin-bottom:4px;">${d.dateStr}</div>
+                                <div style="color:${COLOR_DECLINATION};margin-bottom:2px;">Declination: ${d.dec.toFixed(2)}°</div>
+                                <div style="color:${COLOR_LOSS};margin-bottom:2px;">Extra Loss: ${d.extra_loss.toFixed(2)} dB</div>
+                                <div style="color:#000;margin-bottom:2px;">Distance: ${d.dist.toFixed(0)} km</div>
+                                <div style="color:orange;margin-bottom:2px;">Moon-Sun Sep: ${d.sun_sep.toFixed(2)}°</div>
+                                <div style="color:gray;">Moon-GC Sep: ${d.gc_sep.toFixed(2)}°</div>
+                            `;
+
+                            const caretX = tooltipModel.caretX;
+                            const caretY = tooltipModel.caretY;
+                            tooltipEl.style.left = caretX + 'px';
+                            tooltipEl.style.top = caretY + 'px';
+                            tooltipEl.style.transform = 'translate(-50%, -120%)';
+                            tooltipEl.style.opacity = '1';
+                        }
+                    },
+                    annotation: {
+                        clip: false,
+                        annotations: annotations
+                    }
+                },
+                layout: {
+                    padding: { top: 50, bottom: 10, left: 20, right: 30 }
+                },
+                elements: { line: { tension: 0 } }
+            }
+        });
     });
 });
