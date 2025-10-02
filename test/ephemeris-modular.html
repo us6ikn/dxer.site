@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moon Ephemeris Overview for 2026</title>
+    <script src="https://dxer.site/eme-observer/a.ob.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <script src="https://dxer.site/test/moon_ephemeris.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { text-align: center; font-size: 16px; font-weight: bold; color: black; }
+        .chart-container { position: relative; margin-bottom: 5px; width: 800px; height: 200px; }
+        .y-label-left { position: absolute; left: 20px; top: 25px; color: #fa4d56; font-weight: bold; font-size: 12px; }
+        .y-label-right { position: absolute; right: 20px; top: 25px; color: #1192e8; font-weight: bold; font-size: 12px; }
+        .we-label { position: absolute; left: 30px; top: 46px; color: black; font-size: 8px; }
+        #explanation { margin-top: 20px; font-size: 12px; }
+        #explanation p { margin: 5px 0; }
+        #explanation span { font-size: 14px; margin-right: 5px; }
+    </style>
+</head>
+<body>
+    <h1>MOON EPHEMERIS OVERVIEW FOR THE YEAR 2026, by SA5IKN</h1>
+    <div class="chart-container">
+        <span class="y-label-left">Declination (°)</span>
+        <span class="y-label-right">Extra-Loss (dB)</span>
+        <span class="we-label">WE:</span>
+        <canvas id="chart1"></canvas>
+    </div>
+    <div class="chart-container">
+        <span class="y-label-left">Declination (°)</span>
+        <span class="y-label-right">Extra-Loss (dB)</span>
+        <span class="we-label">WE:</span>
+        <canvas id="chart2"></canvas>
+    </div>
+    <div class="chart-container">
+        <span class="y-label-left">Declination (°)</span>
+        <span class="y-label-right">Extra-Loss (dB)</span>
+        <span class="we-label">WE:</span>
+        <canvas id="chart3"></canvas>
+    </div>
+    <div class="chart-container">
+        <span class="y-label-left">Declination (°)</span>
+        <span class="y-label-right">Extra-Loss (dB)</span>
+        <span class="we-label">WE:</span>
+        <canvas id="chart4"></canvas>
+    </div>
+    <div id="explanation">
+        <h3>Explanation:</h3>
+        <p><span style="color: grey;">■</span> Vertical grey bars show the days where the sky temp is high and could degrade the system temperature.</p>
+        <p><span style="color: orange;">■</span> Vertical orange bars show the days where the moon is close to the sun (&lt;10°), near the new moon dates.</p>
+        <p><span style="color: #1192e8;">―</span> Extra-loss is the additional range loss in dB compared to the minimum pathloss at Moon perigee.</p>
+        <p><span style="color: #fa4d56;">―</span> The declination is plotted as red curve and weekends (WE) are marked at the top of the ephemeris graph.</p>
+    </div>
+</body>
+</html>
