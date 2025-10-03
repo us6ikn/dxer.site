@@ -20,7 +20,7 @@
         }
         header {
             text-align: center;
-            margin-bottom: 1rem;
+            margin-bottom: 0rem;
             width: 100%;
             max-width: 1200px;
             z-index: 100;
@@ -30,13 +30,18 @@
             font-weight: bold;
             color: black;
             margin: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
         }
         .chart-container {
             position: relative;
             width: 100%;
             max-width: 1200px;
             height: clamp(150px, 25vw, 200px);
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             user-select: none;
         }
         .chart-container canvas {
@@ -47,7 +52,7 @@
         .y-label-left {
             position: absolute;
             left: clamp(5px, 2vw, 15px);
-            top: clamp(10px, 3vw, 20px);
+            top: clamp(10px, 3vw, 30px);
             color: #fa4d56;
             font-weight: bold;
             font-size: clamp(8px, 2vw, 12px);
@@ -55,19 +60,11 @@
         }
         .y-label-right {
             position: absolute;
-            right: clamp(5px, 2vw, 15px);
-            top: clamp(10px, 3vw, 20px);
+            right: clamp(5px, 2vw, 30px);
+            top: clamp(10px, 3vw, 30px);
             color: #1192e8;
             font-weight: bold;
             font-size: clamp(8px, 2vw, 12px);
-            z-index: 150;
-        }
-        .we-label {
-            position: absolute;
-            left: clamp(10px, 3vw, 20px);
-            top: clamp(25px, 5vw, 40px);
-            color: black;
-            font-size: clamp(6px, 1.5vw, 8px);
             z-index: 150;
         }
         #explanation {
@@ -83,43 +80,31 @@
             font-size: clamp(10px, 2.5vw, 14px);
             margin-right: 5px;
         }
-        #year-selector {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 0.5rem;
-            z-index: 100;
-        }
-        #year-selector label {
+        #year-input {
             font-size: clamp(12px, 2.5vw, 14px);
-            color: #333;
             font-weight: 500;
-        }
-        #year-selector select {
-            width: clamp(100px, 20vw, 150px);
-            padding: clamp(5px, 1.5vw, 8px);
-            font-size: clamp(12px, 2.5vw, 14px);
+            color: #333;
+            padding: clamp(2px, 1vw, 4px) clamp(5px, 1.5vw, 8px);
             border: 1px solid #ccc;
             border-radius: 4px;
             background: #fff;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             transition: border-color 0.2s, box-shadow 0.2s;
             cursor: pointer;
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 12 12"><path fill="#333" d="M2 4l4 4 4-4z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 5px center;
+            padding-right: 20px;
             max-height: 300px;
             overflow-y: auto;
-            appearance: none;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="#333" d="M2 4l4 4 4-4z"/></svg>');
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            padding-right: 30px;
         }
-        #year-selector select:focus {
+        #year-input:focus {
             outline: none;
             border-color: #1192e8;
             box-shadow: 0 0 0 2px rgba(17, 146, 232, 0.2);
         }
-        #year-selector select:hover {
+        #year-input:hover {
             border-color: #999;
         }
         #error-message {
@@ -141,604 +126,77 @@
             .we-label {
                 top: clamp(20px, 4vw, 30px);
             }
-            #year-selector {
+            h1 {
                 flex-direction: column;
                 gap: 5px;
             }
-            #year-selector select {
+            #year-input {
                 max-height: 200px;
+                padding: clamp(2px, 1vw, 3px) clamp(4px, 1vw, 6px);
+                font-size: clamp(10px, 2.2vw, 12px);
             }
             .chartjs-tooltip {
                 font-size: clamp(8px, 2.5vw, 10px);
             }
         }
+        .author-link {
+            color: inherit;       /* keeps same color as parent (black in your case) */
+            text-decoration: none; /* removes underline */
+            font-weight: normal;   /* match your previous style */
+        }
+        .author-link:hover {
+            text-decoration: underline; /* optional: underline only on hover */
+        }
+
     </style>
 </head>
 <body>
     <header>
-        <div id="year-selector">
-            <label for="year-input">Select Year:</label>
+        <h1 id="chart-title">
+            Moon Ephemeris Overview for
             <select id="year-input"></select>
-            <div id="error-message"></div>
-        </div>
-        <h1 id="chart-title">MOON EPHEMERIS OVERVIEW FOR THE YEAR 2025, by SA5IKN</h1>
+            <a href="https://dxer.site/eme-observer/"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="author-link">by SA5IKN</a>
+        </h1>
+        <div id="error-message"></div>
     </header>
     <div class="chart-container">
         <span class="y-label-left">Declination (°)</span>
-        <span class="y-label-right">Extra-Loss (dB)</span>
-        <span class="we-label">WE:</span>
+        <span class="y-label-right">Extra Loss (dB)</span>
         <canvas id="chart1"></canvas>
     </div>
     <div class="chart-container">
         <span class="y-label-left">Declination (°)</span>
-        <span class="y-label-right">Extra-Loss (dB)</span>
-        <span class="we-label">WE:</span>
+        <span class="y-label-right">Extra Loss (dB)</span>
         <canvas id="chart2"></canvas>
     </div>
     <div class="chart-container">
         <span class="y-label-left">Declination (°)</span>
-        <span class="y-label-right">Extra-Loss (dB)</span>
-        <span class="we-label">WE:</span>
+        <span class="y-label-right">Extra Loss (dB)</span>
         <canvas id="chart3"></canvas>
     </div>
     <div class="chart-container">
         <span class="y-label-left">Declination (°)</span>
-        <span class="y-label-right">Extra-Loss (dB)</span>
-        <span class="we-label">WE:</span>
+        <span class="y-label-right">Extra Loss (dB)</span>
         <canvas id="chart4"></canvas>
     </div>
     <div id="explanation">
-        <h3>Explanation:</h3>
-        <p><span style="color: grey;">■</span> Vertical grey bars show the days where the sky temp is high and could degrade the system temperature.</p>
-        <p><span style="color: orange;">■</span> Vertical orange bars show the days where the moon is close to the sun (&lt;10°), near the new moon dates.</p>
-        <p><span style="color: #1192e8;">―</span> Extra-loss is the additional range loss in dB compared to the minimum pathloss at Moon perigee.</p>
-        <p><span style="color: #fa4d56;">―</span> The declination is plotted as red curve and weekends (WE) are marked at the top of the ephemeris graph.</p>
+        <p style="margin-bottom:1rem; font-size: clamp(10px, 2vw, 12px);">
+                Hover over the charts to see details.
+            </p>
+        <p><span style="color: grey;">■</span> Vertical grey bars show days when high sky temperature can reduce system performance.</p>
+        <p><span style="color: orange;">■</span> Vertical orange bars mark days when the Moon is within 10° of the Sun, near new moon phases.</p>
+        <p><span style="color: #1192e8;">―</span> Extra loss represents the additional path loss in dB relative to the minimum path loss at lunar perigee.</p>
+        <p><span style="color: #fa4d56;">―</span> Declination is plotted as a red curve, with weekends (WE) marked at the top of each ephemeris graph.</p>
+        <p style="margin-top:1rem; font-style:italic; font-size: clamp(10px, 2vw, 12px);">
+                This Ephemeris Overview is powered by
+                <a href="https://dxer.site/eme-observer/" target="_blank" rel="noopener noreferrer">EME Observer</a>
+            </p>
     </div>
     <script>
-        const PERIGEE_DISTANCE_KM = 356352.93;
-        const COLOR_DECLINATION = '#fa4d56';
-        const COLOR_LOSS = '#1192e8';
-        const GC_RA_HOURS = 17 + 45/60 + 40/3600;
-        const GC_DEC = -(29 + 0/60 + 28/3600);
-
-        let charts = [null, null, null, null];
-        let lastWindowSize = { width: window.innerWidth, height: window.innerHeight };
-
-        function populateYearDropdown() {
-            const select = document.getElementById('year-input');
-            const currentYear = new Date().getUTCFullYear();
-            for (let year = 1900; year <= 2100; year++) {
-                const option = document.createElement('option');
-                option.value = year;
-                option.textContent = year;
-                if (year === currentYear) {
-                    option.selected = true;
-                }
-                select.appendChild(option);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            populateYearDropdown();
-            document.querySelectorAll('.chart-container, .chart-container canvas').forEach(element => {
-                element.addEventListener('contextmenu', (e) => {
-                    e.preventDefault();
-                });
-            });
-        });
-
-        function angularSeparation(ra1, dec1, ra2, dec2) {
-            const ra1Rad = ra1 * Math.PI / 12;
-            const dec1Rad = dec1 * Math.PI / 180;
-            const ra2Rad = ra2 * Math.PI / 12;
-            const dec2Rad = dec2 * Math.PI / 180;
-            const cosSep = Math.sin(dec1Rad) * Math.sin(dec2Rad) +
-                           Math.cos(dec1Rad) * Math.cos(dec2Rad) * Math.cos(ra1Rad - ra2Rad);
-            const sepRad = Math.acos(Math.min(Math.max(cosSep, -1), 1));
-            return sepRad * 180 / Math.PI;
-        }
-
-        function computeMoonData(start, end) {
-            const data = [];
-            function formatDateNatural(date) {
-                const year = date.getUTCFullYear();
-                const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-                const day = String(date.getUTCDate()).padStart(2, '0');
-                const hours = String(date.getUTCHours()).padStart(2, '0');
-                const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-                return `${year}-${month}-${day} ${hours}:${minutes} UTC`;
-            }
-
-            for (let dt = new Date(start); dt <= end; dt.setUTCDate(dt.getUTCDate() + 1)) {
-                [0, 12].forEach(hour => {
-                    const dtSample = new Date(dt);
-                    dtSample.setUTCHours(hour, 0, 0, 0);
-                    try {
-                        const astroTime = Astronomy.MakeTime(dtSample);
-                        const libration = Astronomy.Libration(astroTime);
-                        const dist_km = libration.dist_km;
-                        const moonGeo = Astronomy.GeoVector(Astronomy.Body.Moon, astroTime, true);
-                        const sunGeo = Astronomy.GeoVector(Astronomy.Body.Sun, astroTime, true);
-                        const moonEq = Astronomy.EquatorFromVector(moonGeo);
-                        const sunEq = Astronomy.EquatorFromVector(sunGeo);
-                        const dec = moonEq.dec;
-                        const moon_ra = moonEq.ra;
-                        const extra_loss = 40 * Math.log10(dist_km / PERIGEE_DISTANCE_KM);
-                        const sun_sep = angularSeparation(moon_ra, dec, sunEq.ra, sunEq.dec);
-                        const gc_sep = angularSeparation(moon_ra, dec, GC_RA_HOURS, GC_DEC);
-                        data.push({
-                            date: new Date(dtSample),
-                            dateStr: formatDateNatural(dtSample),
-                            dec,
-                            dist: dist_km,
-                            extra_loss,
-                            sun_sep,
-                            gc_sep
-                        });
-                    } catch (e) {
-                        console.warn(`Error computing data for ${dtSample.toISOString()}: ${e.message}`);
-                    }
-                });
-            }
-            data.sort((a, b) => a.date - b.date);
-            return data;
-        }
-
-        function createAnnotations(data, start, end) {
-            const annotations = [];
-            function dateToStrWithHours(date) {
-                return date.toISOString().slice(0, 16);
-            }
-            function interpolateCrossingTime(d1, d2, sep1, sep2, threshold) {
-                const t1 = d1.date.getTime();
-                const t2 = d2.date.getTime();
-                const fraction = (threshold - sep1) / (sep2 - sep1);
-                const interpolatedTime = t1 + fraction * (t2 - t1);
-                return new Date(interpolatedTime);
-            }
-
-            let is_close_sun = data.map(d => d.sun_sep < 10);
-            let startIdx = null;
-            for (let i = 0; i < data.length; i++) {
-                if (is_close_sun[i] && startIdx === null) {
-                    startIdx = i;
-                } else if (!is_close_sun[i] && startIdx !== null) {
-                    let barStart = data[startIdx].date;
-                    let barEnd = data[i - 1].date;
-                    if (startIdx > 0 && data[startIdx - 1].sun_sep >= 10) {
-                        barStart = interpolateCrossingTime(data[startIdx - 1], data[startIdx], data[startIdx - 1].sun_sep, data[startIdx].sun_sep, 10);
-                    }
-                    if (i < data.length && data[i].sun_sep >= 10) {
-                        barEnd = interpolateCrossingTime(data[i - 1], data[i], data[i - 1].sun_sep, data[i].sun_sep, 10);
-                    } else {
-                        barEnd = new Date(data[i - 1].date);
-                        barEnd.setUTCHours(barEnd.getUTCHours() + 12);
-                    }
-                    annotations.push({
-                        type: 'box',
-                        xScaleID: 'x',
-                        xMin: dateToStrWithHours(barStart),
-                        xMax: dateToStrWithHours(barEnd),
-                        yScaleID: 'yDec',
-                        yMin: -30,
-                        yMax: 30,
-                        backgroundColor: 'rgba(255, 165, 0, 0.4)',
-                        borderWidth: 0
-                    });
-                    startIdx = null;
-                }
-            }
-            if (startIdx !== null) {
-                let barStart = data[startIdx].date;
-                let barEnd = new Date(data[data.length - 1].date);
-                barEnd.setUTCHours(barEnd.getUTCHours() + 12);
-                if (startIdx > 0 && data[startIdx - 1].sun_sep >= 10) {
-                    barStart = interpolateCrossingTime(data[startIdx - 1], data[startIdx], data[startIdx - 1].sun_sep, data[startIdx].sun_sep, 10);
-                }
-                annotations.push({
-                    type: 'box',
-                    xScaleID: 'x',
-                    xMin: dateToStrWithHours(barStart),
-                    xMax: dateToStrWithHours(barEnd),
-                        yScaleID: 'yDec',
-                        yMin: -30,
-                        yMax: 30,
-                        backgroundColor: 'rgba(255, 165, 0, 0.4)',
-                        borderWidth: 0
-                    });
-                    startIdx = null;
-                }
-
-                let is_high_temp = data.map(d => d.gc_sep < 10);
-                startIdx = null;
-                for (let i = 0; i < data.length; i++) {
-                    if (is_high_temp[i] && startIdx === null) {
-                        startIdx = i;
-                    } else if (!is_high_temp[i] && startIdx !== null) {
-                        let barStart = data[startIdx].date;
-                        let barEnd = data[i - 1].date;
-                        if (startIdx > 0 && data[startIdx - 1].gc_sep >= 10) {
-                            barStart = interpolateCrossingTime(data[startIdx - 1], data[startIdx], data[startIdx - 1].gc_sep, data[startIdx].gc_sep, 10);
-                        }
-                        if (i < data.length && data[i].gc_sep >= 10) {
-                            barEnd = interpolateCrossingTime(data[i - 1], data[i], data[i - 1].gc_sep, data[i].gc_sep, 10);
-                        } else {
-                            barEnd = new Date(data[i - 1].date);
-                            barEnd.setUTCHours(barEnd.getUTCHours() + 12);
-                        }
-                        annotations.push({
-                            type: 'box',
-                            xScaleID: 'x',
-                            xMin: dateToStrWithHours(barStart),
-                            xMax: dateToStrWithHours(barEnd),
-                            yScaleID: 'yDec',
-                            yMin: -30,
-                            yMax: 30,
-                            backgroundColor: 'rgba(128, 128, 128, 0.4)',
-                            borderWidth: 0
-                        });
-                        startIdx = null;
-                    }
-                }
-                if (startIdx !== null) {
-                    let barStart = data[startIdx].date;
-                    let barEnd = new Date(data[data.length - 1].date);
-                    barEnd.setUTCHours(barEnd.getUTCHours() + 12);
-                    if (startIdx > 0 && data[startIdx - 1].gc_sep >= 10) {
-                        barStart = interpolateCrossingTime(data[startIdx - 1], data[startIdx], data[startIdx - 1].gc_sep, data[startIdx].gc_sep, 10);
-                    }
-                    annotations.push({
-                        type: 'box',
-                        xScaleID: 'x',
-                        xMin: dateToStrWithHours(barStart),
-                        xMax: dateToStrWithHours(barEnd),
-                        yScaleID: 'yDec',
-                        yMin: -30,
-                        yMax: 30,
-                        backgroundColor: 'rgba(128, 128, 128, 0.4)',
-                        borderWidth: 0
-                    });
-                }
-
-                let month_start = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1));
-                while (month_start < end) {
-                    const monthStr = dateToStrWithHours(month_start);
-                    if (month_start.getTime() !== start.getTime() && month_start.getTime() !== end.getTime()) {
-                        annotations.push({
-                            type: 'line',
-                            xScaleID: 'x',
-                            xMin: monthStr,
-                            xMax: monthStr,
-                            yScaleID: 'yDec',
-                            yMin: -30,
-                            yMax: 30,
-                            borderColor: 'gray',
-                            borderWidth: 1.5
-                        });
-                    }
-                    const ndays = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth() + 1, 0)).getUTCDate();
-                    const mid_month = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth(), Math.floor(ndays / 2)));
-                    const midStr = dateToStrWithHours(mid_month);
-                    annotations.push({
-                        type: 'label',
-                        xScaleID: 'x',
-                        yScaleID: 'yDec',
-                        xValue: midStr,
-                        yValue: 38,
-                        content: month_start.toLocaleString('default', { month: 'long' }),
-                        font: { size: clamp(6, 1.5 * window.innerWidth / 100, 8), weight: 'bold' },
-                        color: 'black'
-                    });
-                    month_start = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth() + 1, 1));
-                }
-
-                let current = new Date(start.getTime());
-                while (current < end) {
-                    const wd = current.getUTCDay();
-                    const currentStr = dateToStrWithHours(current);
-                    if (wd === 0 || wd === 6) {
-                        annotations.push({
-                            type: 'line',
-                            xScaleID: 'x',
-                            xMin: currentStr,
-                            xMax: currentStr,
-                            yScaleID: 'yDec',
-                            yMin: -30,
-                            yMax: 30,
-                            borderColor: 'gray',
-                            borderWidth: 1.5,
-                            borderDash: [5, 5],
-                            borderDashOffset: 0
-                        });
-                        if (wd === 6) {
-                            const sunday = new Date(current.getTime());
-                            sunday.setUTCDate(sunday.getUTCDate() + 1);
-                            const label = `${current.getUTCDate()}/${sunday.getUTCDate()}`;
-                            const mid = new Date(current.getTime());
-                            mid.setUTCHours(12);
-                            const midStr = dateToStrWithHours(mid);
-                            annotations.push({
-                                type: 'label',
-                                xScaleID: 'x',
-                                yScaleID: 'yDec',
-                                xValue: midStr,
-                                yValue: 33,
-                                content: label,
-                                font: { size: clamp(6, 1.5 * window.innerWidth / 100, 8) },
-                                color: 'black'
-                            });
-                        }
-                    }
-                    current.setUTCDate(current.getUTCDate() + 1);
-                }
-                return annotations;
-            }
-
-            function hideAllTooltips() {
-                charts.forEach((chart, index) => {
-                    const canvas = document.getElementById(`chart${index + 1}`);
-                    if (canvas) {
-                        const tooltipEl = canvas.parentNode.querySelector(`#chartjs-tooltip-chart${index + 1}`);
-                        if (tooltipEl) {
-                            tooltipEl.style.opacity = '0';
-                        }
-                    }
-                });
-            }
-
-            function externalTooltipHandler(context) {
-                const tooltipModel = context.tooltip;
-                const chart = context.chart;
-                const canvas = chart.canvas;
-                const container = canvas.parentNode;
-                const tooltipId = 'chartjs-tooltip-' + canvas.id;
-                let tooltipEl = container.querySelector('#' + tooltipId);
-
-                if (!tooltipEl) {
-                    tooltipEl = document.createElement('div');
-                    tooltipEl.id = tooltipId;
-                    tooltipEl.className = 'chartjs-tooltip';
-                    tooltipEl.style.position = 'absolute';
-                    tooltipEl.style.pointerEvents = 'none';
-                    tooltipEl.style.background = 'rgba(255,255,255,0.98)';
-                    tooltipEl.style.border = '1px solid #ccc';
-                    tooltipEl.style.borderRadius = '4px';
-                    tooltipEl.style.padding = clamp(4, 1.5 * window.innerWidth / 100, 6) + 'px ' + clamp(6, 2 * window.innerWidth / 100, 8) + 'px';
-                    tooltipEl.style.fontSize = clamp(9, 2 * window.innerWidth / 100, 11) + 'px';
-                    tooltipEl.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)';
-                    tooltipEl.style.transition = 'opacity 0.04s ease';
-                    tooltipEl.style.whiteSpace = 'nowrap';
-                    tooltipEl.style.zIndex = 2000;
-                    tooltipEl.style.opacity = '0';
-                    container.appendChild(tooltipEl);
-                }
-
-                hideAllTooltips();
-
-                if (tooltipModel.opacity === 0 || !tooltipModel.dataPoints || tooltipModel.dataPoints.length === 0) {
-                    tooltipEl.style.opacity = '0';
-                    return;
-                }
-
-                const dataIndex = tooltipModel.dataPoints[0].dataIndex;
-                const dataset = chart.data.datasets;
-                const declinationData = dataset[0].data[dataIndex];
-                const extraLossData = dataset[1].data[dataIndex];
-                const originalData = chart.data.datasets[0].data[dataIndex].originalData;
-
-                if (!originalData) {
-                    tooltipEl.style.opacity = '0';
-                    return;
-                }
-
-                function formatDateNatural(date) {
-                    const year = date.getUTCFullYear();
-                    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-                    const day = String(date.getUTCDate()).padStart(2, '0');
-                    const hours = String(date.getUTCHours()).padStart(2, '0');
-                    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-                    return `${year}-${month}-${day} ${hours}:${minutes} UTC`;
-                }
-
-                tooltipEl.innerHTML = `
-                    <div style="font-weight:700;margin-bottom:${clamp(2, 1 * window.innerWidth / 100, 4)}px">${formatDateNatural(new Date(declinationData.x))}</div>
-                    <div style="color:${COLOR_DECLINATION};margin-bottom:2px">Declination: ${originalData.dec.toFixed(2)}°</div>
-                    <div style="color:${COLOR_LOSS};margin-bottom:2px">Extra Loss: ${originalData.extra_loss.toFixed(2)} dB</div>
-                    <div style="color:#000;margin-bottom:2px">Distance: ${originalData.dist.toFixed(0)} km</div>
-                    <div style="color:orange;margin-bottom:2px">Moon-Sun Sep: ${originalData.sun_sep.toFixed(2)}°</div>
-                    <div style="color:gray">Moon-GC Sep: ${originalData.gc_sep.toFixed(2)}°</div>
-                `;
-
-                const caretX = tooltipModel.caretX;
-                const caretY = tooltipModel.caretY;
-                const isMobile = window.innerWidth <= 600;
-
-                tooltipEl.style.left = `${caretX}px`;
-                tooltipEl.style.top = `${caretY}px`;
-                tooltipEl.style.transform = isMobile ? 'translate(-50%, -100%)' : 'translate(-50%, -120%)';
-                tooltipEl.style.opacity = '1';
-            }
-
-            function createCharts(year) {
-                console.log(`Creating charts for year ${year} at ${new Date().toISOString()}`);
-
-                document.getElementById('chart-title').textContent = `MOON EPHEMERIS OVERVIEW FOR THE YEAR ${year}, by SA5IKN`;
-                const quarters = [
-                    { start: new Date(Date.UTC(year, 0, 1)), end: new Date(Date.UTC(year, 3, 0)) },
-                    { start: new Date(Date.UTC(year, 3, 1)), end: new Date(Date.UTC(year, 6, 0)) },
-                    { start: new Date(Date.UTC(year, 6, 1)), end: new Date(Date.UTC(year, 9, 0)) },
-                    { start: new Date(Date.UTC(year, 9, 1)), end: new Date(Date.UTC(year + 1, 0, 0)) }
-                ];
-
-                quarters.forEach((quarter, index) => {
-                    if (charts[index]) {
-                        charts[index].destroy();
-                        charts[index] = null;
-                    }
-
-                    const data = computeMoonData(quarter.start, quarter.end);
-                    if (!data || data.length === 0) {
-                        console.warn(`No data for quarter ${index + 1}`);
-                        return;
-                    }
-                    const annotations = createAnnotations(data, quarter.start, quarter.end);
-                    const canvas = document.getElementById(`chart${index + 1}`);
-                    if (!canvas) {
-                        console.error(`Canvas element chart${index + 1} not found`);
-                        return;
-                    }
-                    const ctx = canvas.getContext('2d');
-
-                    const declinationData = data.map(d => ({ x: d.date, y: d.dec, originalData: d }));
-                    const extraLossData = data.map(d => ({ x: d.date, y: d.extra_loss, originalData: d }));
-
-                    charts[index] = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            datasets: [
-                                {
-                                    label: 'Declination',
-                                    data: declinationData,
-                                    borderColor: COLOR_DECLINATION,
-                                    borderWidth: clamp(1, 0.3 * window.innerWidth / 100, 1.5),
-                                    pointRadius: 0,
-                                    yAxisID: 'yDec'
-                                },
-                                {
-                                    label: 'Extra Loss',
-                                    data: extraLossData,
-                                    borderColor: COLOR_LOSS,
-                                    borderWidth: clamp(1, 0.3 * window.innerWidth / 100, 1.5),
-                                    pointRadius: 0,
-                                    yAxisID: 'yLoss'
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            scales: {
-                                x: {
-                                    type: 'time',
-                                    time: { unit: 'day', parser: 'yyyy-MM-dd\'T\'HH:mm', displayFormats: { day: 'MMM d' } },
-                                    min: quarter.start,
-                                    max: quarter.end,
-                                    position: 'top',
-                                    ticks: { display: false },
-                                    grid: { display: false },
-                                    border: { display: false }
-                                },
-                                yDec: {
-                                    min: -30,
-                                    max: 30,
-                                    position: 'left',
-                                    ticks: {
-                                        color: COLOR_DECLINATION,
-                                        font: { size: clamp(7, 2 * window.innerWidth / 100, 9) },
-                                        drawTicks: true,
-                                        tickLength: clamp(5, 2 * window.innerWidth / 100, 10)
-                                    },
-                                    grid: { display: true, color: 'rgba(0,0,0,0.3)', borderDash: [2,2], drawBorder: false },
-                                    border: { display: true, color: COLOR_DECLINATION, width: clamp(0.8, 0.3 * window.innerWidth / 100, 1.2) }
-                                },
-                                yLoss: {
-                                    min: 0,
-                                    max: 2.4,
-                                    reverse: true,
-                                    position: 'right',
-                                    ticks: {
-                                        color: COLOR_LOSS,
-                                        font: { size: clamp(7, 2 * window.innerWidth / 100, 9) },
-                                        drawTicks: true,
-                                        tickLength: clamp(5, 2 * window.innerWidth / 100, 10),
-                                        stepSize: 0.4,
-                                        callback: function(value) {
-                                            const allowedTicks = [0, 0.4, 0.8, 1.2, 1.6, 2, 2.4];
-                                            if (allowedTicks.includes(Number(value.toFixed(1)))) {
-                                                return value.toFixed(1);
-                                            }
-                                            return null;
-                                        }
-                                    },
-                                    grid: { display: false, drawBorder: false },
-                                    border: { display: true, color: COLOR_LOSS, width: clamp(0.8, 0.3 * window.innerWidth / 100, 1.2) }
-                                }
-                            },
-                            interaction: {
-                                mode: 'index',
-                                intersect: false,
-                                axis: 'x'
-                            },
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    enabled: false,
-                                    displayColors: false,
-                                    external: externalTooltipHandler
-                                },
-                                annotation: {
-                                    clip: false,
-                                    annotations: annotations
-                                }
-                            },
-                            layout: {
-                                padding: {
-                                    top: clamp(40, 10 * window.innerWidth / 100, 60),
-                                    bottom: clamp(5, 2 * window.innerWidth / 100, 10),
-                                    left: clamp(10, 3 * window.innerWidth / 100, 20),
-                                    right: clamp(15, 4 * window.innerWidth / 100, 30)
-                                }
-                            },
-                            elements: { line: { tension: 0 } }
-                        }
-                    });
-                });
-            }
-
-            function clamp(min, val, max) {
-                return Math.min(Math.max(val, min), max);
-            }
-
-            createCharts(new Date().getUTCFullYear());
-
-            document.getElementById('year-input').addEventListener('change', (event) => {
-                const errorEl = document.getElementById('error-message');
-                const year = parseInt(event.target.value);
-                if (year >= 1900 && year <= 2100) {
-                    errorEl.style.display = 'none';
-                    errorEl.textContent = '';
-                    createCharts(year);
-                } else {
-                    errorEl.style.display = 'block';
-                    errorEl.textContent = 'Please select a year between 1900 and 2100';
-                    event.target.value = new Date().getUTCFullYear();
-                    createCharts(new Date().getUTCFullYear());
-                }
-            });
-
-            let touchTimeout;
-            document.addEventListener('touchend', () => {
-                clearTimeout(touchTimeout);
-                touchTimeout = setTimeout(hideAllTooltips, 1000);
-            });
-
-            let resizeTimeout;
-            window.addEventListener('resize', () => {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(() => {
-                    const currentWidth = window.innerWidth;
-                    const currentHeight = window.innerHeight;
-                    const widthDiff = Math.abs(currentWidth - lastWindowSize.width);
-                    const heightDiff = Math.abs(currentHeight - lastWindowSize.height);
-
-                    if (widthDiff > 10 || heightDiff > 10) {
-                        const year = parseInt(document.getElementById('year-input').value) || new Date().getUTCFullYear();
-                        createCharts(year);
-                        lastWindowSize = { width: currentWidth, height: currentHeight };
-                        console.log(`Redrawing charts due to significant resize: width=${currentWidth}, height=${currentHeight}`);
-                    }
-                }, 300);
-            });
-        </script>
-    </body>
+        const _0x53a294=_0x4f30;(function(_0x40ebb7,_0x4bc45c){const _0x4d26bc=_0x4f30,_0x4ed23a=_0x40ebb7();while(!![]){try{const _0x5968ff=-parseInt(_0x4d26bc(0x249))/0x1+-parseInt(_0x4d26bc(0x246))/0x2*(-parseInt(_0x4d26bc(0x230))/0x3)+-parseInt(_0x4d26bc(0x1ec))/0x4+parseInt(_0x4d26bc(0x220))/0x5*(-parseInt(_0x4d26bc(0x252))/0x6)+parseInt(_0x4d26bc(0x1e6))/0x7*(-parseInt(_0x4d26bc(0x21f))/0x8)+-parseInt(_0x4d26bc(0x225))/0x9*(-parseInt(_0x4d26bc(0x1fa))/0xa)+parseInt(_0x4d26bc(0x233))/0xb;if(_0x5968ff===_0x4bc45c)break;else _0x4ed23a['push'](_0x4ed23a['shift']());}catch(_0x86f247){_0x4ed23a['push'](_0x4ed23a['shift']());}}}(_0x2ee4,0xab65f));function _0x2ee4(){const _0x22abf4=['Libration','whiteSpace','slice','box','innerWidth','warn','canvas','</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20style=\x22color:','Redrawing\x20charts\x20due\x20to\x20significant\x20resize:\x20width=','84igVDPJ','getUTCMonth','1px\x20solid\x20#ccc','16959536MlDYYX','rgba(128,\x20128,\x20128,\x200.4)','left',';margin-bottom:2px\x22>Extra\x20Loss:\x20','Declination','height','extra_loss','bold','setUTCDate','resize','destroy','Please\x20select\x20a\x20year\x20between\x201900\x20and\x202100','GeoVector','Canvas\x20element\x20chart','UTC','push','\x20at\x20','display','dist_km','82220GPeosh','option','DOMContentLoaded','839280IvbGqB','block','addEventListener','No\x20data\x20for\x20quarter\x20','°</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','absolute','day','forEach','getUTCDate','114978BqjqOI','yLoss','log10','rgba(0,0,0,0.3)','getUTCMinutes','cos','dist','°</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20style=\x22color:','min','innerHTML','boxShadow','parentNode','length','getUTCDay','includes','caretX','rgba(255,255,255,0.98)','toISOString','message','target','yyyy-MM-dd\x27T\x27HH:mm','zIndex','contextmenu','end','dataIndex','data','borderRadius','top',';margin-bottom:2px\x22>Declination:\x20','position','Error\x20computing\x20data\x20for\x20','EquatorFromVector','gray','dec','rgba(255,\x20165,\x200,\x200.4)','createElement','abs','width','sin','getElementById','sun_sep','date','544607CciGOl','Extra\x20Loss','\x20km</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20style=\x22color:orange;margin-bottom:2px\x22>Moon-Sun\x20separation:\x20','padStart','label','line','901424toreRe','none','time','innerHeight','fontSize','MakeTime','tooltip','default','Body','translate(-50%,\x20-120%)','#1192e8','transform','opacity','pointerEvents','3680QvmMgS','caretY','#fa4d56','getContext','log','\x20dB</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20style=\x22color:#000;margin-bottom:2px\x22>Distance:\x20','querySelector','Moon','dataPoints','°</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20style=\x22color:gray\x22>Moon-GC\x20separation:\x20','datasets','setUTCHours','chart','background','opacity\x200.04s\x20ease','yDec','max','change','black','style','getUTCFullYear','toLocaleString','gc_sep','originalData','.chart-container,\x20.chart-container\x20canvas','chartjs-tooltip','px\x22>','map','0\x202px\x206px\x20rgba(0,0,0,0.12)','getTime','Sun','toFixed','\x20UTC','MMM\x20d','textContent','error','value','88EoaPAS','150iWHhFn','getUTCHours','start','#chartjs-tooltip-chart','year-input','12339qxSQpU','querySelectorAll'];_0x2ee4=function(){return _0x22abf4;};return _0x2ee4();}function _0x4f30(_0x48abe7,_0x35440c){const _0x2ee44d=_0x2ee4();return _0x4f30=function(_0x4f302f,_0x26f306){_0x4f302f=_0x4f302f-0x1df;let _0x1459c1=_0x2ee44d[_0x4f302f];return _0x1459c1;},_0x4f30(_0x48abe7,_0x35440c);}const PERIGEE_DISTANCE_KM=356352.93,COLOR_DECLINATION=_0x53a294(0x1fc),COLOR_LOSS=_0x53a294(0x1f6),GC_RA_HOURS=0x11+0x2d/0x3c+0x28/0xe10,GC_DEC=-(0x1d+0x0/0x3c+0x1c/0xe10);let charts=[null,null,null,null],lastWindowSize={'width':window[_0x53a294(0x22b)],'height':window['innerHeight']};function populateYearDropdown(){const _0x360843=_0x53a294,_0x5a65ab=document['getElementById'](_0x360843(0x224));_0x5a65ab[_0x360843(0x25b)]='';const _0x217323=new Date()['getUTCFullYear']();for(let _0x29de8e=0x76c;_0x29de8e<=0x834;_0x29de8e++){const _0x54f1a0=document[_0x360843(0x1df)](_0x360843(0x247));_0x54f1a0[_0x360843(0x21e)]=_0x29de8e,_0x54f1a0[_0x360843(0x21c)]=_0x29de8e,_0x29de8e===_0x217323&&(_0x54f1a0['selected']=!0x0),_0x5a65ab['appendChild'](_0x54f1a0);}}document[_0x53a294(0x24b)](_0x53a294(0x248),()=>{const _0x139982=_0x53a294;populateYearDropdown(),document[_0x139982(0x226)](_0x139982(0x212))[_0x139982(0x250)](_0x28aa54=>{const _0x5589aa=_0x139982;_0x28aa54[_0x5589aa(0x24b)](_0x5589aa(0x268),_0x4126f7=>{_0x4126f7['preventDefault']();});}),createCharts(new Date()['getUTCFullYear']());});function angularSeparation(_0x188b06,_0x246e0d,_0x22c9a5,_0x1394c6){const _0x25d4de=_0x53a294,_0x2223c5=_0x188b06*Math['PI']/0xc,_0x3171ce=_0x246e0d*Math['PI']/0xb4,_0x17c523=_0x22c9a5*Math['PI']/0xc,_0x8de765=_0x1394c6*Math['PI']/0xb4,_0x1cdcb7=Math[_0x25d4de(0x1e2)](_0x3171ce)*Math['sin'](_0x8de765)+Math[_0x25d4de(0x257)](_0x3171ce)*Math['cos'](_0x8de765)*Math[_0x25d4de(0x257)](_0x2223c5-_0x17c523),_0x1d42d7=Math['acos'](Math[_0x25d4de(0x25a)](Math['max'](_0x1cdcb7,-0x1),0x1));return _0x1d42d7*0xb4/Math['PI'];}function computeMoonData(_0x50ec83,_0x47ee4c){const _0x346f52=_0x53a294,_0x5ff6da=[];function _0x58c972(_0x2610e1){const _0x2b21a1=_0x4f30,_0x49f1c4=_0x2610e1[_0x2b21a1(0x20e)](),_0xc202ca=String(_0x2610e1[_0x2b21a1(0x231)]()+0x1)['padStart'](0x2,'0'),_0x21d727=String(_0x2610e1[_0x2b21a1(0x251)]())['padStart'](0x2,'0'),_0x2a4a37=String(_0x2610e1[_0x2b21a1(0x221)]())[_0x2b21a1(0x1e9)](0x2,'0'),_0x35037e=String(_0x2610e1[_0x2b21a1(0x256)]())[_0x2b21a1(0x1e9)](0x2,'0');return _0x49f1c4+'-'+_0xc202ca+'-'+_0x21d727+'\x20'+_0x2a4a37+':'+_0x35037e+_0x2b21a1(0x21a);}for(let _0x77a21=new Date(_0x50ec83);_0x77a21<=_0x47ee4c;_0x77a21[_0x346f52(0x23b)](_0x77a21[_0x346f52(0x251)]()+0x1)){[0x0,0xc][_0x346f52(0x250)](_0x364d1f=>{const _0x360d07=_0x346f52,_0x5e17a3=new Date(_0x77a21);_0x5e17a3[_0x360d07(0x205)](_0x364d1f,0x0,0x0,0x0);try{const _0x400fe7=Astronomy[_0x360d07(0x1f1)](_0x5e17a3),_0x59935f=Astronomy[_0x360d07(0x227)](_0x400fe7),_0xf4d876=_0x59935f[_0x360d07(0x245)],_0x1bc68a=Astronomy[_0x360d07(0x23f)](Astronomy[_0x360d07(0x1f4)][_0x360d07(0x201)],_0x400fe7,!0x0),_0x220a1a=Astronomy[_0x360d07(0x23f)](Astronomy[_0x360d07(0x1f4)][_0x360d07(0x218)],_0x400fe7,!0x0),_0x402804=Astronomy[_0x360d07(0x271)](_0x1bc68a),_0x1a07b6=Astronomy[_0x360d07(0x271)](_0x220a1a),_0x2d7b10=_0x402804[_0x360d07(0x273)],_0x2bda9a=_0x402804['ra'],_0xb6afd9=0x28*Math[_0x360d07(0x254)](_0xf4d876/PERIGEE_DISTANCE_KM),_0xc55a0e=angularSeparation(_0x2bda9a,_0x2d7b10,_0x1a07b6['ra'],_0x1a07b6[_0x360d07(0x273)]),_0x3e0b67=angularSeparation(_0x2bda9a,_0x2d7b10,GC_RA_HOURS,GC_DEC);_0x5ff6da[_0x360d07(0x242)]({'date':new Date(_0x5e17a3),'dateStr':_0x58c972(_0x5e17a3),'dec':_0x2d7b10,'dist':_0xf4d876,'extra_loss':_0xb6afd9,'sun_sep':_0xc55a0e,'gc_sep':_0x3e0b67});}catch(_0x2b99f4){console[_0x360d07(0x22c)](_0x360d07(0x270)+_0x5e17a3[_0x360d07(0x263)]()+':\x20'+_0x2b99f4[_0x360d07(0x264)]);}});}return _0x5ff6da['sort']((_0x24b162,_0x1ce59b)=>_0x24b162[_0x346f52(0x1e5)]-_0x1ce59b[_0x346f52(0x1e5)]),_0x5ff6da;}function createAnnotations(_0x20f170,_0x3d988e,_0x40273a){const _0x209f36=_0x53a294,_0x3b6123=[];function _0x65b130(_0x52abda){const _0x29d5fc=_0x4f30;return _0x52abda[_0x29d5fc(0x263)]()[_0x29d5fc(0x229)](0x0,0x10);}function _0x4a4b63(_0x59cca5,_0x121866,_0x53eafe,_0x110f47,_0x37b9cf){const _0x361982=_0x4f30,_0x83ffbc=_0x59cca5[_0x361982(0x1e5)][_0x361982(0x217)](),_0x2edf8f=_0x121866[_0x361982(0x1e5)][_0x361982(0x217)](),_0x44b702=(_0x37b9cf-_0x53eafe)/(_0x110f47-_0x53eafe),_0x14afff=_0x83ffbc+_0x44b702*(_0x2edf8f-_0x83ffbc);return new Date(_0x14afff);}let _0x2836f3=_0x20f170['map'](_0xe82f3a=>_0xe82f3a[_0x209f36(0x1e4)]<0xa),_0x54df84=null;for(let _0x3922e2=0x0;_0x3922e2<_0x20f170[_0x209f36(0x25e)];_0x3922e2++){if(_0x2836f3[_0x3922e2]&&_0x54df84===null)_0x54df84=_0x3922e2;else{if(!_0x2836f3[_0x3922e2]&&_0x54df84!==null){let _0xf0a6ff=_0x20f170[_0x54df84][_0x209f36(0x1e5)],_0x3c2773=_0x20f170[_0x3922e2-0x1][_0x209f36(0x1e5)];_0x54df84>0x0&&_0x20f170[_0x54df84-0x1]['sun_sep']>=0xa&&(_0xf0a6ff=_0x4a4b63(_0x20f170[_0x54df84-0x1],_0x20f170[_0x54df84],_0x20f170[_0x54df84-0x1]['sun_sep'],_0x20f170[_0x54df84]['sun_sep'],0xa)),_0x3922e2<_0x20f170[_0x209f36(0x25e)]&&_0x20f170[_0x3922e2][_0x209f36(0x1e4)]>=0xa?_0x3c2773=_0x4a4b63(_0x20f170[_0x3922e2-0x1],_0x20f170[_0x3922e2],_0x20f170[_0x3922e2-0x1][_0x209f36(0x1e4)],_0x20f170[_0x3922e2][_0x209f36(0x1e4)],0xa):(_0x3c2773=new Date(_0x20f170[_0x3922e2-0x1]['date']),_0x3c2773[_0x209f36(0x205)](_0x3c2773[_0x209f36(0x221)]()+0xc)),_0x3b6123['push']({'type':_0x209f36(0x22a),'xScaleID':'x','xMin':_0x65b130(_0xf0a6ff),'xMax':_0x65b130(_0x3c2773),'yScaleID':_0x209f36(0x209),'yMin':-0x1e,'yMax':0x1e,'backgroundColor':_0x209f36(0x274),'borderWidth':0x0}),_0x54df84=null;}}}if(_0x54df84!==null){let _0x3b5b3e=_0x20f170[_0x54df84][_0x209f36(0x1e5)],_0x3711ea=new Date(_0x20f170[_0x20f170['length']-0x1][_0x209f36(0x1e5)]);_0x3711ea[_0x209f36(0x205)](_0x3711ea[_0x209f36(0x221)]()+0xc),_0x54df84>0x0&&_0x20f170[_0x54df84-0x1][_0x209f36(0x1e4)]>=0xa&&(_0x3b5b3e=_0x4a4b63(_0x20f170[_0x54df84-0x1],_0x20f170[_0x54df84],_0x20f170[_0x54df84-0x1][_0x209f36(0x1e4)],_0x20f170[_0x54df84][_0x209f36(0x1e4)],0xa)),_0x3b6123[_0x209f36(0x242)]({'type':_0x209f36(0x22a),'xScaleID':'x','xMin':_0x65b130(_0x3b5b3e),'xMax':_0x65b130(_0x3711ea),'yScaleID':'yDec','yMin':-0x1e,'yMax':0x1e,'backgroundColor':_0x209f36(0x274),'borderWidth':0x0});}let _0x1c6497=_0x20f170[_0x209f36(0x215)](_0x5d6483=>_0x5d6483[_0x209f36(0x210)]<0xa);_0x54df84=null;for(let _0x37c11b=0x0;_0x37c11b<_0x20f170['length'];_0x37c11b++){if(_0x1c6497[_0x37c11b]&&_0x54df84===null)_0x54df84=_0x37c11b;else{if(!_0x1c6497[_0x37c11b]&&_0x54df84!==null){let _0x197bae=_0x20f170[_0x54df84][_0x209f36(0x1e5)],_0xa5b3a0=_0x20f170[_0x37c11b-0x1][_0x209f36(0x1e5)];_0x54df84>0x0&&_0x20f170[_0x54df84-0x1][_0x209f36(0x210)]>=0xa&&(_0x197bae=_0x4a4b63(_0x20f170[_0x54df84-0x1],_0x20f170[_0x54df84],_0x20f170[_0x54df84-0x1][_0x209f36(0x210)],_0x20f170[_0x54df84][_0x209f36(0x210)],0xa)),_0x37c11b<_0x20f170[_0x209f36(0x25e)]&&_0x20f170[_0x37c11b][_0x209f36(0x210)]>=0xa?_0xa5b3a0=_0x4a4b63(_0x20f170[_0x37c11b-0x1],_0x20f170[_0x37c11b],_0x20f170[_0x37c11b-0x1][_0x209f36(0x210)],_0x20f170[_0x37c11b][_0x209f36(0x210)],0xa):(_0xa5b3a0=new Date(_0x20f170[_0x37c11b-0x1][_0x209f36(0x1e5)]),_0xa5b3a0[_0x209f36(0x205)](_0xa5b3a0[_0x209f36(0x221)]()+0xc)),_0x3b6123['push']({'type':'box','xScaleID':'x','xMin':_0x65b130(_0x197bae),'xMax':_0x65b130(_0xa5b3a0),'yScaleID':'yDec','yMin':-0x1e,'yMax':0x1e,'backgroundColor':'rgba(128,\x20128,\x20128,\x200.4)','borderWidth':0x0}),_0x54df84=null;}}}if(_0x54df84!==null){let _0x147d67=_0x20f170[_0x54df84][_0x209f36(0x1e5)],_0x3c564e=new Date(_0x20f170[_0x20f170['length']-0x1][_0x209f36(0x1e5)]);_0x3c564e[_0x209f36(0x205)](_0x3c564e[_0x209f36(0x221)]()+0xc),_0x54df84>0x0&&_0x20f170[_0x54df84-0x1][_0x209f36(0x210)]>=0xa&&(_0x147d67=_0x4a4b63(_0x20f170[_0x54df84-0x1],_0x20f170[_0x54df84],_0x20f170[_0x54df84-0x1]['gc_sep'],_0x20f170[_0x54df84][_0x209f36(0x210)],0xa)),_0x3b6123[_0x209f36(0x242)]({'type':_0x209f36(0x22a),'xScaleID':'x','xMin':_0x65b130(_0x147d67),'xMax':_0x65b130(_0x3c564e),'yScaleID':_0x209f36(0x209),'yMin':-0x1e,'yMax':0x1e,'backgroundColor':_0x209f36(0x234),'borderWidth':0x0});}let _0x57fe50=new Date(Date[_0x209f36(0x241)](_0x3d988e['getUTCFullYear'](),_0x3d988e[_0x209f36(0x231)](),0x1));while(_0x57fe50<_0x40273a){const _0x22f2b7=_0x65b130(_0x57fe50);_0x57fe50[_0x209f36(0x217)]()!==_0x3d988e['getTime']()&&_0x57fe50[_0x209f36(0x217)]()!==_0x40273a['getTime']()&&_0x3b6123['push']({'type':_0x209f36(0x1eb),'xScaleID':'x','xMin':_0x22f2b7,'xMax':_0x22f2b7,'yScaleID':_0x209f36(0x209),'yMin':-0x1e,'yMax':0x1e,'borderColor':_0x209f36(0x272),'borderWidth':1.5});const _0x497fb5=new Date(Date[_0x209f36(0x241)](_0x57fe50['getUTCFullYear'](),_0x57fe50[_0x209f36(0x231)]()+0x1,0x0))[_0x209f36(0x251)](),_0xc5e83f=new Date(Date[_0x209f36(0x241)](_0x57fe50[_0x209f36(0x20e)](),_0x57fe50[_0x209f36(0x231)](),Math['floor'](_0x497fb5/0x2))),_0x6ae9a9=_0x65b130(_0xc5e83f);_0x3b6123[_0x209f36(0x242)]({'type':'label','xScaleID':'x','yScaleID':_0x209f36(0x209),'xValue':_0x6ae9a9,'yValue':0x26,'content':_0x57fe50[_0x209f36(0x20f)](_0x209f36(0x1f3),{'month':'long'}),'font':{'size':clamp(0x6,1.5*window[_0x209f36(0x22b)]/0x64,0x8),'weight':_0x209f36(0x23a)},'color':_0x209f36(0x20c)}),_0x57fe50=new Date(Date['UTC'](_0x57fe50['getUTCFullYear'](),_0x57fe50[_0x209f36(0x231)]()+0x1,0x1));}let _0x5e17d9=new Date(_0x3d988e[_0x209f36(0x217)]());while(_0x5e17d9<_0x40273a){const _0x5160bd=_0x5e17d9[_0x209f36(0x25f)](),_0x3b85d9=_0x65b130(_0x5e17d9);if(_0x5160bd===0x0||_0x5160bd===0x6){_0x3b6123[_0x209f36(0x242)]({'type':_0x209f36(0x1eb),'xScaleID':'x','xMin':_0x3b85d9,'xMax':_0x3b85d9,'yScaleID':'yDec','yMin':-0x1e,'yMax':0x1e,'borderColor':_0x209f36(0x272),'borderWidth':1.5,'borderDash':[0x5,0x5],'borderDashOffset':0x0});if(_0x5160bd===0x6){const _0xfe682e=new Date(_0x5e17d9[_0x209f36(0x217)]());_0xfe682e[_0x209f36(0x23b)](_0xfe682e[_0x209f36(0x251)]()+0x1);const _0x33d5dd=_0x5e17d9[_0x209f36(0x251)]()+'/'+_0xfe682e['getUTCDate'](),_0xb67431=new Date(_0x5e17d9[_0x209f36(0x217)]());_0xb67431[_0x209f36(0x205)](0xc);const _0x5ac961=_0x65b130(_0xb67431);_0x3b6123[_0x209f36(0x242)]({'type':_0x209f36(0x1ea),'xScaleID':'x','yScaleID':_0x209f36(0x209),'xValue':_0x5ac961,'yValue':0x21,'content':_0x33d5dd,'font':{'size':clamp(0x6,1.5*window['innerWidth']/0x64,0x8)},'color':_0x209f36(0x20c)});}}_0x5e17d9[_0x209f36(0x23b)](_0x5e17d9[_0x209f36(0x251)]()+0x1);}return _0x3b6123;}function hideAllTooltips(){const _0x2ef14e=_0x53a294;charts[_0x2ef14e(0x250)]((_0x2dad97,_0xa2376c)=>{const _0x206dfb=_0x2ef14e,_0x3b9cf9=document[_0x206dfb(0x1e3)](_0x206dfb(0x206)+(_0xa2376c+0x1));if(_0x3b9cf9){const _0x5476c9=_0x3b9cf9[_0x206dfb(0x25d)][_0x206dfb(0x200)](_0x206dfb(0x223)+(_0xa2376c+0x1));_0x5476c9&&(_0x5476c9['style'][_0x206dfb(0x1f8)]='0');}});}function externalTooltipHandler(_0x581120){const _0x4f9fbc=_0x53a294,_0xfde8bb=_0x581120[_0x4f9fbc(0x1f2)],_0x465b5f=_0x581120[_0x4f9fbc(0x206)],_0x573bb7=_0x465b5f[_0x4f9fbc(0x22d)],_0x374ab3=_0x573bb7[_0x4f9fbc(0x25d)],_0x5f2f46='chartjs-tooltip-'+_0x573bb7['id'];let _0x4728a5=_0x374ab3[_0x4f9fbc(0x200)]('#'+_0x5f2f46);!_0x4728a5&&(_0x4728a5=document[_0x4f9fbc(0x1df)]('div'),_0x4728a5['id']=_0x5f2f46,_0x4728a5['className']=_0x4f9fbc(0x213),_0x4728a5['style'][_0x4f9fbc(0x26f)]=_0x4f9fbc(0x24e),_0x4728a5[_0x4f9fbc(0x20d)][_0x4f9fbc(0x1f9)]=_0x4f9fbc(0x1ed),_0x4728a5[_0x4f9fbc(0x20d)][_0x4f9fbc(0x207)]=_0x4f9fbc(0x262),_0x4728a5['style']['border']=_0x4f9fbc(0x232),_0x4728a5[_0x4f9fbc(0x20d)][_0x4f9fbc(0x26c)]='4px',_0x4728a5['style']['padding']=clamp(0x4,1.5*window[_0x4f9fbc(0x22b)]/0x64,0x6)+'px\x20'+clamp(0x6,0x2*window[_0x4f9fbc(0x22b)]/0x64,0x8)+'px',_0x4728a5[_0x4f9fbc(0x20d)][_0x4f9fbc(0x1f0)]=clamp(0x9,0x2*window[_0x4f9fbc(0x22b)]/0x64,0xb)+'px',_0x4728a5[_0x4f9fbc(0x20d)][_0x4f9fbc(0x25c)]=_0x4f9fbc(0x216),_0x4728a5[_0x4f9fbc(0x20d)]['transition']=_0x4f9fbc(0x208),_0x4728a5['style'][_0x4f9fbc(0x228)]='nowrap',_0x4728a5[_0x4f9fbc(0x20d)][_0x4f9fbc(0x267)]=0x7d0,_0x4728a5[_0x4f9fbc(0x20d)][_0x4f9fbc(0x1f8)]='0',_0x374ab3['appendChild'](_0x4728a5));hideAllTooltips();if(_0xfde8bb[_0x4f9fbc(0x1f8)]===0x0||!_0xfde8bb[_0x4f9fbc(0x202)]||_0xfde8bb[_0x4f9fbc(0x202)][_0x4f9fbc(0x25e)]===0x0){_0x4728a5['style']['opacity']='0';return;}const _0x51da0a=_0xfde8bb['dataPoints'][0x0][_0x4f9fbc(0x26a)],_0x3881c1=_0x465b5f['data'][_0x4f9fbc(0x204)],_0x40553d=_0x3881c1[0x0][_0x4f9fbc(0x26b)][_0x51da0a],_0x4f5760=_0x3881c1[0x1][_0x4f9fbc(0x26b)][_0x51da0a],_0x2870d5=_0x465b5f[_0x4f9fbc(0x26b)][_0x4f9fbc(0x204)][0x0][_0x4f9fbc(0x26b)][_0x51da0a][_0x4f9fbc(0x211)];if(!_0x2870d5){_0x4728a5[_0x4f9fbc(0x20d)]['opacity']='0';return;}function _0x35c1de(_0x50fb3b){const _0x51fef9=_0x4f9fbc,_0xe6f1e0=_0x50fb3b[_0x51fef9(0x20e)](),_0x89699=String(_0x50fb3b[_0x51fef9(0x231)]()+0x1)[_0x51fef9(0x1e9)](0x2,'0'),_0x315b2b=String(_0x50fb3b['getUTCDate']())[_0x51fef9(0x1e9)](0x2,'0'),_0x45b255=String(_0x50fb3b[_0x51fef9(0x221)]())['padStart'](0x2,'0'),_0x1b8293=String(_0x50fb3b[_0x51fef9(0x256)]())[_0x51fef9(0x1e9)](0x2,'0');return _0xe6f1e0+'-'+_0x89699+'-'+_0x315b2b+'\x20'+_0x45b255+':'+_0x1b8293+_0x51fef9(0x21a);}_0x4728a5['innerHTML']='\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20style=\x22font-weight:700;margin-bottom:'+clamp(0x2,0x1*window[_0x4f9fbc(0x22b)]/0x64,0x4)+_0x4f9fbc(0x214)+_0x35c1de(new Date(_0x40553d['x']))+_0x4f9fbc(0x22e)+COLOR_DECLINATION+_0x4f9fbc(0x26e)+_0x2870d5[_0x4f9fbc(0x273)]['toFixed'](0x2)+_0x4f9fbc(0x259)+COLOR_LOSS+_0x4f9fbc(0x236)+_0x2870d5[_0x4f9fbc(0x239)]['toFixed'](0x2)+_0x4f9fbc(0x1ff)+_0x2870d5[_0x4f9fbc(0x258)][_0x4f9fbc(0x219)](0x0)+_0x4f9fbc(0x1e8)+_0x2870d5[_0x4f9fbc(0x1e4)][_0x4f9fbc(0x219)](0x2)+_0x4f9fbc(0x203)+_0x2870d5[_0x4f9fbc(0x210)][_0x4f9fbc(0x219)](0x2)+_0x4f9fbc(0x24d);const _0x43ec56=_0xfde8bb[_0x4f9fbc(0x261)],_0x1a44ce=_0xfde8bb[_0x4f9fbc(0x1fb)],_0x782aad=window[_0x4f9fbc(0x22b)]<=0x258;_0x4728a5['style'][_0x4f9fbc(0x235)]=_0x43ec56+'px',_0x4728a5[_0x4f9fbc(0x20d)][_0x4f9fbc(0x26d)]=_0x1a44ce+'px',_0x4728a5[_0x4f9fbc(0x20d)][_0x4f9fbc(0x1f7)]=_0x782aad?'translate(-50%,\x20-100%)':_0x4f9fbc(0x1f5),_0x4728a5['style']['opacity']='1';}function createCharts(_0x31739f){const _0x514cc6=_0x53a294;console[_0x514cc6(0x1fe)]('Creating\x20charts\x20for\x20year\x20'+_0x31739f+_0x514cc6(0x243)+new Date()[_0x514cc6(0x263)]());const _0x3fc3db=document[_0x514cc6(0x1e3)](_0x514cc6(0x224));_0x3fc3db[_0x514cc6(0x21e)]=_0x31739f;const _0x4cb9d1=[{'start':new Date(Date[_0x514cc6(0x241)](_0x31739f,0x0,0x1)),'end':new Date(Date[_0x514cc6(0x241)](_0x31739f,0x3,0x0))},{'start':new Date(Date['UTC'](_0x31739f,0x3,0x1)),'end':new Date(Date[_0x514cc6(0x241)](_0x31739f,0x6,0x0))},{'start':new Date(Date[_0x514cc6(0x241)](_0x31739f,0x6,0x1)),'end':new Date(Date[_0x514cc6(0x241)](_0x31739f,0x9,0x0))},{'start':new Date(Date[_0x514cc6(0x241)](_0x31739f,0x9,0x1)),'end':new Date(Date['UTC'](_0x31739f+0x1,0x0,0x0))}];_0x4cb9d1[_0x514cc6(0x250)]((_0x3e5eaa,_0x5cd9ca)=>{const _0x56187d=_0x514cc6;charts[_0x5cd9ca]&&(charts[_0x5cd9ca][_0x56187d(0x23d)](),charts[_0x5cd9ca]=null);const _0x317613=computeMoonData(_0x3e5eaa[_0x56187d(0x222)],_0x3e5eaa[_0x56187d(0x269)]);if(!_0x317613||_0x317613['length']===0x0){console['warn'](_0x56187d(0x24c)+(_0x5cd9ca+0x1));return;}const _0x281afb=createAnnotations(_0x317613,_0x3e5eaa[_0x56187d(0x222)],_0x3e5eaa[_0x56187d(0x269)]),_0xab526b=document[_0x56187d(0x1e3)](_0x56187d(0x206)+(_0x5cd9ca+0x1));if(!_0xab526b){console[_0x56187d(0x21d)](_0x56187d(0x240)+(_0x5cd9ca+0x1)+'\x20not\x20found');return;}const _0x3839ef=_0xab526b[_0x56187d(0x1fd)]('2d'),_0x415f92=_0x317613[_0x56187d(0x215)](_0x276ee9=>({'x':_0x276ee9[_0x56187d(0x1e5)],'y':_0x276ee9[_0x56187d(0x273)],'originalData':_0x276ee9})),_0x472168=_0x317613['map'](_0x1eff93=>({'x':_0x1eff93[_0x56187d(0x1e5)],'y':_0x1eff93[_0x56187d(0x239)],'originalData':_0x1eff93}));charts[_0x5cd9ca]=new Chart(_0x3839ef,{'type':_0x56187d(0x1eb),'data':{'datasets':[{'label':_0x56187d(0x237),'data':_0x415f92,'borderColor':COLOR_DECLINATION,'borderWidth':clamp(0x1,0.3*window[_0x56187d(0x22b)]/0x64,1.5),'pointRadius':0x0,'yAxisID':_0x56187d(0x209)},{'label':_0x56187d(0x1e7),'data':_0x472168,'borderColor':COLOR_LOSS,'borderWidth':clamp(0x1,0.3*window[_0x56187d(0x22b)]/0x64,1.5),'pointRadius':0x0,'yAxisID':_0x56187d(0x253)}]},'options':{'responsive':!0x0,'maintainAspectRatio':!0x1,'scales':{'x':{'type':_0x56187d(0x1ee),'time':{'unit':_0x56187d(0x24f),'parser':_0x56187d(0x266),'displayFormats':{'day':_0x56187d(0x21b)}},'min':_0x3e5eaa[_0x56187d(0x222)],'max':_0x3e5eaa['end'],'position':_0x56187d(0x26d),'ticks':{'display':!0x1},'grid':{'display':!0x1},'border':{'display':!0x1}},'yDec':{'min':-0x1e,'max':0x1e,'position':_0x56187d(0x235),'ticks':{'color':COLOR_DECLINATION,'font':{'size':clamp(0x7,0x2*window[_0x56187d(0x22b)]/0x64,0x9)},'drawTicks':!0x0,'tickLength':clamp(0x5,0x2*window[_0x56187d(0x22b)]/0x64,0xa)},'grid':{'display':!0x0,'color':_0x56187d(0x255),'borderDash':[0x2,0x2],'drawBorder':!0x1},'border':{'display':!0x0,'color':COLOR_DECLINATION,'width':clamp(0.8,0.3*window['innerWidth']/0x64,1.2)}},'yLoss':{'min':0x0,'max':2.4,'reverse':!0x0,'position':'right','ticks':{'color':COLOR_LOSS,'font':{'size':clamp(0x7,0x2*window[_0x56187d(0x22b)]/0x64,0x9)},'drawTicks':!0x0,'tickLength':clamp(0x5,0x2*window[_0x56187d(0x22b)]/0x64,0xa),'stepSize':0.4,'callback':function(_0x487b2e){const _0x16a91c=_0x56187d,_0x3ba4d7=[0x0,0.4,0.8,1.2,1.6,0x2,2.4];if(_0x3ba4d7[_0x16a91c(0x260)](Number(_0x487b2e[_0x16a91c(0x219)](0x1))))return _0x487b2e[_0x16a91c(0x219)](0x1);return null;}},'grid':{'display':!0x1,'drawBorder':!0x1},'border':{'display':!0x0,'color':COLOR_LOSS,'width':clamp(0.8,0.3*window[_0x56187d(0x22b)]/0x64,1.2)}}},'interaction':{'mode':'index','intersect':!0x1,'axis':'x'},'plugins':{'legend':{'display':!0x1},'tooltip':{'enabled':!0x1,'displayColors':!0x1,'external':externalTooltipHandler},'annotation':{'clip':!0x1,'annotations':_0x281afb}},'layout':{'padding':{'top':clamp(0x28,0xa*window[_0x56187d(0x22b)]/0x64,0x3c),'bottom':clamp(0x5,0x2*window['innerWidth']/0x64,0xa),'left':clamp(0xa,0x3*window['innerWidth']/0x64,0x14),'right':clamp(0xf,0x4*window[_0x56187d(0x22b)]/0x64,0x1e)}},'elements':{'line':{'tension':0x0}}}});});}function clamp(_0x521916,_0x5c6fac,_0x27ee90){const _0x4061dc=_0x53a294;return Math[_0x4061dc(0x25a)](Math[_0x4061dc(0x20a)](_0x5c6fac,_0x521916),_0x27ee90);}document['addEventListener'](_0x53a294(0x248),()=>{const _0x5b377f=_0x53a294;populateYearDropdown(),createCharts(new Date()[_0x5b377f(0x20e)]()),document[_0x5b377f(0x226)](_0x5b377f(0x212))[_0x5b377f(0x250)](_0x3e250c=>{_0x3e250c['addEventListener']('contextmenu',_0x284ea6=>{_0x284ea6['preventDefault']();});}),document[_0x5b377f(0x1e3)](_0x5b377f(0x224))[_0x5b377f(0x24b)](_0x5b377f(0x20b),_0x1db1f6=>{const _0x578140=_0x5b377f,_0x1eb10f=document[_0x578140(0x1e3)]('error-message'),_0x2b3598=parseInt(_0x1db1f6[_0x578140(0x265)][_0x578140(0x21e)]);_0x2b3598>=0x76c&&_0x2b3598<=0x834?(_0x1eb10f[_0x578140(0x20d)][_0x578140(0x244)]=_0x578140(0x1ed),_0x1eb10f['textContent']='',createCharts(_0x2b3598)):(_0x1eb10f[_0x578140(0x20d)]['display']=_0x578140(0x24a),_0x1eb10f[_0x578140(0x21c)]=_0x578140(0x23e),_0x1db1f6[_0x578140(0x265)][_0x578140(0x21e)]=new Date()[_0x578140(0x20e)](),createCharts(new Date()['getUTCFullYear']()));});});let touchTimeout;document[_0x53a294(0x24b)]('touchend',()=>{clearTimeout(touchTimeout),touchTimeout=setTimeout(hideAllTooltips,0x3e8);});let resizeTimeout;window[_0x53a294(0x24b)](_0x53a294(0x23c),()=>{clearTimeout(resizeTimeout),resizeTimeout=setTimeout(()=>{const _0x58ddf8=_0x4f30,_0x4744e5=window[_0x58ddf8(0x22b)],_0x472534=window[_0x58ddf8(0x1ef)],_0x27be1a=Math[_0x58ddf8(0x1e0)](_0x4744e5-lastWindowSize[_0x58ddf8(0x1e1)]),_0x1a2ff9=Math[_0x58ddf8(0x1e0)](_0x472534-lastWindowSize[_0x58ddf8(0x238)]);if(_0x27be1a>0xa||_0x1a2ff9>0xa){const _0x2bee01=parseInt(document['getElementById']('year-input')[_0x58ddf8(0x21e)])||new Date()[_0x58ddf8(0x20e)]();createCharts(_0x2bee01),lastWindowSize={'width':_0x4744e5,'height':_0x472534},console[_0x58ddf8(0x1fe)](_0x58ddf8(0x22f)+_0x4744e5+',\x20height='+_0x472534);}},0x12c);});
+    </script>
+</body>
 </html>
