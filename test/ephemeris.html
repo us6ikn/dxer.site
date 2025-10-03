@@ -23,6 +23,7 @@
             margin-bottom: 1rem;
             width: 100%;
             max-width: 1200px;
+            z-index: 100; /* Ensure header is below tooltips */
         }
         h1 {
             font-size: clamp(12px, 3vw, 16px);
@@ -36,7 +37,7 @@
             max-width: 1200px;
             height: clamp(150px, 25vw, 200px);
             margin-bottom: 10px;
-            overflow: hidden; /* Prevent layout shifts */
+            /* Removed overflow: hidden to prevent tooltip clipping */
         }
         .chart-container canvas {
             width: 100% !important;
@@ -49,6 +50,7 @@
             color: #fa4d56;
             font-weight: bold;
             font-size: clamp(8px, 2vw, 12px);
+            z-index: 150; /* Below tooltips */
         }
         .y-label-right {
             position: absolute;
@@ -57,6 +59,7 @@
             color: #1192e8;
             font-weight: bold;
             font-size: clamp(8px, 2vw, 12px);
+            z-index: 150; /* Below tooltips */
         }
         .we-label {
             position: absolute;
@@ -64,11 +67,13 @@
             top: clamp(25px, 5vw, 40px);
             color: black;
             font-size: clamp(6px, 1.5vw, 8px);
+            z-index: 150; /* Below tooltips */
         }
         #explanation {
             margin-top: 1rem;
             font-size: clamp(10px, 2vw, 12px);
             max-width: 90%;
+            z-index: 100; /* Below tooltips */
         }
         #explanation p {
             margin: 5px 0;
@@ -83,6 +88,7 @@
             justify-content: center;
             gap: 10px;
             margin-bottom: 0.5rem;
+            z-index: 100; /* Below tooltips */
         }
         #year-selector label {
             font-size: clamp(12px, 2.5vw, 14px);
@@ -120,6 +126,9 @@
             color: #fa4d56;
             font-size: clamp(10px, 2vw, 12px);
             margin-top: 5px;
+        }
+        .chartjs-tooltip {
+            z-index: 2000; /* Ensure tooltips are above all other elements */
         }
         @media (max-width: 600px) {
             .chart-container {
@@ -379,366 +388,383 @@
                     xMax: dateToStrWithHours(barEnd),
                     yScaleID: 'yDec',
                     yMin: -30,
-                    yMax: 30,
-                    backgroundColor: 'rgba(128, 128, 128, 0.4)',
-                    borderWidth: 0
-                });
-            }
-
-            let month_start = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1));
-            while (month_start < end) {
-                const monthStr = dateToStrWithHours(month_start);
-                if (month_start.getTime() !== start.getTime() && month_start.getTime() !== end.getTime()) {
-                    annotations.push({
-                        type: 'line',
-                        xScaleID: 'x',
-                        xMin: monthStr,
-                        xMax: monthStr,
-                        yScaleID: 'yDec',
-                        yMin: -30,
                         yMax: 30,
-                        borderColor: 'gray',
-                        borderWidth: 1.5
+                        backgroundColor: 'rgba(128, 128, 128, 0.4)',
+                        borderWidth: 0
                     });
                 }
-                const ndays = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth() + 1, 0)).getUTCDate();
-                const mid_month = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth(), Math.floor(ndays / 2)));
-                const midStr = dateToStrWithHours(mid_month);
-                annotations.push({
-                    type: 'label',
-                    xScaleID: 'x',
-                    yScaleID: 'yDec',
-                    xValue: midStr,
-                    yValue: 38,
-                    content: month_start.toLocaleString('default', { month: 'long' }),
-                    font: { size: clamp(6, 1.5 * window.innerWidth / 100, 8), weight: 'bold' },
-                    color: 'black'
-                });
-                month_start = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth() + 1, 1));
-            }
 
-            let current = new Date(start.getTime());
-            while (current < end) {
-                const wd = current.getUTCDay();
-                const currentStr = dateToStrWithHours(current);
-                if (wd === 0 || wd === 6) {
-                    annotations.push({
-                        type: 'line',
-                        xScaleID: 'x',
-                        xMin: currentStr,
-                        xMax: currentStr,
-                        yScaleID: 'yDec',
-                        yMin: -30,
-                        yMax: 30,
-                        borderColor: 'gray',
-                        borderWidth: 1.5,
-                        borderDash: [5, 5],
-                        borderDashOffset: 0
-                    });
-                    if (wd === 6) {
-                        const sunday = new Date(current.getTime());
-                        sunday.setUTCDate(sunday.getUTCDate() + 1);
-                        const label = `${current.getUTCDate()}/${sunday.getUTCDate()}`;
-                        const mid = new Date(current.getTime());
-                        mid.setUTCHours(12);
-                        const midStr = dateToStrWithHours(mid);
+                let month_start = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1));
+                while (month_start < end) {
+                    const monthStr = dateToStrWithHours(month_start);
+                    if (month_start.getTime() !== start.getTime() && month_start.getTime() !== end.getTime()) {
                         annotations.push({
-                            type: 'label',
+                            type: 'line',
                             xScaleID: 'x',
+                            xMin: monthStr,
+                            xMax: monthStr,
                             yScaleID: 'yDec',
-                            xValue: midStr,
-                            yValue: 33,
-                            content: label,
-                            font: { size: clamp(6, 1.5 * window.innerWidth / 100, 8) },
-                            color: 'black'
+                            yMin: -30,
+                            yMax: 30,
+                            borderColor: 'gray',
+                            borderWidth: 1.5
                         });
                     }
+                    const ndays = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth() + 1, 0)).getUTCDate();
+                    const mid_month = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth(), Math.floor(ndays / 2)));
+                    const midStr = dateToStrWithHours(mid_month);
+                    annotations.push({
+                        type: 'label',
+                        xScaleID: 'x',
+                        yScaleID: 'yDec',
+                        xValue: midStr,
+                        yValue: 38,
+                        content: month_start.toLocaleString('default', { month: 'long' }),
+                        font: { size: clamp(6, 1.5 * window.innerWidth / 100, 8), weight: 'bold' },
+                        color: 'black'
+                    });
+                    month_start = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth() + 1, 1));
                 }
-                current.setUTCDate(current.getUTCDate() + 1);
-            }
-            return annotations;
-        }
 
-        // Helper function to hide all tooltips
-        function hideAllTooltips() {
-            charts.forEach((chart, index) => {
-                const canvas = document.getElementById(`chart${index + 1}`);
-                if (canvas) {
-                    const tooltipEl = canvas.parentNode.querySelector(`#chartjs-tooltip-chart${index + 1}`);
-                    if (tooltipEl) {
-                        tooltipEl.style.opacity = '0';
+                let current = new Date(start.getTime());
+                while (current < end) {
+                    const wd = current.getUTCDay();
+                    const currentStr = dateToStrWithHours(current);
+                    if (wd === 0 || wd === 6) {
+                        annotations.push({
+                            type: 'line',
+                            xScaleID: 'x',
+                            xMin: currentStr,
+                            xMax: currentStr,
+                            yScaleID: 'yDec',
+                            yMin: -30,
+                            yMax: 30,
+                            borderColor: 'gray',
+                            borderWidth: 1.5,
+                            borderDash: [5, 5],
+                            borderDashOffset: 0
+                        });
+                        if (wd === 6) {
+                            const sunday = new Date(current.getTime());
+                            sunday.setUTCDate(sunday.getUTCDate() + 1);
+                            const label = `${current.getUTCDate()}/${sunday.getUTCDate()}`;
+                            const mid = new Date(current.getTime());
+                            mid.setUTCHours(12);
+                            const midStr = dateToStrWithHours(mid);
+                            annotations.push({
+                                type: 'label',
+                                xScaleID: 'x',
+                                yScaleID: 'yDec',
+                                xValue: midStr,
+                                yValue: 33,
+                                content: label,
+                                font: { size: clamp(6, 1.5 * window.innerWidth / 100, 8) },
+                                color: 'black'
+                            });
+                        }
                     }
+                    current.setUTCDate(current.getUTCDate() + 1);
                 }
-            });
-        }
-
-        // External tooltip handler
-        function externalTooltipHandler(context) {
-            const tooltipModel = context.tooltip;
-            const chart = context.chart;
-            const canvas = chart.canvas;
-            const container = canvas.parentNode;
-            const tooltipId = 'chartjs-tooltip-' + canvas.id;
-            let tooltipEl = container.querySelector('#' + tooltipId);
-
-            // Create tooltip element if it doesn't exist
-            if (!tooltipEl) {
-                tooltipEl = document.createElement('div');
-                tooltipEl.id = tooltipId;
-                tooltipEl.className = 'chartjs-tooltip';
-                tooltipEl.style.position = 'absolute';
-                tooltipEl.style.pointerEvents = 'none';
-                tooltipEl.style.background = 'rgba(255,255,255,0.98)';
-                tooltipEl.style.border = '1px solid #ccc';
-                tooltipEl.style.borderRadius = '4px';
-                tooltipEl.style.padding = clamp(4, 1.5 * window.innerWidth / 100, 6) + 'px ' + clamp(6, 2 * window.innerWidth / 100, 8) + 'px';
-                tooltipEl.style.fontSize = clamp(9, 2 * window.innerWidth / 100, 11) + 'px';
-                tooltipEl.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)';
-                tooltipEl.style.transition = 'opacity 0.04s ease';
-                tooltipEl.style.whiteSpace = 'nowrap';
-                tooltipEl.style.zIndex = 1000;
-                tooltipEl.style.opacity = '0';
-                container.appendChild(tooltipEl);
+                return annotations;
             }
 
-            // Hide all other tooltips
-            hideAllTooltips();
-
-            // Hide tooltip if opacity is 0 or no data points
-            if (tooltipModel.opacity === 0 || !tooltipModel.dataPoints || tooltipModel.dataPoints.length === 0) {
-                tooltipEl.style.opacity = '0';
-                return;
-            }
-
-            // Get data from the chart's dataset
-            const dataIndex = tooltipModel.dataPoints[0].dataIndex;
-            const dataset = chart.data.datasets;
-            const declinationData = dataset[0].data[dataIndex]; // Declination dataset
-            const extraLossData = dataset[1].data[dataIndex]; // Extra Loss dataset
-            const originalData = chart.data.datasets[0].data[dataIndex].originalData; // Custom property to store original data
-
-            if (!originalData) {
-                tooltipEl.style.opacity = '0';
-                return;
-            }
-
-            // Format date for display
-            function formatDateNatural(date) {
-                const year = date.getUTCFullYear();
-                const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-                const day = String(date.getUTCDate()).padStart(2, '0');
-                const hours = String(date.getUTCHours()).padStart(2, '0');
-                const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-                return `${year}-${month}-${day} ${hours}:${minutes} UTC`;
-            }
-
-            // Update tooltip content
-            tooltipEl.innerHTML = `
-                <div style="font-weight:700;margin-bottom:${clamp(2, 1 * window.innerWidth / 100, 4)}px">${formatDateNatural(new Date(declinationData.x))}</div>
-                <div style="color:${COLOR_DECLINATION};margin-bottom:2px">Declination: ${originalData.dec.toFixed(2)}°</div>
-                <div style="color:${COLOR_LOSS};margin-bottom:2px">Extra Loss: ${originalData.extra_loss.toFixed(2)} dB</div>
-                <div style="color:#000;margin-bottom:2px">Distance: ${originalData.dist.toFixed(0)} km</div>
-                <div style="color:orange;margin-bottom:2px">Moon-Sun Sep: ${originalData.sun_sep.toFixed(2)}°</div>
-                <div style="color:gray">Moon-GC Sep: ${originalData.gc_sep.toFixed(2)}°</div>
-            `;
-
-            // Position tooltip
-            const caretX = tooltipModel.caretX;
-            const caretY = tooltipModel.caretY;
-            tooltipEl.style.left = caretX + 'px';
-            tooltipEl.style.top = caretY + 'px';
-            tooltipEl.style.transform = 'translate(-50%, -120%)';
-            tooltipEl.style.opacity = '1';
-        }
-
-        function createCharts(year) {
-            // Optional: Log to debug chart redraws (remove in production)
-            console.log(`Creating charts for year ${year} at ${new Date().toISOString()}`);
-
-            document.getElementById('chart-title').textContent = `MOON EPHEMERIS OVERVIEW FOR THE YEAR ${year}, by SA5IKN`;
-            const quarters = [
-                { start: new Date(Date.UTC(year, 0, 1)), end: new Date(Date.UTC(year, 3, 0)) },
-                { start: new Date(Date.UTC(year, 3, 1)), end: new Date(Date.UTC(year, 6, 0)) },
-                { start: new Date(Date.UTC(year, 6, 1)), end: new Date(Date.UTC(year, 9, 0)) },
-                { start: new Date(Date.UTC(year, 9, 1)), end: new Date(Date.UTC(year + 1, 0, 0)) }
-            ];
-
-            quarters.forEach((quarter, index) => {
-                if (charts[index]) {
-                    charts[index].destroy();
-                    charts[index] = null;
-                }
-
-                const data = computeMoonData(quarter.start, quarter.end);
-                if (!data || data.length === 0) {
-                    console.warn(`No data for quarter ${index + 1}`);
-                    return;
-                }
-                const annotations = createAnnotations(data, quarter.start, quarter.end);
-                const canvas = document.getElementById(`chart${index + 1}`);
-                if (!canvas) {
-                    console.error(`Canvas element chart${index + 1} not found`);
-                    return;
-                }
-                const ctx = canvas.getContext('2d');
-
-                // Attach original data to dataset for tooltip access
-                const declinationData = data.map(d => ({ x: d.date, y: d.dec, originalData: d }));
-                const extraLossData = data.map(d => ({ x: d.date, y: d.extra_loss, originalData: d }));
-
-                charts[index] = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        datasets: [
-                            {
-                                label: 'Declination',
-                                data: declinationData,
-                                borderColor: COLOR_DECLINATION,
-                                borderWidth: clamp(1, 0.3 * window.innerWidth / 100, 1.5),
-                                pointRadius: 0,
-                                yAxisID: 'yDec'
-                            },
-                            {
-                                label: 'Extra Loss',
-                                data: extraLossData,
-                                borderColor: COLOR_LOSS,
-                                borderWidth: clamp(1, 0.3 * window.innerWidth / 100, 1.5),
-                                pointRadius: 0,
-                                yAxisID: 'yLoss'
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                type: 'time',
-                                time: { unit: 'day', parser: 'yyyy-MM-dd\'T\'HH:mm', displayFormats: { day: 'MMM d' } },
-                                min: quarter.start,
-                                max: quarter.end,
-                                position: 'top',
-                                ticks: { display: false },
-                                grid: { display: false },
-                                border: { display: false }
-                            },
-                            yDec: {
-                                min: -30,
-                                max: 30,
-                                position: 'left',
-                                ticks: {
-                                    color: COLOR_DECLINATION,
-                                    font: { size: clamp(7, 2 * window.innerWidth / 100, 9) },
-                                    drawTicks: true,
-                                    tickLength: clamp(5, 2 * window.innerWidth / 100, 10)
-                                },
-                                grid: { display: true, color: 'rgba(0,0,0,0.3)', borderDash: [2,2], drawBorder: false },
-                                border: { display: true, color: COLOR_DECLINATION, width: clamp(0.8, 0.3 * window.innerWidth / 100, 1.2) }
-                            },
-                            yLoss: {
-                                min: 0,
-                                max: 2.4,
-                                reverse: true,
-                                position: 'right',
-                                ticks: {
-                                    color: COLOR_LOSS,
-                                    font: { size: clamp(7, 2 * window.innerWidth / 100, 9) },
-                                    drawTicks: true,
-                                    tickLength: clamp(5, 2 * window.innerWidth / 100, 10),
-                                    stepSize: 0.4,
-                                    callback: function(value) {
-                                        const allowedTicks = [0, 0.4, 0.8, 1.2, 1.6, 2, 2.4];
-                                        if (allowedTicks.includes(Number(value.toFixed(1)))) {
-                                            return value.toFixed(1);
-                                        }
-                                        return null;
-                                    }
-                                },
-                                grid: { display: false, drawBorder: false },
-                                border: { display: true, color: COLOR_LOSS, width: clamp(0.8, 0.3 * window.innerWidth / 100, 1.2) }
-                            }
-                        },
-                        interaction: {
-                            mode: 'index',
-                            intersect: false,
-                            axis: 'x'
-                        },
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                enabled: false,
-                                displayColors: false,
-                                external: externalTooltipHandler
-                            },
-                            annotation: {
-                                clip: false,
-                                annotations: annotations
-                            }
-                        },
-                        layout: {
-                            padding: {
-                                top: clamp(30, 8 * window.innerWidth / 100, 50),
-                                bottom: clamp(5, 2 * window.innerWidth / 100, 10),
-                                left: clamp(10, 3 * window.innerWidth / 100, 20),
-                                right: clamp(15, 4 * window.innerWidth / 100, 30)
-                            }
-                        },
-                        elements: { line: { tension: 0 } }
+            // Helper function to hide all tooltips
+            function hideAllTooltips() {
+                charts.forEach((chart, index) => {
+                    const canvas = document.getElementById(`chart${index + 1}`);
+                    if (canvas) {
+                        const tooltipEl = canvas.parentNode.querySelector(`#chartjs-tooltip-chart${index + 1}`);
+                        if (tooltipEl) {
+                            tooltipEl.style.opacity = '0';
+                        }
                     }
                 });
-            });
-        }
-
-        // Clamp function for dynamic sizing
-        function clamp(min, val, max) {
-            return Math.min(Math.max(val, min), max);
-        }
-
-        // Initialize charts with current year
-        createCharts(new Date().getUTCFullYear());
-
-        // Add event listener for year input
-        document.getElementById('year-input').addEventListener('change', (event) => {
-            const errorEl = document.getElementById('error-message');
-            const year = parseInt(event.target.value);
-            if (year >= 1900 && year <= 2100) {
-                errorEl.style.display = 'none';
-                errorEl.textContent = '';
-                createCharts(year);
-            } else {
-                errorEl.style.display = 'block';
-                errorEl.textContent = 'Please select a year between 1900 and 2100';
-                event.target.value = new Date().getUTCFullYear();
-                createCharts(new Date().getUTCFullYear());
             }
-        });
 
-        // Add touch event listener to hide tooltips
-        let touchTimeout;
-        document.addEventListener('touchend', () => {
-            clearTimeout(touchTimeout);
-            touchTimeout = setTimeout(hideAllTooltips, 100);
-        });
+            // External tooltip handler
+            function externalTooltipHandler(context) {
+                const tooltipModel = context.tooltip;
+                const chart = context.chart;
+                const canvas = chart.canvas;
+                const container = canvas.parentNode;
+                const tooltipId = 'chartjs-tooltip-' + canvas.id;
+                let tooltipEl = container.querySelector('#' + tooltipId);
 
-        // Redraw charts on window resize with debouncing and size check
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                const currentWidth = window.innerWidth;
-                const currentHeight = window.innerHeight;
-                const widthDiff = Math.abs(currentWidth - lastWindowSize.width);
-                const heightDiff = Math.abs(currentHeight - lastWindowSize.height);
-
-                // Only redraw if size change is significant (e.g., >10 pixels)
-                if (widthDiff > 10 || heightDiff > 10) {
-                    const year = parseInt(document.getElementById('year-input').value) || new Date().getUTCFullYear();
-                    createCharts(year);
-                    lastWindowSize = { width: currentWidth, height: currentHeight };
-                    console.log(`Redrawing charts due to significant resize: width=${currentWidth}, height=${currentHeight}`);
+                // Create tooltip element if it doesn't exist
+                if (!tooltipEl) {
+                    tooltipEl = document.createElement('div');
+                    tooltipEl.id = tooltipId;
+                    tooltipEl.className = 'chartjs-tooltip';
+                    tooltipEl.style.position = 'absolute';
+                    tooltipEl.style.pointerEvents = 'none';
+                    tooltipEl.style.background = 'rgba(255,255,255,0.98)';
+                    tooltipEl.style.border = '1px solid #ccc';
+                    tooltipEl.style.borderRadius = '4px';
+                    tooltipEl.style.padding = clamp(4, 1.5 * window.innerWidth / 100, 6) + 'px ' + clamp(6, 2 * window.innerWidth / 100, 8) + 'px';
+                    tooltipEl.style.fontSize = clamp(9, 2 * window.innerWidth / 100, 11) + 'px';
+                    tooltipEl.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)';
+                    tooltipEl.style.transition = 'opacity 0.04s ease';
+                    tooltipEl.style.whiteSpace = 'nowrap';
+                    tooltipEl.style.zIndex = 2000;
+                    tooltipEl.style.opacity = '0';
+                    container.appendChild(tooltipEl);
                 }
-            }, 300);
-        });
-    </script>
-</body>
+
+                // Hide all other tooltips
+                hideAllTooltips();
+
+                // Hide tooltip if opacity is 0 or no data points
+                if (tooltipModel.opacity === 0 || !tooltipModel.dataPoints || tooltipModel.dataPoints.length === 0) {
+                    tooltipEl.style.opacity = '0';
+                    return;
+                }
+
+                // Get data from the chart's dataset
+                const dataIndex = tooltipModel.dataPoints[0].dataIndex;
+                const dataset = chart.data.datasets;
+                const declinationData = dataset[0].data[dataIndex]; // Declination dataset
+                const extraLossData = dataset[1].data[dataIndex]; // Extra Loss dataset
+                const originalData = chart.data.datasets[0].data[dataIndex].originalData; // Custom property to store original data
+
+                if (!originalData) {
+                    tooltipEl.style.opacity = '0';
+                    return;
+                }
+
+                // Format date for display
+                function formatDateNatural(date) {
+                    const year = date.getUTCFullYear();
+                    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+                    const day = String(date.getUTCDate()).padStart(2, '0');
+                    const hours = String(date.getUTCHours()).padStart(2, '0');
+                    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+                    return `${year}-${month}-${day} ${hours}:${minutes} UTC`;
+                }
+
+                // Update tooltip content
+                tooltipEl.innerHTML = `
+                    <div style="font-weight:700;margin-bottom:${clamp(2, 1 * window.innerWidth / 100, 4)}px">${formatDateNatural(new Date(declinationData.x))}</div>
+                    <div style="color:${COLOR_DECLINATION};margin-bottom:2px">Declination: ${originalData.dec.toFixed(2)}°</div>
+                    <div style="color:${COLOR_LOSS};margin-bottom:2px">Extra Loss: ${originalData.extra_loss.toFixed(2)} dB</div>
+                    <div style="color:#000;margin-bottom:2px">Distance: ${originalData.dist.toFixed(0)} km</div>
+                    <div style="color:orange;margin-bottom:2px">Moon-Sun Sep: ${originalData.sun_sep.toFixed(2)}°</div>
+                    <div style="color:gray">Moon-GC Sep: ${originalData.gc_sep.toFixed(2)}°</div>
+                `;
+
+                // Position tooltip dynamically
+                const caretX = tooltipModel.caretX;
+                const caretY = tooltipModel.caretY;
+                const chartHeight = canvas.clientHeight;
+                const threshold = 50; // Pixels from top to switch to bottom positioning
+                const isMobile = window.innerWidth <= 600;
+
+                // Adjust position based on caretY to avoid clipping
+                if (caretY < threshold && !isMobile) {
+                    // Place tooltip below the point if too close to the top
+                    tooltipEl.style.top = `${caretY + 20}px`; // Offset below the point
+                    tooltipEl.style.transform = 'translate(-50%, 0%)';
+                } else if (isMobile && caretY < threshold + 20) {
+                    // Adjust for mobile with slightly more offset
+                    tooltipEl.style.top = `${caretY + 30}px`;
+                    tooltipEl.style.transform = 'translate(-50%, 0%)';
+                } else {
+                    // Default: place above the point
+                    tooltipEl.style.top = `${caretY}px`;
+                    tooltipEl.style.transform = 'translate(-50%, -120%)';
+                }
+
+                tooltipEl.style.left = `${caretX}px`;
+                tooltipEl.style.opacity = '1';
+            }
+
+            function createCharts(year) {
+                // Optional: Log to debug chart redraws (remove in production)
+                console.log(`Creating charts for year ${year} at ${new Date().toISOString()}`);
+
+                document.getElementById('chart-title').textContent = `MOON EPHEMERIS OVERVIEW FOR THE YEAR ${year}, by SA5IKN`;
+                const quarters = [
+                    { start: new Date(Date.UTC(year, 0, 1)), end: new Date(Date.UTC(year, 3, 0)) },
+                    { start: new Date(Date.UTC(year, 3, 1)), end: new Date(Date.UTC(year, 6, 0)) },
+                    { start: new Date(Date.UTC(year, 6, 1)), end: new Date(Date.UTC(year, 9, 0)) },
+                    { start: new Date(Date.UTC(year, 9, 1)), end: new Date(Date.UTC(year + 1, 0, 0)) }
+                ];
+
+                quarters.forEach((quarter, index) => {
+                    if (charts[index]) {
+                        charts[index].destroy();
+                        charts[index] = null;
+                    }
+
+                    const data = computeMoonData(quarter.start, quarter.end);
+                    if (!data || data.length === 0) {
+                        console.warn(`No data for quarter ${index + 1}`);
+                        return;
+                    }
+                    const annotations = createAnnotations(data, quarter.start, quarter.end);
+                    const canvas = document.getElementById(`chart${index + 1}`);
+                    if (!canvas) {
+                        console.error(`Canvas element chart${index + 1} not found`);
+                        return;
+                    }
+                    const ctx = canvas.getContext('2d');
+
+                    // Attach original data to dataset for tooltip access
+                    const declinationData = data.map(d => ({ x: d.date, y: d.dec, originalData: d }));
+                    const extraLossData = data.map(d => ({ x: d.date, y: d.extra_loss, originalData: d }));
+
+                    charts[index] = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            datasets: [
+                                {
+                                    label: 'Declination',
+                                    data: declinationData,
+                                    borderColor: COLOR_DECLINATION,
+                                    borderWidth: clamp(1, 0.3 * window.innerWidth / 100, 1.5),
+                                    pointRadius: 0,
+                                    yAxisID: 'yDec'
+                                },
+                                {
+                                    label: 'Extra Loss',
+                                    data: extraLossData,
+                                    borderColor: COLOR_LOSS,
+                                    borderWidth: clamp(1, 0.3 * window.innerWidth / 100, 1.5),
+                                    pointRadius: 0,
+                                    yAxisID: 'yLoss'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    type: 'time',
+                                    time: { unit: 'day', parser: 'yyyy-MM-dd\'T\'HH:mm', displayFormats: { day: 'MMM d' } },
+                                    min: quarter.start,
+                                    max: quarter.end,
+                                    position: 'top',
+                                    ticks: { display: false },
+                                    grid: { display: false },
+                                    border: { display: false }
+                                },
+                                yDec: {
+                                    min: -30,
+                                    max: 30,
+                                    position: 'left',
+                                    ticks: {
+                                        color: COLOR_DECLINATION,
+                                        font: { size: clamp(7, 2 * window.innerWidth / 100, 9) },
+                                        drawTicks: true,
+                                        tickLength: clamp(5, 2 * window.innerWidth / 100, 10)
+                                    },
+                                    grid: { display: true, color: 'rgba(0,0,0,0.3)', borderDash: [2,2], drawBorder: false },
+                                    border: { display: true, color: COLOR_DECLINATION, width: clamp(0.8, 0.3 * window.innerWidth / 100, 1.2) }
+                                },
+                                yLoss: {
+                                    min: 0,
+                                    max: 2.4,
+                                    reverse: true,
+                                    position: 'right',
+                                    ticks: {
+                                        color: COLOR_LOSS,
+                                        font: { size: clamp(7, 2 * window.innerWidth / 100, 9) },
+                                        drawTicks: true,
+                                        tickLength: clamp(5, 2 * window.innerWidth / 100, 10),
+                                        stepSize: 0.4,
+                                        callback: function(value) {
+                                            const allowedTicks = [0, 0.4, 0.8, 1.2, 1.6, 2, 2.4];
+                                            if (allowedTicks.includes(Number(value.toFixed(1)))) {
+                                                return value.toFixed(1);
+                                            }
+                                            return null;
+                                        }
+                                    },
+                                    grid: { display: false, drawBorder: false },
+                                    border: { display: true, color: COLOR_LOSS, width: clamp(0.8, 0.3 * window.innerWidth / 100, 1.2) }
+                                }
+                            },
+                            interaction: {
+                                mode: 'index',
+                                intersect: false,
+                                axis: 'x'
+                            },
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    enabled: false,
+                                    displayColors: false,
+                                    external: externalTooltipHandler
+                                },
+                                annotation: {
+                                    clip: false,
+                                    annotations: annotations
+                                }
+                            },
+                            layout: {
+                                padding: {
+                                    top: clamp(30, 8 * window.innerWidth / 100, 50),
+                                    bottom: clamp(5, 2 * window.innerWidth / 100, 10),
+                                    left: clamp(10, 3 * window.innerWidth / 100, 20),
+                                    right: clamp(15, 4 * window.innerWidth / 100, 30)
+                                }
+                            },
+                            elements: { line: { tension: 0 } }
+                        }
+                    });
+                });
+            }
+
+            // Clamp function for dynamic sizing
+            function clamp(min, val, max) {
+                return Math.min(Math.max(val, min), max);
+            }
+
+            // Initialize charts with current year
+            createCharts(new Date().getUTCFullYear());
+
+            // Add event listener for year input
+            document.getElementById('year-input').addEventListener('change', (event) => {
+                const errorEl = document.getElementById('error-message');
+                const year = parseInt(event.target.value);
+                if (year >= 1900 && year <= 2100) {
+                    errorEl.style.display = 'none';
+                    errorEl.textContent = '';
+                    createCharts(year);
+                } else {
+                    errorEl.style.display = 'block';
+                    errorEl.textContent = 'Please select a year between 1900 and 2100';
+                    event.target.value = new Date().getUTCFullYear();
+                    createCharts(new Date().getUTCFullYear());
+                }
+            });
+
+            // Add touch event listener to hide tooltips
+            let touchTimeout;
+            document.addEventListener('touchend', () => {
+                clearTimeout(touchTimeout);
+                touchTimeout = setTimeout(hideAllTooltips, 100);
+            });
+
+            // Redraw charts on window resize with debouncing and size check
+            let resizeTimeout;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    const currentWidth = window.innerWidth;
+                    const currentHeight = window.innerHeight;
+                    const widthDiff = Math.abs(currentWidth - lastWindowSize.width);
+                    const heightDiff = Math.abs(currentHeight - lastWindowSize.height);
+
+                    // Only redraw if size change is significant (e.g., >10 pixels)
+                    if (widthDiff > 10 || heightDiff > 10) {
+                        const year = parseInt(document.getElementById('year-input').value) || new Date().getUTCFullYear();
+                        createCharts(year);
+                        lastWindowSize = { width: currentWidth, height: currentHeight };
+                        console.log(`Redrawing charts due to significant resize: width=${currentWidth}, height=${currentHeight}`);
+                    }
+                }, 300);
+            });
+        </script>
+    </body>
 </html>
