@@ -37,12 +37,12 @@
             max-width: 1200px;
             height: clamp(150px, 25vw, 200px);
             margin-bottom: 10px;
-            user-select: none; /* Prevent text selection */
+            user-select: none;
         }
         .chart-container canvas {
             width: 100% !important;
             height: 100% !important;
-            user-select: none; /* Prevent text selection on canvas */
+            user-select: none;
         }
         .y-label-left {
             position: absolute;
@@ -443,7 +443,7 @@
                         type: 'line',
                         xScaleID: 'x',
                         xMin: currentStr,
-                        xMax: careStr,
+                        xMax: currentStr,
                         yScaleID: 'yDec',
                         yMin: -30,
                         yMax: 30,
@@ -530,9 +530,9 @@
             // Get data from the chart's dataset
             const dataIndex = tooltipModel.dataPoints[0].dataIndex;
             const dataset = chart.data.datasets;
-            const declinationData = dataset[0].data[dataIndex]; // Declination dataset
-            const extraLossData = dataset[1].data[dataIndex]; // Extra Loss dataset
-            const originalData = chart.data.datasets[0].data[dataIndex].originalData; // Custom property to store original data
+            const declinationData = dataset[0].data[dataIndex];
+            const extraLossData = dataset[1].data[dataIndex];
+            const originalData = chart.data.datasets[0].data[dataIndex].originalData;
 
             if (!originalData) {
                 tooltipEl.style.opacity = '0';
