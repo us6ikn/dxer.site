@@ -20,7 +20,7 @@
         }
         header {
             text-align: center;
-            margin-bottom: 1rem;
+            margin-bottom: 0rem;
             width: 100%;
             max-width: 1200px;
             z-index: 100;
@@ -41,7 +41,7 @@
             width: 100%;
             max-width: 1200px;
             height: clamp(150px, 25vw, 200px);
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             user-select: none;
         }
         .chart-container canvas {
@@ -171,11 +171,17 @@
         <canvas id="chart4"></canvas>
     </div>
     <div id="explanation">
-        <h3>Legend:</h3>
+        <p style="margin-bottom:1rem; font-size: clamp(10px, 2vw, 12px);">
+                Hover over the charts to see details.
+            </p>
         <p><span style="color: grey;">■</span> Grey bars show days when high sky temperature can reduce system performance.</p>
         <p><span style="color: orange;">■</span> Vertical orange bars mark days when the Moon is within 10° of the Sun, near new moon phases.</p>
         <p><span style="color: #1192e8;">―</span> Extra loss represents the additional path loss in dB relative to the minimum path loss at lunar perigee.</p>
         <p><span style="color: #fa4d56;">―</span> Declination is plotted as a red curve, with weekends (WE) marked at the top of each ephemeris graph.</p>
+        <p style="margin-top:1rem; font-style:italic; font-size: clamp(10px, 2vw, 12px);">
+                This Ephemeris Overview is powered by
+                <a href="https://dxer.site/eme-observer/" target="_blank" rel="noopener noreferrer">EME Observer</a>
+            </p>
     </div>
     <script>
         const PERIGEE_DISTANCE_KM = 356352.93;
@@ -540,8 +546,8 @@
                 <div style="color:${COLOR_DECLINATION};margin-bottom:2px">Declination: ${originalData.dec.toFixed(2)}°</div>
                 <div style="color:${COLOR_LOSS};margin-bottom:2px">Extra Loss: ${originalData.extra_loss.toFixed(2)} dB</div>
                 <div style="color:#000;margin-bottom:2px">Distance: ${originalData.dist.toFixed(0)} km</div>
-                <div style="color:orange;margin-bottom:2px">Moon-Sun Sep: ${originalData.sun_sep.toFixed(2)}°</div>
-                <div style="color:gray">Moon-GC Sep: ${originalData.gc_sep.toFixed(2)}°</div>
+                <div style="color:orange;margin-bottom:2px">Moon-Sun separation: ${originalData.sun_sep.toFixed(2)}°</div>
+                <div style="color:gray">Moon-GC separation: ${originalData.gc_sep.toFixed(2)}°</div>
             `;
 
             // Position tooltip
