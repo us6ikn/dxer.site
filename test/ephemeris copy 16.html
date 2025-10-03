@@ -52,7 +52,7 @@
         .y-label-left {
             position: absolute;
             left: clamp(5px, 2vw, 15px);
-            top: clamp(10px, 3vw, 30px);
+            top: clamp(10px, 3vw, 20px);
             color: #fa4d56;
             font-weight: bold;
             font-size: clamp(8px, 2vw, 12px);
@@ -60,8 +60,8 @@
         }
         .y-label-right {
             position: absolute;
-            right: clamp(5px, 2vw, 30px);
-            top: clamp(10px, 3vw, 30px);
+            right: clamp(5px, 2vw, 15px);
+            top: clamp(10px, 3vw, 20px);
             color: #1192e8;
             font-weight: bold;
             font-size: clamp(8px, 2vw, 12px);
@@ -70,7 +70,7 @@
         .we-label {
             position: absolute;
             left: clamp(10px, 3vw, 20px);
-            top: clamp(25px, 5vw, 55px);
+            top: clamp(25px, 5vw, 40px);
             color: black;
             font-size: clamp(6px, 1.5vw, 8px);
             z-index: 150;
@@ -152,33 +152,34 @@
 <body>
     <header>
         <h1 id="chart-title">
-            Moon Ephemeris Overview for
-            <select id="year-input"></select>
-            <span style="font-weight: normal;">by SA5IKN</span>
+          Moon Ephemeris Overview for
+          <select id="year-input"></select>
+          <span style="font-weight: normal;">by SA5IKN</span>
         </h1>
+
         <div id="error-message"></div>
     </header>
     <div class="chart-container">
         <span class="y-label-left">Declination (°)</span>
-        <span class="y-label-right">Extra Loss (dB)</span>
+        <span class="y-label-right">Extra-Loss (dB)</span>
         <span class="we-label">WE:</span>
         <canvas id="chart1"></canvas>
     </div>
     <div class="chart-container">
         <span class="y-label-left">Declination (°)</span>
-        <span class="y-label-right">Extra Loss (dB)</span>
+        <span class="y-label-right">Extra-Loss (dB)</span>
         <span class="we-label">WE:</span>
         <canvas id="chart2"></canvas>
     </div>
     <div class="chart-container">
         <span class="y-label-left">Declination (°)</span>
-        <span class="y-label-right">Extra Loss (dB)</span>
+        <span class="y-label-right">Extra-Loss (dB)</span>
         <span class="we-label">WE:</span>
         <canvas id="chart3"></canvas>
     </div>
     <div class="chart-container">
         <span class="y-label-left">Declination (°)</span>
-        <span class="y-label-right">Extra Loss (dB)</span>
+        <span class="y-label-right">Extra-Loss (dB)</span>
         <span class="we-label">WE:</span>
         <canvas id="chart4"></canvas>
     </div>
@@ -224,7 +225,6 @@
                     e.preventDefault();
                 });
             });
-            createCharts(new Date().getUTCFullYear());
         });
 
         function angularSeparation(ra1, dec1, ra2, dec2) {
@@ -571,9 +571,10 @@
         function createCharts(year) {
             console.log(`Creating charts for year ${year} at ${new Date().toISOString()}`);
 
-            // Update the select element value without recreating it
-            const select = document.getElementById('year-input');
-            select.value = year;
+            // Update the title with the select element
+            document.getElementById('chart-title').innerHTML = `Moon Ephemeris Overview for <select id="year-input"></select> by SA5IKN`;
+            populateYearDropdown();
+            document.getElementById('year-input').value = year;
 
             const quarters = [
                 { start: new Date(Date.UTC(year, 0, 1)), end: new Date(Date.UTC(year, 3, 0)) },
@@ -714,16 +715,10 @@
         }
 
         // Initialize charts with current year
+        createCharts(new Date().getUTCFullYear());
+
+        // Add event listener for year input
         document.addEventListener('DOMContentLoaded', () => {
-            populateYearDropdown();
-            createCharts(new Date().getUTCFullYear());
-            // Prevent context menu on chart containers
-            document.querySelectorAll('.chart-container, .chart-container canvas').forEach(element => {
-                element.addEventListener('contextmenu', (e) => {
-                    e.preventDefault();
-                });
-            });
-            // Add event listener for year input
             document.getElementById('year-input').addEventListener('change', (event) => {
                 const errorEl = document.getElementById('error-message');
                 const year = parseInt(event.target.value);
