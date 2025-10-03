@@ -36,11 +36,6 @@
             max-width: 1200px;
             height: clamp(150px, 25vw, 200px);
             margin-bottom: 10px;
-            overflow: hidden; /* Prevent layout shifts */
-        }
-        .chart-container canvas {
-            width: 100% !important;
-            height: 100% !important;
         }
         .y-label-left {
             position: absolute;
@@ -193,7 +188,6 @@
         const GC_DEC = -(29 + 0/60 + 28/3600);
 
         let charts = [null, null, null, null];
-        let lastWindowSize = { width: window.innerWidth, height: window.innerHeight };
 
         // Populate year dropdown
         function populateYearDropdown() {
@@ -552,9 +546,6 @@
         }
 
         function createCharts(year) {
-            // Optional: Log to debug chart redraws (remove in production)
-            console.log(`Creating charts for year ${year} at ${new Date().toISOString()}`);
-
             document.getElementById('chart-title').textContent = `MOON EPHEMERIS OVERVIEW FOR THE YEAR ${year}, by SA5IKN`;
             const quarters = [
                 { start: new Date(Date.UTC(year, 0, 1)), end: new Date(Date.UTC(year, 3, 0)) },
@@ -720,24 +711,14 @@
             touchTimeout = setTimeout(hideAllTooltips, 100);
         });
 
-        // Redraw charts on window resize with debouncing and size check
+        // Redraw charts on window resize with debouncing
         let resizeTimeout;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
-                const currentWidth = window.innerWidth;
-                const currentHeight = window.innerHeight;
-                const widthDiff = Math.abs(currentWidth - lastWindowSize.width);
-                const heightDiff = Math.abs(currentHeight - lastWindowSize.height);
-
-                // Only redraw if size change is significant (e.g., >10 pixels)
-                if (widthDiff > 10 || heightDiff > 10) {
-                    const year = parseInt(document.getElementById('year-input').value) || new Date().getUTCFullYear();
-                    createCharts(year);
-                    lastWindowSize = { width: currentWidth, height: currentHeight };
-                    console.log(`Redrawing charts due to significant resize: width=${currentWidth}, height=${currentHeight}`);
-                }
-            }, 300);
+                const year = parseInt(document.getElementById('year-input').value) || new Date().getUTCFullYear();
+                createCharts(year);
+            }, 200);
         });
     </script>
 </body>
