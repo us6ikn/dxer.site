@@ -37,12 +37,10 @@
             max-width: 1200px;
             height: clamp(150px, 25vw, 200px);
             margin-bottom: 10px;
-            user-select: none; /* Prevent text selection */
         }
         .chart-container canvas {
             width: 100% !important;
             height: 100% !important;
-            user-select: none; /* Prevent text selection on canvas */
         }
         .y-label-left {
             position: absolute;
@@ -220,15 +218,7 @@
         }
 
         // Call on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            populateYearDropdown();
-            // Prevent context menu on chart containers
-            document.querySelectorAll('.chart-container, .chart-container canvas').forEach(element => {
-                element.addEventListener('contextmenu', (e) => {
-                    e.preventDefault();
-                });
-            });
-        });
+        document.addEventListener('DOMContentLoaded', populateYearDropdown);
 
         function angularSeparation(ra1, dec1, ra2, dec2) {
             const ra1Rad = ra1 * Math.PI / 12;
@@ -443,7 +433,7 @@
                         type: 'line',
                         xScaleID: 'x',
                         xMin: currentStr,
-                        xMax: careStr,
+                        xMax: currentStr,
                         yScaleID: 'yDec',
                         yMin: -30,
                         yMax: 30,
@@ -696,7 +686,7 @@
                         },
                         layout: {
                             padding: {
-                                top: clamp(40, 10 * window.innerWidth / 100, 60),
+                                top: clamp(40, 10 * window.innerWidth / 100, 60), // Increased top padding
                                 bottom: clamp(5, 2 * window.innerWidth / 100, 10),
                                 left: clamp(10, 3 * window.innerWidth / 100, 20),
                                 right: clamp(15, 4 * window.innerWidth / 100, 30)
@@ -736,7 +726,7 @@
         let touchTimeout;
         document.addEventListener('touchend', () => {
             clearTimeout(touchTimeout);
-            touchTimeout = setTimeout(hideAllTooltips, 1000);
+            touchTimeout = setTimeout(hideAllTooltips, 1000); // Increased to 1000ms
         });
 
         // Redraw charts on window resize with debouncing and size check
