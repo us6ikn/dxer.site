@@ -23,6 +23,7 @@
             margin-bottom: 1rem;
             width: 100%;
             max-width: 1200px;
+            z-index: 100;
         }
         h1 {
             font-size: clamp(12px, 3vw, 16px);
@@ -37,6 +38,10 @@
             height: clamp(150px, 25vw, 200px);
             margin-bottom: 10px;
         }
+        .chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
         .y-label-left {
             position: absolute;
             left: clamp(5px, 2vw, 15px);
@@ -44,6 +49,7 @@
             color: #fa4d56;
             font-weight: bold;
             font-size: clamp(8px, 2vw, 12px);
+            z-index: 150;
         }
         .y-label-right {
             position: absolute;
@@ -52,6 +58,7 @@
             color: #1192e8;
             font-weight: bold;
             font-size: clamp(8px, 2vw, 12px);
+            z-index: 150;
         }
         .we-label {
             position: absolute;
@@ -59,11 +66,13 @@
             top: clamp(25px, 5vw, 40px);
             color: black;
             font-size: clamp(6px, 1.5vw, 8px);
+            z-index: 150;
         }
         #explanation {
             margin-top: 1rem;
             font-size: clamp(10px, 2vw, 12px);
             max-width: 90%;
+            z-index: 100;
         }
         #explanation p {
             margin: 5px 0;
@@ -78,6 +87,7 @@
             justify-content: center;
             gap: 10px;
             margin-bottom: 0.5rem;
+            z-index: 100;
         }
         #year-selector label {
             font-size: clamp(12px, 2.5vw, 14px);
@@ -116,6 +126,9 @@
             font-size: clamp(10px, 2vw, 12px);
             margin-top: 5px;
         }
+        .chartjs-tooltip {
+            z-index: 2000;
+        }
         @media (max-width: 600px) {
             .chart-container {
                 height: clamp(120px, 30vw, 180px);
@@ -134,7 +147,6 @@
                 max-height: 200px;
             }
             .chartjs-tooltip {
-                transform: translate(-50%, -130%);
                 font-size: clamp(8px, 2.5vw, 10px);
             }
         }
@@ -188,6 +200,7 @@
         const GC_DEC = -(29 + 0/60 + 28/3600);
 
         let charts = [null, null, null, null];
+        let lastWindowSize = { width: window.innerWidth, height: window.innerHeight };
 
         // Populate year dropdown
         function populateYearDropdown() {
@@ -490,7 +503,7 @@
                 tooltipEl.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)';
                 tooltipEl.style.transition = 'opacity 0.04s ease';
                 tooltipEl.style.whiteSpace = 'nowrap';
-                tooltipEl.style.zIndex = 1000;
+                tooltipEl.style.zIndex = 2000;
                 tooltipEl.style.opacity = '0';
                 container.appendChild(tooltipEl);
             }
@@ -539,13 +552,18 @@
             // Position tooltip
             const caretX = tooltipModel.caretX;
             const caretY = tooltipModel.caretY;
-            tooltipEl.style.left = caretX + 'px';
-            tooltipEl.style.top = caretY + 'px';
-            tooltipEl.style.transform = 'translate(-50%, -120%)';
+            const isMobile = window.innerWidth <= 600;
+
+            // Always place tooltip above the point, adjust offset for mobile
+            tooltipEl.style.left = `${caretX}px`;
+            tooltipEl.style.top = `${caretY}px`;
+            tooltipEl.style.transform = isMobile ? 'translate(-50%, -100%)' : 'translate(-50%, -120%)';
             tooltipEl.style.opacity = '1';
         }
 
         function createCharts(year) {
+            console.log(`Creating charts for year ${year} at ${new Date().toISOString()}`);
+
             document.getElementById('chart-title').textContent = `MOON EPHEMERIS OVERVIEW FOR THE YEAR ${year}, by SA5IKN`;
             const quarters = [
                 { start: new Date(Date.UTC(year, 0, 1)), end: new Date(Date.UTC(year, 3, 0)) },
@@ -668,7 +686,7 @@
                         },
                         layout: {
                             padding: {
-                                top: clamp(30, 8 * window.innerWidth / 100, 50),
+                                top: clamp(40, 10 * window.innerWidth / 100, 60), // Increased top padding
                                 bottom: clamp(5, 2 * window.innerWidth / 100, 10),
                                 left: clamp(10, 3 * window.innerWidth / 100, 20),
                                 right: clamp(15, 4 * window.innerWidth / 100, 30)
@@ -708,17 +726,27 @@
         let touchTimeout;
         document.addEventListener('touchend', () => {
             clearTimeout(touchTimeout);
-            touchTimeout = setTimeout(hideAllTooltips, 100);
+            touchTimeout = setTimeout(hideAllTooltips, 1000); // Increased to 1000ms
         });
 
-        // Redraw charts on window resize with debouncing
+        // Redraw charts on window resize with debouncing and size check
         let resizeTimeout;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
-                const year = parseInt(document.getElementById('year-input').value) || new Date().getUTCFullYear();
-                createCharts(year);
-            }, 200);
+                const currentWidth = window.innerWidth;
+                const currentHeight = window.innerHeight;
+                const widthDiff = Math.abs(currentWidth - lastWindowSize.width);
+                const heightDiff = Math.abs(currentHeight - lastWindowSize.height);
+
+                // Only redraw if size change is significant (e.g., >10 pixels)
+                if (widthDiff > 10 || heightDiff > 10) {
+                    const year = parseInt(document.getElementById('year-input').value) || new Date().getUTCFullYear();
+                    createCharts(year);
+                    lastWindowSize = { width: currentWidth, height: currentHeight };
+                    console.log(`Redrawing charts due to significant resize: width=${currentWidth}, height=${currentHeight}`);
+                }
+            }, 300);
         });
     </script>
 </body>
