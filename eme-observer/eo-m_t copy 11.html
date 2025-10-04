@@ -2173,37 +2173,33 @@
             });
         });
         
-                                                document.getElementById('realTimeButton').addEventListener('click', () => {
-                                                    isRealTimeMode = !isRealTimeMode;
-                                                    const autoTrackButton = document.getElementById('realTimeButton');
-                                                    const hourSlider = document.getElementById('hour');
-                                                    const dateInput = document.getElementById('date');
-                                                    const prevDayButton = document.getElementById('prevDay');
-                                                    const nextDayButton = document.getElementById('nextDay');
+        document.getElementById('realTimeButton').addEventListener('click', () => {
+          isRealTimeMode = !isRealTimeMode;
+          const autoTrackButton = document.getElementById('realTimeButton');
+          const hourSlider = document.getElementById('hour');
+          const dateInput = document.getElementById('date');
+          const prevDayButton = document.getElementById('prevDay');
+          const nextDayButton = document.getElementById('nextDay');
 
-                                                    if (isRealTimeMode) {
-                                                        autoTrackButton.classList.add('active');
-                                                        autoTrackButton.textContent = 'Stop';
-                                                        hourSlider.disabled = true;
-                                                        dateInput.disabled = true;
-                                                        prevDayButton.disabled = true;
-                                                        nextDayButton.disabled = true;
-                                                        startRealTimeUpdates();
-                                                    } else {
-                                                        autoTrackButton.classList.remove('active');
-                                                        autoTrackButton.textContent = 'Track';
-                                                        hourSlider.disabled = false;
-                                                        dateInput.disabled = false;
-                                                        prevDayButton.disabled = false;
-                                                        nextDayButton.disabled = false;
-                                                        stopRealTimeUpdates();
-                                                        // Update hour-value to match slider position
-                                                        const hour = Math.floor(hourIndex / 2);
-                                                        const minutes = (hourIndex % 2) * 30;
-                                                        document.getElementById('hour-value').textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-                                                        updateChart(hourIndex, false);
-                                                    }
-                                                });
+          if (isRealTimeMode) {
+            autoTrackButton.classList.add('active');
+            autoTrackButton.textContent = 'Stop';
+            hourSlider.disabled = true;
+            dateInput.disabled = true;
+            prevDayButton.disabled = true;
+            nextDayButton.disabled = true;
+            startRealTimeUpdates();
+          } else {
+            autoTrackButton.classList.remove('active');
+            autoTrackButton.textContent = 'Track';
+            hourSlider.disabled = false;
+            dateInput.disabled = false;
+            prevDayButton.disabled = false;
+            nextDayButton.disabled = false;
+            stopRealTimeUpdates();
+            updateChart(hourIndex, false);
+          }
+        });
         
         document.getElementById('bandSelect').addEventListener('change', () => {
           const band = document.getElementById('bandSelect').value;
