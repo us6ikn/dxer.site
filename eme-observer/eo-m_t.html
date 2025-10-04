@@ -803,6 +803,9 @@
         let FREQUENCY_HZ = bandConfig['10GHz'].frequency;
 
         function updateBand(band) {
+            // Stop real-time updates to clear any existing interval
+            stopRealTimeUpdates();
+
             // Update frequency
             FREQUENCY_HZ = bandConfig[band].frequency;
 
@@ -849,6 +852,10 @@
                     }
                     // Update charts with new data
                     updateChart(hourIndex, isRealTimeMode);
+                    // Restart real-time updates if mode is active
+                    if (isRealTimeMode) {
+                        startRealTimeUpdates();
+                    }
                 })
                 .catch(error => {
                     console.error(`Error fetching ${jsonFile}:`, error);
