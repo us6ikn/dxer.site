@@ -1185,7 +1185,13 @@
                                                                 throw new Error('GeoVector returned null or undefined');
                                                             }
                                                             const moon = vectorToEquatorial(moonVector, false); // No EQD transformation
+                                                            if (!moon) {
+                                                                throw new Error('vectorToEquatorial returned null');
+                                                            }
                                                             const libration = Astronomy.Libration(astroTime);
+                                                            if (!libration) {
+                                                                throw new Error('Libration returned null or undefined');
+                                                            }
                                                             const distanceKm = libration.dist_km;
                                                             const declination = moon.dec;
 
