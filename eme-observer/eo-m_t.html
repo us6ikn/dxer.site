@@ -1882,16 +1882,22 @@
           updateMoonChart(exactTime);
         }
 
-        function startRealTimeUpdates() {
-          // Clear any existing interval
-          stopRealTimeUpdates();
+                                                function startRealTimeUpdates() {
+                                                    // Clear any existing interval
+                                                    stopRealTimeUpdates();
 
-          // Update immediately
-          updateRealTime();
+                                                    // Calculate milliseconds until the next minute
+                                                    const now = new Date();
+                                                    const secondsUntilNextMinute = 60 - now.getUTCSeconds();
+                                                    const millisecondsUntilNextMinute = secondsUntilNextMinute * 1000 - now.getUTCMilliseconds();
 
-          // Set interval to update every minute (60000 ms)
-          realTimeInterval = setInterval(updateRealTime, 60000);
-        }
+                                                    // Perform first update after delay to align with next minute
+                                                    setTimeout(() => {
+                                                        updateRealTime();
+                                                        // Start regular updates every 60 seconds
+                                                        realTimeInterval = setInterval(updateRealTime, 60000);
+                                                    }, millisecondsUntilNextMinute);
+                                                }
 
         function stopRealTimeUpdates() {
           if (realTimeInterval) {
