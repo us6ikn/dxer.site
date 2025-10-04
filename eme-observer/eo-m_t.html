@@ -1886,12 +1886,15 @@
                                                     // Clear any existing interval
                                                     stopRealTimeUpdates();
 
+                                                    // Perform immediate update
+                                                    updateRealTime();
+
                                                     // Calculate milliseconds until the next minute
                                                     const now = new Date();
                                                     const secondsUntilNextMinute = 60 - now.getUTCSeconds();
                                                     const millisecondsUntilNextMinute = secondsUntilNextMinute * 1000 - now.getUTCMilliseconds();
 
-                                                    // Perform first update after delay to align with next minute
+                                                    // Schedule updates starting at the next minute
                                                     setTimeout(() => {
                                                         updateRealTime();
                                                         // Start regular updates every 60 seconds
