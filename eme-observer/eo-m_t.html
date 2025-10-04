@@ -803,8 +803,16 @@
         let FREQUENCY_HZ = bandConfig['10GHz'].frequency;
 
         function updateBand(band) {
-            // Stop real-time updates to clear any existing interval
+            // Stop real-time updates and disable real-time mode
             stopRealTimeUpdates();
+            isRealTimeMode = false;
+            const autoTrackButton = document.getElementById('realTimeButton');
+            autoTrackButton.classList.remove('active');
+            autoTrackButton.textContent = 'Track';
+            document.getElementById('hour').disabled = false;
+            document.getElementById('date').disabled = false;
+            document.getElementById('prevDay').disabled = false;
+            document.getElementById('nextDay').disabled = false;
 
             // Update frequency
             FREQUENCY_HZ = bandConfig[band].frequency;
@@ -826,7 +834,6 @@
             // Update JSON file and markers
             const jsonFile = bandConfig[band].jsonFile;
             const showActiveOnly = isActiveStationsOnly;
-            // Clear existing markers to prevent overlap
             markers.forEach(marker => marker.setMap(null));
             markers = [];
             fetch(jsonFile)
@@ -851,11 +858,7 @@
                         computeFullDayData(dxDayData, dxInput, dateStr, false);
                     }
                     // Update charts with new data
-                    updateChart(hourIndex, isRealTimeMode);
-                    // Restart real-time updates if mode is active
-                    if (isRealTimeMode) {
-                        startRealTimeUpdates();
-                    }
+                    updateChart(hourIndex, false);
                 })
                 .catch(error => {
                     console.error(`Error fetching ${jsonFile}:`, error);
