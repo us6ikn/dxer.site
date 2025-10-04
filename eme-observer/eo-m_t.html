@@ -332,15 +332,15 @@
       }
 
       .metric-distance {
-        color: #ff832b;
-      }
-
-      .metric-declination {
         color: #24a148;
       }
 
+      .metric-declination {
+        color: #ff832b;
+      }
+
       .metric-pathloss {
-        color: #800080;
+        color: #24a148;
       }
 
       .metric-separator {
@@ -1491,7 +1491,7 @@
                                                                     {
                                                                         label: "Moon Distance (km)",
                                                                         data: distances,
-                                                                        borderColor: "#800080",
+                                                                        borderColor: "#24a148",
                                                                         pointRadius: 0,
                                                                         borderWidth: 1.5,
                                                                         tension: 0.2,
@@ -1500,7 +1500,7 @@
                                                                     {
                                                                         label: "Moon Declination (°)",
                                                                         data: declinations,
-                                                                        borderColor: "#FFA500",
+                                                                        borderColor: "#ff832b",
                                                                         pointRadius: 0,
                                                                         borderWidth: 1.5,
                                                                         tension: 0.2,
@@ -1527,14 +1527,14 @@
                                                                         title: {
                                                                             display: true,
                                                                             text: "Distance (\u00D710³ km)",
-                                                                            color: "#800080",
+                                                                            color: "#24a148",
                                                                             font: { size: 12, family: 'Arial, sans-serif' }
                                                                         },
                                                                         min: 356400,
                                                                         max: 406700,
                                                                         ticks: {
                                                                             stepSize: 10000,
-                                                                            color: "#800080",
+                                                                            color: "#24a148",
                                                                             font: { size: 12 },
                                                                             callback: function(value) {
                                                                                 return (value / 1000).toFixed(0);
@@ -1549,7 +1549,7 @@
                                                                         title: {
                                                                             display: true,
                                                                             text: "Declination (°)",
-                                                                            color: "#FFA500",
+                                                                            color: "#ff832b",
                                                                             font: { size: 12, family: 'Arial, sans-serif' }
                                                                         },
                                                                         min: -30,
@@ -1557,7 +1557,7 @@
                                                                         ticks: {
                                                                             stepSize: 10,
                                                                             callback: val => val + "°",
-                                                                            color: "#FFA500",
+                                                                            color: "#ff832b",
                                                                             font: { size: 12 }
                                                                         },
                                                                         grid: { drawOnChartArea: false }
@@ -1569,7 +1569,7 @@
                                                                         title: {
                                                                             display: true,
                                                                             text: "Extra Path Loss (dB)",
-                                                                            color: "#800080",
+                                                                            color: "#24a148",
                                                                             font: { size: 12, family: 'Arial, sans-serif' }
                                                                         },
                                                                         min: 0,
@@ -1577,7 +1577,7 @@
                                                                         ticks: {
                                                                             stepSize: 0.5,
                                                                             callback: val => val.toFixed(1),
-                                                                            color: "#800080",
+                                                                            color: "#24a148",
                                                                             font: { size: 12 }
                                                                         },
                                                                         grid: { drawOnChartArea: false },
