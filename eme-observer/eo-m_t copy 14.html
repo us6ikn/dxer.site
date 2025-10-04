@@ -1192,9 +1192,8 @@
 
                                                     const startDate = new Date(dateStr);
                                                     startDate.setUTCDate(1);
-                                                    startDate.setUTCHours(0, 0, 0, 0);
                                                     const endDate = new Date(startDate);
-                                                    endDate.setUTCDate(endDate.getUTCDate() + 31); // Slightly over a month to ensure coverage
+                                                    endDate.setUTCDate(endDate.getUTCDate() + 30);
 
                                                     const data = [];
                                                     const labels = [];
@@ -1202,18 +1201,10 @@
                                                     // Sgr A coordinates (J2000): RA = 17h45m40.0409s = 17.76112247h, Dec = -29°00'28.118" = -29.00781056°
                                                     const sgrA = { ra: 17.76112247, dec: -29.00781056 };
 
-                                                    // Generate daily labels for the chart (DD-MM)
                                                     for (let dt = new Date(startDate); dt <= endDate; dt.setUTCDate(dt.getUTCDate() + 1)) {
-                                                        const day = String(dt.getUTCDate()).padStart(2, '0');
-                                                        const month = String(dt.getUTCMonth() + 1).padStart(2, '0');
-                                                        labels.push(`${day}-${month}`);
-                                                    }
-
-                                                    // Compute hourly data
-                                                    for (let dt = new Date(startDate); dt <= endDate; dt.setUTCHours(dt.getUTCHours() + 1)) {
                                                         try {
                                                             const dateString = dt.toISOString().slice(0, 10);
-                                                            const time = dt.toISOString();
+                                                            const time = `${dateString}T00:00:00Z`;
                                                             const astroTime = Astronomy.MakeTime(new Date(time));
                                                             
                                                             const moonVector = Astronomy.GeoVector(Astronomy.Body.Moon, astroTime, true);
@@ -1245,15 +1236,16 @@
                                                             if (distanceKm != null && declination != null && !isNaN(declination) && !isNaN(sunSep) && !isNaN(sgrASep)) {
                                                                 data.push({
                                                                     date: dateString,
-                                                                    time: time,
-                                                                    index: (dt - startDate) / (1000 * 60 * 60), // Hours since start
                                                                     distance: distanceKm,
                                                                     declination: declination,
                                                                     sunSep: sunSep,
                                                                     sgrASep: sgrASep
                                                                 });
+                                                                const day = String(dt.getUTCDate()).padStart(2, '0');
+                                                                const month = String(dt.getUTCMonth() + 1).padStart(2, '0');
+                                                                labels.push(`${day}-${month}`);
                                                             } else {
-                                                                console.warn(`Missing data for ${time}: distance=${distanceKm}, declination=${declination}, sunSep=${sunSep}, sgrASep=${sgrASep}`);
+                                                                console.warn(`Missing data for ${dateString}: distance=${distanceKm}, declination=${declination}, sunSep=${sunSep}, sgrASep=${sgrASep}`);
                                                             }
                                                         } catch (e) {
                                                             console.warn(`Error calculating Moon data for ${dt.toISOString()}: ${e.message}`);
@@ -1272,33 +1264,11 @@
                                                     const dateInput = document.getElementById("date").value;
                                                     const { data: moonData, labels } = calculateMoonDataForMonth(dateInput);
 
-                                                    // Aggregate hourly data to daily for plotting (average per day)
-                                                    const dailyData = [];
-                                                    for (let day = 0; day < labels.length; day++) {
-                                                        const dayStart = day * 24;
-                                                        const dayEnd = Math.min((day + 1) * 24, moonData.length);
-                                                        let distanceSum = 0, declinationSum = 0, count = 0;
-                                                        for (let i = dayStart; i < dayEnd; i++) {
-                                                            if (moonData[i]) {
-                                                                distanceSum += moonData[i].distance;
-                                                                declinationSum += moonData[i].declination;
-                                                                count++;
-                                                            }
-                                                        }
-                                                        dailyData.push({
-                                                            distance: count > 0 ? distanceSum / count : null,
-                                                            declination: count > 0 ? declinationSum / count : null
-                                                        });
-                                                    }
-
-                                                    const distances = dailyData.map(d => d.distance);
-                                                    const declinations = dailyData.map(d => d.declination);
-
-                                                    // Calculate selected day index with hourly precision
-                                                    const startDate = new Date(dateInput);
-                                                    startDate.setUTCDate(1);
-                                                    startDate.setUTCHours(0, 0, 0, 0);
-                                                    const selectedIndex = (currentTime - startDate) / (1000 * 60 * 60); // Hours since start
+                                                    const distances = moonData.map(d => d.distance);
+                                                    const declinations = moonData.map(d => d.declination);
+                                                    const currentDay = currentTime.getUTCDate() - 1;
+                                                    const dayFraction = (currentTime.getUTCHours() * 60 + currentTime.getUTCMinutes()) / (24 * 60);
+                                                    const selectedDay = currentDay + dayFraction;
 
                                                     let currentDistance = null;
                                                     let currentDeclination = null;
@@ -1337,13 +1307,13 @@
                                                         console.warn(`Error calculating current Moon data for ${currentTime.toISOString()}: ${e.message}`);
                                                     }
 
-                                                    // Find intervals where sunSep or sgrASep < 10 degrees with hourly precision
+                                                    // Find intervals where sunSep or sgrASep < 10 degrees
                                                     const annotations = {
                                                         timeMarker: {
                                                             type: 'line',
                                                             mode: 'vertical',
                                                             scaleID: 'x',
-                                                            value: selectedIndex / 24, // Map to daily scale
+                                                            value: selectedDay,
                                                             borderColor: 'black',
                                                             borderWidth: 2,
                                                             label: { enabled: false }
@@ -1357,16 +1327,16 @@
                                                         const dayData = moonData[i];
                                                         if (dayData.sunSep < 10) {
                                                             if (!sunSepInterval) {
-                                                                sunSepInterval = { start: dayData.index, end: dayData.index };
+                                                                sunSepInterval = { start: i, end: i };
                                                             } else {
-                                                                sunSepInterval.end = dayData.index;
+                                                                sunSepInterval.end = i;
                                                             }
                                                         } else if (sunSepInterval) {
                                                             annotations[`sunSep${sunSepInterval.start}`] = {
                                                                 type: 'box',
                                                                 xScaleID: 'x',
-                                                                xMin: sunSepInterval.start / 24, // Map to daily scale
-                                                                xMax: (sunSepInterval.end + 1) / 24,
+                                                                xMin: sunSepInterval.start,
+                                                                xMax: sunSepInterval.end + 1,
                                                                 yMin: -30, // Span full declination range
                                                                 yMax: 30,
                                                                 backgroundColor: 'rgba(255, 255, 0, 0.2)', // Yellow for Sun
@@ -1389,16 +1359,16 @@
 
                                                         if (dayData.sgrASep < 10) {
                                                             if (!sgrASepInterval) {
-                                                                sgrASepInterval = { start: dayData.index, end: dayData.index };
+                                                                sgrASepInterval = { start: i, end: i };
                                                             } else {
-                                                                sgrASepInterval.end = dayData.index;
+                                                                sgrASepInterval.end = i;
                                                             }
                                                         } else if (sgrASepInterval) {
                                                             annotations[`sgrASep${sgrASepInterval.start}`] = {
                                                                 type: 'box',
                                                                 xScaleID: 'x',
-                                                                xMin: sgrASepInterval.start / 24, // Map to daily scale
-                                                                xMax: (sgrASepInterval.end + 1) / 24,
+                                                                xMin: sgrASepInterval.start,
+                                                                xMax: sgrASepInterval.end + 1,
                                                                 yMin: -30, // Span full declination range
                                                                 yMax: 30,
                                                                 backgroundColor: 'rgba(128, 0, 128, 0.2)', // Purple for Sgr A
@@ -1408,7 +1378,7 @@
                                                                     enabled: true,
                                                                     content: 'Moon-Sgr A < 10°',
                                                                     position: 'top',
-                                                                    yAdjust: -25,
+                                                                    yAdjust: -25, // Offset to avoid overlap with Sun annotation
                                                                     font: { size: 10, weight: 'bold', family: 'Arial, sans-serif' },
                                                                     color: 'black',
                                                                     backgroundColor: 'rgba(128, 0, 128, 0.7)',
@@ -1420,13 +1390,13 @@
                                                         }
                                                     }
 
-                                                    // Handle intervals that extend to the last data point
+                                                    // Handle intervals that extend to the last day
                                                     if (sunSepInterval) {
                                                         annotations[`sunSep${sunSepInterval.start}`] = {
                                                             type: 'box',
                                                             xScaleID: 'x',
-                                                            xMin: sunSepInterval.start / 24,
-                                                            xMax: (sunSepInterval.end + 1) / 24,
+                                                            xMin: sunSepInterval.start,
+                                                            xMax: sunSepInterval.end + 1,
                                                             yMin: -30,
                                                             yMax: 30,
                                                             backgroundColor: 'rgba(255, 255, 0, 0.2)',
@@ -1450,8 +1420,8 @@
                                                         annotations[`sgrASep${sgrASepInterval.start}`] = {
                                                             type: 'box',
                                                             xScaleID: 'x',
-                                                            xMin: sgrASepInterval.start / 24,
-                                                            xMax: (sgrASepInterval.end + 1) / 24,
+                                                            xMin: sgrASepInterval.start,
+                                                            xMax: sgrASepInterval.end + 1,
                                                             yMin: -30,
                                                             yMax: 30,
                                                             backgroundColor: 'rgba(128, 0, 128, 0.2)',
@@ -1595,7 +1565,7 @@
                                                         moonChart.data.datasets[0].data = distances;
                                                         moonChart.data.datasets[1].data = declinations;
                                                         moonChart.options.plugins.annotation.annotations = annotations;
-                                                        moonChart.options.plugins.annotation.annotations.timeMarker.value = selectedIndex / 24;
+                                                        moonChart.options.plugins.annotation.annotations.timeMarker.value = selectedDay;
                                                         moonChart.options.scales.y1.min = 356400;
                                                         moonChart.options.scales.y1.max = 406700;
                                                         moonChart.options.scales.y2.min = -30;
