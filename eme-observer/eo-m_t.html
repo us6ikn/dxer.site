@@ -802,10 +802,20 @@
         // Default to 10GHz
         let FREQUENCY_HZ = bandConfig['10GHz'].frequency;
 
+        // Helper function to update hour-value display
+        function updateHourDisplay() {
+            const hour = Math.floor(hourIndex / 2);
+            const minutes = (hourIndex % 2) * 30;
+            document.getElementById('hour-value').textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+        }
+
         function updateBand(band) {
             // Stop real-time updates and disable real-time mode
             stopRealTimeUpdates();
             isRealTimeMode = false;
+            console.log('updateBand: Real-time mode disabled, realTimeInterval cleared'); // Debug log
+
+            // Update UI to reflect real-time mode is off
             const autoTrackButton = document.getElementById('realTimeButton');
             autoTrackButton.classList.remove('active');
             autoTrackButton.textContent = 'Track';
@@ -815,9 +825,7 @@
             document.getElementById('nextDay').disabled = false;
 
             // Update hour-value to match slider position
-            const hour = Math.floor(hourIndex / 2);
-            const minutes = (hourIndex % 2) * 30;
-            document.getElementById('hour-value').textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+            updateHourDisplay();
 
             // Update frequency
             FREQUENCY_HZ = bandConfig[band].frequency;
@@ -862,8 +870,13 @@
                         computeLibrationForDay(dxInput, dateStr, 'dx');
                         computeFullDayData(dxDayData, dxInput, dateStr, false);
                     }
-                    // Update charts with new data
-                    updateChart(hourIndex, false);
+                    // Update charts with new data, ensuring real-time mode is off
+                    if (!isRealTimeMode) {
+                        console.log(`updateBand: Updating chart with hourIndex=${hourIndex}, isRealTimeMode=${isRealTimeMode}`); // Debug log
+                        updateChart(hourIndex, false);
+                    } else {
+                        console.warn('updateBand: Skipped chart update due to unexpected real-time mode'); // Debug log
+                    }
                 })
                 .catch(error => {
                     console.error(`Error fetching ${jsonFile}:`, error);
@@ -1898,23 +1911,24 @@
         }
 
                                                 function startRealTimeUpdates() {
-                                                    // Clear any existing interval
-                                                    stopRealTimeUpdates();
-
-                                                    // Perform immediate update
-                                                    updateRealTime();
-
-                                                    // Calculate milliseconds until the next minute
-                                                    const now = new Date();
-                                                    const secondsUntilNextMinute = 60 - now.getUTCSeconds();
-                                                    const millisecondsUntilNextMinute = secondsUntilNextMinute * 1000 - now.getUTCMilliseconds();
-
-                                                    // Schedule updates starting at the next minute
-                                                    setTimeout(() => {
-                                                        updateRealTime();
-                                                        // Start regular updates every 60 seconds
-                                                        realTimeInterval = setInterval(updateRealTime, 60000);
-                                                    }, millisecondsUntilNextMinute);
+                                                    if (isRealTimeMode) {
+                                                        console.log('startRealTimeUpdates: Starting real-time updates'); // Debug log
+                                                        stopRealTimeUpdates(); // Clear any existing interval
+                                                        updateRealTime(); // Perform immediate update
+                                                        const now = new Date();
+                                                        const secondsUntilNextMinute = 60 - now.getUTCSeconds();
+                                                        const millisecondsUntilNextMinute = secondsUntilNextMinute * 1000 - now.getUTCMilliseconds();
+                                                        setTimeout(() => {
+                                                            if (isRealTimeMode) { // Double-check mode
+                                                                updateRealTime();
+                                                                realTimeInterval = setInterval(updateRealTime, 60000);
+                                                            } else {
+                                                                console.log('startRealTimeUpdates: Aborted interval start due to real-time mode off'); // Debug log
+                                                            }
+                                                        }, millisecondsUntilNextMinute);
+                                                    } else {
+                                                        console.log('startRealTimeUpdates: Skipped because real-time mode is off'); // Debug log
+                                                    }
                                                 }
 
         function stopRealTimeUpdates() {
@@ -1924,38 +1938,42 @@
           }
         }
 
-        function updateRealTime() {
-          const now = new Date();
-          const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-          document.getElementById('date').valueAsDate = utcDate;
-          document.getElementById('date').value = utcDate.toISOString().slice(0,10);
+                                                function updateRealTime() {
+                                                    if (!isRealTimeMode) {
+                                                        console.log('updateRealTime: Skipped because real-time mode is off'); // Debug log
+                                                        return;
+                                                    }
+                                                    console.log('updateRealTime: Running real-time update'); // Debug log
+                                                    const now = new Date();
+                                                    const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+                                                    document.getElementById('date').valueAsDate = utcDate;
+                                                    document.getElementById('date').value = utcDate.toISOString().slice(0,10);
 
-          const hour = now.getUTCHours();
-          const minute = now.getUTCMinutes();
-          const fractionalIndex = hour * 2 + (minute / 30);
-          const displayHour = String(hour).padStart(2, '0');
-          const displayMin = String(minute).padStart(2, '0');
-          document.getElementById('hour-value').textContent = `Time (UTC): ${displayHour}:${displayMin}`;
+                                                    const hour = now.getUTCHours();
+                                                    const minute = now.getUTCMinutes();
+                                                    const fractionalIndex = hour * 2 + (minute / 30);
+                                                    const displayHour = String(hour).padStart(2, '0');
+                                                    const displayMin = String(minute).padStart(2, '0');
+                                                    document.getElementById('hour-value').textContent = `Time (UTC): ${displayHour}:${displayMin}`;
 
-          // Recompute if date changed
-          const dateStr = utcDate.toISOString().slice(0, 10);
-          const qthInput = document.getElementById('qth').value.trim().toUpperCase();
-          const dxInput = document.getElementById('dx').value.trim().toUpperCase();
-          if (qthInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput) && qthDayData.date !== dateStr) {
-            computeLibrationForDay(qthInput, dateStr, 'qth');
-            computeFullDayData(qthDayData, qthInput, dateStr, true);
-          }
-          if (dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput) && dxDayData.date !== dateStr) {
-            computeLibrationForDay(dxInput, dateStr, 'dx');
-            computeFullDayData(dxDayData, dxInput, dateStr, false);
-          }
-          if (qthInput && dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput) && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput) && relDayData.date !== dateStr) {
-            // Trigger rel compute in updateChart
-          }
+                                                    // Recompute if date changed
+                                                    const dateStr = utcDate.toISOString().slice(0, 10);
+                                                    const qthInput = document.getElementById('qth').value.trim().toUpperCase();
+                                                    const dxInput = document.getElementById('dx').value.trim().toUpperCase();
+                                                    if (qthInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput) && qthDayData.date !== dateStr) {
+                                                        computeLibrationForDay(qthInput, dateStr, 'qth');
+                                                        computeFullDayData(qthDayData, qthInput, dateStr, true);
+                                                    }
+                                                    if (dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput) && dxDayData.date !== dateStr) {
+                                                        computeLibrationForDay(dxInput, dateStr, 'dx');
+                                                        computeFullDayData(dxDayData, dxInput, dateStr, false);
+                                                    }
+                                                    if (qthInput && dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput) && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput) && relDayData.date !== dateStr) {
+                                                        // Trigger rel compute in updateChart
+                                                    }
 
-          // Update charts/map
-          updateChart(fractionalIndex, true);
-        }
+                                                    updateChart(fractionalIndex, true);
+                                                }
         
         function decodeEmail(obfuscated) {
             try {
@@ -2206,6 +2224,7 @@
                                                     const nextDayButton = document.getElementById('nextDay');
 
                                                     if (isRealTimeMode) {
+                                                        console.log('realTimeButton: Enabling real-time mode'); // Debug log
                                                         autoTrackButton.classList.add('active');
                                                         autoTrackButton.textContent = 'Stop';
                                                         hourSlider.disabled = true;
@@ -2214,6 +2233,7 @@
                                                         nextDayButton.disabled = true;
                                                         startRealTimeUpdates();
                                                     } else {
+                                                        console.log('realTimeButton: Disabling real-time mode'); // Debug log
                                                         autoTrackButton.classList.remove('active');
                                                         autoTrackButton.textContent = 'Track';
                                                         hourSlider.disabled = false;
@@ -2221,10 +2241,7 @@
                                                         prevDayButton.disabled = false;
                                                         nextDayButton.disabled = false;
                                                         stopRealTimeUpdates();
-                                                        // Update hour-value to match slider position
-                                                        const hour = Math.floor(hourIndex / 2);
-                                                        const minutes = (hourIndex % 2) * 30;
-                                                        document.getElementById('hour-value').textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                                                        updateHourDisplay();
                                                         updateChart(hourIndex, false);
                                                     }
                                                 });
