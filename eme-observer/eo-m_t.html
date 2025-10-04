@@ -1074,10 +1074,16 @@
                                                         if (!moonEq || isNaN(moonEq.ra) || isNaN(moonEq.dec)) {
                                                             throw new Error('Invalid equatorial coordinates');
                                                         }
+                                                        // Use Astronomy.Libration for distance instead of vector.length()
+                                                        const astroTime = Astronomy.MakeTime(vector.t);
+                                                        const libration = Astronomy.Libration(astroTime);
+                                                        if (!libration || isNaN(libration.dist_km)) {
+                                                            throw new Error('Invalid libration data');
+                                                        }
                                                         return {
                                                             ra: moonEq.ra, // Right ascension in hours
                                                             dec: moonEq.dec, // Declination in degrees
-                                                            dist: vector.length() * 149597870.7 // Convert AU to km
+                                                            dist: libration.dist_km // Distance in kilometers
                                                         };
                                                     } catch (e) {
                                                         console.error(`Error in vectorToEquatorial: ${e.message}`);
