@@ -1067,305 +1067,308 @@
 
             return { libration: relLibration, doppler: relDoppler, pol };
         }
+                                                
+                                                function vectorToEquatorial(vector, ofdate) {
+                                                    const sphere = Astronomy.SphereFromVector(vector);
+                                                    if (ofdate) {
+                                                        const rotation = Astronomy.Rotation_EQJ_EQD(vector.t);
+                                                        const rotated = Astronomy.RotateVector(rotation, vector);
+                                                        const sphereOfDate = Astronomy.SphereFromVector(rotated);
+                                                        return { ra: sphereOfDate.lon / 15, dec: sphereOfDate.lat, dist: rotated.length() };
+                                                    }
+                                                    return { ra: sphere.lon / 15, dec: sphere.lat, dist: vector.length() };
+                                                }
+                                                
+                                                function updateMap(currentTime) {
+                                                    const utcTimeString = currentTime.toISOString();
 
-        function updateMap(currentTime) {
-            const utcTimeString = currentTime.toISOString();
+                                                    if (!currentTime || isNaN(currentTime.getTime())) {
+                                                        console.warn(`Invalid currentTime in updateMap: ${currentTime}`);
+                                                        return;
+                                                    }
 
-            if (!currentTime || isNaN(currentTime.getTime())) {
-                console.warn(`Invalid currentTime in updateMap: ${currentTime}`);
-                return;
-            }
+                                                    try {
+                                                        const time = Astronomy.MakeTime(currentTime);
+                                                        const moonVector = Astronomy.GeoMoon(time); // Geocentric vector
+                                                        const moon = vectorToEquatorial(moonVector, true); // Convert to RA/Dec, ofdate=true
+                                                        const libration = Astronomy.Libration(time);
 
-            try {
-                const time = Astronomy.MakeTime(currentTime);
-                const observer = new Astronomy.Observer(0, 0, 0);
-                const moon = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, true);
-                const libration = Astronomy.Libration(time);
+                                                        if (!moon || !libration) {
+                                                            console.warn(`Failed to compute Moon data for ${utcTimeString}`);
+                                                            return;
+                                                        }
 
-                if (!moon || !libration) {
-                    console.warn(`Failed to compute Moon data for ${utcTimeString}`);
-                    return;
-                }
+                                                        const raHours = moon.ra;
+                                                        const decDeg = moon.dec;
+                                                        const raDeg = raHours * 15;
 
-                const raHours = moon.ra;
-                const decDeg = moon.dec;
-                const raDeg = raHours * 15;
+                                                        let gastDeg = Astronomy.SiderealTime(time) * 15;
+                                                        gastDeg = ((gastDeg % 360) + 360) % 360;
 
-                let gastDeg = Astronomy.SiderealTime(time) * 15;
-                gastDeg = ((gastDeg % 360) + 360) % 360;
+                                                        let lonDeg = raDeg - gastDeg;
+                                                        if (lonDeg > 180) lonDeg -= 360;
+                                                        if (lonDeg < -180) lonDeg += 360;
 
-                let lonDeg = raDeg - gastDeg;
-                if (lonDeg > 180) lonDeg -= 360;
-                if (lonDeg < -180) lonDeg += 360;
+                                                        const lat = decDeg;
+                                                        const lon = lonDeg;
 
-                const lat = decDeg;
-                const lon = lonDeg;
+                                                        const earthRadius = 6371;
+                                                        const D_moon = libration.dist_km;
+                                                        const theta_rad = Math.acos(earthRadius / (earthRadius + D_moon));
+                                                        const footprintRadius = earthRadius * theta_rad * 1000;
 
-                const earthRadius = 6371;
-                const D_moon = libration.dist_km;
-                const theta_rad = Math.acos(earthRadius / (earthRadius + D_moon));
-                const footprintRadius = earthRadius * theta_rad * 1000;
+                                                        if (isNaN(lat) || isNaN(lon) || isNaN(footprintRadius)) {
+                                                            console.warn(`Invalid sublunar point data for ${utcTimeString}: lat=${lat}, lon=${lon}, radius=${footprintRadius}`);
+                                                            return;
+                                                        }
 
-                if (isNaN(lat) || isNaN(lon) || isNaN(footprintRadius)) {
-                    console.warn(`Invalid sublunar point data for ${utcTimeString}: lat=${lat}, lon=${lon}, radius=${footprintRadius}`);
-                    return;
-                }
+                                                        if (moonMarker) moonMarker.setMap(null);
+                                                        if (footprintCircle) footprintCircle.setMap(null);
 
-                if (moonMarker) moonMarker.setMap(null);
-                if (footprintCircle) footprintCircle.setMap(null);
+                                                        moonMarker = new google.maps.Marker({
+                                                            position: { lat, lng: lon },
+                                                            map: map,
+                                                            icon: {
+                                                                url: 'images/moon-icon.png',
+                                                                scaledSize: new google.maps.Size(48, 48)
+                                                            },
+                                                            title: `Moon Sublunar Point (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
+                                                        });
 
-                moonMarker = new google.maps.Marker({
-                    position: { lat, lng: lon },
-                    map: map,
-                    icon: {
-                        url: 'images/moon-icon.png',
-                        scaledSize: new google.maps.Size(48, 48)
-                    },
-                    title: `Moon Sublunar Point (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
-                });
+                                                        footprintCircle = new google.maps.Circle({
+                                                            map: map,
+                                                            center: { lat, lng: lon },
+                                                            radius: footprintRadius,
+                                                            fillColor: '#0088FF',
+                                                            fillOpacity: 0.3,
+                                                            strokeColor: '#0000FF',
+                                                            strokeOpacity: 0.6,
+                                                            strokeWeight: 2
+                                                        });
+                                                    } catch (error) {
+                                                        console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
+                                                    }
+                                                }
 
-                footprintCircle = new google.maps.Circle({
-                    map: map,
-                    center: { lat, lng: lon },
-                    radius: footprintRadius,
-                    fillColor: '#0088FF',
-                    fillOpacity: 0.3,
-                    strokeColor: '#0000FF',
-                    strokeOpacity: 0.6,
-                    strokeWeight: 2
-                });
+                                                function calculateMoonDataForMonth(dateStr) {
+                                                    const startDate = new Date(dateStr);
+                                                    startDate.setUTCDate(1);
+                                                    const endDate = new Date(startDate);
+                                                    endDate.setUTCDate(endDate.getUTCDate() + 30);
 
-            } catch (error) {
-                console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
-            }
-        }
+                                                    const data = [];
+                                                    const labels = [];
 
-        function calculateMoonDataForMonth(dateStr) {
-            const startDate = new Date(dateStr);
-            startDate.setUTCDate(1);
-            const endDate = new Date(startDate);
-            endDate.setUTCDate(endDate.getUTCDate() + 30);
+                                                    for (let dt = new Date(startDate); dt <= endDate; dt.setUTCDate(dt.getUTCDate() + 1)) {
+                                                        try {
+                                                            const dateString = dt.toISOString().slice(0, 10);
+                                                            const time = `${dateString}T00:00:00Z`;
+                                                            const astroTime = Astronomy.MakeTime(new Date(time));
+                                                            
+                                                            const moonVector = Astronomy.GeoMoon(astroTime); // Geocentric vector
+                                                            const moon = vectorToEquatorial(moonVector, true); // Convert to RA/Dec, ofdate=true
+                                                            const libration = Astronomy.Libration(astroTime);
+                                                            const distanceKm = libration.dist_km;
+                                                            const declination = moon.dec;
 
-            const data = [];
-            const labels = [];
+                                                            if (distanceKm != null && declination != null) {
+                                                                data.push({
+                                                                    date: dateString,
+                                                                    distance: distanceKm,
+                                                                    declination: declination
+                                                                });
+                                                                const day = String(dt.getUTCDate()).padStart(2, '0');
+                                                                const month = String(dt.getUTCMonth() + 1).padStart(2, '0');
+                                                                labels.push(`${day}-${month}`);
+                                                            } else {
+                                                                console.warn(`Missing data for ${dateString}: distance=${distanceKm}, declination=${declination}`);
+                                                            }
+                                                        } catch (e) {
+                                                            console.warn(`Error calculating Moon data for ${dt.toISOString()}: ${e.message}`);
+                                                        }
+                                                    }
 
-            const observer = new Astronomy.Observer(0, 0, 0);
+                                                    return { data, labels };
+                                                }
 
-            for (let dt = new Date(startDate); dt <= endDate; dt.setUTCDate(dt.getUTCDate() + 1)) {
-                try {
-                    const dateString = dt.toISOString().slice(0, 10);
-                    const time = `${dateString}T00:00:00Z`;
-                    const astroTime = Astronomy.MakeTime(new Date(time));
-                    
-                    const libration = Astronomy.Libration(astroTime);
-                    const distanceKm = libration.dist_km;
+                                                function updateMoonChart(currentTime) {
+                                                    const dateInput = document.getElementById("date").value;
+                                                    const { data: moonData, labels } = calculateMoonDataForMonth(dateInput);
 
-                    const moonEq = Astronomy.Equator(Astronomy.Body.Moon, astroTime, observer, true, true);
-                    
-                    if (!moonEq || distanceKm == null) {
-                        throw new Error("Invalid Moon data");
-                    }
+                                                    const distances = moonData.map(d => d.distance);
+                                                    const declinations = moonData.map(d => d.declination);
+                                                    const currentDay = currentTime.getUTCDate() - 1;
+                                                    const dayFraction = (currentTime.getUTCHours() * 60 + currentTime.getUTCMinutes()) / (24 * 60);
+                                                    const selectedDay = currentDay + dayFraction;
 
-                    const declination = moonEq.dec;
+                                                    let currentDistance = null;
+                                                    let currentDeclination = null;
+                                                    let pathLoss = null;
+                                                    const minDist = 356352.93;
 
-                    if (distanceKm != null && declination != null) {
-                        data.push({
-                            date: dateString,
-                            distance: distanceKm,
-                            declination: declination
-                        });
-                        const day = String(dt.getUTCDate()).padStart(2, '0');
-                        const month = String(dt.getUTCMonth() + 1).padStart(2, '0');
-                        labels.push(`${day}-${month}`);
-                    } else {
-                        console.warn(`Missing data for ${dateString}: distance=${distanceKm}, declination=${declination}`);
-                    }
-                } catch (e) {
-                    console.warn(`Error calculating Moon data for ${dt.toISOString()}: ${e.message}`);
-                }
-            }
+                                                    try {
+                                                        const astroTime = Astronomy.MakeTime(currentTime);
+                                                        const moonVector = Astronomy.GeoMoon(astroTime); // Geocentric vector
+                                                        const moon = vectorToEquatorial(moonVector, true); // Convert to RA/Dec, ofdate=true
+                                                        const libration = Astronomy.Libration(astroTime);
 
-            return { data, labels };
-        }
+                                                        if (moon && libration) {
+                                                            currentDistance = libration.dist_km;
+                                                            currentDeclination = moon.dec;
+                                                            if (currentDistance != null) {
+                                                                pathLoss = 40 * Math.log10(currentDistance / minDist);
+                                                            }
+                                                        } else {
+                                                            throw new Error("Invalid current Moon data");
+                                                        }
+                                                    } catch (e) {
+                                                        console.warn(`Error calculating current Moon data for ${currentTime.toISOString()}: ${e.message}`);
+                                                    }
 
-        function updateMoonChart(currentTime) {
-            const dateInput = document.getElementById("date").value;
-            const { data: moonData, labels } = calculateMoonDataForMonth(dateInput);
+                                                    const moonAnnotation = {
+                                                        timeMarker: {
+                                                            type: 'line',
+                                                            mode: 'vertical',
+                                                            scaleID: 'x',
+                                                            value: selectedDay,
+                                                            borderColor: 'black',
+                                                            borderWidth: 2,
+                                                            label: {
+                                                                enabled: false
+                                                            }
+                                                        }
+                                                    };
 
-            const distances = moonData.map(d => d.distance);
-            const declinations = moonData.map(d => d.declination);
-            const currentDay = currentTime.getUTCDate() - 1;
-            const dayFraction = (currentTime.getUTCHours() * 60 + currentTime.getUTCMinutes()) / (24 * 60);
-            const selectedDay = currentDay + dayFraction;
+                                                    document.getElementById('moonChartLabel').innerHTML =
+                                                        `<span class="metric-label metric-distance">Distance:</span> ${currentDistance != null ? currentDistance.toFixed(0) + ' km' : 'N/A'}` +
+                                                        `<span class="metric-separator">|</span>` +
+                                                        `<span class="metric-label metric-declination">Declination:</span> ${currentDeclination != null ? currentDeclination.toFixed(1) + '°' : 'N/A'}` +
+                                                        `<span class="metric-separator">|</span>` +
+                                                        `<span class="metric-label metric-pathloss">Extra Loss:</span> ${pathLoss != null ? pathLoss.toFixed(2) + ' dB' : 'N/A'}`;
 
-            let currentDistance = null;
-            let currentDeclination = null;
-            let pathLoss = null;
-            const minDist = 356352.93;
-
-            try {
-                const astroTime = Astronomy.MakeTime(currentTime);
-                const observer = new Astronomy.Observer(0, 0, 0);
-                const libration = Astronomy.Libration(astroTime);
-                const moonEq = Astronomy.Equator(Astronomy.Body.Moon, astroTime, observer, true, true);
-                
-                if (libration && moonEq) {
-                    currentDistance = libration.dist_km;
-                    currentDeclination = moonEq.dec;
-                    if (currentDistance != null) {
-                        pathLoss = 40 * Math.log10(currentDistance / minDist);
-                    }
-                } else {
-                    throw new Error("Invalid current Moon data");
-                }
-            } catch (e) {
-                console.warn(`Error calculating current Moon data for ${currentTime.toISOString()}: ${e.message}`);
-            }
-
-            const moonAnnotation = {
-                timeMarker: {
-                    type: 'line',
-                    mode: 'vertical',
-                    scaleID: 'x',
-                    value: selectedDay,
-                    borderColor: 'black',
-                    borderWidth: 2,
-                    label: {
-                        enabled: false
-                    }
-                }
-            };
-
-            document.getElementById('moonChartLabel').innerHTML =
-                `<span class="metric-label metric-distance">Distance:</span> ${currentDistance != null ? currentDistance.toFixed(0) + ' km' : 'N/A'}` +
-                `<span class="metric-separator">|</span>` +
-                `<span class="metric-label metric-declination">Declination:</span> ${currentDeclination != null ? currentDeclination.toFixed(1) + '°' : 'N/A'}` +
-                `<span class="metric-separator">|</span>` +
-                `<span class="metric-label metric-pathloss">Extra Loss:</span> ${pathLoss != null ? pathLoss.toFixed(2) + ' dB' : 'N/A'}`;
-
-            if (!moonChart) {
-                moonChart = new Chart(document.getElementById("moonDistanceChart"), {
-                    type: 'line',
-                    data: {
-                        labels,
-                        datasets: [
-                            {
-                                label: "Moon Distance (km)",
-                                data: distances,
-                                borderColor: "#800080",
-                                pointRadius: 0,
-                                borderWidth: 1.5,
-                                tension: 0.2,
-                                yAxisID: "y1"
-                            },
-                            {
-                                label: "Moon Declination (°)",
-                                data: declinations,
-                                borderColor: "#FFA500",
-                                pointRadius: 0,
-                                borderWidth: 1.5,
-                                tension: 0.2,
-                                yAxisID: "y2"
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: "Date (DD-MM)",
-                                    font: { size: 10, family: 'Arial, sans-serif' }
-                                },
-                                ticks: { font: { size: 10 } }
-                            },
-                            y1: {
-                                type: "linear",
-                                display: true,
-                                position: "left",
-                                title: {
-                                    display: true,
-                                    text: "Distance (\u00D710³ km)",
-                                    color: "#800080",
-                                    font: { size: 12, family: 'Arial, sans-serif' }
-                                },
-                                min: 356400,
-                                max: 406700,
-                                ticks: {
-                                    stepSize: 10000,
-                                    color: "#800080",
-                                    font: { size: 12 },
-                                    callback: function(value) {
-                                        return (value / 1000).toFixed(0);
-                                    }
-                                },
-                                grid: { drawTicks: true, drawBorder: true }
-                            },
-                            y2: {
-                                type: "linear",
-                                display: true,
-                                position: "right",
-                                title: {
-                                    display: true,
-                                    text: "Declination (°)",
-                                    color: "#FFA500",
-                                    font: { size: 12, family: 'Arial, sans-serif' }
-                                },
-                                min: -30,
-                                max: 30,
-                                ticks: {
-                                    stepSize: 10,
-                                    callback: val => val + "°",
-                                    color: "#FFA500",
-                                    font: { size: 12 }
-                                },
-                                grid: { drawOnChartArea: false }
-                            },
-                            y3: {
-                                type: "linear",
-                                display: true,
-                                position: "right",
-                                title: {
-                                    display: true,
-                                    text: "Extra Path Loss (dB)",
-                                    color: "#800080",
-                                    font: { size: 12, family: 'Arial, sans-serif' }
-                                },
-                                min: 0,
-                                max: 2.5,
-                                ticks: {
-                                    stepSize: 0.5,
-                                    callback: val => val.toFixed(1),
-                                    color: "#800080",
-                                    font: { size: 12 }
-                                },
-                                grid: { drawOnChartArea: false },
-                                offset: true
-                            }
-                        },
-                        plugins: {
-                            legend: { display: false },
-                            annotation: { annotations: moonAnnotation }
-                        }
-                    }
-                });
-            } else {
-                moonChart.data.labels = labels;
-                moonChart.data.datasets[0].data = distances;
-                moonChart.data.datasets[1].data = declinations;
-                moonChart.options.plugins.annotation.annotations = moonAnnotation;
-                moonChart.options.plugins.annotation.annotations.timeMarker.value = selectedDay;
-                moonChart.options.scales.y1.min = 356400;
-                moonChart.options.scales.y1.max = 406700;
-                moonChart.options.scales.y2.min = -30;
-                moonChart.options.scales.y2.max = 30;
-                moonChart.options.scales.y3.min = 0;
-                moonChart.options.scales.y3.max = 2.5;
-                moonChart.update('none');
-            }
-        }
+                                                    if (!moonChart) {
+                                                        moonChart = new Chart(document.getElementById("moonDistanceChart"), {
+                                                            type: 'line',
+                                                            data: {
+                                                                labels,
+                                                                datasets: [
+                                                                    {
+                                                                        label: "Moon Distance (km)",
+                                                                        data: distances,
+                                                                        borderColor: "#800080",
+                                                                        pointRadius: 0,
+                                                                        borderWidth: 1.5,
+                                                                        tension: 0.2,
+                                                                        yAxisID: "y1"
+                                                                    },
+                                                                    {
+                                                                        label: "Moon Declination (°)",
+                                                                        data: declinations,
+                                                                        borderColor: "#FFA500",
+                                                                        pointRadius: 0,
+                                                                        borderWidth: 1.5,
+                                                                        tension: 0.2,
+                                                                        yAxisID: "y2"
+                                                                    }
+                                                                ]
+                                                            },
+                                                            options: {
+                                                                responsive: true,
+                                                                maintainAspectRatio: false,
+                                                                scales: {
+                                                                    x: {
+                                                                        title: {
+                                                                            display: true,
+                                                                            text: "Date (DD-MM)",
+                                                                            font: { size: 10, family: 'Arial, sans-serif' }
+                                                                        },
+                                                                        ticks: { font: { size: 10 } }
+                                                                    },
+                                                                    y1: {
+                                                                        type: "linear",
+                                                                        display: true,
+                                                                        position: "left",
+                                                                        title: {
+                                                                            display: true,
+                                                                            text: "Distance (\u00D710³ km)",
+                                                                            color: "#800080",
+                                                                            font: { size: 12, family: 'Arial, sans-serif' }
+                                                                        },
+                                                                        min: 356400,
+                                                                        max: 406700,
+                                                                        ticks: {
+                                                                            stepSize: 10000,
+                                                                            color: "#800080",
+                                                                            font: { size: 12 },
+                                                                            callback: function(value) {
+                                                                                return (value / 1000).toFixed(0);
+                                                                            }
+                                                                        },
+                                                                        grid: { drawTicks: true, drawBorder: true }
+                                                                    },
+                                                                    y2: {
+                                                                        type: "linear",
+                                                                        display: true,
+                                                                        position: "right",
+                                                                        title: {
+                                                                            display: true,
+                                                                            text: "Declination (°)",
+                                                                            color: "#FFA500",
+                                                                            font: { size: 12, family: 'Arial, sans-serif' }
+                                                                        },
+                                                                        min: -30,
+                                                                        max: 30,
+                                                                        ticks: {
+                                                                            stepSize: 10,
+                                                                            callback: val => val + "°",
+                                                                            color: "#FFA500",
+                                                                            font: { size: 12 }
+                                                                        },
+                                                                        grid: { drawOnChartArea: false }
+                                                                    },
+                                                                    y3: {
+                                                                        type: "linear",
+                                                                        display: true,
+                                                                        position: "right",
+                                                                        title: {
+                                                                            display: true,
+                                                                            text: "Extra Path Loss (dB)",
+                                                                            color: "#800080",
+                                                                            font: { size: 12, family: 'Arial, sans-serif' }
+                                                                        },
+                                                                        min: 0,
+                                                                        max: 2.5,
+                                                                        ticks: {
+                                                                            stepSize: 0.5,
+                                                                            callback: val => val.toFixed(1),
+                                                                            color: "#800080",
+                                                                            font: { size: 12 }
+                                                                        },
+                                                                        grid: { drawOnChartArea: false },
+                                                                        offset: true
+                                                                    }
+                                                                },
+                                                                plugins: {
+                                                                    legend: { display: false },
+                                                                    annotation: { annotations: moonAnnotation }
+                                                                }
+                                                            }
+                                                        });
+                                                    } else {
+                                                        moonChart.data.labels = labels;
+                                                        moonChart.data.datasets[0].data = distances;
+                                                        moonChart.data.datasets[1].data = declinations;
+                                                        moonChart.options.plugins.annotation.annotations = moonAnnotation;
+                                                        moonChart.options.plugins.annotation.annotations.timeMarker.value = selectedDay;
+                                                        moonChart.options.scales.y1.min = 356400;
+                                                        moonChart.options.scales.y1.max = 406700;
+                                                        moonChart.options.scales.y2.min = -30;
+                                                        moonChart.options.scales.y2.max = 30;
+                                                        moonChart.options.scales.y3.min = 0;
+                                                        moonChart.options.scales.y3.max = 2.5;
+                                                        moonChart.update('none');
+                                                    }
+                                                }
 
         function updateChart(index, isRealtime = false) {
           const qthInput = document.getElementById("qth").value.trim().toUpperCase();
