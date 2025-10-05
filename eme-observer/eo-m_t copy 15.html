@@ -1427,28 +1427,16 @@
                                                         };
                                                     }
 
-                                                    // Determine the selected band and whether to show M-SgrA separation
-                                                    const band = document.getElementById('bandSelect').value;
-                                                    const showSgrASep = band === '144MHz' || band === '432MHz';
-
-                                                    // Construct the moonChartLabel content
-                                                    let labelContent =
+                                                    document.getElementById('moonChartLabel').innerHTML =
                                                         `<span class="metric-label metric-distance">Dist:</span> ${currentDistance != null ? currentDistance.toFixed(0) + ' km' : 'N/A'}` +
                                                         `<span class="metric-separator">|</span>` +
                                                         `<span class="metric-label metric-declination">Decl:</span> ${currentDeclination != null ? currentDeclination.toFixed(1) + '°' : 'N/A'}` +
                                                         `<span class="metric-separator">|</span>` +
                                                         `<span class="metric-label metric-pathloss">Extra Loss:</span> ${pathLoss != null ? pathLoss.toFixed(2) + ' dB' : 'N/A'}` +
                                                         `<span class="metric-separator">|</span>` +
-                                                        `<span class="metric-label metric-sun-sep">M-Sun:</span> ${currentSunSep != null ? currentSunSep.toFixed(1) + '°' : 'N/A'}`;
-
-                                                    // Conditionally add M-SgrA separation for 144MHz or 432MHz
-                                                    if (showSgrASep) {
-                                                        labelContent +=
-                                                            `<span class="metric-separator">|</span>` +
-                                                            `<span class="metric-label metric-sgra-sep">M-SgrA:</span> ${currentSgrASep != null ? currentSgrASep.toFixed(1) + '°' : 'N/A'}`;
-                                                    }
-
-                                                    document.getElementById('moonChartLabel').innerHTML = labelContent;
+                                                        `<span class="metric-label metric-sun-sep">M-Sun:</span> ${currentSunSep != null ? currentSunSep.toFixed(1) + '°' : 'N/A'}` +
+                                                        `<span class="metric-separator">|</span>` +
+                                                        `<span class="metric-label metric-sgra-sep">M-SgrA:</span> ${currentSgrASep != null ? currentSgrASep.toFixed(1) + '°' : 'N/A'}`;
 
                                                     if (!moonChart) {
                                                         moonChart = new Chart(document.getElementById("moonDistanceChart"), {
