@@ -1337,7 +1337,11 @@
                                                         console.warn(`Error calculating current Moon data for ${currentTime.toISOString()}: ${e.message}`);
                                                     }
 
-                                                    // Find intervals where sunSep or sgrASep < 10 degrees with hourly precision
+                                                    // Determine the selected band and whether to show M-SgrA-related data
+                                                    const band = document.getElementById('bandSelect').value;
+                                                    const showSgrASep = band === '144MHz' || band === '432MHz';
+
+                                                    // Find intervals where sunSep < 10 degrees with hourly precision
                                                     const annotations = {
                                                         timeMarker: {
                                                             type: 'line',
@@ -1376,7 +1380,8 @@
                                                             sunSepInterval = null;
                                                         }
 
-                                                        if (dayData.sgrASep < 10) {
+                                                        // Only process sgrASep annotations if 144MHz or 432MHz is selected
+                                                        if (showSgrASep && dayData.sgrASep < 10) {
                                                             if (!sgrASepInterval) {
                                                                 sgrASepInterval = { start: dayData.index, end: dayData.index };
                                                             } else {
@@ -1413,7 +1418,7 @@
                                                         };
                                                     }
 
-                                                    if (sgrASepInterval) {
+                                                    if (showSgrASep && sgrASepInterval) {
                                                         annotations[`sgrASep${sgrASepInterval.start}`] = {
                                                             type: 'box',
                                                             xScaleID: 'x',
@@ -1426,10 +1431,6 @@
                                                             label: { enabled: false } // No label
                                                         };
                                                     }
-
-                                                    // Determine the selected band and whether to show M-SgrA separation
-                                                    const band = document.getElementById('bandSelect').value;
-                                                    const showSgrASep = band === '144MHz' || band === '432MHz';
 
                                                     // Construct the moonChartLabel content
                                                     let labelContent =
