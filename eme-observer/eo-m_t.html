@@ -681,7 +681,7 @@
         font-weight: bold;
       }
       .metric-sun-sep {
-          color: #ff832b;
+          color: #ff832b; /* Yellow for Sun separation */
           font-weight: bold;
       }
       .metric-sgra-sep {
@@ -1369,7 +1369,9 @@
                                                                 xMax: (sunSepInterval.end + 1) / 24,
                                                                 yMin: -30, // Span full declination range
                                                                 yMax: 30,
-                                                                backgroundColor: '#ff832b'
+                                                                backgroundColor: 'rgba(255, 255, 0, 0.5)', // Yellow, half-transparent
+                                                                borderWidth: 0, // No border
+                                                                label: { enabled: false } // No label
                                                             };
                                                             sunSepInterval = null;
                                                         }
@@ -1388,7 +1390,9 @@
                                                                 xMax: (sgrASepInterval.end + 1) / 24,
                                                                 yMin: -30, // Span full declination range
                                                                 yMax: 30,
-                                                                backgroundColor: 'rgba(128, 0, 128, 0.2)'
+                                                                backgroundColor: 'rgba(128, 0, 128, 0.5)', // Purple, half-transparent
+                                                                borderWidth: 0, // No border
+                                                                label: { enabled: false } // No label
                                                             };
                                                             sgrASepInterval = null;
                                                         }
@@ -1403,19 +1407,9 @@
                                                             xMax: (sunSepInterval.end + 1) / 24,
                                                             yMin: -30,
                                                             yMax: 30,
-                                                            backgroundColor: 'rgba(255, 131, 43, 0.1)', // More transparent
+                                                            backgroundColor: 'rgba(255, 255, 0, 0.5)', // Yellow, half-transparent
                                                             borderWidth: 0, // No border
-                                                            label: {
-                                                                enabled: true,
-                                                                content: 'Moon-Sun < 10°',
-                                                                position: 'top',
-                                                                yAdjust: -10,
-                                                                font: { size: 10, weight: 'bold', family: 'Arial, sans-serif' },
-                                                                color: 'black',
-                                                                backgroundColor: 'rgba(255, 131, 43, 0.7)',
-                                                                padding: 2,
-                                                                cornerRadius: 4
-                                                            }
+                                                            label: { enabled: false } // No label
                                                         };
                                                     }
 
@@ -1427,19 +1421,9 @@
                                                             xMax: (sgrASepInterval.end + 1) / 24,
                                                             yMin: -30,
                                                             yMax: 30,
-                                                            backgroundColor: 'rgba(128, 0, 128, 0.1)', // More transparent
+                                                            backgroundColor: 'rgba(128, 0, 128, 0.5)', // Purple, half-transparent
                                                             borderWidth: 0, // No border
-                                                            label: {
-                                                                enabled: true,
-                                                                content: 'Moon-Sgr A < 10°',
-                                                                position: 'top',
-                                                                yAdjust: -25,
-                                                                font: { size: 10, weight: 'bold', family: 'Arial, sans-serif' },
-                                                                color: 'black',
-                                                                backgroundColor: 'rgba(128, 0, 128, 0.7)',
-                                                                padding: 2,
-                                                                cornerRadius: 4
-                                                            }
+                                                            label: { enabled: false } // No label
                                                         };
                                                     }
 
