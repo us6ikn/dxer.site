@@ -416,7 +416,7 @@
             <a href="https://www.pa0ply.nl/eme-directory/" class="pa0ply-link" target="_blank">(see also PA0PLY EME Directory)</a>
         </div>
         <div id="loading-message" class="loading-message">Loading data...</div>
-        <div id="error-message" class="error-message">Failed to load data. Please try again.</div>
+        <div id="error-message" class="error-message">Failed to load data for this band. Please try another band or check your connection.</div>
         <div class="table-container">
             <table id="stationsTable" class="display responsive">
                 <thead>
@@ -464,6 +464,7 @@
                 const chars = encoded.split('').reverse().join('');
                 return atob(chars);
             } catch (e) {
+                console.warn('Failed to decode email:', e);
                 return '';
             }
         }
@@ -476,20 +477,44 @@
         async function fetchData(band) {
             const loadingMessage = document.getElementById('loading-message');
             const errorMessage = document.getElementById('error-message');
+            const tbody = document.getElementById('stationsData');
+
             loadingMessage.style.display = 'block';
             errorMessage.style.display = 'none';
-            document.getElementById('stationsData').innerHTML = ''; // Clear table
+            tbody.innerHTML = ''; // Clear table body
+
+            // Destroy existing DataTable to prevent conflicts
+            if ($.fn.DataTable.isDataTable('#stationsTable')) {
+                $('#stationsTable').DataTable().clear().destroy();
+                table = null;
+            }
 
             try {
                 const jsonFile = bandConfig[band].jsonFile;
+                console.log(`Fetching data for ${band} from ${jsonFile}`);
                 const response = await fetch(jsonFile);
-                if (!response.ok) throw new Error(`Failed to fetch ${jsonFile}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: Failed to fetch ${jsonFile}`);
+                }
                 const data = await response.json();
+                console.log(`Data received for ${band}:`, data);
+                if (!Array.isArray(data) || data.length === 0) {
+                    throw new Error(`No valid data received for ${band}`);
+                }
                 allStations = data;
                 renderTable(data);
             } catch (error) {
                 console.error('Error fetching data:', error);
+                errorMessage.textContent = `Failed to load data for ${bandConfig[band].label}. Please try another band or check your connection.`;
                 errorMessage.style.display = 'block';
+                // Initialize empty DataTable to avoid "No data available" message
+                table = $('#stationsTable').DataTable({
+                    order: [[0, 'asc']],
+                    responsive: true,
+                    language: {
+                        emptyTable: `No stations available for ${bandConfig[band].label}`
+                    }
+                });
             } finally {
                 loadingMessage.style.display = 'none';
             }
@@ -498,7 +523,19 @@
         function renderTable(data) {
             const tbody = document.getElementById('stationsData');
             tbody.innerHTML = '';
+
+            if (!data || !Array.isArray(data)) {
+                console.warn('Invalid data provided to renderTable:', data);
+                return;
+            }
+
             data.forEach(station => {
+                // Validate station data
+                if (!station || !station.Call) {
+                    console.warn('Invalid station data:', station);
+                    return;
+                }
+
                 const tr = document.createElement('tr');
                 let note = station.Note || '';
                 let callStyle = '';
@@ -507,7 +544,7 @@
                 } else if (/DXpedition|Portable/i.test(note)) {
                     callStyle = 'style="font-weight:bold;"';
                 }
-                let callsign = station.Call;
+                let callsign = station.Call || '';
                 let contactButtons = '';
                 const email = station.CK ? decodeEmail(station.CK) : null;
                 if (email) {
@@ -521,23 +558,23 @@
                 }
                 tr.innerHTML = `
                     <td ${callStyle}>${callsign}</td>
-                    <td>${station.Locator}</td>
-                    <td>${station.DXCC}</td>
-                    <td>${station.Antenna}</td>
-                    <td>${station.Power}</td>
+                    <td>${station.Locator || ''}</td>
+                    <td>${station.DXCC || ''}</td>
+                    <td>${station.Antenna || ''}</td>
+                    <td>${station.Power || ''}</td>
                     <td>${contactButtons}</td>
                     <td>${note}</td>
                 `;
                 tbody.appendChild(tr);
             });
 
-            if ($.fn.DataTable.isDataTable('#stationsTable')) {
-                $('#stationsTable').DataTable().clear().destroy();
-            }
-
+            // Initialize DataTable only if data is present
             table = $('#stationsTable').DataTable({
                 order: [[0, 'asc']],
-                responsive: true
+                responsive: true,
+                language: {
+                    emptyTable: `No stations available for ${bandConfig[$('#bandSelect').val()].label}`
+                }
             });
 
             $('#activeOnlyCheckbox').off('change').on('change', function () {
