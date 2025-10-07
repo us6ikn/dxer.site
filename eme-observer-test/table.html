@@ -197,6 +197,12 @@
             gap: 10px;
         }
 
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
         .band-select {
             padding: 8px;
             font-size: 14px;
@@ -204,11 +210,18 @@
             border: 1px solid #ccc;
             background-color: #fff;
             cursor: pointer;
+            min-width: 120px;
         }
 
         .band-select:focus {
             outline: none;
             border-color: #0056b3;
+        }
+
+        .active-checkbox {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
         }
 
         .error-message {
@@ -265,6 +278,12 @@
                 width: 100%;
                 max-width: 200px;
             }
+
+            .filter-group {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
         }
 
         @media (max-width: 600px) {
@@ -294,6 +313,10 @@
             }
 
             .band-select {
+                width: 100%;
+            }
+
+            .filter-group {
                 width: 100%;
             }
         }
@@ -397,22 +420,24 @@
     <div class="container">
         <h1 id="table-title">EME Stations</h1>
         <div class="controls">
-            <select id="bandSelect" class="band-select">
-                <option value="144MHz">144MHz</option>
-                <option value="432MHz">432MHz</option>
-                <option value="1296MHz">1296MHz</option>
-                <option value="2320MHz">2320MHz</option>
-                <option value="3400MHz">3400MHz</option>
-                <option value="5760MHz">5760MHz</option>
-                <option value="10GHz" selected>10GHz</option>
-                <option value="24GHz">24GHz</option>
-                <option value="47GHz">47GHz</option>
-                <option value="76GHz">76GHz</option>
-            </select>
-            <label>
-                <input type="checkbox" id="activeOnlyCheckbox" style="margin-right: 6px;">
-                Show only active
-            </label>
+            <div class="filter-group">
+                <select id="bandSelect" class="band-select">
+                    <option value="144MHz">144MHz</option>
+                    <option value="432MHz">432MHz</option>
+                    <option value="1296MHz">1296MHz</option>
+                    <option value="2320MHz">2320MHz</option>
+                    <option value="3400MHz">3400MHz</option>
+                    <option value="5760MHz">5760MHz</option>
+                    <option value="10GHz" selected>10GHz</option>
+                    <option value="24GHz">24GHz</option>
+                    <option value="47GHz">47GHz</option>
+                    <option value="76GHz">76GHz</option>
+                </select>
+                <label class="active-checkbox">
+                    <input type="checkbox" id="activeOnlyCheckbox" style="margin-right: 6px;">
+                    Show only active
+                </label>
+            </div>
             <a href="https://www.pa0ply.nl/eme-directory/" class="pa0ply-link" target="_blank">(see also PA0PLY EME Directory)</a>
         </div>
         <div id="loading-message" class="loading-message">Loading data...</div>
@@ -507,7 +532,7 @@
                 console.error('Error fetching data:', error);
                 errorMessage.textContent = `Failed to load data for ${bandConfig[band].label}. Please try another band or check your connection.`;
                 errorMessage.style.display = 'block';
-                // Initialize empty DataTable to avoid "No data available" message
+                // Initialize empty DataTable with custom message
                 table = $('#stationsTable').DataTable({
                     order: [[0, 'asc']],
                     responsive: true,
