@@ -211,6 +211,22 @@
             border-color: #0056b3;
         }
 
+        .error-message {
+            color: red;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .loading-message {
+            color: #0056b3;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+
         @media (max-width: 768px) {
             .container {
                 width: 100%;
@@ -399,7 +415,8 @@
             </label>
             <a href="https://www.pa0ply.nl/eme-directory/" class="pa0ply-link" target="_blank">(see also PA0PLY EME Directory)</a>
         </div>
-
+        <div id="loading-message" class="loading-message">Loading data...</div>
+        <div id="error-message" class="error-message">Failed to load data. Please try again.</div>
         <div class="table-container">
             <table id="stationsTable" class="display responsive">
                 <thead>
@@ -427,6 +444,7 @@
 
     <script>
         let allStations = [];
+        let table = null;
 
         const bandConfig = {
             '144MHz': { label: '144MHz', jsonFile: 'stn_144MHz.json' },
@@ -456,6 +474,12 @@
         }
 
         async function fetchData(band) {
+            const loadingMessage = document.getElementById('loading-message');
+            const errorMessage = document.getElementById('error-message');
+            loadingMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+            document.getElementById('stationsData').innerHTML = ''; // Clear table
+
             try {
                 const jsonFile = bandConfig[band].jsonFile;
                 const response = await fetch(jsonFile);
@@ -465,6 +489,9 @@
                 renderTable(data);
             } catch (error) {
                 console.error('Error fetching data:', error);
+                errorMessage.style.display = 'block';
+            } finally {
+                loadingMessage.style.display = 'none';
             }
         }
 
@@ -505,14 +532,21 @@
             });
 
             if ($.fn.DataTable.isDataTable('#stationsTable')) {
-                $('#stationsTable').DataTable().destroy();
+                $('#stationsTable').DataTable().clear().destroy();
             }
 
-            const table = $('#stationsTable').DataTable({
+            table = $('#stationsTable').DataTable({
                 order: [[0, 'asc']],
                 responsive: true
             });
 
+            $('#activeOnlyCheckbox').off('change').on('change', function () {
+                table.draw();
+            });
+        }
+
+        $(document).ready(() => {
+            // Add search filter only once
             $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
                 if (!document.getElementById('activeOnlyCheckbox')?.checked) {
                     return true;
@@ -521,20 +555,16 @@
                 return !note.includes('dxpedition') && !note.includes('sk') && !note.includes('inactive');
             });
 
-            $('#activeOnlyCheckbox').on('change', function () {
-                table.draw();
-            });
-
+            // Add band select event listener
             $('#bandSelect').on('change', function () {
                 const band = this.value;
                 document.getElementById('ghz-label').textContent = bandConfig[band].label;
                 document.getElementById('table-title').textContent = `${bandConfig[band].label} EME Stations`;
                 fetchData(band);
             });
-        }
 
-        $(document).ready(() => {
-            fetchData('10GHz'); // Default band
+            // Initial data load
+            fetchData('10GHz');
         });
     </script>
 
