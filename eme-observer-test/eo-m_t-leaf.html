@@ -9,15 +9,16 @@
 <script src="/leaflet/Leaflet.greatCircle.js"></script>
 <script src="a.ob.js"></script>
 <style>
-  html, body { margin:0; padding:0; height:100%; font-family:Arial; }
-  #map { height:100dvh; width:100%; }
-  #controls { position:absolute; top:10px; left:10px; z-index:1000; background:rgba(255,255,255,0.95); padding:12px; border-radius:8px; }
-  #hour { width:320px; }
-  button{padding:5px 10px; border-radius:4px; background:#007bff; color:white; border:none; cursor:pointer;}
-  button:hover{background:#0056b3;}
+html, body { margin:0; padding:0; height:100%; font-family:Arial; }
+#map { height:100dvh; width:100%; }
+#controls { position:absolute; top:10px; left:10px; z-index:1000; background:rgba(255,255,255,0.95); padding:12px; border-radius:8px; }
+#hour { width:320px; }
+button { padding:5px 10px; border-radius:4px; background:#007bff; color:white; border:none; cursor:pointer; }
+button:hover { background:#0056b3; }
 </style>
 </head>
 <body>
+
 <div id="map"></div>
 <div id="controls">
   <div>
@@ -32,43 +33,33 @@
 </div>
 
 <script>
-let map, moonMarker, footprintCircle;
+let map;
+let moonLayerGroup;  // Holds both marker + footprint
 
 function initMap() {
-  map = L.map('map', {
-    center: [0,0],
-    zoom: 2,
-    scrollWheelZoom: true,
-    zoomControl: false,
-    worldCopyJump: true
-  });
+  map = L.map('map', { center:[0,0], zoom:2, worldCopyJump:true, zoomControl:false });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:18 }).addTo(map);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 18,
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
-
+  moonLayerGroup = L.layerGroup().addTo(map);  // single layer group
   updateMap();
 }
 
 function updateMap() {
   const selectedDate = document.getElementById('date').value;
-  const index = parseInt(document.getElementById('hour').value,10);
-  const hour = Math.floor(index/2).toString().padStart(2,'0');
+  const index = parseInt(document.getElementById('hour').value, 10);
+  const hour = Math.floor(index/2);
   const minutes = (index%2)?30:0;
-  const utcTimeString = `${selectedDate}T${hour}:${minutes}:00Z`;
+  const utcTimeString = `${selectedDate}T${String(hour).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:00Z`;
 
-  if (!selectedDate || !/^\d{4}-\d{2}-\d{2}$/.test(selectedDate)) return;
-
+  if(!selectedDate) return;
   const utcDate = new Date(utcTimeString);
-  if (isNaN(utcDate.getTime())) return;
+  if(isNaN(utcDate.getTime())) return;
 
   try {
     const time = Astronomy.MakeTime(utcDate);
     const observer = new Astronomy.Observer(0,0,0);
     const moon = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, true);
     const libration = Astronomy.Libration(time);
-    if (!moon || !libration) return;
 
     const raDeg = moon.ra*15;
     const decDeg = moon.dec;
@@ -80,45 +71,41 @@ function updateMap() {
     const lon = lonDeg;
 
     const earthRadiusKm = 6371;
-    const D_moon = libration.dist_km;
-    const safeRatio = Math.min(1, Math.max(-1, earthRadiusKm / (earthRadiusKm + D_moon)));
+    const safeRatio = Math.min(1, Math.max(-1, earthRadiusKm / (earthRadiusKm + libration.dist_km)));
     const theta_rad = Math.acos(safeRatio);
     const footprintRadius_m = earthRadiusKm * theta_rad * 1000;
 
-    // remove old
-    if (moonMarker) { moonMarker.remove(); moonMarker=null; }
-    if (footprintCircle) { footprintCircle.remove(); footprintCircle=null; }
+    // clear previous marker + footprint
+    moonLayerGroup.clearLayers();
 
-    const moonIcon = L.icon({iconUrl:'images/moon-icon.png',iconSize:[48,48],iconAnchor:[24,24]});
-    moonMarker = L.marker([lat, lon],{icon:moonIcon,title:`Moon Sublunar (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`}).addTo(map);
+    const moonIcon = L.icon({ iconUrl:'images/moon-icon.png', iconSize:[48,48], iconAnchor:[24,24] });
+    const marker = L.marker([lat, lon], { icon:moonIcon, title:`Moon Sublunar (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)` });
 
-    // Use [lat, lon] array for plugin
-    footprintCircle = L.greatCircle([lat, lon], {
+    const footprint = L.greatCircle([lat, lon], {
       radius: footprintRadius_m,
       color:'#0000FF',
       fillColor:'#0088FF',
       fillOpacity:0.3,
       weight:2,
       wrapElements:true,
-      clipLat:65,
       degStep:0.5,
-      maxCopies:-1
-    }).addTo(map);
+      maxCopies:-1,
+      clipLat:65
+    });
 
-    footprintCircle.bringToFront();
+    moonLayerGroup.addLayer(marker);
+    moonLayerGroup.addLayer(footprint);
+
     map.panTo([lat, lon]);
     map.setZoom(2);
 
   } catch(err) {
     console.error('Error calculating sublunar point:', err);
-    if (moonMarker) moonMarker.remove();
-    if (footprintCircle) footprintCircle.remove();
-    moonMarker = null;
-    footprintCircle = null;
+    moonLayerGroup.clearLayers();
   }
 }
 
-// UI wiring
+// Slider
 document.getElementById('hour').addEventListener('input', ()=>{
   const hh=Math.floor(parseInt(document.getElementById('hour').value)/2);
   const mm=(parseInt(document.getElementById('hour').value)%2)?30:0;
@@ -126,6 +113,7 @@ document.getElementById('hour').addEventListener('input', ()=>{
   updateMap();
 });
 
+// Date adjust
 function adjustDate(days){
   const dateInput=document.getElementById('date');
   const cur=new Date(dateInput.value);
@@ -148,8 +136,9 @@ window.onload = ()=>{
   const utcMinutes=now.getUTCMinutes();
   let roundedHour=utcHours;
   let roundedMinutes=(utcMinutes>=15 && utcMinutes<45)?30:0;
-  if (utcMinutes>=45){ roundedHour+=1; roundedMinutes=0; }
-  if (roundedHour>=24){ roundedHour-=24; utcDate.setUTCDate(utcDate.getUTCDate()+1); document.getElementById('date').valueAsDate=utcDate; }
+  if(utcMinutes>=45){ roundedHour+=1; roundedMinutes=0; }
+  if(roundedHour>=24){ roundedHour-=24; utcDate.setUTCDate(utcDate.getUTCDate()+1); document.getElementById('date').valueAsDate=utcDate; }
+
   const hourIndex=roundedHour*2+(roundedMinutes===30?1:0);
   document.getElementById('hour').value=hourIndex;
   document.getElementById('hour-value').textContent=`Time (UTC): ${String(roundedHour).padStart(2,'0')}:${roundedMinutes===0?'00':'30'}`;
@@ -157,5 +146,6 @@ window.onload = ()=>{
   initMap();
 };
 </script>
+
 </body>
 </html>
