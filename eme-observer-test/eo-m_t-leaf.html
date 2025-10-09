@@ -183,8 +183,6 @@
 
                 // ensure radius is valid
                 const safeCos = Math.min(1, Math.max(-1, earthRadius / (earthRadius + D_moon)));
-                const theta_rad = Math.acos(safeCos);
-                const footprintRadius = earthRadius * theta_rad * 1000;
 
                 // ✅ use proper lat/lng object
                 const center = L.latLng(lat, lon);
