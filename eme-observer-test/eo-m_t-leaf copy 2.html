@@ -1644,8 +1644,8 @@
         const floorIdx = Math.floor(index);
         const ceilIdx = Math.ceil(index);
         const frac = index - floorIdx;
-        const relFloor = computeRelativeAtIndex(floorIdx, qthDayData, dxDayData);
-        const relCeil = computeRelativeAtIndex(ceilIdx, qthDayData, dxDayData);
+        const relFloor = computeRelativeAtIndex(floorIdx, qthDayData, dxData);
+        const relCeil = computeRelativeAtIndex(ceilIdx, qthDayData, dxData);
         currentRelRate = interpolate(relFloor.libration * 1000, relCeil.libration * 1000, frac);
         currentRelDoppler = interpolate(relFloor.doppler, relCeil.doppler, frac);
         currentPolOffset = interpolate(relFloor.pol, relCeil.pol, frac);
@@ -1944,7 +1944,6 @@
           dxChart.data.labels = labels;
           dxChart.data.datasets[0].data = dxRates;
           dxChart.data.datasets[1].data = dxElevs;
-          dxChart.data.datasets[2].data = dxDopps;
           dxChart.options.plugins.annotation.annotations = dxAnnotation;
           dxChart.options.plugins.annotation.annotations.timeMarker.value = index;
           dxChart.options.scales.y3.max = maxDoppler;
@@ -2400,44 +2399,37 @@
                                                 });
                                             }
 
-    function initMap() {
-      map = L.map('map', {
-        zoomControl: false,
-        attributionControl: false
-      }).setView([0, 0], 2);
+                                            function initMap() {
+                                                try {
+                                                    map = L.map('map', {
+                                                        zoomControl: false,
+                                                        attributionControl: false
+                                                    }).setView([0, 0], 2);
 
-      L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png', {
-        attribution: 'Map tiles by Stamen Design, CC BY 3.0 — Map data © OpenStreetMap contributors',
-        subdomains: 'abcd',
-        minZoom: 0,
-        maxZoom: 18
-      }).addTo(map);
+                                                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                                        attribution: 'Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                                                        maxZoom: 18
+                                                    }).addTo(map);
 
-      map.on('popupopen', function(e) {
-        if (currentInfoWindow && currentInfoWindow !== e.popup) {
-          map.closePopup(currentInfoWindow);
-        }
-        currentInfoWindow = e.popup;
-      });
-
-      const band = document.getElementById('bandSelect').value;
-      const jsonFile = bandConfig[band].jsonFile;
-      const showActiveOnly = isActiveStationsOnly;
-      fetch(jsonFile)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          updateMarkers(data, showActiveOnly);
-        })
-        .catch(error => {
-          console.error(`Error fetching ${jsonFile} in initMap:`, error);
-        });
-      map.invalidateSize();
-    }
+                                                    const band = document.getElementById('bandSelect').value;
+                                                    const jsonFile = bandConfig[band].jsonFile;
+                                                    const showActiveOnly = isActiveStationsOnly;
+                                                    fetch(jsonFile)
+                                                        .then(response => {
+                                                            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                                                            return response.json();
+                                                        })
+                                                        .then(data => {
+                                                            updateMarkers(data, showActiveOnly);
+                                                        })
+                                                        .catch(error => {
+                                                            console.error(`Error fetching ${jsonFile} in initMap:`, error);
+                                                        });
+                                                    map.invalidateSize();
+                                                } catch (e) {
+                                                    console.error('Error initializing map:', e);
+                                                }
+                                            }
     
     let isActiveStationsOnly = false; // Default state (equivalent to checkbox checked)
 
@@ -2934,3 +2926,4 @@
 <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
 <script src="/kofi.js"></script></body>
 </html>
+
