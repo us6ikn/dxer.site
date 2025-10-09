@@ -55,9 +55,9 @@
         }
         </script>
         <script src="a.ob.js"></script>
-        <link rel="stylesheet" href="/leaflet/leaflet.css" />
-        <script src="/leaflet/leaflet.js"></script>
-        <script src="/leaflet/Leaflet.greatCircle.js"></script>
+        <link rel="stylesheet" href="leaflet/leaflet.css" />
+        <script src="leaflet/leaflet.js"></script>
+        <script src="leaflet/Leaflet.greatCircle.js"></script>
 
   <style>
       html, body {
@@ -1366,6 +1366,7 @@
                                                                 xMax: (sunSepInterval.end + 1) / 24,
                                                                 yMin: -30, // Span full declination range
                                                                 yMax: 30,
+                                                                yScaleID: 'y2',
                                                                 backgroundColor: 'rgba(255, 131, 43, 0.5)', // 50% transparent
                                                                 borderWidth: 0, // No border
                                                                 label: { enabled: false } // No label
@@ -1388,6 +1389,7 @@
                                                                 xMax: (sgrASepInterval.end + 1) / 24,
                                                                 yMin: -30, // Span full declination range
                                                                 yMax: 30,
+                                                                yScaleID: 'y2',
                                                                 backgroundColor: 'rgba(128, 0, 128, 0.5)', // Purple, half-transparent
                                                                 borderWidth: 0, // No border
                                                                 label: { enabled: false } // No label
@@ -1405,6 +1407,7 @@
                                                             xMax: (sunSepInterval.end + 1) / 24,
                                                             yMin: -30,
                                                             yMax: 30,
+                                                            yScaleID: 'y2',
                                                             backgroundColor: 'rgba(255, 131, 43, 0.5)', // 50% transparent
                                                             borderWidth: 0, // No border
                                                             label: { enabled: false } // No label
@@ -1419,6 +1422,7 @@
                                                             xMax: (sgrASepInterval.end + 1) / 24,
                                                             yMin: -30,
                                                             yMax: 30,
+                                                            yScaleID: 'y2',
                                                             backgroundColor: 'rgba(128, 0, 128, 0.5)', // Purple, half-transparent
                                                             borderWidth: 0, // No border
                                                             label: { enabled: false } // No label
@@ -1637,8 +1641,8 @@
             const floorIdx = Math.floor(index);
             const ceilIdx = Math.ceil(index);
             const frac = index - floorIdx;
-            const relFloor = computeRelativeAtIndex(floorIdx, qthDayData, dxData);
-            const relCeil = computeRelativeAtIndex(ceilIdx, qthDayData, dxData);
+            const relFloor = computeRelativeAtIndex(floorIdx, qthDayData, dxDayData);
+            const relCeil = computeRelativeAtIndex(ceilIdx, qthDayData, dxDayData);
             currentRelRate = interpolate(relFloor.libration * 1000, relCeil.libration * 1000, frac);
             currentRelDoppler = interpolate(relFloor.doppler, relCeil.doppler, frac);
             currentPolOffset = interpolate(relFloor.pol, relCeil.pol, frac);
@@ -1937,6 +1941,7 @@
               dxChart.data.labels = labels;
               dxChart.data.datasets[0].data = dxRates;
               dxChart.data.datasets[1].data = dxElevs;
+              dxChart.data.datasets[2].data = dxDopps;
               dxChart.options.plugins.annotation.annotations = dxAnnotation;
               dxChart.options.plugins.annotation.annotations.timeMarker.value = index;
               dxChart.options.scales.y3.max = maxDoppler;
@@ -2695,6 +2700,7 @@
                                                 });
 
         window.onload = () => {
+          initMap();
           const now = new Date();
           const utcHours = now.getUTCHours();
           const utcMinutes = now.getUTCMinutes();
@@ -2746,7 +2752,6 @@
           updateMap(currentNow);
           updateMoonChart(currentNow);
           updateChart(hourIndex, false);
-          initMap();
         };
                                                     
         window.addEventListener('unload', () => {
