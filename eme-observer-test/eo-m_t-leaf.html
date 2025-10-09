@@ -32,16 +32,15 @@
 </div>
 
 <script>
-let map, moonLayer;
-let hourIndex = 0;
+let map, moonMarker, footprintCircle;
 
 function initMap() {
   map = L.map('map', {
     center: [0,0],
     zoom: 2,
-    worldCopyJump: true,
     scrollWheelZoom: true,
-    zoomControl: false
+    zoomControl: false,
+    worldCopyJump: true
   });
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -49,14 +48,10 @@ function initMap() {
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
 
-  moonLayer = L.layerGroup().addTo(map);
-
   updateMap();
 }
 
 function updateMap() {
-  if (moonLayer) moonLayer.clearLayers();
-
   const selectedDate = document.getElementById('date').value;
   const index = parseInt(document.getElementById('hour').value,10);
   const hour = Math.floor(index/2).toString().padStart(2,'0');
@@ -90,59 +85,43 @@ function updateMap() {
     const theta_rad = Math.acos(safeRatio);
     const footprintRadius_m = earthRadiusKm * theta_rad * 1000;
 
-    const center = L.latLng(lat, lon);
+    // remove old
+    if (moonMarker) { moonMarker.remove(); moonMarker=null; }
+    if (footprintCircle) { footprintCircle.remove(); footprintCircle=null; }
+
     const moonIcon = L.icon({iconUrl:'images/moon-icon.png',iconSize:[48,48],iconAnchor:[24,24]});
-    const marker = L.marker(center,{icon:moonIcon,title:`Moon Sublunar (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`});
+    moonMarker = L.marker([lat, lon],{icon:moonIcon,title:`Moon Sublunar (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`}).addTo(map);
 
-    // Detect plugin
-    let footprint;
-    if (typeof L.greatCircle === "function") {
-      footprint = L.greatCircle(center,{
-        radius: footprintRadius_m,
-        color:'#0000FF',
-        fillColor:'#0088FF',
-        fillOpacity:0.28,
-        weight:2,
-        wrapElements:false,
-        maxCopies:0,
-        clipLat:65,
-        degStep:0.5
-      });
-    } else if (typeof L.GreatCircle === "function") {
-      footprint = new L.GreatCircle(center,{
-        radius: footprintRadius_m,
-        color:'#0000FF',
-        fillColor:'#0088FF',
-        fillOpacity:0.28,
-        weight:2,
-        wrapElements:false,
-        maxCopies:0,
-        clipLat:65,
-        degStep:0.5
-      });
-    } else {
-      console.warn('⚠️ Leaflet GreatCircle plugin not loaded, using fallback L.circle');
-      footprint = L.circle(center,{radius:footprintRadius_m,color:'#0000FF',fillColor:'#0088FF',fillOpacity:0.28,weight:2});
-    }
+    // Use [lat, lon] array for plugin
+    footprintCircle = L.greatCircle([lat, lon], {
+      radius: footprintRadius_m,
+      color:'#0000FF',
+      fillColor:'#0088FF',
+      fillOpacity:0.3,
+      weight:2,
+      wrapElements:true,
+      clipLat:65,
+      degStep:0.5,
+      maxCopies:-1
+    }).addTo(map);
 
-    moonLayer.addLayer(footprint);
-    moonLayer.addLayer(marker);
-    try { footprint.bringToFront(); } catch(e){}
-
-    map.panTo(center);
+    footprintCircle.bringToFront();
+    map.panTo([lat, lon]);
     map.setZoom(2);
 
   } catch(err) {
-    console.error('Error calculating sublunar point:',err);
-    if (moonLayer) moonLayer.clearLayers();
+    console.error('Error calculating sublunar point:', err);
+    if (moonMarker) moonMarker.remove();
+    if (footprintCircle) footprintCircle.remove();
+    moonMarker = null;
+    footprintCircle = null;
   }
 }
 
 // UI wiring
 document.getElementById('hour').addEventListener('input', ()=>{
-  hourIndex = parseInt(document.getElementById('hour').value,10);
-  const hh=Math.floor(hourIndex/2);
-  const mm=(hourIndex%2)?30:0;
+  const hh=Math.floor(parseInt(document.getElementById('hour').value)/2);
+  const mm=(parseInt(document.getElementById('hour').value)%2)?30:0;
   document.getElementById('hour-value').textContent=`Time (UTC): ${String(hh).padStart(2,'0')}:${mm===0?'00':'30'}`;
   updateMap();
 });
@@ -171,7 +150,7 @@ window.onload = ()=>{
   let roundedMinutes=(utcMinutes>=15 && utcMinutes<45)?30:0;
   if (utcMinutes>=45){ roundedHour+=1; roundedMinutes=0; }
   if (roundedHour>=24){ roundedHour-=24; utcDate.setUTCDate(utcDate.getUTCDate()+1); document.getElementById('date').valueAsDate=utcDate; }
-  hourIndex=roundedHour*2+(roundedMinutes===30?1:0);
+  const hourIndex=roundedHour*2+(roundedMinutes===30?1:0);
   document.getElementById('hour').value=hourIndex;
   document.getElementById('hour-value').textContent=`Time (UTC): ${String(roundedHour).padStart(2,'0')}:${roundedMinutes===0?'00':'30'}`;
 
