@@ -181,7 +181,15 @@
                     title: `Moon Sublunar Point (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
                 });
 
-                const footprintCircle = L.greatCircle([lat, lon], {
+                // ensure radius is valid
+                const safeCos = Math.min(1, Math.max(-1, earthRadius / (earthRadius + D_moon)));
+                const theta_rad = Math.acos(safeCos);
+                const footprintRadius = earthRadius * theta_rad * 1000;
+
+                // ✅ use proper lat/lng object
+                const center = L.latLng(lat, lon);
+
+                const footprintCircle = L.greatCircle(center, {
                     radius: footprintRadius,
                     color: '#0000FF',
                     fillColor: '#0088FF',
@@ -193,14 +201,14 @@
                     maxCopies: -1
                 });
 
-                // 🟢 Add both to our layer group
+                // add both to group
                 moonLayer.addLayer(footprintCircle);
                 moonLayer.addLayer(moonMarker);
 
                 footprintCircle.bringToFront();
-
-                map.panTo([lat, lon]);
+                map.panTo(center);
                 map.setZoom(2);
+
             } catch (error) {
                 console.error(`Error calculating sublunar point: ${error.message}`);
                 if (moonLayer) moonLayer.clearLayers();
