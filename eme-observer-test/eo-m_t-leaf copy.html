@@ -90,9 +90,8 @@
             <div id="hour-value">Time (UTC): 00:00</div>
         </div>
     </div>
-
     <script>
-        let map, moonLayer;
+        let map, moonMarker, footprintCircle;
         let hourIndex = 0;
 
         function initMap() {
@@ -103,22 +102,14 @@
                 scrollWheelZoom: true,
                 worldCopyJump: true
             });
-
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
                 maxZoom: 18
             }).addTo(map);
-
-            // 🟢 Layer group for moon overlays
-            moonLayer = L.layerGroup().addTo(map);
-
             updateMap();
         }
 
         function updateMap() {
-            // 🧹 clear any previous moon footprint & marker
-            if (moonLayer) moonLayer.clearLayers();
-
             const selectedDate = document.getElementById('date').value;
             const index = parseInt(document.getElementById('hour').value);
             const hour = Math.floor(index / 2).toString().padStart(2, '0');
@@ -170,18 +161,27 @@
                     return;
                 }
 
+                if (moonMarker) {
+                    moonMarker.remove();
+                    moonMarker = null;
+                }
+                if (footprintCircle) {
+                    footprintCircle.remove();
+                    footprintCircle = null;
+                }
+
                 const moonIcon = L.icon({
                     iconUrl: 'images/moon-icon.png',
                     iconSize: [48, 48],
                     iconAnchor: [24, 24]
                 });
 
-                const moonMarker = L.marker([lat, lon], {
+                moonMarker = L.marker([lat, lon], {
                     icon: moonIcon,
                     title: `Moon Sublunar Point (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
-                });
+                }).addTo(map);
 
-                const footprintCircle = L.greatCircle([lat, lon], {
+                footprintCircle = L.greatCircle([lat, lon], {
                     radius: footprintRadius,
                     color: '#0000FF',
                     fillColor: '#0088FF',
@@ -191,19 +191,20 @@
                     clipLat: 65,
                     degStep: 0.5,
                     maxCopies: -1
-                });
+                }).addTo(map);
 
-                // 🟢 Add both to our layer group
-                moonLayer.addLayer(footprintCircle);
-                moonLayer.addLayer(moonMarker);
-
-                footprintCircle.bringToFront();
+                if (footprintCircle) {
+                    footprintCircle.bringToFront();
+                }
 
                 map.panTo([lat, lon]);
                 map.setZoom(2);
             } catch (error) {
                 console.error(`Error calculating sublunar point: ${error.message}`);
-                if (moonLayer) moonLayer.clearLayers();
+                if (moonMarker) moonMarker.remove();
+                if (footprintCircle) footprintCircle.remove();
+                moonMarker = null;
+                footprintCircle = null;
             }
         }
 
