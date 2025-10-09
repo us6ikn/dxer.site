@@ -1,146 +1,251 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Moon Sublunar Point Tracker</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/astronomy-engine@2.1.0/astronomy.min.js"></script>
-  <script src="/leaflet/Leaflet.greatCircle.js"></script>
-  <style>
-    body { margin: 0; font-family: system-ui, sans-serif; }
-    #controls {
-      padding: 8px;
-      background: #222;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    #map { height: calc(100vh - 50px); width: 100vw; }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EME Observer – Moon Footprint</title>
+    <link rel="stylesheet" href="/leaflet/leaflet.css" />
+    <script src="/leaflet/leaflet.js"></script>
+    <script src="/leaflet/Leaflet.greatCircle.js"></script>
+    <script src="a.ob.js"></script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            height: 100dvh;
+            width: 100%;
+            z-index: 0;
+        }
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 5;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 12px;
+            border-radius: 8px;
+            max-width: 95vw;
+            box-sizing: border-box;
+        }
+        #date-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        #hour-container {
+            margin-top: 10px;
+        }
+        #hour {
+            width: 100%;
+            height: 10px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            outline: none;
+        }
+        #hour::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #007bff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        #hour-value {
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        input[type="date"] {
+            padding: 5px;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
-  <div id="controls">
-    <label>Date: <input type="date" id="date" /></label>
-    <label>Time step:
-      <input type="range" id="hour" min="0" max="47" step="1" value="0" />
-      <span id="hourLabel">00:00</span>
-    </label>
-    <button id="update">Update Map</button>
-  </div>
+    <div id="map"></div>
+    <div id="controls">
+        <div id="date-container">
+            <button id="prevDay">←</button>
+            <input type="date" id="date" />
+            <button id="nextDay">→</button>
+        </div>
+        <div id="hour-container">
+            <input type="range" id="hour" min="0" max="47" value="0" step="1" />
+            <div id="hour-value">Time (UTC): 00:00</div>
+        </div>
+    </div>
+    <script>
+        let map, moonMarker = null, footprintCircle = null;
+        let hourIndex = 0;
 
-  <div id="map"></div>
+        function initMap() {
+            map = L.map('map', {
+                zoom: 2,
+                center: [0, 0],
+                zoomControl: false,
+                scrollWheelZoom: true,
+                worldCopyJump: true
+            });
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 18
+            }).addTo(map);
 
-  <script>
-    let map, moonMarker = null, footprintCircle = null;
-
-    function initMap() {
-      map = L.map('map').setView([0, 0], 2);
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 6,
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
-
-      document.getElementById('update').addEventListener('click', updateMap);
-      document.getElementById('hour').addEventListener('input', e => {
-        const idx = parseInt(e.target.value, 10);
-        const hour = Math.floor(idx / 2);
-        const min = (idx % 2) ? 30 : 0;
-        document.getElementById('hourLabel').textContent =
-          `${String(hour).padStart(2,'0')}:${String(min).padStart(2,'0')}`;
-        updateMap();
-      });
-
-      // Set today as default
-      const today = new Date();
-      document.getElementById('date').value = today.toISOString().split('T')[0];
-      updateMap();
-    }
-
-    function updateMap() {
-      const selectedDate = document.getElementById('date').value;
-      const index = parseInt(document.getElementById('hour').value, 10);
-      const hour = Math.floor(index / 2);
-      const minutes = (index % 2) ? 30 : 0;
-      const utcTimeString = `${selectedDate}T${String(hour).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:00Z`;
-
-      if (!selectedDate) return;
-      const utcDate = new Date(utcTimeString);
-      if (isNaN(utcDate.getTime())) return;
-
-      try {
-        const time = Astronomy.MakeTime(utcDate);
-        const observer = new Astronomy.Observer(0, 0, 0);
-        const moon = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, true);
-        const libration = Astronomy.Libration(time);
-
-        const raDeg = moon.ra * 15;
-        const decDeg = moon.dec;
-        let gastDeg = Astronomy.SiderealTime(time) * 15;
-        gastDeg = ((gastDeg % 360) + 360) % 360;
-        let lonDeg = raDeg - gastDeg;
-        lonDeg = ((lonDeg + 180) % 360) - 180;
-        const lat = decDeg;
-        const lon = lonDeg;
-
-        const earthRadiusKm = 6371;
-        const safeRatio = Math.min(1, Math.max(-1, earthRadiusKm / (earthRadiusKm + libration.dist_km)));
-        const theta_rad = Math.acos(safeRatio);
-        const footprintRadius_m = earthRadiusKm * theta_rad * 1000;
-
-        // 🔥 Remove all previous blue polygons or circles
-        map.eachLayer(layer => {
-          if (layer instanceof L.Polygon || layer instanceof L.Polyline || layer instanceof L.Circle) {
-            if (layer.options && layer.options.color === '#0000FF') {
-              map.removeLayer(layer);
-            }
-          }
-        });
-
-        // Remove previous marker
-        if (moonMarker) {
-          map.removeLayer(moonMarker);
-          moonMarker = null;
+            updateMap();
         }
 
-        // New marker
-        const moonIcon = L.icon({
-          iconUrl: 'images/moon-icon.png',
-          iconSize: [48, 48],
-          iconAnchor: [24, 24]
+        function updateMap() {
+            const selectedDate = document.getElementById('date').value;
+            const index = parseInt(document.getElementById('hour').value, 10);
+            const hour = Math.floor(index / 2);
+            const minutes = (index % 2) ? 30 : 0;
+            const utcTimeString = `${selectedDate}T${String(hour).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:00Z`;
+
+            if(!selectedDate) return;
+            const utcDate = new Date(utcTimeString);
+            if(isNaN(utcDate.getTime())) return;
+
+            try {
+                const time = Astronomy.MakeTime(utcDate);
+                const observer = new Astronomy.Observer(0,0,0);
+                const moon = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, true);
+                const libration = Astronomy.Libration(time);
+
+                const raDeg = moon.ra * 15;
+                const decDeg = moon.dec;
+                let gastDeg = Astronomy.SiderealTime(time) * 15;
+                gastDeg = ((gastDeg % 360) + 360) % 360;
+                let lonDeg = raDeg - gastDeg;
+                lonDeg = ((lonDeg + 180) % 360) - 180;
+                const lat = decDeg;
+                const lon = lonDeg;
+
+                const earthRadiusKm = 6371;
+                const safeRatio = Math.min(1, Math.max(-1, earthRadiusKm / (earthRadiusKm + libration.dist_km)));
+                const theta_rad = Math.acos(safeRatio);
+                const footprintRadius_m = earthRadiusKm * theta_rad * 1000;
+
+                // ✅ Clean up all previous footprints (GreatCircle polygons or sublayers)
+                map.eachLayer(layer => {
+                    if (layer instanceof L.Polygon || layer instanceof L.Polyline || layer instanceof L.Circle) {
+                        if (layer.options && layer.options.color === '#0000FF') {
+                            map.removeLayer(layer);
+                        }
+                    }
+                });
+
+                // Remove previous marker if it exists
+                if (moonMarker) {
+                    map.removeLayer(moonMarker);
+                    moonMarker = null;
+                }
+
+                // Create new marker
+                const moonIcon = L.icon({
+                    iconUrl: 'images/moon-icon.png',
+                    iconSize: [48, 48],
+                    iconAnchor: [24, 24]
+                });
+                moonMarker = L.marker([lat, lon], {
+                    icon: moonIcon,
+                    title: `Moon Sublunar (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
+                }).addTo(map);
+
+                // Create new GreatCircle
+                footprintCircle = L.greatCircle([lat, lon], {
+                    radius: footprintRadius_m,
+                    color: '#0000FF',
+                    fillColor: '#0088FF',
+                    fillOpacity: 0.3,
+                    weight: 2,
+                    wrapElements: true,
+                    clipLat: 65,
+                    degStep: 0.5,
+                    maxCopies: -1
+                }).addTo(map);
+
+                // Keep current view centered
+                map.panTo([lat, lon]);
+
+            } catch(err) {
+                console.error('Error calculating sublunar point:', err);
+                // Defensive cleanup if something fails mid-update
+                map.eachLayer(layer => {
+                    if (layer instanceof L.Polygon || layer instanceof L.Polyline || layer instanceof L.Circle) {
+                        if (layer.options && layer.options.color === '#0000FF') {
+                            map.removeLayer(layer);
+                        }
+                    }
+                });
+                if (moonMarker) map.removeLayer(moonMarker);
+                footprintCircle = null;
+                moonMarker = null;
+            }
+        }
+
+        document.getElementById("hour").addEventListener("input", () => {
+            hourIndex = parseInt(document.getElementById("hour").value);
+            const hour = Math.floor(hourIndex / 2);
+            const minutes = (hourIndex % 2) * 30;
+            document.getElementById("hour-value").textContent =
+                `Time (UTC): ${String(hour).padStart(2,'0')}:${minutes === 0 ? '00' : '30'}`;
+            updateMap();
         });
-        moonMarker = L.marker([lat, lon], {
-          icon: moonIcon,
-          title: `Moon Sublunar (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
-        }).addTo(map);
 
-        // New great circle footprint
-        footprintCircle = L.greatCircle([lat, lon], {
-          radius: footprintRadius_m,
-          color: '#0000FF',
-          fillColor: '#0088FF',
-          fillOpacity: 0.3,
-          weight: 2,
-          wrapElements: true,
-          clipLat: 65,
-          degStep: 0.5,
-          maxCopies: -1
-        }).addTo(map);
+        function adjustDate(days) {
+            const dateInput = document.getElementById("date");
+            const currentDate = new Date(dateInput.value);
+            currentDate.setDate(currentDate.getDate() + days);
+            dateInput.valueAsDate = currentDate;
+            updateMap();
+        }
 
-        map.panTo([lat, lon]);
+        document.getElementById("prevDay").addEventListener("click", () => adjustDate(-1));
+        document.getElementById("nextDay").addEventListener("click", () => adjustDate(1));
+        document.getElementById("date").addEventListener("change", updateMap);
 
-        console.log(`Sublunar: lat=${lat.toFixed(4)} lon=${lon.toFixed(4)} radius_m=${Math.round(footprintRadius_m)}`);
+        window.onload = () => {
+            const now = new Date();
+            const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+            document.getElementById("date").valueAsDate = utcDate;
 
-      } catch (err) {
-        console.error('Error calculating sublunar point:', err);
-      }
-    }
+            const utcHours = now.getUTCHours();
+            const utcMinutes = now.getUTCMinutes();
+            let roundedHour = utcHours;
+            let roundedMinutes = utcMinutes >= 15 && utcMinutes < 45 ? 30 : 0;
+            if (utcMinutes >= 45) {
+                roundedHour += 1;
+                roundedMinutes = 0;
+            }
+            if (roundedHour >= 24) {
+                roundedHour -= 24;
+                utcDate.setUTCDate(utcDate.getUTCDate() + 1);
+                document.getElementById("date").valueAsDate = utcDate;
+            }
 
-    window.onload = initMap;
-  </script>
+            hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
+            document.getElementById("hour").value = hourIndex;
+            document.getElementById("hour-value").textContent =
+                `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${roundedMinutes === 0 ? '00' : '30'}`;
+
+            initMap();
+        };
+    </script>
 </body>
 </html>
