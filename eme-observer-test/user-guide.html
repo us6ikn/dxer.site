@@ -356,7 +356,7 @@
     <section id="about">
       <h2>About EME Observer</h2>
       <p>
-      <strong>EME Observer</strong> is a web application that provides an interactive map of 10 GHz Earth-Moon-Earth (EME) stations and enables seamless, single-click sked planning. It delivers high-resolution lunar ephemeris data and displays key signal path characteristics, such as libration rate, Doppler spread, and polarization offset, along with station profiles and statistical summaries.
+      <strong>EME Observer</strong> is a web application that provides an interactive map of Earth-Moon-Earth (EME) stations and enables seamless, single-click sked planning. It delivers high-resolution lunar ephemeris data and displays key signal path characteristics, such as libration rate, Doppler spread, and polarization offset, along with station profiles and statistical summaries. EME Observer currently supports all EME bands from 432 MHz and above.
       </p>
       <figure style="margin-top: 10px; text-align: center;">
         <a href="images/eme-observer-collage.webp" target="_blank" rel="noopener">
@@ -374,21 +374,26 @@
         </figcaption>
       </figure>
      
-      <p><strong>Key features include:</strong></p>
-      <ul>
-        <li>Station locations with details on power, antennas, QRZ.com links, personal websites, email addresses and station images (if available)</li>
-        <li>One-click 10&nbsp;GHz EME planner with visualizations of common moon windows and path characteristics</li>
-        <li>Moon footprint and sublunar point plotting</li>
-        <li>Moon distance, declination, and extra path loss—available daily and in 30-minute intervals</li>
-        <li>Moon azimuth, elevation, topocentric libration rate, and Doppler spread at 10.368&nbsp;GHz for both your and DX locations</li>
-        <li>Relative libration rate, Doppler width (DXWidth), and spatial polarization offset (Dpol) between your and DX locations</li>
-        <li>Accurate moonrise and moonset times for both local and DX stations</li>
-        <li>Tabular station view with technical and contact details, including multi-field search</li>
-        <li>Summary statistics covering power levels, antenna sizes, and DXCC distribution</li>
-      </ul>
-      <p>
-        EME Observer was originally developed for personal use—tailored to the pace of my lifestyle and portable 10&nbsp;GHz EME operation, which I enjoy most. It is platform-independent and works equally well on desktop or mobile, making it easy to plan EME activity on the move. EME Observer is NOT a link budjet calculator. It will not tell you whether a QSO is possible but understanding the data it presents can significantly improve your chances.
-      </p>
+     <p><strong>Key features include:</strong></p>
+     <ul>
+       <li>Station locations with details such as transmit power, antennas, QRZ.com links, personal websites, email addresses, and station images (where available)</li>
+       <li>One-click EME planner for all bands at 432&nbsp;MHz and above, featuring visualizations of common Moon windows and signal-path characteristics - supports both Manual and Realtime modes (1-minute tracking steps)</li>
+       <li>Moon footprint and sublunar point plotting</li>
+       <li>Moon distance, declination, and additional path loss — available daily and in 30-minute intervals</li>
+       <li>Moon azimuth, elevation, topocentric libration rate, and Doppler spread at the selected EME band for both your and the DX locations</li>
+       <li>Relative libration rate, Doppler width (DXWidth), and spatial polarization offset (Dpol) between your and the DX locations</li>
+       <li>Accurate Moonrise and Moonset times for both local and DX stations</li>
+       <li>Moon–Sun angular separation and Moon–Sagittarius A* separation for bands below 1&nbsp;GHz, both with visual markers</li>
+       <li>Tabular station view with technical and contact details, including multi-field search capability</li>
+       <li>Summary statistics covering power levels, antenna sizes, and DXCC distribution (currently available for the 10&nbsp;GHz band only)</li>
+     </ul>
+
+     <p>
+       EME Observer was originally developed for personal use — tailored to the rhythm of my lifestyle and portable 10&nbsp;GHz EME operation, which I enjoy most. Thanks to the support of the vibrant and dynamic EME community, EME Observer has grown into a full-featured EME planner and station map for all bands at 432&nbsp;MHz and above. It is platform-independent and performs equally well on desktop and mobile devices, making it easy to plan EME activity on the go.
+       <br><br>
+       EME Observer is <strong>not</strong> a link budget calculator. It will not determine whether a QSO is possible with your particular setup, but understanding the data it presents can significantly improve your chances.
+     </p>
+
       
     </section>
 
@@ -398,14 +403,19 @@
         EME Observer performs astronomical calculations using the <em>Astronomy Engine</em>, built on the VSOP87 and NOVAS C 3.1 models. In certain areas, an optimized version of the Meeus algorithm is used to improve performance without noticeable reduction in precision.
       </p>
       <p>
-        All computations have been thoroughly validated against the Skyfield Python library, using the DE421 ephemeris from NASA Jet Propulsion Laboratory. EME Observer achieves positional accuracy within 1 arcminute (0.017°), fully meeting the precision needs of 10&nbsp;GHz EME planning and analysis.
+        All computations have been thoroughly validated against the <em>Skyfield</em> Python library using the DE421 ephemeris from NASA’s Jet Propulsion Laboratory (JPL). EME Observer achieves positional accuracy within 1&nbsp;arcminute (0.017°), fully meeting the precision requirements for QSO planning and analysis across all EME bands, including the highest microwave frequencies.
       </p>
       <p>
-        Doppler spread calculations are based on methods described by <a href="https://wsjt.sourceforge.io/EME2010_K1JT.pdf" target="_blank" rel="noopener">(J. Taylor K1JT, 2010)</a>, and spatial polarization offset (Dpol) follows the WSJT-X algorithm.
+        Doppler spread calculations are based on methods described by <a href="https://wsjt.sourceforge.io/EME2010_K1JT.pdf" target="_blank" rel="noopener">J. Taylor K1JT, 2010</a>, and spatial polarization offset (Dpol) follows the WSJT-X algorithm.
       </p>
+      
+      <h3 id="station-data">Station Data</h3>
       <p>
-        Station data is contributed by the community. To add or update a station, use <a href="https://forms.gle/vLCqCySPEkH926AX8" target="_blank" rel="noopener">this form</a>. Please only add stations that have TX capability and achieved at least one 10GHz EME QSO.
+        Station data is contributed by the community. To add or update a station, please submit your updates via <a href="https://www.pa0ply.nl/eme-directory/" target="_blank" rel="noopener">PA0PLY EME Directory</a>. Only add stations that have transmit (TX) capability and have completed at least one EME QSO on the band for which you are submitting data.
+        <br><br>
+        To include a station image in the EME Observer station profiles, please send the image to Max SA5IKN using the email address listed on <a href="https://www.qrz.com/db/SA5IKN" target="_blank" rel="noopener">his QRZ.com profile</a>. Please specify what band the picture is for. Each band can use its dedicated picture or one picture can be used for all bands.
       </p>
+
     </section>
 
     <section id="quickstart">
