@@ -65,202 +65,203 @@
           flex-direction: column;
           min-height: 100vh;
           overflow-x: hidden;
+          box-sizing: border-box;
         }
 
         .top-bar {
-            width: 100%;
-            background-color: #ffffff;
-            padding: 20px 0;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+          width: 100%;
+          background-color: #ffffff;
+          padding: 20px 0;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          box-sizing: border-box;
         }
 
         .top-content {
-            max-width: 900px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
+          max-width: 900px;
+          margin: 0 auto;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          box-sizing: border-box;
+          padding: 0 5px; /* Small side padding for narrow screens */
         }
 
         .app-meta {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            text-align: right;
-            margin-bottom: 15px;
-            line-height: 1.1;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          text-align: right;
+          margin-bottom: 15px;
+          line-height: 1.1;
         }
 
         .creator-label {
-            font-size: 0.9rem;
-            color: #555;
-            font-style: italic;
-            margin-bottom: -4px;
+          font-size: 0.9rem;
+          color: #555;
+          font-style: italic;
+          margin-bottom: -4px;
         }
 
         .app-name {
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: #2c3e50;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: -2px;
+          font-size: 1.8rem;
+          font-weight: 600;
+          color: #2c3e50;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          margin: -2px;
         }
 
         .ghz-label {
-            font-size: 0.9rem;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-top: 2px;
+          font-size: 0.9rem;
+          font-weight: bold;
+          color: #2c3e50;
+          margin-top: 2px;
         }
 
         .button-container {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 10px;
+          display: flex;
+          gap: 15px;
+          flex-wrap: wrap;
+          justify-content: center;
+          margin-top: 10px;
+          box-sizing: border-box;
         }
 
         .button-container button {
-            background-color: #0056b3;
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            font-size: 15px;
-            cursor: pointer;
-            border-radius: 6px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            transition: background-color 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          background-color: #0056b3;
+          color: white;
+          border: none;
+          padding: 10px 24px;
+          font-size: 15px;
+          cursor: pointer;
+          border-radius: 6px;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          transition: background-color 0.3s ease;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          box-sizing: border-box;
         }
 
         .button-container button:hover {
-            background-color: #00408a;
+          background-color: #00408a;
         }
 
         .container {
-            width: 90%;
-            max-width: 900px;
-            margin: 20px auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+          width: 90%;
+          max-width: 900px;
+          margin: 20px auto;
+          background-color: #fff;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+          overflow: hidden;
+          box-sizing: border-box;
         }
 
         h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
+          text-align: center;
+          color: #333;
+          margin-bottom: 20px;
         }
 
         p {
-            font-size: 1rem;
-            color: #333;
-            line-height: 1.6;
-            margin: 10px 0;
-            text-align: left;
+          font-size: 1rem;
+          color: #333;
+          line-height: 1.6;
+          margin: 10px 0;
+          text-align: left;
+          overflow-wrap: anywhere; /* Modern word breaking for long strings */
+          hyphens: auto; /* Soft hyphens where possible */
         }
 
         a {
-            color: #0056b3;
-            text-decoration: none;
-            transition: color 0.3s ease;
+          color: #0056b3;
+          text-decoration: none;
+          transition: color 0.3s ease;
+          word-break: break-all; /* Force-break long URLs in links */
         }
 
         a:hover {
-            color: #00408a;
-            text-decoration: underline;
+          color: #00408a;
+          text-decoration: underline;
         }
 
         .screenshot {
-            display: block;
-            max-width: 100%;
-            height: auto;
-            margin: 20px auto;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+          display: block;
+          max-width: 100%;
+          width: auto; /* Allows natural scaling */
+          height: auto;
+          margin: 20px auto;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          box-sizing: border-box;
         }
 
         .screenshot-caption {
-            text-align: center;
-            font-size: 0.9rem;
-            color: #555;
-            margin-top: 10px;
+          text-align: center;
+          font-size: 0.9rem;
+          color: #555;
+          margin-top: 10px;
         }
 
         @media (max-width: 768px) {
-            .container {
-                width: 100%;
-                padding: 10px;
-            }
+          .container {
+            width: 100%;
+            padding: 10px;
+            margin: 10px auto; /* Tighter margins */
+          }
 
-            h1 {
-                font-size: 1.5em;
-            }
+          h1 {
+            font-size: 1.5em;
+          }
 
-            .app-name {
-                font-size: 1.3rem;
-            }
+          .app-name {
+            font-size: 1.3rem;
+          }
 
-            .creator-label,
-            .ghz-label {
-                font-size: 0.75rem;
-            }
+          .creator-label,
+          .ghz-label {
+            font-size: 0.75rem;
+          }
 
-            .app-meta {
-                align-items: flex-end;
-                text-align: right;
-                margin-bottom: 12px;
-            }
+          .app-meta {
+            align-items: flex-end;
+            text-align: right;
+            margin-bottom: 12px;
+          }
 
-            .button-container button {
-                width: 140px;
-                font-size: 14px;
-            }
+          .button-container button {
+            width: 140px;
+            font-size: 14px;
+          }
+
+          .top-content {
+            padding: 0 10px; /* Ensure no edge squeeze */
+          }
         }
 
         @media (max-width: 600px) {
-            .button-container {
-                flex-wrap: nowrap;
-                overflow-x: auto;
-                gap: 8px;
-                justify-content: flex-start;
-            }
+          .button-container {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 8px;
+            justify-content: flex-start;
+            padding: 0 5px; /* Prevent button overflow at edges */
+          }
 
-            .button-container button {
-                flex-shrink: 0;
-                padding: 6px 12px;
-                font-size: 12px;
-                width: auto;
-                white-space: nowrap;
-            }
-        }
-        p {
-            font-size: 1rem;
-            color: #333;
-            line-height: 1.6;
-            margin: 10px 0;
-            text-align: left;
-            overflow-wrap: break-word;  /* Breaks long words/URLs at arbitrary points if needed */
-            word-break: break-word;    /* More aggressive fallback for older browsers */
-            hyphens: auto;             /* Adds soft hyphens where possible (optional, for better aesthetics) */
-        }
+          .button-container button {
+            flex-shrink: 0;
+            padding: 6px 12px;
+            font-size: 12px;
+            width: auto;
+            white-space: nowrap;
+          }
 
-        .screenshot {
-            display: block;
-            max-width: 100%;
-            height: auto;
-            margin: 20px auto;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            width: 100%;  /* Ensures it takes full container width if needed, but scales down */
-            box-sizing: border-box;  /* Includes border/padding in width calc */
+          p {
+            font-size: 0.95rem; /* Slightly smaller for narrow screens */
+          }
         }
     </style>
 </head>
