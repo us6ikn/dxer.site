@@ -241,6 +241,27 @@
                 white-space: nowrap;
             }
         }
+        p {
+            font-size: 1rem;
+            color: #333;
+            line-height: 1.6;
+            margin: 10px 0;
+            text-align: left;
+            overflow-wrap: break-word;  /* Breaks long words/URLs at arbitrary points if needed */
+            word-break: break-word;    /* More aggressive fallback for older browsers */
+            hyphens: auto;             /* Adds soft hyphens where possible (optional, for better aesthetics) */
+        }
+
+        .screenshot {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 20px auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;  /* Ensures it takes full container width if needed, but scales down */
+            box-sizing: border-box;  /* Includes border/padding in width calc */
+        }
     </style>
 </head>
 <body>
