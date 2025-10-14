@@ -7,13 +7,14 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
+
       gtag('config', 'G-7YST3WTEH3');
     </script>
     <meta charset="UTF-8" />
-    <title>EME Observer – Statistics | Moonbounce Data</title>
+    <title>EME Observer – Statistics | 10GHz Moonbounce Data</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <meta name="description" content="View detailed statistics and charts from EME Observer. Analyze station activity, moonbounce trends, and other amateur radio metrics." />
+    <meta name="description" content="View detailed statistics and charts from the 10GHz EME Observer. Analyze station activity, moonbounce trends, and other amateur radio metrics." />
     <meta name="keywords" content="EME Statistics, Moonbounce Stats, 10GHz, Ham Radio, Amateur Radio, EME Observer" />
     <meta name="author" content="SA5IKN" />
     <meta name="robots" content="index, follow" />
@@ -21,14 +22,14 @@
     <!-- Open Graph -->
     <meta property="og:title" content="EME Observer – Statistics" />
     <meta property="og:type" content="website" />
-    <meta property="og:description" content="Explore detailed statistics for Moonbounce activity using EME Observer." />
+    <meta property="og:description" content="Explore detailed statistics for 10GHz Moonbounce activity using EME Observer." />
     <meta property="og:image" content="/social/eme-observer.jpg" />
     <meta property="og:url" content="https://dxer.site/eme-observer/statistics.html" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="EME Observer – Statistics" />
-    <meta name="twitter:description" content="Charts and statistics for EME moonbounce stations." />
+    <meta name="twitter:title" content="EME Observer – 10GHz Stats" />
+    <meta name="twitter:description" content="Charts and statistics for 10GHz EME moonbounce stations." />
     <meta name="twitter:image" content="/social/eme-observer.jpg" />
 
     <!-- Canonical URL -->
@@ -41,7 +42,7 @@
     <link rel="manifest" href="/assets/site.webmanifest" />
     <link rel="shortcut icon" href="/assets/favicon.ico" />
 
-    <!-- Structured Data -->
+    <!-- Structured Data (optional, but helpful if it's a real app/page) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -57,8 +58,10 @@
     }
     </script>
 
-    <script src="chart.js"></script>
-    <style>
+
+  <title>10GHz EME Stations Statistics</title>
+  <script src="chart.js"></script>
+  <style>
       body {
         font-family: Arial, sans-serif;
         margin: 0;
@@ -200,43 +203,6 @@
         margin-top: 2px;
       }
 
-      .controls {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 10px 0;
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-
-      .filter-group {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-      }
-
-      .band-select {
-        padding: 8px;
-        font-size: 14px;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-        background-color: #fff;
-        cursor: pointer;
-        min-width: 120px;
-      }
-
-      .band-select:focus {
-        outline: none;
-        border-color: #0056b3;
-      }
-
-      .stats-message {
-        font-size: 16px;
-        text-align: center;
-        color: #333;
-        margin: 20px 0;
-      }
-
       /* Responsive for tablets and down */
       @media (max-width: 900px) {
         .button-container {
@@ -290,117 +256,61 @@
           text-align: center;
           margin-bottom: 10px;
         }
-
-        .band-select {
-          width: 100%;
-          max-width: 200px;
-        }
-
-        .filter-group {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 10px;
-        }
-
-        .stats-message {
-          font-size: 14px;
-        }
       }
 
-      @media (max-width: 600px) {
-        .controls {
-          flex-direction: column;
-          align-items: flex-start;
-        }
+  </style>
 
-        .band-select {
-          width: 100%;
-        }
 
-        .filter-group {
-          width: 100%;
-        }
-      }
-    </style>
+
 </head>
 <body>
-  <div class="top-bar">
-    <div class="top-content">
-      <div class="app-meta">
-        <div class="creator-label">by SA5IKN</div>
-        <div class="app-name">EME Observer</div>
-        <div id="ghz-label" class="ghz-label">10GHz</div>
-      </div>
-      <div class="button-container">
-        <button onclick="window.location.href='/eme-observer/'">Map View</button>
-        <button onclick="window.location.href='table.html'">Table View</button>
-        <button onclick="window.location.href='datasubmission.html'">Add Station</button>
-        <button onclick="window.location.href='/'">🏠</button>
-        <button onclick="window.location.href='user-guide.html'">?</button>
-      </div>
-    </div>
-  </div>
+    <body>
+        <div class="top-bar">
+          <div class="top-content">
+              <div class="app-meta">
+                <div class="creator-label">by SA5IKN</div>
+                <div class="app-name">EME Observer</div>
+                <div class="ghz-label">10GHz</div>
+              </div>
+
+            <div class="button-container">
+              <button onclick="window.location.href='/eme-observer/'">Map View</button>
+              <button onclick="window.location.href='table.html'">Table View</button>
+              <button onclick="window.location.href='https://forms.gle/vLCqCySPEkH926AX8'">Add/Edit</button>
+              <button onclick="window.location.href='/'">🏠</button>
+              <button onclick="window.location.href='user-guide.html'">?</button>
+            </div>
+          </div>
+        </div>
 
   <div class="container">
-    <h1 id="table-title">EME Stations Statistics</h1>
-    <div class="controls">
-      <div class="filter-group">
-        <select id="bandSelect" class="band-select">
-          <option value="432MHz">432MHz</option>
-          <option value="1296MHz">1296MHz</option>
-          <option value="2320MHz">2320MHz</option>
-          <option value="3400MHz">3400MHz</option>
-          <option value="5760MHz">5760MHz</option>
-          <option value="10GHz" selected>10GHz</option>
-          <option value="24GHz">24GHz</option>
-          <option value="47GHz">47GHz</option>
-          <option value="76GHz">76GHz</option>
-        </select>
-      </div>
-    </div>
-    <div id="statsMessage" class="stats-message" style="display: none;">
-      Statistics is currently only available for 10GHz
-    </div>
-    <div id="statsContent">
-      <h2>Antenna Size</h2>
-      <canvas id="antennaChart"></canvas>
+    <h1>10GHz EME Stations Statistics</h1>
 
-      <h2>Power</h2>
-      <canvas id="powerChart"></canvas>
-      
-      <div class="chart-wrapper">
-        <h2>Stations per DXCC</h2>
-        <p id="dxccTotal" class="dxcc-total"></p>
-        <p class="hover-hint">Hover over the chart to see DXCC details.</p>
-        <canvas id="countryChart"></canvas>
-        <div id="customLegendContainer" style="column-count: 3; column-gap: 1rem; font-size: 0.9em; margin-top: 1rem;"></div>
-      </div>
+    <h2>Antenna Size</h2>
+    <canvas id="antennaChart"></canvas>
+
+    <h2>Power</h2>
+    <canvas id="powerChart"></canvas>
+    
+    <div class="chart-wrapper">
+      <h2>Stations per DXCC</h2>
+      <p id="dxccTotal" class="dxcc-total"></p>
+      <p class="hover-hint">Hover over the chart to see DXCC details.</p>
+      <canvas id="countryChart"></canvas>
+      <div id="customLegendContainer"
+           style="column-count: 3; column-gap: 1rem; font-size: 0.9em; margin-top: 1rem;"></div>
     </div>
+
+
   </div>
 
   <script>
     const FILE_URL_BASE = ''; // Set this to the base URL if needed
 
-    const bandConfig = {
-      '432MHz': { label: '432MHz', jsonFile: 'stn_432MHz.json' },
-      '1296MHz': { label: '1296MHz', jsonFile: 'stn_1296MHz.json' },
-      '2320MHz': { label: '2320MHz', jsonFile: 'stn_2320MHz.json' },
-      '3400MHz': { label: '3400MHz', jsonFile: 'stn_3400MHz.json' },
-      '5760MHz': { label: '5760MHz', jsonFile: 'stn_5760MHz.json' },
-      '10GHz': { label: '10GHz', jsonFile: 'stn_10GHz.json' },
-      '24GHz': { label: '24GHz', jsonFile: 'stn_24GHz.json' },
-      '47GHz': { label: '47GHz', jsonFile: 'stn_47GHz.json' },
-      '76GHz': { label: '76GHz', jsonFile: 'stn_76GHz.json' }
-    };
-
     const files = {
       antenna: FILE_URL_BASE + 'hist_a.txt',
       power: FILE_URL_BASE + 'hist_p.txt',
     };
-
-    let antennaChart = null;
-    let powerChart = null;
-    let countryChart = null;
 
     function parseHistogramData(text) {
       const lines = text.trim().split('\n').slice(1); // Skip header
@@ -415,7 +325,7 @@
           const count = parseInt(parts[1], 10);
           const percentage = parts[2];
           originalLabels.push(label);
-          if (count > 0) { // Only include bins where count > 0
+          if (count > 0) {  // Only include bins where count > 0
             labels.push(label);
             counts.push(count);
             percentages.push(percentage);
@@ -426,13 +336,12 @@
     }
 
     function plotChart(canvasId, labels, counts, percentages, title, xAxisTitle) {
-      const ctx = document.getElementById(canvasId).getContext('2d');
-      return new Chart(ctx, {
+      new Chart(document.getElementById(canvasId), {
         type: 'bar',
         data: {
           labels: labels,
           datasets: [{
-            label: title,
+            label: title, // This is for the dataset label
             data: counts,
             backgroundColor: 'rgba(75, 192, 192, 0.6)',
             borderColor: 'rgba(75, 192, 192, 1)',
@@ -474,135 +383,92 @@
             }
           }
         }
+
       });
     }
+      
+      async function loadCountryData() {
+        try {
+          const response = await fetch(FILE_URL_BASE + 'stn_10GHz.json');
+          const combined = await response.json();
 
-    async function loadCountryData() {
-      try {
-        const response = await fetch(FILE_URL_BASE + 'stn_10GHz.json');
-        const combined = await response.json();
+          const countryCounts = {};
+          for (const station of combined) {
+            const dxcc = station.DXCC || "Unknown";
+            countryCounts[dxcc] = (countryCounts[dxcc] || 0) + 1;
+          }
 
-        const countryCounts = {};
-        for (const station of combined) {
-          const dxcc = station.DXCC || "Unknown";
-          countryCounts[dxcc] = (countryCounts[dxcc] || 0) + 1;
-        }
+          const labels = Object.keys(countryCounts);
+          const data = Object.values(countryCounts);
+          document.getElementById('dxccTotal').textContent = `Activated DXCC: ${labels.length}`;
 
-        const labels = Object.keys(countryCounts);
-        const data = Object.values(countryCounts);
-        document.getElementById('dxccTotal').textContent = `Activated DXCC: ${labels.length}`;
+          const backgroundColors = labels.map((_, i) =>
+            `hsl(${i * 360 / labels.length}, 70%, 60%)`
+          );
 
-        const backgroundColors = labels.map((_, i) => `hsl(${i * 360 / labels.length}, 70%, 60%)`);
-
-        const ctx = document.getElementById('countryChart').getContext('2d');
-        countryChart = new Chart(ctx, {
-          type: 'doughnut',
-          data: {
-            labels: labels,
-            datasets: [{
-              data: data,
-              backgroundColor: backgroundColors,
-              borderColor: '#fff',
-              borderWidth: 1
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: function (context) {
-                    const value = context.raw;
-                    const label = context.label;
-                    return `${label}: ${value} stations`;
+          const chart = new Chart(document.getElementById('countryChart'), {
+            type: 'doughnut',
+            data: {
+              labels: labels,
+              datasets: [{
+                data: data,
+                backgroundColor: backgroundColors,
+                borderColor: '#fff',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  callbacks: {
+                    label: function (context) {
+                      const value = context.raw;
+                      const label = context.label;
+                      return `${label}: ${value} stations`;
+                    }
                   }
                 }
               }
             }
-          }
-        });
+          });
 
-        const customLegendHTML = labels.map((label, i) => {
-          const color = backgroundColors[i];
-          const count = data[i];
-          return `<div style="break-inside: avoid; margin-bottom: 6px;">
-                    <span style="display:inline-block; width:12px; height:12px; background-color:${color}; margin-right:6px; border-radius:2px;"></span>
-                    ${label} (${count})
-                  </div>`;
-        }).join('');
+          const customLegendHTML = labels.map((label, i) => {
+            const color = backgroundColors[i];
+            const count = data[i];
+            return `<div style="break-inside: avoid; margin-bottom: 6px;">
+                      <span style="display:inline-block; width:12px; height:12px; background-color:${color}; margin-right:6px; border-radius:2px;"></span>
+                      ${label} (${count})
+                    </div>`;
+          }).join('');
 
-        document.getElementById('customLegendContainer').innerHTML = customLegendHTML;
-      } catch (err) {
-        console.error('Error loading DXCC pie chart:', err);
+
+          document.getElementById('customLegendContainer').innerHTML = customLegendHTML;
+
+        } catch (err) {
+          console.error('Error loading DXCC pie chart:', err);
+        }
       }
-    }
+
+      // Call it after the others
+      loadCountryData();
+
 
     async function loadAndPlot(fileUrl, canvasId, title, xAxisTitle) {
       try {
         const response = await fetch(fileUrl);
         const text = await response.text();
         const data = parseHistogramData(text);
-        if (canvasId === 'antennaChart') {
-          antennaChart = plotChart(canvasId, data.labels, data.counts, data.percentages, title, xAxisTitle);
-        } else if (canvasId === 'powerChart') {
-          powerChart = plotChart(canvasId, data.labels, data.counts, data.percentages, title, xAxisTitle);
-        }
+        plotChart(canvasId, data.labels, data.counts, data.percentages, title, xAxisTitle);
       } catch (err) {
         console.error(`Error loading ${fileUrl}:`, err);
       }
     }
 
-    function updateUI(band) {
-      const statsContent = document.getElementById('statsContent');
-      const statsMessage = document.getElementById('statsMessage');
-      const tableTitle = document.getElementById('table-title');
-      const ghzLabel = document.getElementById('ghz-label');
-
-      // Update title and label
-      tableTitle.textContent = `${bandConfig[band].label} EME Stations Statistics`;
-      ghzLabel.textContent = bandConfig[band].label;
-
-      // Toggle content based on band
-      if (band === '10GHz') {
-        statsContent.style.display = 'block';
-        statsMessage.style.display = 'none';
-        // Load charts if not already loaded
-        if (!antennaChart) loadAndPlot(files.antenna, 'antennaChart', 'Antenna Count', 'Antenna diameter (m)');
-        if (!powerChart) loadAndPlot(files.power, 'powerChart', 'Power Count', 'Power (W)');
-        if (!countryChart) loadCountryData();
-      } else {
-        statsContent.style.display = 'none';
-        statsMessage.style.display = 'block';
-        // Destroy charts to free memory
-        if (antennaChart) {
-          antennaChart.destroy();
-          antennaChart = null;
-        }
-        if (powerChart) {
-          powerChart.destroy();
-          powerChart = null;
-        }
-        if (countryChart) {
-          countryChart.destroy();
-          countryChart = null;
-          document.getElementById('customLegendContainer').innerHTML = '';
-          document.getElementById('dxccTotal').textContent = '';
-        }
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      // Initialize band selector
-      const bandSelect = document.getElementById('bandSelect');
-      bandSelect.addEventListener('change', (event) => {
-        const band = event.target.value;
-        updateUI(band);
-      });
-
-      // Initial load for 10GHz
-      updateUI('10GHz');
-    });
+    // Load all charts with custom x-axis titles
+    loadAndPlot(files.antenna, 'antennaChart', 'Antenna Count', 'Antenna diameter (m)');
+    loadAndPlot(files.power, 'powerChart', 'Power Count', 'Power (W)');
   </script>
   <!-- Ko-Fi -->
   <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
