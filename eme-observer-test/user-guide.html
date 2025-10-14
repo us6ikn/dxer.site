@@ -342,7 +342,7 @@
       <h2>About EME Observer</h2>
       <p>
         <strong>EME Observer</strong> is a web application that provides an interactive map of Earth-Moon-Earth (EME) stations and enables one-click sked planning and real-time tracking of moon footprint and conditions. It delivers high-resolution lunar ephemeris data and displays key signal-path characteristics, including additional path loss, libration rate, Doppler spread, and polarization offset, together with station profiles and statistical summaries.
-        EME Observer currently supports all EME bands from 432&nbsp;MHz to 76GHz. Planning is also available for 144&nbsp;MHz and 50&nbsp;MHz, but station profiles are not included for these bands.
+        EME Observer currently supports all EME bands from 432&nbsp;MHz to 76GHz. Planning is also available for 144&nbsp;MHz and 50&nbsp;MHz, but station profiles are not currently included for these bands.
       </p>
 
       <figure style="margin-top: 10px; text-align: center;">
@@ -366,7 +366,7 @@
        <li>Station locations with details such as transmit power, antennas, QRZ.com links, personal websites, email addresses, and station images (where available)</li>
        <li>One-click EME planner for all bands, 432&nbsp;MHz and above, featuring visualizations of common Moon windows and signal-path characteristics - supports both Manual and Realtime modes (1-minute tracking steps)</li>
        <li>Moon footprint and sublunar point plotting</li>
-       <li>Moon distance, declination, and additional path loss — available daily and in 30-minute intervals</li>
+       <li>Moon distance, declination, and additional path loss - available daily and in 30-minute intervals</li>
        <li>Moon azimuth, elevation, topocentric libration rate, and Doppler spread at the selected EME band for both your and the DX locations</li>
        <li>Relative libration rate, Doppler width (DXWidth), and spatial polarization offset (Dpol) between your and the DX locations</li>
        <li>Accurate Moonrise and Moonset times for both local and DX stations</li>
@@ -376,7 +376,7 @@
      </ul>
 
      <p>
-       EME Observer was originally developed for personal use — tailored to the rhythm of my lifestyle and portable 10&nbsp;GHz EME operation, which I enjoy most. Thanks to the support of the vibrant and dynamic EME community, EME Observer has grown into a full-featured EME planner and station map for all bands at 432&nbsp;MHz and above. It is platform-independent and performs equally well on desktop and mobile devices, making it easy to plan EME activity on the go.
+       EME Observer was originally developed for personal use, tailored to the rhythm of my lifestyle and portable 10&nbsp;GHz EME operation, which I enjoy most. Thanks to the support of the vibrant and dynamic EME community, EME Observer has grown into a full-featured EME planner and station map for all bands, from 432&nbsp;MHz and above. It is platform-independent and performs equally well on desktop and mobile devices, making it easy to plan EME activity on the go.
        <br><br>
        EME Observer is <strong>not</strong> a link budget calculator. It will not determine whether a QSO is possible with your particular setup, but understanding the data it presents can significantly improve your chances.
      </p>
@@ -390,7 +390,7 @@
         EME Observer performs astronomical calculations using the <em>Astronomy Engine</em>, built on the VSOP87 and NOVAS C 3.1 models. In certain areas, an optimized version of the Meeus algorithm is used to improve performance without noticeable reduction in precision.
       </p>
       <p>
-        All computations have been thoroughly validated against the <em>Skyfield</em> Python library using the DE421 ephemeris from NASA’s Jet Propulsion Laboratory (JPL). EME Observer achieves positional accuracy within 1&nbsp;arcminute (0.017°), fully meeting the precision requirements for QSO planning and analysis across all EME bands, including the highest microwave frequencies.
+        All computations have been thoroughly validated against the <em>Skyfield</em> Python library using the DE421 ephemeris from NASA Jet Propulsion Laboratory (JPL). EME Observer achieves positional accuracy within 1&nbsp;arcminute (0.017°), fully meeting the precision requirements for QSO planning and analysis across all EME bands, including the highest microwave frequencies.
       </p>
       <p>
         Doppler spread calculations are based on methods described by <a href="https://wsjt.sourceforge.io/EME2010_K1JT.pdf" target="_blank" rel="noopener">J. Taylor K1JT, 2010</a>, and spatial polarization offset (Dpol) follows the WSJT-X algorithm.
@@ -430,7 +430,7 @@
         </figcaption>
       </figure>
       <p>
-      Map View is the default view in EME Observer. When the page loads, "My Locator" and "DX Locator" fields are empty, and the date and time are set to the current UTC time, rounded to the nearest 30 minutes. You can adjust the date using the date picker or its arrow buttons, and change the time by moving the time slider. The plotted moon footprint updates dynamically in 30-minute intervals as the time slider is adjusted by the user. The position of the moon icon represents the sublunar point—the location on Earth where the moon is directly overhead.
+      Map View is the default view in EME Observer. When the page loads, "My Locator" and "DX Locator" fields are empty, and the date and time are set to the current UTC time, rounded to the nearest 30 minutes. You can adjust the date using the date picker or its arrow buttons, and change the time by moving the time slider. The plotted moon footprint updates dynamically in 30-minute intervals as the time slider is adjusted by the user. The position of the moon icon represents the sublunar point - the location on Earth where the moon is directly overhead.
       </p>
       
       <h4 id="date-time-controls">Control Panel</h4>
@@ -453,8 +453,8 @@
         The Control Panel in <strong>EME Observer</strong> provides quick access to all essential settings and tools. It includes:
       </p>
       <ul>
-        <li><strong>Time and date controls</strong> — set the observation date and time (UTC) for the EME planner</li>
-        <li><strong>Band selector</strong> — choose the desired EME band: 432&nbsp;MHz, 1296&nbsp;MHz, 2320&nbsp;MHz, 3400&nbsp;MHz, 5760&nbsp;MHz, 10&nbsp;GHz, 24&nbsp;GHz, 47&nbsp;GHz, and 76&nbsp;GHz</li>
+        <li><strong>Time and date controls</strong> — set date and time (UTC) for the EME planner</li>
+        <li><strong>Band selector</strong> — choose the desired EME band: 432&nbsp;MHz, 1296&nbsp;MHz, 2320&nbsp;MHz, 3400&nbsp;MHz, 5760&nbsp;MHz, 10&nbsp;GHz, 24&nbsp;GHz, 47&nbsp;GHz, or 76&nbsp;GHz</li>
         <li><strong>Mode selector</strong> — switch between <em>Manual (Planning)</em> and <em>Tracking (Realtime)</em> modes ("Track" button)</li>
         <li><strong>QTH locator fields</strong> — enter the grid locators for your station and the DX station</li>
         <li><strong>View buttons</strong> — display station records in <em>Table View</em> or analyze station and DXCC statistics in <em>Statistics View</em></li>
@@ -515,7 +515,7 @@
         The vertical <strong>black bar</strong> on the chart represents the selected date and acts as a <strong>time marker</strong>. You can adjust the date using the <strong>date picker</strong> or its arrow controls.
       </p>
       <p>
-        Each curve and its corresponding Y-axis are <strong>color-coded</strong>, as are the numerical values displayed above the chart for the current Moon distance, declination, and additional path loss. In <em>Manual</em> mode, these values update in <strong>30-minute intervals</strong> as you move the time slider, while in <em>Autotracking (Realtime)</em> mode, they automatically update every minute.
+        Each curve and its corresponding Y-axis are <strong>color-coded</strong>, as are the numerical values displayed above the chart for the current Moon distance, declination, and additional path loss. In <em>Manual</em> mode, these values update in <strong>30-minute intervals</strong> as you move the time slider, while in <em>Realtime Tracking</em> mode, they automatically update every minute.
       </p>
 
       
@@ -546,7 +546,7 @@
         <li><strong>Doppler spread</strong> for the selected band (equivalent to “Width” in the Astronomical Data window of WSJT-X)</li>
       </ul>
       <p>
-        The X-axis represents time in <strong>30-minute intervals</strong>, and the <strong>black vertical line</strong> serves as a time marker that updates as you move the time slider in <em>Manual</em> mode or automatically in <em>Autotracking (Realtime)</em> mode.
+        The X-axis represents time in <strong>30-minute intervals</strong>, and the <strong>black vertical line</strong> serves as a time marker that updates as you move the time slider in <em>Manual</em> mode or automatically in <em>Realtime Tracking</em> mode.
       </p>
       <p>
         Each curve on the chart is <strong>color-coded</strong> to match its corresponding Y-axis. The current values for Moon elevation, azimuth, libration rate, and full limb-to-limb Doppler spread are displayed above the chart in matching colors for quick reference.
@@ -750,7 +750,7 @@
     <section id="mobile-experience">
         <h2>Mobile experience</h2>
         <p>
-          <strong>EME Observer</strong> features a responsive design optimized for mobile devices, presenting all essential data in a compact, touch-friendly layout. The screenshots below show the interface as displayed on an iPhone Pro. On smaller screens, vertical scrolling is enabled for charts, allowing users to explore data easily while key controls remain fixed for quick access. The control panel can be minimized using the <em>Hide Panel</em> button, making it easier to explore the map, Moon footprint, and station profiles. One-click sked planning functions identically to the desktop version.
+          <strong>EME Observer</strong> features a responsive design optimized for mobile devices, presenting all essential data in a compact, touch-friendly layout. The screenshots below show the interface as displayed on an iPhone Pro. On smaller screens, vertical scrolling is enabled for charts, allowing users to explore data easily while key controls remain fixed for quick access. The control panel can be minimized using the <em>Hide Panel</em> button (&#x2190;), making it easier to explore the map, Moon footprint, and station profiles. One-click sked planning functions identically to the desktop version and so does the Realtime Tracking Mode.
         </p>
 
     <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 20px;">
@@ -809,12 +809,12 @@
         <p>
           Although <strong>EME Observer</strong> is primarily designed for planning EME QSOs on bands from 432&nbsp;MHz and above, many of its tools and metrics are also useful for lower EME bands, such as 144&nbsp;MHz and 50&nbsp;MHz.
           These include the Moon footprint, Earth–Moon distance, additional path loss, lunar declination, elevation and azimuth charts, moonrise and moonset times, and polarization offset.
-          For convenience, when planning QSOs on lower bands, you may select 432&nbsp;MHz in the band selector to enable the display of Moon–Sagittarius A separation.
+          For convenience, when planning QSOs on lower bands, you may select 432&nbsp;MHz in the band selector to enable the display of Moon–Sagittarius A separation, with markers denoting times when high sky temperature can degrade the system performance.
         </p>
 
         <p>
           The effects of lunar libration are frequency-dependent, varying both qualitatively and quantitatively with the operating band.
-          On lower bands, this appears as fading, while on higher bands it manifests as doppler spreading.
+          On lower bands, this appears as Doppler fading, while on higher bands it manifests as Doppler spreading.
         </p>
 
     </section>
@@ -843,7 +843,7 @@
 
 
     </section>
-
+    
   </div>
   </div>
   <button id="backToTop" title="Back to top">↑</button>
