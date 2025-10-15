@@ -387,7 +387,7 @@
     <section id="accuracy">
       <h2>Data and Accuracy</h2>
       <p>
-        EME Observer performs astronomical calculations using the <em>Astronomy Engine</em>, built on the VSOP87 and NOVAS C 3.1 models. In certain areas, an optimized version of the Meeus algorithm is used to improve performance without noticeable reduction in precision.
+        EME Observer performs astronomical calculations using the <em>Astronomy Engine</em>, built on the VSOP87 and NOVAS C 3.1 models. In certain areas, an optimized version of the Meeus algorithm is used to improve performance without noticeable reduction in precision. See also <a href="#licenses">licenses and credits.</a>
       </p>
       <p>
         All computations have been thoroughly validated against the <em>Skyfield</em> Python library using the DE421 ephemeris from NASA Jet Propulsion Laboratory (JPL). EME Observer achieves positional accuracy within 1&nbsp;arcminute (0.017°), fully meeting the precision requirements for QSO planning and analysis across all EME bands, including the highest microwave frequencies.
@@ -843,6 +843,46 @@
 
 
     </section>
+    
+    <section id="licenses">
+      <h2>Licenses and Credits</h2>
+      <p>
+        <strong>EME Observer</strong><br>
+        © 2025 Max Romensky (SA5IKN). All rights reserved.<br>
+        EME Observer is proprietary software. Redistribution, modification, or
+        reverse engineering of this software, in whole or in part, is prohibited
+        without prior written permission from the author.
+      </p>
+
+      <p>This application incorporates the following third-party components:</p>
+
+      <ul>
+          <li>
+            NASA JPL DE421 Ephemeris - Public domain data provided by NASA’s Jet Propulsion Laboratory.
+          </li>
+          <li>
+            Skyfield © 2014-2025 Brandon Rhodes and contributors - Licensed under the
+            <a href="MIT-license.txt" target="_blank" rel="noopener">MIT License</a>.
+          </li>
+        <li>
+          Astronomy Engine © 2019-2025 Don Cross - Licensed under the
+          <a href="MIT-license.txt" target="_blank" rel="noopener">MIT License</a>.
+        </li>
+        <li>
+          EME Directory © 2025 - Public domain data provided by Jan Kappert (PA0PLY).
+        </li>
+      </ul>
+
+      <p>
+        Certain astronomical algorithms implemented in EME Observer are based on
+        methods published in <em>Astronomical Algorithms</em> (2nd Edition, 1998) by Jean Meeus.
+        These are mathematical in nature and are not subject to copyright.
+      </p>
+
+      </p>
+    </section>
+
+
     
   </div>
   </div>
