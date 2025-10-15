@@ -12,276 +12,306 @@
     <meta charset="UTF-8" />
     <title>EME Observer – User Guide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        
+        <meta name="description" content="Learn how to use the EME Observer tool to plan 10GHz Moonbounce QSOs. This user guide covers features like moon tracking, Dpol, elevation charts, and station tables." />
+        <meta name="keywords" content="EME, Moonbounce, User Guide, Ham Radio, 10GHz, Polarization Offset, Signal Loss, Amateur Radio Tools" />
+        <meta name="author" content="SA5IKN" />
+        <meta name="robots" content="index, follow" />
+        
+        <!-- Open Graph -->
+        <meta property="og:title" content="EME Observer – User Guide" />
+        <meta property="og:type" content="article" />
+        <meta property="og:description" content="Step-by-step user guide for EME Observer. Learn to use the moon tracking map, signal loss charts, and DX tools for 10GHz Moonbounce." />
+        <meta property="og:image" content="/social/eme-observer.jpg" />
+        <meta property="og:url" content="https://dxer.site/eme-observer/user-guide.html" />
+        
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="EME Observer – How to Use the Tool" />
+        <meta name="twitter:description" content="Tutorial and guide for using the 10GHz EME Observer for amateur radio Moonbounce planning." />
+        <meta name="twitter:image" content="/social/eme-observer.jpg" />
+        
+        <!-- Canonical URL -->
+        <link rel="canonical" href="https://dxer.site/eme-observer/user-guide.html" />
+        
+        <!-- Favicon & Icons -->
+        <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png" />
+        <link rel="manifest" href="/assets/site.webmanifest" />
+        <link rel="shortcut icon" href="/assets/favicon.ico" />
+        
+        <!-- Optional Structured Data -->
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "TechArticle",
+                "name": "EME Observer – User Guide",
+                "url": "https://dxer.site/eme-observer/user-guide.html",
+                "description": "Step-by-step instructions for using the EME Observer tool for planning 10GHz Moonbounce QSOs. Learn about moon tracking, Dpol, signal loss, station maps and sked planning.",
+                "author": {
+                    "@type": "Person",
+                    "name": "SA5IKN"
+                },
+                "inLanguage": "en",
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "dxer.site"
+                }
+            }
+        </script>
+        
+        <style>
+            html, body {
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+            
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f9;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                flex-direction: column;
+                min-height: 100vh;
+                overflow-x: hidden;
+            }
+            
+            .top-bar {
+                width: 100%;
+                background-color: #ffffff;
+                padding: 20px 0;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            }
+            
+            .top-content {
+                max-width: 800px;
+                padding: 0 10px;
+                margin: 0 auto;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            
+            .app-meta {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                text-align: right;
+                margin-bottom: 15px;
+                line-height: 1.1;
+            }
+            
+            .creator-label {
+                font-size: 0.9rem;
+                color: #555;
+                font-style: italic;
+                margin-bottom: -4px;
+            }
+            
+            .app-name {
+                font-size: 1.8rem;
+                font-weight: 600;
+                color: #2c3e50;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: -2px;
+            }
+            
+            .ghz-label {
+                font-size: 0.9rem;
+                font-weight: bold;
+                color: #2c3e50;
+                margin-top: 2px;
+            }
+            
+            .button-container {
+                display: flex;
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-top: 10px;
+            }
+            
+            .button-container button {
+                background-color: #0056b3;
+                color: white;
+                border: none;
+                padding: 10px 24px;
+                font-size: 15px;
+                cursor: pointer;
+                border-radius: 6px;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                transition: background-color 0.3s ease;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            
+            .button-container button:hover {
+                background-color: #00408a;
+            }
+            
+            .container {
+                width: 100%;
+                max-width: 800px;
+                margin: 20px auto;
+                background-color: #fff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+            }
+            img {
+                display: block;
+                max-width: 100%;
+                height: auto;
+            }
+            
+            
+            h1, h2, h3 {
+                text-align: left;
+                color: #333;
+                margin-top: 30px;
+            }
+            
+            h1 {
+                text-align: center;
+            }
+            
+            nav ul {
+                list-style: none;
+                padding-left: 0;
+                line-height: 1.8;
+            }
+            
+            nav ul a {
+                text-decoration: none;
+                color: #0056b3;
+            }
+            
+            nav ul a:hover {
+                text-decoration: underline;
+            }
+            
+            section p {
+                color: #333;
+                line-height: 1.6;
+            }
+            
+            @media (max-width: 768px) {
+                .button-container button {
+                    width: 140px;
+                    font-size: 14px;
+                }
+                
+                .app-name {
+                    font-size: 1.3rem;
+                }
+                
+                .creator-label,
+                .ghz-label {
+                    font-size: 0.75rem;
+                }
+                
+                .app-meta {
+                    align-items: flex-end;
+                    text-align: right;
+                    margin-bottom: 12px;
+                }
+                
+                .container {
+                    width: 100%;
+                    padding: 10px;
+                }
+                
+                h1, h2, h3 {
+                    font-size: 1.2em;
+                }
+            }
+            
+            @media (max-width: 600px) {
+                .button-container {
+                    flex-wrap: nowrap;
+                    overflow-x: auto;
+                    gap: 8px;
+                    justify-content: flex-start;
+                }
+                
+                .button-container button {
+                    flex-shrink: 0;
+                    padding: 6px 12px;
+                    font-size: 12px;
+                    width: auto;
+                    white-space: nowrap;
+                }
+            }
+            
+            #backToTop {
+                position: fixed;
+                bottom: 30px;
+                right: 30px;
+                z-index: 100;
+                width: 48px;
+                height: 48px;
+                font-size: 20px;
+                line-height: 48px; /* vertically center the text */
+                text-align: center;
+                border: none;
+                outline: none;
+                background-color: #0056b3;
+                color: white;
+                cursor: pointer;
+                border-radius: 50%;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                display: none;
+                padding: 0; /* Remove padding to avoid distortion */
+                transition: background-color 0.3s ease;
+            }
+            
+            #backToTop:hover {
+                background-color: #00408a;
+            }
+            .button-container {
+                box-sizing: border-box;
+            }
+            *, *::before, *::after {
+                box-sizing: border-box;
+            }
+            
+        </style>
+        
+        <style>
+          #support {
+            background-color: #eaf0fb;
+            border-left: 4px solid #0056b3;
+            margin: 20px auto;
+          }
 
-    <meta name="description" content="Learn how to use the EME Observer tool to plan 10GHz Moonbounce QSOs. This user guide covers features like moon tracking, Dpol, elevation charts, and station tables." />
-    <meta name="keywords" content="EME, Moonbounce, User Guide, Ham Radio, 10GHz, Polarization Offset, Signal Loss, Amateur Radio Tools" />
-    <meta name="author" content="SA5IKN" />
-    <meta name="robots" content="index, follow" />
+          #support h2 {
+            color: #0056b3;
+            text-align: center;
+          }
 
-    <!-- Open Graph -->
-    <meta property="og:title" content="EME Observer – User Guide" />
-    <meta property="og:type" content="article" />
-    <meta property="og:description" content="Step-by-step user guide for EME Observer. Learn to use the moon tracking map, signal loss charts, and DX tools for 10GHz Moonbounce." />
-    <meta property="og:image" content="/social/eme-observer.jpg" />
-    <meta property="og:url" content="https://dxer.site/eme-observer/user-guide.html" />
+          #support ul {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #333;
+            margin-left: 20px;
+          }
 
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="EME Observer – How to Use the Tool" />
-    <meta name="twitter:description" content="Tutorial and guide for using the 10GHz EME Observer for amateur radio Moonbounce planning." />
-    <meta name="twitter:image" content="/social/eme-observer.jpg" />
+          #support ul li {
+            margin-bottom: 4px;
+          }
 
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://dxer.site/eme-observer/user-guide.html" />
+          #support p {
+            color: #333;
+            line-height: 1.6;
+          }
+        </style>
 
-    <!-- Favicon & Icons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png" />
-    <link rel="manifest" href="/assets/site.webmanifest" />
-    <link rel="shortcut icon" href="/assets/favicon.ico" />
-
-    <!-- Optional Structured Data -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "TechArticle",
-      "name": "EME Observer – User Guide",
-      "url": "https://dxer.site/eme-observer/user-guide.html",
-      "description": "Step-by-step instructions for using the EME Observer tool for planning 10GHz Moonbounce QSOs. Learn about moon tracking, Dpol, signal loss, station maps and sked planning.",
-      "author": {
-        "@type": "Person",
-        "name": "SA5IKN"
-      },
-      "inLanguage": "en",
-      "publisher": {
-        "@type": "Organization",
-        "name": "dxer.site"
-      }
-    }
-    </script>
-
-  <style>
-      html, body {
-        max-width: 100%;
-        overflow-x: hidden;
-      }
-
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f4f9;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      flex-direction: column;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    .top-bar {
-      width: 100%;
-      background-color: #ffffff;
-      padding: 20px 0;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    }
-
-    .top-content {
-    max-width: 800px;
-    padding: 0 10px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-
-    .app-meta {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      text-align: right;
-      margin-bottom: 15px;
-      line-height: 1.1;
-    }
-
-    .creator-label {
-      font-size: 0.9rem;
-      color: #555;
-      font-style: italic;
-      margin-bottom: -4px;
-    }
-
-    .app-name {
-      font-size: 1.8rem;
-      font-weight: 600;
-      color: #2c3e50;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: -2px;
-    }
-
-    .ghz-label {
-      font-size: 0.9rem;
-      font-weight: bold;
-      color: #2c3e50;
-      margin-top: 2px;
-    }
-
-    .button-container {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-top: 10px;
-    }
-
-    .button-container button {
-      background-color: #0056b3;
-      color: white;
-      border: none;
-      padding: 10px 24px;
-      font-size: 15px;
-      cursor: pointer;
-      border-radius: 6px;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .button-container button:hover {
-      background-color: #00408a;
-    }
-
-      .container {
-        width: 100%;
-        max-width: 800px;
-        margin: 20px auto;
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        overflow-wrap: break-word;
-        word-wrap: break-word;
-      }
-      img {
-        display: block;
-        max-width: 100%;
-        height: auto;
-      }
-
-
-    h1, h2, h3 {
-      text-align: left;
-      color: #333;
-      margin-top: 30px;
-    }
-
-    h1 {
-      text-align: center;
-    }
-
-    nav ul {
-      list-style: none;
-      padding-left: 0;
-      line-height: 1.8;
-    }
-
-    nav ul a {
-      text-decoration: none;
-      color: #0056b3;
-    }
-
-    nav ul a:hover {
-      text-decoration: underline;
-    }
-
-    section p {
-      color: #333;
-      line-height: 1.6;
-    }
-
-    @media (max-width: 768px) {
-      .button-container button {
-        width: 140px;
-        font-size: 14px;
-      }
-
-      .app-name {
-        font-size: 1.3rem;
-      }
-
-      .creator-label,
-      .ghz-label {
-        font-size: 0.75rem;
-      }
-
-      .app-meta {
-        align-items: flex-end;
-        text-align: right;
-        margin-bottom: 12px;
-      }
-
-      .container {
-        width: 100%;
-        padding: 10px;
-      }
-
-      h1, h2, h3 {
-        font-size: 1.2em;
-      }
-    }
-
-    @media (max-width: 600px) {
-      .button-container {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        gap: 8px;
-        justify-content: flex-start;
-      }
-
-      .button-container button {
-        flex-shrink: 0;
-        padding: 6px 12px;
-        font-size: 12px;
-        width: auto;
-        white-space: nowrap;
-      }
-    }
-
-      #backToTop {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        z-index: 100;
-        width: 48px;
-        height: 48px;
-        font-size: 20px;
-        line-height: 48px; /* vertically center the text */
-        text-align: center;
-        border: none;
-        outline: none;
-        background-color: #0056b3;
-        color: white;
-        cursor: pointer;
-        border-radius: 50%;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        display: none;
-        padding: 0; /* Remove padding to avoid distortion */
-        transition: background-color 0.3s ease;
-      }
-
-      #backToTop:hover {
-        background-color: #00408a;
-      }
-      .button-container {
-        box-sizing: border-box;
-      }
-      *, *::before, *::after {
-        box-sizing: border-box;
-      }
-
-  </style>
 </head>
 <body>
 
@@ -333,6 +363,7 @@
         <li><a href="#mobile-experience">Mobile experience</a></li>
         <li><a href="#other-bands">Use on Bands Below 432 MHz</a></li>
         <li><a href="#dpol">A note on Spatial Polarisation Offset (Dpol)</a></li>
+        <li><a href="#support">Support EME Observer</a></li>
       </ul>
     </nav>
 
@@ -842,6 +873,44 @@
     </figure>
 
 
+    </section>
+    
+    <section id="support">
+      <div class="container">
+        <h2>Support EME Observer</h2>
+        <p>
+          If you enjoy using EME Observer and want to help cover website costs, you can contribute in one of these ways:
+        </p>
+        <ul>
+          <li>
+            <strong>PayPal (Friends & Family):</strong> Send your contribution directly to my email:
+            <a href="mailto:your-email@example.com">your-email@example.com</a>.
+            Using Friends & Family avoids fees, so your full support goes to the project.
+          </li>
+          <li>
+            <strong>Ko-fi:</strong> Support via Ko-fi quickly and easily:
+            <div id="kofi-widget">
+              <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+              <script type='text/javascript'>
+                kofiwidget2.init('Support me on Ko-fi', '#72a4f2', 'F2F8K2YK7');
+                kofiwidget2.draw();
+              </script>
+            </div>
+          </li>
+        </ul>
+
+        <p>
+          <strong>Current supporters:</strong>
+        </p>
+        <ul>
+          <li>F2CT</li>
+          <li>ON5TA</li>
+          <li>F5JWF</li>
+          <li>F6IJI</li>
+        </ul>
+
+        <p>Every contribution, big or small, helps keep EME Observer online and free for the community. Thank you for your support!</p>
+      </div>
     </section>
     
     <section id="licenses">
