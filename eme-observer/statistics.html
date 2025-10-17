@@ -568,8 +568,8 @@
     }
 
     async function loadStatsForBand(band) {
-      const antennaFile = (band === '10GHz') ? FILE_URL_BASE + 'h_a.txt' : FILE_URL_BASE + 'h_a_' + band + '.txt';
-      const powerFile = (band === '10GHz') ? FILE_URL_BASE + 'h_p.txt' : FILE_URL_BASE + 'h_p_' + band + '.txt';
+      const antennaFile = (band === '10GHz') ? FILE_URL_BASE + 'h_a_10GHz.txt' : FILE_URL_BASE + 'h_a_' + band + '.txt';
+      const powerFile = (band === '10GHz') ? FILE_URL_BASE + 'h_p_10GHz.txt' : FILE_URL_BASE + 'h_p_' + band + '.txt';
 
       await loadAndPlot(antennaFile, 'antennaChart', 'Antenna Count', 'Antenna diameter (m)');
       await loadAndPlot(powerFile, 'powerChart', 'Power Count', 'Power (W)');
