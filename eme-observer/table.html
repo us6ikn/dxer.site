@@ -405,7 +405,7 @@
             <div class="app-meta">
                 <div class="creator-label">by SA5IKN</div>
                 <div class="app-name">EME Observer</div>
-                <div id="ghz-label" class="ghz-label">10GHz</div>
+                <div id="ghz-label" class="ghz-label">432MHz-76GHz</div>
             </div>
             <div class="button-container">
                 <button onclick="window.location.href='/eme-observer/'">Map View</button>
@@ -418,7 +418,7 @@
     </div>
 
     <div class="container">
-        <h1 id="table-title">EME Stations</h1>
+        <h1 id="table-title">10GHz EME Stations</h1>
         <div class="controls">
             <div class="filter-group">
                 <select id="bandSelect" class="band-select">
@@ -618,7 +618,6 @@
             // Add band select event listener
             $('#bandSelect').on('change', function () {
                 const band = this.value;
-                document.getElementById('ghz-label').textContent = bandConfig[band].label;
                 document.getElementById('table-title').textContent = `${bandConfig[band].label} EME Stations`;
                 fetchData(band);
             });
