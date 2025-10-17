@@ -492,7 +492,8 @@
 
         const labels = Object.keys(countryCounts);
         const data = Object.values(countryCounts);
-        document.getElementById('dxccTotal').textContent = `Activated DXCC: ${labels.length}`;
+        const prefix = (band === '10GHz') ? 'Activated' : 'Active';
+        document.getElementById('dxccTotal').textContent = `${prefix} DXCC: ${labels.length}`;
 
         // Update note visibility and text
         const dxccNote = document.getElementById('dxccNote');
