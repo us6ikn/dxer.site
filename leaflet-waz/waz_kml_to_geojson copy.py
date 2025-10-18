@@ -10,26 +10,22 @@ root = tree.getroot()
 
 features = []
 
-# --- Extract Polygons (zone boundaries) ---
+# --- extract LineStrings (boundaries) ---
 for placemark in root.findall(".//kml:Placemark", ns):
-    polygon = placemark.find(".//kml:Polygon/kml:outerBoundaryIs/kml:LinearRing/kml:coordinates", ns)
-    name = placemark.find("kml:name", ns)
-    if polygon is not None:
-        coords_text = polygon.text.strip()
+    line = placemark.find(".//kml:LineString/kml:coordinates", ns)
+    if line is not None:
+        coords_text = line.text.strip()
         coords = []
         for pair in coords_text.split():
             lon, lat, *_ = map(float, pair.split(','))
             coords.append([lon, lat])
-        # Ensure polygon is closed
-        if coords[0] != coords[-1]:
-            coords.append(coords[0])
         features.append({
             "type": "Feature",
-            "geometry": {"type": "Polygon", "coordinates": [coords]},
-            "properties": {"name": name.text if name is not None else "WAZ Zone"}
+            "geometry": {"type": "LineString", "coordinates": coords},
+            "properties": {"type": "boundary"}
         })
 
-# --- Extract Points (zone labels or markers) ---
+# --- extract Points (zone names/labels) ---
 for placemark in root.findall(".//kml:Placemark", ns):
     point = placemark.find(".//kml:Point/kml:coordinates", ns)
     name = placemark.find("kml:name", ns)
