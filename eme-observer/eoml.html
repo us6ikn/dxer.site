@@ -1107,7 +1107,7 @@
                                                 const utcTimeString = currentTime.toISOString();
 
                                                 if (!currentTime || isNaN(currentTime.getTime())) {
-                                                    console.warn(`Invalid currentTime in updateMap: ${currentTime}`);
+                                                    console.warn(`Invalid currentTime in updateMap: ${utcTimeString}`);
                                                     return;
                                                 }
 
@@ -1122,44 +1122,38 @@
 
                                                 try {
                                                     const time = Astronomy.MakeTime(currentTime);
-                                                    // Calculate the moon's geocentric vector
-                                                    const moonVector = Astronomy.GeoVector(Astronomy.Body.Moon, time, true);
-                                                    if (!moonVector) {
-                                                        throw new Error('GeoVector returned null or undefined');
-                                                    }
-
-                                                    // Convert to equatorial coordinates
-                                                    const moonEq = vectorToEquatorial(moonVector, false);
-                                                    if (!moonEq) {
-                                                        throw new Error('vectorToEquatorial returned null');
-                                                    }
-
-                                                    // Calculate sublunar point (geographic coordinates of the point on Earth directly below the moon)
                                                     const observer = new Astronomy.Observer(0, 0, 0); // Reference at Earth's center
-                                                    const hor = Astronomy.Horizon(time, observer, moonEq.ra, moonEq.dec, 'normal');
-                                                    let lat = hor.altitude; // Sublunar latitude (approximation)
-                                                    let lon = hor.azimuth - 180; // Sublunar longitude, adjusted
-                                                    if (lon < -180) lon += 360;
-                                                    if (lon > 180) lon -= 360;
-
-                                                    // Calculate moon distance and footprint radius
+                                                    const moon = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, true);
                                                     const libration = Astronomy.Libration(time);
-                                                    if (!libration || isNaN(libration.dist_km)) {
-                                                        throw new Error('Invalid libration data');
-                                                    }
-                                                    const distanceKm = libration.dist_km;
-                                                    const earthRadiusKm = 6371; // Earth's mean radius
-                                                    const moonRadiusKm = MOON_RADIUS / 1000; // Moon radius in km (1.7374e6 meters)
-                                                    // Approximate footprint radius (in meters) for stations that can see the moon
-                                                    const footprintRadius_m = earthRadiusKm * 1000 * Math.acos(earthRadiusKm / (earthRadiusKm + distanceKm - moonRadiusKm));
 
-                                                    // Add moon marker at sublunar point
+                                                    if (!moon || isNaN(moon.ra) || isNaN(moon.dec) || !libration || isNaN(libration.dist_km)) {
+                                                        throw new Error('Invalid moon or libration data');
+                                                    }
+
+                                                    // Calculate sublunar point
+                                                    const raDeg = moon.ra * 15; // RA in degrees
+                                                    const decDeg = moon.dec; // Declination in degrees
+                                                    let gastDeg = Astronomy.SiderealTime(time) * 15; // Greenwich Apparent Sidereal Time in degrees
+                                                    gastDeg = ((gastDeg % 360) + 360) % 360; // Normalize to [0, 360]
+                                                    let lonDeg = raDeg - gastDeg; // Longitude in degrees
+                                                    lonDeg = ((lonDeg + 180) % 360) - 180; // Normalize to [-180, 180]
+                                                    const lat = decDeg; // Latitude is equal to declination
+                                                    const lon = lonDeg;
+
+                                                    // Calculate footprint radius
+                                                    const earthRadiusKm = 6371; // Earth's mean radius
+                                                    const safeRatio = Math.min(1, Math.max(-1, earthRadiusKm / (earthRadiusKm + libration.dist_km)));
+                                                    const theta_rad = Math.acos(safeRatio);
+                                                    const footprintRadius_m = earthRadiusKm * theta_rad * 1000; // Radius in meters
+
+                                                    // Add moon marker
                                                     moonMarker = L.marker([lat, lon], {
                                                         icon: L.icon({
-                                                            iconUrl: 'images/moon.png', // Ensure you have a moon icon at this path
-                                                            iconSize: [20, 20]
+                                                            iconUrl: 'images/moon.png', // Ensure this path is correct
+                                                            iconSize: [20, 20],
+                                                            iconAnchor: [10, 10]
                                                         }),
-                                                        title: 'Moon Sublunar Point'
+                                                        title: `Moon Sublunar (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
                                                     }).addTo(map);
 
                                                     // Add moon footprint using L.greatCircle
@@ -1177,7 +1171,6 @@
                                                         }).addTo(map);
                                                     } catch (e) {
                                                         console.warn(`L.greatCircle failed: ${e.message}. Falling back to L.circle`);
-                                                        // Fallback to L.circle if greatCircle is unavailable
                                                         footprintCircle = L.circle([lat, lon], {
                                                             radius: footprintRadius_m,
                                                             color: '#0000FF',
@@ -1187,11 +1180,20 @@
                                                         }).addTo(map);
                                                     }
 
-                                                    // Optionally center the map on the sublunar point
-                                                    map.setView([lat, lon], map.getZoom());
+                                                    // Keep map centered on sublunar point
+                                                    map.panTo([lat, lon]);
 
                                                 } catch (error) {
                                                     console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
+                                                    // Defensive cleanup
+                                                    if (moonMarker) {
+                                                        map.removeLayer(moonMarker);
+                                                        moonMarker = null;
+                                                    }
+                                                    if (footprintCircle) {
+                                                        map.removeLayer(footprintCircle);
+                                                        footprintCircle = null;
+                                                    }
                                                 }
                                             }
 
