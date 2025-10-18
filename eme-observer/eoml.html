@@ -1111,19 +1111,85 @@
                                                     return;
                                                 }
 
-                                                // Clear previous footprints
+                                                // Clear previous footprints and moon marker
                                                 map.eachLayer(layer => {
-                                                    if (layer instanceof L.Polygon || layer instanceof L.Polyline || layer instanceof L.Circle) {
-                                                        if (layer.options && layer.options.color === '#0000FF') {
+                                                    if (layer instanceof L.Polygon || layer instanceof L.Polyline || layer instanceof L.Circle || layer === moonMarker) {
+                                                        if (layer.options && layer.options.color === '#0000FF' || layer === moonMarker) {
                                                             map.removeLayer(layer);
                                                         }
                                                     }
                                                 });
 
-                                                // Rest of the function remains unchanged
                                                 try {
                                                     const time = Astronomy.MakeTime(currentTime);
-                                                    // ... (rest of the existing code)
+                                                    // Calculate the moon's geocentric vector
+                                                    const moonVector = Astronomy.GeoVector(Astronomy.Body.Moon, time, true);
+                                                    if (!moonVector) {
+                                                        throw new Error('GeoVector returned null or undefined');
+                                                    }
+
+                                                    // Convert to equatorial coordinates
+                                                    const moonEq = vectorToEquatorial(moonVector, false);
+                                                    if (!moonEq) {
+                                                        throw new Error('vectorToEquatorial returned null');
+                                                    }
+
+                                                    // Calculate sublunar point (geographic coordinates of the point on Earth directly below the moon)
+                                                    const observer = new Astronomy.Observer(0, 0, 0); // Reference at Earth's center
+                                                    const hor = Astronomy.Horizon(time, observer, moonEq.ra, moonEq.dec, 'normal');
+                                                    let lat = hor.altitude; // Sublunar latitude (approximation)
+                                                    let lon = hor.azimuth - 180; // Sublunar longitude, adjusted
+                                                    if (lon < -180) lon += 360;
+                                                    if (lon > 180) lon -= 360;
+
+                                                    // Calculate moon distance and footprint radius
+                                                    const libration = Astronomy.Libration(time);
+                                                    if (!libration || isNaN(libration.dist_km)) {
+                                                        throw new Error('Invalid libration data');
+                                                    }
+                                                    const distanceKm = libration.dist_km;
+                                                    const earthRadiusKm = 6371; // Earth's mean radius
+                                                    const moonRadiusKm = MOON_RADIUS / 1000; // Moon radius in km (1.7374e6 meters)
+                                                    // Approximate footprint radius (in meters) for stations that can see the moon
+                                                    const footprintRadius_m = earthRadiusKm * 1000 * Math.acos(earthRadiusKm / (earthRadiusKm + distanceKm - moonRadiusKm));
+
+                                                    // Add moon marker at sublunar point
+                                                    moonMarker = L.marker([lat, lon], {
+                                                        icon: L.icon({
+                                                            iconUrl: 'images/moon.png', // Ensure you have a moon icon at this path
+                                                            iconSize: [20, 20]
+                                                        }),
+                                                        title: 'Moon Sublunar Point'
+                                                    }).addTo(map);
+
+                                                    // Add moon footprint using L.greatCircle
+                                                    try {
+                                                        footprintCircle = L.greatCircle([lat, lon], {
+                                                            radius: footprintRadius_m,
+                                                            color: '#0000FF',
+                                                            fillColor: '#0088FF',
+                                                            fillOpacity: 0.3,
+                                                            weight: 2,
+                                                            wrapElements: true,
+                                                            clipLat: 65,
+                                                            degStep: 0.5,
+                                                            maxCopies: -1
+                                                        }).addTo(map);
+                                                    } catch (e) {
+                                                        console.warn(`L.greatCircle failed: ${e.message}. Falling back to L.circle`);
+                                                        // Fallback to L.circle if greatCircle is unavailable
+                                                        footprintCircle = L.circle([lat, lon], {
+                                                            radius: footprintRadius_m,
+                                                            color: '#0000FF',
+                                                            fillColor: '#0088FF',
+                                                            fillOpacity: 0.3,
+                                                            weight: 2
+                                                        }).addTo(map);
+                                                    }
+
+                                                    // Optionally center the map on the sublunar point
+                                                    map.setView([lat, lon], map.getZoom());
+
                                                 } catch (error) {
                                                     console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
                                                 }
