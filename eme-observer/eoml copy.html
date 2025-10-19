@@ -1165,7 +1165,7 @@
                                                             fillOpacity: 0.3,
                                                             weight: 2,
                                                             wrapElements: true,
-                                                            clipLat: 85,
+                                                            clipLat: 65,
                                                             degStep: 0.5,
                                                             maxCopies: -1
                                                         }).addTo(map);
@@ -1179,6 +1179,9 @@
                                                             weight: 2
                                                         }).addTo(map);
                                                     }
+
+                                                    // Keep map centered on sublunar point
+                                                    map.panTo([lat, lon]);
 
                                                 } catch (error) {
                                                     console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
@@ -2801,7 +2804,9 @@
                                                             }
                                                             chartLabel.innerHTML = '<span class="metric-locator">No data for QTH</span>';
                                                         } else {
-                                                            updateChart(hourIndex, isRealTimeMode);
+                                                            setTimeout(() => {
+                                                                updateChart(hourIndex, isRealTimeMode);
+                                                            }, 0);
                                                         }
                                                     } catch (e) {
                                                         console.error(`Error computing libration for QTH ${locator}: ${e.message}`);
@@ -2843,7 +2848,9 @@
                                                             }
                                                             dxChartLabel.innerHTML = '<span class="metric-locator">No data for DX</span>';
                                                         } else {
-                                                            updateChart(hourIndex, isRealTimeMode);
+                                                            setTimeout(() => {
+                                                                updateChart(hourIndex, isRealTimeMode);
+                                                            }, 0);
                                                         }
                                                     } catch (e) {
                                                         console.error(`Error computing libration for DX ${locator}: ${e.message}`);
