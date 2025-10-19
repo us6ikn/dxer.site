@@ -728,13 +728,7 @@
                                                                         .leaflet-control-layers-overlays {
                                                                             margin-top: 5px;
                                                                         }
-                                                                        #map {
-                                                                            height: 100vh; /* Adjust to match your layout, e.g., 600px if fixed */
-                                                                            background-color: #d0e7ff; /* Light blue fallback for empty areas */
-                                                                        }
-                                                                        .leaflet-container {
-                                                                            background: #d0e7ff; /* Ensure Leaflet’s background isn’t white */
-                                                                        }
+                                                                        
                                                                     </style>
                                                                     
     </head>
@@ -2467,49 +2461,30 @@
 
                                             function initMap() {
                                                 try {
-                                                    // Define tile layers
-                                                    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                                    // Define tile layer
+                                                    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                                                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                                                         minZoom: 0,
-                                                        maxZoom: 19
-                                                    });
-
-                                                    const esriStreets = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-                                                        attribution: '&copy; <a href="https://www.esri.com/">Esri</a>, HERE, Garmin, USGS, Intermap, INCREMENT P, NRCan, Esri Japan, METI, Esri China (Hong Kong), Esri Korea, Esri (Thailand), NGCC, (c) OpenStreetMap contributors, and the GIS User Community',
-                                                        minZoom: 0,
                                                         maxZoom: 20
                                                     });
 
-                                                    const esriTopo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
-                                                        attribution: '&copy; <a href="https://www.esri.com/">Esri</a>, HERE, Garmin, USGS, Intermap, INCREMENT P, NRCan, Esri Japan, METI, Esri China (Hong Kong), Esri Korea, Esri (Thailand), NGCC, (c) OpenStreetMap contributors, and the GIS User Community',
-                                                        minZoom: 0,
-                                                        maxZoom: 20
-                                                    });
-
-                                                    // Define basemaps for layer control
-                                                    const baseMaps = {
-                                                        "OpenStreetMap": osm,
-                                                        "Esri Streets": esriStreets,
-                                                        "Esri Topographic": esriTopo
-                                                    };
-
-                                                    // Initialize map with the default tile layer and zoom control in bottomright
+                                                    // Initialize map with the tile layer and zoom control in bottomright
                                                     map = L.map('map', {
                                                         zoom: 2,
                                                         center: [0, 0],
                                                         gestureHandling: true,
                                                         fullscreenControl: false,
-                                                        layers: [esriTopo], // Set Esri Topo as default for terrain and country names
-                                                        zoomControl: true // Enable zoom control
+                                                        layers: [osm],
+                                                        zoomControl: true // Enable zoom control (already true by default)
                                                     });
 
                                                     // Move zoom control to bottomright
                                                     map.zoomControl.setPosition('bottomright');
 
                                                     // Define CQ Zones and Maidenhead layers with error handling
-                                                    let cqzones, maidenhead;
+                                                    var cqzones, maidenhead;
                                                     if (typeof L.cqzones === 'function') {
-                                                        cqzones = L.cqzones({ color: 'rgba(255, 0, 0, 0.4)' });
+                                                        cqzones = L.cqzones({color : 'rgba(255, 0, 0, 0.4)'});
                                                         cqzones.addTo(map); // Add CQ Zones layer to the map by default
                                                     } else {
                                                         console.error('L.cqzones is not defined. CQ Zones layer will not be available.');
@@ -2520,14 +2495,15 @@
                                                         console.error('L.maidenhead is not defined. Maidenhead layer will not be available.');
                                                     }
 
-                                                    // Add layer control for basemaps and overlays
-                                                    const overlays = {};
+                                                    // Add layer control
+                                                    var overlays = {};
                                                     if (cqzones) overlays["<span style='color: black'>CQ Zones</span>"] = cqzones;
                                                     if (maidenhead) overlays["<span style='color: black'>Maidenhead</span>"] = maidenhead;
 
-                                                    L.control.layers(baseMaps, overlays).addTo(map);
+                                                    L.control.layers({
+                                                        'Map': osm
+                                                    }, overlays).addTo(map);
 
-                                                    // Fetch and update markers
                                                     const band = document.getElementById('bandSelect').value;
                                                     const jsonFile = bandConfig[band].jsonFile;
                                                     const showActiveOnly = isActiveStationsOnly;
