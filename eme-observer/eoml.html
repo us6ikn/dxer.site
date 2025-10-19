@@ -406,7 +406,7 @@
                                                                         
                                                                         .email-button {
                                                                             background-color: #27A9F5;
-                                                                            color: white;
+                                                                            color: white !important; /* Ensure white text */
                                                                             border: none;
                                                                             padding: 2px 6px;
                                                                             cursor: pointer;
@@ -427,15 +427,15 @@
                                                                         }
                                                                         
                                                                         .qrz-button {
-                                                                            background-color: #fd7e14; /* Orange to distinguish from Sked and Email */
-                                                                            color: white;
+                                                                            background-color: #fd7e14;
+                                                                            color: white !important; /* Ensure white text */
                                                                             border: none;
                                                                             padding: 2px 6px;
                                                                             cursor: pointer;
                                                                             font-size: 12px;
                                                                             border-radius: 3px;
-                                                                            margin-left: 5px; /* Space if placed next to other buttons */
-                                                                            text-decoration: none; /* For <a> tag to look like a button */
+                                                                            margin-left: 5px;
+                                                                            text-decoration: none;
                                                                             transition: background-color 0.3s ease;
                                                                         }
                                                                         
@@ -707,6 +707,12 @@
                                                                         }
                                                                         .leaflet-control-layers-overlays {
                                                                             margin-top: 5px;
+                                                                        }
+                                                                        #image-container img {
+                                                                            max-width: 100%; /* Ensure image does not exceed container width */
+                                                                            height: auto; /* Maintain aspect ratio */
+                                                                            display: block; /* Prevent inline spacing issues */
+                                                                            margin-top: 5px; /* Add small margin for spacing */
                                                                         }
                                                                     </style>
                                                                     
