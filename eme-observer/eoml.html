@@ -2460,7 +2460,9 @@
                                                     // Define CQ Zones and Maidenhead layers with error handling
                                                     var cqzones, maidenhead;
                                                     if (typeof L.cqzones === 'function') {
-                                                        cqzones = L.cqzones();
+                                                        cqzones = L.cqzones({
+                                                            color : 'rgba(255, 0, 0, 0.4)'
+                                                        });
                                                         cqzones.addTo(map); // Add CQ Zones layer to the map by default
                                                     } else {
                                                         console.error('L.cqzones is not defined. CQ Zones layer will not be available.');
