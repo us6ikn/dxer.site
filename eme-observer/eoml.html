@@ -2448,21 +2448,23 @@
                                                         maxZoom: 20
                                                     });
 
-                                                    // Initialize map with the tile layer
+                                                    // Initialize map with the tile layer and zoom control in bottomright
                                                     map = L.map('map', {
                                                         zoom: 2,
                                                         center: [0, 0],
                                                         gestureHandling: true,
                                                         fullscreenControl: false,
-                                                        layers: [osm]
+                                                        layers: [osm],
+                                                        zoomControl: true // Enable zoom control (already true by default)
                                                     });
+
+                                                    // Move zoom control to bottomright
+                                                    map.zoomControl.setPosition('bottomright');
 
                                                     // Define CQ Zones and Maidenhead layers with error handling
                                                     var cqzones, maidenhead;
                                                     if (typeof L.cqzones === 'function') {
-                                                        cqzones = L.cqzones({
-                                                            color : 'rgba(255, 0, 0, 0.4)'
-                                                        });
+                                                        cqzones = L.cqzones({color : 'rgba(255, 0, 0, 0.4)'});
                                                         cqzones.addTo(map); // Add CQ Zones layer to the map by default
                                                     } else {
                                                         console.error('L.cqzones is not defined. CQ Zones layer will not be available.');
@@ -2473,7 +2475,7 @@
                                                         console.error('L.maidenhead is not defined. Maidenhead layer will not be available.');
                                                     }
 
-                                                    // Add layer control, including only available layers
+                                                    // Add layer control
                                                     var overlays = {};
                                                     if (cqzones) overlays["<span style='color: black'>CQ Zones</span>"] = cqzones;
                                                     if (maidenhead) overlays["<span style='color: black'>Maidenhead</span>"] = maidenhead;
