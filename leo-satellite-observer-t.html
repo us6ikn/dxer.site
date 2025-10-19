@@ -299,14 +299,15 @@
 
         circles.forEach(c => {
           setTimeout(() => {
-            const circle = L.greatCircle([centerLat, centerLng], {
-              radius: c.r,
-              color: c.color || '#FF0000',
-              weight: 2,
-              opacity: 0.4,
-              fillOpacity: 0.05,
-              interactive: false
-            }).addTo(map._dynamicLayer);
+              const circle = L.greatCircle([centerLat, centerLng], {
+                radius: c.r,
+                color: c.color || '#FF0000',
+                weight: 2,
+                opacity: 0.4,
+                fillOpacity: 0.05,
+                interactive: false
+              }).addTo(map); // ✅ direct to map
+
 
             // Add near-edge label (10% inward offset)
             const labelPt = destinationPoint(centerLat, centerLng, c.r, c.bearing);
