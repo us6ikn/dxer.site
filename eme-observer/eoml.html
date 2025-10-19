@@ -733,7 +733,7 @@
                                                                     
     <!-- Added for noise map -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.169.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     
     </head>
@@ -2246,8 +2246,8 @@
                                                 const noiseContainer = document.getElementById('noiseMapContainer');
                                                 if (noiseContainer.style.display === 'block') {
                                                     const noiseIndex = fractionalIndex * 6; // 6 indices per hour (10-min steps)
-                                                    changeTime(noiseIndex);
-                                                    updateTimeDisplay();
+                                                    noiseChangeTime(noiseIndex);
+                                                    updateNoiseTimeDisplay();
                                                 }
                                             }
     
