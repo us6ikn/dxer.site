@@ -382,7 +382,12 @@
                                                                             flex-wrap: wrap;
                                                                             justify-content: flex-start;
                                                                         }
-                                                                        
+                                                                        #image-container img {
+                                                                                max-width: 100%;
+                                                                                height: auto;
+                                                                                display: block;
+                                                                                margin-top: 5px;
+                                                                            }
                                                                         .sked-button {
                                                                             font-size: 12px;
                                                                             padding: 2px 6px;
@@ -708,12 +713,7 @@
                                                                         .leaflet-control-layers-overlays {
                                                                             margin-top: 5px;
                                                                         }
-                                                                        #image-container img {
-                                                                            max-width: 100%; /* Ensure image does not exceed container width */
-                                                                            height: auto; /* Maintain aspect ratio */
-                                                                            display: block; /* Prevent inline spacing issues */
-                                                                            margin-top: 5px; /* Add small margin for spacing */
-                                                                        }
+                                                                        
                                                                     </style>
                                                                     
     </head>
