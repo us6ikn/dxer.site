@@ -298,28 +298,30 @@
         ];
 
         circles.forEach(c => {
-          // Use Leaflet.greatCircle plugin
-          const circle = L.greatCircle([centerLat, centerLng], {
-            radius: c.r,
-            color: c.color || '#FF0000',
-            weight: 2,
-            opacity: 0.4,
-            fillOpacity: 0.05,
-            interactive: false
-          }).addTo(map._dynamicLayer);
+          setTimeout(() => {
+            const circle = L.greatCircle([centerLat, centerLng], {
+              radius: c.r,
+              color: c.color || '#FF0000',
+              weight: 2,
+              opacity: 0.4,
+              fillOpacity: 0.05,
+              interactive: false
+            }).addTo(map._dynamicLayer);
 
-          // Add near-edge label (10% inward offset)
-          const labelPt = destinationPoint(centerLat, centerLng, c.r, c.bearing);
-          const inward = destinationPoint(labelPt[0], labelPt[1], -Math.max(10000, c.r * 0.05), c.bearing);
-          L.marker([inward[0], inward[1]], {
-            icon: L.divIcon({
-              className: 'circle-label',
-              html: `<span>${c.label}</span>`,
-              iconSize: [60,18]
-            }),
-            interactive: false
-          }).addTo(map._dynamicLayer);
+            // Add near-edge label (10% inward offset)
+            const labelPt = destinationPoint(centerLat, centerLng, c.r, c.bearing);
+            const inward = destinationPoint(labelPt[0], labelPt[1], -Math.max(10000, c.r * 0.05), c.bearing);
+            L.marker([inward[0], inward[1]], {
+              icon: L.divIcon({
+                className: 'circle-label',
+                html: `<span>${c.label}</span>`,
+                iconSize: [60,18]
+              }),
+              interactive: false
+            }).addTo(map._dynamicLayer);
+          }, 100); // delay 100ms so map is fully ready
         });
+
 
 
         // Zoom to the grid area (fit bounds to largest circle)
