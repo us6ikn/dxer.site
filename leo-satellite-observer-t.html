@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- ShareThis -->
+    <script type="text/javascript" src="https://platform-api.sharethis.com/js/sharethis.js#property=6408717eb20f5f00192a0d72&product=inline-share-buttons&source=platform" async></script>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7YST3WTEH3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-7YST3WTEH3');
+    </script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="leaflet/leaflet.css" />
+    <script src="leaflet/leaflet.js"></script>
+
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="LEO SAT Observer" />
+    <meta name="author" content="https://dxer.site" />
+    <title>LEO Satellite Observer</title>
+
+    <style>
+      html, body, #map { height: 100%; margin: 0; padding: 0; }
+      .floating, .floating-window, .map-button, .checkbox-container,
+      #buttons-container-row3, #buttons-container-row5 { position: absolute; z-index: 999; }
+      /* You can keep your existing CSS from your original file here */
+    </style>
+  </head>
+
+  <body>
+    <div class="floating">
+      <label for="grid-locator">Enter your Grid:</label>
+      <input type="text" id="grid-locator" placeholder="e.g. JO89tt" maxlength="6" style="width:68px;">
+      <button onclick="initMap(document.getElementById('grid-locator').value);">Plot your Range</button>
+      <img src="img/AO07logo.png" alt="LEO SAT Observer logo" style="vertical-align:middle; margin-left:5px; width:20px;">
+      <span style="font-family:Arial;font-weight:bold;letter-spacing:1px;margin-left:5px;">
+        LEO Satellite Observer
+        <sup style="font-size:9px;font-weight:normal;">by SA5IKN</sup>
+      </span>
+    </div>
+
+    <!-- Map -->
+    <div id="map"></div>
+
+    <script>
+      let map;
+
+      function calculateCoordinates(gridLocator) {
+        gridLocator = gridLocator.toUpperCase();
+        const pattern = /^([A-R]{2}\d{2}[a-x]{2})$/;
+        if (!pattern.test(gridLocator)) {
+          alert("Invalid grid locator. Use 6-character format like JO89tt");
+          return null;
+        }
+        const lat = (gridLocator.charCodeAt(1) - 65) * 10 + parseInt(gridLocator.charAt(3)) + ((gridLocator.charCodeAt(5) - 97)/24) + (1/48) - 90;
+        const lon = (gridLocator.charCodeAt(0) - 65) * 20 + parseInt(gridLocator.charAt(2))*2 + ((gridLocator.charCodeAt(4)-97)/12) + (1/24) - 180;
+        return { lat, lng: lon };
+      }
+
+      function initMap(gridLocator) {
+        if (!map) {
+          map = L.map('map').setView([0, 0], 2);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+          }).addTo(map);
+        }
+
+        fetch('announcements_filtered.txt')
+          .then(res => res.text())
+          .then(data => {
+            const announcements = data.trim().split('\n');
+            announcements.forEach(line => {
+              const coords = line.match(/Coordinates: \((.*), (.*)\)/);
+              const callsign = line.match(/Callsign: ([^,]*)/);
+              const timeMatch = line.match(/Time: ([^,]*)/);
+              if (!coords || !callsign || !timeMatch) return;
+              const lat = parseFloat(coords[1]), lng = parseFloat(coords[2]);
+              const time = new Date(timeMatch[1]);
+              if (time <= new Date()) return;
+              const marker = L.marker([lat, lng], {
+                icon: L.icon({ iconUrl: 'img/rover1.gif?v=1', iconSize: [20, 20] })
+              }).addTo(map);
+              marker.bindPopup(`<a href="https://hams.at/alerts" target="_blank">${callsign[1]}</a>`);
+            });
+          });
+
+        fetch('output_filtered_leo.txt')
+          .then(res => res.text())
+          .then(data => {
+            const regex = /TRP: ([^,]+), Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coord: \(([^,]+), ([^)]+)\)/g;
+            let match;
+            const seen = new Set();
+            while ((match = regex.exec(data)) !== null) {
+              const [_, trp, dateStr, call, dxgrid, latStr, lngStr] = match;
+              const lat = parseFloat(latStr), lng = parseFloat(lngStr);
+              const key = `${lat},${lng}`;
+              if (seen.has(key)) continue;
+              seen.add(key);
+              const markerIcon = trp === 'F' ? 'img/fmicon_90.png' : 'img/m_30.png';
+              const m = L.marker([lat, lng], {
+                icon: L.icon({ iconUrl: markerIcon, iconSize: [20, 20] })
+              }).addTo(map);
+              const link = gridLocator
+                ? `<a href="https://www.satmatch.com/satellite/RS-44,FO-29,AO-07,ISS,AO-91,SO-50,CAS-4A,CAS-4B/obs1/${gridLocator}/obs2/${dxgrid}?duration_hrs=24">${call}</a>`
+                : `<a href="#" onclick="alert('Enter your Grid Locator first')">${call}</a>`;
+              m.bindPopup(link);
+            }
+          });
+
+        if (gridLocator) {
+          const coords = calculateCoordinates(gridLocator);
+          if (!coords) return;
+          const { lat, lng } = coords;
+
+          L.marker([lat, lng]).addTo(map).bindPopup(gridLocator).openPopup();
+
+          const circles = [
+            { r: 4970000, label: "SO-50" },
+            { r: 7502000, label: "FO-29" },
+            { r: 8042000, label: "RS-44" },
+            { r: 3940000, label: "ISS" },
+            { r: 7907000, label: "AO-07" },
+            { r: 5712000, label: "AO-91" },
+            { r: 13000000, label: "IO-117" }
+          ];
+
+          circles.forEach(c => {
+            const circle = L.circle([lat, lng], {
+              color: c.label === "IO-117" ? "#808080" : "#FF0000",
+              weight: 2,
+              opacity: 0.4,
+              fillOpacity: 0.05,
+              radius: c.r
+            }).addTo(map);
+            const labelLatLng = L.latLng(lat + 0.01, lng); // small offset
+            L.marker(labelLatLng, {
+              icon: L.divIcon({
+                className: 'circle-label',
+                html: `<b style="font-size:12px;color:black">${c.label}</b>`
+              })
+            }).addTo(map);
+          });
+
+          map.setView([lat, lng], 3);
+        }
+      }
+    </script>
+
+    <!-- Ko-Fi Widget -->
+    <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+    <script>
+      kofiWidgetOverlay.draw('sa5ikn', {
+        'type': 'floating-chat',
+        'floating-chat.donateButton.text': 'Support',
+        'floating-chat.donateButton.background-color': '#00b9fe',
+        'floating-chat.donateButton.text-color': '#fff'
+      });
+    </script>
+  </body>
+</html>
