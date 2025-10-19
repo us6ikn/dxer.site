@@ -25,8 +25,7 @@
     <!-- Leaflet files from your local /leaflet folder -->
     <link rel="stylesheet" href="leaflet/leaflet.css" />
     <script src="leaflet/leaflet.js"></script>
-    <!-- User requested plugin (kept included) -->
-    <script src="leaflet/leaflet.greatcircle.js"></script>
+    <script src="leaflet/Leaflet.greatCircle.js"></script>
 
     <link rel="shortcut icon" href="favicon.ico" />
 
@@ -299,28 +298,20 @@
         ];
 
         circles.forEach(c => {
-          // Use leaflet.greatcircle plugin if available (plugin included), otherwise fallback to geodesic polygon created here
-          if (typeof L.GreatCircle !== 'undefined' && false) {
-            // NOTE: plugin APIs vary. For now we default to our own geodesic polygon (below).
-            // This block intentionally disabled (false) to avoid relying on unknown plugin API.
-          }
-
-          // Create geodesic polygon points
-          const latlngs = geodesicCircleLatLngs(centerLat, centerLng, c.r, 96);
-          // Add polygon
-          L.polygon(latlngs, {
-            color: c.color || "#FF0000",
+          // Use Leaflet.greatCircle plugin
+          const circle = L.greatCircle([centerLat, centerLng], {
+            radius: c.r,
+            color: c.color || '#FF0000',
             weight: 2,
             opacity: 0.4,
             fillOpacity: 0.05,
             interactive: false
           }).addTo(map._dynamicLayer);
 
-          // Place a small near-edge label using destination point along the given bearing and a tiny inward offset
+          // Add near-edge label (10% inward offset)
           const labelPt = destinationPoint(centerLat, centerLng, c.r, c.bearing);
-          // Move a little bit toward center to place label slightly inside edge (10% of radius inward)
           const inward = destinationPoint(labelPt[0], labelPt[1], -Math.max(10000, c.r * 0.05), c.bearing);
-          const labelMarker = L.marker([inward[0], inward[1]], {
+          L.marker([inward[0], inward[1]], {
             icon: L.divIcon({
               className: 'circle-label',
               html: `<span>${c.label}</span>`,
@@ -329,6 +320,7 @@
             interactive: false
           }).addTo(map._dynamicLayer);
         });
+
 
         // Zoom to the grid area (fit bounds to largest circle)
         const largestRadius = Math.max(...circles.map(c=>c.r));
