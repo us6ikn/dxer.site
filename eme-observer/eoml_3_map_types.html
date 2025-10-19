@@ -728,14 +728,15 @@
                                                                         .leaflet-control-layers-overlays {
                                                                             margin-top: 5px;
                                                                         }
-                                                                        
+                                                                        #map {
+                                                                            height: 100vh; /* Adjust to match your layout, e.g., 600px if fixed */
+                                                                            background-color: #d0e7ff; /* Light blue fallback for empty areas */
+                                                                        }
+                                                                        .leaflet-container {
+                                                                            background: #d0e7ff; /* Ensure Leaflet’s background isn’t white */
+                                                                        }
                                                                     </style>
                                                                     
-    <!-- Added for noise map -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-    
     </head>
 <body>
     <div id="map"></div>
@@ -806,9 +807,6 @@
       </div>
     </div>
     <button id="showControlsPanel" style="display: none;">→</button>
-    
-    <!-- Noise Map Container -->
-    <div id="noiseMapContainer" style="display:none; position:fixed; top:10%; left:10%; width:80%; height:80%; background:rgba(255,255,255,0.95); border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.3); z-index:1000; overflow:hidden;"></div>
     
 <script src="chart.js"></script>
 <script src="chartjs-plugin-annotation@1.4.0"></script>
@@ -1638,546 +1636,546 @@
                                             }
 
     function updateChart(index, isRealtime = false) {
-        const qthInput = document.getElementById("qth").value.trim().toUpperCase();
-        const dxInput = document.getElementById("dx").value.trim().toUpperCase();
-        const dateInput = document.getElementById("date").value;
-        let dateStr;
+      const qthInput = document.getElementById("qth").value.trim().toUpperCase();
+      const dxInput = document.getElementById("dx").value.trim().toUpperCase();
+      const dateInput = document.getElementById("date").value;
+      let dateStr;
+      try {
+        dateStr = new Date(dateInput).toISOString().slice(0, 10);
+      } catch (e) {
+        console.error('Invalid date input, using current date');
+        dateStr = new Date().toISOString().slice(0, 10);
+      }
+      const band = document.getElementById('bandSelect').value;
+      const maxDoppler = (FREQUENCY_HZ / bandConfig['10GHz'].frequency) * 300;
+
+      let qthValid = false;
+      if (qthInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
+        if (qthDayData.date !== dateStr) {
+          rawData = computeLibrationForDay(qthInput, dateStr, 'qth');
+          computeFullDayData(qthDayData, qthInput, dateStr, true);
+        }
+        qthValid = qthDayData.libration.length === 48;
         try {
-          dateStr = new Date(dateInput).toISOString().slice(0, 10);
+          ({ lat, lon } = qthToLatLon(qthInput));
         } catch (e) {
-          console.error('Invalid date input, using current date');
-          dateStr = new Date().toISOString().slice(0, 10);
+          console.error(`Error converting QTH locator ${qthInput} to lat/lon: ${e.message}`);
+          lat = 0;
+          lon = 0;
         }
-        const band = document.getElementById('bandSelect').value;
-        const maxDoppler = (FREQUENCY_HZ / bandConfig['10GHz'].frequency) * 300;
+      }
 
-        let qthValid = false;
-        if (qthInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
-          if (qthDayData.date !== dateStr) {
-            rawData = computeLibrationForDay(qthInput, dateStr, 'qth');
-            computeFullDayData(qthDayData, qthInput, dateStr, true);
-          }
-          qthValid = qthDayData.libration.length === 48;
-          try {
-            ({ lat, lon } = qthToLatLon(qthInput));
-          } catch (e) {
-            console.error(`Error converting QTH locator ${qthInput} to lat/lon: ${e.message}`);
-            lat = 0;
-            lon = 0;
-          }
+      let dxValid = false;
+      if (dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
+        if (dxDayData.date !== dateStr) {
+          dxRawData = computeLibrationForDay(dxInput, dateStr, 'dx');
+          computeFullDayData(dxDayData, dxInput, dateStr, false);
         }
-
-        let dxValid = false;
-        if (dxInput && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
-          if (dxDayData.date !== dateStr) {
-            dxRawData = computeLibrationForDay(dxInput, dateStr, 'dx');
-            computeFullDayData(dxDayData, dxInput, dateStr, false);
-          }
-          dxValid = dxDayData.libration.length === 48;
-          try {
-            ({ lat: dxLat, lon: dxLon } = qthToLatLon(dxInput));
-          } catch (e) {
-            console.error(`Error converting DX locator ${dxInput} to lat/lon: ${e.message}`);
-            dxLat = 0;
-            dxLon = 0;
-          }
+        dxValid = dxDayData.libration.length === 48;
+        try {
+          ({ lat: dxLat, lon: dxLon } = qthToLatLon(dxInput));
+        } catch (e) {
+          console.error(`Error converting DX locator ${dxInput} to lat/lon: ${e.message}`);
+          dxLat = 0;
+          dxLon = 0;
         }
+      }
 
-        // Get current values (interpolated if real-time)
-        let currentElevQth = null, currentAzQth = null, currentRateQth = null, currentDopplerQth = null;
-        if (qthValid) {
-          currentElevQth = getValueAtIndex(qthDayData.elevations, index);
-          currentAzQth = getValueAtIndex(qthDayData.azimuths, index);
-          currentRateQth = getValueAtIndex(qthDayData.rates, index);
-          currentDopplerQth = getValueAtIndex(qthDayData.dopplers, index);
+      // Get current values (interpolated if real-time)
+      let currentElevQth = null, currentAzQth = null, currentRateQth = null, currentDopplerQth = null;
+      if (qthValid) {
+        currentElevQth = getValueAtIndex(qthDayData.elevations, index);
+        currentAzQth = getValueAtIndex(qthDayData.azimuths, index);
+        currentRateQth = getValueAtIndex(qthDayData.rates, index);
+        currentDopplerQth = getValueAtIndex(qthDayData.dopplers, index);
+      }
+
+      let currentElevDx = null, currentAzDx = null, currentRateDx = null, currentDopplerDx = null;
+      if (dxValid) {
+        currentElevDx = getValueAtIndex(dxDayData.elevations, index);
+        currentAzDx = getValueAtIndex(dxDayData.azimuths, index);
+        currentRateDx = getValueAtIndex(dxDayData.rates, index);
+        currentDopplerDx = getValueAtIndex(dxDayData.dopplers, index);
+      }
+
+      // Relative current
+      let currentRelRate = null, currentRelDoppler = null, currentPolOffset = null;
+      if (qthValid && dxValid) {
+        const floorIdx = Math.floor(index);
+        const ceilIdx = Math.ceil(index);
+        const frac = index - floorIdx;
+        const relFloor = computeRelativeAtIndex(floorIdx, qthDayData, dxDayData);
+        const relCeil = computeRelativeAtIndex(ceilIdx, qthDayData, dxDayData);
+        currentRelRate = interpolate(relFloor.libration * 1000, relCeil.libration * 1000, frac);
+        currentRelDoppler = interpolate(relFloor.doppler, relCeil.doppler, frac);
+        currentPolOffset = interpolate(relFloor.pol, relCeil.pol, frac);
+      }
+
+      // Chart data from caches
+      const qthRates = qthDayData.rates || Array(48).fill(null);
+      const qthElevs = qthDayData.elevations || Array(48).fill(null);
+      const qthDopps = qthDayData.dopplers || Array(48).fill(null);
+
+      const dxRates = dxDayData.rates || Array(48).fill(null);
+      const dxElevs = dxDayData.elevations || Array(48).fill(null);
+      const dxDopps = dxDayData.dopplers || Array(48).fill(null);
+
+      let relLibrations = Array(48).fill(null);
+      let relDopplers = Array(48).fill(null);
+      let polOffsets = Array(48).fill(null);
+      if (qthValid && dxValid && relDayData.date !== dateStr) {
+        for (let i = 0; i < 48; i++) {
+          const rel = computeRelativeAtIndex(i, qthDayData, dxDayData);
+          relLibrations[i] = rel.libration ? rel.libration * 1000 : null;
+          relDopplers[i] = rel.doppler;
+          polOffsets[i] = rel.pol;
         }
+        relDayData.date = dateStr;
+        relDayData.libration = relLibrations;
+        relDayData.dopplers = relDopplers;
+        relDayData.polOffsets = polOffsets;
+      } else if (qthValid && dxValid) {
+        relLibrations = relDayData.libration;
+        relDopplers = relDayData.dopplers;
+        polOffsets = relDayData.polOffsets;
+      }
 
-        let currentElevDx = null, currentAzDx = null, currentRateDx = null, currentDopplerDx = null;
-        if (dxValid) {
-          currentElevDx = getValueAtIndex(dxDayData.elevations, index);
-          currentAzDx = getValueAtIndex(dxDayData.azimuths, index);
-          currentRateDx = getValueAtIndex(dxDayData.rates, index);
-          currentDopplerDx = getValueAtIndex(dxDayData.dopplers, index);
+      const labels = Array(48).fill('').map((_, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
+
+      const qthAnnotation = {
+        timeMarker: {
+          type: 'line',
+          mode: 'vertical',
+          scaleID: 'x',
+          value: index,
+          borderColor: 'black',
+          borderWidth: 2,
+          label: { enabled: false }
         }
+      };
 
-        // Relative current
-        let currentRelRate = null, currentRelDoppler = null, currentPolOffset = null;
-        if (qthValid && dxValid) {
-          const floorIdx = Math.floor(index);
-          const ceilIdx = Math.ceil(index);
-          const frac = index - floorIdx;
-          const relFloor = computeRelativeAtIndex(floorIdx, qthDayData, dxDayData);
-          const relCeil = computeRelativeAtIndex(ceilIdx, qthDayData, dxDayData);
-          currentRelRate = interpolate(relFloor.libration * 1000, relCeil.libration * 1000, frac);
-          currentRelDoppler = interpolate(relFloor.doppler, relCeil.doppler, frac);
-          currentPolOffset = interpolate(relFloor.pol, relCeil.pol, frac);
+      if (qthValid) {
+        try {
+          const moonAnnotations = getMoonAnnotations(dateStr, lat, lon);
+          Object.assign(qthAnnotation, moonAnnotations);
+        } catch (e) {
+          console.warn(`Error getting moon annotations for QTH: ${e.message}`);
         }
+      }
 
-        // Chart data from caches
-        const qthRates = qthDayData.rates || Array(48).fill(null);
-        const qthElevs = qthDayData.elevations || Array(48).fill(null);
-        const qthDopps = qthDayData.dopplers || Array(48).fill(null);
+      if (qthValid) {
+        document.getElementById("chartWrapper").style.display = "block";
 
-        const dxRates = dxDayData.rates || Array(48).fill(null);
-        const dxElevs = dxDayData.elevations || Array(48).fill(null);
-        const dxDopps = dxDayData.dopplers || Array(48).fill(null);
-
-        let relLibrations = Array(48).fill(null);
-        let relDopplers = Array(48).fill(null);
-        let polOffsets = Array(48).fill(null);
-        if (qthValid && dxValid && relDayData.date !== dateStr) {
-          for (let i = 0; i < 48; i++) {
-            const rel = computeRelativeAtIndex(i, qthDayData, dxDayData);
-            relLibrations[i] = rel.libration ? rel.libration * 1000 : null;
-            relDopplers[i] = rel.doppler;
-            polOffsets[i] = rel.pol;
-          }
-          relDayData.date = dateStr;
-          relDayData.libration = relLibrations;
-          relDayData.dopplers = relDopplers;
-          relDayData.polOffsets = polOffsets;
-        } else if (qthValid && dxValid) {
-          relLibrations = relDayData.libration;
-          relDopplers = relDayData.dopplers;
-          polOffsets = relDayData.polOffsets;
-        }
-
-        const labels = Array(48).fill('').map((_, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
-
-        const qthAnnotation = {
-          timeMarker: {
+        if (!chart) {
+          chart = new Chart(document.getElementById("declinationChart"), {
             type: 'line',
-            mode: 'vertical',
-            scaleID: 'x',
-            value: index,
-            borderColor: 'black',
-            borderWidth: 2,
-            label: { enabled: false }
-          }
-        };
-
-        if (qthValid) {
-          try {
-            const moonAnnotations = getMoonAnnotations(dateStr, lat, lon);
-            Object.assign(qthAnnotation, moonAnnotations);
-          } catch (e) {
-            console.warn(`Error getting moon annotations for QTH: ${e.message}`);
-          }
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: "Libration Rate (×10⁻³ °/min)",
+                  data: qthRates,
+                  borderColor: "#ff0000",
+                  pointRadius: 0,
+                  borderWidth: 1.5,
+                  tension: 0.2,
+                  yAxisID: "y1"
+                },
+                {
+                  label: "Moon Elevation (°)",
+                  data: qthElevs,
+                  borderColor: "rgba(0, 0, 255, 0.6)",
+                  backgroundColor: "rgba(0, 0, 255, 0.15)",
+                  fill: { target: { value: 0 }, above: 'rgba(0, 0, 255, 0.15)' },
+                  pointRadius: 0,
+                  borderWidth: 1,
+                  tension: 0.3,
+                  yAxisID: "y2"
+                },
+                {
+                  label: "Doppler Spread, Hz",
+                  data: qthDopps,
+                  borderColor: "green",
+                  pointRadius: 0,
+                  borderWidth: 1.5,
+                  tension: 0.2,
+                  yAxisID: "y3"
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: {
+                  title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
+                  ticks: { font: { size: 10 } }
+                },
+                y1: {
+                  type: "linear",
+                  display: true,
+                  position: "right",
+                  title: { display: true, text: "Libration Rate (×10⁻³ °/min)", color: "#ff0000", font: { size: 10, family: 'Arial, sans-serif' } },
+                  min: 0,
+                  max: 5,
+                  ticks: { stepSize: 1, color: "#ff0000", font: { size: 12 } },
+                  grid: { drawTicks: true, drawBorder: true }
+                },
+                y2: {
+                  position: "left",
+                  display: true,
+                  min: 0,
+                  max: 90,
+                  title: { display: true, text: "Moon Elevation (°)", color: "rgba(0, 0, 255, 0.6)", font: { size: 12, family: 'Arial, sans-serif' } },
+                  grid: { drawOnChartArea: false },
+                  ticks: { stepSize: 15, callback: val => val + "°", color: "rgba(0, 0, 255, 0.6)", font: { size: 12 } }
+                },
+                y3: {
+                  type: "linear",
+                  display: true,
+                  position: "right",
+                  offset: true,
+                  title: { display: true, text: "Doppler Spread (Hz)", color: "green", font: { size: 12, family: 'Arial, sans-serif' } },
+                  min: 0,
+                  max: maxDoppler,
+                  grid: { drawOnChartArea: false },
+                  ticks: {
+                    stepSize: Math.ceil(maxDoppler / 6),
+                    color: "green",
+                    font: { size: 12 },
+                    callback: function(value) {
+                      return Math.round(value); // Format as integer
+                    }
+                  }
+                }
+              },
+              plugins: {
+                legend: { display: false },
+                annotation: { annotations: qthAnnotation }
+              }
+            }
+          });
+        } else {
+          chart.data.labels = labels;
+          chart.data.datasets[0].data = qthRates;
+          chart.data.datasets[1].data = qthElevs;
+          chart.data.datasets[2].data = qthDopps;
+          chart.options.plugins.annotation.annotations = qthAnnotation;
+          chart.options.plugins.annotation.annotations.timeMarker.value = index;
+          chart.options.scales.y3.max = maxDoppler;
+          chart.options.scales.y3.ticks.stepSize = Math.ceil(maxDoppler / 6);
+          chart.update('none');
         }
 
-        if (qthValid) {
-          document.getElementById("chartWrapper").style.display = "block";
+        const rateStr = currentRateQth != null ? (currentRateQth / 1000).toFixed(4) : null;
+        document.getElementById('chartLabel').innerHTML =
+          `<span class="metric-locator">${qthInput}</span>` +
+          `<span class="metric-separator"></span>` +
+          `<span class="metric-label metric-elevation">El:</span> ${currentElevQth != null ? currentElevQth.toFixed(1) + '°' : 'N/A'}` +
+          `<span class="metric-separator">|</span>` +
+          `<span class="metric-label metric-azimuth">Az:</span> ${currentAzQth != null ? currentAzQth.toFixed(1) + '°' : 'N/A'}` +
+          `<span class="metric-separator">|</span>` +
+          `<span class="metric-label metric-libration">Libr:</span> ${rateStr != null ? rateStr + '°/min' : 'N/A'}` +
+          `<span class="metric-separator">|</span>` +
+          `<span class="metric-label metric-doppler">Spread:</span> ${currentDopplerQth != null ? currentDopplerQth.toFixed(0) + ' Hz' : 'N/A'}`;
+      } else {
+        document.getElementById("chartWrapper").style.display = "none";
+        if (chart) {
+          chart.destroy();
+          chart = null;
+        }
+        document.getElementById('chartLabel').innerHTML = '<span class="metric-locator">Enter valid QTH</span>';
+      }
 
-          if (!chart) {
-            chart = new Chart(document.getElementById("declinationChart"), {
-              type: 'line',
-              data: {
-                labels,
-                datasets: [
-                  {
-                    label: "Libration Rate (×10⁻³ °/min)",
-                    data: qthRates,
-                    borderColor: "#ff0000",
-                    pointRadius: 0,
-                    borderWidth: 1.5,
-                    tension: 0.2,
-                    yAxisID: "y1"
-                  },
-                  {
-                    label: "Moon Elevation (°)",
-                    data: qthElevs,
-                    borderColor: "rgba(0, 0, 255, 0.6)",
-                    backgroundColor: "rgba(0, 0, 255, 0.15)",
-                    fill: { target: { value: 0 }, above: 'rgba(0, 0, 255, 0.15)' },
-                    pointRadius: 0,
-                    borderWidth: 1,
-                    tension: 0.3,
-                    yAxisID: "y2"
-                  },
-                  {
-                    label: "Doppler Spread, Hz",
-                    data: qthDopps,
-                    borderColor: "green",
-                    pointRadius: 0,
-                    borderWidth: 1.5,
-                    tension: 0.2,
-                    yAxisID: "y3"
+      const dxAnnotation = {
+        timeMarker: {
+          type: 'line',
+          mode: 'vertical',
+          scaleID: 'x',
+          value: index,
+          borderColor: 'black',
+          borderWidth: 2,
+          label: { enabled: false }
+        }
+      };
+
+      if (dxValid) {
+        try {
+          const moonAnnotations = getMoonAnnotations(dateStr, dxLat, dxLon);
+          Object.assign(dxAnnotation, moonAnnotations);
+        } catch (e) {
+          console.warn(`Error getting moon annotations for DX: ${e.message}`);
+        }
+      }
+
+      if (dxValid) {
+        document.getElementById("dxChartWrapper").style.display = "block";
+
+        if (!dxChart) {
+          dxChart = new Chart(document.getElementById("dxDeclinationChart"), {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: "Libration Rate (×10⁻³ °/min)",
+                  data: dxRates,
+                  borderColor: "#ff0000",
+                  pointRadius: 0,
+                  borderWidth: 1.5,
+                  tension: 0.2,
+                  yAxisID: "y1"
+                },
+                {
+                  label: "Moon Elevation (°)",
+                  data: dxElevs,
+                  borderColor: "rgba(0, 0, 255, 0.6)",
+                  backgroundColor: "rgba(0, 0, 255, 0.15)",
+                  fill: { target: { value: 0 }, above: 'rgba(0, 0, 255, 0.15)' },
+                  pointRadius: 0,
+                  borderWidth: 1,
+                  tension: 0.3,
+                  yAxisID: "y2"
+                },
+                {
+                  label: "Doppler Spread, Hz",
+                  data: dxDopps,
+                  borderColor: "green",
+                  pointRadius: 0,
+                  borderWidth: 1.5,
+                  tension: 0.2,
+                  yAxisID: "y3"
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: {
+                  title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
+                  ticks: { font: { size: 10 } }
+                },
+                y1: {
+                  type: "linear",
+                  display: true,
+                  position: "right",
+                  title: { display: true, text: "Libration Rate (×10⁻³ °/min)", color: "#ff0000", font: { size: 10, family: 'Arial, sans-serif' } },
+                  min: 0,
+                  max: 5,
+                  ticks: { stepSize: 1, color: "#ff0000", font: { size: 12 } },
+                  grid: { drawTicks: true, drawBorder: true }
+                },
+                y2: {
+                  position: "left",
+                  display: true,
+                  min: 0,
+                  max: 90,
+                  title: { display: true, text: "Moon Elevation (°)", color: "rgba(0, 0, 255, 0.6)", font: { size: 12, family: 'Arial, sans-serif' } },
+                  grid: { drawOnChartArea: false },
+                  ticks: { stepSize: 15, callback: val => val + "°", color: "rgba(0, 0, 255, 0.6)", font: { size: 12 } }
+                },
+                y3: {
+                  type: "linear",
+                  display: true,
+                  position: "right",
+                  offset: true,
+                  title: { display: true, text: "Doppler Spread (Hz)", color: "green", font: { size: 12, family: 'Arial, sans-serif' } },
+                  min: 0,
+                  max: maxDoppler,
+                  grid: { drawOnChartArea: false },
+                  ticks: {
+                    stepSize: Math.ceil(maxDoppler / 6),
+                    color: "green",
+                    font: { size: 12 },
+                    callback: function(value) {
+                      return Math.round(value); // Format as integer
+                    }
                   }
-                ]
+                }
               },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                  x: {
-                    title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
-                    ticks: { font: { size: 10 } }
-                  },
-                  y1: {
-                    type: "linear",
-                    display: true,
-                    position: "right",
-                    title: { display: true, text: "Libration Rate (×10⁻³ °/min)", color: "#ff0000", font: { size: 10, family: 'Arial, sans-serif' } },
-                    min: 0,
-                    max: 5,
-                    ticks: { stepSize: 1, color: "#ff0000", font: { size: 12 } },
-                    grid: { drawTicks: true, drawBorder: true }
-                  },
-                  y2: {
-                    position: "left",
-                    display: true,
-                    min: 0,
-                    max: 90,
-                    title: { display: true, text: "Moon Elevation (°)", color: "rgba(0, 0, 255, 0.6)", font: { size: 12, family: 'Arial, sans-serif' } },
-                    grid: { drawOnChartArea: false },
-                    ticks: { stepSize: 15, callback: val => val + "°", color: "rgba(0, 0, 255, 0.6)", font: { size: 12 } }
-                  },
-                  y3: {
-                    type: "linear",
-                    display: true,
-                    position: "right",
-                    offset: true,
-                    title: { display: true, text: "Doppler Spread (Hz)", color: "green", font: { size: 12, family: 'Arial, sans-serif' } },
-                    min: 0,
-                    max: maxDoppler,
-                    grid: { drawOnChartArea: false },
-                    ticks: {
-                      stepSize: Math.ceil(maxDoppler / 6),
-                      color: "green",
-                      font: { size: 12 },
-                      callback: function(value) {
-                        return Math.round(value); // Format as integer
-                      }
+              plugins: {
+                legend: { display: false },
+                annotation: { annotations: dxAnnotation }
+              }
+            }
+          });
+        } else {
+          dxChart.data.labels = labels;
+          dxChart.data.datasets[0].data = dxRates;
+          dxChart.data.datasets[1].data = dxElevs;
+          dxChart.data.datasets[2].data = dxDopps;
+          dxChart.options.plugins.annotation.annotations = dxAnnotation;
+          dxChart.options.plugins.annotation.annotations.timeMarker.value = index;
+          dxChart.options.scales.y3.max = maxDoppler;
+          dxChart.options.scales.y3.ticks.stepSize = Math.ceil(maxDoppler / 6);
+          dxChart.update('none');
+        }
+
+        const rateStr = currentRateDx != null ? (currentRateDx / 1000).toFixed(4) : null;
+        document.getElementById('dxchartLabel').innerHTML =
+          `<span class="metric-locator">${dxInput}</span>` +
+          `<span class="metric-separator"></span>` +
+          `<span class="metric-label metric-elevation">El:</span> ${currentElevDx != null ? currentElevDx.toFixed(1) + '°' : 'N/A'}` +
+          `<span class="metric-separator">|</span>` +
+          `<span class="metric-label metric-azimuth">Az:</span> ${currentAzDx != null ? currentAzDx.toFixed(1) + '°' : 'N/A'}` +
+          `<span class="metric-separator">|</span>` +
+          `<span class="metric-label metric-libration">Libr:</span> ${rateStr != null ? rateStr + '°/min' : 'N/A'}` +
+          `<span class="metric-separator">|</span>` +
+          `<span class="metric-label metric-doppler">Spread:</span> ${currentDopplerDx != null ? currentDopplerDx.toFixed(0) + ' Hz' : 'N/A'}`;
+      } else {
+        document.getElementById("dxChartWrapper").style.display = "none";
+        if (dxChart) {
+          dxChart.destroy();
+          dxChart = null;
+        }
+        document.getElementById('dxchartLabel').innerHTML = '<span class="metric-locator">Enter valid DX</span>';
+      }
+
+      const relativeAnnotation = {
+        timeMarker: {
+          type: 'line',
+          mode: 'vertical',
+          scaleID: 'x',
+          value: index,
+          borderColor: 'black',
+          borderWidth: 2,
+          label: { enabled: false }
+        }
+      };
+
+      if (qthValid && dxValid) {
+        try {
+          const skedAnnotations = getSkedAnnotations(dateStr, lat, lon, dxLat, dxLon);
+          Object.assign(relativeAnnotation, skedAnnotations);
+        } catch (e) {
+          console.warn(`Error getting sked annotations: ${e.message}`);
+        }
+      }
+
+      if (qthValid && dxValid && relLibrations.some(r => r != null)) {
+        document.getElementById("relativeChartWrapper").style.display = "block";
+
+        if (!relativeChart) {
+          relativeChart = new Chart(document.getElementById("relativeDataChart"), {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: "Relative Libration (×10⁻³ °/min)",
+                  data: relLibrations,
+                  borderColor: "red",
+                  pointRadius: 0,
+                  borderWidth: 1.5,
+                  tension: 0.2,
+                  yAxisID: "y1"
+                },
+                {
+                  label: "Relative Spread, Hz",
+                  data: relDopplers,
+                  borderColor: "green",
+                  pointRadius: 0,
+                  borderWidth: 1.5,
+                  tension: 0.2,
+                  yAxisID: "y2"
+                },
+                {
+                  label: "Polarization Offset (°)",
+                  data: polOffsets,
+                  borderColor: "blue",
+                  pointRadius: 0,
+                  borderWidth: 1.5,
+                  tension: 0.2,
+                  yAxisID: "y3"
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: {
+                  title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
+                  ticks: { font: { size: 10 } }
+                },
+                y1: {
+                  type: "linear",
+                  display: true,
+                  position: "right",
+                  title: { display: true, text: "Rel. Libration (×10⁻³ °/min)", color: "red", font: { size: 10, family: 'Arial, sans-serif' } },
+                  min: 0,
+                  max: 5,
+                  ticks: { stepSize: 1, color: "red", font: { size: 12 } },
+                  grid: { drawTicks: true, drawBorder: true }
+                },
+                y2: {
+                  type: "linear",
+                  display: true,
+                  position: "right",
+                  offset: true,
+                  title: { display: true, text: "Rel. Spread (Hz)", color: "green", font: { size: 12, family: 'Arial, sans-serif' } },
+                  min: 0,
+                  max: maxDoppler,
+                  grid: { drawOnChartArea: false },
+                  ticks: {
+                    stepSize: Math.ceil(maxDoppler / 6),
+                    color: "green",
+                    font: { size: 12 },
+                    callback: function(value) {
+                      return Math.round(value); // Format as integer
                     }
                   }
                 },
-                plugins: {
-                  legend: { display: false },
-                  annotation: { annotations: qthAnnotation }
+                y3: {
+                  type: "linear",
+                  display: true,
+                  position: "left",
+                  title: { display: true, text: "Polarization Offset (°)", color: "blue", font: { size: 12, family: 'Arial, sans-serif' } },
+                  min: -90,
+                  max: 90,
+                  grid: { drawOnChartArea: false },
+                  ticks: { stepSize: 30, callback: val => val + "°", color: "blue", font: { size: 12 } }
                 }
-              }
-            });
-          } else {
-            chart.data.labels = labels;
-            chart.data.datasets[0].data = qthRates;
-            chart.data.datasets[1].data = qthElevs;
-            chart.data.datasets[2].data = qthDopps;
-            chart.options.plugins.annotation.annotations = qthAnnotation;
-            chart.options.plugins.annotation.annotations.timeMarker.value = index;
-            chart.options.scales.y3.max = maxDoppler;
-            chart.options.scales.y3.ticks.stepSize = Math.ceil(maxDoppler / 6);
-            chart.update('none');
-          }
-
-          const rateStr = currentRateQth != null ? (currentRateQth / 1000).toFixed(4) : null;
-          document.getElementById('chartLabel').innerHTML =
-            `<span class="metric-locator">${qthInput}</span>` +
-            `<span class="metric-separator"></span>` +
-            `<span class="metric-label metric-elevation">El:</span> ${currentElevQth != null ? currentElevQth.toFixed(1) + '°' : 'N/A'}` +
-            `<span class="metric-separator">|</span>` +
-            `<span class="metric-label metric-azimuth">Az:</span> ${currentAzQth != null ? currentAzQth.toFixed(1) + '°' : 'N/A'}` +
-            `<span class="metric-separator">|</span>` +
-            `<span class="metric-label metric-libration">Libr:</span> ${rateStr != null ? rateStr + '°/min' : 'N/A'}` +
-            `<span class="metric-separator">|</span>` +
-            `<span class="metric-label metric-doppler">Spread:</span> ${currentDopplerQth != null ? currentDopplerQth.toFixed(0) + ' Hz' : 'N/A'}`;
-        } else {
-          document.getElementById("chartWrapper").style.display = "none";
-          if (chart) {
-            chart.destroy();
-            chart = null;
-          }
-          document.getElementById('chartLabel').innerHTML = '<span class="metric-locator">Enter valid QTH</span>';
-        }
-
-        const dxAnnotation = {
-          timeMarker: {
-            type: 'line',
-            mode: 'vertical',
-            scaleID: 'x',
-            value: index,
-            borderColor: 'black',
-            borderWidth: 2,
-            label: { enabled: false }
-          }
-        };
-
-        if (dxValid) {
-          try {
-            const moonAnnotations = getMoonAnnotations(dateStr, dxLat, dxLon);
-            Object.assign(dxAnnotation, moonAnnotations);
-          } catch (e) {
-            console.warn(`Error getting moon annotations for DX: ${e.message}`);
-          }
-        }
-
-        if (dxValid) {
-          document.getElementById("dxChartWrapper").style.display = "block";
-
-          if (!dxChart) {
-            dxChart = new Chart(document.getElementById("dxDeclinationChart"), {
-              type: 'line',
-              data: {
-                labels,
-                datasets: [
-                  {
-                    label: "Libration Rate (×10⁻³ °/min)",
-                    data: dxRates,
-                    borderColor: "#ff0000",
-                    pointRadius: 0,
-                    borderWidth: 1.5,
-                    tension: 0.2,
-                    yAxisID: "y1"
-                  },
-                  {
-                    label: "Moon Elevation (°)",
-                    data: dxElevs,
-                    borderColor: "rgba(0, 0, 255, 0.6)",
-                    backgroundColor: "rgba(0, 0, 255, 0.15)",
-                    fill: { target: { value: 0 }, above: 'rgba(0, 0, 255, 0.15)' },
-                    pointRadius: 0,
-                    borderWidth: 1,
-                    tension: 0.3,
-                    yAxisID: "y2"
-                  },
-                  {
-                    label: "Doppler Spread, Hz",
-                    data: dxDopps,
-                    borderColor: "green",
-                    pointRadius: 0,
-                    borderWidth: 1.5,
-                    tension: 0.2,
-                    yAxisID: "y3"
-                  }
-                ]
               },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                  x: {
-                    title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
-                    ticks: { font: { size: 10 } }
-                  },
-                  y1: {
-                    type: "linear",
-                    display: true,
-                    position: "right",
-                    title: { display: true, text: "Libration Rate (×10⁻³ °/min)", color: "#ff0000", font: { size: 10, family: 'Arial, sans-serif' } },
-                    min: 0,
-                    max: 5,
-                    ticks: { stepSize: 1, color: "#ff0000", font: { size: 12 } },
-                    grid: { drawTicks: true, drawBorder: true }
-                  },
-                  y2: {
-                    position: "left",
-                    display: true,
-                    min: 0,
-                    max: 90,
-                    title: { display: true, text: "Moon Elevation (°)", color: "rgba(0, 0, 255, 0.6)", font: { size: 12, family: 'Arial, sans-serif' } },
-                    grid: { drawOnChartArea: false },
-                    ticks: { stepSize: 15, callback: val => val + "°", color: "rgba(0, 0, 255, 0.6)", font: { size: 12 } }
-                  },
-                  y3: {
-                    type: "linear",
-                    display: true,
-                    position: "right",
-                    offset: true,
-                    title: { display: true, text: "Doppler Spread (Hz)", color: "green", font: { size: 12, family: 'Arial, sans-serif' } },
-                    min: 0,
-                    max: maxDoppler,
-                    grid: { drawOnChartArea: false },
-                    ticks: {
-                      stepSize: Math.ceil(maxDoppler / 6),
-                      color: "green",
-                      font: { size: 12 },
-                      callback: function(value) {
-                        return Math.round(value); // Format as integer
-                      }
-                    }
-                  }
-                },
-                plugins: {
-                  legend: { display: false },
-                  annotation: { annotations: dxAnnotation }
-                }
+              plugins: {
+                legend: { display: false },
+                annotation: { annotations: relativeAnnotation }
               }
-            });
-          } else {
-            dxChart.data.labels = labels;
-            dxChart.data.datasets[0].data = dxRates;
-            dxChart.data.datasets[1].data = dxElevs;
-            dxChart.data.datasets[2].data = dxDopps;
-            dxChart.options.plugins.annotation.annotations = dxAnnotation;
-            dxChart.options.plugins.annotation.annotations.timeMarker.value = index;
-            dxChart.options.scales.y3.max = maxDoppler;
-            dxChart.options.scales.y3.ticks.stepSize = Math.ceil(maxDoppler / 6);
-            dxChart.update('none');
-          }
-
-          const rateStr = currentRateDx != null ? (currentRateDx / 1000).toFixed(4) : null;
-          document.getElementById('dxchartLabel').innerHTML =
-            `<span class="metric-locator">${dxInput}</span>` +
-            `<span class="metric-separator"></span>` +
-            `<span class="metric-label metric-elevation">El:</span> ${currentElevDx != null ? currentElevDx.toFixed(1) + '°' : 'N/A'}` +
-            `<span class="metric-separator">|</span>` +
-            `<span class="metric-label metric-azimuth">Az:</span> ${currentAzDx != null ? currentAzDx.toFixed(1) + '°' : 'N/A'}` +
-            `<span class="metric-separator">|</span>` +
-            `<span class="metric-label metric-libration">Libr:</span> ${rateStr != null ? rateStr + '°/min' : 'N/A'}` +
-            `<span class="metric-separator">|</span>` +
-            `<span class="metric-label metric-doppler">Spread:</span> ${currentDopplerDx != null ? currentDopplerDx.toFixed(0) + ' Hz' : 'N/A'}`;
+            }
+          });
         } else {
-          document.getElementById("dxChartWrapper").style.display = "none";
-          if (dxChart) {
-            dxChart.destroy();
-            dxChart = null;
-          }
-          document.getElementById('dxchartLabel').innerHTML = '<span class="metric-locator">Enter valid DX</span>';
+          relativeChart.data.labels = labels;
+          relativeChart.data.datasets[0].data = relLibrations;
+          relativeChart.data.datasets[1].data = relDopplers;
+          relativeChart.data.datasets[2].data = polOffsets;
+          relativeChart.options.plugins.annotation.annotations = relativeAnnotation;
+          relativeChart.options.plugins.annotation.annotations.timeMarker.value = index;
+          relativeChart.options.scales.y2.max = maxDoppler;
+          relativeChart.options.scales.y2.ticks.stepSize = Math.ceil(maxDoppler / 6);
+          relativeChart.update('none');
         }
 
-        const relativeAnnotation = {
-          timeMarker: {
-            type: 'line',
-            mode: 'vertical',
-            scaleID: 'x',
-            value: index,
-            borderColor: 'black',
-            borderWidth: 2,
-            label: { enabled: false }
-          }
-        };
-
-        if (qthValid && dxValid) {
-          try {
-            const skedAnnotations = getSkedAnnotations(dateStr, lat, lon, dxLat, dxLon);
-            Object.assign(relativeAnnotation, skedAnnotations);
-          } catch (e) {
-            console.warn(`Error getting sked annotations: ${e.message}`);
-          }
+        const relRateStr = currentRelRate != null ? (currentRelRate / 1000).toFixed(4) : null;
+        document.getElementById('relativeChartLabel').innerHTML =
+          `<span class="metric-label metric-rel-libration">Rel LR:</span> ${relRateStr != null ? relRateStr + '°/min' : 'N/A'}` +
+          `<span class="metric-separator"> | </span>` +
+          `<span class="metric-label metric-rel-doppler">DX Width:</span> ${currentRelDoppler != null ? currentRelDoppler.toFixed(0) + ' Hz' : 'N/A'}` +
+          `<span class="metric-separator"> | </span>` +
+          `<span class="metric-label metric-poloffset">Dpol:</span> ${currentPolOffset != null ? currentPolOffset.toFixed(1) + '°' : 'N/A'}`;
+      } else {
+        document.getElementById("relativeChartWrapper").style.display = "none";
+        if (relativeChart) {
+          relativeChart.destroy();
+          relativeChart = null;
         }
+        document.getElementById('relativeChartLabel').innerHTML = '<span class="metric-locator">Enter valid QTH and DX</span>';
+      }
 
-        if (qthValid && dxValid && relLibrations.some(r => r != null)) {
-          document.getElementById("relativeChartWrapper").style.display = "block";
-
-          if (!relativeChart) {
-            relativeChart = new Chart(document.getElementById("relativeDataChart"), {
-              type: 'line',
-              data: {
-                labels,
-                datasets: [
-                  {
-                    label: "Relative Libration (×10⁻³ °/min)",
-                    data: relLibrations,
-                    borderColor: "red",
-                    pointRadius: 0,
-                    borderWidth: 1.5,
-                    tension: 0.2,
-                    yAxisID: "y1"
-                  },
-                  {
-                    label: "Relative Spread, Hz",
-                    data: relDopplers,
-                    borderColor: "green",
-                    pointRadius: 0,
-                    borderWidth: 1.5,
-                    tension: 0.2,
-                    yAxisID: "y2"
-                  },
-                  {
-                    label: "Polarization Offset (°)",
-                    data: polOffsets,
-                    borderColor: "blue",
-                    pointRadius: 0,
-                    borderWidth: 1.5,
-                    tension: 0.2,
-                    yAxisID: "y3"
-                  }
-                ]
-              },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                  x: {
-                    title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
-                    ticks: { font: { size: 10 } }
-                  },
-                  y1: {
-                    type: "linear",
-                    display: true,
-                    position: "right",
-                    title: { display: true, text: "Rel. Libration (×10⁻³ °/min)", color: "red", font: { size: 10, family: 'Arial, sans-serif' } },
-                    min: 0,
-                    max: 5,
-                    ticks: { stepSize: 1, color: "red", font: { size: 12 } },
-                    grid: { drawTicks: true, drawBorder: true }
-                  },
-                  y2: {
-                    type: "linear",
-                    display: true,
-                    position: "right",
-                    offset: true,
-                    title: { display: true, text: "Rel. Spread (Hz)", color: "green", font: { size: 12, family: 'Arial, sans-serif' } },
-                    min: 0,
-                    max: maxDoppler,
-                    grid: { drawOnChartArea: false },
-                    ticks: {
-                      stepSize: Math.ceil(maxDoppler / 6),
-                      color: "green",
-                      font: { size: 12 },
-                      callback: function(value) {
-                        return Math.round(value); // Format as integer
-                      }
-                    }
-                  },
-                  y3: {
-                    type: "linear",
-                    display: true,
-                    position: "left",
-                    title: { display: true, text: "Polarization Offset (°)", color: "blue", font: { size: 12, family: 'Arial, sans-serif' } },
-                    min: -90,
-                    max: 90,
-                    grid: { drawOnChartArea: false },
-                    ticks: { stepSize: 30, callback: val => val + "°", color: "blue", font: { size: 12 } }
-                  }
-                },
-                plugins: {
-                  legend: { display: false },
-                  annotation: { annotations: relativeAnnotation }
-                }
-              }
-            });
-          } else {
-            relativeChart.data.labels = labels;
-            relativeChart.data.datasets[0].data = relLibrations;
-            relativeChart.data.datasets[1].data = relDopplers;
-            relativeChart.data.datasets[2].data = polOffsets;
-            relativeChart.options.plugins.annotation.annotations = relativeAnnotation;
-            relativeChart.options.plugins.annotation.annotations.timeMarker.value = index;
-            relativeChart.options.scales.y2.max = maxDoppler;
-            relativeChart.options.scales.y2.ticks.stepSize = Math.ceil(maxDoppler / 6);
-            relativeChart.update('none');
-          }
-
-          const relRateStr = currentRelRate != null ? (currentRelRate / 1000).toFixed(4) : null;
-          document.getElementById('relativeChartLabel').innerHTML =
-            `<span class="metric-label metric-rel-libration">Rel LR:</span> ${relRateStr != null ? relRateStr + '°/min' : 'N/A'}` +
-            `<span class="metric-separator"> | </span>` +
-            `<span class="metric-label metric-rel-doppler">DX Width:</span> ${currentRelDoppler != null ? currentRelDoppler.toFixed(0) + ' Hz' : 'N/A'}` +
-            `<span class="metric-separator"> | </span>` +
-            `<span class="metric-label metric-poloffset">Dpol:</span> ${currentPolOffset != null ? currentPolOffset.toFixed(1) + '°' : 'N/A'}`;
-        } else {
-          document.getElementById("relativeChartWrapper").style.display = "none";
-          if (relativeChart) {
-            relativeChart.destroy();
-            relativeChart = null;
-          }
-          document.getElementById('relativeChartLabel').innerHTML = '<span class="metric-locator">Enter valid QTH and DX</span>';
-        }
-
-        // Update map and moon chart with exact time
-        const exactTime = isRealtime ? new Date() : new Date(`${dateStr}T${Math.floor(index / 2).toString().padStart(2, '0')}:${String((index % 2) * 30).padStart(2, '0')}:00Z`);
-        updateMap(exactTime);
-        updateMoonChart(exactTime);
+      // Update map and moon chart with exact time
+      const exactTime = isRealtime ? new Date() : new Date(`${dateStr}T${Math.floor(index / 2).toString().padStart(2, '0')}:${String((index % 2) * 30).padStart(2, '0')}:00Z`);
+      updateMap(exactTime);
+      updateMoonChart(exactTime);
     }
 
                                             function startRealTimeUpdates() {
@@ -2221,7 +2219,7 @@
 
                                                 const hour = now.getUTCHours();
                                                 const minute = now.getUTCMinutes();
-                                                const fractionalIndex = hour + (minute / 60);
+                                                const fractionalIndex = hour * 2 + (minute / 30);
                                                 const displayHour = String(hour).padStart(2, '0');
                                                 const displayMin = String(minute).padStart(2, '0');
                                                 document.getElementById('hour-value').textContent = `Time (UTC): ${displayHour}:${displayMin}`;
@@ -2242,13 +2240,6 @@
                                                     calculateMoonDataForMonth(dateStr);
                                                 }
                                                 updateChart(fractionalIndex, true);
-                                                // Update noise map if visible
-                                                const noiseContainer = document.getElementById('noiseMapContainer');
-                                                if (noiseContainer.style.display === 'block') {
-                                                    const noiseIndex = fractionalIndex * 6; // 6 indices per hour (10-min steps)
-                                                    changeTime(noiseIndex);
-                                                    updateTimeDisplay();
-                                                }
                                             }
     
     function decodeEmail(obfuscated) {
@@ -2476,30 +2467,49 @@
 
                                             function initMap() {
                                                 try {
-                                                    // Define tile layer
-                                                    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                                    // Define tile layers
+                                                    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                                                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                                                        minZoom: 0,
+                                                        maxZoom: 19
+                                                    });
+
+                                                    const esriStreets = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+                                                        attribution: '&copy; <a href="https://www.esri.com/">Esri</a>, HERE, Garmin, USGS, Intermap, INCREMENT P, NRCan, Esri Japan, METI, Esri China (Hong Kong), Esri Korea, Esri (Thailand), NGCC, (c) OpenStreetMap contributors, and the GIS User Community',
                                                         minZoom: 0,
                                                         maxZoom: 20
                                                     });
 
-                                                    // Initialize map with the tile layer and zoom control in bottomright
+                                                    const esriTopo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+                                                        attribution: '&copy; <a href="https://www.esri.com/">Esri</a>, HERE, Garmin, USGS, Intermap, INCREMENT P, NRCan, Esri Japan, METI, Esri China (Hong Kong), Esri Korea, Esri (Thailand), NGCC, (c) OpenStreetMap contributors, and the GIS User Community',
+                                                        minZoom: 0,
+                                                        maxZoom: 20
+                                                    });
+
+                                                    // Define basemaps for layer control
+                                                    const baseMaps = {
+                                                        "OpenStreetMap": osm,
+                                                        "Esri Streets": esriStreets,
+                                                        "Esri Topographic": esriTopo
+                                                    };
+
+                                                    // Initialize map with the default tile layer and zoom control in bottomright
                                                     map = L.map('map', {
                                                         zoom: 2,
                                                         center: [0, 0],
                                                         gestureHandling: true,
                                                         fullscreenControl: false,
-                                                        layers: [osm],
-                                                        zoomControl: true // Enable zoom control (already true by default)
+                                                        layers: [esriTopo], // Set Esri Topo as default for terrain and country names
+                                                        zoomControl: true // Enable zoom control
                                                     });
 
                                                     // Move zoom control to bottomright
                                                     map.zoomControl.setPosition('bottomright');
 
                                                     // Define CQ Zones and Maidenhead layers with error handling
-                                                    var cqzones, maidenhead;
+                                                    let cqzones, maidenhead;
                                                     if (typeof L.cqzones === 'function') {
-                                                        cqzones = L.cqzones({color : 'rgba(255, 0, 0, 0.4)'});
+                                                        cqzones = L.cqzones({ color: 'rgba(255, 0, 0, 0.4)' });
                                                         cqzones.addTo(map); // Add CQ Zones layer to the map by default
                                                     } else {
                                                         console.error('L.cqzones is not defined. CQ Zones layer will not be available.');
@@ -2510,15 +2520,14 @@
                                                         console.error('L.maidenhead is not defined. Maidenhead layer will not be available.');
                                                     }
 
-                                                    // Add layer control
-                                                    var overlays = {};
+                                                    // Add layer control for basemaps and overlays
+                                                    const overlays = {};
                                                     if (cqzones) overlays["<span style='color: black'>CQ Zones</span>"] = cqzones;
                                                     if (maidenhead) overlays["<span style='color: black'>Maidenhead</span>"] = maidenhead;
 
-                                                    L.control.layers({
-                                                        'Map': osm
-                                                    }, overlays).addTo(map);
+                                                    L.control.layers(baseMaps, overlays).addTo(map);
 
+                                                    // Fetch and update markers
                                                     const band = document.getElementById('bandSelect').value;
                                                     const jsonFile = bandConfig[band].jsonFile;
                                                     const showActiveOnly = isActiveStationsOnly;
@@ -3034,1045 +3043,6 @@
             if (moonChart) moonChart.resize();
         }
     });
-    
-    // Noise Map Integration
-    // Add toggle in scrollable-controls
-    const noiseToggleLabel = document.createElement('label');
-    const toggleNoiseMap = document.createElement('input');
-    toggleNoiseMap.type = 'checkbox';
-    toggleNoiseMap.id = 'toggleNoiseMap';
-    noiseToggleLabel.appendChild(toggleNoiseMap);
-    noiseToggleLabel.append(' Noise Map');
-    document.getElementById('scrollable-controls').appendChild(noiseToggleLabel);
-
-    let noiseMapInitialized = false;
-    let noiseScene, noiseCamera, noiseRenderer, noiseControls, noiseRaycaster, noiseMouse, noiseSpheres = [], noiseMinNoise = Infinity, noiseMaxNoise = -Infinity, noiseRawPoints = [];
-    let noiseMoonTrajectoryGroup, noiseSunTrajectoryGroup, noiseMoonPositions = [], noiseDxMoonPositions = [], noiseSunPositions = [], noiseCommonMoonWindow = [], noiseCurrentTimeIndex = 0;
-    let noiseMoonMarker, noiseSunMarker, noiseAzStep = 5, noiseElStep = 5;
-    let noiseShowSunCheckbox, noiseColorBarCanvas, noiseColorBarContext, noiseMinNoiseLabel, noiseMaxNoiseLabel, noiseColorBarContainer, noiseInfoBox, noiseDemoStatus, noiseCsvUpload;
-    let noiseCloseButton;
-    let noiseAnimateId;
-    let noiseResizeObserver;
-
-    function getNoiseColor(noise) {
-      const range = noiseMaxNoise - noiseMinNoise;
-      const norm = range === 0 ? 0.5 : (noise - noiseMinNoise) / range;
-      return new THREE.Color().setHSL(0.7 - norm * 0.7, 1.0, 0.5);
-    }
-
-    function noiseCalculateStepSizes() {
-      if (!noiseRawPoints.length) {
-        return { azStep: 5, elStep: 5 };
-      }
-
-      const azValues = [...new Set(noiseRawPoints.map(p => p.az))].sort((a, b) => a - b);
-      const elValues = [...new Set(noiseRawPoints.map(p => p.el))].sort((a, b) => a - b);
-
-      const azDiffs = azValues.slice(1).map((v, i) => v - azValues[i]).filter(d => d > 0);
-      const elDiffs = elValues.slice(1).map((v, i) => v - elValues[i]).filter(d => d > 0);
-
-      const azStep = azDiffs.length ? Math.min(...azDiffs) : 5;
-      const elStep = elDiffs.length ? Math.min(...elDiffs) : 5;
-
-      return { azStep, elStep };
-    }
-
-    function noiseInterpolateNoiseAtPosition(azimuth, elevation) {
-      if (!noiseRawPoints.length) {
-        return null;
-      }
-
-      const maxDistance = Math.max(noiseAzStep, noiseElStep) * 1.0;
-      const maxClosestDistance = 6;
-      const minPoints = 1;
-
-      const pointsWithDistance = noiseRawPoints.map(point => {
-        const dAz = Math.abs(point.az - azimuth);
-        const dEl = Math.abs(point.el - elevation);
-        const distance = Math.sqrt(dAz * dAz + dEl * dEl);
-        return { ...point, distance };
-      });
-
-      const nearbyPoints = pointsWithDistance.filter(p => p.distance <= maxDistance);
-
-      if (nearbyPoints.length >= minPoints) {
-        if (nearbyPoints.length === 1) {
-          return { noise: nearbyPoints[0].noise };
-        }
-
-        let totalWeight = 0;
-        let weightedNoise = 0;
-        nearbyPoints.forEach(point => {
-          const weight = 1 / (point.distance * point.distance + 1e-6);
-          weightedNoise += weight * point.noise;
-          totalWeight += weight;
-        });
-
-        if (totalWeight === 0) {
-          return null;
-        }
-
-        const interpolatedNoise = weightedNoise / totalWeight;
-        return { noise: Math.max(noiseMinNoise, Math.min(noiseMaxNoise, interpolatedNoise)) };
-      }
-
-      const closestPoint = pointsWithDistance.reduce((min, p) => p.distance < min.distance ? p : min, pointsWithDistance[0]);
-      if (closestPoint.distance <= maxClosestDistance) {
-        return { noise: closestPoint.noise };
-      }
-      return null;
-    }
-
-    function noiseDrawColorBar() {
-      if (noiseMinNoise === Infinity || noiseMaxNoise === -Infinity) {
-        noiseColorBarContainer.style.display = 'none';
-        return;
-      }
-      noiseColorBarContainer.style.display = 'flex';
-
-      noiseMinNoiseLabel.textContent = `${noiseMinNoise.toFixed(2)} dB`;
-      noiseMaxNoiseLabel.textContent = `${noiseMaxNoise.toFixed(2) } dB`;
-
-      const dpr = window.devicePixelRatio || 1;
-      const computedStyle = getComputedStyle(noiseColorBarCanvas);
-      const canvasWidth = parseFloat(computedStyle.width);
-      const canvasHeight = parseFloat(computedStyle.height);
-      noiseColorBarCanvas.width = canvasWidth * dpr;
-      noiseColorBarCanvas.height = canvasHeight * dpr;
-      noiseColorBarContext.scale(dpr, dpr);
-
-      noiseColorBarContext.save();
-      noiseColorBarContext.setTransform(1, 0, 0, 1, 0, 0);
-      noiseColorBarContext.clearRect(0, 0, noiseColorBarCanvas.width, noiseColorBarCanvas.height);
-
-      const gradient = noiseColorBarContext.createLinearGradient(0, noiseColorBarCanvas.height, 0, 0);
-      for (let i = 0; i <= 1; i += 0.1) {
-        const norm = i;
-        const color = new THREE.Color().setHSL(0.7 - norm * 0.7, 1.0, 0.5);
-        gradient.addColorStop(i, `#${color.getHexString()}`);
-      }
-      noiseColorBarContext.fillStyle = gradient;
-      noiseColorBarContext.fillRect(0, 0, noiseColorBarCanvas.width, noiseColorBarCanvas.height);
-
-      if (noiseMoonPositions.length && noiseMoonPositions[noiseCurrentTimeIndex] && noiseMoonPositions[noiseCurrentTimeIndex].elevation > 0 && noiseRawPoints.length) {
-        const moonData = noiseMoonPositions[noiseCurrentTimeIndex];
-        const noisePoint = noiseInterpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
-        if (noisePoint) {
-          const noise = noisePoint.noise;
-          const norm = (noiseMaxNoise - noiseMinNoise) === 0 ? 0.5 : (noise - noiseMinNoise) / (noiseMaxNoise - noiseMinNoise);
-          let y = noiseColorBarCanvas.height * (1 - norm);
-          y = Math.max(2 * dpr, Math.min(noiseColorBarCanvas.height - 2 * dpr, y));
-
-          const isMobile = window.innerWidth <= 600 || window.matchMedia("(orientation: portrait)").matches;
-          const triangleSize = isMobile ? 12 : 18;
-          const textOffset = isMobile ? 14 : 22;
-          const fontSize = isMobile ? 12 : 14;
-
-          noiseColorBarContext.strokeStyle = '#000000';
-          noiseColorBarContext.lineWidth = 2 * dpr;
-          noiseColorBarContext.beginPath();
-          noiseColorBarContext.moveTo(noiseColorBarCanvas.width, y);
-          noiseColorBarContext.lineTo(noiseColorBarCanvas.width + triangleSize * dpr, y - (triangleSize / 2) * dpr);
-          noiseColorBarContext.lineTo(noiseColorBarCanvas.width + triangleSize * dpr, y + (triangleSize / 2) * dpr);
-          noiseColorBarContext.closePath();
-          noiseColorBarContext.stroke();
-
-          noiseColorBarContext.fillStyle = '#ffffff';
-          noiseColorBarContext.fill();
-
-          noiseColorBarContext.fillStyle = '#ffffff';
-          noiseColorBarContext.strokeStyle = '#000000';
-          noiseColorBarContext.lineWidth = 1 * dpr;
-          noiseColorBarContext.font = `bold ${fontSize * dpr}px Segoe UI`;
-          noiseColorBarContext.textAlign = 'left';
-          noiseColorBarContext.textBaseline = 'middle';
-          noiseColorBarContext.strokeText(`${noise.toFixed(2)} dB`, noiseColorBarCanvas.width + textOffset * dpr, y);
-          noiseColorBarContext.fillText(`${noise.toFixed(2)} dB`, noiseColorBarCanvas.width + textOffset * dpr, y);
-
-          noiseColorBarContext.fillStyle = '#ff0000';
-          noiseColorBarContext.fillRect(0, y - 2 * dpr, 5 * dpr, 4 * dpr);
-        }
-      }
-
-      noiseColorBarContext.restore();
-    }
-
-    function updateNoiseMoonMarker() {
-      if (!noiseMoonPositions.length || !noiseMoonPositions[noiseCurrentTimeIndex]) {
-        if (noiseMoonMarker) noiseMoonMarker.visible = false;
-        return false;
-      }
-
-      const moonData = noiseMoonPositions[noiseCurrentTimeIndex];
-      if (moonData.elevation <= 0) {
-        if (noiseMoonMarker) noiseMoonMarker.visible = false;
-        return false;
-      }
-
-      if (!noiseMoonMarker) {
-        const geom = new THREE.SphereGeometry(0.03);
-        const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-        noiseMoonMarker = new THREE.Mesh(geom, mat);
-        noiseScene.add(noiseMoonMarker);
-      }
-
-      noiseMoonMarker.visible = true;
-      noiseMoonMarker.position.copy(moonData.position);
-      return true;
-    }
-
-    function updateNoiseSunMarker() {
-      if (!noiseSunPositions.length || !noiseShowSunCheckbox.checked || !noiseSunPositions[noiseCurrentTimeIndex]) {
-        if (noiseSunMarker) noiseSunMarker.visible = false;
-        return false;
-      }
-
-      const sunData = noiseSunPositions[noiseCurrentTimeIndex];
-      if (sunData.elevation <= 0) {
-        if (noiseSunMarker) noiseSunMarker.visible = false;
-        return false;
-      }
-
-      if (!noiseSunMarker) {
-        const geom = new THREE.SphereGeometry(0.02);
-        const mat = new THREE.MeshBasicMaterial({ color: 0xffa500 });
-        noiseSunMarker = new THREE.Mesh(geom, mat);
-        noiseScene.add(noiseSunMarker);
-      }
-
-      noiseSunMarker.visible = true;
-      noiseSunMarker.position.copy(sunData.position);
-      return true;
-    }
-
-    function updateNoiseInfoBox() {
-      let html = '';
-
-      if (noiseMoonPositions.length && noiseMoonPositions[noiseCurrentTimeIndex]) {
-        const moonData = noiseMoonPositions[noiseCurrentTimeIndex];
-        if (moonData.elevation > 0) {
-          const noisePoint = noiseInterpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
-          const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A';
-          html += `
-            <b>Moon</b><br>
-            Az: ${moonData.azimuth.toFixed(1)}° El: ${moonData.elevation.toFixed(1)}°<br>
-            ${noiseText}
-          `;
-        } else {
-          html += `
-            <b>Moon</b><br>
-            Moon below horizon
-          `;
-        }
-      } else {
-        html += `
-          <b>Moon</b><br>
-          Moon below horizon
-        `;
-      }
-
-      if (noiseDxMoonPositions.length && noiseDxMoonPositions[noiseCurrentTimeIndex]) {
-        const dxMoonData = noiseDxMoonPositions[noiseCurrentTimeIndex];
-        html += `<br>`;
-        if (dxMoonData.elevation > 0) {
-          html += `
-            <b>DX Moon</b><br>
-            Az: ${dxMoonData.azimuth.toFixed(1)}° El: ${dxMoonData.elevation.toFixed(1)}°
-          `;
-        } else {
-          html += `
-            <b>DX Moon</b><br>
-            DX Moon below horizon
-          `;
-        }
-      }
-
-      if (noiseShowSunCheckbox.checked && noiseSunPositions.length && noiseSunPositions[noiseCurrentTimeIndex]) {
-        const sunData = noiseSunPositions[noiseCurrentTimeIndex];
-        html += `<br>`;
-        if (sunData.elevation > 0) {
-          html += `
-            <b>Sun</b><br>
-            Az: ${sunData.azimuth.toFixed(1)}° El: ${sunData.elevation.toFixed(1)}°
-          `;
-        } else {
-          html += `
-            <b>Sun</b><br>
-            Sun below horizon
-          `;
-        }
-      } else if (noiseShowSunCheckbox.checked) {
-        html += `
-          <br><b>Sun</b><br>
-          Sun below horizon
-        `;
-      }
-
-      noiseInfoBox.innerHTML = html;
-      noiseInfoBox.style.display = 'block';
-    }
-
-    function updateNoiseTimeDisplay() {
-      if (!noiseMoonPositions.length || !noiseMoonPositions[noiseCurrentTimeIndex]) {
-        updateNoiseInfoBox();
-        noiseDrawColorBar();
-        return;
-      }
-
-      const time = noiseMoonPositions[noiseCurrentTimeIndex].time;
-      const moonVisible = noiseMoonPositions[noiseCurrentTimeIndex].elevation > 0;
-      const sunVisible = noiseShowSunCheckbox.checked && noiseSunPositions[noiseCurrentTimeIndex]?.elevation > 0;
-
-      updateNoiseInfoBox();
-      noiseDrawColorBar();
-    }
-
-    function noiseChangeTime(index) {
-      if (!noiseMoonPositions.length) return;
-      noiseCurrentTimeIndex = Math.max(0, Math.min(index, noiseMoonPositions.length - 1));
-      updateNoiseMoonMarker();
-      updateNoiseSunMarker();
-      updateNoiseTimeDisplay();
-    }
-
-    function noiseAddTrajectories(selectedDate) {
-      const grid = document.getElementById('qth').value || 'JO89tt';
-      const dxGrid = document.getElementById('dx').value;
-      const coords = maidenheadToLatLon(grid);
-      let dxCoords = null;
-      if (dxGrid && isValidGrid(dxGrid)) {
-        dxCoords = maidenheadToLatLon(dxGrid);
-      }
-
-      if (!coords) {
-        return;
-      }
-
-      const lat = coords.lat;
-      const lon = coords.lon;
-      const observer = new Astronomy.Observer(lat, lon, 0);
-      let dxObserver = null;
-      if (dxCoords) {
-        dxObserver = new Astronomy.Observer(dxCoords.lat, dxCoords.lon, 0);
-      }
-
-      const date = selectedDate ? new Date(selectedDate) : new Date();
-      const startOfDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
-      const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
-
-      noiseMoonTrajectoryGroup.clear();
-      noiseSunTrajectoryGroup.clear();
-      if (noiseMoonMarker) noiseScene.remove(noiseMoonMarker);
-      if (noiseSunMarker) noiseScene.remove(noiseSunMarker);
-      noiseMoonMarker = null;
-      noiseSunMarker = null;
-      noiseMoonPositions = [];
-      noiseDxMoonPositions = [];
-      noiseSunPositions = [];
-      noiseCommonMoonWindow = [];
-      noiseCurrentTimeIndex = 0;
-
-      let moonSegment = [];
-      let sunSegment = [];
-      let commonMoonSegment = [];
-      const moonSegments = [];
-      const sunSegments = [];
-      const commonMoonSegments = [];
-
-      let firstMoonVisibleIndex = -1;
-      let firstSunVisibleIndex = -1;
-
-      for (let minutes = 0; minutes < 1440; minutes += 10) {
-        const time = new Date(startOfDay.getTime() + minutes * 60 * 1000);
-        if (time >= endOfDay) break;
-
-        const moonEq = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, false);
-        const moonHor = Astronomy.Horizon(time, observer, moonEq.ra, moonEq.dec, 'normal');
-        const moonElevationDeg = moonHor.altitude;
-        const moonAzimuthDeg = moonHor.azimuth;
-
-        const azRadMoon = THREE.MathUtils.degToRad(360 - moonAzimuthDeg);
-        const elRadMoon = THREE.MathUtils.degToRad(Math.max(moonElevationDeg, 0));
-        const r = 1;
-        const xMoon = r * Math.cos(elRadMoon) * Math.sin(azRadMoon);
-        const yMoon = r * Math.sin(elRadMoon);
-        const zMoon = r * Math.cos(elRadMoon) * Math.cos(azRadMoon);
-        const moonPoint = new THREE.Vector3(xMoon, yMoon, zMoon);
-
-        if (moonElevationDeg > 0) {
-          moonSegment.push(moonPoint);
-          if (firstMoonVisibleIndex === -1) firstMoonVisibleIndex = minutes / 10;
-        } else {
-          if (moonSegment.length > 1) moonSegments.push(moonSegment);
-          moonSegment = [];
-        }
-        noiseMoonPositions.push({ time, position: moonPoint, azimuth: moonAzimuthDeg, elevation: moonElevationDeg });
-
-        let isCommon = false;
-        if (dxObserver) {
-          const dxMoonEq = Astronomy.Equator(Astronomy.Body.Moon, time, dxObserver, true, false);
-          const dxMoonHor = Astronomy.Horizon(time, dxObserver, dxMoonEq.ra, dxMoonEq.dec, 'normal');
-          const dxMoonElevationDeg = dxMoonHor.altitude;
-          const dxMoonAzimuthDeg = dxMoonHor.azimuth;
-
-          if (dxMoonElevationDeg > 0 && moonElevationDeg > 0) {
-            commonMoonSegment.push(moonPoint);
-            isCommon = true;
-          }
-          noiseDxMoonPositions.push({ time, azimuth: dxMoonAzimuthDeg, elevation: dxMoonElevationDeg });
-        }
-
-        if (isCommon) {
-          noiseCommonMoonWindow.push({ time, index: minutes / 10 });
-        } else if (commonMoonSegment.length > 1) {
-          commonMoonSegments.push(commonMoonSegment);
-          commonMoonSegment = [];
-        }
-
-        const sunEq = Astronomy.Equator(Astronomy.Body.Sun, time, observer, true, false);
-        const sunHor = Astronomy.Horizon(time, observer, sunEq.ra, sunEq.dec, 'normal');
-        const sunElevationDeg = sunHor.altitude;
-        const sunAzimuthDeg = sunHor.azimuth;
-
-        const azRadSun = THREE.MathUtils.degToRad(360 - sunAzimuthDeg);
-        const elRadSun = THREE.MathUtils.degToRad(Math.max(sunElevationDeg, 0));
-        const xSun = r * Math.cos(elRadSun) * Math.sin(azRadSun);
-        const ySun = r * Math.sin(elRadSun);
-        const zSun = r * Math.cos(elRadSun) * Math.cos(azRadSun);
-        const sunPoint = new THREE.Vector3(xSun, ySun, zSun);
-
-        if (sunElevationDeg > 0) {
-          sunSegment.push(sunPoint);
-          if (firstSunVisibleIndex === -1) firstSunVisibleIndex = minutes / 10;
-        } else {
-          if (sunSegment.length > 1) sunSegments.push(sunSegment);
-          sunSegment = [];
-        }
-        noiseSunPositions.push({ time, position: sunPoint, azimuth: sunAzimuthDeg, elevation: sunElevationDeg });
-      }
-
-      if (moonSegment.length > 1) moonSegments.push(moonSegment);
-      if (sunSegment.length > 1) sunSegments.push(sunSegment);
-      if (commonMoonSegment.length > 1) commonMoonSegments.push(commonMoonSegment);
-
-      moonSegments.forEach(seg => {
-        const geom = new THREE.BufferGeometry().setFromPoints(seg);
-        const mat = new THREE.LineBasicMaterial({ color: 0xffff00 });
-        const line = new THREE.Line(geom, mat);
-        line.userData = { isMoonTrajectory: true };
-        noiseMoonTrajectoryGroup.add(line);
-      });
-
-      commonMoonSegments.forEach(seg => {
-        const geom = new THREE.BufferGeometry().setFromPoints(seg);
-        const mat = new THREE.LineBasicMaterial({ color: 0x00ff00, linewidth: 1 });
-        const line = new THREE.Line(geom, mat);
-        line.userData = { isCommonMoonTrajectory: true };
-        noiseMoonTrajectoryGroup.add(line);
-      });
-
-      sunSegments.forEach(seg => {
-        const geom = new THREE.BufferGeometry().setFromPoints(seg);
-        const mat = new THREE.LineBasicMaterial({ color: 0xffa500 });
-        const line = new THREE.Line(geom, mat);
-        line.userData = { isSunTrajectory: true };
-        noiseSunTrajectoryGroup.add(line);
-      });
-
-      noiseSunTrajectoryGroup.visible = noiseShowSunCheckbox.checked;
-
-      if (firstMoonVisibleIndex !== -1) {
-        noiseCurrentTimeIndex = firstMoonVisibleIndex;
-      } else if (noiseShowSunCheckbox.checked && firstSunVisibleIndex !== -1) {
-        noiseCurrentTimeIndex = firstSunVisibleIndex;
-      } else {
-        noiseCurrentTimeIndex = 72;
-      }
-      updateNoiseMoonMarker();
-      updateNoiseSunMarker();
-      updateNoiseTimeDisplay();
-    }
-
-    function isValidGrid(locator) {
-      if (!locator || locator.length < 4 || locator.length > 6) return false;
-      locator = locator.toUpperCase();
-      const regex = /^[A-R]{2}[0-9]{2}([A-X]{2})?$/;
-      return regex.test(locator);
-    }
-
-    function maidenheadToLatLon(locator) {
-      if (!locator || locator.length < 4) return null;
-      locator = locator.toUpperCase();
-      const A = 'A'.charCodeAt(0);
-      let lon = (locator.charCodeAt(0) - A) * 20 - 180;
-      let lat = (locator.charCodeAt(1) - A) * 10 - 90;
-      lon += parseInt(locator[2]) * 2;
-      lat += parseInt(locator[3]) * 1;
-      if (locator.length >= 6) {
-        lon += (locator.charCodeAt(4) - A) * 5 / 60;
-        lat += (locator.charCodeAt(5) - A) * 2.5 / 60;
-      }
-      lon += 2.5 / 60;
-      lat += 1.25 / 60;
-      return { lat, lon };
-    }
-
-    function noiseAddAzimuthCompass() {
-      const compassRadius = 1.05;
-      const labelDistance = 1.2;
-      const compassGroup = new THREE.Group();
-
-      const fontLoader = new THREE.FontLoader();
-      fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-        const directions = [
-          { label: 'N', az: 0, color: 0xff0000 },
-          { label: 'E', az: 90, color: 0xffffff },
-          { label: 'S', az: 180, color: 0xffffff },
-          { label: 'W', az: 270, color: 0xffffff }
-        ];
-
-        directions.forEach(dir => {
-          const azRad = THREE.MathUtils.degToRad(360 - dir.az);
-          const x = labelDistance * Math.sin(azRad);
-          const z = labelDistance * Math.cos(azRad);
-          const y = 0;
-
-          const textGeom = new THREE.TextGeometry(dir.label, {
-            font: font,
-            size: 0.1,
-            height: 0.001
-          });
-          const textMat = new THREE.MeshBasicMaterial({ color: dir.color });
-          const text = new THREE.Mesh(textGeom, textMat);
-          text.position.set(x, y, z);
-          text.lookAt(0, 0, 0);
-          compassGroup.add(text);
-        });
-
-        const ringGeom = new THREE.RingGeometry(compassRadius - 0.002, compassRadius + 0.002, 256);
-        const ringMat = new THREE.MeshBasicMaterial({
-          color: 0xffffff,
-          side: THREE.DoubleSide,
-          transparent: true,
-          opacity: 0.9
-        });
-        const ring = new THREE.Mesh(ringGeom, ringMat);
-        ring.rotation.x = -Math.PI / 2;
-        ring.position.y = 0;
-        compassGroup.add(ring);
-
-        for (let i = 0; i < 360; i += 10) {
-          const angle = THREE.MathUtils.degToRad(360 - i);
-          const isMajor = i % 30 === 0;
-          const outer = compassRadius + 0.02;
-          const inner = compassRadius - (isMajor ? 0.05 : 0.02);
-
-          const x1 = inner * Math.cos(angle);
-          const z1 = inner * Math.sin(angle);
-          const x2 = outer * Math.cos(angle);
-          const z2 = outer * Math.sin(angle);
-
-          const tickGeom = new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(x1, 0, z1),
-            new THREE.Vector3(x2, 0, z2)
-          ]);
-          const tickMat = new THREE.LineBasicMaterial({
-            color: 0xffffff,
-            transparent: true,
-            opacity: isMajor ? 1.0 : 0.5
-          });
-          const tick = new THREE.Line(tickGeom, tickMat);
-          compassGroup.add(tick);
-
-          if (isMajor && ![0, 90, 180, 270].includes(i)) {
-            const labelDist = compassRadius + 0.1;
-            const lx = labelDist * Math.sin(angle);
-            const lz = labelDist * Math.cos(angle);
-
-            const degGeom = new THREE.TextGeometry(i.toString(), {
-              font: font,
-              size: 0.045,
-              height: 0.001
-            });
-            const degMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-            const label = new THREE.Mesh(degGeom, degMat);
-            label.position.set(lx, 0, lz);
-            label.lookAt(0, 0, 0);
-            label.rotation.y += Math.PI;
-            compassGroup.add(label);
-          }
-        }
-
-        noiseScene.add(compassGroup);
-      }, undefined, (error) => {});
-    }
-
-    function noiseParseCsvData(csvText, csvSource) {
-      Papa.parse(csvText, {
-        header: true,
-        delimiter: ";",
-        skipEmptyLines: true,
-        complete: function (results) {
-          noiseRawPoints.length = 0;
-          noiseSpheres.forEach(s => noiseScene.remove(s));
-          noiseSpheres.length = 0;
-          noiseMinNoise = Infinity;
-          noiseMaxNoise = -Infinity;
-
-          const headers = results.meta.fields;
-          const requiredColumns = ['Azimuth', 'Elevation', 'Noise'];
-          const hasRequiredColumns = requiredColumns.every(col => headers.includes(col));
-          if (!hasRequiredColumns) {
-            noiseDemoStatus.textContent = 'Error: CSV must contain Azimuth, Elevation, and Noise columns';
-            noiseDemoStatus.style.color = 'red';
-            noiseDemoStatus.style.display = 'block';
-            return;
-          }
-
-          results.data.forEach(row => {
-            if (row.Valid !== undefined && row.Valid !== "True") return;
-
-            const az = parseFloat(row.Azimuth?.replace(",", "."));
-            const el = parseFloat(row.Elevation?.replace(",", "."));
-            const noise = parseFloat(row.Noise?.replace(",", "."));
-
-            if (isNaN(az) || isNaN(el) || isNaN(noise)) return;
-
-            noiseMinNoise = Math.min(noiseMinNoise, noise);
-            noiseMaxNoise = Math.max(noiseMaxNoise, noise);
-
-            noiseRawPoints.push({ az, el, noise });
-          });
-
-          if (noiseRawPoints.length === 0) {
-            noiseDemoStatus.textContent = 'Error: No valid data points in CSV';
-            noiseDemoStatus.style.color = 'red';
-            noiseDemoStatus.style.display = 'block';
-            return;
-          }
-
-          const steps = noiseCalculateStepSizes();
-          noiseAzStep = steps.azStep;
-          noiseElStep = steps.elStep;
-
-          noiseRawPoints.forEach(point => {
-            const azRad = THREE.MathUtils.degToRad(360 - point.az);
-            const elRad = THREE.MathUtils.degToRad(point.el);
-            const r = 1;
-
-            const x = r * Math.cos(elRad) * Math.sin(azRad);
-            const y = r * Math.sin(elRad);
-            const z = r * Math.cos(elRad) * Math.cos(azRad);
-
-            const geometry = new THREE.SphereGeometry(0.02, 8, 8);
-            const material = new THREE.MeshBasicMaterial({ color: getNoiseColor(point.noise) });
-
-            const sphere = new THREE.Mesh(geometry, material);
-            sphere.position.set(x, y, z);
-
-            sphere.userData = {
-              azimuth: point.az,
-              elevation: point.el,
-              noise: point.noise
-            };
-
-            noiseSpheres.push(sphere);
-            noiseScene.add(sphere);
-          });
-
-          let isCompleteDome = false;
-          if (noiseRawPoints.length > 0) {
-            const azValues = [...new Set(noiseRawPoints.map(p => p.az))].sort((a, b) => a - b);
-            const elValues = [...new Set(noiseRawPoints.map(p => p.el))].sort((a, b) => a - b);
-            const azRange = azValues[azValues.length - 1] - azValues[0];
-            const elRange = elValues[elValues.length - 1] - elValues[0];
-            isCompleteDome = azRange > 300 && elRange > 80;
-          }
-
-          if (!noiseRawPoints.length || isCompleteDome) {
-            const distance = 2;
-            const azRad = THREE.MathUtils.degToRad(180);
-            const elRad = THREE.MathUtils.degToRad(30);
-            noiseCamera.position.set(
-              distance * Math.cos(elRad) * Math.sin(azRad),
-              distance * Math.sin(elRad),
-              distance * Math.cos(elRad) * Math.cos(azRad)
-            );
-            noiseCamera.lookAt(0, 0, 0);
-            noiseControls.target.set(0, 0, 0);
-          } else {
-            const boundingBox = new THREE.Box3();
-            noiseSpheres.forEach(s => boundingBox.expandByPoint(s.position));
-
-            const center = new THREE.Vector3();
-            boundingBox.getCenter(center);
-
-            const size = new THREE.Vector3();
-            boundingBox.getSize(size);
-            const maxDim = Math.max(size.x, size.y, size.z) || 2;
-
-            let avgPosition = new THREE.Vector3();
-            noiseSpheres.forEach(s => avgPosition.add(s.position));
-            avgPosition.divideScalar(noiseSpheres.length);
-
-            const directionToData = avgPosition.clone().normalize();
-            const distance = maxDim * 2;
-            noiseCamera.position.copy(directionToData.clone().multiplyScalar(distance));
-            noiseCamera.lookAt(center);
-            noiseControls.target.copy(center);
-          }
-
-          noiseControls.update();
-          noiseAddAzimuthCompass();
-          updateNoiseTimeDisplay();
-          noiseDrawColorBar();
-
-          if (csvSource === 'demo') {
-            noiseDemoStatus.textContent = 'Demo loaded!';
-            noiseDemoStatus.style.color = 'red';
-            noiseDemoStatus.style.display = 'block';
-          } else if (csvSource === 'stored') {
-            noiseDemoStatus.textContent = 'Stored CSV loaded';
-            noiseDemoStatus.style.color = 'blue';
-            noiseDemoStatus.style.display = 'block';
-          } else {
-            noiseDemoStatus.textContent = 'CSV loaded!';
-            noiseDemoStatus.style.color = 'blue';
-            noiseDemoStatus.style.display = 'block';
-          }
-        },
-        error: function (error) {
-          noiseDemoStatus.textContent = 'Error: Invalid CSV format';
-          noiseDemoStatus.style.color = 'red';
-          noiseDemoStatus.style.display = 'block';
-        }
-      });
-    }
-
-    function initNoiseMap() {
-      const container = document.getElementById('noiseMapContainer');
-
-      // Create noiseControls
-      const noiseControls = document.createElement('div');
-      noiseControls.style.position = 'absolute';
-      noiseControls.style.top = '10px';
-      noiseControls.style.left = '10px';
-      noiseControls.style.background = 'white';
-      noiseControls.style.padding = '5px';
-      container.appendChild(noiseControls);
-
-      noiseCsvUpload = document.createElement('input');
-      noiseCsvUpload.type = 'file';
-      noiseCsvUpload.accept = '.csv';
-      noiseControls.appendChild(noiseCsvUpload);
-
-      const sunLabel = document.createElement('label');
-      noiseShowSunCheckbox = document.createElement('input');
-      noiseShowSunCheckbox.type = 'checkbox';
-      noiseShowSunCheckbox.checked = false;
-      sunLabel.appendChild(noiseShowSunCheckbox);
-      sunLabel.append(' Show Sun');
-      noiseControls.appendChild(sunLabel);
-
-      // colorBarContainer
-      noiseColorBarContainer = document.createElement('div');
-      noiseColorBarContainer.style.position = 'absolute';
-      noiseColorBarContainer.style.bottom = '10px';
-      noiseColorBarContainer.style.right = '10px';
-      noiseColorBarContainer.style.display = 'flex';
-      noiseColorBarContainer.style.flexDirection = 'column';
-      noiseColorBarContainer.style.alignItems = 'center';
-      container.appendChild(noiseColorBarContainer);
-
-      noiseMinNoiseLabel = document.createElement('span');
-      noiseColorBarContainer.appendChild(noiseMinNoiseLabel);
-
-      noiseColorBarCanvas = document.createElement('canvas');
-      noiseColorBarCanvas.width = 20;
-      noiseColorBarCanvas.height = 200;
-      noiseColorBarCanvas.style.width = '20px';
-      noiseColorBarCanvas.style.height = '200px';
-      noiseColorBarContainer.appendChild(noiseColorBarCanvas);
-
-      noiseColorBarContext = noiseColorBarCanvas.getContext('2d');
-
-      noiseMaxNoiseLabel = document.createElement('span');
-      noiseColorBarContainer.appendChild(noiseMaxNoiseLabel);
-
-      // infoBox
-      noiseInfoBox = document.createElement('div');
-      noiseInfoBox.style.position = 'absolute';
-      noiseInfoBox.style.bottom = '10px';
-      noiseInfoBox.style.left = '10px';
-      noiseInfoBox.style.background = 'white';
-      noiseInfoBox.style.padding = '5px';
-      noiseInfoBox.style.border = '1px solid #ccc';
-      noiseInfoBox.style.display = 'none';
-      container.appendChild(noiseInfoBox);
-
-      // demoStatus
-      noiseDemoStatus = document.createElement('div');
-      noiseDemoStatus.style.position = 'absolute';
-      noiseDemoStatus.style.top = '50px';
-      noiseDemoStatus.style.left = '10px';
-      noiseDemoStatus.style.display = 'none';
-      container.appendChild(noiseDemoStatus);
-
-      // close button
-      noiseCloseButton = document.createElement('button');
-      noiseCloseButton.textContent = 'Close';
-      noiseCloseButton.style.position = 'absolute';
-      noiseCloseButton.style.top = '5px';
-      noiseCloseButton.style.right = '5px';
-      container.appendChild(noiseCloseButton);
-
-      // canvas div
-      const canvasDiv = document.createElement('div');
-      canvasDiv.style.width = '100%';
-      canvasDiv.style.height = '100%';
-      container.appendChild(canvasDiv);
-
-      noiseScene = new THREE.Scene();
-      noiseMoonTrajectoryGroup = new THREE.Group();
-      noiseSunTrajectoryGroup = new THREE.Group();
-      noiseScene.add(noiseMoonTrajectoryGroup);
-      noiseScene.add(noiseSunTrajectoryGroup);
-
-      noiseRenderer = new THREE.WebGLRenderer({ antialias: true });
-      noiseRenderer.setSize(canvasDiv.clientWidth, canvasDiv.clientHeight);
-      canvasDiv.appendChild(noiseRenderer.domElement);
-
-      noiseCamera = new THREE.PerspectiveCamera(75, canvasDiv.clientWidth / canvasDiv.clientHeight, 0.1, 1000);
-      const defaultDistance = 2;
-      const defaultAzRad = THREE.MathUtils.degToRad(180);
-      const defaultElRad = THREE.MathUtils.degToRad(30);
-      noiseCamera.position.set(
-        defaultDistance * Math.cos(defaultElRad) * Math.sin(defaultAzRad),
-        defaultDistance * Math.sin(defaultElRad),
-        defaultDistance * Math.cos(defaultElRad) * Math.cos(defaultAzRad)
-      );
-      noiseCamera.lookAt(0, 0, 0);
-
-      noiseControls = new THREE.OrbitControls(noiseCamera, noiseRenderer.domElement);
-      noiseControls.enableDamping = true;
-      noiseControls.target.set(0, 0, 0);
-      noiseControls.update();
-
-      noiseRaycaster = new THREE.Raycaster();
-      noiseMouse = new THREE.Vector2();
-
-      noiseAddAzimuthCompass();
-
-      // Load stored or demo CSV
-      const storedCsv = localStorage.getItem('skyObserverCsv');
-      if (storedCsv) {
-        noiseParseCsvData(storedCsv, 'stored');
-      } else {
-        fetch('2025-05-29_20.44.04.csv')
-          .then(response => response.text())
-          .then(csv => noiseParseCsvData(csv, 'demo'))
-          .catch(error => {
-            console.error('Error loading demo CSV:', error);
-            const distance = 2;
-            const azRad = THREE.MathUtils.degToRad(180);
-            const elRad = THREE.MathUtils.degToRad(30);
-            noiseCamera.position.set(
-              distance * Math.cos(elRad) * Math.sin(azRad),
-              distance * Math.sin(elRad),
-              distance * Math.cos(elRad) * Math.cos(azRad)
-            );
-            noiseCamera.lookAt(0, 0, 0);
-            noiseControls.target.set(0, 0, 0);
-            noiseControls.update();
-            noiseAddTrajectories(document.getElementById('date').value);
-          });
-      }
-
-      // Event listeners
-      noiseShowSunCheckbox.addEventListener('change', () => {
-        noiseSunTrajectoryGroup.visible = noiseShowSunCheckbox.checked;
-        updateNoiseSunMarker();
-        updateNoiseTimeDisplay();
-      });
-
-      noiseCsvUpload.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const csvText = event.target.result;
-          localStorage.setItem('skyObserverCsv', csvText);
-          noiseParseCsvData(csvText, 'uploaded');
-        };
-        reader.readAsText(file);
-      });
-
-      noiseCloseButton.addEventListener('click', () => {
-        toggleNoiseMap.checked = false;
-        container.style.display = 'none';
-        cancelAnimationFrame(noiseAnimateId);
-        removeNoiseListeners();
-      });
-
-      // Click event for raycaster
-      noiseRenderer.domElement.addEventListener('click', (event) => {
-        const rect = noiseRenderer.domElement.getBoundingClientRect();
-        noiseMouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-        noiseMouse.y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-        noiseRaycaster.setFromCamera(noiseMouse, noiseCamera);
-        const intersects = noiseRaycaster.intersectObjects([
-          ...noiseSpheres,
-          noiseMoonMarker,
-          noiseSunMarker
-        ].filter(obj => obj !== null));
-
-        if (intersects.length > 0) {
-          const clickedObject = intersects[0].object;
-
-          if (clickedObject === noiseMoonMarker && noiseMoonPositions[noiseCurrentTimeIndex] && noiseMoonPositions[noiseCurrentTimeIndex].elevation > 0) {
-            const moonData = noiseMoonPositions[noiseCurrentTimeIndex];
-            const noisePoint = noiseInterpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
-            const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A (Outside Dome)';
-            noiseInfoBox.innerHTML = `
-              <b>Moon</b><br>
-              Az: ${moonData.azimuth.toFixed(1)}° El: ${moonData.elevation.toFixed(1)}°<br>
-              ${noiseText}
-            `;
-            noiseInfoBox.style.display = 'block';
-          } else if (clickedObject === noiseSunMarker && noiseShowSunCheckbox.checked && noiseSunPositions[noiseCurrentTimeIndex] && noiseSunPositions[noiseCurrentTimeIndex].elevation > 0) {
-            const sunData = noiseSunPositions[noiseCurrentTimeIndex];
-            noiseInfoBox.innerHTML = `
-              <b>Sun</b><br>
-              Az: ${sunData.azimuth.toFixed(1)}° El: ${sunData.elevation.toFixed(1)}°
-            `;
-            noiseInfoBox.style.display = 'block';
-          } else if (clickedObject.userData?.noise !== undefined) {
-            const { azimuth, elevation, noise } = clickedObject.userData;
-            noiseInfoBox.innerHTML = `
-              <b>Measurement</b><br>
-              Az: ${azimuth.toFixed(1)}° El: ${elevation.toFixed(1)}°<br>
-              Noise: ${noise.toFixed(2)} dB
-            `;
-            noiseInfoBox.style.display = 'block';
-          }
-        } else {
-          updateNoiseInfoBox();
-        }
-      });
-
-      // Touch event
-      noiseRenderer.domElement.addEventListener('touchend', (event) => {
-        const touch = event.changedTouches[0];
-        if (!touch) return;
-
-        const rect = noiseRenderer.domElement.getBoundingClientRect();
-        noiseMouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
-        noiseMouse.y = - ((touch.clientY - rect.top) / rect.height) * 2 + 1;
-
-        noiseRaycaster.setFromCamera(noiseMouse, noiseCamera);
-        const intersects = noiseRaycaster.intersectObjects([
-          ...noiseSpheres,
-          noiseMoonMarker,
-          noiseSunMarker
-        ].filter(obj => obj !== null));
-
-        if (intersects.length > 0) {
-          const clickedObject = intersects[0].object;
-
-          if (clickedObject === noiseMoonMarker && noiseMoonPositions[noiseCurrentTimeIndex] && noiseMoonPositions[noiseCurrentTimeIndex].elevation > 0) {
-            const moonData = noiseMoonPositions[noiseCurrentTimeIndex];
-            const noisePoint = noiseInterpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
-            const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A (Outside Dome)';
-            noiseInfoBox.innerHTML = `
-              <b>Moon</b><br>
-              Az: ${moonData.azimuth.toFixed(1)}° El: ${moonData.elevation.toFixed(1)}°<br>
-              ${noiseText}
-            `;
-            noiseInfoBox.style.display = 'block';
-          } else if (clickedObject === noiseSunMarker && noiseShowSunCheckbox.checked && noiseSunPositions[noiseCurrentTimeIndex] && noiseSunPositions[noiseCurrentTimeIndex].elevation > 0) {
-            const sunData = noiseSunPositions[noiseCurrentTimeIndex];
-            noiseInfoBox.innerHTML = `
-              <b>Sun</b><br>
-              Az: ${sunData.azimuth.toFixed(1)}° El: ${sunData.elevation.toFixed(1)}°
-            `;
-            noiseInfoBox.style.display = 'block';
-          } else if (clickedObject.userData?.noise !== undefined) {
-            const { azimuth, elevation, noise } = clickedObject.userData;
-            noiseInfoBox.innerHTML = `
-              <b>Measurement</b><br>
-              Az: ${azimuth.toFixed(1)}° El: ${elevation.toFixed(1)}°<br>
-              Noise: ${noise.toFixed(2)} dB
-            `;
-            noiseInfoBox.style.display = 'block';
-          }
-        } else {
-          updateNoiseInfoBox();
-        }
-      });
-
-      function noiseAnimate() {
-        noiseAnimateId = requestAnimationFrame(noiseAnimate);
-        noiseControls.update();
-        noiseRenderer.render(noiseScene, noiseCamera);
-      }
-
-      noiseAnimate();
-
-      // Resize observer
-      noiseResizeObserver = new ResizeObserver(() => {
-        noiseCamera.aspect = noiseRenderer.domElement.clientWidth / noiseRenderer.domElement.clientHeight;
-        noiseCamera.updateProjectionMatrix();
-        noiseRenderer.setSize(noiseRenderer.domElement.clientWidth, noiseRenderer.domElement.clientHeight);
-        noiseDrawColorBar();
-      });
-      noiseResizeObserver.observe(noiseRenderer.domElement.parentElement);
-
-      noiseMapInitialized = true;
-    }
-
-    // Listeners functions
-    function updateNoiseTraj() {
-      noiseAddTrajectories(document.getElementById('date').value);
-      noiseChangeTime(getNoiseCurrentIndex());
-      updateNoiseTimeDisplay();
-    }
-
-    function updateNoiseTime() {
-      noiseChangeTime(getNoiseCurrentIndex());
-      updateNoiseTimeDisplay();
-    }
-
-    function getNoiseCurrentIndex() {
-      return document.getElementById('hour').value * 3;
-    }
-
-    toggleNoiseMap.addEventListener('change', () => {
-      const container = document.getElementById('noiseMapContainer');
-      if (toggleNoiseMap.checked) {
-        if (!noiseMapInitialized) {
-          initNoiseMap();
-        }
-        container.style.display = 'block';
-        noiseAddTrajectories(document.getElementById('date').value);
-        noiseChangeTime(getNoiseCurrentIndex());
-        updateNoiseTimeDisplay();
-        // Add listeners
-        document.getElementById('qth').addEventListener('input', updateNoiseTraj);
-        document.getElementById('dx').addEventListener('input', updateNoiseTraj);
-        document.getElementById('date').addEventListener('change', updateNoiseTraj);
-        document.getElementById('hour').addEventListener('input', updateNoiseTime);
-      } else {
-        container.style.display = 'none';
-        cancelAnimationFrame(noiseAnimateId);
-        // Remove listeners
-        document.getElementById('qth').removeEventListener('input', updateNoiseTraj);
-        document.getElementById('dx').removeEventListener('input', updateNoiseTraj);
-        document.getElementById('date').removeEventListener('change', updateNoiseTraj);
-        document.getElementById('hour').removeEventListener('input', updateNoiseTime);
-      }
-    });
-
 </script>
 <!-- Ko-Fi -->
 <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
