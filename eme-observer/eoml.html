@@ -54,12 +54,14 @@
                                                                             }
                                                                         }
                                                                     </script>
-                                                                    <script src="a.ob.js"></script>
                                                                     <link rel="stylesheet" href="/leaflet/leaflet.css" />
-                                                                    <script src="https://unpkg.com/leaflet.vectorgrid@latest/dist/Leaflet.VectorGrid.js"></script>
-                                                                    <script src="https://cdn.jsdelivr.net/npm/text-image/dist/text-image.js"></script>
-                                                                    <script src="https://ha8tks.github.io/Leaflet.CQzones/src/L.CQzones.js"></script>
-                                                                    <script src="https://ha8tks.github.io/Leaflet.Maidenhead/src/L.Maidenhead.js"></script>
+                                                                        <!-- Move leaflet.js before dependent scripts -->
+                                                                        <script src="/leaflet/leaflet.js"></script>
+                                                                        <script src="https://unpkg.com/leaflet.vectorgrid@latest/dist/Leaflet.VectorGrid.js"></script>
+                                                                        <script src="https://cdn.jsdelivr.net/npm/text-image/dist/text-image.js"></script>
+                                                                        <script src="https://ha8tks.github.io/Leaflet.CQzones/src/L.CQzones.js"></script>
+                                                                        <script src="https://ha8tks.github.io/Leaflet.Maidenhead/src/L.Maidenhead.js"></script>
+                                                                        <script src="a.ob.js"></script>
                                                                     <style>
                                                                         html, body {
                                                                             margin: 0;
@@ -782,7 +784,6 @@
 <script src="chart.js"></script>
 <script src="chartjs-plugin-annotation@1.4.0"></script>
 <script src="l.ob.js"></script>
-<script src="/leaflet/leaflet.js"></script>
 <script src="/leaflet/Leaflet.greatCircle.js"></script>
 <script>
     let chart;
@@ -2456,20 +2457,28 @@
                                                         layers: [osm]
                                                     });
 
-                                                    // Define CQ Zones and Maidenhead layers
-                                                    var cqzones = L.cqzones();
-                                                    var maidenhead = L.maidenhead();
+                                                    // Define CQ Zones and Maidenhead layers with error handling
+                                                    var cqzones, maidenhead;
+                                                    if (typeof L.cqzones === 'function') {
+                                                        cqzones = L.cqzones();
+                                                        cqzones.addTo(map); // Add CQ Zones layer to the map by default
+                                                    } else {
+                                                        console.error('L.cqzones is not defined. CQ Zones layer will not be available.');
+                                                    }
+                                                    if (typeof L.maidenhead === 'function') {
+                                                        maidenhead = L.maidenhead();
+                                                    } else {
+                                                        console.error('L.maidenhead is not defined. Maidenhead layer will not be available.');
+                                                    }
 
-                                                    // Add CQ Zones layer to the map by default
-                                                    cqzones.addTo(map);
+                                                    // Add layer control, including only available layers
+                                                    var overlays = {};
+                                                    if (cqzones) overlays["<span style='color: black'>CQ Zones</span>"] = cqzones;
+                                                    if (maidenhead) overlays["<span style='color: black'>Maidenhead</span>"] = maidenhead;
 
-                                                    // Add layer control
                                                     L.control.layers({
                                                         'Map': osm
-                                                    }, {
-                                                        "<span style='color: black'>CQ Zones</span>": cqzones,
-                                                        "<span style='color: black'>Maidenhead</span>": maidenhead
-                                                    }).addTo(map);
+                                                    }, overlays).addTo(map);
 
                                                     const band = document.getElementById('bandSelect').value;
                                                     const jsonFile = bandConfig[band].jsonFile;
