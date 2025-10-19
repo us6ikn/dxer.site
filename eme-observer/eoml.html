@@ -62,7 +62,6 @@
                                                                         <script src="https://ha8tks.github.io/Leaflet.CQzones/src/L.CQzones.js"></script>
                                                                         <script src="https://ha8tks.github.io/Leaflet.Maidenhead/src/L.Maidenhead.js"></script>
                                                                         <script src="a.ob.js"></script>
-                                                                        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
                                                                     <style>
                                                                         html, body {
                                                                             margin: 0;
@@ -729,9 +728,6 @@
                                                                         .leaflet-control-layers-overlays {
                                                                             margin-top: 5px;
                                                                         }
-                                                                        .noise-popup .leaflet-popup-content {
-                                                                            width: 620px !important;
-                                                                        }
                                                                         
                                                                     </style>
                                                                     
@@ -801,14 +797,6 @@
         <div id="moonChartWrapper" style="display: block;">
           <div id="moonChartLabel"></div>
           <canvas id="moonDistanceChart"></canvas>
-        </div>
-        <div>
-          <label for="csvFile">Upload CSV:</label>
-          <input type="file" id="csvFile" accept=".csv">
-        </div>
-        <div>
-          <input type="checkbox" id="showDome">
-          <label for="showDome">Show Noise Dome</label>
         </div>
       </div>
     </div>
@@ -3031,109 +3019,6 @@
             if (moonChart) moonChart.resize();
         }
     });
-    
-    let noiseData = [];
-    let noisePopup = null;
-    
-    document.getElementById('csvFile').addEventListener('change', (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const text = e.target.result;
-          noiseData = parseCSV(text);
-        };
-        reader.readAsText(file);
-      }
-    });
-    
-    function parseCSV(text) {
-      const lines = text.trim().split('\n');
-      const data = [];
-      for (let i = 1; i < lines.length; i++) { // skip header
-        const parts = lines[i].split(';');
-        if (parts.length >= 7) {
-          const az = parseFloat(parts[4].replace(',', '.'));
-          const el = parseFloat(parts[5].replace(',', '.'));
-          const noise = parseFloat(parts[6].replace(',', '.'));
-          if (!isNaN(az) && !isNaN(el) && !isNaN(noise)) {
-            data.push({az, el, noise});
-          }
-        }
-      }
-      return data;
-    }
-    
-    document.getElementById('showDome').addEventListener('change', (e) => {
-      if (e.target.checked) {
-        if (noiseData.length === 0) {
-          alert('Please upload CSV first');
-          e.target.checked = false;
-          return;
-        }
-        showNoiseDome();
-      } else {
-        if (noisePopup) {
-          noisePopup.remove();
-          noisePopup = null;
-        }
-      }
-    });
-    
-    function showNoiseDome() {
-      const content = document.createElement('div');
-      content.style.width = '600px';
-      content.style.height = '600px';
-      content.id = 'noisePlot';
-      noisePopup = L.popup({
-        maxWidth: 620,
-        minWidth: 620,
-        className: 'noise-popup'
-      }).setLatLng(map.getCenter())
-        .setContent(content)
-        .openOn(map);
-      setTimeout(() => {
-        renderNoisePlot();
-      }, 100);
-    }
-    
-    function renderNoisePlot() {
-      const x = [];
-      const y = [];
-      const z = [];
-      const colors = [];
-      noiseData.forEach(p => {
-        const elRad = degToRad(p.el);
-        const azRad = degToRad(p.az);
-        const hdist = Math.cos(elRad);
-        x.push(hdist * Math.sin(azRad));
-        y.push(hdist * Math.cos(azRad));
-        z.push(Math.sin(elRad));
-        colors.push(p.noise);
-      });
-      const data = [{
-        type: 'mesh3d',
-        x: x,
-        y: y,
-        z: z,
-        intensity: colors,
-        colorscale: 'Viridis',
-        showscale: true
-      }];
-      const layout = {
-        title: 'EME Noise Dome',
-        scene: {
-          aspectmode: 'cube',
-          xaxis: {title: 'X'},
-          yaxis: {title: 'Y'},
-          zaxis: {title: 'Z'}
-        },
-        width: 600,
-        height: 600
-      };
-      Plotly.newPlot('noisePlot', data, layout);
-    }
-    
 </script>
 <!-- Ko-Fi -->
 <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
