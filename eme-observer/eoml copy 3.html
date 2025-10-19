@@ -56,10 +56,6 @@
                                                                     </script>
                                                                     <script src="a.ob.js"></script>
                                                                     <link rel="stylesheet" href="/leaflet/leaflet.css" />
-                                                                    <script src="https://unpkg.com/leaflet.vectorgrid@latest/dist/Leaflet.VectorGrid.js"></script>
-                                                                    <script src="https://cdn.jsdelivr.net/npm/text-image/dist/text-image.js"></script>
-                                                                    <script src="https://ha8tks.github.io/Leaflet.CQzones/src/L.CQzones.js"></script>
-                                                                    <script src="https://ha8tks.github.io/Leaflet.Maidenhead/src/L.Maidenhead.js"></script>
                                                                     <style>
                                                                         html, body {
                                                                             margin: 0;
@@ -687,24 +683,6 @@
                                                                         .metric-sgra-sep {
                                                                             color: #800080; /* Purple for Sgr A separation */
                                                                             font-weight: bold;
-                                                                        }
-                                                                        .leaflet-control-layers {
-                                                                            background-color: rgba(255, 255, 255, 0.95);
-                                                                            border-radius: 8px;
-                                                                            padding: 10px;
-                                                                            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-                                                                            font-family: 'Arial, sans-serif';
-                                                                            font-size: 12px;
-                                                                        }
-                                                                        .leaflet-control-layers label {
-                                                                            font-weight: normal;
-                                                                            color: #2c3e50;
-                                                                        }
-                                                                        .leaflet-control-layers input[type="checkbox"] {
-                                                                            margin-right: 5px;
-                                                                        }
-                                                                        .leaflet-control-layers-overlays {
-                                                                            margin-top: 5px;
                                                                         }
                                                                     </style>
                                                                     
@@ -2440,35 +2418,14 @@
 
                                             function initMap() {
                                                 try {
-                                                    // Define tile layer
-                                                    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                                                        minZoom: 0,
-                                                        maxZoom: 20
-                                                    });
-
-                                                    // Initialize map with the tile layer
                                                     map = L.map('map', {
                                                         zoom: 2,
                                                         center: [0, 0],
                                                         gestureHandling: true,
-                                                        fullscreenControl: false,
-                                                        layers: [osm]
+                                                        fullscreenControl: false
                                                     });
-
-                                                    // Define CQ Zones and Maidenhead layers
-                                                    var cqzones = L.cqzones();
-                                                    var maidenhead = L.maidenhead();
-
-                                                    // Add CQ Zones layer to the map by default
-                                                    cqzones.addTo(map);
-
-                                                    // Add layer control
-                                                    L.control.layers({
-                                                        'Map': osm
-                                                    }, {
-                                                        "<span style='color: black'>CQ Zones</span>": cqzones,
-                                                        "<span style='color: black'>Maidenhead</span>": maidenhead
+                                                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                                                     }).addTo(map);
 
                                                     const band = document.getElementById('bandSelect').value;
@@ -2486,10 +2443,12 @@
                                                         })
                                                         .catch(error => {
                                                             console.error(`Error fetching ${jsonFile} in initMap:`, error);
+                                                            // Optionally display an error message to the user
                                                             alert(`Failed to load station data for ${band}. Please try again later.`);
                                                         });
                                                 } catch (error) {
                                                     console.error('Error initializing map:', error);
+                                                    // Display fallback message to user
                                                     document.getElementById('map').innerHTML = '<p style="color: red; text-align: center;">Failed to load map. Please check your internet connection or try again later.</p>';
                                                 }
                                             }
