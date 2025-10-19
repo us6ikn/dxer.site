@@ -374,9 +374,7 @@
                                                                             color: #000;
                                                                             font-weight: bold;
                                                                         }
-                                                                        .leaflet-popup-content {
-                                                                            max-width: 350px !important; /* Increase popup width if needed */
-                                                                        }
+                                                                        
                                                                         .button-group-infowindow {
                                                                             display: flex;
                                                                             gap: 3px;
@@ -384,12 +382,27 @@
                                                                             flex-wrap: wrap;
                                                                             justify-content: flex-start;
                                                                         }
+                                                                        /* Ensure popup content is wide enough for images */
+                                                                        .leaflet-popup-content {
+                                                                            min-width: 280px !important; /* Slightly less than 300px to account for padding */
+                                                                            max-width: 300px !important; /* Reinforce Leaflet's default max-width */
+                                                                            box-sizing: border-box; /* Ensure padding is included in width calculations */
+                                                                        }
+
+                                                                        /* Style the image container to prevent overflow */
+                                                                        #image-container {
+                                                                            width: 100%; /* Ensure container spans full popup width */
+                                                                            overflow: hidden; /* Prevent image from overflowing container */
+                                                                            margin-top: 5px; /* Spacing above container */
+                                                                        }
+
+                                                                        /* Constrain images within the container */
                                                                         #image-container img {
-                                                                                max-width: 100%;
-                                                                                height: auto;
-                                                                                display: block;
-                                                                                margin-top: 5px;
-                                                                            }
+                                                                            max-width: 100%; /* Fit within container */
+                                                                            height: auto; /* Maintain aspect ratio */
+                                                                            display: block; /* Prevent inline spacing issues */
+                                                                            margin: 0 auto; /* Center the image */
+                                                                        }
                                                                         .sked-button {
                                                                             font-size: 12px;
                                                                             padding: 2px 6px;
