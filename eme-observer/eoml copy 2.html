@@ -1654,8 +1654,8 @@
         const floorIdx = Math.floor(index);
         const ceilIdx = Math.ceil(index);
         const frac = index - floorIdx;
-        const relFloor = computeRelativeAtIndex(floorIdx, qthDayData, dxDayData);
-        const relCeil = computeRelativeAtIndex(ceilIdx, qthDayData, dxDayData);
+        const relFloor = computeRelativeAtIndex(floorIdx, qthDayData, dxData);
+        const relCeil = computeRelativeAtIndex(ceilIdx, qthDayData, dxData);
         currentRelRate = interpolate(relFloor.libration * 1000, relCeil.libration * 1000, frac);
         currentRelDoppler = interpolate(relFloor.doppler, relCeil.doppler, frac);
         currentPolOffset = interpolate(relFloor.pol, relCeil.pol, frac);
@@ -2801,9 +2801,7 @@
                                                             }
                                                             chartLabel.innerHTML = '<span class="metric-locator">No data for QTH</span>';
                                                         } else {
-                                                            setTimeout(() => {
-                                                                updateChart(hourIndex, isRealTimeMode);
-                                                            }, 0);
+                                                            updateChart(hourIndex, isRealTimeMode);
                                                         }
                                                     } catch (e) {
                                                         console.error(`Error computing libration for QTH ${locator}: ${e.message}`);
@@ -2845,9 +2843,7 @@
                                                             }
                                                             dxChartLabel.innerHTML = '<span class="metric-locator">No data for DX</span>';
                                                         } else {
-                                                            setTimeout(() => {
-                                                                updateChart(hourIndex, isRealTimeMode);
-                                                            }, 0);
+                                                            updateChart(hourIndex, isRealTimeMode);
                                                         }
                                                     } catch (e) {
                                                         console.error(`Error computing libration for DX ${locator}: ${e.message}`);
