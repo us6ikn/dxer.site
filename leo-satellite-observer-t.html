@@ -324,8 +324,8 @@
           ];
 
           circles.forEach(circle => {
-              // Draw footprint and keep reference
-              const greatCircle = L.greatCircle([coords.lat, coords.lng], {
+              // Draw footprint
+              L.greatCircle([coords.lat, coords.lng], {
                   radius: circle.radius,
                   color: circle.strokeColor || "#FF0000",
                   fillOpacity: circle.fillOpacity !== undefined ? circle.fillOpacity : 0.05,
@@ -336,21 +336,17 @@
                   maxCopies: -1
               }).addTo(map);
 
-              // Use the generated coordinates from the greatCircle
-              // greatCircle.coords is an array of {lat, lng}
-              if (greatCircle.coords && greatCircle.coords.length > 0) {
-                  // Pick a point at 25% along the curve
-                  const index = Math.floor(greatCircle.coords.length * 0.25);
-                  const labelPoint = greatCircle.coords[index];
+              // Place label at an approximate point along the footprint
+              // Use the same center and radius
+              const labelPoint = destinationPoint(coords.lat, coords.lng, circle.radius, circle.angle);
 
-                  L.marker([labelPoint.lat, labelPoint.lng], { opacity: 0 })
-                   .bindTooltip(circle.label, {
-                       permanent: true,
-                       direction: 'right',
-                       className: 'sat-label',
-                       offset: [5, 0]
-                   }).addTo(map);
-              }
+              L.marker([labelPoint.lat, labelPoint.lng], { opacity: 0 })
+               .bindTooltip(circle.label, {
+                   permanent: true,
+                   direction: 'right',
+                   className: 'sat-label',
+                   offset: [5, 0]
+               }).addTo(map);
           });
 
 
