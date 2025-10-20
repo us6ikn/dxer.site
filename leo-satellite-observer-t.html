@@ -244,6 +244,19 @@
       var openInfoWindow = null; // Track open popup
       const BLINKING_GIF_URL = 'img/rover1.gif?v=1';
 
+      function destinationPoint(lat, lon, distance, bearing) {
+        const R = 6371000; // Earth radius in meters
+        const rad = Math.PI / 180;
+        const deg = 180 / Math.PI;
+        lat = lat * rad;
+        lon = lon * rad;
+        bearing = bearing * rad;
+        const d = distance / R;
+        const lat2 = Math.asin(Math.sin(lat) * Math.cos(d) + Math.cos(lat) * Math.sin(d) * Math.cos(bearing));
+        const lon2 = lon + Math.atan2(Math.sin(bearing) * Math.sin(d) * Math.cos(lat), Math.cos(d) - Math.sin(lat) * Math.sin(lat2));
+        return { lat: lat2 * deg, lng: lon2 * deg };
+      }
+
       function calculateCoordinates(gridLocator) {
         // Validate and calculate coordinates from grid locator
         gridLocator = gridLocator.toUpperCase();
@@ -440,8 +453,8 @@
             }).addTo(map);
 
             // Add label
-            const labelPos = L.latLng(coords.lat, coords.lng).atDistanceBearing(circle.radius, circle.angle * Math.PI / 180);
-            L.marker(labelPos, {
+            const labelCoords = destinationPoint(coords.lat, coords.lng, circle.radius, circle.angle);
+            L.marker([labelCoords.lat, labelCoords.lng], {
               icon: L.divIcon({
                 className: 'label',
                 html: `<span style="color: black; font-size: 12px; font-weight: bold;">${circle.label}</span>`,
@@ -451,6 +464,9 @@
           });
         }
       }
+
+      // Initialize the map on page load without grid locator
+      initMap('');
     </script>
 
     <!-- Ko-fi widget -->
