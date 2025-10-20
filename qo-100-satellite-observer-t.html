@@ -241,6 +241,40 @@
           "<span style='color: black'>QTH Locators</span>": maidenhead
         }).addTo(map);
 
+        // Draw default circle at page load
+        const defaultCircle = {
+          center: { lat: 0.0, lng: 25.8110 },
+          radius: 9050000,
+          strokeColor: "#0000FF",  // optional: choose a color
+          fillOpacity: 0.05,
+          label: "Default Zone",
+          angle: 0 // angle for optional label placement
+        };
+
+        // Draw the circle
+        L.greatCircle([defaultCircle.center.lat, defaultCircle.center.lng], {
+            radius: defaultCircle.radius,
+            color: defaultCircle.strokeColor,
+            fillOpacity: defaultCircle.fillOpacity,
+            weight: 1,
+            wrapElements: true,
+            clipLat: 85,
+            degStep: 0.5,
+            maxCopies: -1
+        }).addTo(map);
+
+        // Optional: add label at north (or any angle)
+        const labelPoint = destinationPoint(defaultCircle.center.lat, defaultCircle.center.lng, defaultCircle.radius, defaultCircle.angle);
+        L.marker([labelPoint.lat, labelPoint.lng], {
+            icon: L.divIcon({
+                className: 'sat-label',
+                html: defaultCircle.label,
+                iconSize: [60, 20],
+                iconAnchor: [30, 10]
+            }),
+            interactive: false
+        }).addTo(map);
+
 
         var markersCluster = L.markerClusterGroup({
           spiderfyOnMaxZoom: true,
