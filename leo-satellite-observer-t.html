@@ -405,9 +405,6 @@
                   }).addTo(map);
 
                   let content = markers.map(m => {
-                    if (!gridLocator) {
-                      return `<a href="#" onclick="alert('Enter your Grid Locator and click Plot your Range first'); return false;">${m.callsign}</a>`;
-                    }
                     return `<a href="https://www.qrz.com/db/">${m.callsign}</a>`;
                   }).join(", ");
                   content = `<div>${content}</div>`;
