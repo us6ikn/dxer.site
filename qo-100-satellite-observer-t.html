@@ -3,7 +3,7 @@
   <head>
     <!-- Meta tags -->
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-    <meta name="description" content="LEO SAT Observer" />
+    <meta name="description" content="QO-100 Satellite Observer" />
     <meta name="author" content="https://dxer.site" />
     <meta charset="utf-8">
     <title>QO-100 Satellite Observer</title>
@@ -125,7 +125,7 @@
 
       .observer-buttons {
         display: flex;
-        gap: 12px;
+        gap: 11px;
         margin-top: 10px;
       }
         .sat-label {
@@ -161,6 +161,11 @@
 
       <div class="observer-buttons">
         <button onclick="window.open('https://dxer.site', '_blank')">🏠</button>
+        <button onclick="window.open('https://x.com/m0skn_sa5ikn', '_blank')" style="padding:6px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M23.954 4.569c-.885.392-1.83.656-2.825.775 1.014-.611 1.794-1.574 2.163-2.724-.951.564-2.005.974-3.127 1.195-.897-.959-2.178-1.559-3.594-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.708.87 3.215 2.188 4.096-.807-.026-1.566-.248-2.229-.616v.062c0 2.385 1.693 4.374 3.946 4.828-.413.111-.849.171-1.296.171-.317 0-.626-.03-.927-.086.627 1.956 2.444 3.379 4.6 3.418-1.68 1.316-3.809 2.101-6.102 2.101-.396 0-.788-.023-1.175-.068 2.179 1.397 4.768 2.211 7.557 2.211 9.054 0 14-7.496 14-13.986 0-.21 0-.423-.015-.634.961-.694 1.8-1.562 2.46-2.549z"/>
+            </svg>
+          </button>
         <button onclick="window.open('https://dxer.site/leo-satellite-observer.html', '_blank')">LEO</button>
         <button onclick="window.open('https://dxer.site/greencube-observer.html', '_blank')">MEO</button>
         <button onclick="window.open('https://dxer.site/eme-observer/', '_blank')">EME</button>
@@ -271,7 +276,7 @@
               markersCluster.addLayer(marker);
             });
 
-            // Load main LEO markers
+            // Load main QO-100 markers
             fetch("output_filtered_qo100.txt")
               .then(response => response.text())
               .then(data => {
