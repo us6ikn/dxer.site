@@ -409,7 +409,9 @@
                 wrapElements: true,
                 fillColor: circle.strokeColor || "#FF0000",
                 fillOpacity: circle.fillOpacity !== undefined ? circle.fillOpacity : 0.05,
-                interactive: false
+                clipLat: 85,
+                degStep: 0.5,
+                maxCopies: -1
               }).addTo(map);
 
               const labelCoords = destinationPoint(coords.lat, coords.lng, circle.radius, circle.angle);
