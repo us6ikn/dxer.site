@@ -338,7 +338,7 @@
 
               // Place label at an approximate point along the footprint
               // Use the same center and radius
-              const labelPoint = destinationPoint(coords.lat, coords.lng, circle.radius+100, circle.angle);
+              const labelPoint = destinationPoint(coords.lat, coords.lng, circle.radius, circle.angle);
 
               L.marker([labelPoint.lat, labelPoint.lng], { opacity: 0 })
                .bindTooltip(circle.label, {
