@@ -366,14 +366,6 @@
                     markersCluster.addLayer(marker);
                 }
 
-
-                  const popupHtml = `<div>${markers.map(m => `<a href="https://www.qrz.com/db/${m.callsign}" target="_blank">${m.callsign}</a>`).join(", ")}</div>`;
-                  marker.bindPopup(popupHtml);
-                  markersCluster.addLayer(marker);
-                }
-
-                map.addLayer(markersCluster);
-              });
           });
 
         // Draw satellite footprints
