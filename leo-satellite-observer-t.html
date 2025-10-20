@@ -188,8 +188,6 @@
       <input type="text" id="grid-locator" placeholder="e.g. JO89tt" maxlength="6" style="width: 68px;">
       <button onclick="initMap(document.getElementById('grid-locator').value); document.getElementById('layer-toggle').checked = false;">Plot your Range</button>
       <div class="checkbox-container" style="display: flex; align-items: center;">
-        <input type="checkbox" style="margin-top: 10px;" id="layer-toggle">
-        <label for="layer-toggle" style="margin-top: 10px;">CQ/ITU/Maidenhead</label>
         <img src="img/AO07logo.png" alt="LEO SAT Observer logo" style="vertical-align: middle; margin-left: 5px; width: 20px;">
         <span style="position: relative; display: inline-block; font-family: Arial, sans-serif; font-weight: bold; letter-spacing: 1px; margin-left: 5px; margin-top: 10px;">
           LEO Satellite Observer
@@ -226,10 +224,6 @@
       <button class="toggle-button"></button>
       <button class="arrow-button" onclick="toggleFloatingWindow()">&#x25b6;</button>
       <div class="content">
-        <div><img src="img/fmicon_90.png" alt="" style="width:15px;height:15px;"> FM. Spotted < 90 days ago</div>
-        <div><img src="img/fmicon_m90.png" alt="" style="width:15px;height:15px;"> FM. Spotted > 90 days ago</div>
-        <div><img src="img/m_30.png" alt="" style="width:15px;height:15px;"> Linear. Spotted < 90 days ago</div>
-        <div><img src="img/m_m30.png" alt="" style="width:15px;height:15px;"> Linear. Spotted > 90 days ago</div>
         <div><p style="font-size: smaller;">&nbsp;&nbsp;&nbsp;&nbsp;Data sources: <br> &nbsp;&nbsp;&nbsp;&nbsp;DX Cluster and <a href="http://aar29.free.fr/sat/indexlogin.html">AAR29 Sat Log</a> <br> &nbsp;&nbsp;&nbsp;&nbsp;(with permission)</p></div>
         <div class="sharethis-inline-share-buttons"></div>
       </div>
@@ -314,16 +308,6 @@
           "<span style='color: black'>Locator</span>": maidenhead
         };
         L.control.layers(baseMaps, overlayMaps).addTo(map);
-
-        // Toggle layer visibility
-        var layerToggle = document.getElementById('layer-toggle');
-        layerToggle.addEventListener('change', function () {
-          if (layerToggle.checked) {
-            layerGroup.addTo(map);
-          } else {
-            layerGroup.remove();
-          }
-        });
 
         // Load announcements data
         fetch('announcements_filtered.txt')
@@ -450,17 +434,6 @@
 
       // Initialize the map on page load without grid locator
       initMap('');
-    </script>
-
-    <!-- Ko-fi widget -->
-    <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
-    <script>
-      kofiWidgetOverlay.draw('sa5ikn', {
-        'type': 'floating-chat',
-        'floating-chat.donateButton.text': 'Support',
-        'floating-chat.donateButton.background-color': '#00b9fe',
-        'floating-chat.donateButton.text-color': '#fff'
-      });
     </script>
   </body>
 </html>
