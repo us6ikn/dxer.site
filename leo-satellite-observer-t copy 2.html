@@ -128,15 +128,6 @@
         gap: 8px;
         margin-top: 10px;
       }
-        .sat-label {
-            background-color: rgba(255,255,255,0.8);
-            border-radius: 3px;
-            padding: 2px 4px;
-            font-size: 12px;
-            font-weight: bold;
-            color: black;
-            white-space: nowrap;
-        }
 
       * { outline: none !important; }
     </style>
@@ -335,19 +326,14 @@
               maxCopies: -1
             }).addTo(map);
 
-            // Create an invisible marker at the label position
-            const labelMarker = L.marker(destinationPoint(coords.lat, coords.lng, circle.radius, circle.angle), {
-                opacity: 0 // marker itself invisible
+            const labelCoords = destinationPoint(coords.lat, coords.lng, circle.radius, circle.angle);
+            L.marker([labelCoords.lat, labelCoords.lng], {
+              icon: L.divIcon({
+                className: 'label',
+                html: `<span style="color: black; font-size: 12px; font-weight: bold;">${circle.label}</span>`,
+                iconSize: [100, 20]
+              })
             }).addTo(map);
-
-            // Attach a permanent tooltip to the marker
-            labelMarker.bindTooltip(circle.label, {
-                permanent: true,
-                direction: 'right',  // try 'top', 'bottom', 'left' if needed
-                className: 'sat-label',
-                offset: [5, 0]       // pixels offset
-            }).openTooltip();
-
           });
         }
       }
