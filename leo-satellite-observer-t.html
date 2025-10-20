@@ -324,35 +324,31 @@
           ];
 
           circles.forEach(circle => {
-              // Draw the satellite footprint
-              const greatCircle = L.greatCircle([coords.lat, coords.lng], {
-                  radius: circle.radius,
-                  color: circle.strokeColor || "#FF0000",
-                  fillOpacity: circle.fillOpacity !== undefined ? circle.fillOpacity : 0.05,
-                  weight: 1,
-                  wrapElements: true,
-                  clipLat: 85,
-                  degStep: 0.5,
-                  maxCopies: -1
-              }).addTo(map);
+            const greatCircle = L.greatCircle([coords.lat, coords.lng], {
+              radius: circle.radius,
+              color: circle.strokeColor || "#FF0000",
+              fillOpacity: circle.fillOpacity !== undefined ? circle.fillOpacity : 0.05,
+              weight: 1,
+              wrapElements: true,
+              clipLat: 85,
+              degStep: 0.5,
+              maxCopies: -1
+            }).addTo(map);
 
-              // Get the array of LatLng points from the greatCircle
-              const latlngs = greatCircle.getLatLngs()[0]; // L.greatCircle returns a nested array
-              if (!latlngs || latlngs.length === 0) return;
+            // Create an invisible marker at the label position
+            const labelMarker = L.marker(destinationPoint(coords.lat, coords.lng, circle.radius, circle.angle), {
+                opacity: 0 // marker itself invisible
+            }).addTo(map);
 
-              // Pick the midpoint along the footprint line
-              const midpoint = latlngs[Math.floor(latlngs.length / 2)];
+            // Attach a permanent tooltip to the marker
+            labelMarker.bindTooltip(circle.label, {
+                permanent: true,
+                direction: 'right',  // try 'top', 'bottom', 'left' if needed
+                className: 'sat-label',
+                offset: [5, 0]       // pixels offset
+            }).openTooltip();
 
-              // Attach the label at the midpoint
-              L.marker(midpoint, {
-                  icon: L.divIcon({
-                      className: 'sat-label',
-                      html: `<span>${circle.label}</span>`,
-                      iconAnchor: [0, 0] // adjust if you want the label slightly above or to the side
-                  })
-              }).addTo(map);
           });
-
         }
       }
 
