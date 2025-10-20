@@ -19,6 +19,11 @@
     <script src="https://ha8tks.github.io/Leaflet.CQzones/src/L.CQzones.js"></script>
     <script src="https://ha8tks.github.io/Leaflet.ITUzones/src/L.ITUzones.js"></script>
     <script src="https://ha8tks.github.io/Leaflet.Maidenhead/src/L.Maidenhead.js"></script>
+    <!-- MarkerCluster plugin -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
     <script src="leaflet/Leaflet.greatCircle.js"></script>
     
     <!-- Font Awesome for icons -->
@@ -277,160 +282,147 @@
         content.classList.toggle('show');
       }
 
-      function initMap(gridLocator) {
-        // Initialize Leaflet map
-        if (map) map.remove(); // Remove existing map if any
-        map = L.map('map', {
-          center: [20, 0],
-          zoom: 3,
-          zoomControl: true,
-          attributionControl: true
-        });
+        function initMap(gridLocator) {
+          if (map) map.remove();
+          map = L.map('map', {
+            center: [20, 0],
+            zoom: 3,
+            zoomControl: true,
+            attributionControl: true
+          });
 
-        // Add OpenStreetMap base layer
-        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
-          minZoom: 0,
-          maxZoom: 20
-        }).addTo(map);
+          // Base layer
+          var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+            minZoom: 0,
+            maxZoom: 20
+          }).addTo(map);
 
-        // Initialize CQ, ITU, and Maidenhead layers
-        var cqzones = L.cqzones();
-        var ituzones = L.ituzones();
-        var maidenhead = L.maidenhead();
-        layerGroup = L.layerGroup([cqzones, ituzones, maidenhead]);
+          // Overlay layers
+          var cqzones = L.cqzones();
+          var ituzones = L.ituzones();
+          var maidenhead = L.maidenhead();
+          layerGroup = L.layerGroup([cqzones, ituzones, maidenhead]);
+          L.control.layers({ 'Map': osm }, {
+            "<span style='color: black'>CQZone</span>": cqzones,
+            "<span style='color: black'>ITUZone</span>": ituzones,
+            "<span style='color: black'>Locator</span>": maidenhead
+          }).addTo(map);
 
-        // Add layer control
-        var baseMaps = { 'Map': osm };
-        var overlayMaps = {
-          "<span style='color: black'>CQZone</span>": cqzones,
-          "<span style='color: black'>ITUZone</span>": ituzones,
-          "<span style='color: black'>Locator</span>": maidenhead
-        };
-        L.control.layers(baseMaps, overlayMaps).addTo(map);
+          // 🔹 Create a marker cluster group
+          var markersCluster = L.markerClusterGroup({
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false,
+            maxClusterRadius: 50
+          });
 
-        // Load announcements data
-        fetch('announcements_filtered.txt')
-          .then(response => response.text())
-          .then(data => {
-            const announcements = data.trim().split('\n');
-            announcements.forEach(announcement => {
-              const coordinates = announcement.match(/Coordinates: \((.*), (.*)\)/);
-              const timeString = announcement.match(/Time: ([^,]*)/);
-              const callsign = announcement.match(/Callsign: ([^,]*)/);
-              if (!coordinates || !timeString || !callsign) return;
-              const lat = parseFloat(coordinates[1]);
-              const lng = parseFloat(coordinates[2]);
-              const time = new Date(timeString[1]);
-              if (time <= new Date()) return;
+          // 🔹 Load announcements
+          fetch('announcements_filtered.txt')
+            .then(response => response.text())
+            .then(data => {
+              const announcements = data.trim().split('\n');
+              announcements.forEach(announcement => {
+                const coordinates = announcement.match(/Coordinates: \((.*), (.*)\)/);
+                const timeString = announcement.match(/Time: ([^,]*)/);
+                const callsign = announcement.match(/Callsign: ([^,]*)/);
+                if (!coordinates || !timeString || !callsign) return;
 
-              const marker = L.marker([lat, lng], {
-                icon: L.icon({
-                  iconUrl: BLINKING_GIF_URL,
-                  iconSize: [20, 20],
-                  iconAnchor: [10, 10]
-                }),
-                zIndexOffset: 10000
-              }).addTo(map);
+                const lat = parseFloat(coordinates[1]);
+                const lng = parseFloat(coordinates[2]);
+                const time = new Date(timeString[1]);
+                if (time <= new Date()) return;
 
-              marker.bindPopup(`<div><a href="https://hams.at/alerts" target="_blank">${callsign[1]}</a></div>`, {
-                autoClose: true,
-                closeOnClick: true
-              }).on('popupopen', () => {
-                if (openInfoWindow) openInfoWindow.close();
-                openInfoWindow = marker.getPopup();
+                const marker = L.marker([lat, lng], {
+                  icon: L.icon({
+                    iconUrl: BLINKING_GIF_URL,
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10]
+                  })
+                });
+
+                marker.bindPopup(`<div><a href="https://hams.at/alerts" target="_blank">${callsign[1]}</a></div>`);
+                markersCluster.addLayer(marker); // 🔹 Add to cluster instead of map
               });
+
+              // 🔹 Load main LEO markers
+              fetch("output_filtered_leo.txt")
+                .then(response => response.text())
+                .then(data => {
+                  const regex = /TRP: ([^,]+), Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coord: \(([^,]+), ([^)]+)\)/g;
+                  const callsigns = {};
+                  let match;
+                  while ((match = regex.exec(data)) !== null) {
+                    const callsign = match[3];
+                    const dxgridlocator = match[4];
+                    const lat = parseFloat(match[5]);
+                    const lng = parseFloat(match[6]);
+                    const key = `${lat},${lng}`;
+                    if (!callsigns[key]) callsigns[key] = [];
+                    callsigns[key].push({ callsign, dxgridlocator, markerIcon: "img/m_m30.png" });
+                  }
+
+                  for (const key in callsigns) {
+                    const [lat, lng] = key.split(",");
+                    const markers = callsigns[key];
+                    const markerIcon = markers[0].markerIcon;
+                    const marker = L.marker([lat, lng], {
+                      icon: L.icon({
+                        iconUrl: markerIcon,
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10]
+                      }),
+                      title: markers.map(m => m.callsign).join(", ")
+                    });
+
+                    const popupHtml = `<div>${markers.map(m => `<a href="https://www.qrz.com/db/${m.callsign}" target="_blank">${m.callsign}</a>`).join(", ")}</div>`;
+                    marker.bindPopup(popupHtml);
+                    markersCluster.addLayer(marker); // 🔹 Add to cluster
+                  }
+
+                  // 🔹 Add all clustered markers to map
+                  map.addLayer(markersCluster);
+                });
             });
 
-            // Load marker data
-            fetch("output_filtered_leo.txt")
-              .then(response => response.text())
-              .then(data => {
-                const regex = /TRP: ([^,]+), Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coord: \(([^,]+), ([^)]+)\)/g;
-                const callsigns = {};
-                let match;
-                while ((match = regex.exec(data)) !== null) {
-                  const callsign = match[3];
-                  const dxgridlocator = match[4];
-                  const lat = parseFloat(match[5]);
-                  const lng = parseFloat(match[6]);
-                  const key = `${lat},${lng}`;
-                  if (!callsigns[key]) callsigns[key] = [];
-                  let markerIcon;
-                    markerIcon = "img/m_m30.png";
-                  callsigns[key].push({ callsign, dxgridlocator, markerIcon });
-                }
+          // Satellite footprints unchanged...
+          if (gridLocator) {
+            const coords = calculateCoordinates(gridLocator);
+            if (!coords) return;
+            L.marker([coords.lat, coords.lng], { title: gridLocator }).addTo(map);
 
-                for (const key in callsigns) {
-                  const [lat, lng] = key.split(",");
-                  const markers = callsigns[key];
-                  const markerIcon = markers[0].markerIcon;
-                  const marker = L.marker([lat, lng], {
-                    icon: L.icon({
-                      iconUrl: markerIcon,
-                      iconSize: [20, 20],
-                      iconAnchor: [10, 10]
-                    }),
-                    title: markers.map(m => m.callsign).join(", ")
-                  }).addTo(map);
+            const circles = [
+              { radius: 4970000, label: "SO-50", angle: 265 },
+              { radius: 7502000, label: "FO-29", angle: 245 },
+              { radius: 8042000, label: "RS-44", angle: 225 },
+              { radius: 3940000, label: "ISS", angle: 275 },
+              { radius: 7907000, label: "AO-07", angle: 235 },
+              { radius: 5712000, label: "AO-91", angle: 255 },
+              { radius: 13000000, label: "IO-117", angle: 185, strokeColor: "#808080", fillOpacity: 0.0 }
+            ];
 
-                  let content = markers.map(m => {
-                    return `<a href="https://www.qrz.com/db/">${m.callsign}</a>`;
-                  }).join(", ");
-                  content = `<div>${content}</div>`;
-                  marker.bindPopup(content, {
-                    autoClose: true,
-                    closeOnClick: true
-                  }).on('popupopen', () => {
-                    if (openInfoWindow) openInfoWindow.close();
-                    openInfoWindow = marker.getPopup();
-                  });
-                }
-              });
-          });
+            circles.forEach(circle => {
+              const greatCircle = L.greatCircle([coords.lat, coords.lng], {
+                radius: circle.radius,
+                color: circle.strokeColor || "#FF0000",
+                opacity: 0.4,
+                weight: 2,
+                fillColor: circle.strokeColor || "#FF0000",
+                fillOpacity: circle.fillOpacity !== undefined ? circle.fillOpacity : 0.05,
+                interactive: false
+              }).addTo(map);
 
-        // Plot satellite footprints if gridLocator is provided
-        if (gridLocator) {
-          const coords = calculateCoordinates(gridLocator);
-          if (!coords) return;
-
-          // Plot marker for grid locator
-          L.marker([coords.lat, coords.lng], { title: gridLocator }).addTo(map);
-
-          // Define satellite footprints
-          const circles = [
-            { radius: 4970000, label: "SO-50", angle: 265 },
-            { radius: 7502000, label: "FO-29", angle: 245 },
-            { radius: 8042000, label: "RS-44", angle: 225 },
-            { radius: 3940000, label: "ISS", angle: 275 },
-            { radius: 7907000, label: "AO-07", angle: 235 },
-            { radius: 5712000, label: "AO-91", angle: 255 },
-            { radius: 13000000, label: "IO-117", angle: 185, strokeColor: "#808080", fillOpacity: 0.0 }
-          ];
-
-          circles.forEach(circle => {
-            const greatCircle = L.greatCircle([coords.lat, coords.lng], {
-              radius: circle.radius,
-              color: circle.strokeColor || "#FF0000",
-              opacity: 0.4,
-              weight: 2,
-              fillColor: circle.strokeColor || "#FF0000",
-              fillOpacity: circle.fillOpacity !== undefined ? circle.fillOpacity : 0.05,
-              interactive: false
-            }).addTo(map);
-
-            // Add label
-            const labelCoords = destinationPoint(coords.lat, coords.lng, circle.radius, circle.angle);
-            L.marker([labelCoords.lat, labelCoords.lng], {
-              icon: L.divIcon({
-                className: 'label',
-                html: `<span style="color: black; font-size: 12px; font-weight: bold;">${circle.label}</span>`,
-                iconSize: [100, 20]
-              })
-            }).addTo(map);
-          });
+              const labelCoords = destinationPoint(coords.lat, coords.lng, circle.radius, circle.angle);
+              L.marker([labelCoords.lat, labelCoords.lng], {
+                icon: L.divIcon({
+                  className: 'label',
+                  html: `<span style="color: black; font-size: 12px; font-weight: bold;">${circle.label}</span>`,
+                  iconSize: [100, 20]
+                })
+              }).addTo(map);
+            });
+          }
         }
-      }
+
 
       // Initialize the map on page load without grid locator
       initMap('');
