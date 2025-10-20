@@ -225,14 +225,16 @@
         }).addTo(map);
 
         var cqzones = L.cqzones();
-        var ituzones = L.ituzones();
         var maidenhead = L.maidenhead();
-        layerGroup = L.layerGroup([cqzones, ituzones, maidenhead]);
+
+        cqzones.addTo(map);
+        maidenhead.addTo(map);
+
         L.control.layers({ 'Map': osm }, {
           "<span style='color: black'>CQZone</span>": cqzones,
-          "<span style='color: black'>ITUZone</span>": ituzones,
           "<span style='color: black'>Locator</span>": maidenhead
         }).addTo(map);
+
 
         var markersCluster = L.markerClusterGroup({
           spiderfyOnMaxZoom: true,
@@ -292,7 +294,7 @@
                   const marker = L.marker([lat, lng], {
                     icon: L.icon({
                       iconUrl: markerIcon,
-                      iconSize: [20, 20],
+                      iconSize: [16, 16],
                       iconAnchor: [10, 10]
                     }),
                     title: markers.map(m => m.callsign).join(", ")
