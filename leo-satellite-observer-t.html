@@ -403,12 +403,11 @@
             circles.forEach(circle => {
               const greatCircle = L.greatCircle([coords.lat, coords.lng], {
                 radius: circle.radius,
-                color: circle.strokeColor || "#FF0000",
+                olor: '#0000FF',
+                fillColor: '#0088FF',
                 fillOpacity: 0.2,
                 weight: 1,
                 wrapElements: true,
-                fillColor: circle.strokeColor || "#FF0000",
-                fillOpacity: circle.fillOpacity !== undefined ? circle.fillOpacity : 0.05,
                 clipLat: 85,
                 degStep: 0.5,
                 maxCopies: -1
