@@ -408,7 +408,7 @@
                     if (!gridLocator) {
                       return `<a href="#" onclick="alert('Enter your Grid Locator and click Plot your Range first'); return false;">${m.callsign}</a>`;
                     }
-                    return `<a href="https://www.satmatch.com/satellite/RS-44,FO-29,AO-07,ISS,AO-91,SO-50,CAS-4A,CAS-4B/obs1/${gridLocator}/obs2/${m.dxgridlocator}?duration_hrs=24">${m.callsign}</a>`;
+                    return `<a href="https://www.qrz.com/db/">${m.callsign}</a>`;
                   }).join(", ");
                   content = `<div>${content}</div>`;
                   marker.bindPopup(content, {
