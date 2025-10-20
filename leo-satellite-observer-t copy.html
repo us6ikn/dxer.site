@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Meta tags -->
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="LEO SAT Observer" />
+    <meta name="author" content="https://dxer.site" />
+    <meta charset="utf-8">
+    <title>LEO Satellite Observer</title>
+    
+    <!-- Leaflet dependencies -->
+    <script type="text/javascript" src="https://unpkg.com/leaflet@latest/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@latest/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet.vectorgrid@latest/dist/Leaflet.VectorGrid.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/text-image/dist/text-image.js"></script>
+    <script src="https://ha8tks.github.io/Leaflet.CQzones/src/L.CQzones.js"></script>
+    <script src="https://ha8tks.github.io/Leaflet.ITUzones/src/L.ITUzones.js"></script>
+    <script src="https://ha8tks.github.io/Leaflet.Maidenhead/src/L.Maidenhead.js"></script>
+
+    <!-- MarkerCluster plugin -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
+    <script src="leaflet/Leaflet.greatCircle.js"></script>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    
+    <style>
+      html, body {
+        height: 100%;
+        padding: 0;
+        margin: 0;
+      }
+      #map {
+        height: 100%;
+      }
+
+      .floating {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+        background-color: rgba(255, 255, 255, 0.85);
+        padding: 10px 15px;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
+      }
+
+      .floating h2 {
+        display: flex;
+        align-items: center;
+        font-family: Arial, sans-serif;
+        font-weight: bold;
+        font-size: 16px;
+        letter-spacing: 1px;
+        margin: 0 0 8px 0;
+      }
+
+      .floating h2 img {
+        width: 28px;
+        height: 28px;
+        margin-right: 6px;
+      }
+
+      .floating sup {
+        font-size: 10px;
+        font-weight: normal;
+        margin-left: 3px;
+      }
+
+      .button-panel {
+        position: absolute;
+        top: 120px;
+        left: 20px;
+        z-index: 1000;
+        background-color: rgba(255, 255, 255, 0.85);
+        padding: 10px 15px;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
+        display: flex;
+        gap: 10px;
+      }
+
+      .button-panel button {
+        background-color: #0078d4;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 6px 12px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        transition: background 0.2s;
+      }
+
+      .button-panel button:hover {
+        background-color: #005fa3;
+      }
+
+      * { outline: none !important; }
+    </style>
+  </head>
+
+  <body>
+    <!-- Floating input + logo -->
+    <div class="floating">
+      <h2>
+        <img src="img/AO07logo.png" alt="LEO logo"> LEO Satellite Observer
+        <sup>by SA5IKN</sup>
+      </h2>
+      <label for="grid-locator">Enter your Grid:</label>
+      <input type="text" id="grid-locator" placeholder="e.g. JO89tt" maxlength="6" style="width: 68px;">
+      <button onclick="initMap(document.getElementById('grid-locator').value)">Plot your Range</button>
+    </div>
+
+    <!-- Floating button panel for MEO/GEO -->
+    <div class="button-panel">
+      <button onclick="window.open('https://dxer.site/greencube-observer.html', '_blank')">MEO Observer</button>
+      <button onclick="window.open('https://dxer.site/qo-100-satellite-observer.html', '_blank')">GEO Observer</button>
+    </div>
+
+    <!-- Map container -->
+    <div id="map"></div>
+
+    <script>
+      var map;
+      var layerGroup; // For CQ/ITU/Maidenhead layers
+      const BLINKING_GIF_URL = 'img/rover1.gif?v=1';
+
+      function destinationPoint(lat, lon, distance, bearing) {
+        const R = 6371000;
+        const rad = Math.PI / 180;
+        const deg = 180 / Math.PI;
+        lat = lat * rad;
+        lon = lon * rad;
+        bearing = bearing * rad;
+        const d = distance / R;
+        const lat2 = Math.asin(Math.sin(lat) * Math.cos(d) + Math.cos(lat) * Math.sin(d) * Math.cos(bearing));
+        const lon2 = lon + Math.atan2(Math.sin(bearing) * Math.sin(d) * Math.cos(lat),
+                                      Math.cos(d) - Math.sin(lat) * Math.sin(lat2));
+        return { lat: lat2 * deg, lng: lon2 * deg };
+      }
+
+      function calculateCoordinates(gridLocator) {
+        gridLocator = gridLocator.toUpperCase();
+        var gridLocatorPattern = /^([A-R]{2}\d{2}[a-x]{2})$/i;
+        if (!gridLocatorPattern.test(gridLocator)) {
+          alert("Invalid grid locator format. Please enter a valid 6-character grid locator.");
+          return null;
+        }
+        var lat1 = (gridLocator.charCodeAt(1) - 65) * 10;
+        var lat2 = ((gridLocator.charCodeAt(5) - 97) / 24) + (1 / 48) - 90;
+        var lat3 = parseInt(gridLocator.charAt(3));
+        var latitude = lat1 + lat3 + lat2;
+        var lon1 = ((gridLocator.charCodeAt(0) - 65) * 20);
+        var lon2 = parseInt(gridLocator.charAt(2)) * 2;
+        var lon3 = ((gridLocator.charCodeAt(4) - 97) / 12) + (1 / 24);
+        var longitude = lon1 + lon2 + lon3 - 180;
+        return { lat: latitude, lng: longitude };
+      }
+
+      function initMap(gridLocator) {
+        if (map) map.remove();
+        map = L.map('map', {
+          center: [0, 0],
+          zoom: 2,
+          zoomControl: true,
+          attributionControl: true
+        });
+
+        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+          minZoom: 0,
+          maxZoom: 20
+        }).addTo(map);
+
+        var cqzones = L.cqzones();
+        var ituzones = L.ituzones();
+        var maidenhead = L.maidenhead();
+        layerGroup = L.layerGroup([cqzones, ituzones, maidenhead]);
+        L.control.layers({ 'Map': osm }, {
+          "<span style='color: black'>CQZone</span>": cqzones,
+          "<span style='color: black'>ITUZone</span>": ituzones,
+          "<span style='color: black'>Locator</span>": maidenhead
+        }).addTo(map);
+
+        var markersCluster = L.markerClusterGroup({
+          spiderfyOnMaxZoom: true,
+          showCoverageOnHover: false,
+          maxClusterRadius: 50
+        });
+
+        fetch('announcements_filtered.txt')
+          .then(response => response.text())
+          .then(data => {
+            const announcements = data.trim().split('\n');
+            announcements.forEach(announcement => {
+              const coordinates = announcement.match(/Coordinates: \((.*), (.*)\)/);
+              const timeString = announcement.match(/Time: ([^,]*)/);
+              const callsign = announcement.match(/Callsign: ([^,]*)/);
+              if (!coordinates || !timeString || !callsign) return;
+
+              const lat = parseFloat(coordinates[1]);
+              const lng = parseFloat(coordinates[2]);
+              const time = new Date(timeString[1]);
+              if (time <= new Date()) return;
+
+              const marker = L.marker([lat, lng], {
+                icon: L.icon({
+                  iconUrl: BLINKING_GIF_URL,
+                  iconSize: [20, 20],
+                  iconAnchor: [10, 10]
+                })
+              });
+
+              marker.bindPopup(`<div><a href="https://hams.at/alerts" target="_blank">${callsign[1]}</a></div>`);
+              markersCluster.addLayer(marker);
+            });
+
+            fetch("output_filtered_leo.txt")
+              .then(response => response.text())
+              .then(data => {
+                const regex = /TRP: ([^,]+), Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coord: \(([^,]+), ([^)]+)\)/g;
+                const callsigns = {};
+                let match;
+                while ((match = regex.exec(data)) !== null) {
+                  const callsign = match[3];
+                  const dxgridlocator = match[4];
+                  const lat = parseFloat(match[5]);
+                  const lng = parseFloat(match[6]);
+                  const key = `${lat},${lng}`;
+                  if (!callsigns[key]) callsigns[key] = [];
+                  callsigns[key].push({ callsign, dxgridlocator, markerIcon: "img/m_m30.png" });
+                }
+
+                for (const key in callsigns) {
+                  const [lat, lng] = key.split(",");
+                  const markers = callsigns[key];
+                  const markerIcon = markers[0].markerIcon;
+                  const marker = L.marker([lat, lng], {
+                    icon: L.icon({
+                      iconUrl: markerIcon,
+                      iconSize: [20, 20],
+                      iconAnchor: [10, 10]
+                    }),
+                    title: markers.map(m => m.callsign).join(", ")
+                  });
+
+                  const popupHtml = `<div>${markers.map(m => `<a href="https://www.qrz.com/db/${m.callsign}" target="_blank">${m.callsign}</a>`).join(", ")}</div>`;
+                  marker.bindPopup(popupHtml);
+                  markersCluster.addLayer(marker);
+                }
+
+                map.addLayer(markersCluster);
+              });
+          });
+
+        if (gridLocator) {
+          const coords = calculateCoordinates(gridLocator);
+          if (!coords) return;
+          L.marker([coords.lat, coords.lng], { title: gridLocator }).addTo(map);
+
+          const circles = [
+            { radius: 4970000, label: "SO-50", angle: 265 },
+            { radius: 7502000, label: "FO-29", angle: 245 },
+            { radius: 8042000, label: "RS-44", angle: 225 },
+            { radius: 3940000, label: "ISS", angle: 275 },
+            { radius: 7907000, label: "AO-07", angle: 235 },
+            { radius: 5712000, label: "AO-91", angle: 255 },
+            { radius: 13000000, label: "IO-117", angle: 185, strokeColor: "#808080", fillOpacity: 0.0 }
+          ];
+
+          circles.forEach(circle => {
+            const greatCircle = L.greatCircle([coords.lat, coords.lng], {
+              radius: circle.radius,
+              color: circle.strokeColor || "#FF0000",
+              fillOpacity: circle.fillOpacity !== undefined ? circle.fillOpacity : 0.05,
+              weight: 1,
+              wrapElements: true,
+              clipLat: 85,
+              degStep: 0.5,
+              maxCopies: -1
+            }).addTo(map);
+
+            const labelCoords = destinationPoint(coords.lat, coords.lng, circle.radius, circle.angle);
+            L.marker([labelCoords.lat, labelCoords.lng], {
+              icon: L.divIcon({
+                className: 'label',
+                html: `<span style="color: black; font-size: 12px; font-weight: bold;">${circle.label}</span>`,
+                iconSize: [100, 20]
+              })
+            }).addTo(map);
+          });
+        }
+      }
+
+      initMap('');
+    </script>
+  </body>
+</html>
