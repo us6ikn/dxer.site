@@ -211,19 +211,6 @@
         var longitude = lon1 + lon2 + lon3 - 180;
         return { lat: latitude, lng: longitude };
       }
-        
-        function distanceMeters(lat1, lng1, lat2, lng2) {
-            const R = 6371000; // Earth radius in meters
-            const rad = Math.PI / 180;
-            const dLat = (lat2 - lat1) * rad;
-            const dLng = (lng2 - lng1) * rad;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1*rad) * Math.cos(lat2*rad) *
-                      Math.sin(dLng/2) * Math.sin(dLng/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
-        }
-
 
       function initMap(gridLocator) {
         if (map) map.remove();
@@ -299,74 +286,73 @@
         fetch('announcements_filtered.txt')
           .then(response => response.text())
           .then(data => {
-              const announcements = data.trim().split('\n');
-              announcements.forEach(announcement => {
-                  const coordinates = announcement.match(/Coordinates: \((.*), (.*)\)/);
-                  const timeString = announcement.match(/Time: ([^,]*)/);
-                  const callsign = announcement.match(/Callsign: ([^,]*)/);
-                  if (!coordinates || !timeString || !callsign) return;
-                  
-                  const lat = parseFloat(coordinates[1]);
-                  const lng = parseFloat(coordinates[2]);
-                  const time = new Date(timeString[1]);
-                  if (time <= new Date()) return;
-                  
-                  const marker = L.marker([lat, lng], {
-                      icon: L.icon({
-                          iconUrl: BLINKING_GIF_URL,
-                          iconSize: [16, 16],
-                          iconAnchor: [10, 10]
-                      })
-                  });
-                  
-                  marker.bindPopup(`<div><a href="https://hams.at/alerts" target="_blank">${callsign[1]}</a></div>`);
-                  markersCluster.addLayer(marker);
+            const announcements = data.trim().split('\n');
+            announcements.forEach(announcement => {
+              const coordinates = announcement.match(/Coordinates: \((.*), (.*)\)/);
+              const timeString = announcement.match(/Time: ([^,]*)/);
+              const callsign = announcement.match(/Callsign: ([^,]*)/);
+              if (!coordinates || !timeString || !callsign) return;
+
+              const lat = parseFloat(coordinates[1]);
+              const lng = parseFloat(coordinates[2]);
+              const time = new Date(timeString[1]);
+              if (time <= new Date()) return;
+
+              const marker = L.marker([lat, lng], {
+                icon: L.icon({
+                  iconUrl: BLINKING_GIF_URL,
+                  iconSize: [16, 16],
+                  iconAnchor: [10, 10]
+                })
               });
-              
-              // Load main QO-100 markers
-              fetch("output_filtered_qo100.txt")
+
+              marker.bindPopup(`<div><a href="https://hams.at/alerts" target="_blank">${callsign[1]}</a></div>`);
+              markersCluster.addLayer(marker);
+            });
+
+            // Load main QO-100 markers
+            fetch("output_filtered_qo100.txt")
               .then(response => response.text())
               .then(data => {
-                  const regex = /TRP: ([^,]+), Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coord: \(([^,]+), ([^)]+)\)/g;
-                  const callsigns = {};
-                  let match;
-                  while ((match = regex.exec(data)) !== null) {
-                      const callsign = match[3];
-                      const dxgridlocator = match[4];
-                      const lat = parseFloat(match[5]);
-                      const lng = parseFloat(match[6]);
-                      const key = `${lat},${lng}`;
-                      if (!callsigns[key]) callsigns[key] = [];
-                      callsigns[key].push({ callsign, dxgridlocator, markerIcon: "img/176096839586434633.png" });
-                  }
-                  
-                  const footprintCenter = { lat: 0.0, lng: 25.8110 };
-                  const maxDistance = 10000000; // 10,000 km
-                  
-                  for (const key in callsigns) {
-                      const [lat, lng] = key.split(",").map(Number);
-                      const markers = callsigns[key];
-                      const markerIcon = markers[0].markerIcon;
-                      
-                      // Skip markers outside the 10,000 km range
-                      const distance = distanceMeters(lat, lng, footprintCenter.lat, footprintCenter.lng);
-                      if (distance > maxDistance) continue;
-                      
-                      const marker = L.marker([lat, lng], {
-                          icon: L.icon({
-                              iconUrl: markerIcon,
-                              iconSize: [16, 16],
-                              iconAnchor: [10, 10]
-                          }),
-                          title: markers.map(m => m.callsign).join(", ")
-                      });
-                      
-                      const popupHtml = `<div>${markers.map(m => `<a href="https://www.qrz.com/db/${m.callsign}" target="_blank">${m.callsign}</a>`).join(", ")}</div>`;
-                      marker.bindPopup(popupHtml);
-                      markersCluster.addLayer(marker);
-                  }
-                  
-              });
+                const regex = /TRP: ([^,]+), Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coord: \(([^,]+), ([^)]+)\)/g;
+                const callsigns = {};
+                let match;
+                while ((match = regex.exec(data)) !== null) {
+                  const callsign = match[3];
+                  const dxgridlocator = match[4];
+                  const lat = parseFloat(match[5]);
+                  const lng = parseFloat(match[6]);
+                  const key = `${lat},${lng}`;
+                  if (!callsigns[key]) callsigns[key] = [];
+                  callsigns[key].push({ callsign, dxgridlocator, markerIcon: "img/176096839586434633.png" });
+                }
+
+                const footprintCenter = { lat: 0.0, lng: 25.8110 };
+                const maxDistance = 10000000; // 10,000 km
+
+                for (const key in callsigns) {
+                    const [lat, lng] = key.split(",").map(Number);
+                    const markers = callsigns[key];
+                    const markerIcon = markers[0].markerIcon;
+
+                    // Skip markers outside the 10,000 km range
+                    const distance = distanceMeters(lat, lng, footprintCenter.lat, footprintCenter.lng);
+                    if (distance > maxDistance) continue;
+
+                    const marker = L.marker([lat, lng], {
+                        icon: L.icon({
+                            iconUrl: markerIcon,
+                            iconSize: [16, 16],
+                            iconAnchor: [10, 10]
+                        }),
+                        title: markers.map(m => m.callsign).join(", ")
+                    });
+
+                    const popupHtml = `<div>${markers.map(m => `<a href="https://www.qrz.com/db/${m.callsign}" target="_blank">${m.callsign}</a>`).join(", ")}</div>`;
+                    marker.bindPopup(popupHtml);
+                    markersCluster.addLayer(marker);
+                }
+
           });
 
         // Draw satellite footprints
