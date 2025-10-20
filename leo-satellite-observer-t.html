@@ -227,12 +227,11 @@
         var cqzones = L.cqzones();
         var maidenhead = L.maidenhead();
 
-        cqzones.addTo(map);
         maidenhead.addTo(map);
 
         L.control.layers({ 'Map': osm }, {
-          "<span style='color: black'>CQZone</span>": cqzones,
-          "<span style='color: black'>Locator</span>": maidenhead
+          "<span style='color: black'>CQ Zones</span>": cqzones,
+          "<span style='color: black'>QTH Locators</span>": maidenhead
         }).addTo(map);
 
 
