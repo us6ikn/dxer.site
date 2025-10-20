@@ -327,32 +327,26 @@
                   callsigns[key].push({ callsign, dxgridlocator, markerIcon: "img/176096839586434633.png" });
                 }
 
-                const footprintCenter = { lat: 0.0, lng: 25.8110 };
-                const maxDistance = 10000000; // 10,000 km
-
                 for (const key in callsigns) {
-                    const [lat, lng] = key.split(",").map(Number);
-                    const markers = callsigns[key];
-                    const markerIcon = markers[0].markerIcon;
+                  const [lat, lng] = key.split(",");
+                  const markers = callsigns[key];
+                  const markerIcon = markers[0].markerIcon;
+                  const marker = L.marker([lat, lng], {
+                    icon: L.icon({
+                      iconUrl: markerIcon,
+                      iconSize: [16, 16],
+                      iconAnchor: [10, 10]
+                    }),
+                    title: markers.map(m => m.callsign).join(", ")
+                  });
 
-                    // Skip markers outside the 10,000 km range
-                    const distance = distanceMeters(lat, lng, footprintCenter.lat, footprintCenter.lng);
-                    if (distance > maxDistance) continue;
-
-                    const marker = L.marker([lat, lng], {
-                        icon: L.icon({
-                            iconUrl: markerIcon,
-                            iconSize: [16, 16],
-                            iconAnchor: [10, 10]
-                        }),
-                        title: markers.map(m => m.callsign).join(", ")
-                    });
-
-                    const popupHtml = `<div>${markers.map(m => `<a href="https://www.qrz.com/db/${m.callsign}" target="_blank">${m.callsign}</a>`).join(", ")}</div>`;
-                    marker.bindPopup(popupHtml);
-                    markersCluster.addLayer(marker);
+                  const popupHtml = `<div>${markers.map(m => `<a href="https://www.qrz.com/db/${m.callsign}" target="_blank">${m.callsign}</a>`).join(", ")}</div>`;
+                  marker.bindPopup(popupHtml);
+                  markersCluster.addLayer(marker);
                 }
 
+                map.addLayer(markersCluster);
+              });
           });
 
         // Draw satellite footprints
