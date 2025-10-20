@@ -255,7 +255,20 @@
             radius: defaultCircle.radius,
             color: defaultCircle.strokeColor,
             fillOpacity: defaultCircle.fillOpacity,
-            weight: 2,
+            weight: 3,
+            wrapElements: true,
+            clipLat: 85,
+            degStep: 0.5,
+            maxCopies: -1
+        }).addTo(map);
+
+        // Draw outer shadow
+        const shadowWidth = 150000; // 100 km in meters
+        L.greatCircle([defaultCircle.center.lat, defaultCircle.center.lng], {
+            radius: defaultCircle.radius + shadowWidth,  // outer radius
+            color: "#000000",       // shadow color
+            fillOpacity: 0.05,      // low opacity
+            weight: 0,              // no border line
             wrapElements: true,
             clipLat: 85,
             degStep: 0.5,
