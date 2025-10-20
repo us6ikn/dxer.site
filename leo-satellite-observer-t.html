@@ -285,11 +285,12 @@
         function initMap(gridLocator) {
           if (map) map.remove();
           map = L.map('map', {
-            center: [20, 0],
-            zoom: 2,
-            worldCopyJump: true,
-            zoomControl: true,
-            attributionControl: true
+              zoom: 2,
+              center: [0, 0],
+              gestureHandling: true,
+              fullscreenControl: false,
+              layers: [osm],
+              zoomControl: true // Enable zoom control (already true by default)
           });
 
           // Base layer
