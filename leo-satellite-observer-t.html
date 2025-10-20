@@ -368,26 +368,12 @@
                 while ((match = regex.exec(data)) !== null) {
                   const callsign = match[3];
                   const dxgridlocator = match[4];
-                  const trp = match[1];
-                  const latestTime = Date.parse(match[2]);
                   const lat = parseFloat(match[5]);
                   const lng = parseFloat(match[6]);
                   const key = `${lat},${lng}`;
                   if (!callsigns[key]) callsigns[key] = [];
                   let markerIcon;
-                  if (Date.now() - latestTime <= 90 * 24 * 60 * 60 * 1000 && trp == 'F') {
-                    markerIcon = "img/fmicon_90.png";
-                  } else if (Date.now() - latestTime > 90 * 24 * 60 * 60 * 1000 && Date.now() - latestTime < 365 * 2 * 24 * 60 * 60 * 1000 && trp == 'F') {
-                    markerIcon = "img/fmicon_m90.png";
-                  } else if (Date.now() - latestTime > 365 * 2 * 24 * 60 * 60 * 1000 && trp == 'F') {
-                    markerIcon = "img/fmicon_m2y.png";
-                  } else if (Date.now() - latestTime <= 90 * 24 * 60 * 60 * 1000 && trp == 'L') {
-                    markerIcon = "img/m_30.png";
-                  } else if (Date.now() - latestTime > 90 * 24 * 60 * 60 * 1000 && Date.now() - latestTime < 365 * 2 * 24 * 60 * 60 * 1000 && trp == 'L') {
                     markerIcon = "img/m_m30.png";
-                  } else if (Date.now() - latestTime > 365 * 2 * 24 * 60 * 60 * 1000 && trp == 'L') {
-                    markerIcon = "img/m_2y.png";
-                  }
                   callsigns[key].push({ callsign, dxgridlocator, markerIcon });
                 }
 
