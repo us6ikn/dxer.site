@@ -311,7 +311,7 @@
             });
 
             // Load main QO-100 markers
-            fetch("output_filtered_qo100.txt")
+            fetch("output_qo100.txt")
               .then(response => response.text())
               .then(data => {
                 const regex = /TRP: ([^,]+), Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coord: \(([^,]+), ([^)]+)\)/g;

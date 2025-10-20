@@ -272,7 +272,7 @@
             });
 
             // Load main LEO markers
-            fetch("output_filtered_leo.txt")
+            fetch("output_leo.txt")
               .then(response => response.text())
               .then(data => {
                 const regex = /TRP: ([^,]+), Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coord: \(([^,]+), ([^)]+)\)/g;
