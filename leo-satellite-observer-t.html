@@ -241,6 +241,34 @@
           maxClusterRadius: 50
         });
 
+        // Load announcements
+        fetch('announcements_filtered.txt')
+          .then(response => response.text())
+          .then(data => {
+            const announcements = data.trim().split('\n');
+            announcements.forEach(announcement => {
+              const coordinates = announcement.match(/Coordinates: \((.*), (.*)\)/);
+              const timeString = announcement.match(/Time: ([^,]*)/);
+              const callsign = announcement.match(/Callsign: ([^,]*)/);
+              if (!coordinates || !timeString || !callsign) return;
+
+              const lat = parseFloat(coordinates[1]);
+              const lng = parseFloat(coordinates[2]);
+              const time = new Date(timeString[1]);
+              if (time <= new Date()) return;
+
+              const marker = L.marker([lat, lng], {
+                icon: L.icon({
+                  iconUrl: BLINKING_GIF_URL,
+                  iconSize: [16, 16],
+                  iconAnchor: [10, 10]
+                })
+              });
+
+              marker.bindPopup(`<div><a href="https://hams.at/alerts" target="_blank">${callsign[1]}</a></div>`);
+              markersCluster.addLayer(marker);
+            });
+
             // Load main LEO markers
             fetch("output_filtered_leo.txt")
               .then(response => response.text())
