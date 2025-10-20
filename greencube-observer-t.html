@@ -279,23 +279,31 @@
             fetch("output_filtered.txt")
               .then(response => response.text())
               .then(data => {
-                const regex = /TRP: ([^,]+), Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coord: \(([^,]+), ([^)]+)\)/g;
+                // Match new format:
+                // Earliest: 2023-01-04T00:41:53Z, Latest: 2024-07-20T14:38:56Z,
+                // Callsign: EA3GCV, Grid locator: JN01VF, Coordinates: (41.2291, 1.7916)
+                const regex = /Earliest:\s*([^,]+),\s*Latest:\s*([^,]+),\s*Callsign:\s*([^,]+),\s*Grid locator:\s*([^,]+),\s*Coordinates:\s*\(([^,]+),\s*([^)]+)\)/g;
+                
                 const callsigns = {};
                 let match;
                 while ((match = regex.exec(data)) !== null) {
+                  const earliest = match[1];
+                  const latest = match[2];
                   const callsign = match[3];
-                  const dxgridlocator = match[4];
+                  const grid = match[4];
                   const lat = parseFloat(match[5]);
                   const lng = parseFloat(match[6]);
+
                   const key = `${lat},${lng}`;
                   if (!callsigns[key]) callsigns[key] = [];
-                  callsigns[key].push({ callsign, dxgridlocator, markerIcon: "img/176096839586434633.png" });
+                  callsigns[key].push({ callsign, grid, earliest, latest, markerIcon: "img/176096839586434633.png" });
                 }
 
                 for (const key in callsigns) {
                   const [lat, lng] = key.split(",");
                   const markers = callsigns[key];
                   const markerIcon = markers[0].markerIcon;
+
                   const marker = L.marker([lat, lng], {
                     icon: L.icon({
                       iconUrl: markerIcon,
@@ -305,13 +313,28 @@
                     title: markers.map(m => m.callsign).join(", ")
                   });
 
-                  const popupHtml = `<div>${markers.map(m => `<a href="https://www.qrz.com/db/${m.callsign}" target="_blank">${m.callsign}</a>`).join(", ")}</div>`;
+                  // Build popup info
+                  const popupHtml = markers.map(m => {
+                    // Format ISO date to readable UTC without seconds
+                    const firstHeard = new Date(m.earliest).toISOString().replace("T", " ").replace(".000Z", " UTC");
+                    const lastHeard = new Date(m.latest).toISOString().replace("T", " ").replace(".000Z", " UTC");
+                    return `
+                      <div style="line-height:1.4;">
+                        <a href="https://www.qrz.com/db/${m.callsign}" target="_blank"><b>${m.callsign}</b></a><br>
+                        First heard: ${firstHeard}<br>
+                        Last heard: ${lastHeard}<br>
+                        GRID locator: ${m.grid}
+                      </div>
+                    `;
+                  }).join("<hr style='margin:4px 0;'>");
+
                   marker.bindPopup(popupHtml);
                   markersCluster.addLayer(marker);
                 }
 
                 map.addLayer(markersCluster);
               });
+
           });
 
         // Draw satellite footprints
