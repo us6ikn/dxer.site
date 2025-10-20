@@ -324,31 +324,36 @@
           ];
 
           circles.forEach(circle => {
-            const greatCircle = L.greatCircle([coords.lat, coords.lng], {
-              radius: circle.radius,
-              color: circle.strokeColor || "#FF0000",
-              fillOpacity: circle.fillOpacity !== undefined ? circle.fillOpacity : 0.05,
-              weight: 1,
-              wrapElements: true,
-              clipLat: 85,
-              degStep: 0.5,
-              maxCopies: -1
-            }).addTo(map);
+              const greatCircle = L.greatCircle([coords.lat, coords.lng], {
+                  radius: circle.radius,
+                  color: circle.strokeColor || "#FF0000",
+                  fillOpacity: circle.fillOpacity !== undefined ? circle.fillOpacity : 0.05,
+                  weight: 1,
+                  wrapElements: true,
+                  clipLat: 85,
+                  degStep: 0.5,
+                  maxCopies: -1
+              }).addTo(map);
 
-            // Create an invisible marker at the label position
-            const labelMarker = L.marker(destinationPoint(coords.lat, coords.lng, circle.radius, circle.angle), {
-                opacity: 0 // marker itself invisible
-            }).addTo(map);
+              // Get LatLng points of the great circle
+              const latlngs = greatCircle.getLatLngs()[0]; // first ring
 
-            // Attach a permanent tooltip to the marker
-            labelMarker.bindTooltip(circle.label, {
-                permanent: true,
-                direction: 'right',  // try 'top', 'bottom', 'left' if needed
-                className: 'sat-label',
-                offset: [5, 0]       // pixels offset
-            }).openTooltip();
+              if (latlngs && latlngs.length > 0) {
+                  // Pick a point somewhere along the circle to place the label
+                  const labelIndex = Math.floor(latlngs.length * 0.25); // 25% along the curve
+                  const labelPoint = latlngs[labelIndex];
 
+                  L.marker(labelPoint, {
+                      icon: L.divIcon({
+                          className: 'sat-label',
+                          html: `<span>${circle.label}</span>`,
+                          iconSize: [50, 20],
+                          iconAnchor: [25, 10] // center the label
+                      })
+                  }).addTo(map);
+              }
           });
+
         }
       }
 
