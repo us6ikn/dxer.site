@@ -25,6 +25,60 @@
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
     <script src="leaflet/Leaflet.greatCircle.js"></script>
+    <script>
+    /**
+     * Patch for Leaflet.greatCircle.js to fix the horizontal line artifact.
+     * Splits the circle when it crosses the ±180° meridian.
+     */
+    L.GreatCircle.include({
+      _generateCoordinates: function(center, radius, opts) {
+        const d2r = Math.PI / 180;
+        const r2d = 180 / Math.PI;
+        const lat = center[0] * d2r;
+        const lon = center[1] * d2r;
+        const points = [];
+        const numPoints = opts.steps || 360;
+        const splitThreshold = 180; // degrees difference to detect wrap
+
+        let lastLon = null;
+        let ring = [];
+        const rings = [ring];
+
+        for (let i = 0; i <= numPoints; i++) {
+          const bearing = i * (360 / numPoints) * d2r;
+          const lat2 = Math.asin(Math.sin(lat) * Math.cos(radius / 6371000) +
+                      Math.cos(lat) * Math.sin(radius / 6371000) * Math.cos(bearing));
+          const lon2 = lon + Math.atan2(
+            Math.sin(bearing) * Math.sin(radius / 6371000) * Math.cos(lat),
+            Math.cos(radius / 6371000) - Math.sin(lat) * Math.sin(lat2)
+          );
+          let lonDeg = lon2 * r2d;
+          if (lonDeg > 180) lonDeg -= 360;
+          if (lonDeg < -180) lonDeg += 360;
+
+          // 🧩 Detect large longitude jump — split polygon to prevent wrap line
+          if (lastLon !== null && Math.abs(lonDeg - lastLon) > splitThreshold) {
+            ring = [];
+            rings.push(ring);
+          }
+          lastLon = lonDeg;
+          ring.push([lat2 * r2d, lonDeg]);
+        }
+
+        return rings;
+      },
+
+      // Override onAdd to use multipolygon if needed
+      onAdd: function(map) {
+        const coords = this._generateCoordinates(this._center, this._radius, this.options);
+        const shape = (coords.length > 1)
+          ? L.multiPolygon(coords, this.options)
+          : L.polygon(coords[0], this.options);
+        this._layer = shape.addTo(map);
+      }
+    });
+    </script>
+
     
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
