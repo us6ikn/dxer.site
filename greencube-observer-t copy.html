@@ -296,15 +296,7 @@
 
                   const key = `${lat},${lng}`;
                   if (!callsigns[key]) callsigns[key] = [];
-                  let markerIcon = "img/176096839586434633.png"; // default
-
-                  if (callsign.endsWith("/MM")) {
-                    markerIcon = "img/ship_s.png";
-                  } else if (callsign.endsWith("/P") || callsign.endsWith("/R")) {
-                    markerIcon = "img/car.png";
-                  }
-
-                  callsigns[key].push({ callsign, grid, earliest, latest, markerIcon });
+                  callsigns[key].push({ callsign, grid, earliest, latest, markerIcon: "img/176096839586434633.png" });
                 }
 
                 for (const key in callsigns) {
