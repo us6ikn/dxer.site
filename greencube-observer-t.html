@@ -212,25 +212,56 @@
       .notice-banner {
         position: absolute;
         bottom: 20px;
-        right: 50px;
+        right: 20px;
         z-index: 1000;
         background-color: #fff8e1;
         color: #333;
         border-left: 5px solid #ffcc00;
         box-shadow: 0px 2px 8px rgba(0,0,0,0.2);
-        padding: 10px 12px;
+        padding: 10px 12px 10px 10px;
         border-radius: 8px;
         font-size: 13px;
         display: flex;
         align-items: flex-start;
         gap: 8px;
-        max-width: 260px;
+        max-width: 280px;
+        opacity: 1;
+        transition: opacity 0.4s ease, transform 0.4s ease;
+      }
+
+      .notice-banner.hide {
+        opacity: 0;
+        transform: translateY(10px);
+        pointer-events: none;
       }
 
       .notice-banner .warning-icon {
         flex-shrink: 0;
         color: #ff9800;
+        margin-top: 2px;
       }
+
+      .notice-text {
+        line-height: 1.4;
+      }
+
+      .notice-close {
+        background: transparent;
+        border: none;
+        color: #555;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-left: auto;
+        line-height: 1;
+        padding: 0 4px;
+        transition: color 0.2s ease;
+      }
+
+      .notice-close:hover {
+        color: #000;
+      }
+
 
     </style>
   </head>
@@ -499,17 +530,24 @@
 
       initMap('');
     </script>
+    <script>
+    function hideNotice() {
+      const banner = document.getElementById('noticeBanner');
+      banner.classList.add('hide');
+      setTimeout(() => banner.remove(), 500); // remove after fade-out
+    }
+    </script>
     <script src="leaderboard-l.js"></script>
     <!-- Historical Notice -->
-    <div class="notice-banner">
+    <div class="notice-banner" id="noticeBanner">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="warning-icon">
         <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
       </svg>
-      <div>
+      <div class="notice-text">
         <strong>Note:</strong> IO-117 (GreenCube) ceased operations on <b>2024-08-25</b> following radiation damage sustained in the Van Allen belts.<br>
         Data shown here represents <b>historical activity</b>.
       </div>
+      <button class="notice-close" onclick="hideNotice()">✕</button>
     </div>
-
   </body>
 </html>
