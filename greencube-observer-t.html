@@ -475,38 +475,7 @@
       }
 
       initMap('');
-      
-      function toggleLeaderboard() {
-        const widget = document.getElementById('leaderboard');
-        const showButton = document.querySelector('.show-button');
-        
-        if (widget.style.display === 'none') {
-          widget.style.display = 'block';
-          showButton.style.display = 'none';
-        } else {
-          widget.style.display = 'none';
-          showButton.style.display = 'block';
-        }
-      }
-
-      // Example: load leaderboard data dynamically (optional)
-      fetch('leaderboard_top5.txt')
-        .then(response => response.text())
-        .then(data => {
-          const lines = data.trim().split('\n');
-          const list = document.getElementById('leaderboard-list');
-          list.innerHTML = ''; // clear loading text
-
-          lines.slice(0, 5).forEach(line => {
-            const item = document.createElement('li');
-            item.textContent = line;
-            list.appendChild(item);
-          });
-        })
-        .catch(() => {
-          document.getElementById('leaderboard-list').innerHTML = '<li>Error loading data</li>';
-        });
-
     </script>
+    <script src="leaderboard.js"></script>
   </body>
 </html>
