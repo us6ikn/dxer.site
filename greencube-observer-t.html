@@ -248,7 +248,7 @@
         });
 
         // Load announcements
-        fetch('announcements_filtered.txt')
+        fetch('announcements_filtered_all.txt')
           .then(response => response.text())
           .then(data => {
             const announcements = data.trim().split('\n');
