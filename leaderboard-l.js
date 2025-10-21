@@ -1,55 +1,63 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
+  const leaderboardList = document.getElementById("leaderboard-list");
+  const leaderboardWidget = document.getElementById("leaderboard");
+  const showButton = document.querySelector(".show-button");
+
+  // Load leaderboard data
   fetch("leaderboard.txt")
-    .then(response => {
+    .then((response) => {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.text();
     })
-    .then(data => {
-      const regex = /Rank: (\d+), Observer: ([^,]+), Cont: ([^,]+), Observations: (\d+), Percentage: ([^%]+)%, Grid Locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
+    .then((data) => {
+      const regex =
+        /Rank: (\d+), Observer: ([^,]+), Cont: ([^,]+), Observations: (\d+), Percentage: ([^%]+)%, Grid Locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
+
       const leaderboard = [];
       let match;
 
-      // Extract leaderboard data
       while ((match = regex.exec(data)) !== null) {
-        const rank = parseInt(match[1]);
-        const observer = match[2];
-        const continent = match[3];
-        const percentage = parseFloat(match[5]);
-        leaderboard.push({ rank, observer, continent, percentage });
+        leaderboard.push({
+          rank: parseInt(match[1]),
+          observer: match[2],
+          continent: match[3],
+          percentage: parseFloat(match[5]),
+        });
       }
 
-      // Sort leaderboard by percentage in descending order
+      // Sort descending
       leaderboard.sort((a, b) => b.percentage - a.percentage);
 
-      // Select leaderboard container
-      const leaderboardList = document.querySelector('.leaderboard-widget ol');
-      leaderboardList.innerHTML = ''; // ✅ Clear "Loading..." or any existing items
+      // Clear placeholder text
+      leaderboardList.innerHTML = "";
 
-      // Display top 5 ranked observers
+      // Populate top 5
       if (leaderboard.length > 0) {
-        for (let i = 0; i < Math.min(5, leaderboard.length); i++) {
-          const item = leaderboard[i];
-          const li = document.createElement('li');
-          li.textContent = `${item.rank}. ${item.observer}, ${item.percentage}% - ${item.continent}`;
-          leaderboardList.appendChild(li);
-        }
-
-        // ✅ Optional: Add a small “Last updated” line
-        const updated = document.createElement('div');
-        updated.style.fontSize = '11px';
-        updated.style.marginTop = '6px';
-        updated.style.textAlign = 'right';
-        updated.style.color = '#555';
-        updated.textContent = `Updated: ${new Date().toUTCString()}`;
-        leaderboardList.parentElement.appendChild(updated);
-
+        leaderboard
+          .slice(0, 5)
+          .forEach((entry) => {
+            const li = document.createElement("li");
+            li.textContent = `${entry.rank}. ${entry.observer}, ${entry.percentage}% - ${entry.continent}`;
+            leaderboardList.appendChild(li);
+          });
       } else {
-        leaderboardList.innerHTML = '<li>No leaderboard data available.</li>';
+        leaderboardList.innerHTML = "<li>No data available.</li>";
       }
     })
-    .catch(error => {
-      console.error('Error fetching leaderboard data:', error);
-      const leaderboardList = document.querySelector('.leaderboard-widget ol');
-      leaderboardList.innerHTML = '<li>Leaderboard unavailable.</li>';
+    .catch((error) => {
+      console.error("Error fetching leaderboard data:", error);
+      leaderboardList.innerHTML = "<li>Leaderboard unavailable.</li>";
     });
+
+  // Toggle leaderboard visibility
+  window.toggleLeaderboard = function () {
+    const isVisible = leaderboardWidget.style.display !== "none";
+    if (isVisible) {
+      leaderboardWidget.style.display = "none";
+      showButton.style.display = "block";
+    } else {
+      leaderboardWidget.style.display = "block";
+      showButton.style.display = "none";
+    }
+  };
 });
