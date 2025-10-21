@@ -15,8 +15,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GreenCube IO-117 Statistics - VUCC GRIDs</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- Inter font for consistent look -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
@@ -24,6 +22,8 @@
       font-family: 'Inter', Arial, sans-serif;
       margin: 0;
       padding: 0;
+      background: #fafafa;
+      color: #222;
     }
 
     /* Floating panel */
@@ -101,7 +101,7 @@
       background-color: #005fa3;
     }
 
-    /* Chart area */
+    /* Page title */
     .chart-title-main {
       margin-top: 150px;
       text-align: center;
@@ -109,21 +109,36 @@
       font-weight: 600;
     }
 
-    .chart-container {
+    /* Chart panels */
+    .chart-panel {
       width: 90%;
       max-width: 800px;
       margin: 20px auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 20px;
     }
 
-    canvas {
+    .chart-panel canvas {
       width: 100% !important;
       height: auto !important;
     }
 
+    /* Table panel */
+    .table-panel {
+      width: 90%;
+      max-width: 800px;
+      margin: 20px auto 40px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+
     /* Table styling */
     #dxccTable {
-      width: 90%;
-      margin: 20px auto;
+      width: 100%;
       border-collapse: collapse;
     }
 
@@ -172,17 +187,32 @@
     </div>
   </div>
 
-  <!-- Title -->
+  <!-- Page title -->
   <div class="chart-title-main">
     IO-117 GreenCube Statistics: VUCC - GRIDs
   </div>
 
-  <!-- Charts -->
-  <div class="chart-container">
+  <!-- Chart panels -->
+  <div class="chart-panel">
     <canvas id="newGridChart"></canvas>
   </div>
-  <div class="chart-container">
+
+  <div class="chart-panel">
     <canvas id="cumulativeGridChart"></canvas>
+  </div>
+
+  <!-- Table panel -->
+  <div class="table-panel">
+    <table id="dxccTable">
+      <thead>
+        <tr>
+          <th data-column="0" class="sortable-header" onclick="sortTable(0)">GRID</th>
+          <th data-column="1" class="sortable-header" onclick="sortTable(1)">First heard</th>
+          <th data-column="2" class="sortable-header" onclick="sortTable(2)">Last heard</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
 
   <script>
@@ -222,7 +252,6 @@
       const labels = Object.keys(months).sort();
       const values = labels.map(month => months[month].count);
 
-      // Bar chart: new grids per month
       const ctx = document.getElementById('newGridChart').getContext('2d');
       new Chart(ctx, {
         type: 'bar',
@@ -248,7 +277,6 @@
         }
       });
 
-      // Line chart: cumulative
       const cumulativeValues = values.reduce((acc, val) => {
         acc.push((acc.length > 0 ? acc[acc.length - 1] : 0) + val);
         return acc;
@@ -275,21 +303,8 @@
     }
 
     plotGridCharts();
-  </script>
 
-  <!-- Table -->
-  <table id="dxccTable">
-    <thead>
-      <tr>
-        <th data-column="0" class="sortable-header" onclick="sortTable(0)">GRID</th>
-        <th data-column="1" class="sortable-header" onclick="sortTable(1)">First heard</th>
-        <th data-column="2" class="sortable-header" onclick="sortTable(2)">Last heard</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <script>
+    // Table sorting and population
     let sortingOrder = [1, 1, 1];
 
     function sortTable(columnIndex) {
