@@ -51,6 +51,76 @@
         min-width: 200px;
       }
 
+        /* Leaderboard Widget */
+        .leaderboard-widget {
+          position: absolute;
+          bottom: 20px;
+          left: 20px;
+          z-index: 1000;
+          background-color: rgba(255, 255, 255, 0.9);
+          padding: 10px 14px;
+          border-radius: 10px;
+          box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.35);
+          width: 180px;
+          font-size: 13px;
+        }
+
+        .leaderboard-widget h2 {
+          font-size: 14px;
+          font-weight: 700;
+          margin: 0 0 8px 0;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .leaderboard-widget h2 a {
+          font-size: 11px;
+          font-weight: 600;
+          color: #0078d4;
+          text-decoration: none;
+        }
+
+        .leaderboard-widget h2 a:hover {
+          text-decoration: underline;
+        }
+
+        .leaderboard-widget ol {
+          padding-left: 18px;
+          margin: 0 0 8px 0;
+        }
+
+        .leaderboard-widget li {
+          margin-bottom: 3px;
+        }
+
+        .hide-button {
+          display: block;
+          margin-top: 6px;
+        }
+
+        .show-button {
+          position: absolute;
+          bottom: 20px;
+          left: 20px;
+          z-index: 1000;
+          background-color: #0078d4;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          padding: 6px 10px;
+          cursor: pointer;
+          font-size: 12px;
+          font-weight: 600;
+          transition: background 0.2s ease;
+          display: none;
+        }
+
+        .show-button:hover {
+          background-color: #005fa3;
+        }
+
+        
       /* Header alignment */
       .floating h2 {
         display: flex;
@@ -125,7 +195,7 @@
 
       .observer-buttons {
         display: flex;
-        gap: 15px;
+        gap: 5px;
         margin-top: 10px;
       }
         .sat-label {
@@ -165,6 +235,12 @@
               <path d="M12 3l9 9h-3v9h-12v-9h-3l9-9z"/>
             </svg>
           </button>
+          <button onclick="window.open('https://dxer.site/greencube-io117-statistics-dxcc.html', '_blank')" style="padding:6px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 3h2v18H3V3zm16 10h2v8h-2v-8zM11 8h2v13h-2V8zM7 13h2v8H7v-8zm8-6h2v14h-2V7z"/>
+            </svg>
+          </button>
+
         <button onclick="window.open('https://dxer.site/leo-satellite-observer.html', '_blank')">LEO</button>
         <button onclick="window.open('https://dxer.site/qo-100-satellite-observer.html', '_blank')">GEO</button>
         <button onclick="window.open('https://dxer.site/eme-observer/', '_blank')">EME</button>
@@ -174,6 +250,22 @@
     <!-- Map container -->
     <div id="map"></div>
 
+    <!-- Leaderboard Widget -->
+    <div class="leaderboard-widget" id="leaderboard">
+      <h2>
+        Open Data Leaders
+        <a href="https://dxer.site/greencube-leaderboard.html" target="_blank">&nbsp;ALL</a>
+      </h2>
+      <ol id="leaderboard-list">
+        <li>Loading...</li>
+      </ol>
+      <button class="hide-button" onclick="toggleLeaderboard()">Hide</button>
+    </div>
+
+    <!-- Show Button -->
+    <button class="show-button" onclick="toggleLeaderboard()">Show Leaders</button>
+
+    
     <script>
       var map;
       var layerGroup;
@@ -383,6 +475,38 @@
       }
 
       initMap('');
+      
+      function toggleLeaderboard() {
+        const widget = document.getElementById('leaderboard');
+        const showButton = document.querySelector('.show-button');
+        
+        if (widget.style.display === 'none') {
+          widget.style.display = 'block';
+          showButton.style.display = 'none';
+        } else {
+          widget.style.display = 'none';
+          showButton.style.display = 'block';
+        }
+      }
+
+      // Example: load leaderboard data dynamically (optional)
+      fetch('leaderboard_top5.txt')
+        .then(response => response.text())
+        .then(data => {
+          const lines = data.trim().split('\n');
+          const list = document.getElementById('leaderboard-list');
+          list.innerHTML = ''; // clear loading text
+
+          lines.slice(0, 5).forEach(line => {
+            const item = document.createElement('li');
+            item.textContent = line;
+            list.appendChild(item);
+          });
+        })
+        .catch(() => {
+          document.getElementById('leaderboard-list').innerHTML = '<li>Error loading data</li>';
+        });
+
     </script>
   </body>
 </html>
