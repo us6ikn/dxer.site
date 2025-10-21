@@ -109,13 +109,18 @@
             font-weight: 600;
         }
 
-        /* Responsive chart container */
-        .chart-container {
+        /* Chart panels */
+        .chart-panel {
             width: 90%;
             max-width: 800px;
             margin: 20px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
         }
-        canvas {
+
+        .chart-panel canvas {
             width: 100% !important;
             height: auto !important;
         }
@@ -177,12 +182,12 @@
         IO-117 GreenCube Statistics: DXCC
     </div>
 
-    <!-- Responsive charts -->
-    <div class="chart-container">
+    <!-- Chart panels -->
+    <div class="chart-panel">
         <canvas id="newDXCCChart"></canvas>
     </div>
 
-    <div class="chart-container">
+    <div class="chart-panel">
         <canvas id="cumulativeDXCCChart"></canvas>
     </div>
 
