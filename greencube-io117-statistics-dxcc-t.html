@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenCube IO-117 Statistics - DXCC</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', Arial, sans-serif;
+            background-color: #f8f8f8;
+        }
+
+        /* Floating header panel like the observer page */
+        .floating {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background-color: rgba(255,255,255,0.95);
+            padding: 14px 18px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 12px rgba(0,0,0,0.35);
+            min-width: 250px;
+        }
+
+        .floating h2 {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 16px;
+            margin: 0 0 10px 0;
+        }
+
+        .floating h2 img {
+            width: 28px;
+            height: 28px;
+            margin-right: 8px;
+        }
+
+        .title-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .title-sub {
+            font-size: 11px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .title-main {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .observer-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .observer-buttons a img {
+            height: 30px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: transform 0.2s ease;
+        }
+
+        .observer-buttons a img:hover {
+            transform: scale(1.05);
+        }
+
+        /* Chart container styling */
+        .chart-container {
+            margin: 120px 20px 20px 20px; /* leave space for floating panel */
+        }
+
+        .chart-title-main {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+            font-size: 13px;
+            background-color: #fff;
+            box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #0078d4;
+            color: white;
+            cursor: pointer;
+        }
+
+        th[data-sorted="true"] {
+            background-color: #005fa3;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #e0f0ff;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Floating header -->
+    <div class="floating">
+        <h2>
+            <img src="img/gclogo.png" alt="GreenCube logo">
+            <div class="title-text">
+                <div class="title-sub">by SA5IKN</div>
+                <div class="title-main">GreenCube Observer</div>
+            </div>
+        </h2>
+
+        <div class="observer-buttons">
+            <a href="greencube-io117-statistics-dxcc.html"><img src="https://dxer.site/img/dxcc.png" alt="DXCC Statistics"></a>
+            <a href="greencube-io117-statistics-grids.html"><img src="https://dxer.site/img/grid.png" alt="Grids Statistics"></a>
+            <a href="greencube-io117-statistics-stations.html"><img src="https://dxer.site/img/stations.png" alt="Stations Statistics"></a>
+            <a href="greencube-leaderboard.html"><img src="https://dxer.site/img/data.png" alt="SatNOGS Data Statistics"></a>
+            <a href="greencube-observer"><img src="img/back.png" alt="Back to Observer" style="height:30px;"></a>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-container">
+        <div class="chart-title-main">IO-117 GreenCube Statistics: DXCC (updated dynamically)</div>
+        <canvas id="newDXCCChart" width="800" height="400"></canvas>
+        <canvas id="cumulativeDXCCChart" width="800" height="400"></canvas>
+
+        <!-- Table -->
+        <table id="dxccTable">
+            <thead>
+                <tr>
+                    <th data-column="0" class="sortable-header" onclick="sortTable(0)">DXCC</th>
+                    <th data-column="1" class="sortable-header" onclick="sortTable(1)">First heard</th>
+                    <th data-column="2" class="sortable-header" onclick="sortTable(2)">Last heard</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data dynamically loaded -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Scripts -->
+    <script src="charts-dxcc.js"></script> <!-- your chart plotting JS -->
+    <script src="table-dxcc.js"></script> <!-- your table population & sorting JS -->
+
+</body>
+</html>
