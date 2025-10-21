@@ -24,7 +24,6 @@
             font-family: 'Inter', Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: #f9f9f9;
         }
 
         /* Floating control panel */
@@ -110,7 +109,7 @@
             font-weight: 600;
         }
 
-        /* Chart and Table panels */
+        /* Chart panels */
         .chart-panel {
             width: 90%;
             max-width: 800px;
@@ -121,20 +120,15 @@
             padding: 20px;
         }
 
-        .chart-panel h3 {
-            margin-bottom: 16px;
-            font-weight: 600;
-            text-align: center;
-        }
-
         .chart-panel canvas {
             width: 100% !important;
-            height: 300px !important;
+            height: auto !important;
         }
 
         /* Table styling */
         #dxccTable {
-            width: 100%;
+            width: 90%;
+            margin: 20px auto;
             border-collapse: collapse;
         }
 
@@ -190,29 +184,104 @@
 
     <!-- Chart panels -->
     <div class="chart-panel">
-        <h3>New DXCC Entities per Month</h3>
         <canvas id="newDXCCChart"></canvas>
     </div>
 
     <div class="chart-panel">
-        <h3>Cumulative DXCC Count</h3>
         <canvas id="cumulativeDXCCChart"></canvas>
     </div>
 
-    <!-- DXCC Table Panel -->
-    <div class="chart-panel">
-        <h3>DXCC Table</h3>
-        <table id="dxccTable">
-          <thead>
-            <tr>
-              <th data-column="0" class="sortable-header" onclick="sortTable(0)">DXCC</th>
-              <th data-column="1" class="sortable-header" onclick="sortTable(1)">First heard</th>
-              <th data-column="2" class="sortable-header" onclick="sortTable(2)">Last heard</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-    </div>
+    <script>
+        async function fetchData() {
+            try {
+                const response = await fetch('out_dxcc_stats.txt');
+                if (!response.ok) throw new Error('Failed to fetch data');
+                return await response.text();
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                return null;
+            }
+        }
+
+        async function plotNewDXCCChart() {
+            try {
+                const data = await fetchData();
+                if (!data) return;
+
+                const lines = data.split('\n');
+                const months = {};
+                const seenDXCC = new Set();
+
+                lines.forEach(line => {
+                    const match = line.match(/DXCC: ([^,]+).*Earliest: (\d{4}-\d{2})-\d{2}T\d{2}:\d{2}:\d{2}Z/);
+                    if (match) {
+                        const dxcc = match[1].trim();
+                        const month = match[2];
+                        if (!seenDXCC.has(dxcc)) {
+                            months[month] = months[month] || { count: 0, entities: new Set() };
+                            months[month].entities.add(dxcc);
+                            months[month].count++;
+                            seenDXCC.add(dxcc);
+                        }
+                    }
+                });
+
+                const labels = Object.keys(months).sort();
+                const values = labels.map(month => months[month].count);
+
+                // Bar chart for new DXCC per month
+                const ctx = document.getElementById('newDXCCChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels, datasets: [{ label: 'New DXCC Entities per Month', data: values, backgroundColor: 'rgba(75, 192, 192, 0.6)' }] },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true } },
+                        onClick: function(evt, elements) {
+                            if (elements.length > 0) {
+                                const index = elements[0].index;
+                                const month = this.data.labels[index];
+                                if (months[month]) {
+                                    alert(`New DXCC Entities for ${month}: ${Array.from(months[month].entities).join(', ')}`);
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Line chart for cumulative DXCC
+                const cumulativeValues = values.reduce((acc, val) => {
+                    acc.push((acc.length > 0 ? acc[acc.length - 1] : 0) + val);
+                    return acc;
+                }, []);
+
+                const ctx2 = document.getElementById('cumulativeDXCCChart').getContext('2d');
+                new Chart(ctx2, {
+                    type: 'line',
+                    data: { labels, datasets: [{ label: 'Cumulative DXCC Count', data: cumulativeValues, borderColor: 'rgba(255, 99, 132, 0.6)', fill: false }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+                });
+
+            } catch (error) {
+                console.error('Error plotting chart:', error);
+            }
+        }
+
+        plotNewDXCCChart();
+    </script>
+
+    <!-- DXCC Table -->
+    <table id="dxccTable">
+      <thead>
+        <tr>
+          <th data-column="0" class="sortable-header" onclick="sortTable(0)">DXCC</th>
+          <th data-column="1" class="sortable-header" onclick="sortTable(1)">First heard</th>
+          <th data-column="2" class="sortable-header" onclick="sortTable(2)">Last heard</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
     <script>
         let sortingOrder = [1, 1, 1];
@@ -249,81 +318,7 @@
               }
             });
           });
-
-        async function fetchData() {
-            try {
-                const response = await fetch('out_dxcc_stats.txt');
-                if (!response.ok) throw new Error('Failed to fetch data');
-                return await response.text();
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                return null;
-            }
-        }
-
-        async function plotNewDXCCChart() {
-            const data = await fetchData();
-            if (!data) return;
-
-            const lines = data.split('\n');
-            const months = {};
-            const seenDXCC = new Set();
-
-            lines.forEach(line => {
-                const match = line.match(/DXCC: ([^,]+).*Earliest: (\d{4}-\d{2})-/);
-                if (match) {
-                    const dxcc = match[1].trim();
-                    const month = match[2];
-                    if (!seenDXCC.has(dxcc)) {
-                        months[month] = months[month] || { count: 0, entities: new Set() };
-                        months[month].entities.add(dxcc);
-                        months[month].count++;
-                        seenDXCC.add(dxcc);
-                    }
-                }
-            });
-
-            const labels = Object.keys(months).sort();
-            const values = labels.map(month => months[month].count);
-
-            // Bar chart
-            const ctx = document.getElementById('newDXCCChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: { labels, datasets: [{ label: 'New DXCC Entities per Month', data: values, backgroundColor: 'rgba(75, 192, 192, 0.6)' }] },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } },
-                    onClick: function(evt, elements) {
-                        if (elements.length > 0) {
-                            const index = elements[0].index;
-                            const month = this.data.labels[index];
-                            if (months[month]) {
-                                alert(`New DXCC Entities for ${month}: ${Array.from(months[month].entities).join(', ')}`);
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Line chart
-            const cumulativeValues = values.reduce((acc, val) => {
-                acc.push((acc.length > 0 ? acc[acc.length - 1] : 0) + val);
-                return acc;
-            }, []);
-
-            const ctx2 = document.getElementById('cumulativeDXCCChart').getContext('2d');
-            new Chart(ctx2, {
-                type: 'line',
-                data: { labels, datasets: [{ label: 'Cumulative DXCC Count', data: cumulativeValues, borderColor: 'rgba(255, 99, 132, 0.6)', fill: false }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
-            });
-        }
-
-        plotNewDXCCChart();
     </script>
-
     <!-- Ko-Fi -->
     <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
     <script src="kofi.js"></script>
