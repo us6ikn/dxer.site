@@ -282,7 +282,7 @@
                 // Match new format:
                 // Earliest: 2023-01-04T00:41:53Z, Latest: 2024-07-20T14:38:56Z,
                 // Callsign: EA3GCV, Grid locator: JN01VF, Coordinates: (41.2291, 1.7916)
-                const regex = /Earliest:\s*([^,]+),\s*Latest:\s*([^,]+),\s*Callsign:\s*([^,]+),\s*Grid locator:\s*([^,]+),\s*Coordinates:\s*\(([^,]+),\s*([^)]+)\)/g;
+                const regex = /Earliest: ([^,]+), Latest: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
                 
                 const callsigns = {};
                 let match;
