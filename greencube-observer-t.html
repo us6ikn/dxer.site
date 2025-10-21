@@ -248,7 +248,7 @@
         });
 
         // Load announcements
-        fetch('announcements_filtered_all.txt')
+        fetch('announcements_filtered.txt')
           .then(response => response.text())
           .then(data => {
             const announcements = data.trim().split('\n');
@@ -276,13 +276,11 @@
             });
 
             // Load main GreenCube markers
-            fetch("output_filtered.txt")
+            fetch("output_filtered_all.txt")
               .then(response => response.text())
               .then(data => {
-                // Match new format:
-                // Earliest: 2023-01-04T00:41:53Z, Latest: 2024-07-20T14:38:56Z,
-                // Callsign: EA3GCV, Grid locator: JN01VF, Coordinates: (41.2291, 1.7916)
-                const regex = /Earliest: ([^,]+), Latest: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
+                  
+                const regex = /Earliest:\s*([^,]+),\s*Latest:\s*([^,]+),\s*Callsign:\s*([^,]+),\s*Grid locator:\s*([^,]+),\s*Coordinates:\s*\(([^,]+),\s*([^)]+)\)/g;
                 
                 const callsigns = {};
                 let match;
