@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html>
+    <script type="text/javascript" src="https://platform-api.sharethis.com/js/sharethis.js#property=6408717eb20f5f00192a0d72&product=inline-share-buttons&source=platform" async="async"></script>
+  <head>
+      <!-- Google tag (gtag.js) -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-7YST3WTEH3"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-7YST3WTEH3');
+      </script>
+      <!-- Include Font Awesome CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="LEO SAT Observer" />
+    <meta name="author" content="https://dxer.site" />
+    <meta charset="utf-8">
+    <title>LEO Satellite Observer</title>
+    <style>
+      html, body {
+        height: 100%;
+        padding: 0;
+        margin: 0;
+        }
+      #map {
+       height: 100%;
+       }
+    </style>
+    <style>
+    .twitter-container {
+      position: fixed;
+      bottom: 60px;
+      left: 15px;
+      z-index: 9999;
+    }
+
+    .twitter-follow-button {
+      display: inline-block;
+      background-color: #1da1f2;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 16px;
+      font-weight: bold;
+      text-decoration: none;
+    }
+        .floating {
+          position: absolute;
+          top: 20px;
+          left: 20px;
+          z-index: 1000;
+          background-color: rgba(255, 255, 255, 0.8);
+          padding: 10px;
+          border-radius: 5px;
+          box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+          opacity: 1.0;
+        }
+        .checkbox-container {
+            display: flex;
+            flex-direction: row;
+          }
+        
+        
+        .floating-button {
+          position: absolute;
+          bottom: 195px;
+          left: 8px;
+          z-index: 999;
+        }
+
+        .floating-button-icon {
+          font-size: 30px; /* Adjust the size of the icon as needed */
+          color: #808080; /* Adjust the color of the icon as needed */
+          padding: 10px; /* Add padding around the icon as needed */
+          background-color: rgba(255, 255, 255, 0.0); /* Add background color to the icon as needed */
+          border-radius: 50%; /* Apply border radius to create a circular button */
+        }
+        
+        .floating-window {
+          position: fixed;
+          bottom: 300px;
+          right: 60px;
+          z-index: 9999;
+        }
+
+        .toggle-button {
+          position: absolute;
+          top: 45px;
+          right: 0;
+          width: 20px;
+          height: 20px;
+          font-size: 20px;
+          font-weight: bold;
+          text-align: center;
+          color: transparent;
+          background-color: transparent;
+          border: none;
+          border-radius: 50%;
+          cursor: pointer;
+          opacity: 0;
+        }
+
+        .arrow-button {
+          position: absolute;
+          top: 47px;
+          left: -22;
+          width: 20px;
+          height: 20px;
+          font-size: 20px;
+          font-weight: bold;
+          text-align: center;
+          color: black;
+          background-color: transparent;
+          border: none;
+          cursor: pointer;
+          opacity: 1;
+        }
+        
+        .content {
+          position: absolute;
+          top: 0;
+          right: -280px;
+          width: 220px;
+          padding: 10px;
+          background-color: rgba(255, 255, 255, 0.8);
+          padding: 10px;
+          border-radius: 5px;
+          box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+          transition: right 0.5s;
+          z-index: -1;
+        }
+
+        .show {
+          right: 0;
+          z-index: 9999;
+        }
+
+        
+        .blinking-marker {
+          /* Set the marker icon to the URL of your blinking gif */
+          background-image: url(img/rover.gif);
+          /* Set the width and height of the marker */
+          width: 20px;
+          height: 20px;
+          /* Set the background position to display the first frame of the gif */
+          background-position: 0 0;
+          /* Set the animation to cycle through the frames of the gif */
+          animation: blink 1s steps(2) infinite;
+        }
+        /* Define the animation */
+        @keyframes blink {
+          50% {
+            background-position: -32px 0;
+          }
+        }
+        /* Style for the buttons */
+        .map-button {
+            background: none;
+            height: 30px;
+            border: none;
+            padding: 0;
+            margin: 5px; /* Adjust margin as needed */
+            cursor: pointer;
+        }
+        #buttons-container-row3 {
+            position: absolute;
+            bottom: 100px; /* Adjust the top position as needed */
+            left: 10px; /* Adjust the left position as needed */
+            display: flex;
+            flex-wrap: wrap;
+            z-index: 999; /* Ensure buttons appear above other elements */
+        }
+
+        #buttons-container-row5 {
+            position: absolute;
+            bottom: 60px; /* Adjust the top position as needed */
+            left: 10px; /* Adjust the left position as needed */
+            display: flex;
+            flex-wrap: wrap;
+            z-index: 999; /* Ensure buttons appear above other elements */
+        }
+    </style>
+    <style>
+        * {
+          outline: none !important;
+        }
+    </style>
+  </head>
+  <body>
+      <div class="floating">
+        <label for="grid-locator">Enter your Grid:</label>
+        <input type="text" id="grid-locator" placeholder="e.g. JO89tt" maxlength="6" style="width: 68px;">
+        <button onclick="initMap(document.getElementById('grid-locator').value); document.getElementById('kml-layer-toggle').checked = false;">Plot your Range</button>
+        <div class="checkbox-container" style="display: flex; align-items: center;">
+          <input type="checkbox" style="margin-top: 10px;" id="kml-layer-toggle">
+          <label for="kml-layer-toggle" style="margin-top: 10px;">CQ Zones</label>
+          <img src="img/AO07logo.png" alt="LEO SAT Observer logo" style="vertical-align: middle; margin-left: 5px; width: 20px;">
+              <span style="position: relative; display: inline-block; font-family: Arial, sans-serif; font-weight: bold; letter-spacing: 1px; margin-left: 5px; margin-top: 10px;">
+                LEO Satellite Observer
+                <sup style="position: absolute; top: -7px; right: 0; font-size: 9px; font-family: Arial, sans-serif; font-weight: normal; letter-spacing: 0px;">by SA5IKN</sup>
+              </span>
+        </div>
+      </div>
+
+      <a href="http://aar29.free.fr/sat/indexlogin.html" style="position: fixed; bottom: 150px; left: 20px; color: gray; font-family: Arial; font-size: 14px; z-index: 9999; font-weight: bold;">SPOT</a>
+
+      <!-- Container for the buttons - Third Row -->
+      <div id="buttons-container-row3">
+          <!-- LEO Button -->
+          <a href="https://dxer.site/qo-100-satellite-observer.html" target="_blank">
+              <img src="https://dxer.site/img/GEO.png" alt="QO+100 Satellite Observer" class="map-button">
+          </a>
+          
+          <!-- GEO Button -->
+          <a href="https://dxer.site/greencube-observer.html" target="_blank">
+              <img src="https://dxer.site/img/MEO.png" alt="GreenCube Observer" class="map-button">
+          </a>
+      </div>
+      <!-- Container for the buttons - Fifth Row -->
+      <div id="buttons-container-row5">
+          <!-- Home Button -->
+          <a href="https://dxer.site" target="_blank">
+              <img src="https://dxer.site/img/Home.png" alt="Homepage" class="map-button">
+          </a>
+          
+          <!-- Twitter Button -->
+          <a href="https://twitter.com/m0skn_sa5ikn?ref_src=twsrc%5Etfw" target="_blank">
+              <img src="https://dxer.site/img/x.png" alt="X Twitter" class="map-button">
+          </a>
+      </div>
+      
+
+      <div class="floating-window">
+        <button class="toggle-button"></button>
+        <button class="arrow-button" onclick="toggleFloatingWindow()">&#x25b6;</button>
+        <div class="content">
+            <div><img src="img/fmicon_90.png" alt="" style="width:15px;height:15px;"> FM. Spotted < 90 days ago</div>
+            <div><img src="img/fmicon_m90.png" alt="" style="width:15px;height:15px;"> FM. Spotted > 90 days ago</div>
+            <div><img src="img/m_30.png" alt="" style="width:15px;height:15px;"> Linear. Spotted < 90 days ago</div>
+            <div><img src="img/m_m30.png" alt="" style="width:15px;height:15px;"> Linear. Spotted > 90 days ago</div>
+            <div><p style="font-size: smaller;">&nbsp;&nbsp;&nbsp;&nbsp;Data sources: <br> &nbsp;&nbsp;&nbsp;&nbsp;DX Cluster and <a href="http://aar29.free.fr/sat/indexlogin.html">AAR29 Sat Log</a> <br> &nbsp;&nbsp;&nbsp;&nbsp;(with permission)</p></div>
+            <div class="sharethis-inline-share-buttons"></div>
+          </div>
+        
+      </div>
+
+
+    <div id="map"></div>
+    <script>
+      var map;
+      var kmlLayer;
+      
+      // Define the URL of your blinking gif
+      const BLINKING_GIF_URL = 'img/rover1.gif?v=1';
+
+      function calculateCoordinates(gridLocator) {
+          // Get the grid locator from user input and convert to uppercase
+          var gridLocator = document.getElementById("grid-locator").value.toUpperCase();
+
+          // Force the first two characters to be uppercase
+          gridLocator = gridLocator.substr(0,2).toUpperCase() + gridLocator.substr(2);
+
+          // Force the last two characters to be lowercase
+          gridLocator = gridLocator.substr(0,4) + gridLocator.substr(4).toLowerCase();
+
+          // Use regular expression to validate the grid locator format
+          var gridLocatorPattern = /^([A-R]{2}\d{2}[a-z]{2})([0-9]*[a-z]*)?$/;
+          if (!gridLocatorPattern.test(gridLocator)) {
+              alert("Invalid grid locator format. Please enter a valid 6-character grid locator.");
+              return;
+          }
+          // Calculate the latitude and longitude of the grid locator
+          var lat1 = (gridLocator.charCodeAt(1) - 65) * 10;
+          var lat2 = ((gridLocator.charCodeAt(5) - 97)/24) +  (1 / 48) - 90;
+          var lat3 = parseInt(gridLocator.charAt(3));
+          var latitude = lat1 + lat3 + lat2;
+
+          var lon1 = ((gridLocator.charCodeAt(0) - 65) * 20);
+          var lon2 = parseInt(gridLocator.charAt(2)) * 2;
+          var lon3 = ((gridLocator.charCodeAt(4) - 97) / 12) + (1/24);
+          var longitude = lon1 + lon2 + lon3 - 180;
+
+          return { lat: latitude, lng: longitude };
+      }
+      
+      function toggleFloatingWindow() {
+        var content = document.querySelector('.floating-window .content');
+        content.classList.toggle('show');
+      }
+
+      
+      function initMap(gridLocator) {
+          map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 2,
+            center: { lat: 0, lng: 0 },
+            mapTypeControl: false,
+            streetViewControl: false,
+            fullscreenControl: false
+          });
+          
+          // Load the announcements data from the file
+          fetch('announcements_filtered.txt')
+            .then(response => response.text())
+            .then(data => {
+              // Split the data into individual announcements
+              const announcements = data.trim().split('\n');
+              
+        let openInfoWindow = null; // keep track of the currently open info window
+
+          const infowindow = new google.maps.InfoWindow();
+          
+          kmlLayer = new google.maps.KmlLayer('https://dxer.site/WAZ.kml?v=1.3', {
+            suppressInfoWindows: true,
+            preserveViewport: true,
+            map: null // set map to null initially
+          });
+          kmlLayer.set('strokeColor', '#000000'); // set line color to red
+                      kmlLayer.set('strokeWeight', 2); // set line width to 2 pixels
+                      kmlLayer.set('fillOpacity', 0); // set fill opacity to 0 (transparent)
+          kmlLayer.addListener('click', function(event) {
+            var zoneNumber = event.featureData.infoWindowHtml;
+            var infowindow = new google.maps.InfoWindow({
+              content: zoneNumber,
+            });
+            infowindow.setPosition(event.latLng);
+            infowindow.open(map);
+          });
+
+          var kmlLayerToggle = document.getElementById('kml-layer-toggle');
+          kmlLayerToggle.addEventListener('change', function() {
+            if (kmlLayerToggle.checked) {
+              kmlLayer.setMap(map);
+            } else {
+              kmlLayer.setMap(null);
+            }
+          });
+
+          fetch("output_filtered_leo.txt")
+            .then(response => response.text())
+            .then(data => {
+              const regex = /TRP: ([^,]+), Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coord: \(([^,]+), ([^)]+)\)/g;
+              const callsigns = {};
+              let match;
+              while ((match = regex.exec(data)) !== null) {
+                const callsign = match[3];
+                const dxgridlocator = match[4];
+                const trp = match[1];
+                const latestTime = Date.parse(match[2]);
+                const lat = parseFloat(match[5]);
+                const lng = parseFloat(match[6]);
+                const key = `${lat},${lng}`;
+                if (!callsigns[key]) {
+                  callsigns[key] = [];
+                }
+                if (Date.now() - latestTime <= 90 * 24 * 60 * 60 * 1000 && trp == 'F') {
+                    callsigns[key].push({
+                      callsign: callsign,
+                      dxgridlocator: dxgridlocator,
+                    markerIcon: "img/fmicon_90.png"
+                  });
+                } else if (Date.now() - latestTime > 90 * 24 * 60 * 60 * 1000 && Date.now() - latestTime < 365 * 2 * 24 * 60 * 60 * 1000 && trp == 'F') {
+                        callsigns[key].push({
+                          callsign: callsign,
+                          dxgridlocator: dxgridlocator,
+                        markerIcon: "img/fmicon_m90.png"
+                      });
+                } else if (Date.now() - latestTime > 365 * 2 * 24 * 60 * 60 * 1000 && trp == 'F') {
+                        callsigns[key].push({
+                          callsign: callsign,
+                          dxgridlocator: dxgridlocator,
+                        markerIcon: "img/fmicon_m2y.png"
+                      });
+                } else if (Date.now() - latestTime <= 90 * 24 * 60 * 60 * 1000 && trp == 'L') {
+                        callsigns[key].push({
+                          callsign: callsign,
+                          dxgridlocator: dxgridlocator,
+                        markerIcon: "img/m_30.png"
+                      });
+                } else if (Date.now() - latestTime > 90 * 24 * 60 * 60 * 1000 && Date.now() - latestTime < 365 * 2 * 24 * 60 * 60 * 1000 && trp == 'L') {
+                        callsigns[key].push({
+                          callsign: callsign,
+                          dxgridlocator: dxgridlocator,
+                        markerIcon: "img/m_m30.png"
+                      });
+                } else if (Date.now() - latestTime > 365 * 2 * 24 * 60 * 60 * 1000 && trp == 'L') {
+                        callsigns[key].push({
+                          callsign: callsign,
+                          dxgridlocator: dxgridlocator,
+                        markerIcon: "img/m_2y.png"
+                      });
+                }
+              }
+              
+              for (const key in callsigns) {
+                const [lat, lng] = key.split(",");
+                const markers = callsigns[key];
+                const markerIcon = markers[0].markerIcon;
+                const marker = new google.maps.Marker({
+                  position: { lat: parseFloat(lat), lng: parseFloat(lng) },
+                  map: map,
+                  title: markers.map(m => m.callsign).join(", "),
+                  icon: {
+                    url: markerIcon,
+                    scaledSize: new google.maps.Size(20, 20)
+                  }
+                });
+                
+                let content = markers.map(m => {
+                  if (!gridLocator) {
+                    return `<a href="#" onclick="alert('Enter your Grid Locator and click Plot your Range first'); return false;">${m.callsign}</a>`;
+                  }
+                  return `<a href="https://www.satmatch.com/satellite/RS-44,FO-29,AO-07,ISS,AO-91,SO-50,CAS-4A,CAS-4B/obs1/${gridLocator}/obs2/${m.dxgridlocator}?duration_hrs=24">${m.callsign}</a>`;
+                }).join(", ");
+                
+                content = `<div>${content}</div>`;
+                marker.addListener("click", () => {
+                    // Close the currently open info window
+                    if (openInfoWindow) {
+                      openInfoWindow.close();
+                    }
+                  infowindow.setContent(content);
+                  infowindow.open(map, marker);
+                });
+              }
+
+              // Loop through the announcements and create markers for each one
+              for (let i = 0; i < announcements.length; i++) {
+                const announcement = announcements[i];
+
+                // Extract the coordinates and time from the announcement
+                            const coordinates = announcement.match(/Coordinates: \((.*), (.*)\)/);
+                            const timeString = announcement.match(/Time: ([^,]*)/)[1];
+
+                            if (!coordinates || !timeString) {
+                              continue;
+                            }
+
+                            const lat = parseFloat(coordinates[1]);
+                            const lng = parseFloat(coordinates[2]);
+                            const time = new Date(timeString);
+
+                            // Check if the time is in the future
+                            if (time <= new Date()) {
+                              continue;
+                            }
+
+                // Extract the callsign from the announcement
+                const callsign = announcement.match(/Callsign: ([^,]*)/)[1];
+
+                // Create a new marker with the blinking icon
+                const marker = new google.maps.Marker({
+                  position: { lat, lng },
+                  map,
+                  icon: {
+                      url: BLINKING_GIF_URL,
+                      scaledSize: new google.maps.Size(20, 20)
+                    },
+                  optimized: false, // disable marker animation optimization
+                  zIndex: 10000 // set the z-index to a high value
+                });
+
+                // Add a listener to the marker
+                marker.addListener('click', () => {
+                  // Close the currently open info window
+                  if (openInfoWindow) {
+                    openInfoWindow.close();
+                  }
+
+                  // Create an info window with the callsign and hyperlink to https://hams.at/alerts
+                  const infoWindow = new google.maps.InfoWindow({
+                    content: `<div><a href="https://hams.at/alerts" target="_blank">${callsign}</a></div>`,
+                  });
+
+                  // Open the info window on the marker and update the currently open info window
+                  infoWindow.open(map, marker);
+                  openInfoWindow = infoWindow;
+                });
+              }
+            });
+              
+              // Plot the markers with different radius circles around them if gridLocator is provided
+              if (gridLocator) {
+                const { lat, lng } = calculateCoordinates(gridLocator);
+
+                // Create a marker for the gridLocator
+                const marker = new google.maps.Marker({
+                  position: { lat, lng },
+                  map: map,
+                  title: gridLocator
+                });
+
+                // Create a circle with 5000 km radius around the gridLocator
+                const circle1 = new google.maps.Circle({
+                  strokeColor: "#FF0000", // Red
+                  strokeOpacity: 0.4,
+                  strokeWeight: 2,
+                  fillColor: "#FF0000", // Red
+                  fillOpacity: 0.05,
+                  map,
+                  center: { lat, lng },
+                  radius: 4970000 // SO-50 range
+                });
+                
+                circle1.setMap(map); // Set the circle on the map
+                circle1.setOptions({ clickable: false }); // Make the circle transparent to mouse events
+
+                // Create a circle with 7000 km radius around the gridLocator
+                const circle2 = new google.maps.Circle({
+                  strokeColor: "#FF0000",
+                  strokeOpacity: 0.4,
+                  strokeWeight: 2,
+                  fillColor: "#FF0000",
+                  fillOpacity: 0.05,
+                  map,
+                  center: { lat, lng },
+                  radius: 7502000 // FO-29 range
+                });
+                
+                circle2.setMap(map); // Set the circle on the map
+                circle2.setOptions({ clickable: false }); // Make the circle transparent to mouse events
+
+                // Create a circle with 8000 km radius around the gridLocator
+                const circle3 = new google.maps.Circle({
+                  strokeColor: "#FF0000",
+                  strokeOpacity: 0.4,
+                  strokeWeight: 2,
+                  fillColor: "#FF0000",
+                  fillOpacity: 0.05,
+                  map,
+                  center: { lat, lng },
+                  radius: 8042000 // RS-44 range
+                });
+                
+                circle3.setMap(map); // Set the circle on the map
+                circle3.setOptions({ clickable: false }); // Make the circle transparent to mouse events
+                
+                // Create a circle with 8000 km radius around the gridLocator
+                const circle4 = new google.maps.Circle({
+                  strokeColor: "#FF0000",
+                  strokeOpacity: 0.4,
+                  strokeWeight: 2,
+                  fillColor: "#FF0000",
+                  fillOpacity: 0.05,
+                  map,
+                  center: { lat, lng },
+                  radius: 3940000 // ISS range
+                });
+                
+                circle4.setMap(map); // Set the circle on the map
+                circle4.setOptions({ clickable: false }); // Make the circle transparent to mouse events
+                
+                // Create a circle with 8000 km radius around the gridLocator
+                const circle5 = new google.maps.Circle({
+                  strokeColor: "#FF0000",
+                  strokeOpacity: 0.4,
+                  strokeWeight: 2,
+                  fillColor: "#FF0000",
+                  fillOpacity: 0.05,
+                  map,
+                  center: { lat, lng },
+                  radius: 7907000 // AO-07 range
+                });
+                
+                circle5.setMap(map); // Set the circle on the map
+                circle5.setOptions({ clickable: false }); // Make the circle transparent to mouse events
+                
+                // Create a circle with 8000 km radius around the gridLocator
+                const circle6 = new google.maps.Circle({
+                  strokeColor: "#FF0000",
+                  strokeOpacity: 0.4,
+                  strokeWeight: 2,
+                  fillColor: "#FF0000",
+                  fillOpacity: 0.05,
+                  map,
+                  center: { lat, lng },
+                  radius: 5712000 // AO-91 range
+                });
+                
+                circle6.setMap(map); // Set the circle on the map
+                circle6.setOptions({ clickable: false }); // Make the circle transparent to mouse events
+
+                // Create a circle with 8000 km radius around the gridLocator
+                const circle7 = new google.maps.Circle({
+                  strokeColor: "#808080",
+                  strokeOpacity: 0.4,
+                  strokeWeight: 2,
+                  fillColor: "#808080",
+                  fillOpacity: 0.0,
+                  map,
+                  center: { lat, lng },
+                  radius: 13000000 // IO-117 range
+                });
+                
+                circle7.setMap(map); // Set the circle on the map
+                circle7.setOptions({ clickable: false }); // Make the circle transparent to mouse events
+
+                // Add custom markers with labels along the circumference of the circles
+                const label1 = new google.maps.Marker({
+                  position: google.maps.geometry.spherical.computeOffset(circle1.getCenter(), circle1.getRadius(), 265), // Position the marker along the circumference
+                  map: map,
+                  label: {
+                    text: "SO-50", // Label text for circle1
+                    color: "black", // Label text color
+                    fontSize: "12px", // Label font size
+                    fontWeight: "bold" // Label font weight
+                  }
+                });
+
+                const label2 = new google.maps.Marker({
+                  position: google.maps.geometry.spherical.computeOffset(circle2.getCenter(), circle2.getRadius(), 245), // Position the marker along the circumference
+                  map: map,
+                  label: {
+                    text: "FO-29", // Label text for circle2
+                    color: "black", // Label text color
+                    fontSize: "12px", // Label font size
+                    fontWeight: "bold" // Label font weight
+                  }
+                });
+
+                const label3 = new google.maps.Marker({
+                  position: google.maps.geometry.spherical.computeOffset(circle3.getCenter(), circle3.getRadius(), 225), // Position the marker along the circumference
+                  map: map,
+                  label: {
+                    text: "RS-44", // Label text for circle3
+                    color: "black", // Label text color
+                    fontSize: "12px", // Label font size
+                    fontWeight: "bold" // Label font weight
+                  }
+                });
+                
+                const label4 = new google.maps.Marker({
+                  position: google.maps.geometry.spherical.computeOffset(circle4.getCenter(), circle4.getRadius(), 275), // Position the marker along the circumference
+                  map: map,
+                  label: {
+                    text: "ISS", // Label text for circle3
+                    color: "black", // Label text color
+                    fontSize: "12px", // Label font size
+                    fontWeight: "bold" // Label font weight
+                  }
+                });
+                
+                const label5 = new google.maps.Marker({
+                  position: google.maps.geometry.spherical.computeOffset(circle5.getCenter(), circle5.getRadius(), 235), // Position the marker along the circumference
+                  map: map,
+                  label: {
+                    text: "AO-07", // Label text for circle3
+                    color: "black", // Label text color
+                    fontSize: "12px", // Label font size
+                    fontWeight: "bold" // Label font weight
+                  }
+                });
+                
+                const label6 = new google.maps.Marker({
+                  position: google.maps.geometry.spherical.computeOffset(circle6.getCenter(), circle6.getRadius(), 255), // Position the marker along the circumference
+                  map: map,
+                  label: {
+                    text: "AO-91", // Label text for circle3
+                    color: "black", // Label text color
+                    fontSize: "12px", // Label font size
+                    fontWeight: "bold" // Label font weight
+                  }
+                });
+                
+                const label7 = new google.maps.Marker({
+                  position: google.maps.geometry.spherical.computeOffset(circle7.getCenter(), circle7.getRadius(), 185), // Position the marker along the circumference
+                  map: map,
+                  label: {
+                    text: "IO-117", // Label text for circle3
+                    color: "black", // Label text color
+                    fontSize: "12px", // Label font size
+                    fontWeight: "bold" // Label font weight
+                  }
+                });
+
+              } else {
+                // Handle case when gridLocator is not provided
+              }
+
+            });
+
+        
+      }
+    </script>
+    
+    <script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCVurUk8HQghMZ1gHdCGiZ7NSW8uSaRpXA&callback=initMap&libraries=geometry&v=3.56">
+    </script>
+
+    
+    <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+    <script>
+      kofiWidgetOverlay.draw('sa5ikn', {
+        'type': 'floating-chat',
+        'floating-chat.donateButton.text': 'Support',
+        'floating-chat.donateButton.background-color': '#00b9fe',
+        'floating-chat.donateButton.text-color': '#fff'
+      });
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7YST3WTEH3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-7YST3WTEH3');
+    </script>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GreenCube Observer Leaderboard IO-117" />
+    <meta name="author" content="https://dxer.site" />
+    <meta charset="utf-8">
+  <title>GreenCube Observer Leaderboard</title>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPRWRoTRhE5TddxBITIhBcKjdQpz2CXRs&callback=initMap&v=3.56" defer></script>
+  <style>
+    #map {
+      height: 500px;
+      width: 100%;
+    }
+    #leaderboard {
+      margin-top: 20px;
+      font-family: Arial, sans-serif;
+    }
+    #leaderboard h2 {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 10px;
+      position: relative;
+    }
+    #leaderboard h2 sup {
+      position: absolute;
+      top: -20px;
+      left: 0;
+      font-size: 9px;
+      font-family: Arial, sans-serif;
+      font-weight: normal;
+      letter-spacing: 0px;
+    }
+    #leaderboard h2 span {
+      font-weight: normal;
+    }
+    #leaderboard table {
+      width: 100%;
+      border-collapse: collapse;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    #leaderboard th, #leaderboard td {
+      padding: 12px;
+      border-bottom: 1px solid #f2f2f2;
+      text-align: left;
+    }
+    #leaderboard th {
+      background-color: #f5f5f5;
+      color: #333;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    #leaderboard td {
+      color: #666;
+    }
+    #leaderboard tbody tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    #leaderboard tbody tr:hover {
+      background-color: #f0f0f0;
+    }
+    #backButton {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: rgba(255, 255, 255, 0.5); /* Half-transparent white background */
+      border: 1px solid #ccc;
+      padding: 10px 20px; /* Increased padding for better appearance */
+      cursor: pointer;
+      z-index: 1000;
+      font-size: 16px; /* Larger font size */
+      text-decoration: none; /* Remove underline */
+      color: #333; /* Text color */
+      border-radius: 5px; /* Rounded corners */
+    }
+    .button-container {
+      position: absolute;
+      top: 65px; /* Adjust as needed */
+      left: 10px; /* Adjust as needed */
+      z-index: 1000;
+    }
+    .button-container a {
+      display: inline-block;
+      margin-right: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <a href="https://dxer.site/greencube-observer" id="backButton">&#9664; <img src="img/gclogo.png" alt="GreenCube Observer logo" style="vertical-align: middle; margin-left: 5px; width: 20px; height: 20px;">
+      <span style="position: relative; display: inline-block; font-family: Arial, sans-serif; font-weight: bold; letter-spacing: 1px; margin-left: 5px; margin-top: 10px;">
+          GreenCube Observer
+          <sup style="position: absolute; top: -7px; right: 0; font-size: 9px; font-family: Arial, sans-serif; font-weight: normal; letter-spacing: 0px;">by SA5IKN</sup>
+      </span></a>
+  
+  <div class="button-container">
+    <a href="https://dxer.site/greencube-io117-statistics-dxcc.html" target="_self">
+        <img src="https://dxer.site//img/dxcc.png" alt="DXCC Statistics" style="height: 30px;">
+    </a>
+    <a href="https://dxer.site/greencube-io117-statistics-grids.html" target="_self">
+        <img src="https://dxer.site//img/grid.png" alt="Grids Statistics" style="height: 30px;">
+    </a>
+    <a href="https://dxer.site/greencube-io117-statistics-stations.html" target="_self">
+        <img src="https://dxer.site//img/stations.png" alt="Stations Statistics" style="height: 30px;">
+    </a>
+    <a href="https://dxer.site/greencube-leaderboard.html" target="_self">
+        <img src="https://dxer.site//img/data.png" alt="SatNOGS Data Statistics" style="height: 30px;">
+    </a>
+  </div>
+
+  <div id="leaderboard">
+      <h2>Open Data Contributors Leaderboard <span>(last 7 days)</span> <a href="https://dxer.site/greencube-FAQ" target="_blank">FAQ</a></h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Contributor</th>
+          <th>Continent</th>
+          <th>Contribution</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboardBody">
+        <!-- Leaderboard data will be dynamically added here -->
+      </tbody>
+    </table>
+  </div>
+  
+  <div><p style="font-size: smaller;">&nbsp;&nbsp;&nbsp;&nbsp;Latest database update: <br>&nbsp;&nbsp;&nbsp;&nbsp;<span id="last-modified"></span></p></div>
+  <script>
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+              var lastModified = new Date(this.getResponseHeader("Last-Modified"));
+              document.getElementById("last-modified").innerHTML = lastModified.toUTCString();
+          }
+      };
+      xhttp.open("HEAD", "leaderboard.txt", true);
+      xhttp.send();
+  </script>
+  
+  <script>
+    function initMap() {
+      const map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 2,
+        center: { lat: 0, lng: 0 },
+        streetViewControl: false, // Remove street view control
+        mapTypeControl: false // Remove map type control
+      });
+
+      const leaderboardBody = document.getElementById('leaderboardBody');
+
+      fetch("leaderboard.txt")
+        .then(response => response.text())
+        .then(data => {
+          const regex = /Rank: (\d+), Observer: ([^,]+), Cont: ([^,]+), Observations: (\d+), Percentage: ([^%]+)%, Grid Locator: ([^,]+), Coordinates: \(([^,]+), ([^)]+)\)/g;
+          let match;
+          let leaderboardHTML = '';
+          let rank = 1;
+          while ((match = regex.exec(data)) !== null) {
+            const latitude = parseFloat(match[7]);
+            const longitude = parseFloat(match[8]);
+            const percentage = parseFloat(match[5]);
+
+            // Calculate marker scale based on percentage
+            const scale = Math.log(percentage * 1000) * 2; // Adjust the divisor for scaling
+
+            const marker = new google.maps.Marker({
+              position: { lat: latitude, lng: longitude },
+              map: map,
+              title: `Contributor: ${match[2]}\nContinent: ${match[3]}\nContribution: ${match[5]}%\nGrid Locator: ${match[6]}`,
+              icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: scale, // Set marker scale
+                fillColor: 'red', // Change marker color if needed
+                fillOpacity: 0.6,
+                strokeWeight: 0
+              }
+            });
+
+            // Add click event listener to marker
+            marker.addListener('click', (function(match) {
+              return function() {
+                // Create info window
+                const infoWindow = new google.maps.InfoWindow({
+                  content: `<div>Contributor: ${match[2]}</div><div>Continent: ${match[3]}</div><div>Contribution: ${match[5]}%</div><div>Grid Locator: ${match[6]}</div>`
+                });
+
+                // Open info window when marker is clicked
+                infoWindow.open(map, marker);
+              };
+            })(match));
+
+            // Add row to leaderboard
+            leaderboardHTML += `<tr>
+                                  <td>${rank}</td>
+                                  <td>${match[2]}</td>
+                                  <td>${match[3]}</td>
+                                  <td>${match[5]}%</td>
+                                </tr>`;
+            rank++;
+          }
+          leaderboardBody.innerHTML = leaderboardHTML;
+        });
+    }
+  </script>
+</body>
+</html>

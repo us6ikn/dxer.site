@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7YST3WTEH3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-7YST3WTEH3');
+    </script>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <!-- All styles CSS -->
+    <link rel="stylesheet" type="text/css" href="styles-stats.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenCube IO-117 Statistics - DXCC</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    
+    <!-- Main panel -->
+    <div>
+        <a href="https://dxer.site/greencube-observer" id="backButton">&#9664;
+            <img src="img/gclogo.png" alt="GreenCube Observer logo" style="vertical-align: middle; margin-left: 5px; width: 20px; height: 20px;">
+            <span style="position: relative; display: inline-block; font-family: Arial, sans-serif; font-weight: bold; letter-spacing: 1px; margin-left: 5px; margin-top: 10px;">
+                GreenCube Observer
+                <sup style="position: absolute; top: -7px; right: 0; font-size: 9px; font-family: Arial, sans-serif; font-weight: normal; letter-spacing: 0px;">by SA5IKN</sup>
+            </span>
+        </a>
+        <div style="margin-top: 10px;">
+            <a href="https://dxer.site/greencube-io117-statistics-dxcc.html" target="_self">
+                <img src="https://dxer.site//img/dxcc.png" alt="DXCC Statistics" style="height: 30px;">
+            </a>
+            <a href="https://dxer.site/greencube-io117-statistics-grids.html" target="_self">
+                <img src="https://dxer.site//img/grid.png" alt="Grids Statistics" style="height: 30px;">
+            </a>
+            <a href="https://dxer.site/greencube-io117-statistics-stations.html" target="_self">
+                <img src="https://dxer.site//img/stations.png" alt="Stations Statistics" style="height: 30px;">
+            </a>
+            <a href="https://dxer.site/greencube-leaderboard.html" target="_self">
+                <img src="https://dxer.site//img/data.png" alt="SatNOGS Data Statistics" style="height: 30px;">
+            </a>
+        </div>
+    </div>
+
+    <br>
+    <!-- Title for the Pie Chart -->
+    <div class="chart-title-main">
+        IO-117 GreenCube Statistics: DXCC (updated dynamically)
+    </div>
+
+    
+    <canvas id="newDXCCChart" width="800" height="400"></canvas>
+    <canvas id="cumulativeDXCCChart" width="800" height="400"></canvas>
+
+    <script>
+        // Function to fetch data from file
+        async function fetchData() {
+            try {
+                const response = await fetch('out_dxcc_stats.txt');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                const text = await response.text();
+                return text;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                return null;
+            }
+        }
+
+        // Function to parse data and plot chart for new DXCC entities per month
+        async function plotNewDXCCChart() {
+            try {
+                const data = await fetchData();
+                if (!data) {
+                    console.error('No data available');
+                    return;
+                }
+
+                const lines = data.split('\n');
+                const months = {};
+
+                // Keep track of DXCC entities seen so far
+                const seenDXCC = new Set();
+
+                lines.forEach(line => {
+                    const match = line.match(/DXCC: ([^,]+).*Earliest: (\d{4}-\d{2})-\d{2}T\d{2}:\d{2}:\d{2}Z/);
+                    if (match) {
+                        const dxcc = match[1].trim();
+                        const month = match[2];
+                        if (!seenDXCC.has(dxcc)) {
+                            // If the DXCC entity is not seen before, count it
+                            months[month] = months[month] || { count: 0, entities: new Set() };
+                            months[month].entities.add(dxcc);
+                            months[month].count++;
+                            // Add the DXCC entity to seenDXCC
+                            seenDXCC.add(dxcc);
+                        }
+                    }
+                });
+
+                const labels = Object.keys(months).sort();
+                const values = labels.map(month => months[month].count);
+                console.log(values);
+
+                // Create the bar chart for new DXCC entities per month
+                const ctx = document.getElementById('newDXCCChart').getContext('2d');
+                const newDXCCChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'New DXCC Entities per Month',
+                            data: values,
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }],
+                            xAxes: [{
+                                ticks: {
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0)'
+                                }
+                            }]
+                        },
+                        tooltips: {
+                            enabled: false
+                        },
+                        onClick: function(evt, elements) {
+                            console.log('Elements array:', elements);
+                            if (elements.length > 0) {
+                                var index = elements[0].index; // Adjusted here
+                                console.log('Index:', index);
+                                if (index >= 0 && index < this.data.labels.length) {
+                                    var month = this.data.labels[index];
+                                    if (months.hasOwnProperty(month)) {
+                                        var entities = Array.from(months[month].entities);
+                                        alert(`New DXCC Entities for ${month}: ${entities.join(', ')}`);
+                                    } else {
+                                        console.error('No data available for this month:', month);
+                                    }
+                                } else {
+                                    console.error('Invalid index:', index);
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Calculate cumulative values
+                const cumulativeValues = values.reduce((acc, val) => {
+                    acc.push((acc.length > 0 ? acc[acc.length - 1] : 0) + val);
+                    return acc;
+                }, []);
+
+                // Create the line chart for cumulative DXCC entities
+                const ctx2 = document.getElementById('cumulativeDXCCChart').getContext('2d');
+                const cumulativeDXCCChart = new Chart(ctx2, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Cumulative DXCC Count',
+                            data: cumulativeValues,
+                            borderColor: 'rgba(255, 99, 132, 0.6)',
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }],
+                            xAxes: [{
+                                ticks: {
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0)'
+                                }
+                            }]
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error plotting chart:', error);
+            }
+        }
+
+        // Plot the new DXCC chart when the page is loaded
+        plotNewDXCCChart();
+    </script>
+    
+    <table id="dxccTable">
+      <thead>
+        <tr>
+          <th data-column="0" class="sortable-header" onclick="sortTable(0)">DXCC</th>
+          <th data-column="1" class="sortable-header" onclick="sortTable(1)">First heard</th>
+          <th data-column="2" class="sortable-header" onclick="sortTable(2)">Last heard</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data will be loaded here -->
+      </tbody>
+    </table>
+
+    <script>
+    let sortingOrder = [1, 1, 1]; // Initial sorting order for each column
+
+    function sortTable(columnIndex) {
+      const table = document.getElementById("dxccTable");
+      const rows = Array.from(table.rows).slice(1); // Exclude header row
+      const isDateColumn = columnIndex === 1 || columnIndex === 2;
+      sortingOrder[columnIndex] *= -1; // Toggle sorting order
+      rows.sort((a, b) => {
+        const aValue = isDateColumn ? new Date(a.cells[columnIndex].textContent) : a.cells[columnIndex].textContent.toLowerCase();
+        const bValue = isDateColumn ? new Date(b.cells[columnIndex].textContent) : b.cells[columnIndex].textContent.toLowerCase();
+        if (aValue < bValue) return -1 * sortingOrder[columnIndex];
+        if (aValue > bValue) return 1 * sortingOrder[columnIndex];
+        return 0;
+      });
+      while (table.rows.length > 1) {
+        table.deleteRow(1);
+      }
+      rows.forEach(row => {
+        table.appendChild(row);
+      });
+
+      // Update data-sorted attribute for styling
+      const headers = table.querySelectorAll('th');
+      headers.forEach((header, index) => {
+        header.setAttribute('data-sorted', index === columnIndex ? sortingOrder[columnIndex] > 0 : false);
+      });
+    }
+    </script>
+
+    <script>
+    // Fetch data from the file and populate the table
+    fetch('out_dxcc_stats.txt')
+      .then(response => response.text())
+      .then(data => {
+        const tableBody = document.querySelector('#dxccTable tbody');
+        const lines = data.trim().split('\n');
+        lines.forEach(line => {
+          const [_, dxcc, earliest, latest] = line.match(/DXCC: (.*), Earliest: (.*)\, Latest: (.*)/);
+          const row = document.createElement('tr');
+          row.innerHTML = `<td>${dxcc}</td><td>${earliest.replace('T', ' ')}</td><td>${latest.replace('T', ' ')}</td>`;
+          tableBody.appendChild(row);
+        });
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+    </script>
+    <!-- Ko-Fi -->
+    <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+    <script src="kofi.js"></script>
+</body>
+</html>

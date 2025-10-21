@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7YST3WTEH3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-7YST3WTEH3');
+    </script>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <!-- All styles CSS -->
+    <link rel="stylesheet" type="text/css" href="styles-stats.css">
+    <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>GreenCube IO-117 Statistics - Stations</title>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    
+    <!-- Main panel -->
+    <div>
+        <a href="https://dxer.site/greencube-observer" id="backButton">&#9664;
+            <img src="img/gclogo.png" alt="GreenCube Observer logo" style="vertical-align: middle; margin-left: 5px; width: 20px; height: 20px;">
+            <span style="position: relative; display: inline-block; font-family: Arial, sans-serif; font-weight: bold; letter-spacing: 1px; margin-left: 5px; margin-top: 10px;">
+                GreenCube Observer
+                <sup style="position: absolute; top: -7px; right: 0; font-size: 9px; font-family: Arial, sans-serif; font-weight: normal; letter-spacing: 0px;">by SA5IKN</sup>
+            </span>
+        </a>
+        <div style="margin-top: 10px;">
+            <a href="https://dxer.site/greencube-io117-statistics-dxcc.html" target="_self">
+                <img src="https://dxer.site//img/dxcc.png" alt="DXCC Statistics" style="height: 30px;">
+            </a>
+            <a href="https://dxer.site/greencube-io117-statistics-grids.html" target="_self">
+                <img src="https://dxer.site//img/grid.png" alt="Grids Statistics" style="height: 30px;">
+            </a>
+            <a href="https://dxer.site/greencube-io117-statistics-stations.html" target="_self">
+                <img src="https://dxer.site//img/stations.png" alt="Stations Statistics" style="height: 30px;">
+            </a>
+            <a href="https://dxer.site/greencube-leaderboard.html" target="_self">
+                <img src="https://dxer.site//img/data.png" alt="SatNOGS Data Statistics" style="height: 30px;">
+            </a>
+        </div>
+    </div>
+
+    <br>
+    <!-- Title for the Pie Chart -->
+    <div class="chart-title-main">
+        IO-117 GreenCube Statistics: Stations (updated dynamically)
+    </div>
+    
+    <canvas id="newDXCCChart" width="800" height="400"></canvas>
+    <canvas id="cumulativeDXCCChart" width="800" height="400"></canvas>
+    
+    <script>
+        // Function to fetch data from file
+        async function fetchData() {
+            try {
+                const response = await fetch('out_stations_stats.txt');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                const text = await response.text();
+                return text;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                return null;
+            }
+        }
+
+        // Function to parse data and plot chart for new DXCC entities per month
+        async function plotNewDXCCChart() {
+            try {
+                const data = await fetchData();
+                if (!data) {
+                    console.error('No data available');
+                    return;
+                }
+
+                const lines = data.split('\n');
+                const months = {};
+
+                // Keep track of DXCC entities seen so far
+                const seenDXCC = new Set();
+
+                lines.forEach(line => {
+                    const match = line.match(/Callsign: ([^,]+).*Earliest: (\d{4}-\d{2})-\d{2}T\d{2}:\d{2}:\d{2}Z/);
+                    if (match) {
+                        const dxcc = match[1].trim();
+                        const month = match[2];
+                        if (!seenDXCC.has(dxcc)) {
+                            // If the station is not seen before, count it
+                            months[month] = months[month] || { count: 0, entities: new Set() };
+                            months[month].entities.add(dxcc);
+                            months[month].count++;
+                            // Add the DXCC entity to seenDXCC
+                            seenDXCC.add(dxcc);
+                        }
+                    }
+                });
+
+                const labels = Object.keys(months).sort();
+                const values = labels.map(month => months[month].count);
+                console.log(values);
+
+                // Create the bar chart for new Stations per month
+                const ctx = document.getElementById('newDXCCChart').getContext('2d');
+                const newDXCCChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'New Stations per Month',
+                            data: values,
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }],
+                            xAxes: [{
+                                ticks: {
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0)'
+                                }
+                            }]
+                        },
+                        tooltips: {
+                            enabled: false
+                        },
+                        onClick: function(evt, elements) {
+                            console.log('Elements array:', elements);
+                            if (elements.length > 0) {
+                                var index = elements[0].index; // Adjusted here
+                                console.log('Index:', index);
+                                if (index >= 0 && index < this.data.labels.length) {
+                                    var month = this.data.labels[index];
+                                    if (months.hasOwnProperty(month)) {
+                                        var entities = Array.from(months[month].entities);
+                                        alert(`New Stations for ${month}: ${entities.join(', ')}`);
+                                    } else {
+                                        console.error('No data available for this month:', month);
+                                    }
+                                } else {
+                                    console.error('Invalid index:', index);
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Calculate cumulative values
+                const cumulativeValues = values.reduce((acc, val) => {
+                    acc.push((acc.length > 0 ? acc[acc.length - 1] : 0) + val);
+                    return acc;
+                }, []);
+
+                // Create the line chart for cumulative Stations entities
+                const ctx2 = document.getElementById('cumulativeDXCCChart').getContext('2d');
+                const cumulativeDXCCChart = new Chart(ctx2, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Cumulative Station Count',
+                            data: cumulativeValues,
+                            borderColor: 'rgba(255, 99, 132, 0.6)',
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }],
+                            xAxes: [{
+                                ticks: {
+                                    fontColor: '#333'
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0)'
+                                }
+                            }]
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error plotting chart:', error);
+            }
+        }
+
+        // Plot the new stations chart when the page is loaded
+        plotNewDXCCChart();
+    </script>
+    
+    <br>
+    <br>
+    <br>
+    <!-- Title for the Pie Chart -->
+    <div class="chart-title">
+        Stations Activity Retention: Time Span Between First and Latest Activity
+    </div>
+    <canvas id="activityDaysPieChart" width="800" height="400"></canvas>
+    <script>
+        // Function to fetch data from file
+        async function fetchData() {
+            try {
+                const response = await fetch('out_stations_stats.txt');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                const text = await response.text();
+                return text;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                return null;
+            }
+        }
+
+        // Function to parse data and plot chart for new DXCC entities per month
+        async function plotNewDXCCChart() {
+            try {
+                const data = await fetchData();
+                if (!data) {
+                    console.error('No data available');
+                    return;
+                }
+
+                const lines = data.split('\n');
+                const activityDays = {
+                    '1 day': 0,
+                    '2-7 days': 0,
+                    '8 days-1 month': 0,
+                    '1-3 months': 0,
+                    '3-6 months': 0,
+                    '6-12 months': 0,
+                    'more than 12 months': 0
+                };
+
+                lines.forEach(line => {
+                    const match = line.match(/Callsign: ([^,]+).*Earliest: (\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}Z.*Latest: (\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}Z/);
+                    if (match) {
+                        const earliestDate = new Date(match[2]);
+                        const latestDate = new Date(match[3]);
+                        const duration = (latestDate - earliestDate) / (1000 * 60 * 60 * 24); // Duration in days
+                        if (duration <= 1) {
+                            activityDays['1 day']++;
+                        } else if (duration <= 7) {
+                            activityDays['2-7 days']++;
+                        } else if (duration <= 30) {
+                            activityDays['8 days-1 month']++;
+                        } else if (duration <= 90) {
+                            activityDays['1-3 months']++;
+                        } else if (duration <= 180) {
+                            activityDays['3-6 months']++;
+                        } else if (duration <= 365) {
+                            activityDays['6-12 months']++;
+                        } else {
+                            activityDays['more than 12 months']++;
+                        }
+                    }
+                });
+
+                const activityLabels = Object.keys(activityDays);
+                const activityValues = Object.values(activityDays);
+
+                // Create the pie chart
+                    const ctx3 = document.getElementById('activityDaysPieChart').getContext('2d');
+                    const activityDaysPieChart = new Chart(ctx3, {
+                        type: 'pie',
+                        data: {
+                            labels: activityLabels,
+                            datasets: [{
+                                data: activityValues,
+                                backgroundColor: [
+                                    'rgba(255, 99, 132, 0.6)',
+                                    'rgba(54, 162, 235, 0.6)',
+                                    'rgba(255, 206, 86, 0.6)',
+                                    'rgba(75, 192, 192, 0.6)',
+                                    'rgba(153, 102, 255, 0.6)',
+                                    'rgba(255, 159, 64, 0.6)',
+                                    'rgba(107, 191, 106, 0.6)'
+                                ]
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'right'
+                                },
+                                tooltips: {
+                                    callbacks: {
+                                        label: function(tooltipItem, data) {
+                                            var dataset = data.datasets[tooltipItem.datasetIndex];
+                                            var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                                                return previousValue + currentValue;
+                                            });
+                                            var currentValue = dataset.data[tooltipItem.index];
+                                            var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
+                                            return currentValue + " (" + percentage + "%)";
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+
+            } catch (error) {
+                console.error('Error plotting chart:', error);
+            }
+        }
+
+        // Plot the new stations chart when the page is loaded
+        plotNewDXCCChart();
+    </script>
+
+    <!-- Title for the Pie Chart -->
+    <div class="chart-title">
+        Stations Activity Distribution: Number of Days Since Latest Activity
+    </div>
+    <canvas id="activityDaysPieChart1" width="800" height="400"></canvas>
+    <script>
+        // Function to fetch data from file
+        async function fetchData() {
+            try {
+                const response = await fetch('out_stations_stats.txt');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                const text = await response.text();
+                return text;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                return null;
+            }
+        }
+
+        // Function to parse data and plot chart for new DXCC entities per month
+        async function plotNewDXCCChart() {
+            try {
+                const data = await fetchData();
+                if (!data) {
+                    console.error('No data available');
+                    return;
+                }
+
+                const lines = data.split('\n');
+                const activityDays = {
+                    '0-7 days': 0,
+                    '8 days-1 month': 0,
+                    '1-3 months': 0,
+                    '3-6 months': 0,
+                    '6-12 months': 0,
+                    'more than 12 months': 0
+                };
+
+                lines.forEach(line => {
+                    const match = line.match(/Callsign: ([^,]+).*Earliest: (\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}Z.*Latest: (\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}Z/);
+                    if (match) {
+                        const earliestDate = new Date(match[2]);
+                        const latestDate = new Date(match[3]);
+                        const nowDate = new Date();
+                        const duration = (nowDate - latestDate) / (1000 * 60 * 60 * 24); // Duration in days
+
+                        if (duration <= 7) {
+                            activityDays['0-7 days']++;
+                        } else if (duration <= 30) {
+                            activityDays['8 days-1 month']++;
+                        } else if (duration <= 90) {
+                            activityDays['1-3 months']++;
+                        } else if (duration <= 180) {
+                            activityDays['3-6 months']++;
+                        } else if (duration <= 365) {
+                            activityDays['6-12 months']++;
+                        } else {
+                            activityDays['more than 12 months']++;
+                        }
+                    }
+                });
+
+                const activityLabels = Object.keys(activityDays);
+                const activityValues = Object.values(activityDays);
+
+                // Create the pie chart
+                    const ctx3 = document.getElementById('activityDaysPieChart1').getContext('2d');
+                    const activityDaysPieChart1 = new Chart(ctx3, {
+                        type: 'pie',
+                        data: {
+                            labels: activityLabels,
+                            datasets: [{
+                                data: activityValues,
+                                backgroundColor: [
+                                    'rgba(255, 99, 132, 0.6)',
+                                    'rgba(54, 162, 235, 0.6)',
+                                    'rgba(255, 206, 86, 0.6)',
+                                    'rgba(75, 192, 192, 0.6)',
+                                    'rgba(153, 102, 255, 0.6)',
+                                    'rgba(255, 159, 64, 0.6)',
+                                    'rgba(107, 191, 106, 0.6)'
+                                ]
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'right'
+                                },
+                                tooltips: {
+                                    callbacks: {
+                                        label: function(tooltipItem, data) {
+                                            var dataset = data.datasets[tooltipItem.datasetIndex];
+                                            var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                                                return previousValue + currentValue;
+                                            });
+                                            var currentValue = dataset.data[tooltipItem.index];
+                                            var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
+                                            return currentValue + " (" + percentage + "%)";
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+
+            } catch (error) {
+                console.error('Error plotting chart:', error);
+            }
+        }
+
+        // Plot the new stations chart when the page is loaded
+        plotNewDXCCChart();
+    </script>
+    <!-- Ko-Fi -->
+    <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+    <script src="kofi.js"></script>
+</body>
+</html>
