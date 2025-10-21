@@ -109,6 +109,17 @@
             font-weight: 600;
         }
 
+        /* Responsive chart container */
+        .chart-container {
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+
         /* Table styling */
         #dxccTable {
             width: 90%;
@@ -161,17 +172,21 @@
       </div>
     </div>
 
-    <!-- Title for the Pie Chart -->
+    <!-- Title for the charts -->
     <div class="chart-title-main">
         IO-117 GreenCube Statistics: DXCC (updated dynamically)
     </div>
 
-    <!-- Charts -->
-    <canvas id="newDXCCChart" width="800" height="400"></canvas>
-    <canvas id="cumulativeDXCCChart" width="800" height="400"></canvas>
+    <!-- Responsive charts -->
+    <div class="chart-container">
+        <canvas id="newDXCCChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="cumulativeDXCCChart"></canvas>
+    </div>
 
     <script>
-        // Fetch data from file
         async function fetchData() {
             try {
                 const response = await fetch('out_dxcc_stats.txt');
@@ -213,19 +228,11 @@
                 const ctx = document.getElementById('newDXCCChart').getContext('2d');
                 new Chart(ctx, {
                     type: 'bar',
-                    data: {
-                        labels,
-                        datasets: [{
-                            label: 'New DXCC Entities per Month',
-                            data: values,
-                            backgroundColor: 'rgba(75, 192, 192, 0.6)'
-                        }]
-                    },
+                    data: { labels, datasets: [{ label: 'New DXCC Entities per Month', data: values, backgroundColor: 'rgba(75, 192, 192, 0.6)' }] },
                     options: {
-                        scales: {
-                            y: { beginAtZero: true },
-                            x: { }
-                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true } },
                         onClick: function(evt, elements) {
                             if (elements.length > 0) {
                                 const index = elements[0].index;
@@ -247,21 +254,8 @@
                 const ctx2 = document.getElementById('cumulativeDXCCChart').getContext('2d');
                 new Chart(ctx2, {
                     type: 'line',
-                    data: {
-                        labels,
-                        datasets: [{
-                            label: 'Cumulative DXCC Count',
-                            data: cumulativeValues,
-                            borderColor: 'rgba(255, 99, 132, 0.6)',
-                            fill: false
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            y: { beginAtZero: true },
-                            x: { }
-                        }
-                    }
+                    data: { labels, datasets: [{ label: 'Cumulative DXCC Count', data: cumulativeValues, borderColor: 'rgba(255, 99, 132, 0.6)', fill: false }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
                 });
 
             } catch (error) {
@@ -272,7 +266,7 @@
         plotNewDXCCChart();
     </script>
 
-    <!-- Table for DXCC entities -->
+    <!-- DXCC Table -->
     <table id="dxccTable">
       <thead>
         <tr>
@@ -281,8 +275,7 @@
           <th data-column="2" class="sortable-header" onclick="sortTable(2)">Last heard</th>
         </tr>
       </thead>
-      <tbody>
-      </tbody>
+      <tbody></tbody>
     </table>
 
     <script>
@@ -305,6 +298,7 @@
           });
         }
 
+        // Populate table
         fetch('out_dxcc_stats.txt')
           .then(resp => resp.text())
           .then(data => {
