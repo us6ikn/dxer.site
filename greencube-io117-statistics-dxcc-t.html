@@ -125,33 +125,43 @@
             height: auto !important;
         }
 
-        /* Table styling */
-        #dxccTable {
-            width: 90%;
-            margin: 20px auto;
-            border-collapse: collapse;
-        }
+        /* Table panel style */
+            .table-panel {
+                width: 90%;
+                max-width: 800px;
+                margin: 20px auto 40px;
+                background: #fff;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                padding: 20px;
+            }
 
-        #dxccTable th, #dxccTable td {
-            border: 1px solid #ccc;
-            padding: 6px 10px;
-            text-align: left;
-        }
+            /* Table inside panel */
+            #dxccTable {
+                width: 100%;
+                border-collapse: collapse;
+            }
 
-        #dxccTable th.sortable-header {
-            cursor: pointer;
-            background-color: #f3f3f3;
-        }
+            #dxccTable th, #dxccTable td {
+                border: 1px solid #ccc;
+                padding: 6px 10px;
+                text-align: left;
+            }
 
-        #dxccTable th[data-sorted="true"]::after {
-            content: " ▲";
-            font-size: 10px;
-        }
+            #dxccTable th.sortable-header {
+                cursor: pointer;
+                background-color: #f3f3f3;
+            }
 
-        #dxccTable th[data-sorted="false"]::after {
-            content: " ▼";
-            font-size: 10px;
-        }
+            #dxccTable th[data-sorted="true"]::after {
+                content: " ▲";
+                font-size: 10px;
+            }
+
+            #dxccTable th[data-sorted="false"]::after {
+                content: " ▼";
+                font-size: 10px;
+            }
     </style>
 </head>
 
