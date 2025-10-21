@@ -1,48 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7YST3WTEH3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-7YST3WTEH3');
+    </script>
+
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GreenCube IO-117 Statistics - DXCC</title>
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Google Fonts -->
+    <!-- Professional font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
-        body {
+        html, body {
+            font-family: 'Inter', Arial, sans-serif;
             margin: 0;
             padding: 0;
-            font-family: 'Inter', Arial, sans-serif;
-            background-color: #f8f8f8;
         }
 
-        /* Floating header panel like the observer page */
+        /* Floating control panel */
         .floating {
-            position: fixed;
+            position: absolute;
             top: 20px;
             left: 20px;
             z-index: 1000;
-            background-color: rgba(255,255,255,0.95);
+            background-color: rgba(255, 255, 255, 0.95);
             padding: 14px 18px;
             border-radius: 10px;
-            box-shadow: 0px 0px 12px rgba(0,0,0,0.35);
-            min-width: 250px;
+            box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.35);
+            min-width: 220px;
         }
 
         .floating h2 {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             font-weight: 700;
             font-size: 16px;
             margin: 0 0 10px 0;
+            letter-spacing: 0.5px;
         }
 
         .floating h2 img {
             width: 28px;
             height: 28px;
-            margin-right: 8px;
+            margin-right: 6px;
+            margin-top: 2px;
         }
 
         .title-text {
@@ -50,10 +60,9 @@
             flex-direction: column;
         }
 
-        .title-sub {
-            font-size: 11px;
-            font-weight: 500;
-            color: #333;
+        .title-line {
+            display: flex;
+            align-items: baseline;
         }
 
         .title-main {
@@ -61,116 +70,256 @@
             font-weight: 700;
         }
 
+        .title-sub {
+            font-size: 11px;
+            font-weight: 500;
+            text-align: right;
+            margin-top: -2px;
+            color: #333;
+        }
+
         .observer-buttons {
             display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
+            gap: 5px;
             margin-top: 10px;
+            flex-wrap: wrap;
         }
 
-        .observer-buttons a img {
-            height: 30px;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: transform 0.2s ease;
-        }
-
-        .observer-buttons a img:hover {
-            transform: scale(1.05);
-        }
-
-        /* Chart container styling */
-        .chart-container {
-            margin: 120px 20px 20px 20px; /* leave space for floating panel */
-        }
-
-        .chart-title-main {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        /* Table styling */
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-top: 20px;
-            font-size: 13px;
-            background-color: #fff;
-            box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        th {
+        .observer-buttons button {
             background-color: #0078d4;
             color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 10px;
             cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: background 0.2s ease;
         }
 
-        th[data-sorted="true"] {
+        .observer-buttons button:hover {
             background-color: #005fa3;
         }
 
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
+        /* Chart titles */
+        .chart-title-main {
+            margin-top: 150px; /* ensures it is below the floating panel */
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
         }
 
-        tr:hover {
-            background-color: #e0f0ff;
+        /* Table styling */
+        #dxccTable {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
         }
 
+        #dxccTable th, #dxccTable td {
+            border: 1px solid #ccc;
+            padding: 6px 10px;
+            text-align: left;
+        }
+
+        #dxccTable th.sortable-header {
+            cursor: pointer;
+            background-color: #f3f3f3;
+        }
+
+        #dxccTable th[data-sorted="true"]::after {
+            content: " ▲";
+            font-size: 10px;
+        }
+
+        #dxccTable th[data-sorted="false"]::after {
+            content: " ▼";
+            font-size: 10px;
+        }
     </style>
 </head>
+
 <body>
 
-    <!-- Floating header -->
+    <!-- Unified floating panel -->
     <div class="floating">
-        <h2>
-            <img src="img/gclogo.png" alt="GreenCube logo">
-            <div class="title-text">
-                <div class="title-sub">by SA5IKN</div>
-                <div class="title-main">GreenCube Observer</div>
-            </div>
-        </h2>
-
-        <div class="observer-buttons">
-            <a href="greencube-io117-statistics-dxcc.html"><img src="https://dxer.site/img/dxcc.png" alt="DXCC Statistics"></a>
-            <a href="greencube-io117-statistics-grids.html"><img src="https://dxer.site/img/grid.png" alt="Grids Statistics"></a>
-            <a href="greencube-io117-statistics-stations.html"><img src="https://dxer.site/img/stations.png" alt="Stations Statistics"></a>
-            <a href="greencube-leaderboard.html"><img src="https://dxer.site/img/data.png" alt="SatNOGS Data Statistics"></a>
-            <a href="greencube-observer"><img src="img/back.png" alt="Back to Observer" style="height:30px;"></a>
+      <h2>
+        <img src="img/gclogo.png" alt="GreenCube logo">
+        <div class="title-text">
+          <div class="title-sub">by SA5IKN</div>
+          <div class="title-line">
+            <span class="title-main">GreenCube Observer</span>
+          </div>
         </div>
+      </h2>
+
+      <div class="observer-buttons">
+          <button onclick="window.open('https://dxer.site/greencube-io117-statistics-dxcc.html', '_self')">DXCC</button>
+          <button onclick="window.open('https://dxer.site/greencube-io117-statistics-grids.html', '_self')">Grids</button>
+          <button onclick="window.open('https://dxer.site/greencube-io117-statistics-stations.html', '_self')">Stations</button>
+          <button onclick="window.open('https://dxer.site/greencube-leaderboard.html', '_self')">Data</button>
+      </div>
+    </div>
+
+    <!-- Title for the Pie Chart -->
+    <div class="chart-title-main">
+        IO-117 GreenCube Statistics: DXCC (updated dynamically)
     </div>
 
     <!-- Charts -->
-    <div class="chart-container">
-        <div class="chart-title-main">IO-117 GreenCube Statistics: DXCC (updated dynamically)</div>
-        <canvas id="newDXCCChart" width="800" height="400"></canvas>
-        <canvas id="cumulativeDXCCChart" width="800" height="400"></canvas>
+    <canvas id="newDXCCChart" width="800" height="400"></canvas>
+    <canvas id="cumulativeDXCCChart" width="800" height="400"></canvas>
 
-        <!-- Table -->
-        <table id="dxccTable">
-            <thead>
-                <tr>
-                    <th data-column="0" class="sortable-header" onclick="sortTable(0)">DXCC</th>
-                    <th data-column="1" class="sortable-header" onclick="sortTable(1)">First heard</th>
-                    <th data-column="2" class="sortable-header" onclick="sortTable(2)">Last heard</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Data dynamically loaded -->
-            </tbody>
-        </table>
-    </div>
+    <script>
+        // Fetch data from file
+        async function fetchData() {
+            try {
+                const response = await fetch('out_dxcc_stats.txt');
+                if (!response.ok) throw new Error('Failed to fetch data');
+                return await response.text();
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                return null;
+            }
+        }
 
-    <!-- Scripts -->
-    <script src="charts-dxcc.js"></script> <!-- your chart plotting JS -->
-    <script src="table-dxcc.js"></script> <!-- your table population & sorting JS -->
+        async function plotNewDXCCChart() {
+            try {
+                const data = await fetchData();
+                if (!data) return;
+
+                const lines = data.split('\n');
+                const months = {};
+                const seenDXCC = new Set();
+
+                lines.forEach(line => {
+                    const match = line.match(/DXCC: ([^,]+).*Earliest: (\d{4}-\d{2})-\d{2}T\d{2}:\d{2}:\d{2}Z/);
+                    if (match) {
+                        const dxcc = match[1].trim();
+                        const month = match[2];
+                        if (!seenDXCC.has(dxcc)) {
+                            months[month] = months[month] || { count: 0, entities: new Set() };
+                            months[month].entities.add(dxcc);
+                            months[month].count++;
+                            seenDXCC.add(dxcc);
+                        }
+                    }
+                });
+
+                const labels = Object.keys(months).sort();
+                const values = labels.map(month => months[month].count);
+
+                // Bar chart for new DXCC per month
+                const ctx = document.getElementById('newDXCCChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'New DXCC Entities per Month',
+                            data: values,
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: { beginAtZero: true },
+                            x: { }
+                        },
+                        onClick: function(evt, elements) {
+                            if (elements.length > 0) {
+                                const index = elements[0].index;
+                                const month = this.data.labels[index];
+                                if (months[month]) {
+                                    alert(`New DXCC Entities for ${month}: ${Array.from(months[month].entities).join(', ')}`);
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Line chart for cumulative DXCC
+                const cumulativeValues = values.reduce((acc, val) => {
+                    acc.push((acc.length > 0 ? acc[acc.length - 1] : 0) + val);
+                    return acc;
+                }, []);
+
+                const ctx2 = document.getElementById('cumulativeDXCCChart').getContext('2d');
+                new Chart(ctx2, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Cumulative DXCC Count',
+                            data: cumulativeValues,
+                            borderColor: 'rgba(255, 99, 132, 0.6)',
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: { beginAtZero: true },
+                            x: { }
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error plotting chart:', error);
+            }
+        }
+
+        plotNewDXCCChart();
+    </script>
+
+    <!-- Table for DXCC entities -->
+    <table id="dxccTable">
+      <thead>
+        <tr>
+          <th data-column="0" class="sortable-header" onclick="sortTable(0)">DXCC</th>
+          <th data-column="1" class="sortable-header" onclick="sortTable(1)">First heard</th>
+          <th data-column="2" class="sortable-header" onclick="sortTable(2)">Last heard</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+
+    <script>
+        let sortingOrder = [1, 1, 1];
+
+        function sortTable(columnIndex) {
+          const table = document.getElementById("dxccTable");
+          const rows = Array.from(table.rows).slice(1);
+          const isDateColumn = columnIndex === 1 || columnIndex === 2;
+          sortingOrder[columnIndex] *= -1;
+          rows.sort((a, b) => {
+            const aValue = isDateColumn ? new Date(a.cells[columnIndex].textContent) : a.cells[columnIndex].textContent.toLowerCase();
+            const bValue = isDateColumn ? new Date(b.cells[columnIndex].textContent) : b.cells[columnIndex].textContent.toLowerCase();
+            return (aValue < bValue ? -1 : aValue > bValue ? 1 : 0) * sortingOrder[columnIndex];
+          });
+          while (table.rows.length > 1) table.deleteRow(1);
+          rows.forEach(row => table.appendChild(row));
+          table.querySelectorAll('th').forEach((header, idx) => {
+            header.setAttribute('data-sorted', idx === columnIndex ? sortingOrder[columnIndex] > 0 : false);
+          });
+        }
+
+        fetch('out_dxcc_stats.txt')
+          .then(resp => resp.text())
+          .then(data => {
+            const tableBody = document.querySelector('#dxccTable tbody');
+            data.trim().split('\n').forEach(line => {
+              const match = line.match(/DXCC: (.*), Earliest: (.*), Latest: (.*)/);
+              if (match) {
+                  const [_, dxcc, earliest, latest] = match;
+                  const row = document.createElement('tr');
+                  row.innerHTML = `<td>${dxcc}</td><td>${earliest.replace('T', ' ')}</td><td>${latest.replace('T', ' ')}</td>`;
+                  tableBody.appendChild(row);
+              }
+            });
+          });
+    </script>
 
 </body>
 </html>
