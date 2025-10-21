@@ -18,7 +18,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
 
   <style>
-    body {
+    html, body {
       font-family: 'Inter', Arial, sans-serif;
       margin: 0;
       padding: 0;
@@ -26,130 +26,142 @@
       color: #222;
     }
 
+    /* Floating panel */
     .floating {
-      position: sticky;
-      top: 0;
+      position: absolute;
+      top: 20px;
+      left: 20px;
       z-index: 1000;
-      background: rgba(255,255,255,0.97);
-      padding: 16px 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      background: rgba(255,255,255,0.95);
+      padding: 14px 18px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 12px rgba(0,0,0,0.35);
+      min-width: 220px;
+    }
+
+    .floating h2 {
+      display: flex;
+      align-items: flex-start;
+      font-weight: 700;
+      font-size: 16px;
+      margin: 0 0 10px 0;
+      letter-spacing: 0.5px;
+    }
+
+    .floating h2 img {
+      width: 28px;
+      height: 28px;
+      margin-right: 6px;
+      margin-top: 2px;
+    }
+
+    .title-text {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
     }
 
-    .floating a#backButton {
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-      color: #333;
-      font-weight: 700;
-      font-size: 15px;
-      margin-bottom: 10px;
-    }
-
-    .floating a#backButton img {
-      width: 24px;
-      height: 24px;
-      margin-left: 6px;
-    }
-
-    .floating a#backButton sup {
-      font-size: 10px;
-      color: #555;
-      margin-left: 4px;
+    .title-sub {
+      font-size: 11px;
       font-weight: 500;
+      text-align: right;
+      margin-top: -2px;
+      color: #333;
     }
 
-    .nav-buttons {
+    .title-main {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .observer-buttons {
       display: flex;
+      gap: 5px;
+      margin-top: 10px;
       flex-wrap: wrap;
-      gap: 6px;
     }
 
-    .nav-buttons a img {
-      height: 32px;
-      transition: transform 0.2s ease;
+    .observer-buttons button {
+      background-color: #0078d4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: background 0.2s ease;
     }
 
-    .nav-buttons a img:hover {
-      transform: scale(1.08);
-    }
-
-    .content {
-      max-width: 1200px;
-      margin: 20px auto 60px;
-      padding: 0 16px;
-    }
-
-    .chart-section {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      margin-bottom: 28px;
-      padding: 20px;
+    .observer-buttons button:hover {
+      background-color: #005fa3;
     }
 
     .chart-title-main {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 12px;
-      color: #333;
+      margin-top: 150px;
       text-align: center;
+      font-size: 18px;
+      font-weight: 600;
     }
 
-    .chart-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: #444;
-      text-align: center;
+    .chart-container {
+      width: 90%;
+      max-width: 900px;
+      margin: 20px auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 20px;
     }
 
     canvas {
-      max-width: 100%;
+      width: 100% !important;
       height: auto !important;
     }
 
     @media (max-width: 720px) {
-      .chart-section { padding: 14px; }
-      .chart-title-main, .chart-title { font-size: 14px; }
+      .chart-container { padding: 14px; }
+      .chart-title-main { font-size: 16px; }
     }
   </style>
 </head>
+
 <body>
-
+  <!-- Floating panel -->
   <div class="floating">
-    <a href="https://dxer.site/greencube-observer" id="backButton">
-      &#9664;
-      <img src="img/gclogo.png" alt="GreenCube Observer logo">
-      GreenCube Observer <sup>by SA5IKN</sup>
-    </a>
-
-    <div class="nav-buttons">
-      <a href="https://dxer.site/greencube-io117-statistics-dxcc.html"><img src="img/dxcc.png" alt="DXCC Statistics"></a>
-      <a href="https://dxer.site/greencube-io117-statistics-grids.html"><img src="img/grid.png" alt="Grids Statistics"></a>
-      <a href="https://dxer.site/greencube-io117-statistics-stations.html"><img src="img/stations.png" alt="Stations Statistics"></a>
-      <a href="https://dxer.site/greencube-leaderboard.html"><img src="img/data.png" alt="SatNOGS Data Statistics"></a>
+    <h2>
+      <img src="img/gclogo.png" alt="GreenCube logo">
+      <div class="title-text">
+        <div class="title-sub">by SA5IKN</div>
+        <div class="title-main">GreenCube Observer</div>
+      </div>
+    </h2>
+    <div class="observer-buttons">
+      <button onclick="window.open('https://dxer.site/greencube-observer', '_self')">Map</button>
+      <button onclick="window.open('https://dxer.site/greencube-io117-statistics-grids.html', '_self')">Grids</button>
+      <button onclick="window.open('https://dxer.site/greencube-io117-statistics-stations.html', '_self')">Stations</button>
+      <button onclick="window.open('https://dxer.site/greencube-leaderboard.html', '_self')">Data</button>
     </div>
   </div>
 
-  <div class="content">
-    <div class="chart-section">
-      <div class="chart-title-main">IO-117 GreenCube Statistics: Stations (updated dynamically)</div>
-      <canvas id="newStationsChart"></canvas>
-      <canvas id="cumulativeStationsChart"></canvas>
-    </div>
+  <div class="chart-title-main">IO-117 GreenCube Statistics: Stations (updated dynamically)</div>
 
-    <div class="chart-section">
-      <div class="chart-title">Stations Activity Retention: Time Span Between First and Latest Activity</div>
-      <canvas id="activityRetentionChart"></canvas>
-    </div>
+  <!-- Charts -->
+  <div class="chart-container">
+    <canvas id="newStationsChart"></canvas>
+  </div>
 
-    <div class="chart-section">
-      <div class="chart-title">Stations Activity Distribution: Number of Days Since Latest Activity</div>
-      <canvas id="activityDistributionChart"></canvas>
-    </div>
+  <div class="chart-container">
+    <canvas id="cumulativeStationsChart"></canvas>
+  </div>
+
+  <div class="chart-container">
+    <div class="chart-title">Stations Activity Retention: Time Span Between First and Latest Activity</div>
+    <canvas id="activityRetentionChart"></canvas>
+  </div>
+
+  <div class="chart-container">
+    <div class="chart-title">Stations Activity Distribution: Number of Days Since Latest Activity</div>
+    <canvas id="activityDistributionChart"></canvas>
   </div>
 
   <script>
@@ -162,12 +174,11 @@
     function parseStationsByMonth(data) {
       const months = {};
       const seen = new Set();
-      const lines = data.split('\n');
-      lines.forEach(line => {
-        const match = line.match(/Callsign:\s*([^,]+).*Earliest:\s*(\d{4}-\d{2})-\d{2}T/);
-        if (match) {
-          const callsign = match[1].trim();
-          const month = match[2];
+      data.split('\n').forEach(line => {
+        const m = line.match(/Callsign:\s*([^,]+).*Earliest:\s*(\d{4}-\d{2})-/);
+        if (m) {
+          const callsign = m[1].trim();
+          const month = m[2];
           if (!seen.has(callsign)) {
             months[month] = (months[month] || 0) + 1;
             seen.add(callsign);
@@ -178,17 +189,12 @@
     }
 
     function parseActivityRetention(data) {
-      const buckets = {
-        '1 day': 0, '2–7 days': 0, '8 days–1 month': 0,
-        '1–3 months': 0, '3–6 months': 0, '6–12 months': 0, 'more than 12 months': 0
-      };
+      const buckets = {'1 day':0,'2–7 days':0,'8 days–1 month':0,'1–3 months':0,'3–6 months':0,'6–12 months':0,'more than 12 months':0};
       const lines = data.split('\n');
       lines.forEach(line => {
         const m = line.match(/Earliest:\s*(\d{4}-\d{2}-\d{2}).*Latest:\s*(\d{4}-\d{2}-\d{2})/);
         if (m) {
-          const earliest = new Date(m[1]);
-          const latest = new Date(m[2]);
-          const days = (latest - earliest) / (1000 * 60 * 60 * 24);
+          const days = (new Date(m[2]) - new Date(m[1]))/(1000*60*60*24);
           if (days <= 1) buckets['1 day']++;
           else if (days <= 7) buckets['2–7 days']++;
           else if (days <= 30) buckets['8 days–1 month']++;
@@ -202,17 +208,12 @@
     }
 
     function parseActivityDistribution(data) {
-      const buckets = {
-        '0–7 days': 0, '8 days–1 month': 0, '1–3 months': 0,
-        '3–6 months': 0, '6–12 months': 0, 'more than 12 months': 0
-      };
+      const buckets = {'0–7 days':0,'8 days–1 month':0,'1–3 months':0,'3–6 months':0,'6–12 months':0,'more than 12 months':0};
       const now = new Date();
-      const lines = data.split('\n');
-      lines.forEach(line => {
+      data.split('\n').forEach(line => {
         const m = line.match(/Latest:\s*(\d{4}-\d{2}-\d{2})/);
         if (m) {
-          const latest = new Date(m[1]);
-          const days = (now - latest) / (1000 * 60 * 60 * 24);
+          const days = (now - new Date(m[1]))/(1000*60*60*24);
           if (days <= 7) buckets['0–7 days']++;
           else if (days <= 30) buckets['8 days–1 month']++;
           else if (days <= 90) buckets['1–3 months']++;
@@ -224,53 +225,34 @@
       return buckets;
     }
 
-    function createChart(id, type, labels, data, label, color) {
+    function createChart(id,type,labels,data,label,color) {
       const ctx = document.getElementById(id);
-      new Chart(ctx, {
+      new Chart(ctx,{
         type,
-        data: {
-          labels,
-          datasets: [{
-            label,
-            data,
-            backgroundColor: type === 'bar' ? color : undefined,
-            borderColor: type === 'line' ? color : undefined,
-            fill: false,
-            tension: 0.3
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { display: type !== 'bar', position: 'right' } },
-          scales: type !== 'pie' ? {
-            x: { ticks: { color: '#333' }, grid: { color: 'rgba(0,0,0,0)' } },
-            y: { beginAtZero: true, ticks: { color: '#333' }, grid: { color: 'rgba(0,0,0,0.1)' } }
-          } : {}
+        data:{labels,datasets:[{label,data,backgroundColor:type==='bar'?color:undefined,borderColor:type==='line'?color:undefined,fill:false,tension:0.3}]},
+        options:{
+          responsive:true,
+          plugins:{legend:{display:type!=='bar',position:'right'}},
+          scales:type!=='pie'?{
+            x:{ticks:{color:'#333'},grid:{color:'rgba(0,0,0,0)'}},
+            y:{beginAtZero:true,ticks:{color:'#333'},grid:{color:'rgba(0,0,0,0.1)'}}
+          }:{}
         }
       });
     }
 
-    loadData().then(data => {
-      // New stations and cumulative charts
-      const monthly = parseStationsByMonth(data);
-      const labels = Object.keys(monthly).sort();
-      const newValues = labels.map(m => monthly[m]);
-      const cumulative = newValues.reduce((a,v,i)=>[...a,(a[i-1]||0)+v],[]);
-      createChart('newStationsChart', 'bar', labels, newValues, 'New Stations per Month', 'rgba(75,192,192,0.6)');
-      createChart('cumulativeStationsChart', 'line', labels, cumulative, 'Cumulative Station Count', 'rgba(255,99,132,0.7)');
-
-      // Activity retention
-      const retention = parseActivityRetention(data);
-      createChart('activityRetentionChart', 'pie', Object.keys(retention), Object.values(retention), 'Retention', [
-        'rgba(255,99,132,0.6)','rgba(54,162,235,0.6)','rgba(255,206,86,0.6)',
-        'rgba(75,192,192,0.6)','rgba(153,102,255,0.6)','rgba(255,159,64,0.6)','rgba(107,191,106,0.6)'
+    loadData().then(data=>{
+      const monthly=parseStationsByMonth(data);
+      const labels=Object.keys(monthly).sort();
+      const newValues=labels.map(m=>monthly[m]);
+      const cumulative=newValues.reduce((a,v,i)=>[...a,(a[i-1]||0)+v],[]);
+      createChart('newStationsChart','bar',labels,newValues,'New Stations per Month','rgba(75,192,192,0.6)');
+      createChart('cumulativeStationsChart','line',labels,cumulative,'Cumulative Station Count','rgba(255,99,132,0.7)');
+      createChart('activityRetentionChart','pie',Object.keys(parseActivityRetention(data)),Object.values(parseActivityRetention(data)),'Retention',[
+        'rgba(255,99,132,0.6)','rgba(54,162,235,0.6)','rgba(255,206,86,0.6)','rgba(75,192,192,0.6)','rgba(153,102,255,0.6)','rgba(255,159,64,0.6)','rgba(107,191,106,0.6)'
       ]);
-
-      // Activity distribution
-      const distribution = parseActivityDistribution(data);
-      createChart('activityDistributionChart', 'pie', Object.keys(distribution), Object.values(distribution), 'Activity', [
-        'rgba(255,99,132,0.6)','rgba(54,162,235,0.6)','rgba(255,206,86,0.6)',
-        'rgba(75,192,192,0.6)','rgba(153,102,255,0.6)','rgba(255,159,64,0.6)'
+      createChart('activityDistributionChart','pie',Object.keys(parseActivityDistribution(data)),Object.values(parseActivityDistribution(data)),'Activity',[
+        'rgba(255,99,132,0.6)','rgba(54,162,235,0.6)','rgba(255,206,86,0.6)','rgba(75,192,192,0.6)','rgba(153,102,255,0.6)','rgba(255,159,64,0.6)'
       ]);
     }).catch(console.error);
   </script>
