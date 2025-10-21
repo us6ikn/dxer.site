@@ -27,7 +27,6 @@
   <style>
     html,body { height:100%; margin:0; font-family: 'Inter', Arial, sans-serif; }
 
-    /* Floating control panel (same style as other pages) */
     .floating {
       position: absolute;
       top: 20px;
@@ -53,11 +52,9 @@
     }
     .observer-buttons button:hover { background-color:#005fa3; }
 
-    /* Layout */
-    #map { width: 100%; height: 60vh; min-height: 360px; } /* responsive map height */
+    #map { width: 100%; height: 60vh; min-height: 360px; }
     .page-inner { max-width:1200px; margin:16px auto; padding:0 16px; }
 
-    /* Leaderboard table */
     #leaderboard { margin-top: 18px; }
     #leaderboard h2 { font-size:18px; color:#333; margin:0 0 8px 0; display:flex; align-items:center; gap:8px; }
     #leaderboard h2 span { font-weight:500; font-size:13px; color:#666; }
@@ -79,7 +76,6 @@
     #leaderboard tbody tr:nth-child(even) { background:#fafafa; }
     #leaderboard tbody tr:hover { background:#f0f7ff; }
 
-    /* Back button (moved into floating header area visually) */
     #backButton {
       position: absolute;
       top: 12px;
@@ -98,13 +94,8 @@
     }
     #backButton img { width:20px; height:20px; }
 
-    /* Last modified text */
-    .last-updated { font-size:12px; color:#666; margin-top:10px; }
-
-    /* Popup styling small improvements */
     .leaflet-popup-content { font-family: Inter, Arial, sans-serif; font-size:13px; }
 
-    /* Responsive tweaks */
     @media (max-width:720px){
       .floating { left: 10px; right: 10px; min-width: auto; top: 12px; padding:10px; }
       #map { height: 50vh; }
@@ -115,7 +106,6 @@
 </head>
 <body>
 
-  <!-- Floating panel -->
   <div class="floating" aria-hidden="false">
     <h2>
       <img src="img/gclogo.png" alt="GreenCube logo">
@@ -134,11 +124,9 @@
     </div>
   </div>
 
-  <!-- Map -->
   <div id="map"></div>
 
   <div class="page-inner">
-    <!-- Leaderboard header & table -->
     <div id="leaderboard">
       <h2>Open Data Contributors Leaderboard <span>(last 7 days)</span></h2>
       <div style="overflow-x:auto;">
@@ -153,31 +141,15 @@
               <th>Grid</th>
             </tr>
           </thead>
-          <tbody id="leaderboardBody">
-            <!-- rows inserted here -->
-          </tbody>
+          <tbody id="leaderboardBody"></tbody>
         </table>
       </div>
-
-      <div class="last-updated">Latest database update: <span id="last-modified">—</span></div>
     </div>
   </div>
 
   <script>
-    // Utility: parse each line of leaderboard.txt
-    // Example line format (from you):
-    // Rank: 1, Observer: K8DP, Cont: NA, Observations: 7537, Percentage: 19.704%, Grid Locator: EN62vt, Coordinates: (42.8125, -86.20833333333333)
     const LINE_REGEX = /Rank:\s*(\d+),\s*Observer:\s*([^,]+),\s*Cont:\s*([^,]+),\s*Observations:\s*(\d+),\s*Percentage:\s*([\d.]+)%,\s*Grid Locator:\s*([^,]+),\s*Coordinates:\s*\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)/;
 
-    // Fetch last-modified header
-    fetch('leaderboard.txt', { method: 'HEAD' })
-      .then(resp => {
-        const lm = resp.headers.get('last-modified');
-        if (lm) document.getElementById('last-modified').textContent = new Date(lm).toUTCString();
-      })
-      .catch(() => {/* ignore */});
-
-    // Fetch file & build map + table
     fetch('leaderboard.txt')
       .then(r => r.text())
       .then(raw => {
@@ -198,12 +170,9 @@
           const lon = parseFloat(m[8]);
 
           rows.push({ rank, observer, continent, observations, percentage, grid, lat, lon });
-
-          // Create marker data
           markers.push({ observer, continent, observations, percentage, grid, lat, lon });
         });
 
-        // Populate table
         const tbody = document.getElementById('leaderboardBody');
         tbody.innerHTML = rows.map(r => `
           <tr>
@@ -216,8 +185,13 @@
           </tr>
         `).join('');
 
-        // Initialize Leaflet map
-        const map = L.map('map', { preferCanvas: true }).setView([20,0], 2);
+        const map = L.map('map', {
+          preferCanvas: true,
+          zoomControl: false // we'll move it manually
+        }).setView([20,0], 2);
+
+        // Add zoom control bottom-right
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 19,
@@ -226,13 +200,9 @@
 
         if (markers.length === 0) return;
 
-        // Add markers and compute bounds
         const bounds = [];
         markers.forEach(m => {
-          // radius scaling: keep it readable across percentage ranges
-          // formula: radius = max(6, percentage * 1.2)
           const radius = Math.max(6, m.percentage * 1.2);
-
           const circle = L.circleMarker([m.lat, m.lon], {
             radius: radius,
             fillColor: '#d9534f',
@@ -241,7 +211,6 @@
             weight: 0
           }).addTo(map);
 
-          // Popup content
           const popupHtml = `
             <div style="font-weight:700;margin-bottom:6px;">${m.observer}</div>
             <div>Continent: <strong>${m.continent}</strong></div>
@@ -249,23 +218,16 @@
             <div>Contribution: <strong>${m.percentage}%</strong></div>
             <div>Grid: <strong>${m.grid}</strong></div>
           `;
-
           circle.bindPopup(popupHtml, { minWidth: 180 });
           circle.bindTooltip(`${m.observer} — ${m.percentage}%`, { direction: 'top', offset: [0, -radius] });
 
           bounds.push([m.lat, m.lon]);
         });
 
-        // Fit to bounds with some padding
-        if (bounds.length === 1) {
-          map.setView(bounds[0], 6);
-        } else {
-          map.fitBounds(bounds, { padding: [40, 40] });
-        }
+        if (bounds.length === 1) map.setView(bounds[0], 6);
+        else map.fitBounds(bounds, { padding: [40, 40] });
       })
-      .catch(err => {
-        console.error('Failed to load leaderboard.txt', err);
-      });
+      .catch(err => console.error('Failed to load leaderboard.txt', err));
   </script>
 </body>
 </html>
