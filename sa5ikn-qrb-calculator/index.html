@@ -8,49 +8,41 @@
       gtag('js', new Date());
       gtag('config', 'G-7YST3WTEH3');
     </script>
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- ✅ Only include required plugins for Maidenhead (QTH Locator) -->
+    <script src="https://unpkg.com/leaflet.vectorgrid@latest/dist/Leaflet.VectorGrid.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/text-image/dist/text-image.js"></script>
+    <script src="https://ha8tks.github.io/Leaflet.Maidenhead/src/L.Maidenhead.js"></script>
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>SA5IKN QRB Calculator - QTH Locator Azimuth and Distance Finder</title>
-    <meta name="description" content="SA5IKN QRB Calculator helps radio amateurs calculate azimuth and distance between two Maidenhead grid locators. It provides an Interactive map with draggable markers for QTH locators.">
-    <meta name="keywords" content="QRB calculator, azimuth finder, Maidenhead locator, grid square calculator, azimuth, ham radio, amateur radio, DX, SA5IKN, VHF, UHF, SHF, microwaves">
+    <title>SA5IKN QRB - QTF Calculator - QTH Locator Azimuth and Distance Finder</title>
+    <meta name="description" content="SA5IKN QRB - QTF Calculator helps radio amateurs calculate azimuth and distance between two Maidenhead grid locators. It provides an Interactive map with draggable markers for QTH locators.">
+    <meta name="keywords" content="QRB - QTF calculator, azimuth finder, Maidenhead locator, grid square calculator, azimuth, ham radio, amateur radio, DX, SA5IKN, VHF, UHF, SHF, microwaves">
     <meta name="author" content="SA5IKN">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://dxer.site/sa5ikn-qrb-calculator/" />
-    <!-- Favicon and App Icons -->
+
     <link rel="apple-touch-icon" sizes="180x180" href="https://dxer.site/assets/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="https://dxer.site/assets/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="https://dxer.site/assets/favicon-16x16.png">
     <link rel="manifest" href="https://dxer.site/assets/site.webmanifest">
     <link rel="shortcut icon" href="https://dxer.site/assets/favicon.ico">
-    <!-- Open Graph Meta -->
-    <meta property="og:title" content="SA5IKN QRB Calculator - QTH Locator Azimuth and Distance Finder">
+
+    <meta property="og:title" content="SA5IKN QRB - QTF Calculator - QTH Locator Azimuth and Distance Finder">
     <meta property="og:type" content="website">
-    <meta property="og:description" content="SA5IKN QRB Calculator helps radio amateurs calculate azimuth and distance between Maidenhead grid locators. Interactive map with draggable markers.">
+    <meta property="og:description" content="SA5IKN QRB - QTF Calculator helps radio amateurs calculate azimuth and distance between Maidenhead grid locators. Interactive map with draggable markers.">
     <meta property="og:image" content="https://dxer.site/social/sa5ikn-qrb-calculator.jpg">
     <meta property="og:url" content="https://dxer.site/sa5ikn-qrb-calculator/">
-    <!-- Twitter Meta -->
+
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="SA5IKN QRB Calculator - QTH Locator Azimuth and Distance Finder" />
-    <meta name="twitter:description" content="SA5IKN QRB Calculator helps radio amateurs calculate azimuth and distance between two Maidenhead grid locators. It provides an Interactive map with draggable markers for QTH locators." />
+    <meta name="twitter:title" content="SA5IKN QRB - QTF Calculator - QTH Locator Azimuth and Distance Finder" />
+    <meta name="twitter:description" content="SA5IKN QRB - QTF Calculator helps radio amateurs calculate azimuth and distance between two Maidenhead grid locators. It provides an Interactive map with draggable markers for QTH locators." />
     <meta name="twitter:image" content="https://dxer.site/social/sa5ikn-qrb-calculator.jpg" />
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "SA5IKN QRB Calculator",
-        "url": "https://dxer.site/sa5ikn-qrb-calculator/",
-        "author": { "@type": "Person", "name": "SA5IKN" },
-        "description": "SA5IKN QRB Calculator helps radio amateurs calculate azimuth and distance between two Maidenhead grid locators. It provides an Interactive map with draggable markers for QTH locators.",
-        "applicationCategory": "Science",
-        "operatingSystem": "All",
-        "browserRequirements": "Requires JavaScript",
-        "inLanguage": "en",
-        "applicationSubCategory": "Amateur Radio Application",
-        "offers": { "@type": "Offer", "price": "0.00", "priceCurrency": "USD" }
-      }
-    </script>
+
     <style>
       html, body {
         height: 100%;
@@ -87,8 +79,9 @@
       .input-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 8px;
         margin-bottom: 10px;
+        align-items: center;
       }
       .input-row input[type="text"] {
         flex: 1;
@@ -99,6 +92,13 @@
       .input-row button {
         padding: 0.4em 1em;
         font-weight: bold;
+        background-color: #f5f5f5;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .input-row button:hover {
+        background-color: #e0e0e0;
       }
       #locator1 {
         border: 2px solid #1e88e5;
@@ -124,18 +124,33 @@
       }
     </style>
 </head>
+
 <body>
   <div id="map"></div>
+
   <div class="widget-container">
     <div class="widget">
       <div class="input-row">
-        <a href="https://dxer.site" title="Back to Home" style="text-decoration: none; font-size: 1.4em; padding: 0.3em 0.5em;">🏠</a>
+        <button onclick="window.open('https://dxer.site', '_blank')" style="padding:6px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 3l9 9h-3v9h-12v-9h-3l9-9z"/>
+          </svg>
+        </button>
+
         <input type="text" id="locator1" maxlength="10" placeholder="e.g. IO91wm34CD" />
+
+        <!-- ✅ Swap button between locator fields -->
+        <button onclick="swapLocators()" title="Swap locators" style="padding:6px;">
+          ⇄
+        </button>
+
         <input type="text" id="locator2" maxlength="10" placeholder="e.g. IO91wm34CD" />
+
         <button onclick="calculateAzimuth()">Calculate</button>
       </div>
+
       <div id="initialInstructions">
-        <h3 style="margin-top: 0; font-size: 1.2em;">How to use SA5IKN QRB Calculator</h3>
+        <h3 style="margin-top: 0; font-size: 1.2em;">How to use SA5IKN QRB-QTF Calculator</h3>
         <p>Enter two Maidenhead locators in the fields above. Valid locator lengths are from <strong>4 to 10 characters</strong>.</p>
         <ul style="padding-left: 1.2em; margin-top: 0.5em;">
           <li><span style="color:#1e88e5; font-weight:bold;">Blue marker</span>: Your QTH locator</li>
@@ -149,27 +164,146 @@
   </div>
 
   <script>
-      let map,markers=[],line,precisions=[6,6];function setMapHeight(){const vh=window.innerHeight;document.getElementById('map').style.height=vh+'px'}
-      window.addEventListener('load',setMapHeight);window.addEventListener('resize',setMapHeight);function locatorToLatLng(locator){locator=locator.toUpperCase();const A='A'.charCodeAt(0);let lon=-180,lat=-90;if(locator.length>=2){lon+=(locator.charCodeAt(0)-A)*20;lat+=(locator.charCodeAt(1)-A)*10}
-      if(locator.length>=4){lon+=parseInt(locator[2])*2;lat+=parseInt(locator[3])*1}
-      if(locator.length>=6){lon+=(locator.charCodeAt(4)-A)*5/60;lat+=(locator.charCodeAt(5)-A)*2.5/60}
-      if(locator.length>=8){lon+=parseInt(locator[6])*(5/600);lat+=parseInt(locator[7])*(2.5/600)}
-      if(locator.length>=10){lon+=(locator.charCodeAt(8)-A)*(5/14400);lat+=(locator.charCodeAt(9)-A)*(2.5/14400)}
-      const precision=locator.length;if(precision===2){lon+=10;lat+=5}else if(precision===4){lon+=1;lat+=0.5}else if(precision===6){lon+=2.5/60;lat+=1.25/60}else if(precision===8){lon+=5/1200;lat+=2.5/1200}else if(precision===10){lon+=5/28800;lat+=2.5/28800}
-      return{lat,lng:lon,precision}}
-      function latLngToLocator(lat,lon,precision=6){const A='A'.charCodeAt(0);lat+=90;lon+=180;let locator='';locator+=String.fromCharCode(Math.floor(lon/20)+A);locator+=String.fromCharCode(Math.floor(lat/10)+A);lon=(lon%20);lat=(lat%10);locator+=Math.floor(lon/2);locator+=Math.floor(lat/1);if(precision>=6){lon=(lon%2);lat=(lat%1);locator+=String.fromCharCode(Math.floor(lon*60/5)+A);locator+=String.fromCharCode(Math.floor(lat*60/2.5)+A)}
-      if(precision>=8){lon=(lon%(5/60));lat=(lat%(2.5/60));locator+=Math.floor(lon/(5/600));locator+=Math.floor(lat/(2.5/600))}
-      if(precision>=10){lon=(lon%(5/600));lat=(lat%(2.5/600));locator+=String.fromCharCode(Math.floor(lon/(5/14400))+A);locator+=String.fromCharCode(Math.floor(lat/(2.5/14400))+A)}
-      return locator.slice(0,precision)}
-      function toRadians(deg){return deg*Math.PI/180}
-      function computeDistance(pos1,pos2){const R=6371;const dLat=toRadians(pos2.lat-pos1.lat);const dLng=toRadians(pos2.lng-pos1.lng);const a=Math.sin(dLat/2)**2+Math.cos(toRadians(pos1.lat))*Math.cos(toRadians(pos2.lat))*Math.sin(dLng/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))}
-      function computeAzimuth(pos1,pos2){const lat1=toRadians(pos1.lat);const lat2=toRadians(pos2.lat);const dLng=toRadians(pos2.lng-pos1.lng);const y=Math.sin(dLng)*Math.cos(lat2);const x=Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLng);let brng=Math.atan2(y,x);brng=(brng*180/Math.PI+360)%360;return brng}
-      function initMap(){map=L.map('map').setView([0,0],2);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map)}
-      function addDraggableMarker(latlng,color,index,precision){const marker=L.marker(latlng,{draggable:!0,icon:L.divIcon({className:'custom-marker',html:`<div style="width:14px;height:14px;background:${color};border-radius:50%;border:1px solid white;"></div>`})}).addTo(map);marker.on('dragend',()=>{const pos=marker.getLatLng();document.getElementById(`locator${index + 1}`).value=latLngToLocator(pos.lat,pos.lng,10);precisions[index]=10;const pos1=markers[0]?markers[0].getLatLng():locatorToLatLng(document.getElementById('locator1').value);const pos2=markers[1]?markers[1].getLatLng():locatorToLatLng(document.getElementById('locator2').value);pos1.precision=precisions[0];pos2.precision=precisions[1];updateMap(pos1,pos2)});markers[index]=marker}
-      function updateMap(pos1,pos2){markers.forEach(m=>map.removeLayer(m));markers=[];if(line)map.removeLayer(line);precisions[0]=document.getElementById('locator1').value.length||6;precisions[1]=document.getElementById('locator2').value.length||6;addDraggableMarker(pos1,'#1e88e5',0,precisions[0]);addDraggableMarker(pos2,'#43a047',1,precisions[1]);line=L.polyline([pos1,pos2],{color:'red'}).addTo(map);map.fitBounds(L.latLngBounds([pos1,pos2]));const distance=computeDistance(pos1,pos2).toFixed(1);const azimuth=computeAzimuth(pos1,pos2).toFixed(1);document.getElementById('azimuthResult').innerHTML=`Distance: ${distance} km, Azimuth: ${azimuth}°`;document.getElementById('initialInstructions').classList.add('hidden')}
-      function calculateAzimuth(){const locator1=document.getElementById('locator1').value;const locator2=document.getElementById('locator2').value;const instructions=document.getElementById('initialInstructions');if(!locator1||!locator2||locator1.length<4||locator2.length<4){document.getElementById('azimuthResult').innerHTML='Please enter valid Maidenhead locators (4-10 characters).';instructions.classList.remove('hidden');return}
-      precisions[0]=locator1.length;precisions[1]=locator2.length;const pos1=locatorToLatLng(locator1);const pos2=locatorToLatLng(locator2);updateMap(pos1,pos2)}
-      window.onload=initMap
+    let map, markers = [], line, precisions = [6,6];
+
+    function setMapHeight(){
+      const vh = window.innerHeight;
+      document.getElementById('map').style.height = vh + 'px';
+    }
+    window.addEventListener('load', setMapHeight);
+    window.addEventListener('resize', setMapHeight);
+
+    function locatorToLatLng(locator){
+      locator = locator.toUpperCase();
+      const A = 'A'.charCodeAt(0);
+      let lon = -180, lat = -90;
+      if(locator.length >= 2){ lon += (locator.charCodeAt(0)-A)*20; lat += (locator.charCodeAt(1)-A)*10; }
+      if(locator.length >= 4){ lon += parseInt(locator[2])*2; lat += parseInt(locator[3])*1; }
+      if(locator.length >= 6){ lon += (locator.charCodeAt(4)-A)*5/60; lat += (locator.charCodeAt(5)-A)*2.5/60; }
+      if(locator.length >= 8){ lon += parseInt(locator[6])*(5/600); lat += parseInt(locator[7])*(2.5/600); }
+      if(locator.length >= 10){ lon += (locator.charCodeAt(8)-A)*(5/14400); lat += (locator.charCodeAt(9)-A)*(2.5/14400); }
+      const precision = locator.length;
+      if(precision === 2){ lon += 10; lat += 5; }
+      else if(precision === 4){ lon += 1; lat += 0.5; }
+      else if(precision === 6){ lon += 2.5/60; lat += 1.25/60; }
+      else if(precision === 8){ lon += 5/1200; lat += 2.5/1200; }
+      else if(precision === 10){ lon += 5/28800; lat += 2.5/28800; }
+      return { lat, lng: lon, precision };
+    }
+
+    function latLngToLocator(lat, lon, precision=6){
+      const A='A'.charCodeAt(0);
+      lat+=90; lon+=180;
+      let locator='';
+      locator+=String.fromCharCode(Math.floor(lon/20)+A);
+      locator+=String.fromCharCode(Math.floor(lat/10)+A);
+      lon=(lon%20); lat=(lat%10);
+      locator+=Math.floor(lon/2); locator+=Math.floor(lat/1);
+      if(precision>=6){ lon=(lon%2); lat=(lat%1);
+        locator+=String.fromCharCode(Math.floor(lon*60/5)+A);
+        locator+=String.fromCharCode(Math.floor(lat*60/2.5)+A);
+      }
+      if(precision>=8){ lon=(lon%(5/60)); lat=(lat%(2.5/60));
+        locator+=Math.floor(lon/(5/600)); locator+=Math.floor(lat/(2.5/600));
+      }
+      if(precision>=10){ lon=(lon%(5/600)); lat=(lat%(2.5/600));
+        locator+=String.fromCharCode(Math.floor(lon/(5/14400))+A);
+        locator+=String.fromCharCode(Math.floor(lat/(2.5/14400))+A);
+      }
+      return locator.slice(0,precision);
+    }
+
+    function toRadians(deg){return deg*Math.PI/180}
+    function computeDistance(pos1,pos2){
+      const R=6371;
+      const dLat=toRadians(pos2.lat-pos1.lat);
+      const dLng=toRadians(pos2.lng-pos1.lng);
+      const a=Math.sin(dLat/2)**2+Math.cos(toRadians(pos1.lat))*Math.cos(toRadians(pos2.lat))*Math.sin(dLng/2)**2;
+      return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+    }
+    function computeAzimuth(pos1,pos2){
+      const lat1=toRadians(pos1.lat); const lat2=toRadians(pos2.lat);
+      const dLng=toRadians(pos2.lng-pos1.lng);
+      const y=Math.sin(dLng)*Math.cos(lat2);
+      const x=Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLng);
+      let brng=Math.atan2(y,x);
+      brng=(brng*180/Math.PI+360)%360;
+      return brng;
+    }
+
+    function initMap(){
+      map = L.map('map', { zoomControl: false }).setView([0,0], 2);
+      L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+      const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      // ✅ Add only the Maidenhead QTH locator layer
+      const maidenheadLayer = L.maidenhead();
+      maidenheadLayer.addTo(map);
+    }
+
+    function addDraggableMarker(latlng,color,index,precision){
+      const marker=L.marker(latlng,{
+        draggable:true,
+        icon:L.divIcon({className:'custom-marker',
+          html:`<div style="width:14px;height:14px;background:${color};border-radius:50%;border:1px solid white;"></div>`})
+      }).addTo(map);
+
+      marker.on('dragend',()=>{
+        const pos=marker.getLatLng();
+        document.getElementById(`locator${index+1}`).value=latLngToLocator(pos.lat,pos.lng,10);
+        precisions[index]=10;
+        const pos1=markers[0]?markers[0].getLatLng():locatorToLatLng(document.getElementById('locator1').value);
+        const pos2=markers[1]?markers[1].getLatLng():locatorToLatLng(document.getElementById('locator2').value);
+        pos1.precision=precisions[0]; pos2.precision=precisions[1];
+        updateMap(pos1,pos2);
+      });
+      markers[index]=marker;
+    }
+
+    function updateMap(pos1,pos2){
+      markers.forEach(m=>map.removeLayer(m));
+      markers=[];
+      if(line) map.removeLayer(line);
+      precisions[0]=document.getElementById('locator1').value.length||6;
+      precisions[1]=document.getElementById('locator2').value.length||6;
+      addDraggableMarker(pos1,'#1e88e5',0,precisions[0]);
+      addDraggableMarker(pos2,'#43a047',1,precisions[1]);
+      line=L.polyline([pos1,pos2],{color:'red'}).addTo(map);
+      map.fitBounds(L.latLngBounds([pos1,pos2]));
+      const distance=computeDistance(pos1,pos2).toFixed(1);
+      const azimuth=computeAzimuth(pos1,pos2).toFixed(1);
+      document.getElementById('azimuthResult').innerHTML=`Distance: ${distance} km, Azimuth: ${azimuth}°`;
+      document.getElementById('initialInstructions').classList.add('hidden');
+    }
+
+    function calculateAzimuth(){
+      const locator1=document.getElementById('locator1').value;
+      const locator2=document.getElementById('locator2').value;
+      const instructions=document.getElementById('initialInstructions');
+      if(!locator1||!locator2||locator1.length<4||locator2.length<4){
+        document.getElementById('azimuthResult').innerHTML='Please enter valid Maidenhead locators (4-10 characters).';
+        instructions.classList.remove('hidden');
+        return;
+      }
+      precisions[0]=locator1.length; precisions[1]=locator2.length;
+      const pos1=locatorToLatLng(locator1);
+      const pos2=locatorToLatLng(locator2);
+      updateMap(pos1,pos2);
+    }
+
+    // ✅ Swap Locators function
+    function swapLocators(){
+      const loc1=document.getElementById('locator1').value;
+      const loc2=document.getElementById('locator2').value;
+      document.getElementById('locator1').value=loc2;
+      document.getElementById('locator2').value=loc1;
+      calculateAzimuth(); // recalculate and redraw
+    }
+
+    window.onload=initMap;
   </script>
 
   <!-- Ko-Fi -->
