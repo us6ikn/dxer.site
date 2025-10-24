@@ -420,7 +420,7 @@
                                                                             margin-top: 4px;
                                                                         }
 
-                                                                        /* Labels and Metrics (Keep Existing Colors, Refine Typography) */
+                                                                        /* Labels and Metrics - Preserve Original Colors, Refine Typography */
                                                                         label {
                                                                             font-weight: 600;
                                                                             font-size: 13px;
@@ -429,11 +429,71 @@
                                                                             display: block;
                                                                         }
 
-                                                                        .metric-label, .metric-distance, .metric-declination, .metric-pathloss, .metric-separator,
-                                                                        .metric-elevation, .metric-azimuth, .metric-libration, .metric-doppler, .metric-locator,
-                                                                        .metric-rel-libration, .metric-rel-doppler, .metric-poloffset, .metric-sun-sep, .metric-sgra-sep {
-                                                                            font-size: 12px;
-                                                                            font-weight: 500;
+                                                                        .metric-label {
+                                                                            font-weight: bold;
+                                                                        }
+
+                                                                        .metric-distance {
+                                                                            color: #24a148;
+                                                                        }
+
+                                                                        .metric-declination {
+                                                                            color: #ff832b;
+                                                                        }
+
+                                                                        .metric-pathloss {
+                                                                            color: #24a148;
+                                                                        }
+
+                                                                        .metric-separator {
+                                                                            color: #666;
+                                                                            margin: 0 4px;
+                                                                        }
+
+                                                                        .metric-elevation {
+                                                                            color: rgba(0, 0, 255, 0.6);
+                                                                        }
+
+                                                                        .metric-azimuth {
+                                                                            color: #444;
+                                                                        }
+
+                                                                        .metric-libration {
+                                                                            color: #ff0000;
+                                                                        }
+
+                                                                        .metric-doppler {
+                                                                            color: green;
+                                                                        }
+
+                                                                        .metric-locator {
+                                                                            color: #000;
+                                                                            font-weight: bold;
+                                                                        }
+
+                                                                        .metric-rel-libration {
+                                                                            color: red;
+                                                                            font-weight: bold;
+                                                                        }
+
+                                                                        .metric-rel-doppler {
+                                                                            color: green;
+                                                                            font-weight: bold;
+                                                                        }
+
+                                                                        .metric-poloffset {
+                                                                            color: blue;
+                                                                            font-weight: bold;
+                                                                        }
+
+                                                                        .metric-sun-sep {
+                                                                            color: #ff832b; /* Yellow for Sun separation */
+                                                                            font-weight: bold;
+                                                                        }
+
+                                                                        .metric-sgra-sep {
+                                                                            color: #800080; /* Purple for Sgr A separation */
+                                                                            font-weight: bold;
                                                                         }
 
                                                                         /* Popup and Other Existing Rules (Unchanged for Functionality) */
