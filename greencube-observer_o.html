@@ -337,31 +337,23 @@
         return { lat: lat2 * deg, lng: lon2 * deg };
       }
 
-        function calculateCoordinates(gridLocator) {
-            gridLocator = gridLocator.toUpperCase();
-            var gridLocatorPattern = /^[A-R]{2}\d{2}[A-X]{2}$/i;
-            if (!gridLocatorPattern.test(gridLocator)) {
-                alert("Invalid grid locator format. Please enter a valid 6-character grid locator.");
-                return null;
-            }
-
-            // Latitude calculation
-            var lat = -90
-                + (gridLocator.charCodeAt(1) - 65) * 10        // Field
-                + parseInt(gridLocator.charAt(3))             // Square
-                + (gridLocator.charCodeAt(5) - 65) / 24       // Subsquare
-                + 1/48;                                       // Center of subsquare
-
-            // Longitude calculation
-            var lon = -180
-                + (gridLocator.charCodeAt(0) - 65) * 20       // Field
-                + parseInt(gridLocator.charAt(2)) * 2         // Square
-                + (gridLocator.charCodeAt(4) - 65) / 12       // Subsquare
-                + 1/24;                                       // Center of subsquare
-
-            return { lat: lat, lng: lon };
+      function calculateCoordinates(gridLocator) {
+        gridLocator = gridLocator.toUpperCase();
+        var gridLocatorPattern = /^([A-R]{2}\d{2}[a-x]{2})$/i;
+        if (!gridLocatorPattern.test(gridLocator)) {
+          alert("Invalid grid locator format. Please enter a valid 6-character grid locator.");
+          return null;
         }
-
+        var lat1 = (gridLocator.charCodeAt(1) - 65) * 10;
+        var lat2 = ((gridLocator.charCodeAt(5) - 97) / 24) + (1 / 48) - 90;
+        var lat3 = parseInt(gridLocator.charAt(3));
+        var latitude = lat1 + lat3 + lat2;
+        var lon1 = ((gridLocator.charCodeAt(0) - 65) * 20);
+        var lon2 = parseInt(gridLocator.charAt(2)) * 2;
+        var lon3 = ((gridLocator.charCodeAt(4) - 97) / 12) + (1 / 24);
+        var longitude = lon1 + lon2 + lon3 - 180;
+        return { lat: latitude, lng: longitude };
+      }
 
       function initMap(gridLocator) {
         if (map) map.remove();
