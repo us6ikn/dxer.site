@@ -51,6 +51,7 @@
         min-width: 200px;
       }
 
+      /* Header alignment */
       .floating h2 {
         display: flex;
         align-items: flex-start;
@@ -127,22 +128,22 @@
         gap: 15px;
         margin-top: 10px;
       }
-
-      .sat-label {
-          background-color: rgba(255,255,255,0.8);
-          border-radius: 3px;
-          padding: 2px 4px;
-          font-size: 12px;
-          font-weight: bold;
-          color: black;
-          white-space: nowrap;
-      }
+        .sat-label {
+            background-color: rgba(255,255,255,0.8);
+            border-radius: 3px;
+            padding: 2px 4px;
+            font-size: 12px;
+            font-weight: bold;
+            color: black;
+            white-space: nowrap;
+        }
 
       * { outline: none !important; }
     </style>
   </head>
 
   <body>
+    <!-- Unified floating panel -->
     <div class="floating">
       <h2>
         <img src="img/AO07logo.png" alt="LEO logo">
@@ -159,22 +160,23 @@
       <button onclick="initMap(document.getElementById('grid-locator').value)">Plot your Range</button>
 
       <div class="observer-buttons">
-        <button onclick="window.open('https://dxer.site', '_blank')" style="padding:6px;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 3l9 9h-3v9h-12v-9h-3l9-9z"/>
-          </svg>
-        </button>
+          <button onclick="window.open('https://dxer.site', '_blank')" style="padding:6px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 3l9 9h-3v9h-12v-9h-3l9-9z"/>
+            </svg>
+          </button>
         <button onclick="window.open('https://dxer.site/greencube-observer.html', '_blank')">MEO</button>
         <button onclick="window.open('https://dxer.site/qo-100-satellite-observer.html', '_blank')">GEO</button>
         <button onclick="window.open('https://dxer.site/eme-observer/', '_blank')">EME</button>
       </div>
     </div>
 
+    <!-- Map container -->
     <div id="map"></div>
 
     <script>
       var map;
-      var markersCluster; // Global so we can toggle it
+      var layerGroup;
       const BLINKING_GIF_URL = 'img/rover1.gif?v=1';
 
       function destinationPoint(lat, lon, distance, bearing) {
@@ -211,9 +213,16 @@
 
       function initMap(gridLocator) {
         if (map) map.remove();
-        map = L.map('map', { center: [0, 0], zoom: 2, zoomControl: false, attributionControl: true });
-
-        L.control.zoom({ position: 'bottomright' }).addTo(map);
+        map = L.map('map', {
+          center: [0, 0],
+          zoom: 2,
+          zoomControl: false,
+          attributionControl: true
+        });
+        
+        L.control.zoom({
+                position: 'bottomright'
+            }).addTo(map);
 
         var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
@@ -226,8 +235,13 @@
 
         maidenhead.addTo(map);
 
-        // MarkerCluster for all stations
-        markersCluster = L.markerClusterGroup({
+        L.control.layers({ 'Map': osm }, {
+          "<span style='color: black'>CQ Zones</span>": cqzones,
+          "<span style='color: black'>QTH Locators</span>": maidenhead
+        }).addTo(map);
+
+
+        var markersCluster = L.markerClusterGroup({
           spiderfyOnMaxZoom: true,
           showCoverageOnHover: false,
           maxClusterRadius: 10
@@ -250,7 +264,11 @@
               if (time <= new Date()) return;
 
               const marker = L.marker([lat, lng], {
-                icon: L.icon({ iconUrl: BLINKING_GIF_URL, iconSize: [16, 16], iconAnchor: [10, 10] })
+                icon: L.icon({
+                  iconUrl: BLINKING_GIF_URL,
+                  iconSize: [16, 16],
+                  iconAnchor: [10, 10]
+                })
               });
 
               marker.bindPopup(`<div><a href="https://hams.at/alerts" target="_blank">${callsign[1]}</a></div>`);
@@ -279,7 +297,11 @@
                   const markers = callsigns[key];
                   const markerIcon = markers[0].markerIcon;
                   const marker = L.marker([lat, lng], {
-                    icon: L.icon({ iconUrl: markerIcon, iconSize: [16, 16], iconAnchor: [10, 10] }),
+                    icon: L.icon({
+                      iconUrl: markerIcon,
+                      iconSize: [16, 16],
+                      iconAnchor: [10, 10]
+                    }),
                     title: markers.map(m => m.callsign).join(", ")
                   });
 
@@ -288,7 +310,6 @@
                   markersCluster.addLayer(marker);
                 }
 
-                // Add markersCluster to map
                 map.addLayer(markersCluster);
               });
           });
@@ -310,6 +331,7 @@
           ];
 
           circles.forEach(circle => {
+              // Draw footprint
               L.greatCircle([coords.lat, coords.lng], {
                   radius: circle.radius,
                   color: circle.strokeColor || "#FF0000",
@@ -327,23 +349,14 @@
                   icon: L.divIcon({
                       className: 'sat-label',
                       html: circle.label,
-                      iconSize: [40, 20],
-                      iconAnchor: [20, 10]
+                      iconSize: [40, 20], // adjust width/height as needed
+                      iconAnchor: [20, 10] // center the label over the point
                   }),
-                  interactive: false
+                  interactive: false // makes it not clickable
               }).addTo(map);
+
           });
         }
-
-        // Add layer control with stations toggle
-        L.control.layers(
-          { 'Map': osm },
-          {
-            "<span style='color: black'>CQ Zones</span>": cqzones,
-            "<span style='color: black'>QTH Locators</span>": maidenhead,
-            "<span style='color: black'>Stations</span>": markersCluster
-          }
-        ).addTo(map);
       }
 
       initMap('');
