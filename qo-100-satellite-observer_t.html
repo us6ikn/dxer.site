@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Meta tags -->
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="QO-100 Satellite Observer" />
+    <meta name="author" content="https://dxer.site" />
+    <meta charset="utf-8">
+    <title>QO-100 Satellite Observer</title>
+    
+    <!-- Leaflet dependencies -->
+    <script type="text/javascript" src="https://unpkg.com/leaflet@latest/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@latest/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet.vectorgrid@latest/dist/Leaflet.VectorGrid.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/text-image/dist/text-image.js"></script>
+    <script src="https://ha8tks.github.io/Leaflet.CQzones/src/L.CQzones.js"></script>
+    <script src="https://ha8tks.github.io/Leaflet.ITUzones/src/L.ITUzones.js"></script>
+    <script src="https://ha8tks.github.io/Leaflet.Maidenhead/src/L.Maidenhead.js"></script>
+
+    <!-- MarkerCluster plugin -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
+    <script src="leaflet/Leaflet.greatCircle.js"></script>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+
+    <!-- Professional font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+      html, body {
+        height: 100%;
+        padding: 0;
+        margin: 0;
+        font-family: 'Inter', Arial, sans-serif;
+      }
+      #map {
+        height: 100%;
+      }
+
+      .floating {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 14px 18px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.35);
+        min-width: 200px;
+      }
+
+      /* Header alignment */
+      .floating h2 {
+        display: flex;
+        align-items: flex-start;
+        font-weight: 700;
+        font-size: 16px;
+        margin: 0 0 10px 0;
+        letter-spacing: 0.5px;
+      }
+
+      .floating h2 img {
+        width: 28px;
+        height: 28px;
+        margin-right: 6px;
+        margin-top: 2px;
+      }
+
+      .title-text {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .title-line {
+        display: flex;
+        align-items: baseline;
+      }
+
+      .title-main {
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      .title-sub {
+        font-size: 11px;
+        font-weight: 500;
+        text-align: right;
+        margin-top: -2px;
+        color: #333;
+      }
+
+      label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+
+      input[type="text"] {
+        width: 75px;
+        padding: 5px 6px;
+        font-size: 13px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-right: 6px;
+      }
+
+      button {
+        background-color: #0078d4;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 10px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        transition: background 0.2s ease;
+      }
+
+      button:hover {
+        background-color: #005fa3;
+      }
+
+      .observer-buttons {
+        display: flex;
+        gap: 13px;
+        margin-top: 10px;
+      }
+        .sat-label {
+            background-color: rgba(255,255,255,0.8);
+            border-radius: 3px;
+            padding: 2px 4px;
+            font-size: 12px;
+            font-weight: bold;
+            color: black;
+            white-space: nowrap;
+        }
+
+      * { outline: none !important; }
+    </style>
+  </head>
+
+  <body>
+    <!-- Unified floating panel -->
+    <div class="floating">
+      <h2>
+        <img src="img/qo100logo.png" alt="QO-100 logo">
+        <div class="title-text">
+          <div class="title-sub">by SA5IKN</div>
+          <div class="title-line">
+            <span class="title-main">QO-100 Satellite Observer</span>
+          </div>
+        </div>
+      </h2>
+
+      <label for="grid-locator">Enter your Grid:</label>
+      <input type="text" id="grid-locator" placeholder="e.g. JO89tt" maxlength="6">
+      <button onclick="initMap(document.getElementById('grid-locator').value)">Plot LEO+MEO Range</button>
+
+      <div class="observer-buttons">
+          <button onclick="window.open('https://dxer.site', '_blank')" style="padding:6px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 3l9 9h-3v9h-12v-9h-3l9-9z"/>
+            </svg>
+          </button>
+        <button onclick="window.open('https://x.com/m0skn_sa5ikn', '_blank')" style="padding:6px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M23.954 4.569c-.885.392-1.83.656-2.825.775 1.014-.611 1.794-1.574 2.163-2.724-.951.564-2.005.974-3.127 1.195-.897-.959-2.178-1.559-3.594-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.708.87 3.215 2.188 4.096-.807-.026-1.566-.248-2.229-.616v.062c0 2.385 1.693 4.374 3.946 4.828-.413.111-.849.171-1.296.171-.317 0-.626-.03-.927-.086.627 1.956 2.444 3.379 4.6 3.418-1.68 1.316-3.809 2.101-6.102 2.101-.396 0-.788-.023-1.175-.068 2.179 1.397 4.768 2.211 7.557 2.211 9.054 0 14-7.496 14-13.986 0-.21 0-.423-.015-.634.961-.694 1.8-1.562 2.46-2.549z"/>
+            </svg>
+          </button>
+        <button onclick="window.open('https://dxer.site/leo-satellite-observer.html', '_blank')">LEO</button>
+        <button onclick="window.open('https://dxer.site/greencube-observer.html', '_blank')">MEO</button>
+        <button onclick="window.open('https://dxer.site/eme-observer/', '_blank')">EME</button>
+      </div>
+    </div>
+
+    <!-- Map container -->
+    <div id="map"></div>
+
+    <script>
+      var map;
+      var layerGroup;
+      const BLINKING_GIF_URL = 'img/rover1.gif?v=1';
+
+      function destinationPoint(lat, lon, distance, bearing) {
+        const R = 6371000;
+        const rad = Math.PI / 180;
+        const deg = 180 / Math.PI;
+        lat = lat * rad;
+        lon = lon * rad;
+        bearing = bearing * rad;
+        const d = distance / R;
+        const lat2 = Math.asin(Math.sin(lat) * Math.cos(d) + Math.cos(lat) * Math.sin(d) * Math.cos(bearing));
+        const lon2 = lon + Math.atan2(Math.sin(bearing) * Math.sin(d) * Math.cos(lat),
+                                      Math.cos(d) - Math.sin(lat) * Math.sin(lat2));
+        return { lat: lat2 * deg, lng: lon2 * deg };
+      }
+
+        function calculateCoordinates(gridLocator) {
+            gridLocator = gridLocator.toUpperCase();
+            var gridLocatorPattern = /^[A-R]{2}\d{2}[A-X]{2}$/i;
+            if (!gridLocatorPattern.test(gridLocator)) {
+                alert("Invalid grid locator format. Please enter a valid 6-character grid locator.");
+                return null;
+            }
+
+            // Latitude calculation
+            var lat = -90
+                + (gridLocator.charCodeAt(1) - 65) * 10        // Field
+                + parseInt(gridLocator.charAt(3))             // Square
+                + (gridLocator.charCodeAt(5) - 65) / 24       // Subsquare
+                + 1/48;                                       // Center of subsquare
+
+            // Longitude calculation
+            var lon = -180
+                + (gridLocator.charCodeAt(0) - 65) * 20       // Field
+                + parseInt(gridLocator.charAt(2)) * 2         // Square
+                + (gridLocator.charCodeAt(4) - 65) / 12       // Subsquare
+                + 1/24;                                       // Center of subsquare
+
+            return { lat: lat, lng: lon };
+        }
+
+      function initMap(gridLocator) {
+        if (map) map.remove();
+        map = L.map('map', {
+          center: [0, 0],
+          zoom: 2,
+          zoomControl: false,
+          attributionControl: true
+        });
+        
+        L.control.zoom({
+                position: 'bottomright'
+            }).addTo(map);
+
+        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+          minZoom: 0,
+          maxZoom: 10
+        }).addTo(map);
+
+        var cqzones = L.cqzones();
+        var maidenhead = L.maidenhead();
+
+        maidenhead.addTo(map);
+
+        L.control.layers({ 'Map': osm }, {
+          "<span style='color: black'>CQ Zones</span>": cqzones,
+          "<span style='color: black'>QTH Locators</span>": maidenhead
+        }).addTo(map);
+
+        // Draw default circle at page load
+        const defaultCircle = {
+          center: { lat: 0.0, lng: 25.8110 },
+          radius: 9050000,
+          strokeColor: "#D95F45",  // optional: choose a color
+          fillOpacity: 0.05,
+          angle: 0 // angle for optional label placement
+        };
+
+        // Draw the circle
+        L.greatCircle([defaultCircle.center.lat, defaultCircle.center.lng], {
+            radius: defaultCircle.radius,
+            color: defaultCircle.strokeColor,
+            fillOpacity: defaultCircle.fillOpacity,
+            weight: 3,
+            wrapElements: true,
+            clipLat: 85,
+            degStep: 0.5,
+            maxCopies: -1
+        }).addTo(map);
+
+        // Draw outer shadow
+        const shadowWidth = 150000; // 100 km in meters
+        L.greatCircle([defaultCircle.center.lat, defaultCircle.center.lng], {
+            radius: defaultCircle.radius + shadowWidth,  // outer radius
+            color: "#000000",       // shadow color
+            fillOpacity: 0.1,      // low opacity
+            weight: 0,              // no border line
+            wrapElements: true,
+            clipLat: 85,
+            degStep: 0.5,
+            maxCopies: -1
+        }).addTo(map);
+
+
+        var markersCluster = L.markerClusterGroup({
+          spiderfyOnMaxZoom: true,
+          showCoverageOnHover: false,
+          maxClusterRadius: 20
+        });
+
+        // Load announcements
+        fetch('announcements_filtered.txt')
+          .then(response => response.text())
+          .then(data => {
+            const announcements = data.trim().split('\n');
+            announcements.forEach(announcement => {
+              const coordinates = announcement.match(/Coordinates: \((.*), (.*)\)/);
+              const timeString = announcement.match(/Time: ([^,]*)/);
+              const callsign = announcement.match(/Callsign: ([^,]*)/);
+              if (!coordinates || !timeString || !callsign) return;
+
+              const lat = parseFloat(coordinates[1]);
+              const lng = parseFloat(coordinates[2]);
+              const time = new Date(timeString[1]);
+              if (time <= new Date()) return;
+
+              const marker = L.marker([lat, lng], {
+                icon: L.icon({
+                  iconUrl: BLINKING_GIF_URL,
+                  iconSize: [16, 16],
+                  iconAnchor: [10, 10]
+                })
+              });
+
+              marker.bindPopup(`<div><a href="https://hams.at/alerts" target="_blank">${callsign[1]}</a></div>`);
+              markersCluster.addLayer(marker);
+            });
+
+            // Load main QO-100 markers
+            fetch("output_qo100.txt")
+              .then(response => response.text())
+              .then(data => {
+                const regex = /TRP: ([^,]+), Date: ([^,]+), Callsign: ([^,]+), Grid locator: ([^,]+), Coord: \(([^,]+), ([^)]+)\)/g;
+                const callsigns = {};
+                let match;
+                while ((match = regex.exec(data)) !== null) {
+                  const callsign = match[3];
+                  const dxgridlocator = match[4];
+                  const lat = parseFloat(match[5]);
+                  const lng = parseFloat(match[6]);
+                  const key = `${lat},${lng}`;
+                  if (!callsigns[key]) callsigns[key] = [];
+                  callsigns[key].push({ callsign, dxgridlocator, markerIcon: "img/176096839586434633.png" });
+                }
+
+                for (const key in callsigns) {
+                  const [lat, lng] = key.split(",");
+                  const markers = callsigns[key];
+                  const markerIcon = markers[0].markerIcon;
+                  const marker = L.marker([lat, lng], {
+                    icon: L.icon({
+                      iconUrl: markerIcon,
+                      iconSize: [16, 16],
+                      iconAnchor: [10, 10]
+                    }),
+                    title: markers.map(m => m.callsign).join(", ")
+                  });
+
+                  const popupHtml = `<div>${markers.map(m => `<a href="https://www.qrz.com/db/${m.callsign}" target="_blank">${m.callsign}</a>`).join(", ")}</div>`;
+                  marker.bindPopup(popupHtml);
+                  markersCluster.addLayer(marker);
+                }
+
+                map.addLayer(markersCluster);
+              });
+          });
+
+        // Draw satellite footprints
+        if (gridLocator) {
+          const coords = calculateCoordinates(gridLocator);
+          if (!coords) return;
+          L.marker([coords.lat, coords.lng], { title: gridLocator }).addTo(map);
+
+          const circles = [
+            { radius: 4970000, label: "SO-50", angle: 265 },
+            { radius: 7502000, label: "FO-29", angle: 245 },
+            { radius: 8042000, label: "RS-44", angle: 225 },
+            { radius: 3940000, label: "ISS", angle: 275 },
+            { radius: 7907000, label: "AO-07", angle: 235 },
+            { radius: 5712000, label: "AO-91", angle: 255 },
+            { radius: 13000000, label: "IO-117", angle: 185, strokeColor: "#808080", fillOpacity: 0.0 }
+          ];
+
+          circles.forEach(circle => {
+              // Draw footprint
+              L.greatCircle([coords.lat, coords.lng], {
+                  radius: circle.radius,
+                  color: circle.strokeColor || "#FF0000",
+                  fillOpacity: circle.fillOpacity !== undefined ? circle.fillOpacity : 0.05,
+                  weight: 1,
+                  wrapElements: true,
+                  clipLat: 85,
+                  degStep: 0.5,
+                  maxCopies: -1
+              }).addTo(map);
+
+              const labelPoint = destinationPoint(coords.lat, coords.lng, circle.radius, circle.angle-125);
+
+              L.marker([labelPoint.lat, labelPoint.lng], {
+                  icon: L.divIcon({
+                      className: 'sat-label',
+                      html: circle.label,
+                      iconSize: [40, 20], // adjust width/height as needed
+                      iconAnchor: [20, 10] // center the label over the point
+                  }),
+                  interactive: false // makes it not clickable
+              }).addTo(map);
+
+          });
+        }
+      }
+
+      initMap('');
+    </script>
+  </body>
+</html>
