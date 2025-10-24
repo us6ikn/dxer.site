@@ -185,6 +185,7 @@
                                                                             margin-bottom: 8px;
                                                                             padding-bottom: 8px;
                                                                             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+                                                                            width: fit-content;
                                                                         }
 
                                                                         .creator-label {
@@ -192,6 +193,8 @@
                                                                             color: #666;
                                                                             font-weight: 500;
                                                                             margin-bottom: 2px;
+                                                                            text-align: right;
+                                                                            width: 100%;
                                                                         }
 
                                                                         .app-name {
@@ -226,12 +229,16 @@
                                                                             color: white;
                                                                             border: none;
                                                                             border-radius: 5px;
-                                                                            padding: 6px 10px;
+                                                                            padding: 4px 8px; /* Reduced vertical padding */
                                                                             cursor: pointer;
                                                                             font-size: 12px;
                                                                             font-weight: 600;
                                                                             transition: background 0.2s ease;
                                                                             min-width: 40px;
+                                                                            min-height: 24px; /* Reduced min-height */
+                                                                            display: flex;
+                                                                            align-items: center;
+                                                                            justify-content: center;
                                                                         }
 
                                                                         #prevDay:hover, #nextDay:hover {
@@ -329,7 +336,7 @@
                                                                             color: white !important;
                                                                             border: none;
                                                                             border-radius: 6px;
-                                                                            padding: 6px 10px;
+                                                                            padding: 4px 8px; /* Reduced vertical padding for less height */
                                                                             cursor: pointer;
                                                                             font-size: 12px;
                                                                             font-weight: 600;
@@ -338,7 +345,7 @@
                                                                             display: inline-flex;
                                                                             align-items: center;
                                                                             justify-content: center;
-                                                                            min-height: 32px; /* Consistent touch target */
+                                                                            min-height: 24px; /* Reduced from 32px for compact feel */
                                                                             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
                                                                         }
 
@@ -379,7 +386,7 @@
 
                                                                         .auto-track-button {
                                                                             background-color: #17a2b8;
-                                                                            padding: 6px 12px;
+                                                                            padding: 4px 8px; /* Consistent reduced padding */
                                                                             font-size: 11px;
                                                                         }
 
@@ -389,10 +396,17 @@
                                                                         }
 
                                                                         .nav-button.icon-button {
-                                                                            padding: 6px;
+                                                                            padding: 4px; /* Reduced for icons */
                                                                             width: auto;
-                                                                            min-width: 32px;
+                                                                            min-width: 28px; /* Slightly larger for touch */
+                                                                            height: 28px; /* Square for icons */
                                                                             font-size: 14px; /* For icons */
+                                                                        }
+
+                                                                        .nav-button.icon-button svg {
+                                                                            width: 16px;
+                                                                            height: 16px;
+                                                                            fill: currentColor;
                                                                         }
 
                                                                         /* Band Select */
@@ -516,8 +530,8 @@
                                                                             top: 50%;
                                                                             left: 20px;
                                                                             transform: translateY(-50%);
-                                                                            width: 32px;
-                                                                            height: 32px;
+                                                                            width: 28px; /* Slightly reduced */
+                                                                            height: 28px;
                                                                             padding: 0;
                                                                             background-color: #0078d4;
                                                                             color: white;
@@ -563,8 +577,13 @@
                                                                                 max-width: 80px;
                                                                             }
                                                                             .nav-button {
-                                                                                padding: 5px 8px;
+                                                                                padding: 3px 6px; /* Further reduce on mobile */
+                                                                                min-height: 22px;
                                                                                 font-size: 11px;
+                                                                            }
+                                                                            #prevDay, #nextDay {
+                                                                                padding: 3px 6px;
+                                                                                min-height: 22px;
                                                                             }
                                                                         }
                                                                     </style>
@@ -606,12 +625,24 @@
             
             <!-- Nav Buttons -->
             <div class="button-group">
-                <button id="activeStationsButton" class="nav-button">All</button>
+                <button id="activeStationsButton" class="nav-button icon-button" title="Toggle All/Active Stations">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+                    </svg>
+                </button>
                 <a href="statistics.html" class="nav-button">Statistics</a>
                 <a href="table.html" class="nav-button">Table</a>
                 <a href="datasubmission.html" class="nav-button">Add Station</a>
-                <a href="/" class="nav-button icon-button">🏠</a>
-                <a href="user-guide.html" class="nav-button icon-button">?</a>
+                <a href="/" class="nav-button icon-button" title="Home">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 3l9 9h-3v9h-12v-9h-3l9-9z"/>
+                    </svg>
+                </a>
+                <a href="user-guide.html" class="nav-button icon-button" title="Help">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
+                    </svg>
+                </a>
                 <button id="toggleControlsPanel" class="nav-button">←</button>
             </div>
             
@@ -2383,11 +2414,12 @@
     document.getElementById('activeStationsButton').addEventListener('click', () => {
       isActiveStationsOnly = !isActiveStationsOnly;
       const activeButton = document.getElementById('activeStationsButton');
-      activeButton.textContent = isActiveStationsOnly ? 'Active' : 'All';
       if (isActiveStationsOnly) {
         activeButton.classList.add('active');
+        activeButton.title = 'Active Stations';
       } else {
         activeButton.classList.remove('active');
+        activeButton.title = 'All Stations';
       }
       const band = document.getElementById('bandSelect').value;
       const jsonFile = bandConfig[band].jsonFile;
