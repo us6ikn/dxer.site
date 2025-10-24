@@ -773,7 +773,7 @@
             <a href="user-guide.html" class="nav-button icon-button">?</a>
             <button id="toggleControlsPanel" class="nav-button">←</button>
           </div>
-          <input type="range" id="hour" min="0" max="47" value="0" step="0.5" />
+          <input type="range" id="hour" min="0" max="47" value="0" step="1" />
           <div class="locator-group">
             <div class="locator-input">
               <label for="qth">My Locator:</label>
@@ -820,9 +820,9 @@
     let moonDataForMonth = [];
     let hourIndex = 0;
     let lat = 0;
-    lon = 0;
+    let lon = 0;
     let dxLat = 0;
-    dxLon = 0;
+    let dxLon = 0;
     let moonMarker;
     let footprintCircle;
     let currentInfoWindow = null;
@@ -832,9 +832,9 @@
     let moonDayData = { date: null, data: [], labels: [] };
 
     // NEW: Caches for day data to avoid recompute
-    let qthDayData = { date: null, points: [] };
-    let dxDayData = { date: null, points: [] };
-    let relDayData = { date: null, points: [] };
+    let qthDayData = { date: null, libration: [], elevations: [], azimuths: [], dopplers: [], rates: [] };
+    let dxDayData = { date: null, libration: [], elevations: [], azimuths: [], dopplers: [], rates: [] };
+    let relDayData = { date: null, libration: [], dopplers: [], polOffsets: [] };
 
     const MOON_RADIUS = 1.7374e6;
     const SPEED_OF_LIGHT = 299792458;
@@ -857,10 +857,9 @@
 
     // Helper function to update hour-value display
     function updateHourDisplay() {
-        const timeMin = hourIndex * 30;
-        const hour = Math.floor(timeMin / 60);
-        const min = Math.floor(timeMin % 60);
-        document.getElementById('hour-value').textContent = 'Time (UTC): ' + String(hour).padStart(2, '0') + ':' + String(min).padStart(2, '0');
+        const hour = Math.floor(hourIndex / 2);
+        const minutes = (hourIndex % 2) * 30;
+        document.getElementById('hour-value').textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
     }
 
     function updateBand(band) {
@@ -951,7 +950,7 @@
         const month = date.getUTCMonth() + 1;
         const day = date.getUTCDate();
 
-        const libPoints = [];
+        const results = [];
         for (let i = 0; i < 48; i++) {
             const hour = Math.floor(i / 2);
             const minute = (i % 2) * 30;
@@ -963,142 +962,107 @@
                 if (isNaN(libLat) || isNaN(libLon) || libLat === null || libLon === null) {
                     throw new Error(`Invalid libration values: lat=${libLat}, lon=${libLon}`);
                 }
-                libPoints.push({
-                    x: i,
+                results.push({
+                    date: isoDate,
                     lat: libLat,
                     lon: libLon
                 });
             } catch (e) {
                 console.warn(`Error computing libration for ${isoDate} at ${locator}: ${e.message}`);
-                libPoints.push({
-                    x: i,
+                results.push({
+                    date: isoDate,
                     lat: null,
                     lon: null
                 });
             }
         }
 
+        const librationRates = results.map((curr, i, arr) => {
+            if (
+                i <= 0 ||
+                i >= arr.length - 1 ||
+                arr[i-1].lat === null ||
+                arr[i-1].lon === null ||
+                arr[i+1].lat === null ||
+                arr[i+1].lon === null ||
+                curr.lat === null ||
+                curr.lon === null
+            ) {
+                return { date: curr.date, rate: null, dldt: null, dbdt: null };
+            }
+
+            try {
+                const dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
+                const dlon = (arr[i+1].lon - arr[i-1].lon) / 60;
+                if (isNaN(dlat) || isNaN(dlon) || !isFinite(dlat) || !isFinite(dlon)) {
+                    console.warn(`Invalid dlat/dlon for ${curr.date} at ${locator}: dlat=${dlat}, dlon=${dlon}`);
+                    return { date: curr.date, rate: null, dldt: null, dbdt: null };
+                }
+                const rate = Math.sqrt(dlat * dlat + dlon * dlon);
+                if (isNaN(rate) || !isFinite(rate)) {
+                    console.warn(`Invalid rate for ${curr.date} at ${locator}: rate=${rate}, dlat=${dlat}, dlon=${dlon}`);
+                    return { date: curr.date, rate: null, dldt: null, dbdt: null };
+                }
+                return { date: curr.date, rate, dldt: dlat, dbdt: dlon };
+            } catch (e) {
+                console.warn(`Error computing rate for ${curr.date} at ${locator}: ${e.message}`);
+                return { date: curr.date, rate: null, dldt: null, dbdt: null };
+            }
+        });
+
+        // Update cache
         const cache = type === 'qth' ? qthDayData : dxDayData;
         cache.date = dateStr;
-        cache.libPoints = libPoints;
+        cache.libration = librationRates;
 
         if (type === 'qth') {
-            rawData = libPoints.slice();
-            document.getElementById("chartWrapper").style.display = rawData.some(r => r.lat != null) ? "block" : "none";
+            rawData = librationRates.slice();
+            document.getElementById("chartWrapper").style.display = rawData.some(r => r.rate != null) ? "block" : "none";
         } else {
-            dxRawData = libPoints.slice();
-            document.getElementById("dxChartWrapper").style.display = dxRawData.some(r => r.lat != null) ? "block" : "none";
+            dxRawData = librationRates.slice();
+            document.getElementById("dxChartWrapper").style.display = dxRawData.some(r => r.rate != null) ? "block" : "none";
         }
-        return libPoints;
+        return librationRates;
     }
 
     function computeFullDayData(cache, locator, dateStr, isQth) {
         const { lat: obsLat, lon: obsLon } = qthToLatLon(locator);
-        const libPoints = cache.libPoints;
-        const points = [];
-
-        const year = new Date(dateStr).getUTCFullYear();
-        const month = new Date(dateStr).getUTCMonth() + 1;
-        const day = new Date(dateStr).getUTCDate();
+        const libData = cache.libration;
+        const elevations = [];
+        const azimuths = [];
+        const dopplers = [];
+        const rates = [];
 
         for (let i = 0; i < 48; i++) {
             const hour = Math.floor(i / 2);
             const minutes = (i % 2) * 30;
-            const dt = new Date(Date.UTC(year, month - 1, day, hour, minutes));
+            const dt = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00Z`);
             const observer = new Astronomy.Observer(obsLat, obsLon, 0);
             const moonEq = Astronomy.Equator(Astronomy.Body.Moon, dt, observer, true, false);
             const hor = Astronomy.Horizon(dt, observer, moonEq.ra, moonEq.dec, 'normal');
             const elevationDeg = hor.altitude;
             const azimuthDeg = hor.azimuth;
 
-            let dldt = null;
-            let dbdt = null;
-            let rate = null;
+            let rate = libData[i]?.rate ?? null;
             let doppler = null;
-            if (i > 0 && i < 47 && libPoints[i-1].lat != null && libPoints[i].lat != null && libPoints[i+1].lat != null) {
-                dldt = (libPoints[i+1].lat - libPoints[i-1].lat) / 60;
-                dbdt = (libPoints[i+1].lon - libPoints[i-1].lon) / 60;
-                rate = Math.sqrt(dldt * dldt + dbdt * dbdt);
+            if (elevationDeg > 0 && rate != null) {
+                rates.push(rate * 1000);
                 const omegaRadSec = rate * (Math.PI / 180) / 60;
                 doppler = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
+            } else {
+                rates.push(null);
+                doppler = null;
             }
 
-            points.push({
-                index: i,
-                elevation: Math.max(0, elevationDeg),
-                azimuth: azimuthDeg,
-                dldt,
-                dbdt,
-                rate,
-                doppler
-            });
+            elevations.push(elevationDeg > 0 ? elevationDeg : null);
+            azimuths.push(elevationDeg > 0 ? azimuthDeg : null);
+            dopplers.push(doppler);
         }
 
-        // Now add rise/set extra points
-        const astroTime = Astronomy.MakeTime(new Date(dateStr + 'T00:00:00Z'));
-        const observer = new Astronomy.Observer(obsLat, obsLon, 0);
-        const riseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, astroTime, 1.0);
-        const setEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, astroTime, 1.0);
-
-        const addExtraPoint = (event, type) => {
-            if (event && event.date) {
-                const eventDate = event.date;
-                const eventDateStr = eventDate.toISOString().slice(0, 10);
-                if (eventDateStr === dateStr) {
-                    const index = timeToChartIndex(eventDate);
-                    if (Math.abs(index - Math.round(index)) < 0.01) return;
-                    const minusTime = new Date(eventDate.getTime() - 30 * 60 * 1000);
-                    const plusTime = new Date(eventDate.getTime() + 30 * 60 * 1000);
-
-                    const computeLibAt = (time) => {
-                        const y = time.getUTCFullYear();
-                        const m = time.getUTCMonth() + 1;
-                        const d = time.getUTCDate();
-                        const h = time.getUTCHours();
-                        const min = time.getUTCMinutes();
-                        return EMEastroLib.topocentricLibration(y, m, d, h, min, obsLat, obsLon);
-                    };
-
-                    const [lat_minus, lon_minus] = computeLibAt(minusTime);
-                    const [lat_plus, lon_plus] = computeLibAt(plusTime);
-
-                    let dldt = null;
-                    let dbdt = null;
-                    let rate = null;
-                    let doppler = null;
-                    if (lat_minus != null && lon_minus != null && lat_plus != null && lon_plus != null) {
-                        dldt = (lat_plus - lat_minus) / 60;
-                        dbdt = (lon_plus - lon_minus) / 60;
-                        rate = Math.sqrt(dldt * dldt + dbdt * dbdt);
-                        const omegaRadSec = rate * (Math.PI / 180) / 60;
-                        doppler = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
-                    }
-
-                    const eventAstroTime = Astronomy.MakeTime(eventDate);
-                    const moonEq = Astronomy.Equator(Astronomy.Body.Moon, eventAstroTime, observer, true, false);
-                    const hor = Astronomy.Horizon(eventDate, observer, moonEq.ra, moonEq.dec, 'normal');
-                    const azimuthDeg = hor.azimuth;
-
-                    points.push({
-                        index,
-                        elevation: 0,
-                        azimuth: azimuthDeg,
-                        dldt,
-                        dbdt,
-                        rate,
-                        doppler
-                    });
-                }
-            }
-        };
-
-        addExtraPoint(riseEvent);
-        addExtraPoint(setEvent);
-
-        // Sort points by index
-        points.sort((a, b) => a.index - b.index);
-
-        cache.points = points;
+        cache.elevations = elevations;
+        cache.azimuths = azimuths;
+        cache.dopplers = dopplers;
+        cache.rates = rates;
     }
 
     function interpolate(a, b, frac) {
