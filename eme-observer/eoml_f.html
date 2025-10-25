@@ -1180,9 +1180,6 @@
                                                         }).addTo(map);
                                                     }
 
-                                                    // Keep map centered on sublunar point
-                                                    map.panTo([lat, lon]);
-
                                                 } catch (error) {
                                                     console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
                                                     // Defensive cleanup
