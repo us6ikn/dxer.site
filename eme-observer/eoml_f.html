@@ -976,83 +976,116 @@
         }
         return librationRates;
     }
+    
+    function getLibrationAtIndex(libArray, targetX) {
+      const floor = Math.floor(targetX);
+      const ceil = Math.ceil(targetX);
+      if (floor < 0 || ceil > 47) return null;
+      const libFloor = libArray[floor];
+      const libCeil = libArray[ceil];
+      if (!libFloor || !libCeil || libFloor.rate == null || libCeil.rate == null) return null;
+      const frac = targetX - floor;
+      return {
+        dldt: interpolate(libFloor.dldt, libCeil.dldt, frac),
+        dbdt: interpolate(libFloor.dbdt, libCeil.dbdt, frac),
+        rate: interpolate(libFloor.rate, libCeil.rate, frac)
+      };
+    }
 
     function computeFullDayData(cache, locator, dateStr, isQth) {
-        const { lat: obsLat, lon: obsLon } = qthToLatLon(locator);
-        const libData = cache.libration;
-        const observer = new Astronomy.Observer(obsLat, obsLon, 0);
-        const jsDate = new Date(`${dateStr}T00:00:00Z`);
-        const astroTime = Astronomy.MakeTime(jsDate);
+      const { lat: obsLat, lon: obsLon } = qthToLatLon(locator);
+      const libData = cache.libration;
+      const elevations = [];
+      const azimuths = [];
+      const dopplers = [];
+      const rates = [];
 
-        let riseEvent = null, setEvent = null;
-        try {
-            riseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, astroTime, 1.0);
-        } catch (e) {
-            console.warn(`Error calculating moonrise for ${dateStr}: ${e.message}`);
+      const date = new Date(dateStr);
+      const year = date.getUTCFullYear();
+      const month = date.getUTCMonth() + 1;
+      const day = date.getUTCDate();
+      const observer = new Astronomy.Observer(obsLat, obsLon, 0);
+      const startDt = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+      const astroStart = Astronomy.MakeTime(startDt);
+
+      // Compute rise/set
+      let riseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, astroStart, 1.0);
+      let setEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, astroStart, 1.0);
+
+      // Regular 30-min points
+      for (let i = 0; i < 48; i++) {
+        const hour = Math.floor(i / 2);
+        const minute = (i % 2) * 30;
+        const dt = new Date(Date.UTC(year, month - 1, day, hour, minute));
+        const moonEq = Astronomy.Equator(Astronomy.Body.Moon, dt, observer, true, false);
+        const hor = Astronomy.Horizon(dt, observer, moonEq.ra, moonEq.dec, 'normal');
+        const elevationDeg = hor.altitude;
+        const azimuthDeg = hor.azimuth;
+
+        let rate = libData[i]?.rate ?? null;
+        let doppler = null;
+        if (elevationDeg >= 0 && rate != null) {  // Changed to >= 0
+          const omegaRadSec = rate * (Math.PI / 180) / 60;
+          doppler = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
+          rates.push({ x: i, y: rate * 1000 });
+        } else {
+          rates.push({ x: i, y: null });
         }
-        try {
-            setEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, astroTime, 1.0);
-        } catch (e) {
-            console.warn(`Error calculating moonset for ${dateStr}: ${e.message}`);
+        dopplers.push({ x: i, y: doppler });
+        elevations.push({ x: i, y: elevationDeg >= 0 ? elevationDeg : null });  // Changed to >= 0
+        azimuths.push({ x: i, y: elevationDeg >= 0 ? azimuthDeg : null });
+      }
+
+      // Function to add extra point
+      const addExtraPoint = (event) => {
+        if (event && event.date) {
+          const extraDt = event.date;
+          if (extraDt.getUTCFullYear() !== year || extraDt.getUTCMonth() + 1 !== month || extraDt.getUTCDate() !== day) return;
+
+          const extraHour = extraDt.getUTCHours();
+          const extraMin = extraDt.getUTCMinutes() + extraDt.getUTCSeconds() / 60;
+          const extraIndex = (extraHour + extraMin / 60) * 2;
+
+          // Skip if too close to existing point
+          const nearest = Math.round(extraIndex);
+          if (Math.abs(extraIndex - nearest) < 0.001) return;
+
+          // Compute az/el (el ~0)
+          const eq = Astronomy.Equator(Astronomy.Body.Moon, extraDt, observer, true, false);
+          const hor = Astronomy.Horizon(extraDt, observer, eq.ra, eq.dec, 'normal');
+          const azimuthExtra = hor.azimuth;
+
+          // Interpolate rate
+          const floor = Math.floor(extraIndex);
+          const ceil = Math.ceil(extraIndex);
+          const frac = extraIndex - floor;
+          const rateExtra = interpolate(libData[floor]?.rate, libData[ceil]?.rate, frac);
+
+          let rateY = null;
+          let dopplerY = null;
+          if (rateExtra != null) {
+            rateY = rateExtra * 1000;
+            const omegaRadSec = rateExtra * (Math.PI / 180) / 60;
+            dopplerY = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
+          }
+
+          elevations.push({ x: extraIndex, y: 0 });
+          azimuths.push({ x: extraIndex, y: azimuthExtra });
+          rates.push({ x: extraIndex, y: rateY });
+          dopplers.push({ x: extraIndex, y: dopplerY });
         }
+      };
 
-        let riseTime = null, setTime = null;
-        if (riseEvent && riseEvent.date) {
-            const riseDateStr = riseEvent.date.toISOString().slice(0, 10);
-            if (riseDateStr === dateStr) {
-                riseTime = riseEvent.date;
-            }
-        }
-        if (setEvent && setEvent.date) {
-            const setDateStr = setEvent.date.toISOString().slice(0, 10);
-            if (setDateStr === dateStr) {
-                setTime = setEvent.date;
-            }
-        }
+      addExtraPoint(riseEvent);
+      addExtraPoint(setEvent);
 
-        const elevations = [];
-        const azimuths = [];
-        const dopplers = [];
-        const rates = [];
+      // Sort all arrays by x
+      [elevations, azimuths, rates, dopplers].forEach(arr => arr.sort((a, b) => a.x - b.x));
 
-        for (let i = 0; i < 48; i++) {
-            const hour = Math.floor(i / 2);
-            const minutes = (i % 2) * 30;
-            let dt = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00Z`);
-            let calcTime = dt;
-
-            if (riseTime && i === Math.floor(timeToChartIndex(riseTime))) {
-                calcTime = riseTime;
-            }
-            if (setTime && i === Math.ceil(timeToChartIndex(setTime))) {
-                calcTime = setTime;
-            }
-
-            const moonEq = Astronomy.Equator(Astronomy.Body.Moon, calcTime, observer, true, false);
-            const hor = Astronomy.Horizon(calcTime, observer, moonEq.ra, moonEq.dec, 'normal');
-            const elevationDeg = hor.altitude;
-            const azimuthDeg = hor.azimuth;
-
-            let rate = libData[i]?.rate ?? null;
-            let doppler = null;
-            if (elevationDeg > 0 && rate != null) {
-                rates.push(rate * 1000);
-                const omegaRadSec = rate * (Math.PI / 180) / 60;
-                doppler = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
-            } else {
-                rates.push(null);
-                doppler = null;
-            }
-
-            elevations.push(elevationDeg > 0 ? elevationDeg : null);
-            azimuths.push(elevationDeg > 0 ? azimuthDeg : null);
-            dopplers.push(doppler);
-        }
-
-        cache.elevations = elevations;
-        cache.azimuths = azimuths;
-        cache.dopplers = dopplers;
-        cache.rates = rates;
+      cache.elevations = elevations;
+      cache.azimuths = azimuths;
+      cache.dopplers = dopplers;
+      cache.rates = rates;
     }
 
     function interpolate(a, b, frac) {
@@ -1060,47 +1093,49 @@
         return a + (b - a) * frac;
     }
 
-    function getValueAtIndex(data, index) {
-        if (index < 0 || index > 47) return null;
-        const floorIdx = Math.floor(index);
-        const ceilIdx = Math.ceil(index);
-        const frac = index - floorIdx;
-        if (floorIdx === ceilIdx) return data[floorIdx];
-        return interpolate(data[floorIdx], data[ceilIdx], frac);
-    }
+                                             function getYAtX(dataPoints, targetX) {
+                                               if (dataPoints.length === 0) return null;
+                                               let lower = null;
+                                               let upper = null;
+                                               for (let point of dataPoints) {
+                                                 if (point.x <= targetX && (lower === null || point.x > lower.x)) lower = point;
+                                                 if (point.x >= targetX && (upper === null || point.x < upper.x)) upper = point;
+                                               }
+                                               if (lower === null || upper === null) return null;
+                                               if (lower.x === targetX) return lower.y;
+                                               if (upper.x === targetX) return upper.y;
+                                               if (lower.y === null || upper.y === null) return null;
+                                               const frac = (targetX - lower.x) / (upper.x - lower.x);
+                                               return lower.y + frac * (upper.y - lower.y);
+                                             }
 
-    function computeRelativeAtIndex(idx, qthData, dxData) {
-        const qthL = qthData.libration[idx];
-        const dxL = dxData.libration[idx];
-        if (!qthL || !dxL || qthL.dldt == null || dxL.dldt == null) {
-            return { libration: null, doppler: null, pol: null };
-        }
+                                             function computeRelativeAtIndex(idx, qthData, dxData) {
+                                               const qthElev = getYAtX(qthData.elevations, idx);
+                                               const dxElev = getYAtX(dxData.elevations, idx);
+                                               if (qthElev < 0 || dxElev < 0) return { libration: null, doppler: null, pol: null };  // Changed to < 0
 
-        const qthElev = qthData.elevations[idx];
-        const dxElev = dxData.elevations[idx];
-        if (qthElev <= 0 || dxElev <= 0) {
-            return { libration: null, doppler: null, pol: null };
-        }
+                                               const qthL = getLibrationAtIndex(qthData.libration, idx);
+                                               const dxL = getLibrationAtIndex(dxData.libration, idx);
+                                               if (!qthL || !dxL) return { libration: null, doppler: null, pol: null };
 
-        const dldt_sum = qthL.dldt + dxL.dldt;
-        const dbdt_sum = qthL.dbdt + dxL.dbdt;
-        const relLibration = Math.sqrt(dldt_sum * dldt_sum + dbdt_sum * dbdt_sum) / 2;
+                                               const dldt_sum = qthL.dldt + dxL.dldt;
+                                               const dbdt_sum = qthL.dbdt + dxL.dbdt;
+                                               const relLibration = Math.sqrt(dldt_sum * dldt_sum + dbdt_sum * dbdt_sum) / 2;
 
-        const omegaRadSec = relLibration * (Math.PI / 180) / 60;
-        const relDoppler = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
+                                               const omegaRadSec = relLibration * (Math.PI / 180) / 60;
+                                               const relDoppler = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
 
-        // Pol offset
-        const qthAz = qthData.azimuths[idx];
-        const dxAz = dxData.azimuths[idx];
-        let pol = null;
-        if (qthAz != null && dxAz != null) {
-            const polQth = calcPoloffset(lat, qthAz, qthElev);
-            const polDx = calcPoloffset(dxLat, dxAz, dxElev);
-            pol = calcPoloffsetDiff(polQth, polDx);
-        }
+                                               let pol = null;
+                                               const qthAz = getYAtX(qthData.azimuths, idx);
+                                               const dxAz = getYAtX(dxData.azimuths, idx);
+                                               if (qthAz != null && dxAz != null) {
+                                                 const polQth = calcPoloffset(lat, qthAz, qthElev);
+                                                 const polDx = calcPoloffset(dxLat, dxAz, dxElev);
+                                                 pol = calcPoloffsetDiff(polQth, polDx);
+                                               }
 
-        return { libration: relLibration, doppler: relDoppler, pol };
-    }
+                                               return { libration: relLibration, doppler: relDoppler, pol };
+                                             }
                                             
                                             function angularSeparation(ra1, dec1, ra2, dec2) {
                                                 const d1 = degToRad(dec1);
@@ -1675,18 +1710,18 @@
       // Get current values (interpolated if real-time)
       let currentElevQth = null, currentAzQth = null, currentRateQth = null, currentDopplerQth = null;
       if (qthValid) {
-        currentElevQth = getValueAtIndex(qthDayData.elevations, index);
-        currentAzQth = getValueAtIndex(qthDayData.azimuths, index);
-        currentRateQth = getValueAtIndex(qthDayData.rates, index);
-        currentDopplerQth = getValueAtIndex(qthDayData.dopplers, index);
+        currentElevQth = getYAtX(qthDayData.elevations, index);
+        currentAzQth = getYAtX(qthDayData.azimuths, index);
+        currentRateQth = getYAtX(qthDayData.rates, index);
+        currentDopplerQth = getYAtX(qthDayData.dopplers, index);
       }
 
       let currentElevDx = null, currentAzDx = null, currentRateDx = null, currentDopplerDx = null;
       if (dxValid) {
-        currentElevDx = getValueAtIndex(dxDayData.elevations, index);
-        currentAzDx = getValueAtIndex(dxDayData.azimuths, index);
-        currentRateDx = getValueAtIndex(dxDayData.rates, index);
-        currentDopplerDx = getValueAtIndex(dxDayData.dopplers, index);
+        currentElevDx = getYAtX(dxDayData.elevations, index);
+        currentAzDx = getYAtX(dxDayData.azimuths, index);
+        currentRateDx = getYAtX(dxDayData.rates, index);
+        currentDopplerDx = getYAtX(dxDayData.dopplers, index);
       }
 
       // Relative current
@@ -1711,24 +1746,91 @@
       const dxElevs = dxDayData.elevations || Array(48).fill(null);
       const dxDopps = dxDayData.dopplers || Array(48).fill(null);
 
-      let relLibrations = Array(48).fill(null);
-      let relDopplers = Array(48).fill(null);
-      let polOffsets = Array(48).fill(null);
-      if (qthValid && dxValid && relDayData.date !== dateStr) {
-        for (let i = 0; i < 48; i++) {
+      // Build relative data as {x, y} arrays (supports fractional x for extras)
+      let relLibrations = [];
+      let relDopplers = [];
+      let polOffsets = [];
+
+      // Standard 48 points (every 30 min)
+      for (let i = 0; i < 48; i++) {
           const rel = computeRelativeAtIndex(i, qthDayData, dxDayData);
-          relLibrations[i] = rel.libration ? rel.libration * 1000 : null;
-          relDopplers[i] = rel.doppler;
-          polOffsets[i] = rel.pol;
-        }
-        relDayData.date = dateStr;
-        relDayData.libration = relLibrations;
-        relDayData.dopplers = relDopplers;
-        relDayData.polOffsets = polOffsets;
+          relLibrations.push({ x: i, y: rel.libration ? rel.libration * 1000 : null });
+          relDopplers.push({ x: i, y: rel.doppler });
+          polOffsets.push({ x: i, y: rel.pol });
+      }
+
+      // Helper to add extra point (only if valid and not too close to standard)
+      const addExtraRel = (pointIndex) => {
+          if (!Number.isFinite(pointIndex)) return;  // Skip invalid indices
+          const nearestStandard = Math.round(pointIndex);
+          if (Math.abs(pointIndex - nearestStandard) < 0.001) return;  // Too close, skip
+
+          const rel = computeRelativeAtIndex(pointIndex, qthDayData, dxDayData);
+          relLibrations.push({ x: pointIndex, y: rel.libration ? rel.libration * 1000 : null });
+          relDopplers.push({ x: pointIndex, y: rel.doppler });
+          polOffsets.push({ x: pointIndex, y: rel.pol });
+      };
+
+      // Compute sked start/end indices (reuse logic from getSkedAnnotations)
+      let skedStartIndex = null;
+      let skedEndIndex = null;
+      if (qthValid && dxValid) {
+          const observerQth = new Astronomy.Observer(lat, lon, 0);  // Use global lat/lon
+          const observerDx = new Astronomy.Observer(dxLat, dxLon, 0);
+          const jsDate = new Date(`${dateStr}T00:00:00Z`);
+          const astroTime = Astronomy.MakeTime(jsDate);
+
+          let qthRiseEvent = null, qthSetEvent = null, dxRiseEvent = null, dxSetEvent = null;
+          try {
+              qthRiseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observerQth, +1, astroTime, 1.0);
+              qthSetEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observerQth, -1, astroTime, 1.0);
+              dxRiseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observerDx, +1, astroTime, 1.0);
+              dxSetEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observerDx, -1, astroTime, 1.0);
+          } catch (e) {
+              console.warn(`Error calculating sked rise/set: ${e.message}`);
+          }
+
+          if (qthRiseEvent?.date && qthSetEvent?.date && dxRiseEvent?.date && dxSetEvent?.date) {
+              const qthRise = qthRiseEvent.date;
+              const qthSet = qthSetEvent.date;
+              const dxRise = dxRiseEvent.date;
+              const dxSet = dxSetEvent.date;
+
+              // Check if all on target day
+              const targetDateStr = dateStr;
+              const isSameDay = (d) => d.toISOString().slice(0, 10) === targetDateStr;
+              if (isSameDay(qthRise) && isSameDay(qthSet) && isSameDay(dxRise) && isSameDay(dxSet)) {
+                  const skedStartTime = qthRise > dxRise ? qthRise : dxRise;  // Later rise
+                  const skedEndTime = qthSet < dxSet ? qthSet : dxSet;         // Earlier set
+
+                  // Convert to fractional chart index (hours * 2)
+                  const hoursToIndex = (time) => {
+                      const hours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
+                      return hours * 2;
+                  };
+                  skedStartIndex = hoursToIndex(skedStartTime);
+                  skedEndIndex = hoursToIndex(skedEndTime);
+              }
+          }
+      }
+
+      // Add extras if valid
+      if (skedStartIndex !== null) addExtraRel(skedStartIndex);
+      if (skedEndIndex !== null) addExtraRel(skedEndIndex);
+
+      // Sort all arrays by x for proper plotting
+      [relLibrations, relDopplers, polOffsets].forEach(arr => arr.sort((a, b) => a.x - b.x));
+
+      // Cache the sorted arrays (update relDayData to store {x,y} instead of flat arrays)
+      if (qthValid && dxValid && relDayData.date !== dateStr) {
+          relDayData.date = dateStr;
+          relDayData.libration = relLibrations;
+          relDayData.dopplers = relDopplers;
+          relDayData.polOffsets = polOffsets;
       } else if (qthValid && dxValid) {
-        relLibrations = relDayData.libration;
-        relDopplers = relDayData.dopplers;
-        polOffsets = relDayData.polOffsets;
+          relLibrations = relDayData.libration;
+          relDopplers = relDayData.dopplers;
+          polOffsets = relDayData.polOffsets;
       }
 
       const labels = Array(48).fill('').map((_, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
@@ -1799,8 +1901,22 @@
               maintainAspectRatio: false,
               scales: {
                 x: {
-                  title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
-                  ticks: { font: { size: 10 } }
+                  type: 'linear',
+                  min: 0,
+                  max: 47,
+                  title: {
+                    display: true,
+                    text: "Time (UTC)",
+                    font: { size: 10, family: 'Arial, sans-serif' }
+                  },
+                  ticks: {
+                    callback: function(value) {
+                      const hour = Math.floor(value / 2);
+                      const minute = (value % 2) * 30;
+                      return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                    },
+                    font: { size: 10 }
+                  }
                 },
                 y1: {
                   type: "linear",
@@ -1944,8 +2060,22 @@
               maintainAspectRatio: false,
               scales: {
                 x: {
-                  title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
-                  ticks: { font: { size: 10 } }
+                  type: 'linear',
+                  min: 0,
+                  max: 47,
+                  title: {
+                    display: true,
+                    text: "Time (UTC)",
+                    font: { size: 10, family: 'Arial, sans-serif' }
+                  },
+                  ticks: {
+                    callback: function(value) {
+                      const hour = Math.floor(value / 2);
+                      const minute = (value % 2) * 30;
+                      return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                    },
+                    font: { size: 10 }
+                  }
                 },
                 y1: {
                   type: "linear",
@@ -2087,8 +2217,22 @@
               maintainAspectRatio: false,
               scales: {
                 x: {
-                  title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
-                  ticks: { font: { size: 10 } }
+                  type: 'linear',
+                  min: 0,
+                  max: 47,
+                  title: {
+                    display: true,
+                    text: "Time (UTC)",
+                    font: { size: 10, family: 'Arial, sans-serif' }
+                  },
+                  ticks: {
+                    callback: function(value) {
+                      const hour = Math.floor(value / 2);
+                      const minute = (value % 2) * 30;
+                      return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                    },
+                    font: { size: 10 }
+                  }
                 },
                 y1: {
                   type: "linear",
