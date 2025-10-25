@@ -1732,9 +1732,9 @@
         const frac = index - floorIdx;
         const relFloor = computeRelativeAtIndex(floorIdx, qthDayData, dxData);
         const relCeil = computeRelativeAtIndex(ceilIdx, qthDayData, dxData);
-        currentRelRate = interpolate(relFloor.libration * 1000, relCeil.libration * 1000, frac);
-        currentRelDoppler = interpolate(relFloor.doppler, relCeil.doppler, frac);
-        currentPolOffset = interpolate(relFloor.pol, relCeil.pol, frac);
+        currentRelRate = getYAtX(relLibrations, index) ?? null;
+        currentRelDoppler = getYAtX(relDopplers, index) ?? null;
+        currentPolOffset = getYAtX(polOffsets, index) ?? null;
       }
 
       // Chart data from caches
