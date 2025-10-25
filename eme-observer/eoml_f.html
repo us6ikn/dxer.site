@@ -724,7 +724,7 @@
             <a href="user-guide.html" class="nav-button icon-button">?</a>
             <button id="toggleControlsPanel" class="nav-button">←</button>
           </div>
-          <input type="range" id="hour" min="0" max="47" value="0" step="1" />
+          <input type="range" id="hour" min="0" max="287" value="0" step="1" />
           <div class="locator-group">
             <div class="locator-input">
               <label for="qth">My Locator:</label>
@@ -809,8 +809,8 @@
 
     // Helper function to update hour-value display
     function updateHourDisplay() {
-        const hour = Math.floor(hourIndex / 2);
-        const minutes = (hourIndex % 2) * 30;
+        const hour = Math.floor(hourIndex / 12);
+        const minutes = (hourIndex % 12) * 5;
         document.getElementById('hour-value').textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
     }
 
@@ -903,9 +903,9 @@
         const day = date.getUTCDate();
 
         const results = [];
-        for (let i = 0; i < 48; i++) {
-            const hour = Math.floor(i / 2);
-            const minute = (i % 2) * 30;
+        for (let i = 0; i < 288; i++) {
+            const hour = Math.floor(i / 12);
+            const minute = (i % 12) * 5;
             const dt = new Date(Date.UTC(year, month - 1, day, hour, minute));
             const isoDate = dt.toISOString().replace('.000Z', '');
 
@@ -944,8 +944,8 @@
             }
 
             try {
-                const dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
-                const dlon = (arr[i+1].lon - arr[i-1].lon) / 60;
+                const dlat = (arr[i+1].lat - arr[i-1].lat) / 10;
+                const dlon = (arr[i+1].lon - arr[i-1].lon) / 10;
                 if (isNaN(dlat) || isNaN(dlon) || !isFinite(dlat) || !isFinite(dlon)) {
                     console.warn(`Invalid dlat/dlon for ${curr.date} at ${locator}: dlat=${dlat}, dlon=${dlon}`);
                     return { date: curr.date, rate: null, dldt: null, dbdt: null };
@@ -976,116 +976,45 @@
         }
         return librationRates;
     }
-    
-    function getLibrationAtIndex(libArray, targetX) {
-      const floor = Math.floor(targetX);
-      const ceil = Math.ceil(targetX);
-      if (floor < 0 || ceil > 47) return null;
-      const libFloor = libArray[floor];
-      const libCeil = libArray[ceil];
-      if (!libFloor || !libCeil || libFloor.rate == null || libCeil.rate == null) return null;
-      const frac = targetX - floor;
-      return {
-        dldt: interpolate(libFloor.dldt, libCeil.dldt, frac),
-        dbdt: interpolate(libFloor.dbdt, libCeil.dbdt, frac),
-        rate: interpolate(libFloor.rate, libCeil.rate, frac)
-      };
-    }
 
     function computeFullDayData(cache, locator, dateStr, isQth) {
-      const { lat: obsLat, lon: obsLon } = qthToLatLon(locator);
-      const libData = cache.libration;
-      const elevations = [];
-      const azimuths = [];
-      const dopplers = [];
-      const rates = [];
+        const { lat: obsLat, lon: obsLon } = qthToLatLon(locator);
+        const libData = cache.libration;
+        const elevations = [];
+        const azimuths = [];
+        const dopplers = [];
+        const rates = [];
 
-      const date = new Date(dateStr);
-      const year = date.getUTCFullYear();
-      const month = date.getUTCMonth() + 1;
-      const day = date.getUTCDate();
-      const observer = new Astronomy.Observer(obsLat, obsLon, 0);
-      const startDt = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
-      const astroStart = Astronomy.MakeTime(startDt);
+        for (let i = 0; i < 288; i++) {
+            const hour = Math.floor(i / 12);
+            const minutes = (i % 12) * 5;
+            const dt = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00Z`);
+            const observer = new Astronomy.Observer(obsLat, obsLon, 0);
+            const moonEq = Astronomy.Equator(Astronomy.Body.Moon, dt, observer, true, false);
+            const hor = Astronomy.Horizon(dt, observer, moonEq.ra, moonEq.dec, 'normal');
+            const elevationDeg = hor.altitude;
+            const azimuthDeg = hor.azimuth;
 
-      // Compute rise/set
-      let riseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, astroStart, 1.0);
-      let setEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, astroStart, 1.0);
+            let rate = libData[i]?.rate ?? null;
+            let doppler = null;
+            if (elevationDeg > 0 && rate != null) {
+                rates.push(rate * 1000);
+                const omegaRadSec = rate * (Math.PI / 180) / 10;
+                doppler = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
+            } else {
+                rates.push(null);
+                doppler = null;
+            }
 
-      // Regular 30-min points
-      for (let i = 0; i < 48; i++) {
-        const hour = Math.floor(i / 2);
-        const minute = (i % 2) * 30;
-        const dt = new Date(Date.UTC(year, month - 1, day, hour, minute));
-        const moonEq = Astronomy.Equator(Astronomy.Body.Moon, dt, observer, true, false);
-        const hor = Astronomy.Horizon(dt, observer, moonEq.ra, moonEq.dec, 'normal');
-        const elevationDeg = hor.altitude;
-        const azimuthDeg = hor.azimuth;
-
-        let rate = libData[i]?.rate ?? null;
-        let doppler = null;
-        if (elevationDeg >= 0 && rate != null) {  // Changed to >= 0
-          const omegaRadSec = rate * (Math.PI / 180) / 60;
-          doppler = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
-          rates.push({ x: i, y: rate * 1000 });
-        } else {
-          rates.push({ x: i, y: null });
+            elevations.push(elevationDeg > 0 ? elevationDeg : null);
+            azimuths.push(elevationDeg > 0 ? azimuthDeg : null);
+            dopplers.push(doppler);
         }
-        dopplers.push({ x: i, y: doppler });
-        elevations.push({ x: i, y: elevationDeg >= 0 ? elevationDeg : null });  // Changed to >= 0
-        azimuths.push({ x: i, y: elevationDeg >= 0 ? azimuthDeg : null });
-      }
 
-      // Function to add extra point
-      const addExtraPoint = (event) => {
-        if (event && event.date) {
-          const extraDt = event.date;
-          if (extraDt.getUTCFullYear() !== year || extraDt.getUTCMonth() + 1 !== month || extraDt.getUTCDate() !== day) return;
-
-          const extraHour = extraDt.getUTCHours();
-          const extraMin = extraDt.getUTCMinutes() + extraDt.getUTCSeconds() / 60;
-          const extraIndex = (extraHour + extraMin / 60) * 2;
-
-          // Skip if too close to existing point
-          const nearest = Math.round(extraIndex);
-          if (Math.abs(extraIndex - nearest) < 0.001) return;
-
-          // Compute az/el (el ~0)
-          const eq = Astronomy.Equator(Astronomy.Body.Moon, extraDt, observer, true, false);
-          const hor = Astronomy.Horizon(extraDt, observer, eq.ra, eq.dec, 'normal');
-          const azimuthExtra = hor.azimuth;
-
-          // Interpolate rate
-          const floor = Math.floor(extraIndex);
-          const ceil = Math.ceil(extraIndex);
-          const frac = extraIndex - floor;
-          const rateExtra = interpolate(libData[floor]?.rate, libData[ceil]?.rate, frac);
-
-          let rateY = null;
-          let dopplerY = null;
-          if (rateExtra != null) {
-            rateY = rateExtra * 1000;
-            const omegaRadSec = rateExtra * (Math.PI / 180) / 60;
-            dopplerY = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
-          }
-
-          elevations.push({ x: extraIndex, y: 0 });
-          azimuths.push({ x: extraIndex, y: azimuthExtra });
-          rates.push({ x: extraIndex, y: rateY });
-          dopplers.push({ x: extraIndex, y: dopplerY });
-        }
-      };
-
-      addExtraPoint(riseEvent);
-      addExtraPoint(setEvent);
-
-      // Sort all arrays by x
-      [elevations, azimuths, rates, dopplers].forEach(arr => arr.sort((a, b) => a.x - b.x));
-
-      cache.elevations = elevations;
-      cache.azimuths = azimuths;
-      cache.dopplers = dopplers;
-      cache.rates = rates;
+        cache.elevations = elevations;
+        cache.azimuths = azimuths;
+        cache.dopplers = dopplers;
+        cache.rates = rates;
     }
 
     function interpolate(a, b, frac) {
@@ -1093,49 +1022,48 @@
         return a + (b - a) * frac;
     }
 
-                                             function getYAtX(dataPoints, targetX) {
-                                               if (dataPoints.length === 0) return null;
-                                               let lower = null;
-                                               let upper = null;
-                                               for (let point of dataPoints) {
-                                                 if (point.x <= targetX && (lower === null || point.x > lower.x)) lower = point;
-                                                 if (point.x >= targetX && (upper === null || point.x < upper.x)) upper = point;
-                                               }
-                                               if (lower === null || upper === null) return null;
-                                               if (lower.x === targetX) return lower.y;
-                                               if (upper.x === targetX) return upper.y;
-                                               if (lower.y === null || upper.y === null) return null;
-                                               const frac = (targetX - lower.x) / (upper.x - lower.x);
-                                               return lower.y + frac * (upper.y - lower.y);
-                                             }
+    function getValueAtIndex(data, index) {
+        if (index < 0 || index > 287) return null;
+        const floorIdx = Math.floor(index);
+        const ceilIdx = Math.ceil(index);
+        const frac = index - floorIdx;
+        if (floorIdx === ceilIdx) return data[floorIdx];
+        return interpolate(data[floorIdx], data[ceilIdx], frac);
+    }
 
-                                             function computeRelativeAtIndex(idx, qthDayData, dxDayData) {  // Changed param to dxDayData
-                                               const qthElev = getYAtX(qthDayData.elevations, idx);
-                                               const dxElev = getYAtX(dxDayData.elevations, idx);  // Now dxDayData
-                                               if (qthElev < 0 || dxElev < 0) return { libration: null, doppler: null, pol: null };
+    function computeRelativeAtIndex(idx, qthData, dxData) {
+        const qthL = qthData.libration[idx];
+        const dxL = dxData.libration[idx];
+        if (!qthL || !dxL || qthL.dldt == null || dxL.dldt == null) {
+            return { libration: null, doppler: null, pol: null };
+        }
 
-                                               const qthL = getLibrationAtIndex(qthDayData.libration, idx);
-                                               const dxL = getLibrationAtIndex(dxDayData.libration, idx);  // Now dxDayData
-                                               if (!qthL || !dxL) return { libration: null, doppler: null, pol: null };
+        const qthElev = qthData.elevations[idx];
+        const dxElev = dxData.elevations[idx];
+        if (qthElev <= 0 || dxElev <= 0) {
+            return { libration: null, doppler: null, pol: null };
+        }
 
-                                               const dldt_sum = qthL.dldt + dxL.dldt;
-                                               const dbdt_sum = qthL.dbdt + dxL.dbdt;
-                                               const relLibration = Math.sqrt(dldt_sum * dldt_sum + dbdt_sum * dbdt_sum) / 2;
+        const dldt_sum = qthL.dldt + dxL.dldt;
+        const dbdt_sum = qthL.dbdt + dxL.dbdt;
+        const relLibration = Math.sqrt(dldt_sum * dldt_sum + dbdt_sum * dbdt_sum) / 2;
 
-                                               const omegaRadSec = relLibration * (Math.PI / 180) / 60;
-                                               const relDoppler = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
+        const omegaRadSec = relLibration * (Math.PI / 180) / 10;
+        const relDoppler = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
 
-                                               let pol = null;
-                                               const qthAz = getYAtX(qthDayData.azimuths, idx);
-                                               const dxAz = getYAtX(dxDayData.azimuths, idx);  // Now dxDayData
-                                               if (qthAz != null && dxAz != null) {
-                                                 const polQth = calcPoloffset(lat, qthAz, qthElev);
-                                                 const polDx = calcPoloffset(dxLat, dxAz, dxElev);
-                                                 pol = calcPoloffsetDiff(polQth, polDx);
-                                               }
+        // Pol offset
+        const qthAz = qthData.azimuths[idx];
+        const dxAz = dxData.azimuths[idx];
+        let pol = null;
+        if (qthAz != null && dxAz != null) {
+            const polQth = calcPoloffset(lat, qthAz, qthElev);
+            const polDx = calcPoloffset(dxLat, dxAz, dxElev);
+            pol = calcPoloffsetDiff(polQth, polDx);
+        }
 
-                                               return { libration: relLibration, doppler: relDoppler, pol };
-                                             }
+        return { libration: relLibration, doppler: relDoppler, pol };
+    }
+                                            
                                             function angularSeparation(ra1, dec1, ra2, dec2) {
                                                 const d1 = degToRad(dec1);
                                                 const d2 = degToRad(dec2);
@@ -1680,8 +1608,7 @@
           rawData = computeLibrationForDay(qthInput, dateStr, 'qth');
           computeFullDayData(qthDayData, qthInput, dateStr, true);
         }
-        qthValid = qthDayData.libration && qthDayData.libration.length > 0;  // Or >47 if want extras
-        // Same for dxValid
+        qthValid = qthDayData.libration.length === 288;
         try {
           ({ lat, lon } = qthToLatLon(qthInput));
         } catch (e) {
@@ -1697,7 +1624,7 @@
           dxRawData = computeLibrationForDay(dxInput, dateStr, 'dx');
           computeFullDayData(dxDayData, dxInput, dateStr, false);
         }
-        dxValid = dxDayData.libration.length === 48;
+        dxValid = dxDayData.libration.length === 288;
         try {
           ({ lat: dxLat, lon: dxLon } = qthToLatLon(dxInput));
         } catch (e) {
@@ -1710,127 +1637,67 @@
       // Get current values (interpolated if real-time)
       let currentElevQth = null, currentAzQth = null, currentRateQth = null, currentDopplerQth = null;
       if (qthValid) {
-        currentElevQth = getYAtX(qthDayData.elevations, index);
-        currentAzQth = getYAtX(qthDayData.azimuths, index);
-        currentRateQth = getYAtX(qthDayData.rates, index);
-        currentDopplerQth = getYAtX(qthDayData.dopplers, index);
+        currentElevQth = getValueAtIndex(qthDayData.elevations, index);
+        currentAzQth = getValueAtIndex(qthDayData.azimuths, index);
+        currentRateQth = getValueAtIndex(qthDayData.rates, index);
+        currentDopplerQth = getValueAtIndex(qthDayData.dopplers, index);
       }
 
       let currentElevDx = null, currentAzDx = null, currentRateDx = null, currentDopplerDx = null;
       if (dxValid) {
-        currentElevDx = getYAtX(dxDayData.elevations, index);
-        currentAzDx = getYAtX(dxDayData.azimuths, index);
-        currentRateDx = getYAtX(dxDayData.rates, index);
-        currentDopplerDx = getYAtX(dxDayData.dopplers, index);
+        currentElevDx = getValueAtIndex(dxDayData.elevations, index);
+        currentAzDx = getValueAtIndex(dxDayData.azimuths, index);
+        currentRateDx = getValueAtIndex(dxDayData.rates, index);
+        currentDopplerDx = getValueAtIndex(dxDayData.dopplers, index);
       }
 
       // Relative current
       let currentRelRate = null, currentRelDoppler = null, currentPolOffset = null;
       if (qthValid && dxValid) {
-          currentRelRate = getYAtX(relLibrations, index) ?? null;
-            currentRelDoppler = getYAtX(relDopplers, index) ?? null;
-            currentPolOffset = getYAtX(polOffsets, index) ?? null;
-        currentRelDoppler = getYAtX(relDopplers, index) ?? null;
-        currentPolOffset = getYAtX(polOffsets, index) ?? null;
+        const floorIdx = Math.floor(index);
+        const ceilIdx = Math.ceil(index);
+        const frac = index - floorIdx;
+        const relFloor = computeRelativeAtIndex(floorIdx, qthDayData, dxDayData);
+        const relCeil = computeRelativeAtIndex(ceilIdx, qthDayData, dxDayData);
+        currentRelRate = interpolate(relFloor.libration * 1000, relCeil.libration * 1000, frac);
+        currentRelDoppler = interpolate(relFloor.doppler, relCeil.doppler, frac);
+        currentPolOffset = interpolate(relFloor.pol, relCeil.pol, frac);
       }
 
       // Chart data from caches
-      const qthRates = qthDayData.rates || [];  // Empty array, not fill(null)
-      const qthElevs = qthDayData.elevations || [];
-      const qthDopps = qthDayData.dopplers || [];
+      const qthRates = qthDayData.rates || Array(288).fill(null);
+      const qthElevs = qthDayData.elevations || Array(288).fill(null);
+      const qthDopps = qthDayData.dopplers || Array(288).fill(null);
 
-      const dxRates = dxDayData.rates || [];
-      const dxElevs = dxDayData.elevations || [];
-      const dxDopps = dxDayData.dopplers || [];
+      const dxRates = dxDayData.rates || Array(288).fill(null);
+      const dxElevs = dxDayData.elevations || Array(288).fill(null);
+      const dxDopps = dxDayData.dopplers || Array(288).fill(null);
 
-      // Build relative data as {x, y} arrays (supports fractional x for extras)
-      let relLibrations = [];
-      let relDopplers = [];
-      let polOffsets = [];
-
-      // Standard 48 points (every 30 min)
-      for (let i = 0; i < 48; i++) {
-          const rel = computeRelativeAtIndex(i, qthDayData, dxDayData);
-          relLibrations.push({ x: i, y: rel.libration ? rel.libration * 1000 : null });
-          relDopplers.push({ x: i, y: rel.doppler });
-          polOffsets.push({ x: i, y: rel.pol });
-      }
-
-      // Helper to add extra point (only if valid and not too close to standard)
-      const addExtraRel = (pointIndex) => {
-          if (!Number.isFinite(pointIndex)) return;  // Skip invalid indices
-          const nearestStandard = Math.round(pointIndex);
-          if (Math.abs(pointIndex - nearestStandard) < 0.001) return;  // Too close, skip
-
-          const rel = computeRelativeAtIndex(pointIndex, qthDayData, dxDayData);
-          relLibrations.push({ x: pointIndex, y: rel.libration ? rel.libration * 1000 : null });
-          relDopplers.push({ x: pointIndex, y: rel.doppler });
-          polOffsets.push({ x: pointIndex, y: rel.pol });
-      };
-
-      // Compute sked start/end indices (reuse logic from getSkedAnnotations)
-      let skedStartIndex = null;
-      let skedEndIndex = null;
-      if (qthValid && dxValid) {
-          const observerQth = new Astronomy.Observer(lat, lon, 0);  // Use global lat/lon
-          const observerDx = new Astronomy.Observer(dxLat, dxLon, 0);
-          const jsDate = new Date(`${dateStr}T00:00:00Z`);
-          const astroTime = Astronomy.MakeTime(jsDate);
-
-          let qthRiseEvent = null, qthSetEvent = null, dxRiseEvent = null, dxSetEvent = null;
-          try {
-              qthRiseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observerQth, +1, astroTime, 1.0);
-              qthSetEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observerQth, -1, astroTime, 1.0);
-              dxRiseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observerDx, +1, astroTime, 1.0);
-              dxSetEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observerDx, -1, astroTime, 1.0);
-          } catch (e) {
-              console.warn(`Error calculating sked rise/set: ${e.message}`);
-          }
-
-          if (qthRiseEvent?.date && qthSetEvent?.date && dxRiseEvent?.date && dxSetEvent?.date) {
-              const qthRise = qthRiseEvent.date;
-              const qthSet = qthSetEvent.date;
-              const dxRise = dxRiseEvent.date;
-              const dxSet = dxSetEvent.date;
-
-              // Check if all on target day
-              const targetDateStr = dateStr;
-              const isSameDay = (d) => d.toISOString().slice(0, 10) === targetDateStr;
-              if (isSameDay(qthRise) && isSameDay(qthSet) && isSameDay(dxRise) && isSameDay(dxSet)) {
-                  const skedStartTime = qthRise > dxRise ? qthRise : dxRise;  // Later rise
-                  const skedEndTime = qthSet < dxSet ? qthSet : dxSet;         // Earlier set
-
-                  // Convert to fractional chart index (hours * 2)
-                  const hoursToIndex = (time) => {
-                      const hours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
-                      return hours * 2;
-                  };
-                  skedStartIndex = hoursToIndex(skedStartTime);
-                  skedEndIndex = hoursToIndex(skedEndTime);
-              }
-          }
-      }
-
-      // Add extras if valid
-      if (skedStartIndex !== null) addExtraRel(skedStartIndex);
-      if (skedEndIndex !== null) addExtraRel(skedEndIndex);
-
-      // Sort all arrays by x for proper plotting
-      [relLibrations, relDopplers, polOffsets].forEach(arr => arr.sort((a, b) => a.x - b.x));
-
-      // Cache the sorted arrays (update relDayData to store {x,y} instead of flat arrays)
+      let relLibrations = Array(288).fill(null);
+      let relDopplers = Array(288).fill(null);
+      let polOffsets = Array(288).fill(null);
       if (qthValid && dxValid && relDayData.date !== dateStr) {
-          relDayData.date = dateStr;
-          relDayData.libration = relLibrations;
-          relDayData.dopplers = relDopplers;
-          relDayData.polOffsets = polOffsets;
+        for (let i = 0; i < 288; i++) {
+          const rel = computeRelativeAtIndex(i, qthDayData, dxDayData);
+          relLibrations[i] = rel.libration ? rel.libration * 1000 : null;
+          relDopplers[i] = rel.doppler;
+          polOffsets[i] = rel.pol;
+        }
+        relDayData.date = dateStr;
+        relDayData.libration = relLibrations;
+        relDayData.dopplers = relDopplers;
+        relDayData.polOffsets = polOffsets;
       } else if (qthValid && dxValid) {
-          relLibrations = relDayData.libration;
-          relDopplers = relDayData.dopplers;
-          polOffsets = relDayData.polOffsets;
+        relLibrations = relDayData.libration;
+        relDopplers = relDayData.dopplers;
+        polOffsets = relDayData.polOffsets;
       }
 
-      const labels = Array(48).fill('').map((_, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
+      const labels = Array(288).fill('').map((_, i) => {
+          const hour = Math.floor(i / 12);
+          const minutes = (i % 12) * 5;
+          return `${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+      });
 
       const qthAnnotation = {
         timeMarker: {
@@ -1860,6 +1727,7 @@
           chart = new Chart(document.getElementById("declinationChart"), {
             type: 'line',
             data: {
+              labels,
               datasets: [
                 {
                   label: "Libration Rate (×10⁻³ °/min)",
@@ -1897,22 +1765,8 @@
               maintainAspectRatio: false,
               scales: {
                 x: {
-                  type: 'linear',
-                  min: 0,
-                  max: 47,
-                  title: {
-                    display: true,
-                    text: "Time (UTC)",
-                    font: { size: 10, family: 'Arial, sans-serif' }
-                  },
-                  ticks: {
-                    callback: function(value) {
-                      const hour = Math.floor(value / 2);
-                      const minute = (value % 2) * 30;
-                      return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-                    },
-                    font: { size: 10 }
-                  }
+                  title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
+                  ticks: { font: { size: 10 } }
                 },
                 y1: {
                   type: "linear",
@@ -2018,6 +1872,7 @@
           dxChart = new Chart(document.getElementById("dxDeclinationChart"), {
             type: 'line',
             data: {
+              labels,
               datasets: [
                 {
                   label: "Libration Rate (×10⁻³ °/min)",
@@ -2055,22 +1910,8 @@
               maintainAspectRatio: false,
               scales: {
                 x: {
-                  type: 'linear',
-                  min: 0,
-                  max: 47,
-                  title: {
-                    display: true,
-                    text: "Time (UTC)",
-                    font: { size: 10, family: 'Arial, sans-serif' }
-                  },
-                  ticks: {
-                    callback: function(value) {
-                      const hour = Math.floor(value / 2);
-                      const minute = (value % 2) * 30;
-                      return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-                    },
-                    font: { size: 10 }
-                  }
+                  title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
+                  ticks: { font: { size: 10 } }
                 },
                 y1: {
                   type: "linear",
@@ -2169,7 +2010,7 @@
         }
       }
 
-      if (qthValid && dxValid && relLibrations.some(p => p.y != null)) {
+      if (qthValid && dxValid && relLibrations.some(r => r != null)) {
         document.getElementById("relativeChartWrapper").style.display = "block";
 
         if (!relativeChart) {
@@ -2212,22 +2053,8 @@
               maintainAspectRatio: false,
               scales: {
                 x: {
-                  type: 'linear',
-                  min: 0,
-                  max: 47,
-                  title: {
-                    display: true,
-                    text: "Time (UTC)",
-                    font: { size: 10, family: 'Arial, sans-serif' }
-                  },
-                  ticks: {
-                    callback: function(value) {
-                      const hour = Math.floor(value / 2);
-                      const minute = (value % 2) * 30;
-                      return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-                    },
-                    font: { size: 10 }
-                  }
+                  title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
+                  ticks: { font: { size: 10 } }
                 },
                 y1: {
                   type: "linear",
@@ -2303,7 +2130,7 @@
       }
 
       // Update map and moon chart with exact time
-      const exactTime = isRealtime ? new Date() : new Date(`${dateStr}T${Math.floor(index / 2).toString().padStart(2, '0')}:${String((index % 2) * 30).padStart(2, '0')}:00Z`);
+      const exactTime = isRealtime ? new Date() : new Date(`${dateStr}T${Math.floor(index / 12).toString().padStart(2, '0')}:${String((index % 12) * 5).padStart(2, '0')}:00Z`);
       updateMap(exactTime);
       updateMoonChart(exactTime);
     }
@@ -2349,7 +2176,7 @@
 
                                                 const hour = now.getUTCHours();
                                                 const minute = now.getUTCMinutes();
-                                                const fractionalIndex = hour * 2 + (minute / 30);
+                                                const fractionalIndex = hour * 12 + (minute / 5);
                                                 const displayHour = String(hour).padStart(2, '0');
                                                 const displayMin = String(minute).padStart(2, '0');
                                                 document.getElementById('hour-value').textContent = `Time (UTC): ${displayHour}:${displayMin}`;
@@ -2731,12 +2558,12 @@
             const riseDateStr = riseDate.toISOString().slice(0, 10);
             if (riseDateStr === targetDateStr) {
                 let index = timeToChartIndex(riseDate);
-                const isLate = riseDate.getUTCHours() >= 23 && riseDate.getUTCMinutes() >= 30;
+                const isLate = riseDate.getUTCHours() >= 23 && riseDate.getUTCMinutes() >= 55;
                 annotations['moonrise'] = {
                     type: 'line',
                     mode: 'vertical',
                     scaleID: 'x',
-                    value: isLate ? 47 : index,
+                    value: isLate ? 287 : index,
                     borderColor: 'blue',
                     borderWidth: 1,
                     label: {
@@ -2763,12 +2590,12 @@
             const setDateStr = setDate.toISOString().slice(0, 10);
             if (setDateStr === targetDateStr) {
                 let index = timeToChartIndex(setDate);
-                const isLate = setDate.getUTCHours() >= 23 && setDate.getUTCMinutes() >= 30;
+                const isLate = setDate.getUTCHours() >= 23 && setDate.getUTCMinutes() >= 55;
                 annotations['moonset'] = {
                     type: 'line',
                     mode: 'vertical',
                     scaleID: 'x',
-                    value: isLate ? 47 : index,
+                    value: isLate ? 287 : index,
                     borderColor: 'orange',
                     borderWidth: 1,
                     label: {
@@ -2796,10 +2623,10 @@
     function timeToChartIndex(date) {
         if (!(date instanceof Date)) throw new Error("Expected a Date object");
         let hours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
-        if (hours >= 23.5) {
-            hours = 23.5;
+        if (hours >= 23.9167) {
+            hours = 23.9167;
         }
-        return hours * 2;
+        return hours * 12;
     }
 
     function getSkedAnnotations(dateStr, qthLat, qthLon, dxLat, dxLon) {
@@ -2830,9 +2657,9 @@
         function timeToChartIndex(date) {
             if (!(date instanceof Date)) return null;
             const hours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
-            let index = Math.round(hours * 2);
+            let index = Math.round(hours * 12);
             if (index < 0) index = 0;
-            if (index > 47) index = 47;
+            if (index > 287) index = 287;
             return index;
         }
 
@@ -2860,8 +2687,8 @@
 
     document.getElementById("hour").addEventListener("input", () => {
         hourIndex = parseInt(document.getElementById("hour").value);
-        const hour = Math.floor(hourIndex / 2);
-        const minutes = (hourIndex % 2) * 30;
+        const hour = Math.floor(hourIndex / 12);
+        const minutes = (hourIndex % 12) * 5;
         document.getElementById("hour-value").textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
         updateChart(hourIndex, false);
     });
@@ -2911,10 +2738,10 @@
                                                 document.getElementById('date').value = utcDate.toISOString().slice(0,10);
 
                                                 let roundedHour = utcHours;
-                                                let roundedMinutes = utcMinutes >= 15 && utcMinutes < 45 ? 30 : 0;
-                                                if (utcMinutes >= 45) {
-                                                    roundedHour += 1;
+                                                let roundedMinutes = Math.round(utcMinutes / 5) * 5;
+                                                if (roundedMinutes >= 60) {
                                                     roundedMinutes = 0;
+                                                    roundedHour += 1;
                                                 }
                                                 if (roundedHour >= 24) {
                                                     roundedHour -= 24;
@@ -2923,7 +2750,7 @@
                                                     document.getElementById('date').value = utcDate.toISOString().slice(0,10);
                                                 }
 
-                                                hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
+                                                hourIndex = roundedHour * 12 + (roundedMinutes / 5);
                                                 document.getElementById('hour').value = hourIndex;
                                                 document.getElementById('hour-value').textContent =
                                                     `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${String(roundedMinutes).padStart(2, '0')}`;
