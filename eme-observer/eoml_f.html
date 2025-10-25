@@ -980,6 +980,36 @@
     function computeFullDayData(cache, locator, dateStr, isQth) {
         const { lat: obsLat, lon: obsLon } = qthToLatLon(locator);
         const libData = cache.libration;
+        const observer = new Astronomy.Observer(obsLat, obsLon, 0);
+        const jsDate = new Date(`${dateStr}T00:00:00Z`);
+        const astroTime = Astronomy.MakeTime(jsDate);
+
+        let riseEvent = null, setEvent = null;
+        try {
+            riseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, astroTime, 1.0);
+        } catch (e) {
+            console.warn(`Error calculating moonrise for ${dateStr}: ${e.message}`);
+        }
+        try {
+            setEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, astroTime, 1.0);
+        } catch (e) {
+            console.warn(`Error calculating moonset for ${dateStr}: ${e.message}`);
+        }
+
+        let riseTime = null, setTime = null;
+        if (riseEvent && riseEvent.date) {
+            const riseDateStr = riseEvent.date.toISOString().slice(0, 10);
+            if (riseDateStr === dateStr) {
+                riseTime = riseEvent.date;
+            }
+        }
+        if (setEvent && setEvent.date) {
+            const setDateStr = setEvent.date.toISOString().slice(0, 10);
+            if (setDateStr === dateStr) {
+                setTime = setEvent.date;
+            }
+        }
+
         const elevations = [];
         const azimuths = [];
         const dopplers = [];
@@ -988,16 +1018,24 @@
         for (let i = 0; i < 48; i++) {
             const hour = Math.floor(i / 2);
             const minutes = (i % 2) * 30;
-            const dt = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00Z`);
-            const observer = new Astronomy.Observer(obsLat, obsLon, 0);
-            const moonEq = Astronomy.Equator(Astronomy.Body.Moon, dt, observer, true, false);
-            const hor = Astronomy.Horizon(dt, observer, moonEq.ra, moonEq.dec, 'normal');
+            let dt = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00Z`);
+            let calcTime = dt;
+
+            if (riseTime && i === Math.floor(timeToChartIndex(riseTime))) {
+                calcTime = riseTime;
+            }
+            if (setTime && i === Math.ceil(timeToChartIndex(setTime))) {
+                calcTime = setTime;
+            }
+
+            const moonEq = Astronomy.Equator(Astronomy.Body.Moon, calcTime, observer, true, false);
+            const hor = Astronomy.Horizon(calcTime, observer, moonEq.ra, moonEq.dec, 'normal');
             const elevationDeg = hor.altitude;
             const azimuthDeg = hor.azimuth;
 
             let rate = libData[i]?.rate ?? null;
             let doppler = null;
-            if (elevationDeg >= 0 && rate != null) {
+            if (elevationDeg > 0 && rate != null) {
                 rates.push(rate * 1000);
                 const omegaRadSec = rate * (Math.PI / 180) / 60;
                 doppler = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
@@ -1006,8 +1044,8 @@
                 doppler = null;
             }
 
-            elevations.push(elevationDeg >= 0 ? elevationDeg : null);
-            azimuths.push(elevationDeg >= 0 ? azimuthDeg : null);
+            elevations.push(elevationDeg > 0 ? elevationDeg : null);
+            azimuths.push(elevationDeg > 0 ? azimuthDeg : null);
             dopplers.push(doppler);
         }
 
@@ -1040,7 +1078,7 @@
 
         const qthElev = qthData.elevations[idx];
         const dxElev = dxData.elevations[idx];
-        if (qthElev < 0 || dxElev < 0) {
+        if (qthElev <= 0 || dxElev <= 0) {
             return { libration: null, doppler: null, pol: null };
         }
 
@@ -1179,6 +1217,9 @@
                                                             weight: 2
                                                         }).addTo(map);
                                                     }
+
+                                                    // Keep map centered on sublunar point
+                                                    map.panTo([lat, lon]);
 
                                                 } catch (error) {
                                                     console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
@@ -1654,8 +1695,8 @@
         const floorIdx = Math.floor(index);
         const ceilIdx = Math.ceil(index);
         const frac = index - floorIdx;
-        const relFloor = computeRelativeAtIndex(floorIdx, qthDayData, dxDayData);
-        const relCeil = computeRelativeAtIndex(ceilIdx, qthDayData, dxDayData);
+        const relFloor = computeRelativeAtIndex(floorIdx, qthDayData, dxData);
+        const relCeil = computeRelativeAtIndex(ceilIdx, qthDayData, dxData);
         currentRelRate = interpolate(relFloor.libration * 1000, relCeil.libration * 1000, frac);
         currentRelDoppler = interpolate(relFloor.doppler, relCeil.doppler, frac);
         currentPolOffset = interpolate(relFloor.pol, relCeil.pol, frac);
@@ -1690,6 +1731,8 @@
         polOffsets = relDayData.polOffsets;
       }
 
+      const labels = Array(48).fill('').map((_, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
+
       const qthAnnotation = {
         timeMarker: {
           type: 'line',
@@ -1714,74 +1757,15 @@
       if (qthValid) {
         document.getElementById("chartWrapper").style.display = "block";
 
-        // Prepare data points including fractional for moonrise/moonset
-        let dataPoints = Array.from({length: 48}, (_, i) => i);
-        const jsDate = new Date(`${dateStr}T00:00:00Z`);
-        const astroTime = Astronomy.MakeTime(jsDate);
-        const observer = new Astronomy.Observer(lat, lon, 0);
-        const riseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, astroTime, 1.0);
-        const setEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, astroTime, 1.0);
-        if (riseEvent && riseEvent.date.toISOString().slice(0,10) === dateStr) {
-          const hours = riseEvent.date.getUTCHours() + riseEvent.date.getUTCMinutes()/60 + riseEvent.date.getUTCSeconds()/3600;
-          const riseIndex = hours * 2;
-          if (!Number.isInteger(riseIndex)) {
-            dataPoints.push(riseIndex);
-          }
-        }
-        if (setEvent && setEvent.date.toISOString().slice(0,10) === dateStr) {
-          const hours = setEvent.date.getUTCHours() + setEvent.date.getUTCMinutes()/60 + setEvent.date.getUTCSeconds()/3600;
-          const setIndex = hours * 2;
-          if (!Number.isInteger(setIndex)) {
-            dataPoints.push(setIndex);
-          }
-        }
-        dataPoints = [...new Set(dataPoints)].sort((a,b) => a - b);
-
-        // Build datasets with {x, y}
-        const rateData = [];
-        const elevData = [];
-        const doppData = [];
-        for (const idx of dataPoints) {
-          let el = getValueAtIndex(qthElevs, idx);
-          let az = getValueAtIndex(qthDayData.azimuths, idx);
-          let rate = getValueAtIndex(qthRates, idx);
-          let dopp = getValueAtIndex(qthDopps, idx);
-
-          // For fractional points, recompute exact el/az
-          if (!Number.isInteger(idx)) {
-            const hoursTotal = idx / 2;
-            const hour = Math.floor(hoursTotal);
-            const minTotal = (hoursTotal - hour) * 60;
-            const min = Math.floor(minTotal);
-            const sec = Math.round((minTotal - min) * 60);
-            const dt = new Date(Date.UTC(jsDate.getUTCFullYear(), jsDate.getUTCMonth(), jsDate.getUTCDate(), hour, min, sec));
-            const moonEq = Astronomy.Equator(Astronomy.Body.Moon, dt, observer, true, false);
-            const hor = Astronomy.Horizon(dt, observer, moonEq.ra, moonEq.dec, 'normal');
-            el = hor.altitude;
-            if (Math.abs(el) < 1e-6) el = 0;
-            az = hor.azimuth;
-          }
-
-          let pushRate = null, pushDopp = null;
-          if (el >= 0 && rate != null) {
-            pushRate = rate;
-            const omegaRadSec = (rate / 1000) * (Math.PI / 180) / 60;
-            pushDopp = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
-          }
-
-          rateData.push({x: idx, y: pushRate});
-          elevData.push({x: idx, y: el >= 0 ? el : null});
-          doppData.push({x: idx, y: pushDopp});
-        }
-
         if (!chart) {
           chart = new Chart(document.getElementById("declinationChart"), {
             type: 'line',
             data: {
+              labels,
               datasets: [
                 {
                   label: "Libration Rate (×10⁻³ °/min)",
-                  data: rateData,
+                  data: qthRates,
                   borderColor: "#ff0000",
                   pointRadius: 0,
                   borderWidth: 1.5,
@@ -1790,7 +1774,7 @@
                 },
                 {
                   label: "Moon Elevation (°)",
-                  data: elevData,
+                  data: qthElevs,
                   borderColor: "rgba(0, 0, 255, 0.6)",
                   backgroundColor: "rgba(0, 0, 255, 0.15)",
                   fill: { target: { value: 0 }, above: 'rgba(0, 0, 255, 0.15)' },
@@ -1801,7 +1785,7 @@
                 },
                 {
                   label: "Doppler Spread, Hz",
-                  data: doppData,
+                  data: qthDopps,
                   borderColor: "green",
                   pointRadius: 0,
                   borderWidth: 1.5,
@@ -1815,22 +1799,8 @@
               maintainAspectRatio: false,
               scales: {
                 x: {
-                  type: 'linear',
-                  min: 0,
-                  max: 47,
                   title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
-                  ticks: {
-                    callback: function(value) {
-                      if (Number.isInteger(value)) {
-                        const hour = Math.floor(value / 2);
-                        const min = (value % 2 === 0) ? '00' : '30';
-                        return `${hour}:${min}`;
-                      }
-                      return null;
-                    },
-                    stepSize: 1,
-                    font: { size: 10 }
-                  }
+                  ticks: { font: { size: 10 } }
                 },
                 y1: {
                   type: "linear",
@@ -1877,9 +1847,10 @@
             }
           });
         } else {
-          chart.data.datasets[0].data = rateData;
-          chart.data.datasets[1].data = elevData;
-          chart.data.datasets[2].data = doppData;
+          chart.data.labels = labels;
+          chart.data.datasets[0].data = qthRates;
+          chart.data.datasets[1].data = qthElevs;
+          chart.data.datasets[2].data = qthDopps;
           chart.options.plugins.annotation.annotations = qthAnnotation;
           chart.options.plugins.annotation.annotations.timeMarker.value = index;
           chart.options.scales.y3.max = maxDoppler;
@@ -1931,74 +1902,15 @@
       if (dxValid) {
         document.getElementById("dxChartWrapper").style.display = "block";
 
-        // Prepare data points including fractional for moonrise/moonset
-        let dataPoints = Array.from({length: 48}, (_, i) => i);
-        const jsDate = new Date(`${dateStr}T00:00:00Z`);
-        const astroTime = Astronomy.MakeTime(jsDate);
-        const observer = new Astronomy.Observer(dxLat, dxLon, 0);
-        const riseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, astroTime, 1.0);
-        const setEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, astroTime, 1.0);
-        if (riseEvent && riseEvent.date.toISOString().slice(0,10) === dateStr) {
-          const hours = riseEvent.date.getUTCHours() + riseEvent.date.getUTCMinutes()/60 + riseEvent.date.getUTCSeconds()/3600;
-          const riseIndex = hours * 2;
-          if (!Number.isInteger(riseIndex)) {
-            dataPoints.push(riseIndex);
-          }
-        }
-        if (setEvent && setEvent.date.toISOString().slice(0,10) === dateStr) {
-          const hours = setEvent.date.getUTCHours() + setEvent.date.getUTCMinutes()/60 + setEvent.date.getUTCSeconds()/3600;
-          const setIndex = hours * 2;
-          if (!Number.isInteger(setIndex)) {
-            dataPoints.push(setIndex);
-          }
-        }
-        dataPoints = [...new Set(dataPoints)].sort((a,b) => a - b);
-
-        // Build datasets with {x, y}
-        const rateData = [];
-        const elevData = [];
-        const doppData = [];
-        for (const idx of dataPoints) {
-          let el = getValueAtIndex(dxElevs, idx);
-          let az = getValueAtIndex(dxDayData.azimuths, idx);
-          let rate = getValueAtIndex(dxRates, idx);
-          let dopp = getValueAtIndex(dxDopps, idx);
-
-          // For fractional points, recompute exact el/az
-          if (!Number.isInteger(idx)) {
-            const hoursTotal = idx / 2;
-            const hour = Math.floor(hoursTotal);
-            const minTotal = (hoursTotal - hour) * 60;
-            const min = Math.floor(minTotal);
-            const sec = Math.round((minTotal - min) * 60);
-            const dt = new Date(Date.UTC(jsDate.getUTCFullYear(), jsDate.getUTCMonth(), jsDate.getUTCDate(), hour, min, sec));
-            const moonEq = Astronomy.Equator(Astronomy.Body.Moon, dt, observer, true, false);
-            const hor = Astronomy.Horizon(dt, observer, moonEq.ra, moonEq.dec, 'normal');
-            el = hor.altitude;
-            if (Math.abs(el) < 1e-6) el = 0;
-            az = hor.azimuth;
-          }
-
-          let pushRate = null, pushDopp = null;
-          if (el >= 0 && rate != null) {
-            pushRate = rate;
-            const omegaRadSec = (rate / 1000) * (Math.PI / 180) / 60;
-            pushDopp = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
-          }
-
-          rateData.push({x: idx, y: pushRate});
-          elevData.push({x: idx, y: el >= 0 ? el : null});
-          doppData.push({x: idx, y: pushDopp});
-        }
-
         if (!dxChart) {
           dxChart = new Chart(document.getElementById("dxDeclinationChart"), {
             type: 'line',
             data: {
+              labels,
               datasets: [
                 {
                   label: "Libration Rate (×10⁻³ °/min)",
-                  data: rateData,
+                  data: dxRates,
                   borderColor: "#ff0000",
                   pointRadius: 0,
                   borderWidth: 1.5,
@@ -2007,7 +1919,7 @@
                 },
                 {
                   label: "Moon Elevation (°)",
-                  data: elevData,
+                  data: dxElevs,
                   borderColor: "rgba(0, 0, 255, 0.6)",
                   backgroundColor: "rgba(0, 0, 255, 0.15)",
                   fill: { target: { value: 0 }, above: 'rgba(0, 0, 255, 0.15)' },
@@ -2018,7 +1930,7 @@
                 },
                 {
                   label: "Doppler Spread, Hz",
-                  data: doppData,
+                  data: dxDopps,
                   borderColor: "green",
                   pointRadius: 0,
                   borderWidth: 1.5,
@@ -2032,22 +1944,8 @@
               maintainAspectRatio: false,
               scales: {
                 x: {
-                  type: 'linear',
-                  min: 0,
-                  max: 47,
                   title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
-                  ticks: {
-                    callback: function(value) {
-                      if (Number.isInteger(value)) {
-                        const hour = Math.floor(value / 2);
-                        const min = (value % 2 === 0) ? '00' : '30';
-                        return `${hour}:${min}`;
-                      }
-                      return null;
-                    },
-                    stepSize: 1,
-                    font: { size: 10 }
-                  }
+                  ticks: { font: { size: 10 } }
                 },
                 y1: {
                   type: "linear",
@@ -2094,9 +1992,10 @@
             }
           });
         } else {
-          dxChart.data.datasets[0].data = rateData;
-          dxChart.data.datasets[1].data = elevData;
-          dxChart.data.datasets[2].data = doppData;
+          dxChart.data.labels = labels;
+          dxChart.data.datasets[0].data = dxRates;
+          dxChart.data.datasets[1].data = dxElevs;
+          dxChart.data.datasets[2].data = dxDopps;
           dxChart.options.plugins.annotation.annotations = dxAnnotation;
           dxChart.options.plugins.annotation.annotations.timeMarker.value = index;
           dxChart.options.scales.y3.max = maxDoppler;
@@ -2148,101 +2047,15 @@
       if (qthValid && dxValid && relLibrations.some(r => r != null)) {
         document.getElementById("relativeChartWrapper").style.display = "block";
 
-        // Prepare data points including fractional for sked start/end
-        let dataPoints = Array.from({length: 48}, (_, i) => i);
-        const jsDate = new Date(`${dateStr}T00:00:00Z`);
-        const astroTime = Astronomy.MakeTime(jsDate);
-        const qthObserver = new Astronomy.Observer(lat, lon, 0);
-        const dxObserver = new Astronomy.Observer(dxLat, dxLon, 0);
-        const qthRise = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObserver, +1, astroTime, 1.0);
-        const qthSet = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObserver, -1, astroTime, 1.0);
-        const dxRise = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObserver, +1, astroTime, 1.0);
-        const dxSet = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObserver, -1, astroTime, 1.0);
-        let skedStartIndex = null, skedEndIndex = null;
-        if (qthRise && qthSet && dxRise && dxSet &&
-            qthRise.date.toISOString().slice(0,10) === dateStr &&
-            qthSet.date.toISOString().slice(0,10) === dateStr &&
-            dxRise.date.toISOString().slice(0,10) === dateStr &&
-            dxSet.date.toISOString().slice(0,10) === dateStr) {
-          const qthRiseTime = qthRise.date;
-          const dxRiseTime = dxRise.date;
-          const skedStartTime = qthRiseTime > dxRiseTime ? qthRiseTime : dxRiseTime;
-          const hoursStart = skedStartTime.getUTCHours() + skedStartTime.getUTCMinutes()/60 + skedStartTime.getUTCSeconds()/3600;
-          skedStartIndex = hoursStart * 2;
-          if (!Number.isInteger(skedStartIndex)) {
-            dataPoints.push(skedStartIndex);
-          }
-
-          const qthSetTime = qthSet.date;
-          const dxSetTime = dxSet.date;
-          const skedEndTime = qthSetTime < dxSetTime ? qthSetTime : dxSetTime;
-          const hoursEnd = skedEndTime.getUTCHours() + skedEndTime.getUTCMinutes()/60 + skedEndTime.getUTCSeconds()/3600;
-          skedEndIndex = hoursEnd * 2;
-          if (!Number.isInteger(skedEndIndex)) {
-            dataPoints.push(skedEndIndex);
-          }
-        }
-        dataPoints = [...new Set(dataPoints)].sort((a,b) => a - b);
-
-        // Build datasets with {x, y}
-        const relLibData = [];
-        const relDoppData = [];
-        const polData = [];
-        for (const idx of dataPoints) {
-          let qthEl = getValueAtIndex(qthDayData.elevations, idx);
-          let dxEl = getValueAtIndex(dxDayData.elevations, idx);
-          let qthAz = getValueAtIndex(qthDayData.azimuths, idx);
-          let dxAz = getValueAtIndex(dxDayData.azimuths, idx);
-
-          // For fractional points, recompute exact els/azs
-          if (!Number.isInteger(idx)) {
-            const hoursTotal = idx / 2;
-            const hour = Math.floor(hoursTotal);
-            const minTotal = (hoursTotal - hour) * 60;
-            const min = Math.floor(minTotal);
-            const sec = Math.round((minTotal - min) * 60);
-            const dt = new Date(Date.UTC(jsDate.getUTCFullYear(), jsDate.getUTCMonth(), jsDate.getUTCDate(), hour, min, sec));
-
-            // QTH
-            const qthMoonEq = Astronomy.Equator(Astronomy.Body.Moon, dt, qthObserver, true, false);
-            const qthHor = Astronomy.Horizon(dt, qthObserver, qthMoonEq.ra, qthMoonEq.dec, 'normal');
-            qthEl = qthHor.altitude;
-            if (Math.abs(qthEl) < 1e-6) qthEl = 0;
-            qthAz = qthHor.azimuth;
-
-            // DX
-            const dxMoonEq = Astronomy.Equator(Astronomy.Body.Moon, dt, dxObserver, true, false);
-            const dxHor = Astronomy.Horizon(dt, dxObserver, dxMoonEq.ra, dxMoonEq.dec, 'normal');
-            dxEl = dxHor.altitude;
-            if (Math.abs(dxEl) < 1e-6) dxEl = 0;
-            dxAz = dxHor.azimuth;
-          }
-
-          let relLib = null, relDopp = null, pol = null;
-          if (qthEl >= 0 && dxEl >= 0) {
-            const rel = computeRelativeAtIndex(idx, qthDayData, dxDayData);
-            relLib = rel.libration ? rel.libration * 1000 : null;
-            relDopp = rel.doppler;
-            if (qthAz != null && dxAz != null) {
-              const polQth = calcPoloffset(lat, qthAz, qthEl);
-              const polDx = calcPoloffset(dxLat, dxAz, dxEl);
-              pol = calcPoloffsetDiff(polQth, polDx);
-            }
-          }
-
-          relLibData.push({x: idx, y: relLib});
-          relDoppData.push({x: idx, y: relDopp});
-          polData.push({x: idx, y: pol});
-        }
-
         if (!relativeChart) {
           relativeChart = new Chart(document.getElementById("relativeDataChart"), {
             type: 'line',
             data: {
+              labels,
               datasets: [
                 {
                   label: "Relative Libration (×10⁻³ °/min)",
-                  data: relLibData,
+                  data: relLibrations,
                   borderColor: "red",
                   pointRadius: 0,
                   borderWidth: 1.5,
@@ -2251,7 +2064,7 @@
                 },
                 {
                   label: "Relative Spread, Hz",
-                  data: relDoppData,
+                  data: relDopplers,
                   borderColor: "green",
                   pointRadius: 0,
                   borderWidth: 1.5,
@@ -2260,7 +2073,7 @@
                 },
                 {
                   label: "Polarization Offset (°)",
-                  data: polData,
+                  data: polOffsets,
                   borderColor: "blue",
                   pointRadius: 0,
                   borderWidth: 1.5,
@@ -2274,22 +2087,8 @@
               maintainAspectRatio: false,
               scales: {
                 x: {
-                  type: 'linear',
-                  min: 0,
-                  max: 47,
                   title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
-                  ticks: {
-                    callback: function(value) {
-                      if (Number.isInteger(value)) {
-                        const hour = Math.floor(value / 2);
-                        const min = (value % 2 === 0) ? '00' : '30';
-                        return `${hour}:${min}`;
-                      }
-                      return null;
-                    },
-                    stepSize: 1,
-                    font: { size: 10 }
-                  }
+                  ticks: { font: { size: 10 } }
                 },
                 y1: {
                   type: "linear",
@@ -2337,9 +2136,10 @@
             }
           });
         } else {
-          relativeChart.data.datasets[0].data = relLibData;
-          relativeChart.data.datasets[1].data = relDoppData;
-          relativeChart.data.datasets[2].data = polData;
+          relativeChart.data.labels = labels;
+          relativeChart.data.datasets[0].data = relLibrations;
+          relativeChart.data.datasets[1].data = relDopplers;
+          relativeChart.data.datasets[2].data = polOffsets;
           relativeChart.options.plugins.annotation.annotations = relativeAnnotation;
           relativeChart.options.plugins.annotation.annotations.timeMarker.value = index;
           relativeChart.options.scales.y2.max = maxDoppler;
