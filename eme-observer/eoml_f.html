@@ -1109,13 +1109,13 @@
                                                return lower.y + frac * (upper.y - lower.y);
                                              }
 
-                                             function computeRelativeAtIndex(idx, qthData, dxData) {
-                                               const qthElev = getYAtX(qthData.elevations, idx);
-                                               const dxElev = getYAtX(dxData.elevations, idx);
-                                               if (qthElev < 0 || dxElev < 0) return { libration: null, doppler: null, pol: null };  // Changed to < 0
+                                             function computeRelativeAtIndex(idx, qthDayData, dxDayData) {  // Changed param to dxDayData
+                                               const qthElev = getYAtX(qthDayData.elevations, idx);
+                                               const dxElev = getYAtX(dxDayData.elevations, idx);  // Now dxDayData
+                                               if (qthElev < 0 || dxElev < 0) return { libration: null, doppler: null, pol: null };
 
-                                               const qthL = getLibrationAtIndex(qthData.libration, idx);
-                                               const dxL = getLibrationAtIndex(dxData.libration, idx);
+                                               const qthL = getLibrationAtIndex(qthDayData.libration, idx);
+                                               const dxL = getLibrationAtIndex(dxDayData.libration, idx);  // Now dxDayData
                                                if (!qthL || !dxL) return { libration: null, doppler: null, pol: null };
 
                                                const dldt_sum = qthL.dldt + dxL.dldt;
@@ -1126,8 +1126,8 @@
                                                const relDoppler = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
 
                                                let pol = null;
-                                               const qthAz = getYAtX(qthData.azimuths, idx);
-                                               const dxAz = getYAtX(dxData.azimuths, idx);
+                                               const qthAz = getYAtX(qthDayData.azimuths, idx);
+                                               const dxAz = getYAtX(dxDayData.azimuths, idx);  // Now dxDayData
                                                if (qthAz != null && dxAz != null) {
                                                  const polQth = calcPoloffset(lat, qthAz, qthElev);
                                                  const polDx = calcPoloffset(dxLat, dxAz, dxElev);
@@ -1136,7 +1136,6 @@
 
                                                return { libration: relLibration, doppler: relDoppler, pol };
                                              }
-                                            
                                             function angularSeparation(ra1, dec1, ra2, dec2) {
                                                 const d1 = degToRad(dec1);
                                                 const d2 = degToRad(dec2);
@@ -1681,7 +1680,8 @@
           rawData = computeLibrationForDay(qthInput, dateStr, 'qth');
           computeFullDayData(qthDayData, qthInput, dateStr, true);
         }
-        qthValid = qthDayData.libration.length === 48;
+        qthValid = qthDayData.libration && qthDayData.libration.length > 0;  // Or >47 if want extras
+        // Same for dxValid
         try {
           ({ lat, lon } = qthToLatLon(qthInput));
         } catch (e) {
@@ -1727,24 +1727,21 @@
       // Relative current
       let currentRelRate = null, currentRelDoppler = null, currentPolOffset = null;
       if (qthValid && dxValid) {
-        const floorIdx = Math.floor(index);
-        const ceilIdx = Math.ceil(index);
-        const frac = index - floorIdx;
-        const relFloor = computeRelativeAtIndex(floorIdx, qthDayData, dxData);
-        const relCeil = computeRelativeAtIndex(ceilIdx, qthDayData, dxData);
-        currentRelRate = getYAtX(relLibrations, index) ?? null;
+          currentRelRate = getYAtX(relLibrations, index) ?? null;
+            currentRelDoppler = getYAtX(relDopplers, index) ?? null;
+            currentPolOffset = getYAtX(polOffsets, index) ?? null;
         currentRelDoppler = getYAtX(relDopplers, index) ?? null;
         currentPolOffset = getYAtX(polOffsets, index) ?? null;
       }
 
       // Chart data from caches
-      const qthRates = qthDayData.rates || Array(48).fill(null);
-      const qthElevs = qthDayData.elevations || Array(48).fill(null);
-      const qthDopps = qthDayData.dopplers || Array(48).fill(null);
+      const qthRates = qthDayData.rates || [];  // Empty array, not fill(null)
+      const qthElevs = qthDayData.elevations || [];
+      const qthDopps = qthDayData.dopplers || [];
 
-      const dxRates = dxDayData.rates || Array(48).fill(null);
-      const dxElevs = dxDayData.elevations || Array(48).fill(null);
-      const dxDopps = dxDayData.dopplers || Array(48).fill(null);
+      const dxRates = dxDayData.rates || [];
+      const dxElevs = dxDayData.elevations || [];
+      const dxDopps = dxDayData.dopplers || [];
 
       // Build relative data as {x, y} arrays (supports fractional x for extras)
       let relLibrations = [];
@@ -2174,7 +2171,7 @@
         }
       }
 
-      if (qthValid && dxValid && relLibrations.some(r => r != null)) {
+      if (qthValid && dxValid && relLibrations.some(p => p.y != null)) {
         document.getElementById("relativeChartWrapper").style.display = "block";
 
         if (!relativeChart) {
