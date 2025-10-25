@@ -999,7 +999,7 @@
             let doppler = null;
             if (elevationDeg > 0 && rate != null) {
                 rates.push(rate * 1000);
-                const omegaRadSec = rate * (Math.PI / 180) / 10;
+                const omegaRadSec = rate * (Math.PI / 180) / 60;
                 doppler = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
             } else {
                 rates.push(null);
