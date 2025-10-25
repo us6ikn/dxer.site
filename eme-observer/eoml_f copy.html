@@ -944,8 +944,8 @@
             }
 
             try {
-                const dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
-                const dlon = (arr[i+1].lon - arr[i-1].lon) / 60;
+                const dlat = (arr[i+1].lat - arr[i-1].lat) / 10;
+                const dlon = (arr[i+1].lon - arr[i-1].lon) / 10;
                 if (isNaN(dlat) || isNaN(dlon) || !isFinite(dlat) || !isFinite(dlon)) {
                     console.warn(`Invalid dlat/dlon for ${curr.date} at ${locator}: dlat=${dlat}, dlon=${dlon}`);
                     return { date: curr.date, rate: null, dldt: null, dbdt: null };
@@ -999,7 +999,7 @@
             let doppler = null;
             if (elevationDeg > 0 && rate != null) {
                 rates.push(rate * 1000);
-                const omegaRadSec = rate * (Math.PI / 180) / 60;
+                const omegaRadSec = rate * (Math.PI / 180) / 10;
                 doppler = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
             } else {
                 rates.push(null);
@@ -1048,7 +1048,7 @@
         const dbdt_sum = qthL.dbdt + dxL.dbdt;
         const relLibration = Math.sqrt(dldt_sum * dldt_sum + dbdt_sum * dbdt_sum) / 2;
 
-        const omegaRadSec = relLibration * (Math.PI / 180) / 60;
+        const omegaRadSec = relLibration * (Math.PI / 180) / 10;
         const relDoppler = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
 
         // Pol offset
@@ -2738,7 +2738,7 @@
                                                 document.getElementById('date').value = utcDate.toISOString().slice(0,10);
 
                                                 let roundedHour = utcHours;
-                                                let roundedMinutes = Math.round(utcMinutes /5 )*5;
+                                                let roundedMinutes = Math.round(utcMinutes / 5) * 5;
                                                 if (roundedMinutes >= 60) {
                                                     roundedMinutes = 0;
                                                     roundedHour += 1;
