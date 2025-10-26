@@ -2245,7 +2245,7 @@
                                                 const fractionalIndex = hour * 12 + (minute / 5);
                                                 const displayHour = String(hour).padStart(2, '0');
                                                 const displayMin = String(minute).padStart(2, '0');
-                                                document.getElementById('hour-value').textContent = `Time (UTC): ${displayHour}:${displayMin}`;
+                                                document.getElementById('hour-value').textContent = `UTC: ${displayHour}:${displayMin}`;
 
                                                 const dateStr = utcDate.toISOString().slice(0, 10);
                                                 const qthInput = document.getElementById('qth').value.trim().toUpperCase();
@@ -2785,7 +2785,7 @@
         hourIndex = parseInt(document.getElementById("hour").value);
         const hour = Math.floor(hourIndex / 12);
         const minutes = (hourIndex % 12) * 5;
-        document.getElementById("hour-value").textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+        document.getElementById("hour-value").textContent = `UTC: ${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
         updateChart(hourIndex, false);
     });
 
@@ -2849,7 +2849,7 @@
                                                 hourIndex = roundedHour * 12 + (roundedMinutes / 5);
                                                 document.getElementById('hour').value = hourIndex;
                                                 document.getElementById('hour-value').textContent =
-                                                    `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${String(roundedMinutes).padStart(2, '0')}`;
+                                                    `UTC: ${String(roundedHour).padStart(2, '0')}:${String(roundedMinutes).padStart(2, '0')}`;
 
                                                 document.getElementById('showControlsPanel').classList.remove('visible');
 
