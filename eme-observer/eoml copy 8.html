@@ -735,8 +735,8 @@
 
     // Helper function to update hour-value display
     function updateHourDisplay() {
-        const hour = Math.floor(hourIndex / 12);
-        const minutes = (hourIndex % 12) * 5;
+        const hour = Math.floor(hourIndex / 2);
+        const minutes = (hourIndex % 2) * 30;
         document.getElementById('hour-value').textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
     }
 
@@ -829,9 +829,9 @@
         const day = date.getUTCDate();
 
         const results = [];
-        for (let i = 0; i < 288; i++) {
-            const hour = Math.floor(i / 12);
-            const minute = (i % 12) * 5;
+        for (let i = 0; i < 48; i++) {
+            const hour = Math.floor(i / 2);
+            const minute = (i % 2) * 30;
             const dt = new Date(Date.UTC(year, month - 1, day, hour, minute));
             const isoDate = dt.toISOString().replace('.000Z', '');
 
@@ -870,8 +870,8 @@
             }
 
             try {
-                const dlat = (arr[i+1].lat - arr[i-1].lat) / 10;
-                const dlon = (arr[i+1].lon - arr[i-1].lon) / 10;
+                const dlat = (arr[i+1].lat - arr[i-1].lat) / 60;
+                const dlon = (arr[i+1].lon - arr[i-1].lon) / 60;
                 if (isNaN(dlat) || isNaN(dlon) || !isFinite(dlat) || !isFinite(dlon)) {
                     console.warn(`Invalid dlat/dlon for ${curr.date} at ${locator}: dlat=${dlat}, dlon=${dlon}`);
                     return { date: curr.date, rate: null, dldt: null, dbdt: null };
@@ -911,9 +911,9 @@
         const dopplers = [];
         const rates = [];
 
-        for (let i = 0; i < 288; i++) {
-            const hour = Math.floor(i / 12);
-            const minutes = (i % 12) * 5;
+        for (let i = 0; i < 48; i++) {
+            const hour = Math.floor(i / 2);
+            const minutes = (i % 2) * 30;
             const dt = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00Z`);
             const observer = new Astronomy.Observer(obsLat, obsLon, 0);
             const moonEq = Astronomy.Equator(Astronomy.Body.Moon, dt, observer, true, false);
@@ -949,7 +949,7 @@
     }
 
     function getValueAtIndex(data, index) {
-        if (index < 0 || index > 287) return null;
+        if (index < 0 || index > 47) return null;
         const floorIdx = Math.floor(index);
         const ceilIdx = Math.ceil(index);
         const frac = index - floorIdx;
@@ -966,7 +966,7 @@
 
         const qthElev = qthData.elevations[idx];
         const dxElev = dxData.elevations[idx];
-        if (qthElev < 1 || dxElev < 1) {
+        if (qthElev <= 0 || dxElev <= 0) {
             return { libration: null, doppler: null, pol: null };
         }
 
@@ -1088,10 +1088,10 @@
                                                             radius: footprintRadius_m,
                                                             color: '#0000FF',
                                                             fillColor: '#0088FF',
-                                                            fillOpacity: 0.3,
-                                                            weight: 2,
+                                                            fillOpacity: 0.2,
+                                                            weight: 1,
                                                             wrapElements: true,
-                                                            clipLat: 65,
+                                                            clipLat: 85,
                                                             degStep: 0.5,
                                                             maxCopies: -1
                                                         }).addTo(map);
@@ -1105,8 +1105,6 @@
                                                             weight: 2
                                                         }).addTo(map);
                                                     }
-
-                                                    // Removed map.panTo([lat, lon]); to prevent re-centering
 
                                                 } catch (error) {
                                                     console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
@@ -1533,7 +1531,7 @@
           rawData = computeLibrationForDay(qthInput, dateStr, 'qth');
           computeFullDayData(qthDayData, qthInput, dateStr, true);
         }
-        qthValid = qthDayData.libration.length === 288;
+        qthValid = qthDayData.libration.length === 48;
         try {
           ({ lat, lon } = qthToLatLon(qthInput));
         } catch (e) {
@@ -1549,7 +1547,7 @@
           dxRawData = computeLibrationForDay(dxInput, dateStr, 'dx');
           computeFullDayData(dxDayData, dxInput, dateStr, false);
         }
-        dxValid = dxDayData.libration.length === 288;
+        dxValid = dxDayData.libration.length === 48;
         try {
           ({ lat: dxLat, lon: dxLon } = qthToLatLon(dxInput));
         } catch (e) {
@@ -1590,19 +1588,19 @@
       }
 
       // Chart data from caches
-      const qthRates = qthDayData.rates || Array(288).fill(null);
-      const qthElevs = qthDayData.elevations || Array(288).fill(null);
-      const qthDopps = qthDayData.dopplers || Array(288).fill(null);
+      const qthRates = qthDayData.rates || Array(48).fill(null);
+      const qthElevs = qthDayData.elevations || Array(48).fill(null);
+      const qthDopps = qthDayData.dopplers || Array(48).fill(null);
 
-      const dxRates = dxDayData.rates || Array(288).fill(null);
-      const dxElevs = dxDayData.elevations || Array(288).fill(null);
-      const dxDopps = dxDayData.dopplers || Array(288).fill(null);
+      const dxRates = dxDayData.rates || Array(48).fill(null);
+      const dxElevs = dxDayData.elevations || Array(48).fill(null);
+      const dxDopps = dxDayData.dopplers || Array(48).fill(null);
 
-      let relLibrations = Array(288).fill(null);
-      let relDopplers = Array(288).fill(null);
-      let polOffsets = Array(288).fill(null);
+      let relLibrations = Array(48).fill(null);
+      let relDopplers = Array(48).fill(null);
+      let polOffsets = Array(48).fill(null);
       if (qthValid && dxValid && relDayData.date !== dateStr) {
-        for (let i = 0; i < 288; i++) {
+        for (let i = 0; i < 48; i++) {
           const rel = computeRelativeAtIndex(i, qthDayData, dxDayData);
           relLibrations[i] = rel.libration ? rel.libration * 1000 : null;
           relDopplers[i] = rel.doppler;
@@ -1618,11 +1616,7 @@
         polOffsets = relDayData.polOffsets;
       }
 
-      const labels = Array(288).fill('').map((_, i) => {
-          const hour = Math.floor(i / 12);
-          const minutes = (i % 12) * 5;
-          return `${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-      });
+      const labels = Array(48).fill('').map((_, i) => `${Math.floor(i / 2)}:${i % 2 === 0 ? '00' : '30'}`);
 
       const qthAnnotation = {
         timeMarker: {
@@ -2055,7 +2049,7 @@
       }
 
       // Update map and moon chart with exact time
-      const exactTime = isRealtime ? new Date() : new Date(`${dateStr}T${Math.floor(index / 12).toString().padStart(2, '0')}:${String((index % 12) * 5).padStart(2, '0')}:00Z`);
+      const exactTime = isRealtime ? new Date() : new Date(`${dateStr}T${Math.floor(index / 2).toString().padStart(2, '0')}:${String((index % 2) * 30).padStart(2, '0')}:00Z`);
       updateMap(exactTime);
       updateMoonChart(exactTime);
     }
@@ -2101,7 +2095,7 @@
 
                                                 const hour = now.getUTCHours();
                                                 const minute = now.getUTCMinutes();
-                                                const fractionalIndex = hour * 12 + (minute / 5);
+                                                const fractionalIndex = hour * 2 + (minute / 30);
                                                 const displayHour = String(hour).padStart(2, '0');
                                                 const displayMin = String(minute).padStart(2, '0');
                                                 document.getElementById('hour-value').textContent = `Time (UTC): ${displayHour}:${displayMin}`;
@@ -2216,7 +2210,7 @@
                                                     const marker = L.marker(markerPosition, {
                                                         icon: L.icon({
                                                             iconUrl: iconUrl,
-                                                            iconSize: [20, 20]
+                                                            iconSize: [16, 16]
                                                         }),
                                                         title: callsign
                                                     }).addTo(map);
@@ -2257,7 +2251,6 @@
                                                             <div>Website: <a href="${website}" target="_blank">${displayWebsite}</a></div>
                                                             <div id="image-container-${sanitizedCallsign}">
                                                                 Station Picture (clickable):<br>
-
                                                                 <a id="image-link-${sanitizedCallsign}" href="${bandSpecificImageUrl}" target="_blank">
                                                                     <img id="station-image-${sanitizedCallsign}" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA" alt="${callsign} station"/>
                                                                 </a>
@@ -2350,15 +2343,48 @@
 
                                             function initMap() {
                                                 try {
+                                                    // Define tile layer
+                                                    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                                                        minZoom: 0,
+                                                        maxZoom: 20
+                                                    });
+
+                                                    // Initialize map with the tile layer and zoom control in bottomright
                                                     map = L.map('map', {
                                                         zoom: 2,
                                                         center: [0, 0],
                                                         gestureHandling: true,
-                                                        fullscreenControl: false
+                                                        fullscreenControl: false,
+                                                        layers: [osm],
+                                                        zoomControl: true // Enable zoom control (already true by default)
                                                     });
-                                                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                                    }).addTo(map);
+
+                                                    // Move zoom control to bottomright
+                                                    map.zoomControl.setPosition('bottomright');
+
+                                                    // Define CQ Zones and Maidenhead layers with error handling
+                                                    var cqzones, maidenhead;
+                                                    if (typeof L.cqzones === 'function') {
+                                                        cqzones = L.cqzones({color : 'rgba(255, 0, 0, 0.4)'});
+                                                        cqzones.addTo(map); // Add CQ Zones layer to the map by default
+                                                    } else {
+                                                        console.error('L.cqzones is not defined. CQ Zones layer will not be available.');
+                                                    }
+                                                    if (typeof L.maidenhead === 'function') {
+                                                        maidenhead = L.maidenhead();
+                                                    } else {
+                                                        console.error('L.maidenhead is not defined. Maidenhead layer will not be available.');
+                                                    }
+
+                                                    // Add layer control
+                                                    var overlays = {};
+                                                    if (cqzones) overlays["<span style='color: black'>CQ Zones</span>"] = cqzones;
+                                                    if (maidenhead) overlays["<span style='color: black'>Maidenhead</span>"] = maidenhead;
+
+                                                    L.control.layers({
+                                                        'Map': osm
+                                                    }, overlays).addTo(map);
 
                                                     const band = document.getElementById('bandSelect').value;
                                                     const jsonFile = bandConfig[band].jsonFile;
@@ -2375,12 +2401,10 @@
                                                         })
                                                         .catch(error => {
                                                             console.error(`Error fetching ${jsonFile} in initMap:`, error);
-                                                            // Optionally display an error message to the user
                                                             alert(`Failed to load station data for ${band}. Please try again later.`);
                                                         });
                                                 } catch (error) {
                                                     console.error('Error initializing map:', error);
-                                                    // Display fallback message to user
                                                     document.getElementById('map').innerHTML = '<p style="color: red; text-align: center;">Failed to load map. Please check your internet connection or try again later.</p>';
                                                 }
                                             }
@@ -2390,11 +2414,12 @@
     document.getElementById('activeStationsButton').addEventListener('click', () => {
       isActiveStationsOnly = !isActiveStationsOnly;
       const activeButton = document.getElementById('activeStationsButton');
-      activeButton.textContent = isActiveStationsOnly ? 'Active' : 'All';
       if (isActiveStationsOnly) {
         activeButton.classList.add('active');
+        activeButton.title = 'Active Stations';
       } else {
         activeButton.classList.remove('active');
+        activeButton.title = 'All Stations';
       }
       const band = document.getElementById('bandSelect').value;
       const jsonFile = bandConfig[band].jsonFile;
@@ -2483,12 +2508,12 @@
             const riseDateStr = riseDate.toISOString().slice(0, 10);
             if (riseDateStr === targetDateStr) {
                 let index = timeToChartIndex(riseDate);
-                const isLate = riseDate.getUTCHours() >= 23 && riseDate.getUTCMinutes() >= 55;
+                const isLate = riseDate.getUTCHours() >= 23 && riseDate.getUTCMinutes() >= 30;
                 annotations['moonrise'] = {
                     type: 'line',
                     mode: 'vertical',
                     scaleID: 'x',
-                    value: isLate ? 287 : index,
+                    value: isLate ? 47 : index,
                     borderColor: 'blue',
                     borderWidth: 1,
                     label: {
@@ -2515,12 +2540,12 @@
             const setDateStr = setDate.toISOString().slice(0, 10);
             if (setDateStr === targetDateStr) {
                 let index = timeToChartIndex(setDate);
-                const isLate = setDate.getUTCHours() >= 23 && setDate.getUTCMinutes() >= 55;
+                const isLate = setDate.getUTCHours() >= 23 && setDate.getUTCMinutes() >= 30;
                 annotations['moonset'] = {
                     type: 'line',
                     mode: 'vertical',
                     scaleID: 'x',
-                    value: isLate ? 287 : index,
+                    value: isLate ? 47 : index,
                     borderColor: 'orange',
                     borderWidth: 1,
                     label: {
@@ -2548,10 +2573,10 @@
     function timeToChartIndex(date) {
         if (!(date instanceof Date)) throw new Error("Expected a Date object");
         let hours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
-        if (hours >= 23.9167) {
-            hours = 23.9167;
+        if (hours >= 23.5) {
+            hours = 23.5;
         }
-        return hours * 12;
+        return hours * 2;
     }
 
     function getSkedAnnotations(dateStr, qthLat, qthLon, dxLat, dxLon) {
@@ -2582,9 +2607,9 @@
         function timeToChartIndex(date) {
             if (!(date instanceof Date)) return null;
             const hours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
-            let index = Math.round(hours * 12);
+            let index = Math.round(hours * 2);
             if (index < 0) index = 0;
-            if (index > 287) index = 287;
+            if (index > 47) index = 47;
             return index;
         }
 
@@ -2612,8 +2637,8 @@
 
     document.getElementById("hour").addEventListener("input", () => {
         hourIndex = parseInt(document.getElementById("hour").value);
-        const hour = Math.floor(hourIndex / 12);
-        const minutes = (hourIndex % 12) * 5;
+        const hour = Math.floor(hourIndex / 2);
+        const minutes = (hourIndex % 2) * 30;
         document.getElementById("hour-value").textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
         updateChart(hourIndex, false);
     });
@@ -2663,10 +2688,10 @@
                                                 document.getElementById('date').value = utcDate.toISOString().slice(0,10);
 
                                                 let roundedHour = utcHours;
-                                                let roundedMinutes = Math.round(utcMinutes / 5) * 5;
-                                                if (roundedMinutes >= 60) {
-                                                    roundedMinutes = 0;
+                                                let roundedMinutes = utcMinutes >= 15 && utcMinutes < 45 ? 30 : 0;
+                                                if (utcMinutes >= 45) {
                                                     roundedHour += 1;
+                                                    roundedMinutes = 0;
                                                 }
                                                 if (roundedHour >= 24) {
                                                     roundedHour -= 24;
@@ -2675,7 +2700,7 @@
                                                     document.getElementById('date').value = utcDate.toISOString().slice(0,10);
                                                 }
 
-                                                hourIndex = roundedHour * 12 + (roundedMinutes / 5);
+                                                hourIndex = roundedHour * 2 + (roundedMinutes === 30 ? 1 : 0);
                                                 document.getElementById('hour').value = hourIndex;
                                                 document.getElementById('hour-value').textContent =
                                                     `Time (UTC): ${String(roundedHour).padStart(2, '0')}:${String(roundedMinutes).padStart(2, '0')}`;
