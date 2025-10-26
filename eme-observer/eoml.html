@@ -1086,10 +1086,10 @@
                                                     try {
                                                         footprintCircle = L.greatCircle([lat, lon], {
                                                             radius: footprintRadius_m,
-                                                            color: '#0000FF',
-                                                            fillColor: '#0088FF',
-                                                            fillOpacity: 0.3,
-                                                            weight: 2,
+                                                            color: currentColor,
+                                                            fillColor: currentColor,
+                                                            fillOpacity: 0.2,
+                                                            weight: 1,
                                                             wrapElements: true,
                                                             clipLat: 65,
                                                             degStep: 0.5,
@@ -2358,29 +2358,15 @@
                                                         fullscreenControl: false
                                                     });
 
-                                                    // --- Base layers ---
+                                                    // Define and add OSM base layer
                                                     var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                                        maxZoom: 19,
                                                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                                    });
-
-                                                    var cartoLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                                                        maxZoom: 19,
-                                                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>'
-                                                    });
-
-                                                    var esri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-                                                        maxZoom: 19,
-                                                        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, HERE, Garmin, FAO, NOAA, USGS, © OpenStreetMap contributors'
-                                                    });
-
-                                                    // Add default base layer
-                                                    cartoLight.addTo(map);
+                                                    }).addTo(map);
 
                                                     // Move zoom control to bottom right
                                                     map.zoomControl.setPosition('bottomright');
 
-                                                    // --- Overlays ---
+                                                    // Define CQ Zones and Maidenhead layers
                                                     var cqzones, maidenhead;
                                                     if (typeof L.cqzones === 'function') {
                                                         cqzones = L.cqzones({ color: 'rgba(255, 0, 0, 0.4)' });
@@ -2395,20 +2381,16 @@
                                                         console.error('L.maidenhead is not defined. Maidenhead layer will not be available.');
                                                     }
 
-                                                    // --- Layer control ---
-                                                    var baseLayers = {
-                                                        "Carto Light (English)": cartoLight,
-                                                        "OpenStreetMap": osm,
-                                                        "Esri WorldStreetMap (English)": esri
-                                                    };
-
+                                                    // Add layer control (base + overlays)
                                                     var overlays = {};
                                                     if (cqzones) overlays["<span style='color: black'>CQ Zones</span>"] = cqzones;
                                                     if (maidenhead) overlays["<span style='color: black'>Maidenhead</span>"] = maidenhead;
 
-                                                    L.control.layers(baseLayers, overlays).addTo(map);
+                                                    L.control.layers({
+                                                        'Map': osm
+                                                    }, overlays).addTo(map);
 
-                                                    // --- Load station markers ---
+                                                    // Load markers based on band
                                                     const band = document.getElementById('bandSelect').value;
                                                     const jsonFile = bandConfig[band].jsonFile;
                                                     const showActiveOnly = isActiveStationsOnly;
@@ -2431,7 +2413,6 @@
                                                     document.getElementById('map').innerHTML = '<p style="color: red; text-align: center;">Failed to load map. Please check your internet connection or try again later.</p>';
                                                 }
                                             }
-
 
     
     let isActiveStationsOnly = false; // Default state (equivalent to checkbox checked)
