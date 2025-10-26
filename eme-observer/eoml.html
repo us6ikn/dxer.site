@@ -586,16 +586,15 @@
                                                                                 min-height: 22px;
                                                                             }
                                                                         }
-                                                                        /* --- INLINE HEADER WITH DATE/TIME --- */
+                                                                        /* --- CLEAN INLINE HEADER LAYOUT --- */
                                                                         .app-header-row {
                                                                             display: flex;
                                                                             align-items: center;
                                                                             justify-content: space-between;
                                                                             flex-wrap: wrap;
                                                                             gap: 10px;
-                                                                            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-                                                                            padding-bottom: 8px;
-                                                                            margin-bottom: 8px;
+                                                                            padding-bottom: 4px;
+                                                                            margin-bottom: 6px;
                                                                         }
 
                                                                         .app-name-wrapper {
@@ -605,6 +604,7 @@
                                                                             line-height: 1.1;
                                                                         }
 
+                                                                        /* --- INLINE DATE/TIME --- */
                                                                         #date-container-inline {
                                                                             display: flex;
                                                                             align-items: center;
@@ -619,6 +619,35 @@
                                                                             border-radius: 5px;
                                                                         }
 
+                                                                        #date-container-inline .icon-only {
+                                                                            background-color: #0078d4;
+                                                                            color: white;
+                                                                            border: none;
+                                                                            border-radius: 5px;
+                                                                            padding: 4px;
+                                                                            display: flex;
+                                                                            align-items: center;
+                                                                            justify-content: center;
+                                                                            width: 28px;
+                                                                            height: 28px;
+                                                                            cursor: pointer;
+                                                                            transition: background 0.2s ease;
+                                                                        }
+
+                                                                        #date-container-inline .icon-only:hover {
+                                                                            background-color: #005fa3;
+                                                                        }
+
+                                                                        /* --- UNIFIED BUTTON ROW --- */
+                                                                        .combined-nav {
+                                                                            display: flex;
+                                                                            align-items: center;
+                                                                            flex-wrap: wrap;
+                                                                            gap: 6px;
+                                                                            justify-content: flex-start;
+                                                                            margin-top: 6px;
+                                                                        }
+
                                                                         /* --- ACTIVE STATION BUTTON HEIGHT FIX --- */
                                                                         #activeStationsButton.icon-button {
                                                                             min-height: 28px !important;
@@ -629,6 +658,7 @@
                                                                             justify-content: center;
                                                                         }
 
+
                                                                     </style>
                                                                     
     </head>
@@ -636,22 +666,30 @@
         <div id="map"></div>
         <div id="controls">
             <div id="fixed-controls">
-                <!-- Header + Date/Time Row Combined -->
+                <!-- Header + Inline Date/Time -->
                 <div class="app-header-row">
                     <div class="app-name-wrapper">
                         <div class="app-name">EME Observer</div>
                         <div class="creator-label">by SA5IKN</div>
                     </div>
                     <div id="date-container-inline">
-                        <button id="prevDay">←</button>
+                        <button id="prevDay" title="Previous Day" class="icon-only">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                            </svg>
+                        </button>
                         <input type="date" id="date" />
-                        <button id="nextDay">→</button>
+                        <button id="nextDay" title="Next Day" class="icon-only">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                                <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+                            </svg>
+                        </button>
                         <span id="hour-value">UTC: 00:00</span>
                     </div>
                 </div>
 
-                <!-- Band + Tracking -->
-                <div class="button-band-group">
+                <!-- Band + Track + Nav Buttons -->
+                <div class="button-band-group combined-nav">
                     <button id="realTimeButton" class="auto-track-button">Track</button>
                     <select id="bandSelect" class="band-select">
                         <option value="432MHz">432MHz</option>
@@ -664,12 +702,10 @@
                         <option value="47GHz">47GHz</option>
                         <option value="76GHz">76GHz</option>
                     </select>
-                </div>
 
-                <!-- Nav Buttons -->
-                <div class="button-group">
+                    <!-- Nav Buttons Inline -->
                     <button id="activeStationsButton" class="nav-button icon-button" title="Toggle All/Active Stations">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
                         </svg>
                     </button>
@@ -683,7 +719,7 @@
                             <path d="M3 3v18h18V3H3zm16 4H5V5h14v2zm0 4H5V9h14v2zm0 4H5v-2h14v2zm0 4H5v-2h14v2z"/>
                         </svg>
                     </a>
-                    <a href="datasubmission.html" class="nav-button">Add Station</a>
+                    <a href="datasubmission.html" class="nav-button" title="Add Station">Add Station</a>
                     <a href="/" class="nav-button icon-button" title="Home">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 3l9 9h-3v9h-12v-9h-3l9-9z"/>
@@ -713,7 +749,7 @@
                 </div>
             </div>
 
-            <!-- Scrollable Controls (Charts, unchanged) -->
+            <!-- Scrollable Controls (Charts unchanged) -->
             <div id="scrollable-controls">
                 <div id="chartWrapper" style="display: none;">
                     <div id="chartLabel"></div>
