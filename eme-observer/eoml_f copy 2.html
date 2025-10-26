@@ -1040,7 +1040,7 @@
 
         const qthElev = qthData.elevations[idx];
         const dxElev = dxData.elevations[idx];
-        if (qthElev < 1 || dxElev < 1) {
+        if (qthElev <= 0 || dxElev <= 0) {
             return { libration: null, doppler: null, pol: null };
         }
 
@@ -1180,7 +1180,8 @@
                                                         }).addTo(map);
                                                     }
 
-                                                    // Removed map.panTo([lat, lon]); to prevent re-centering
+                                                    // Keep map centered on sublunar point
+                                                    map.panTo([lat, lon]);
 
                                                 } catch (error) {
                                                     console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
