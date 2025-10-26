@@ -878,7 +878,7 @@
     function updateHourDisplay() {
         const hour = Math.floor(hourIndex / 12);
         const minutes = (hourIndex % 12) * 5;
-        document.getElementById('hour-value').textContent = `Time (UTC): ${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+        document.getElementById('hour-value').textContent = `UTC: ${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
     }
 
     function updateBand(band) {
