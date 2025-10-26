@@ -647,7 +647,7 @@
             </div>
             
             <!-- Time Slider -->
-            <input type="range" id="hour" min="0" max="47" value="0" step="1" />
+            <input type="range" id="hour" min="0" max="287" value="0" step="1" />
             
             <!-- Locators -->
             <div class="locator-group">
@@ -2358,7 +2358,33 @@
                                                     });
                                                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                                                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                                    }).addTo(map);
+                                                    });
+                                                    
+                                                    // Move zoom control to bottomright
+                                                    map.zoomControl.setPosition('bottomright');
+
+                                                    // Define CQ Zones and Maidenhead layers with error handling
+                                                    var cqzones, maidenhead;
+                                                    if (typeof L.cqzones === 'function') {
+                                                        cqzones = L.cqzones({color : 'rgba(255, 0, 0, 0.4)'});
+                                                        cqzones.addTo(map); // Add CQ Zones layer to the map by default
+                                                    } else {
+                                                        console.error('L.cqzones is not defined. CQ Zones layer will not be available.');
+                                                    }
+                                                    if (typeof L.maidenhead === 'function') {
+                                                        maidenhead = L.maidenhead();
+                                                    } else {
+                                                        console.error('L.maidenhead is not defined. Maidenhead layer will not be available.');
+                                                    }
+
+                                                    // Add layer control
+                                                    var overlays = {};
+                                                    if (cqzones) overlays["<span style='color: black'>CQ Zones</span>"] = cqzones;
+                                                    if (maidenhead) overlays["<span style='color: black'>Maidenhead</span>"] = maidenhead;
+
+                                                    L.control.layers({
+                                                        'Map': osm
+                                                    }, overlays).addTo(map);
 
                                                     const band = document.getElementById('bandSelect').value;
                                                     const jsonFile = bandConfig[band].jsonFile;
