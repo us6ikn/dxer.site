@@ -1048,7 +1048,7 @@
         const dbdt_sum = qthL.dbdt + dxL.dbdt;
         const relLibration = Math.sqrt(dldt_sum * dldt_sum + dbdt_sum * dbdt_sum) / 2;
 
-        const omegaRadSec = relLibration * (Math.PI / 180) / 10;
+        const omegaRadSec = relLibration * (Math.PI / 180) / 60;
         const relDoppler = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
 
         // Pol offset
@@ -1180,8 +1180,7 @@
                                                         }).addTo(map);
                                                     }
 
-                                                    // Keep map centered on sublunar point
-                                                    map.panTo([lat, lon]);
+                                                    // Removed map.panTo([lat, lon]); to prevent re-centering
 
                                                 } catch (error) {
                                                     console.error(`Error calculating sublunar point for ${utcTimeString}: ${error.message}`);
