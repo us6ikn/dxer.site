@@ -592,9 +592,9 @@
                                                                             align-items: center;
                                                                             justify-content: space-between;
                                                                             flex-wrap: wrap;
-                                                                            gap: 6px;
-                                                                            padding-bottom: 2px;
-                                                                            margin-bottom: 4px; /* reduced spacing */
+                                                                            gap: 10px;
+                                                                            padding-bottom: 4px;
+                                                                            margin-bottom: 6px;
                                                                         }
 
                                                                         .app-name-wrapper {
@@ -657,54 +657,8 @@
                                                                             align-items: center;
                                                                             justify-content: center;
                                                                         }
-                                                                        /* --- UNIFIED BUTTON AND SELECT HEIGHTS --- */
-                                                                        .control-button,
-                                                                        .icon-button,
-                                                                        .control-select,
-                                                                        #date-container-inline .icon-only {
-                                                                            height: 32px;
-                                                                            min-height: 32px;
-                                                                            display: flex;
-                                                                            align-items: center;
-                                                                            justify-content: center;
-                                                                            border-radius: 5px;
-                                                                            border: none;
-                                                                            background-color: #0078d4;
-                                                                            color: white;
-                                                                            cursor: pointer;
-                                                                            transition: background 0.2s ease;
-                                                                            padding: 0 10px;
-                                                                            box-sizing: border-box;
-                                                                        }
 
-                                                                        .control-button:hover,
-                                                                        .icon-button:hover,
-                                                                        #date-container-inline .icon-only:hover {
-                                                                            background-color: #005fa3;
-                                                                        }
 
-                                                                        .icon-button svg {
-                                                                            width: 18px;
-                                                                            height: 18px;
-                                                                        }
-
-                                                                        .control-select {
-                                                                            font-size: 13px;
-                                                                            color: #333;
-                                                                            background-color: #fff;
-                                                                            border: 1px solid #ccc;
-                                                                            cursor: pointer;
-                                                                        }
-
-                                                                        /* --- ROW ALIGNMENT --- */
-                                                                        .combined-nav {
-                                                                            display: flex;
-                                                                            align-items: center;
-                                                                            flex-wrap: wrap;
-                                                                            gap: 6px;
-                                                                            justify-content: flex-start;
-                                                                            margin-top: 4px; /* smaller gap */
-                                                                        }
                                                                     </style>
                                                                     
     </head>
@@ -736,8 +690,8 @@
 
                 <!-- Band + Track + Nav Buttons -->
                 <div class="button-band-group combined-nav">
-                    <button id="realTimeButton" class="control-button">Track</button>
-                    <select id="bandSelect" class="control-select">
+                    <button id="realTimeButton" class="auto-track-button">Track</button>
+                    <select id="bandSelect" class="band-select">
                         <option value="432MHz">432MHz</option>
                         <option value="1296MHz">1296MHz</option>
                         <option value="2320MHz">2320MHz</option>
@@ -750,41 +704,33 @@
                     </select>
 
                     <!-- Nav Buttons Inline -->
-                    <button id="activeStationsButton" class="icon-button" title="Toggle All/Active Stations">
+                    <button id="activeStationsButton" class="nav-button icon-button" title="Toggle All/Active Stations">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
                         </svg>
                     </button>
-                    <a href="statistics.html" class="icon-button" title="Statistics">
+                    <a href="statistics.html" class="nav-button icon-button" title="Statistics">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M5 9h2v10H5zM11 4h2v15h-2zM17 12h2v7h-2z"/>
                         </svg>
                     </a>
-                    <a href="table.html" class="icon-button" title="Table">
+                    <a href="table.html" class="nav-button icon-button" title="Table">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M3 3v18h18V3H3zm16 4H5V5h14v2zm0 4H5V9h14v2zm0 4H5v-2h14v2zm0 4H5v-2h14v2z"/>
                         </svg>
                     </a>
-                    <a href="datasubmission.html" class="icon-button" title="Add Station">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                        </svg>
-                    </a>
-                    <a href="/" class="icon-button" title="Home">
+                    <a href="datasubmission.html" class="nav-button" title="Add Station">Add Station</a>
+                    <a href="/" class="nav-button icon-button" title="Home">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 3l9 9h-3v9h-12v-9h-3l9-9z"/>
                         </svg>
                     </a>
-                    <a href="user-guide.html" class="icon-button" title="Help">
+                    <a href="user-guide.html" class="nav-button icon-button" title="Help">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
                         </svg>
                     </a>
-                    <button id="toggleControlsPanel" class="icon-button" title="Toggle Controls">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-                        </svg>
-                    </button>
+                    <button id="toggleControlsPanel" class="nav-button">←</button>
                 </div>
 
                 <!-- Time Slider -->
@@ -824,6 +770,7 @@
             </div>
         </div>
         <button id="showControlsPanel" style="display: none;">→</button>
+
     
 <script src="chart.js"></script>
 <script src="chartjs-plugin-annotation@1.4.0"></script>
