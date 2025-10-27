@@ -763,6 +763,87 @@
                                                                         }
                                                                     </style>
                                                                     <style>
+                                                                        /* --------------------------------------------------------------
+                                                                           1. DESKTOP – make buttons larger & give the panel breathing room
+                                                                           -------------------------------------------------------------- */
+                                                                        @media (min-width: 601px) {               /* desktop */
+                                                                            #controls { padding: 18px 22px; }     /* a little more inner space */
+
+                                                                            /* ---- unified button size (nav, sked, email, qrz, track, …) ---- */
+                                                                            .nav-button,
+                                                                            .sked-button,
+                                                                            .email-button,
+                                                                            .qrz-button,
+                                                                            .auto-track-button,
+                                                                            .control-button,
+                                                                            .icon-button,
+                                                                            .control-select,
+                                                                            #date-container-inline .icon-only,
+                                                                            #prevDay,
+                                                                            #nextDay {
+                                                                                min-height: 32px !important;      /* taller, easier to tap */
+                                                                                padding: 6px 12px !important;    /* more horizontal space */
+                                                                                font-size: 13px !important;      /* readable text */
+                                                                            }
+
+                                                                            /* icon-only buttons keep a square shape but grow a bit */
+                                                                            .icon-button {
+                                                                                min-width: 32px !important;
+                                                                                width: 32px !important;
+                                                                                height: 32px !important;
+                                                                            }
+                                                                            .icon-button svg { width: 18px; height: 18px; }
+
+                                                                            /* band selector & date input */
+                                                                            #bandSelect,
+                                                                            input[type="date"] { height: 32px; font-size: 13px; }
+
+                                                                            /* locator inputs */
+                                                                            .locator-input input { max-width: 90px; padding: 6px 8px; }
+
+                                                                            /* reduce the vertical gap between rows */
+                                                                            .combined-nav { gap: 8px; }
+                                                                            .button-band-group { gap: 10px; }
+                                                                        }
+
+                                                                        /* --------------------------------------------------------------
+                                                                           2. MOBILE – shrink buttons *only* on very narrow screens
+                                                                           -------------------------------------------------------------- */
+                                                                        @media (max-width: 600px) {
+                                                                            #controls { padding: 10px 12px; }
+
+                                                                            .nav-button,
+                                                                            .sked-button,
+                                                                            .email-button,
+                                                                            .qrz-button,
+                                                                            .auto-track-button,
+                                                                            .control-button,
+                                                                            .icon-button,
+                                                                            .control-select,
+                                                                            #date-container-inline .icon-only,
+                                                                            #prevDay,
+                                                                            #nextDay {
+                                                                                min-height: 24px !important;
+                                                                                padding: 2px 4px !important;
+                                                                                font-size: 10px !important;
+                                                                            }
+
+                                                                            .icon-button { min-width: 26px !important; width: 26px !important; height: 26px !important; }
+                                                                            .icon-button svg { width: 14px; height: 14px; }
+
+                                                                            #bandSelect,
+                                                                            input[type="date"] { height: 20px; font-size: 11px; }
+
+                                                                            .locator-input input { max-width: 70px; }
+                                                                        }
+
+                                                                        /* --------------------------------------------------------------
+                                                                           3. Keep the “folded” panel behaviour untouched
+                                                                           -------------------------------------------------------------- */
+                                                                        #controls.folded { transform: translateX(calc(-100% + 34px)); }
+                                                                        #showControlsPanel { width: 30px; height: 30px; font-size: 16px; }
+                                                                    </style>
+                                                                    <style>
                                                                     /* ------------------------------------------------------------------
                                                                        1. ICON-ONLY BUTTONS (prev/next day, nav icons, panel toggle)
                                                                        ------------------------------------------------------------------ */
