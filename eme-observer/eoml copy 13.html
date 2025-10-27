@@ -305,7 +305,6 @@
                                                                             font-weight: 600;
                                                                             color: #333;
                                                                             white-space: nowrap;
-                                                                            line-height: 1;
                                                                         }
 
                                                                         .locator-input input {
@@ -315,7 +314,7 @@
                                                                             border: 1px solid #ccc;
                                                                             border-radius: 5px;
                                                                             background: white;
-                                                                            max-width: 80px; /* Reduced */
+                                                                            max-width: 100px; /* Prevents over-expansion */
                                                                         }
 
                                                                         /* Buttons - Unified Professional Style */
@@ -392,21 +391,17 @@
                                                                         }
 
                                                                         .nav-button.icon-button {
-                                                                            padding: 2px; /* Reduced for icons */
+                                                                            padding: 4px; /* Reduced for icons */
                                                                             width: auto;
-                                                                            min-width: 24px; /* Reduced */
-                                                                            height: 24px; /* Reduced */
-                                                                            font-size: 12px; /* Reduced for icons */
+                                                                            min-width: 28px; /* Slightly larger for touch */
+                                                                            height: 28px; /* Square for icons */
+                                                                            font-size: 14px; /* For icons */
                                                                         }
 
                                                                         .nav-button.icon-button svg {
-                                                                            width: 14px; /* Reduced */
-                                                                            height: 14px;
+                                                                            width: 16px;
+                                                                            height: 16px;
                                                                             fill: currentColor;
-                                                                        }
-
-                                                                        .icon-button.active {
-                                                                            background-color: #005fa3;
                                                                         }
 
                                                                         /* Band Select */
@@ -530,8 +525,8 @@
                                                                             top: 50%;
                                                                             left: 20px;
                                                                             transform: translateY(-50%);
-                                                                            width: 24px;
-                                                                            height: 24px;
+                                                                            width: 28px; /* Slightly reduced */
+                                                                            height: 28px;
                                                                             padding: 0;
                                                                             background-color: #0078d4;
                                                                             color: white;
@@ -574,7 +569,7 @@
                                                                                 min-width: 260px;
                                                                             }
                                                                             .locator-input input {
-                                                                                max-width: 70px;
+                                                                                max-width: 80px;
                                                                             }
                                                                             .nav-button {
                                                                                 padding: 3px 6px; /* Further reduce on mobile */
@@ -633,7 +628,6 @@
                                                                             }
                                                                             .app-header-row {
                                                                                 flex-wrap: nowrap;
-                                                                                gap: 2px;
                                                                             }
                                                                         }
                                                                         /* --- CLEAN INLINE HEADER LAYOUT --- */
@@ -642,7 +636,7 @@
                                                                             align-items: center;
                                                                             justify-content: space-between;
                                                                             flex-wrap: wrap;
-                                                                            gap: 4px;
+                                                                            gap: 6px;
                                                                             padding-bottom: 0px; /* Reduced */
                                                                             margin-bottom: 0px; /* Reduced */
                                                                         }
@@ -681,7 +675,7 @@
                                                                             display: flex;
                                                                             align-items: center;
                                                                             justify-content: center;
-                                                                            width: 24px;
+                                                                            width: 28px;
                                                                             cursor: pointer;
                                                                             transition: background 0.2s ease;
                                                                         }
@@ -725,7 +719,7 @@
                                                                             color: white;
                                                                             cursor: pointer;
                                                                             transition: background 0.2s ease;
-                                                                            padding: 0 6px;
+                                                                            padding: 0 10px;
                                                                             box-sizing: border-box;
                                                                         }
 
@@ -746,7 +740,6 @@
                                                                             background-color: #fff;
                                                                             border: 1px solid #ccc;
                                                                             cursor: pointer;
-                                                                            padding: 0 4px;
                                                                         }
 
                                                                         /* --- ROW ALIGNMENT --- */
@@ -754,12 +747,12 @@
                                                                             display: flex;
                                                                             align-items: center;
                                                                             flex-wrap: wrap;
-                                                                            gap: 4px;
+                                                                            gap: 6px;
                                                                             justify-content: flex-start;
                                                                             margin-top: 0px; /* Reduced */
                                                                         }
                                                                         .control-button {
-                                                                            min-width: 50px; /* Reduced width for Track/Stop */
+                                                                            min-width: 60px; /* Fixed width for Track/Stop */
                                                                         }
                                                                     </style>
                                                                     
@@ -832,8 +825,8 @@
                         </svg>
                     </a>
                     <a href="user-guide.html" class="icon-button" title="Help">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4zm-1 16h2v-2h-2v2z"/>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
                         </svg>
                     </a>
                     <button id="toggleControlsPanel" class="icon-button" title="Toggle Controls">
@@ -879,11 +872,7 @@
                 </div>
             </div>
         </div>
-        <button id="showControlsPanel" style="display: none;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
-            </svg>
-        </button>
+        <button id="showControlsPanel" style="display: none;">→</button>
     
 <script src="chart.js"></script>
 <script src="chartjs-plugin-annotation@1.4.0"></script>
@@ -2621,12 +2610,12 @@
     document.getElementById('activeStationsButton').addEventListener('click', () => {
       isActiveStationsOnly = !isActiveStationsOnly;
       const activeButton = document.getElementById('activeStationsButton');
+      activeButton.textContent = isActiveStationsOnly ? 'Active' : 'All';
       if (isActiveStationsOnly) {
         activeButton.classList.add('active');
       } else {
         activeButton.classList.remove('active');
       }
-      activeButton.title = isActiveStationsOnly ? 'Showing Active Stations (Click to show All)' : 'Showing All Stations (Click to show Active only)';
       const band = document.getElementById('bandSelect').value;
       const jsonFile = bandConfig[band].jsonFile;
       fetch(jsonFile)
