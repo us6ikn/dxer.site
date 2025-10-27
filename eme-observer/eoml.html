@@ -90,12 +90,6 @@
                                                                             display: none;
                                                                         }
 
-                                                                        #declinationChart, #dxDeclinationChart, #relativeDataChart, #moonDistanceChart {
-                                                                            width: 100%;
-                                                                            height: calc(100% - 20px);
-                                                                            box-sizing: border-box;
-                                                                        }
-
                                                                         #moonChartWrapper {
                                                                             display: block;
                                                                         }
@@ -152,7 +146,7 @@
                                                                             padding-bottom: 12px;
                                                                             display: flex;
                                                                             flex-direction: column;
-                                                                            gap: 12px; /* Increased for breathing room */
+                                                                            gap: 6px; /* Reduced for less vertical space */
                                                                             border-bottom: 1px solid rgba(0, 0, 0, 0.1); /* Subtle section divider */
                                                                         }
 
@@ -182,8 +176,8 @@
                                                                             flex-direction: column;
                                                                             align-items: flex-start; /* Align left for better flow */
                                                                             position: relative;
-                                                                            margin-bottom: 8px;
-                                                                            padding-bottom: 8px;
+                                                                            margin-bottom: 0px; /* Reduced */
+                                                                            padding-bottom: 0px; /* Reduced */
                                                                             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
                                                                             width: fit-content;
                                                                         }
@@ -250,6 +244,7 @@
                                                                             font-weight: 500;
                                                                             color: #333;
                                                                             white-space: nowrap;
+                                                                            width: 70px; /* Fixed width to prevent movement */
                                                                         }
 
                                                                         /* Time Slider */
@@ -431,7 +426,7 @@
                                                                             display: flex;
                                                                             align-items: center;
                                                                             gap: 8px;
-                                                                            margin-top: 4px;
+                                                                            margin-top: 0px; /* Reduced */
                                                                         }
 
                                                                         /* Labels and Metrics - Preserve Original Colors, Refine Typography */
@@ -585,6 +580,55 @@
                                                                                 padding: 3px 6px;
                                                                                 min-height: 22px;
                                                                             }
+                                                                            .app-name {
+                                                                                font-size: 14px;
+                                                                            }
+                                                                            .creator-label {
+                                                                                font-size: 10px;
+                                                                            }
+                                                                            .combined-nav {
+                                                                                gap: 4px;
+                                                                            }
+                                                                            .control-button, .icon-button, .control-select {
+                                                                                height: 24px;
+                                                                                min-height: 24px;
+                                                                            }
+                                                                            .icon-button {
+                                                                                min-width: 24px;
+                                                                                padding: 2px;
+                                                                            }
+                                                                            .icon-button svg {
+                                                                                width: 14px;
+                                                                                height: 14px;
+                                                                            }
+                                                                            .control-button {
+                                                                                padding: 0 6px;
+                                                                                font-size: 11px;
+                                                                                min-width: 50px;
+                                                                            }
+                                                                            .control-select {
+                                                                                padding: 0 4px;
+                                                                                font-size: 11px;
+                                                                            }
+                                                                            #date-container-inline {
+                                                                                gap: 4px;
+                                                                            }
+                                                                            #date-container-inline .icon-only {
+                                                                                width: 24px;
+                                                                                height: 24px;
+                                                                                padding: 2px;
+                                                                            }
+                                                                            input[type="date"] {
+                                                                                font-size: 12px;
+                                                                                padding: 2px 4px;
+                                                                                height: 24px;
+                                                                            }
+                                                                            #hour-value {
+                                                                                font-size: 12px;
+                                                                            }
+                                                                            .app-header-row {
+                                                                                flex-wrap: nowrap;
+                                                                            }
                                                                         }
                                                                         /* --- CLEAN INLINE HEADER LAYOUT --- */
                                                                         .app-header-row {
@@ -593,8 +637,8 @@
                                                                             justify-content: space-between;
                                                                             flex-wrap: wrap;
                                                                             gap: 6px;
-                                                                            padding-bottom: 2px;
-                                                                            margin-bottom: 2px; /* Reduced from 4px for tighter spacing */
+                                                                            padding-bottom: 0px; /* Reduced */
+                                                                            margin-bottom: 0px; /* Reduced */
                                                                         }
 
                                                                         .app-name-wrapper {
@@ -647,7 +691,7 @@
                                                                             flex-wrap: wrap;
                                                                             gap: 6px;
                                                                             justify-content: flex-start;
-                                                                            margin-top: 2px; /* Reduced from 4px for tighter spacing */
+                                                                            margin-top: 0px; /* Reduced */
                                                                         }
 
                                                                         /* --- ACTIVE STATION BUTTON HEIGHT FIX --- */
@@ -705,7 +749,10 @@
                                                                             flex-wrap: wrap;
                                                                             gap: 6px;
                                                                             justify-content: flex-start;
-                                                                            margin-top: 2px; /* smaller gap */
+                                                                            margin-top: 0px; /* Reduced */
+                                                                        }
+                                                                        .control-button {
+                                                                            min-width: 60px; /* Fixed width for Track/Stop */
                                                                         }
                                                                     </style>
                                                                     
