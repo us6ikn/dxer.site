@@ -805,20 +805,6 @@
                                                                             .combined-nav { gap: 8px; }
                                                                             .button-band-group { gap: 10px; }
                                                                         }
-                                                                        /* --------------------------------------------------------------
-                                                                           SVG ICON SIZES – Desktop / Tablet only
-                                                                           -------------------------------------------------------------- */
-                                                                        @media (min-width: 601px) {               /* desktop + tablets */
-                                                                            .icon-button svg,
-                                                                            #date-container-inline .icon-only svg,
-                                                                            #prevDay svg,
-                                                                            #nextDay svg {
-                                                                                width: 20px !important;          /* bigger, crisp icons */
-                                                                                height: 20px !important;
-                                                                            }
-                                                                        }
-
-                                                                        /* Mobile stays exactly as you already have (14px) – no change */
 
                                                                         /* --------------------------------------------------------------
                                                                            2. MOBILE – shrink buttons *only* on very narrow screens
@@ -846,7 +832,7 @@
                                                                             .icon-button svg { width: 14px; height: 14px; }
 
                                                                             #bandSelect,
-                                                                            input[type="date"] { height: 26px; font-size: 11px; }
+                                                                            input[type="date"] { height: 20px; font-size: 11px; }
 
                                                                             .locator-input input { max-width: 70px; }
                                                                         }
@@ -857,7 +843,63 @@
                                                                         #controls.folded { transform: translateX(calc(-100% + 34px)); }
                                                                         #showControlsPanel { width: 30px; height: 30px; font-size: 16px; }
                                                                     </style>
-                                                                    
+                                                                    <style>
+                                                                    /* ------------------------------------------------------------------
+                                                                       1. ICON-ONLY BUTTONS (prev/next day, nav icons, panel toggle)
+                                                                       ------------------------------------------------------------------ */
+                                                                    .icon-only,
+                                                                    .combined-nav .icon-button,
+                                                                    #toggleControlsPanel {
+                                                                        /* same base size on every screen */
+                                                                        width: 28px !important;   /* mobile default */
+                                                                        height: 28px !important;
+                                                                        padding: 0 !important;
+                                                                        display: flex;
+                                                                        align-items: center;
+                                                                        justify-content: center;
+                                                                    }
+
+                                                                    /* ------------------------------------------------------------------
+                                                                       2. SVG SIZE – responsive but never tiny on larger screens
+                                                                       ------------------------------------------------------------------ */
+                                                                    .icon-only svg,
+                                                                    .combined-nav .icon-button svg,
+                                                                    #toggleControlsPanel svg {
+                                                                        width: 16px;   /* desktop / tablet */
+                                                                        height: 16px;
+                                                                        fill: currentColor;
+                                                                    }
+
+                                                                    /* ------------------------------------------------------------------
+                                                                       3. MOBILE – keep the original tiny icons (they already looked good)
+                                                                       ------------------------------------------------------------------ */
+                                                                    @media (max-width: 600px) {
+                                                                        .icon-only svg,
+                                                                        .combined-nav .icon-button svg,
+                                                                        #toggleControlsPanel svg {
+                                                                            width: 14px;
+                                                                            height: 14px;
+                                                                        }
+                                                                    }
+
+                                                                    /* ------------------------------------------------------------------
+                                                                       4. DESKTOP – make the *buttons* a little bigger (optional)
+                                                                       ------------------------------------------------------------------ */
+                                                                    @media (min-width: 601px) {
+                                                                        .icon-only,
+                                                                        .combined-nav .icon-button,
+                                                                        #toggleControlsPanel {
+                                                                            width: 32px !important;
+                                                                            height: 32px !important;
+                                                                        }
+                                                                        .icon-only svg,
+                                                                        .combined-nav .icon-button svg,
+                                                                        #toggleControlsPanel svg {
+                                                                            width: 18px;   /* slightly larger on big screens */
+                                                                            height: 18px;
+                                                                        }
+                                                                    }
+                                                                    </style>
                                                                     
     </head>
     <body>
