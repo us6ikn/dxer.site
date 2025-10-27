@@ -805,6 +805,20 @@
                                                                             .combined-nav { gap: 8px; }
                                                                             .button-band-group { gap: 10px; }
                                                                         }
+                                                                        /* --------------------------------------------------------------
+                                                                           SVG ICON SIZES – Desktop / Tablet only
+                                                                           -------------------------------------------------------------- */
+                                                                        @media (min-width: 601px) {               /* desktop + tablets */
+                                                                            .icon-button svg,
+                                                                            #date-container-inline .icon-only svg,
+                                                                            #prevDay svg,
+                                                                            #nextDay svg {
+                                                                                width: 20px !important;          /* bigger, crisp icons */
+                                                                                height: 20px !important;
+                                                                            }
+                                                                        }
+
+                                                                        /* Mobile stays exactly as you already have (14px) – no change */
 
                                                                         /* --------------------------------------------------------------
                                                                            2. MOBILE – shrink buttons *only* on very narrow screens
@@ -843,6 +857,7 @@
                                                                         #controls.folded { transform: translateX(calc(-100% + 34px)); }
                                                                         #showControlsPanel { width: 30px; height: 30px; font-size: 16px; }
                                                                     </style>
+                                                                    
                                                                     
     </head>
     <body>
