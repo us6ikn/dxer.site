@@ -302,7 +302,7 @@
             <div style="display: flex; flex-direction: row; gap: 4px;">
               <a href="https://dxer.site" target="_blank" title="Go to homepage"
                  style="text-decoration: none; font-size: 16px; background: rgba(255,255,255,0.1); color: white; padding: 2px 6px; border-radius: 4px;">
-                🏠
+                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white">
               </a>
               <a href="https://dxer.site/eme-observer/" target="_blank" title="Go to EME Observer"
                  style="text-decoration: none; font-size: 16px; background: rgba(255,255,255,0.1); color: white; padding: 2px 6px; border-radius: 4px;">
@@ -471,7 +471,7 @@
 
           const raycaster = new THREE.Raycaster();
           const mouse = new THREE.Vector2();
-          let tiles = [];  // Changed from spheres to tiles
+          let spheres = [];
           let minNoise = Infinity, maxNoise = -Infinity;
           const rawPoints = [];
 
@@ -1426,8 +1426,8 @@
               skipEmptyLines: true,
               complete: function (results) {
                 rawPoints.length = 0;
-                tiles.forEach(t => scene.remove(t));  // Changed from spheres to tiles
-                tiles.length = 0;  // Changed from spheres to tiles
+                spheres.forEach(s => scene.remove(s));
+                spheres.length = 0;
                 minNoise = Infinity;
                 maxNoise = -Infinity;
 
@@ -1476,26 +1476,20 @@
                   const y = r * Math.sin(elRad);
                   const z = r * Math.cos(elRad) * Math.cos(azRad);
 
-                  // Hexagonal tile implementation
-                  const hexRadius = 0.02;
-                  const hexHeight = 0.005;
-                  const geometry = new THREE.CylinderGeometry(hexRadius, hexRadius, hexHeight, 6);
-                  const material = new THREE.MeshBasicMaterial({
-                    color: getColor(point.noise),
-                    side: THREE.DoubleSide
-                  });
-                  const tile = new THREE.Mesh(geometry, material);
-                  tile.position.set(x, y, z);
-                  tile.rotation.x = Math.PI / 2;  // Rotate to lay flat on the dome
+                  const geometry = new THREE.SphereGeometry(0.02, 8, 8);
+                  const material = new THREE.MeshBasicMaterial({ color: getColor(point.noise) });
 
-                  tile.userData = {
+                  const sphere = new THREE.Mesh(geometry, material);
+                  sphere.position.set(x, y, z);
+
+                  sphere.userData = {
                     azimuth: point.az,
                     elevation: point.el,
                     noise: point.noise
                   };
 
-                  tiles.push(tile);  // Changed from spheres to tiles
-                  scene.add(tile);
+                  spheres.push(sphere);
+                  scene.add(sphere);
                 });
 
                 let isCompleteDome = false;
@@ -1520,7 +1514,7 @@
                   controls.target.set(0, 0, 0);
                 } else {
                   const boundingBox = new THREE.Box3();
-                  tiles.forEach(t => boundingBox.expandByPoint(t.position));  // Changed from spheres to tiles
+                  spheres.forEach(s => boundingBox.expandByPoint(s.position));
 
                   const center = new THREE.Vector3();
                   boundingBox.getCenter(center);
@@ -1530,8 +1524,8 @@
                   const maxDim = Math.max(size.x, size.y, size.z) || 2;
 
                   let avgPosition = new THREE.Vector3();
-                  tiles.forEach(t => avgPosition.add(t.position));  // Changed from spheres to tiles
-                  avgPosition.divideScalar(tiles.length);  // Changed from spheres to tiles
+                  spheres.forEach(s => avgPosition.add(s.position));
+                  avgPosition.divideScalar(spheres.length);
 
                   const directionToData = avgPosition.clone().normalize();
                   const distance = maxDim * 2;
@@ -1618,7 +1612,7 @@
 
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObjects([
-              ...tiles,  // Changed from spheres to tiles
+              ...spheres,
               moonMarker,
               sunMarker
             ].filter(obj => obj !== null));
@@ -1687,7 +1681,7 @@
 
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObjects([
-              ...tiles,  // Changed from spheres to tiles
+              ...spheres,
               moonMarker,
               sunMarker
             ].filter(obj => obj !== null));
