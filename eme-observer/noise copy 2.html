@@ -620,13 +620,6 @@
           function updateTracking() {
             if (!autoTracking) return;
             currentRealTimeData = getCurrentPositions();
-            const data = currentRealTimeData;
-            const moonUp = data.moon.el > 0;
-            const sunUp = showSunCheckbox.checked && data.sun.el > 0;
-            if (!moonUp && !sunUp) {
-              stopTracking();
-              return;
-            }
             updateMoonMarker();
             updateSunMarker();
             updateTimeDisplay();
@@ -641,9 +634,6 @@
               addTrajectories(todayStr);
             }
             currentRealTimeData = getCurrentPositions();
-            updateMoonMarker();
-            updateSunMarker();
-            updateTimeDisplay();
             isRealTime = true;
             timeSlider.disabled = true;
             trackButton.textContent = 'Stop';
@@ -651,10 +641,15 @@
             const now = new Date();
             const seconds = now.getUTCSeconds();
             const msToNextMinute = (60 - seconds) * 1000 - now.getUTCMilliseconds();
-            trackingTimeout = setTimeout(() => {
+            if (msToNextMinute > 0) {
+              trackingTimeout = setTimeout(() => {
+                updateTracking();
+                trackingInterval = setInterval(updateTracking, 60000);
+              }, msToNextMinute);
+            } else {
               updateTracking();
               trackingInterval = setInterval(updateTracking, 60000);
-            }, msToNextMinute);
+            }
           }
 
           function stopTracking() {
