@@ -641,11 +641,11 @@
               addTrajectories(todayStr);
             }
             currentRealTimeData = getCurrentPositions();
+            isRealTime = true;
+            timeSlider.disabled = true;
             updateMoonMarker();
             updateSunMarker();
             updateTimeDisplay();
-            isRealTime = true;
-            timeSlider.disabled = true;
             trackButton.textContent = 'Stop';
             autoTracking = true;
             const now = new Date();
