@@ -1373,33 +1373,27 @@
             if (commonMoonSegment.length > 1) commonMoonSegments.push(commonMoonSegment);
 
             moonSegments.forEach(seg => {
-              if (seg.length < 2) return;
-              const curve = new THREE.CatmullRomCurve3(seg);
-              const tubeGeom = new THREE.TubeGeometry(curve, 64, 0.005, 8, false);
-              const tubeMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-              const tube = new THREE.Mesh(tubeGeom, tubeMat);
-              tube.userData = { isMoonTrajectory: true };
-              moonTrajectoryGroup.add(tube);
+              const geom = new THREE.BufferGeometry().setFromPoints(seg);
+              const mat = new THREE.LineBasicMaterial({ color: 0xffff00 });
+              const line = new THREE.Line(geom, mat);
+              line.userData = { isMoonTrajectory: true };
+              moonTrajectoryGroup.add(line);
             });
 
             commonMoonSegments.forEach(seg => {
-              if (seg.length < 2) return;
-              const curve = new THREE.CatmullRomCurve3(seg);
-              const tubeGeom = new THREE.TubeGeometry(curve, 64, 0.007, 8, false);
-              const tubeMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-              const tube = new THREE.Mesh(tubeGeom, tubeMat);
-              tube.userData = { isCommonMoonTrajectory: true };
-              moonTrajectoryGroup.add(tube);
+              const geom = new THREE.BufferGeometry().setFromPoints(seg);
+              const mat = new THREE.LineBasicMaterial({ color: 0x00ff00, linewidth: 1 });
+              const line = new THREE.Line(geom, mat);
+              line.userData = { isCommonMoonTrajectory: true };
+              moonTrajectoryGroup.add(line);
             });
 
             sunSegments.forEach(seg => {
-              if (seg.length < 2) return;
-              const curve = new THREE.CatmullRomCurve3(seg);
-              const tubeGeom = new THREE.TubeGeometry(curve, 64, 0.005, 8, false);
-              const tubeMat = new THREE.MeshBasicMaterial({ color: 0xffa500 });
-              const tube = new THREE.Mesh(tubeGeom, tubeMat);
-              tube.userData = { isSunTrajectory: true };
-              sunTrajectoryGroup.add(tube);
+              const geom = new THREE.BufferGeometry().setFromPoints(seg);
+              const mat = new THREE.LineBasicMaterial({ color: 0xffa500 });
+              const line = new THREE.Line(geom, mat);
+              line.userData = { isSunTrajectory: true };
+              sunTrajectoryGroup.add(line);
             });
 
             sunTrajectoryGroup.visible = showSunCheckbox.checked;
