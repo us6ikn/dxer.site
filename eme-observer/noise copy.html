@@ -76,32 +76,14 @@
           box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
-        #trackButton {
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          border-radius: 12px;
-          color: white;
-          font-size: 24px;
-          font-family: sans-serif;
-          padding: 10px 20px;
-          cursor: pointer;
-          transition: background 0.2s, transform 0.2s;
-          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-
-        #moonTimeControls button:hover, #trackButton:hover {
+        #moonTimeControls button:hover {
           background: rgba(255, 255, 255, 0.2);
           transform: scale(1.05);
         }
 
-        #moonTimeControls button:active, #trackButton:active {
+        #moonTimeControls button:active {
           background: rgba(255, 255, 255, 0.3);
           transform: scale(0.97);
-        }
-
-        #trackButton:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
         }
 
         #moonTimeControls {
@@ -369,7 +351,6 @@
             --:-- UTC
           </span>
           <input type="range" id="timeSlider" min="0" max="0" value="0" aria-label="Select time for moon and sun position" role="slider" tabindex="0" style="width: 80vw; max-width: 300px; accent-color: #fff; cursor: pointer;">
-          <button id="trackButton">Track</button>
         </div>
 
         <div id="colorBarContainer" style="
@@ -414,11 +395,6 @@
           let sunMarker = null;
           let azStep = 5;
           let elStep = 5;
-          let isRealTime = false;
-          let currentRealTimeData = null;
-          let autoTracking = false;
-          let trackingTimeout = null;
-          let trackingInterval = null;
           
           const moonTimeDisplay = document.getElementById('moonTimeDisplay');
           const timeSlider = document.getElementById('timeSlider');
@@ -434,7 +410,6 @@
           const minNoiseLabel = document.getElementById('minNoiseLabel');
           const maxNoiseLabel = document.getElementById('maxNoiseLabel');
           const colorBarContainer = document.getElementById('colorBarContainer');
-          const trackButton = document.getElementById('trackButton');
 
           const renderer = new THREE.WebGLRenderer({ antialias: true });
           renderer.setSize(window.innerWidth, window.innerHeight);
@@ -547,129 +522,6 @@
             return null;
           }
 
-          function getCurrentPositions() {
-            const now = new Date();
-            const grid = gridInput.value || 'JO89tt';
-            const coords = maidenheadToLatLon(grid);
-            if (!coords) return null;
-            const observer = new Astronomy.Observer(coords.lat, coords.lon, 0);
-
-            // Moon
-            const moonEq = Astronomy.Equator(Astronomy.Body.Moon, now, observer, true, false);
-            const moonHor = Astronomy.Horizon(now, observer, moonEq.ra, moonEq.dec, 'normal');
-            const moonEl = moonHor.altitude;
-            const moonAz = moonHor.azimuth;
-            const azRadMoon = THREE.MathUtils.degToRad(360 - moonAz);
-            const elRadMoon = THREE.MathUtils.degToRad(Math.max(moonEl, 0));
-            const r = 1;
-            const xMoon = r * Math.cos(elRadMoon) * Math.sin(azRadMoon);
-            const yMoon = r * Math.sin(elRadMoon);
-            const zMoon = r * Math.cos(elRadMoon) * Math.cos(azRadMoon);
-            const moonPos = new THREE.Vector3(xMoon, yMoon, zMoon);
-
-            // Sun
-            let sunEl = -1;
-            let sunAz = 0;
-            let sunPos = new THREE.Vector3();
-            if (showSunCheckbox.checked) {
-              const sunEq = Astronomy.Equator(Astronomy.Body.Sun, now, observer, true, false);
-              const sunHor = Astronomy.Horizon(now, observer, sunEq.ra, sunEq.dec, 'normal');
-              sunEl = sunHor.altitude;
-              sunAz = sunHor.azimuth;
-              const azRadSun = THREE.MathUtils.degToRad(360 - sunAz);
-              const elRadSun = THREE.MathUtils.degToRad(Math.max(sunEl, 0));
-              const xSun = r * Math.cos(elRadSun) * Math.sin(azRadSun);
-              const ySun = r * Math.sin(elRadSun);
-              const zSun = r * Math.cos(elRadSun) * Math.cos(azRadSun);
-              sunPos = new THREE.Vector3(xSun, ySun, zSun);
-            }
-
-            // DX Moon
-            let dxMoon = null;
-            const dxGrid = dxGridInput.value;
-            if (dxGrid && isValidGrid(dxGrid)) {
-              const dxCoords = maidenheadToLatLon(dxGrid);
-              const dxObserver = new Astronomy.Observer(dxCoords.lat, dxCoords.lon, 0);
-              const dxMoonEq = Astronomy.Equator(Astronomy.Body.Moon, now, dxObserver, true, false);
-              const dxMoonHor = Astronomy.Horizon(now, dxObserver, dxMoonEq.ra, dxMoonEq.dec, 'normal');
-              const dxMoonAz = dxMoonHor.azimuth;
-              const dxMoonEl = dxMoonHor.altitude;
-              dxMoon = { az: dxMoonAz, el: dxMoonEl };
-            }
-
-            return {
-              moon: { pos: moonPos, az: moonAz, el: moonEl, time: now },
-              sun: { pos: sunPos, az: sunAz, el: sunEl, time: now },
-              dxMoon
-            };
-          }
-
-          function isTrackable() {
-            const data = getCurrentPositions();
-            if (!data) return false;
-            const moonUp = data.moon.el > 0;
-            const sunUp = showSunCheckbox.checked && data.sun.el > 0;
-            return moonUp || sunUp;
-          }
-
-          function updateTrackButtonState() {
-            const trackable = isTrackable();
-            trackButton.disabled = !trackable && !autoTracking;
-          }
-
-          function updateTracking() {
-            if (!autoTracking) return;
-            currentRealTimeData = getCurrentPositions();
-            updateMoonMarker();
-            updateSunMarker();
-            updateTimeDisplay();
-            updateTrackButtonState();
-          }
-
-          function startTracking() {
-            const today = new Date();
-            const todayStr = today.toISOString().split('T')[0];
-            if (datePicker.value !== todayStr) {
-              datePicker.value = todayStr;
-              addTrajectories(todayStr);
-            }
-            currentRealTimeData = getCurrentPositions();
-            isRealTime = true;
-            timeSlider.disabled = true;
-            trackButton.textContent = 'Stop';
-            autoTracking = true;
-            const now = new Date();
-            const seconds = now.getUTCSeconds();
-            const msToNextMinute = (60 - seconds) * 1000 - now.getUTCMilliseconds();
-            if (msToNextMinute > 0) {
-              trackingTimeout = setTimeout(() => {
-                updateTracking();
-                trackingInterval = setInterval(updateTracking, 60000);
-              }, msToNextMinute);
-            } else {
-              updateTracking();
-              trackingInterval = setInterval(updateTracking, 60000);
-            }
-          }
-
-          function stopTracking() {
-            if (trackingInterval) clearInterval(trackingInterval);
-            if (trackingTimeout) clearTimeout(trackingTimeout);
-            autoTracking = false;
-            isRealTime = false;
-            currentRealTimeData = null;
-            timeSlider.disabled = moonPositions.length === 0;
-            trackButton.textContent = 'Track';
-            const now = new Date();
-            const nowMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
-            const index = Math.round(nowMinutes / 10);
-            if (index >= 0 && index < moonPositions.length) {
-              currentTimeIndex = index;
-            }
-            updateTimeSlider();
-            updateTrackButtonState();
-          }
-
           function drawColorBar() {
             if (minNoise === Infinity || maxNoise === -Infinity) {
               colorBarContainer.style.display = 'none';
@@ -701,21 +553,9 @@
             colorBarContext.fillStyle = gradient;
             colorBarContext.fillRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
 
-            let az, el;
-            let showMarker = false;
-            if (isRealTime && currentRealTimeData && currentRealTimeData.moon.el > 0 && rawPoints.length) {
-              showMarker = true;
-              az = currentRealTimeData.moon.az;
-              el = currentRealTimeData.moon.el;
-            } else if (!isRealTime && moonPositions.length && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0 && rawPoints.length) {
-              showMarker = true;
+            if (moonPositions.length && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0 && rawPoints.length) {
               const moonData = moonPositions[currentTimeIndex];
-              az = moonData.azimuth;
-              el = moonData.elevation;
-            }
-
-            if (showMarker) {
-              const noisePoint = interpolateNoiseAtPosition(az, el);
+              const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
               if (noisePoint) {
                 const noise = noisePoint.noise;
                 const norm = (maxNoise - minNoise) === 0 ? 0.5 : (noise - minNoise) / (maxNoise - minNoise);
@@ -757,105 +597,64 @@
           }
 
           function updateMoonMarker() {
-            if (isRealTime) {
-              if (!currentRealTimeData) {
-                if (moonMarker) moonMarker.visible = false;
-                return false;
-              }
-              const moonData = currentRealTimeData.moon;
-              if (moonData.el <= 0) {
-                if (moonMarker) moonMarker.visible = false;
-                return false;
-              }
-              if (!moonMarker) {
-                const geom = new THREE.SphereGeometry(0.03);
-                const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-                moonMarker = new THREE.Mesh(geom, mat);
-                scene.add(moonMarker);
-              }
-              moonMarker.visible = true;
-              moonMarker.position.copy(moonData.pos);
-              return true;
-            } else {
-              if (!moonPositions.length || !moonPositions[currentTimeIndex]) {
-                if (moonMarker) moonMarker.visible = false;
-                return false;
-              }
-              const moonData = moonPositions[currentTimeIndex];
-              if (moonData.elevation <= 0) {
-                if (moonMarker) moonMarker.visible = false;
-                return false;
-              }
-              if (!moonMarker) {
-                const geom = new THREE.SphereGeometry(0.03);
-                const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-                moonMarker = new THREE.Mesh(geom, mat);
-                scene.add(moonMarker);
-              }
-              moonMarker.visible = true;
-              moonMarker.position.copy(moonData.position);
-              return true;
+            if (!moonPositions.length || !moonPositions[currentTimeIndex]) {
+              if (moonMarker) moonMarker.visible = false;
+              return false;
             }
+
+            const moonData = moonPositions[currentTimeIndex];
+            if (moonData.elevation <= 0) {
+              if (moonMarker) moonMarker.visible = false;
+              return false;
+            }
+
+            if (!moonMarker) {
+              const geom = new THREE.SphereGeometry(0.03);
+              const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+              moonMarker = new THREE.Mesh(geom, mat);
+              scene.add(moonMarker);
+            }
+
+            moonMarker.visible = true;
+            moonMarker.position.copy(moonData.position);
+            return true;
           }
 
           function updateSunMarker() {
-            if (isRealTime) {
-              if (!currentRealTimeData || !showSunCheckbox.checked) {
-                if (sunMarker) sunMarker.visible = false;
-                return false;
-              }
-              const sunData = currentRealTimeData.sun;
-              if (sunData.el <= 0) {
-                if (sunMarker) sunMarker.visible = false;
-                return false;
-              }
-              if (!sunMarker) {
-                const geom = new THREE.SphereGeometry(0.02);
-                const mat = new THREE.MeshBasicMaterial({ color: 0xffa500 });
-                sunMarker = new THREE.Mesh(geom, mat);
-                scene.add(sunMarker);
-              }
-              sunMarker.visible = true;
-              sunMarker.position.copy(sunData.pos);
-              return true;
-            } else {
-              if (!sunPositions.length || !showSunCheckbox.checked || !sunPositions[currentTimeIndex]) {
-                if (sunMarker) sunMarker.visible = false;
-                return false;
-              }
-              const sunData = sunPositions[currentTimeIndex];
-              if (sunData.elevation <= 0) {
-                if (sunMarker) sunMarker.visible = false;
-                return false;
-              }
-              if (!sunMarker) {
-                const geom = new THREE.SphereGeometry(0.02);
-                const mat = new THREE.MeshBasicMaterial({ color: 0xffa500 });
-                sunMarker = new THREE.Mesh(geom, mat);
-                scene.add(sunMarker);
-              }
-              sunMarker.visible = true;
-              sunMarker.position.copy(sunData.position);
-              return true;
+            if (!sunPositions.length || !showSunCheckbox.checked || !sunPositions[currentTimeIndex]) {
+              if (sunMarker) sunMarker.visible = false;
+              return false;
             }
+
+            const sunData = sunPositions[currentTimeIndex];
+            if (sunData.elevation <= 0) {
+              if (sunMarker) sunMarker.visible = false;
+              return false;
+            }
+
+            if (!sunMarker) {
+              const geom = new THREE.SphereGeometry(0.02);
+              const mat = new THREE.MeshBasicMaterial({ color: 0xffa500 });
+              sunMarker = new THREE.Mesh(geom, mat);
+              scene.add(sunMarker);
+            }
+
+            sunMarker.visible = true;
+            sunMarker.position.copy(sunData.position);
+            return true;
           }
 
           function updateInfoBox() {
             let html = '';
-            if (isRealTime) {
-              if (!currentRealTimeData) {
-                infoBox.innerHTML = 'No data';
-                infoBox.style.display = 'block';
-                return;
-              }
-              const data = currentRealTimeData;
-              // Moon
-              if (data.moon.el > 0) {
-                const noisePoint = interpolateNoiseAtPosition(data.moon.az, data.moon.el);
+
+            if (moonPositions.length && moonPositions[currentTimeIndex]) {
+              const moonData = moonPositions[currentTimeIndex];
+              if (moonData.elevation > 0) {
+                const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
                 const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A';
                 html += `
                   <b>Moon</b><br>
-                  Az: ${data.moon.az.toFixed(1)}° El: ${data.moon.el.toFixed(1)}°<br>
+                  Az: ${moonData.azimuth.toFixed(1)}° El: ${moonData.elevation.toFixed(1)}°<br>
                   ${noiseText}
                 `;
               } else {
@@ -864,127 +663,65 @@
                   Moon below horizon
                 `;
               }
-              // DX Moon
-              if (data.dxMoon) {
-                html += `<br>`;
-                if (data.dxMoon.el > 0) {
-                  html += `
-                    <b>DX Moon</b><br>
-                    Az: ${data.dxMoon.az.toFixed(1)}° El: ${data.dxMoon.el.toFixed(1)}°
-                  `;
-                  if (data.moon.el > 0 && data.dxMoon.el > 0) {
-                    html += `<br><span style="color: lime;">Common window</span>`;
-                  }
-                } else {
-                  html += `
-                    <b>DX Moon</b><br>
-                    DX Moon below horizon
-                  `;
-                }
-              }
-              // Sun
-              if (showSunCheckbox.checked) {
-                html += `<br>`;
-                if (data.sun.el > 0) {
-                  html += `
-                    <b>Sun</b><br>
-                    Az: ${data.sun.az.toFixed(1)}° El: ${data.sun.el.toFixed(1)}°
-                  `;
-                } else {
-                  html += `
-                    <b>Sun</b><br>
-                    Sun below horizon
-                  `;
-                }
-              }
             } else {
-              if (moonPositions.length && moonPositions[currentTimeIndex]) {
-                const moonData = moonPositions[currentTimeIndex];
-                if (moonData.elevation > 0) {
-                  const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
-                  const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A';
-                  html += `
-                    <b>Moon</b><br>
-                    Az: ${moonData.azimuth.toFixed(1)}° El: ${moonData.elevation.toFixed(1)}°<br>
-                    ${noiseText}
-                  `;
-                } else {
-                  html += `
-                    <b>Moon</b><br>
-                    Moon below horizon
-                  `;
-                }
+              html += `
+                <b>Moon</b><br>
+                Moon below horizon
+              `;
+            }
+
+            if (dxMoonPositions.length && dxMoonPositions[currentTimeIndex]) {
+              const dxMoonData = dxMoonPositions[currentTimeIndex];
+              html += `<br>`;
+              if (dxMoonData.elevation > 0) {
+                html += `
+                  <b>DX Moon</b><br>
+                  Az: ${dxMoonData.azimuth.toFixed(1)}° El: ${dxMoonData.elevation.toFixed(1)}°
+                `;
               } else {
                 html += `
-                  <b>Moon</b><br>
-                  Moon below horizon
-                `;
-              }
-
-              if (dxMoonPositions.length && dxMoonPositions[currentTimeIndex]) {
-                const dxMoonData = dxMoonPositions[currentTimeIndex];
-                html += `<br>`;
-                if (dxMoonData.elevation > 0) {
-                  html += `
-                    <b>DX Moon</b><br>
-                    Az: ${dxMoonData.azimuth.toFixed(1)}° El: ${dxMoonData.elevation.toFixed(1)}°
-                  `;
-                } else {
-                  html += `
-                    <b>DX Moon</b><br>
-                    DX Moon below horizon
-                  `;
-                }
-              }
-
-              if (showSunCheckbox.checked && sunPositions.length && sunPositions[currentTimeIndex]) {
-                const sunData = sunPositions[currentTimeIndex];
-                html += `<br>`;
-                if (sunData.elevation > 0) {
-                  html += `
-                    <b>Sun</b><br>
-                    Az: ${sunData.azimuth.toFixed(1)}° El: ${sunData.elevation.toFixed(1)}°
-                  `;
-                } else {
-                  html += `
-                    <b>Sun</b><br>
-                    Sun below horizon
-                  `;
-                }
-              } else if (showSunCheckbox.checked) {
-                html += `
-                  <br><b>Sun</b><br>
-                  Sun below horizon
+                  <b>DX Moon</b><br>
+                  DX Moon below horizon
                 `;
               }
             }
+
+            if (showSunCheckbox.checked && sunPositions.length && sunPositions[currentTimeIndex]) {
+              const sunData = sunPositions[currentTimeIndex];
+              html += `<br>`;
+              if (sunData.elevation > 0) {
+                html += `
+                  <b>Sun</b><br>
+                  Az: ${sunData.azimuth.toFixed(1)}° El: ${sunData.elevation.toFixed(1)}°
+                `;
+              } else {
+                html += `
+                  <b>Sun</b><br>
+                  Sun below horizon
+                `;
+              }
+            } else if (showSunCheckbox.checked) {
+              html += `
+                <br><b>Sun</b><br>
+                Sun below horizon
+              `;
+            }
+
             infoBox.innerHTML = html;
             infoBox.style.display = 'block';
           }
 
           function updateTimeDisplay() {
-            let time, moonVisible, sunVisible;
-            if (isRealTime) {
-              if (!currentRealTimeData) {
-                moonTimeDisplay.textContent = '--:-- UTC';
-                updateInfoBox();
-                drawColorBar();
-                return;
-              }
-              time = currentRealTimeData.moon.time;
-              moonVisible = currentRealTimeData.moon.el > 0;
-              sunVisible = showSunCheckbox.checked && currentRealTimeData.sun.el > 0;
-            } else {
-              if (!moonPositions.length || !moonPositions[currentTimeIndex]) {
-                moonTimeDisplay.textContent = '--:-- UTC';
-                updateInfoBox();
-                drawColorBar();
-                return;
-              }
-              time = moonPositions[currentTimeIndex].time;
-              moonVisible = moonPositions[currentTimeIndex].elevation > 0;
-              sunVisible = showSunCheckbox.checked && sunPositions[currentTimeIndex]?.elevation > 0;
+            if (!moonPositions.length || !moonPositions[currentTimeIndex]) {
+              moonTimeDisplay.textContent = '--:-- UTC';
+              updateInfoBox();
+              drawColorBar();
+              return;
             }
+
+            const time = moonPositions[currentTimeIndex].time;
+            const moonVisible = moonPositions[currentTimeIndex].elevation > 0;
+            const sunVisible = showSunCheckbox.checked && sunPositions[currentTimeIndex]?.elevation > 0;
 
             if (moonVisible || sunVisible) {
               const hours = String(time.getUTCHours()).padStart(2, '0');
@@ -998,7 +735,6 @@
           }
 
           function updateTimeSlider() {
-            if (isRealTime) return;
             timeSlider.min = 0;
             timeSlider.max = moonPositions.length - 1 || 0;
             timeSlider.value = currentTimeIndex;
@@ -1009,7 +745,7 @@
           }
 
           function changeTime(index) {
-            if (isRealTime || !moonPositions.length) return;
+            if (!moonPositions.length) return;
             currentTimeIndex = Math.max(0, Math.min(index, moonPositions.length - 1));
             updateMoonMarker();
             updateSunMarker();
@@ -1017,9 +753,6 @@
           }
 
           function changeDate(days) {
-            if (isRealTime) {
-              stopTracking();
-            }
             let currentDate = datePicker.value ? new Date(datePicker.value) : new Date();
             currentDate.setUTCDate(currentDate.getUTCDate() + days);
             const year = currentDate.getUTCFullYear();
@@ -1030,7 +763,6 @@
           }
 
           timeSlider.addEventListener('input', (e) => {
-            if (isRealTime) return;
             e.stopPropagation();
             changeTime(parseInt(e.target.value));
           });
@@ -1051,9 +783,6 @@
           });
 
           datePicker.addEventListener('change', (e) => {
-            if (isRealTime) {
-              stopTracking();
-            }
             const selectedDate = e.target.value;
             if (selectedDate) {
               addTrajectories(selectedDate);
@@ -1065,23 +794,8 @@
 
           showSunCheckbox.addEventListener('change', () => {
             sunTrajectoryGroup.visible = showSunCheckbox.checked;
-            if (isRealTime) {
-              updateTracking();
-            } else {
-              updateSunMarker();
-              updateTimeDisplay();
-            }
-            updateTrackButtonState();
-          });
-
-          trackButton.addEventListener('click', () => {
-            if (autoTracking) {
-              stopTracking();
-            } else {
-              if (isTrackable()) {
-                startTracking();
-              }
-            }
+            updateSunMarker();
+            updateTimeDisplay();
           });
 
           function isValidGrid(locator) {
@@ -1093,20 +807,13 @@
 
           gridInput.addEventListener('input', () => {
             const grid = gridInput.value;
-            if (!isValidGrid(grid)) {
-              gridInput.style.borderColor = 'red';
-              if (isRealTime) {
-                stopTracking();
-              }
-              return;
-            }
-            gridInput.style.borderColor = '#fff';
-            localStorage.setItem('skyObserverGrid', grid);
-            if (isRealTime) {
-              updateTracking();
-            } else {
+            if (isValidGrid(grid)) {
+              gridInput.style.borderColor = '#fff';
+              localStorage.setItem('skyObserverGrid', grid);
               const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
               addTrajectories(dateVal);
+            } else {
+              gridInput.style.borderColor = 'red';
             }
           });
 
@@ -1119,12 +826,8 @@
             } else {
               dxGridInput.style.borderColor = '#fff';
             }
-            if (isRealTime) {
-              updateTracking();
-            } else {
-              const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
-              addTrajectories(dateVal);
-            }
+            const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
+            addTrajectories(dateVal);
           });
 
           function maidenheadToLatLon(locator) {
@@ -1239,7 +942,6 @@
           }
 
           function addTrajectories(selectedDate) {
-            if (isRealTime) return;
             const grid = gridInput.value || 'JO89tt';
             const dxGrid = dxGridInput.value;
             const coords = maidenheadToLatLon(grid);
@@ -1406,9 +1108,6 @@
           window.addTrajectories = addTrajectories;
 
           function parseCsvData(csvText, csvSource) {
-            if (isRealTime) {
-              stopTracking();
-            }
             Papa.parse(csvText, {
               header: true,
               delimiter: ";",
@@ -1526,6 +1225,7 @@
                 controls.update();
                 addAzimuthCompass();
                 updateTimeDisplay();
+                drawColorBar();
 
                 if (csvSource === 'demo') {
                   demoStatus.textContent = 'Demo loaded!';
@@ -1609,44 +1309,23 @@
             if (intersects.length > 0) {
               const clickedObject = intersects[0].object;
 
-              if (clickedObject === moonMarker) {
-                if (isRealTime && currentRealTimeData && currentRealTimeData.moon.el > 0) {
-                  const moonData = currentRealTimeData.moon;
-                  const noisePoint = interpolateNoiseAtPosition(moonData.az, moonData.el);
-                  const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A (Outside Dome)';
-                  infoBox.innerHTML = `
-                    <b>Moon</b><br>
-                    Az: ${moonData.az.toFixed(1)}° El: ${moonData.el.toFixed(1)}°<br>
-                    ${noiseText}
-                  `;
-                  infoBox.style.display = 'block';
-                } else if (!isRealTime && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0) {
-                  const moonData = moonPositions[currentTimeIndex];
-                  const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
-                  const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A (Outside Dome)';
-                  infoBox.innerHTML = `
-                    <b>Moon</b><br>
-                    Az: ${moonData.azimuth.toFixed(1)}° El: ${moonData.elevation.toFixed(1)}°<br>
-                    ${noiseText}
-                  `;
-                  infoBox.style.display = 'block';
-                }
-              } else if (clickedObject === sunMarker && showSunCheckbox.checked) {
-                if (isRealTime && currentRealTimeData && currentRealTimeData.sun.el > 0) {
-                  const sunData = currentRealTimeData.sun;
-                  infoBox.innerHTML = `
-                    <b>Sun</b><br>
-                    Az: ${sunData.az.toFixed(1)}° El: ${sunData.el.toFixed(1)}°
-                  `;
-                  infoBox.style.display = 'block';
-                } else if (!isRealTime && sunPositions[currentTimeIndex] && sunPositions[currentTimeIndex].elevation > 0) {
-                  const sunData = sunPositions[currentTimeIndex];
-                  infoBox.innerHTML = `
-                    <b>Sun</b><br>
-                    Az: ${sunData.azimuth.toFixed(1)}° El: ${sunData.elevation.toFixed(1)}°
-                  `;
-                  infoBox.style.display = 'block';
-                }
+              if (clickedObject === moonMarker && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0) {
+                const moonData = moonPositions[currentTimeIndex];
+                const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
+                const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A (Outside Dome)';
+                infoBox.innerHTML = `
+                  <b>Moon</b><br>
+                  Az: ${moonData.azimuth.toFixed(1)}° El: ${moonData.elevation.toFixed(1)}°<br>
+                  ${noiseText}
+                `;
+                infoBox.style.display = 'block';
+              } else if (clickedObject === sunMarker && showSunCheckbox.checked && sunPositions[currentTimeIndex] && sunPositions[currentTimeIndex].elevation > 0) {
+                const sunData = sunPositions[currentTimeIndex];
+                infoBox.innerHTML = `
+                  <b>Sun</b><br>
+                  Az: ${sunData.azimuth.toFixed(1)}° El: ${sunData.elevation.toFixed(1)}°
+                `;
+                infoBox.style.display = 'block';
               } else if (clickedObject.userData?.noise !== undefined) {
                 const { azimuth, elevation, noise } = clickedObject.userData;
                 infoBox.innerHTML = `
@@ -1678,44 +1357,23 @@
             if (intersects.length > 0) {
               const clickedObject = intersects[0].object;
 
-              if (clickedObject === moonMarker) {
-                if (isRealTime && currentRealTimeData && currentRealTimeData.moon.el > 0) {
-                  const moonData = currentRealTimeData.moon;
-                  const noisePoint = interpolateNoiseAtPosition(moonData.az, moonData.el);
-                  const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A (Outside Dome)';
-                  infoBox.innerHTML = `
-                    <b>Moon</b><br>
-                    Az: ${moonData.az.toFixed(1)}° El: ${moonData.el.toFixed(1)}°<br>
-                    ${noiseText}
-                  `;
-                  infoBox.style.display = 'block';
-                } else if (!isRealTime && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0) {
-                  const moonData = moonPositions[currentTimeIndex];
-                  const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
-                  const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A (Outside Dome)';
-                  infoBox.innerHTML = `
-                    <b>Moon</b><br>
-                    Az: ${moonData.azimuth.toFixed(1)}° El: ${moonData.elevation.toFixed(1)}°<br>
-                    ${noiseText}
-                  `;
-                  infoBox.style.display = 'block';
-                }
-              } else if (clickedObject === sunMarker && showSunCheckbox.checked) {
-                if (isRealTime && currentRealTimeData && currentRealTimeData.sun.el > 0) {
-                  const sunData = currentRealTimeData.sun;
-                  infoBox.innerHTML = `
-                    <b>Sun</b><br>
-                    Az: ${sunData.az.toFixed(1)}° El: ${sunData.el.toFixed(1)}°
-                  `;
-                  infoBox.style.display = 'block';
-                } else if (!isRealTime && sunPositions[currentTimeIndex] && sunPositions[currentTimeIndex].elevation > 0) {
-                  const sunData = sunPositions[currentTimeIndex];
-                  infoBox.innerHTML = `
-                    <b>Sun</b><br>
-                    Az: ${sunData.azimuth.toFixed(1)}° El: ${sunData.elevation.toFixed(1)}°
-                  `;
-                  infoBox.style.display = 'block';
-                }
+              if (clickedObject === moonMarker && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0) {
+                const moonData = moonPositions[currentTimeIndex];
+                const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
+                const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A (Outside Dome)';
+                infoBox.innerHTML = `
+                  <b>Moon</b><br>
+                  Az: ${moonData.azimuth.toFixed(1)}° El: ${moonData.elevation.toFixed(1)}°<br>
+                  ${noiseText}
+                `;
+                infoBox.style.display = 'block';
+              } else if (clickedObject === sunMarker && showSunCheckbox.checked && sunPositions[currentTimeIndex] && sunPositions[currentTimeIndex].elevation > 0) {
+                const sunData = sunPositions[currentTimeIndex];
+                infoBox.innerHTML = `
+                  <b>Sun</b><br>
+                  Az: ${sunData.azimuth.toFixed(1)}° El: ${sunData.elevation.toFixed(1)}°
+                `;
+                infoBox.style.display = 'block';
               } else if (clickedObject.userData?.noise !== undefined) {
                 const { azimuth, elevation, noise } = clickedObject.userData;
                 infoBox.innerHTML = `
@@ -1744,7 +1402,6 @@
           const day = String(today.getUTCDate()).padStart(2, '0');
           datePicker.value = `${year}-${month}-${day}`;
           addTrajectories();
-          updateTrackButtonState();
         </script>
     </body>
 </html>
