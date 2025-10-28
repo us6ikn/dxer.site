@@ -99,34 +99,6 @@
                                                                             padding-bottom: 20px;
                                                                         }
 
-                                                                        /* Annual Button for Moon Chart */
-                                                                        .annual-button {
-                                                                            position: absolute;
-                                                                            top: 5px;
-                                                                            right: 5px;
-                                                                            background-color: #0078d4;
-                                                                            color: white;
-                                                                            border: none;
-                                                                            border-radius: 4px;
-                                                                            padding: 4px 8px;
-                                                                            font-size: 12px;
-                                                                            font-weight: 600;
-                                                                            cursor: pointer;
-                                                                            transition: background 0.2s ease;
-                                                                            text-decoration: none;
-                                                                            display: inline-flex;
-                                                                            align-items: center;
-                                                                            justify-content: center;
-                                                                            min-height: 24px;
-                                                                            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-                                                                            z-index: 10;
-                                                                        }
-
-                                                                        .annual-button:hover {
-                                                                            background-color: #005fa3;
-                                                                            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-                                                                        }
-
                                                                         /* Reverted to original chart label styles */
                                                                         #chartLabel, #dxchartLabel, #relativeChartLabel, #moonChartLabel {
                                                                             text-align: center;
@@ -615,6 +587,77 @@
                                                                             opacity: 0.6;
                                                                         }
 
+                                                                        /* Media Queries for Responsiveness */
+                                                                        @media (max-width: 600px) {
+                                                                            #controls {
+                                                                                padding: 12px 14px;
+                                                                                left: 10px;
+                                                                                top: 10px;
+                                                                                min-width: 260px;
+                                                                            }
+                                                                            .locator-input input {
+                                                                                max-width: 70px;
+                                                                            }
+                                                                            .nav-button {
+                                                                                padding: 3px 6px; /* Further reduce on mobile */
+                                                                                min-height: 22px;
+                                                                                font-size: 11px;
+                                                                            }
+                                                                            #prevDay, #nextDay {
+                                                                                padding: 3px 6px;
+                                                                                min-height: 22px;
+                                                                            }
+                                                                            .app-name {
+                                                                                font-size: 14px;
+                                                                            }
+                                                                            .creator-label {
+                                                                                font-size: 10px;
+                                                                            }
+                                                                            .combined-nav {
+                                                                                gap: 4px;
+                                                                            }
+                                                                            .control-button, .icon-button, .control-select {
+                                                                                height: 24px;
+                                                                                min-height: 24px;
+                                                                            }
+                                                                            .icon-button {
+                                                                                min-width: 24px;
+                                                                                padding: 2px;
+                                                                            }
+                                                                            .icon-button svg {
+                                                                                width: 14px;
+                                                                                height: 14px;
+                                                                            }
+                                                                            .control-button {
+                                                                                padding: 0 6px;
+                                                                                font-size: 11px;
+                                                                                min-width: 50px;
+                                                                            }
+                                                                            .control-select {
+                                                                                padding: 0 4px;
+                                                                                font-size: 11px;
+                                                                            }
+                                                                            #date-container-inline {
+                                                                                gap: 4px;
+                                                                            }
+                                                                            #date-container-inline .icon-only {
+                                                                                width: 24px;
+                                                                                height: 24px;
+                                                                                padding: 2px;
+                                                                            }
+                                                                            input[type="date"] {
+                                                                                font-size: 12px;
+                                                                                padding: 2px 4px;
+                                                                                height: 24px;
+                                                                            }
+                                                                            #hour-value {
+                                                                                font-size: 12px;
+                                                                            }
+                                                                            .app-header-row {
+                                                                                flex-wrap: nowrap;
+                                                                                gap: 2px;
+                                                                            }
+                                                                        }
                                                                         /* --- CLEAN INLINE HEADER LAYOUT --- */
                                                                         .app-header-row {
                                                                             display: flex;
@@ -679,6 +722,15 @@
                                                                             margin-top: 0px; /* Reduced */
                                                                         }
 
+                                                                        /* --- ACTIVE STATION BUTTON HEIGHT FIX --- */
+                                                                        #activeStationsButton.icon-button {
+                                                                            min-height: 28px !important;
+                                                                            height: 28px !important;
+                                                                            padding: 4px !important;
+                                                                            display: flex;
+                                                                            align-items: center;
+                                                                            justify-content: center;
+                                                                        }
                                                                         /* --- UNIFIED BUTTON AND SELECT HEIGHTS --- */
                                                                         .control-button,
                                                                         .icon-button,
@@ -728,13 +780,15 @@
                                                                             justify-content: flex-start;
                                                                             margin-top: 0px; /* Reduced */
                                                                         }
-
                                                                         .control-button {
-                                                                            min-width: 60px; /* Fixed width to prevent layout shift on text change */
+                                                                            min-width: 50px; /* Reduced width for Track/Stop */
                                                                         }
-
-                                                                        /* 1. DESKTOP – make buttons larger & give the panel breathing room */
-                                                                        @media (min-width: 601px) {
+                                                                    </style>
+                                                                    <style>
+                                                                        /* --------------------------------------------------------------
+                                                                           1. DESKTOP – make buttons larger & give the panel breathing room
+                                                                           -------------------------------------------------------------- */
+                                                                        @media (min-width: 601px) {               /* desktop */
                                                                             #controls { padding: 18px 22px; }     /* a little more inner space */
 
                                                                             /* ---- unified button size (nav, sked, email, qrz, track, …) ---- */
@@ -752,22 +806,12 @@
                                                                             }
 
                                                                             /* icon-only buttons keep a square shape but grow a bit */
-                                                                            .icon-button,
-                                                                            .icon-only,
-                                                                            #date-container-inline .icon-only,
-                                                                            #prevDay,
-                                                                            #nextDay {
+                                                                            .icon-button {
                                                                                 min-width: 32px !important;
                                                                                 width: 32px !important;
                                                                                 height: 32px !important;
-                                                                                padding: 0 !important;
                                                                             }
-                                                                            .icon-button svg,
-                                                                            .icon-only svg,
-                                                                            #date-container-inline .icon-only svg {
-                                                                                width: 18px;
-                                                                                height: 18px;
-                                                                            }
+                                                                            .icon-button svg { width: 18px; height: 18px; }
 
                                                                             /* band selector & date input */
                                                                             #bandSelect,
@@ -781,9 +825,11 @@
                                                                             .button-band-group { gap: 10px; }
                                                                         }
 
-                                                                        /* 2. MOBILE – shrink buttons *only* on very narrow screens */
+                                                                        /* --------------------------------------------------------------
+                                                                           2. MOBILE – shrink buttons *only* on very narrow screens
+                                                                           -------------------------------------------------------------- */
                                                                         @media (max-width: 600px) {
-                                                                            #controls { padding: 12px 14px; left: 10px; top: 10px; min-width: 260px; }
+                                                                            #controls { padding: 10px 12px; }
 
                                                                             .nav-button,
                                                                             .sked-button,
@@ -801,89 +847,77 @@
                                                                                 font-size: 10px !important;
                                                                             }
 
-                                                                            .icon-button,
-                                                                            .icon-only,
-                                                                            #date-container-inline .icon-only,
-                                                                            #prevDay,
-                                                                            #nextDay {
-                                                                                min-width: 26px !important;
-                                                                                width: 26px !important;
-                                                                                height: 26px !important;
-                                                                                padding: 0 !important;
-                                                                            }
-                                                                            .icon-button svg,
-                                                                            .icon-only svg,
-                                                                            #date-container-inline .icon-only svg {
-                                                                                width: 14px;
-                                                                                height: 14px;
-                                                                            }
+                                                                            .icon-button { min-width: 26px !important; width: 26px !important; height: 26px !important; }
+                                                                            .icon-button svg { width: 14px; height: 14px; }
 
                                                                             #bandSelect,
                                                                             input[type="date"] { height: 20px; font-size: 11px; }
 
                                                                             .locator-input input { max-width: 70px; }
-
-                                                                            .app-name { font-size: 14px; }
-                                                                            .creator-label { font-size: 10px; }
-                                                                            .combined-nav { gap: 4px; }
-                                                                            #date-container-inline { gap: 4px; }
-                                                                            #date-container-inline .icon-only { width: 24px; height: 24px; padding: 2px; }
-                                                                            input[type="date"] { font-size: 12px; padding: 2px 4px; height: 24px; }
-                                                                            #hour-value { font-size: 12px; }
-                                                                            .app-header-row { flex-wrap: nowrap; gap: 2px; }
                                                                         }
 
-                                                                        /* 3. Keep the “folded” panel behaviour untouched */
+                                                                        /* --------------------------------------------------------------
+                                                                           3. Keep the “folded” panel behaviour untouched
+                                                                           -------------------------------------------------------------- */
                                                                         #controls.folded { transform: translateX(calc(-100% + 34px)); }
                                                                         #showControlsPanel { width: 30px; height: 30px; font-size: 16px; }
+                                                                    </style>
+                                                                    <style>
+                                                                    /* ------------------------------------------------------------------
+                                                                       1. ICON-ONLY BUTTONS (prev/next day, nav icons, panel toggle)
+                                                                       ------------------------------------------------------------------ */
+                                                                    .icon-only,
+                                                                    .combined-nav .icon-button,
+                                                                    #toggleControlsPanel {
+                                                                        /* same base size on every screen */
+                                                                        width: 28px !important;   /* mobile default */
+                                                                        height: 28px !important;
+                                                                        padding: 0 !important;
+                                                                        display: flex;
+                                                                        align-items: center;
+                                                                        justify-content: center;
+                                                                    }
 
-                                                                        /* 4. ICON-ONLY BUTTONS (prev/next day, nav icons, panel toggle) */
-                                                                        .icon-only,
-                                                                        .combined-nav .icon-button,
-                                                                        #toggleControlsPanel {
-                                                                            /* same base size on every screen */
-                                                                            width: 28px !important;   /* mobile default */
-                                                                            height: 28px !important;
-                                                                            padding: 0 !important;
-                                                                            display: flex;
-                                                                            align-items: center;
-                                                                            justify-content: center;
-                                                                        }
+                                                                    /* ------------------------------------------------------------------
+                                                                       2. SVG SIZE – responsive but never tiny on larger screens
+                                                                       ------------------------------------------------------------------ */
+                                                                    .icon-only svg,
+                                                                    .combined-nav .icon-button svg,
+                                                                    #toggleControlsPanel svg {
+                                                                        width: 16px;   /* desktop / tablet */
+                                                                        height: 16px;
+                                                                        fill: currentColor;
+                                                                    }
 
-                                                                        /* 5. SVG SIZE – responsive but never tiny on larger screens */
+                                                                    /* ------------------------------------------------------------------
+                                                                       3. MOBILE – keep the original tiny icons (they already looked good)
+                                                                       ------------------------------------------------------------------ */
+                                                                    @media (max-width: 600px) {
                                                                         .icon-only svg,
                                                                         .combined-nav .icon-button svg,
                                                                         #toggleControlsPanel svg {
-                                                                            width: 16px;   /* desktop / tablet */
-                                                                            height: 16px;
-                                                                            fill: currentColor;
+                                                                            width: 14px;
+                                                                            height: 14px;
                                                                         }
+                                                                    }
 
-                                                                        /* 6. MOBILE – keep the original tiny icons (they already looked good) */
-                                                                        @media (max-width: 600px) {
-                                                                            .icon-only svg,
-                                                                            .combined-nav .icon-button svg,
-                                                                            #toggleControlsPanel svg {
-                                                                                width: 14px;
-                                                                                height: 14px;
-                                                                            }
+                                                                    /* ------------------------------------------------------------------
+                                                                       4. DESKTOP – make the *buttons* a little bigger (optional)
+                                                                       ------------------------------------------------------------------ */
+                                                                    @media (min-width: 601px) {
+                                                                        .icon-only,
+                                                                        .combined-nav .icon-button,
+                                                                        #toggleControlsPanel {
+                                                                            width: 32px !important;
+                                                                            height: 32px !important;
                                                                         }
-
-                                                                        /* 7. DESKTOP – make the *buttons* a little bigger (optional) */
-                                                                        @media (min-width: 601px) {
-                                                                            .icon-only,
-                                                                            .combined-nav .icon-button,
-                                                                            #toggleControlsPanel {
-                                                                                width: 32px !important;
-                                                                                height: 32px !important;
-                                                                            }
-                                                                            .icon-only svg,
-                                                                            .combined-nav .icon-button svg,
-                                                                            #toggleControlsPanel svg {
-                                                                                width: 18px;   /* slightly larger on big screens */
-                                                                                height: 18px;
-                                                                            }
+                                                                        .icon-only svg,
+                                                                        .combined-nav .icon-button svg,
+                                                                        #toggleControlsPanel svg {
+                                                                            width: 18px;   /* slightly larger on big screens */
+                                                                            height: 18px;
                                                                         }
+                                                                    }
                                                                     </style>
                                                                     
     </head>
@@ -997,7 +1031,6 @@
                     <canvas id="relativeDataChart"></canvas>
                 </div>
                 <div id="moonChartWrapper" style="display: block;">
-                    <a href="https://eme.radio/moon-ephemeris" class="annual-button" target="_blank">Annual</a>
                     <div id="moonChartLabel"></div>
                     <canvas id="moonDistanceChart"></canvas>
                 </div>
