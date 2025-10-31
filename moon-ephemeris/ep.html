@@ -54,7 +54,7 @@
             left: clamp(5px, 2vw, 15px);
             top: clamp(10px, 3vw, 30px);
             color: #fa4d56;
-            font-weight: horizontal;
+            font-weight: bold;
             font-size: clamp(8px, 2vw, 12px);
             z-index: 150;
         }
@@ -153,13 +153,16 @@
 <body>
     <header>
         <h1 id="chart-title">
-            Moon Ephemeris Overview for
+            MOON EPHEMERIS OVERVIEW for
             <select id="year-input"></select>
             <a href="https://dxer.site/eme-observer/"
                target="_blank"
                rel="noopener noreferrer"
                class="author-link">by SA5IKN</a>
         </h1>
+        <div id="explanation">
+        <p>Click on the year in the title to select different year</p>
+        </div>
         <div id="error-message"></div>
     </header>
     <div class="chart-container">
@@ -584,38 +587,39 @@
             const caretY = tooltipModel.caretY;
             const offset = 5; // small offset from the point
             const padding = 5; // edge padding
+            const chartWidth = container.clientWidth;
+            const chartHeight = container.clientHeight;
+            const centerX = chartWidth / 2;
 
-            // Horizontal positioning: side with more space
-            const leftSpace = caretX;
-            const rightSpace = canvas.width - caretX;
+            // Horizontal positioning: based on center
             let hLeft;
-            if (leftSpace > rightSpace) {
-                // Prefer left
-                hLeft = caretX - ttWidth - offset;
-                if (hLeft < padding) {
-                    // Not enough space left, try right
-                    hLeft = caretX + offset;
-                    if (hLeft + ttWidth > canvas.width - padding) {
-                        // Still overflows, center
-                        hLeft = Math.max(padding, Math.min(canvas.width - ttWidth - padding, caretX - ttWidth / 2));
+            if (caretX < centerX) {
+                // Point left of center: prefer right
+                hLeft = caretX + offset;
+                if (hLeft + ttWidth > chartWidth - padding) {
+                    // Try left
+                    hLeft = caretX - ttWidth - offset;
+                    if (hLeft < padding) {
+                        // Center and clamp
+                        hLeft = Math.max(padding, Math.min(chartWidth - ttWidth - padding, caretX - ttWidth / 2));
                     }
                 }
             } else {
-                // Prefer right
-                hLeft = caretX + offset;
-                if (hLeft + ttWidth > canvas.width - padding) {
-                    // Not enough space right, try left
-                    hLeft = caretX - ttWidth - offset;
-                    if (hLeft < padding) {
-                        // Still overflows, center
-                        hLeft = Math.max(padding, Math.min(canvas.width - ttWidth - padding, caretX - ttWidth / 2));
+                // Point right of center: prefer left
+                hLeft = caretX - ttWidth - offset;
+                if (hLeft < padding) {
+                    // Try right
+                    hLeft = caretX + offset;
+                    if (hLeft + ttWidth > chartWidth - padding) {
+                        // Center and clamp
+                        hLeft = Math.max(padding, Math.min(chartWidth - ttWidth - padding, caretX - ttWidth / 2));
                     }
                 }
             }
 
             // Vertical positioning: side with more space
             const topSpace = caretY;
-            const bottomSpace = canvas.height - caretY;
+            const bottomSpace = chartHeight - caretY;
             let vTop;
             if (topSpace > bottomSpace) {
                 // Prefer above
@@ -623,7 +627,7 @@
                 if (vTop < padding) {
                     // Not enough above, try below
                     vTop = caretY + offset;
-                    if (vTop + ttHeight > canvas.height - padding) {
+                    if (vTop + ttHeight > chartHeight - padding) {
                         // Still overflows, place at top
                         vTop = padding;
                     }
@@ -631,12 +635,12 @@
             } else {
                 // Prefer below
                 vTop = caretY + offset;
-                if (vTop + ttHeight > canvas.height - padding) {
+                if (vTop + ttHeight > chartHeight - padding) {
                     // Not enough below, try above
                     vTop = caretY - ttHeight - offset;
                     if (vTop < padding) {
                         // Still overflows, place at bottom
-                        vTop = canvas.height - ttHeight - padding;
+                        vTop = chartHeight - ttHeight - padding;
                     }
                 }
             }
