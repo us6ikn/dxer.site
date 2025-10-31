@@ -25,28 +25,6 @@
             max-width: 1200px;
             z-index: 100;
         }
-        .nav-links {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
-        .nav-link {
-            padding: 0.5rem 1rem;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            text-decoration: none;
-            color: #495057;
-            font-size: 0.9em;
-            transition: background-color 0.2s, color 0.2s;
-            white-space: nowrap;
-        }
-        .nav-link:hover {
-            background: #e9ecef;
-            color: #212529;
-        }
         h1 {
             font-size: clamp(12px, 3vw, 16px);
             font-weight: bold;
@@ -160,13 +138,6 @@
             .chartjs-tooltip {
                 font-size: clamp(8px, 2.5vw, 10px);
             }
-            .nav-links {
-                gap: 0.5rem;
-            }
-            .nav-link {
-                padding: 0.4rem 0.8rem;
-                font-size: 0.85em;
-            }
         }
         .author-link {
             color: inherit;       /* keeps same color as parent (black in your case) */
@@ -181,12 +152,8 @@
 </head>
 <body>
     <header>
-        <div class="nav-links">
-            <a href="https://eme.radio/moon-ephemeris" target="_blank" rel="noopener noreferrer" class="nav-link">Moon Ephemeris PDF</a>
-            <a href="https://dxer.site/eme-observer" target="_blank" rel="noopener noreferrer" class="nav-link">EME Planner & Stations Map</a>
-        </div>
         <h1 id="chart-title">
-            MOON EPHEMERIS -
+            MOON EPHEMERIS OVERVIEW for
             <select id="year-input"></select>
             <a href="https://dxer.site/eme-observer/"
                target="_blank"
