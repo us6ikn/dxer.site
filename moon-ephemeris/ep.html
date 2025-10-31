@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moon Ephemeris Overview</title>
+    <script src="https://dxer.site/eme-observer/a.ob.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 0rem;
+            width: 100%;
+            max-width: 1200px;
+            z-index: 100;
+        }
+        h1 {
+            font-size: clamp(12px, 3vw, 16px);
+            font-weight: bold;
+            color: black;
+            margin: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            height: clamp(150px, 25vw, 200px);
+            margin-bottom: 5px;
+            user-select: none;
+        }
+        .chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+            user-select: none;
+        }
+        .y-label-left {
+            position: absolute;
+            left: clamp(5px, 2vw, 15px);
+            top: clamp(10px, 3vw, 30px);
+            color: #fa4d56;
+            font-weight: horizontal;
+            font-size: clamp(8px, 2vw, 12px);
+            z-index: 150;
+        }
+        .y-label-right {
+            position: absolute;
+            right: clamp(5px, 2vw, 30px);
+            top: clamp(10px, 3vw, 30px);
+            color: #1192e8;
+            font-weight: bold;
+            font-size: clamp(8px, 2vw, 12px);
+            z-index: 150;
+        }
+        #explanation {
+            margin-top: 1rem;
+            font-size: clamp(10px, 2vw, 12px);
+            max-width: 90%;
+            z-index: 100;
+        }
+        #explanation p {
+            margin: 5px 0;
+        }
+        #explanation span {
+            font-size: clamp(10px, 2.5vw, 14px);
+            margin-right: 5px;
+        }
+        #year-input {
+            font-size: clamp(12px, 2.5vw, 14px);
+            font-weight: 500;
+            color: #333;
+            padding: clamp(2px, 1vw, 4px) clamp(5px, 1.5vw, 8px);
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 12 12"><path fill="#333" d="M2 4l4 4 4-4z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 5px center;
+            padding-right: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        #year-input:focus {
+            outline: none;
+            border-color: #1192e8;
+            box-shadow: 0 0 0 2px rgba(17, 146, 232, 0.2);
+        }
+        #year-input:hover {
+            border-color: #999;
+        }
+        #error-message {
+            display: none;
+            color: #fa4d56;
+            font-size: clamp(10px, 2vw, 12px);
+            margin-top: 5px;
+        }
+        .chartjs-tooltip {
+            z-index: 2000;
+        }
+        @media (max-width: 600px) {
+            .chart-container {
+                height: clamp(120px, 30vw, 180px);
+            }
+            .y-label-left, .y-label-right {
+                top: clamp(5px, 2vw, 10px);
+            }
+            .we-label {
+                top: clamp(20px, 4vw, 30px);
+            }
+            h1 {
+                flex-direction: column;
+                gap: 5px;
+            }
+            #year-input {
+                max-height: 200px;
+                padding: clamp(2px, 1vw, 3px) clamp(4px, 1vw, 6px);
+                font-size: clamp(10px, 2.2vw, 12px);
+            }
+            .chartjs-tooltip {
+                font-size: clamp(8px, 2.5vw, 10px);
+            }
+        }
+        .author-link {
+            color: inherit;       /* keeps same color as parent (black in your case) */
+            text-decoration: none; /* removes underline */
+            font-weight: normal;   /* match your previous style */
+        }
+        .author-link:hover {
+            text-decoration: underline; /* optional: underline only on hover */
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1 id="chart-title">
+            Moon Ephemeris Overview for
+            <select id="year-input"></select>
+            <a href="https://dxer.site/eme-observer/"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="author-link">by SA5IKN</a>
+        </h1>
+        <div id="error-message"></div>
+    </header>
+    <div class="chart-container">
+        <span class="y-label-left">Declination (°)</span>
+        <span class="y-label-right">Extra Loss (dB)</span>
+        <canvas id="chart1"></canvas>
+    </div>
+    <div class="chart-container">
+        <span class="y-label-left">Declination (°)</span>
+        <span class="y-label-right">Extra Loss (dB)</span>
+        <canvas id="chart2"></canvas>
+    </div>
+    <div class="chart-container">
+        <span class="y-label-left">Declination (°)</span>
+        <span class="y-label-right">Extra Loss (dB)</span>
+        <canvas id="chart3"></canvas>
+    </div>
+    <div class="chart-container">
+        <span class="y-label-left">Declination (°)</span>
+        <span class="y-label-right">Extra Loss (dB)</span>
+        <canvas id="chart4"></canvas>
+    </div>
+    <div id="explanation">
+        <p style="margin-bottom:1rem; font-size: clamp(10px, 2vw, 12px);">
+                Hover over the charts to see details.
+            </p>
+        <p><span style="color: grey;">■</span> Vertical grey bars show days when high sky temperature can reduce system performance.</p>
+        <p><span style="color: orange;">■</span> Vertical orange bars mark days when the Moon is within 10° of the Sun, near new moon phases.</p>
+        <p><span style="color: #1192e8;">―</span> Extra loss represents the additional path loss in dB relative to the minimum path loss at lunar perigee.</p>
+        <p><span style="color: #fa4d56;">―</span> Declination is plotted as a red curve, with weekends (WE) marked at the top of each ephemeris graph.</p>
+        <p style="margin-top:1rem; font-style:italic; font-size: clamp(10px, 2vw, 12px);">
+                This Ephemeris Overview is powered by
+                <a href="https://dxer.site/eme-observer/" target="_blank" rel="noopener noreferrer">EME Observer</a>
+            </p>
+    </div>
+    <script>
+        const PERIGEE_DISTANCE_KM = 356352.93;
+        const COLOR_DECLINATION = '#fa4d56';
+        const COLOR_LOSS = '#1192e8';
+        const GC_RA_HOURS = 17 + 45/60 + 40/3600;
+        const GC_DEC = -(29 + 0/60 + 28/3600);
+
+        let charts = [null, null, null, null];
+        let lastWindowSize = { width: window.innerWidth, height: window.innerHeight };
+
+        // Clamp function for dynamic sizing
+        function clamp(min, val, max) {
+            return Math.min(Math.max(val, min), max);
+        }
+
+        // Populate year dropdown
+        function populateYearDropdown() {
+            const select = document.getElementById('year-input');
+            select.innerHTML = ''; // Clear existing options
+            const currentYear = new Date().getUTCFullYear();
+            for (let year = 1900; year <= 2100; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === currentYear) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            }
+        }
+
+        // Call on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            populateYearDropdown();
+            // Prevent context menu on chart containers
+            document.querySelectorAll('.chart-container, .chart-container canvas').forEach(element => {
+                element.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                });
+            });
+            createCharts(new Date().getUTCFullYear());
+        });
+
+        function angularSeparation(ra1, dec1, ra2, dec2) {
+            const ra1Rad = ra1 * Math.PI / 12;
+            const dec1Rad = dec1 * Math.PI / 180;
+            const ra2Rad = ra2 * Math.PI / 12;
+            const dec2Rad = dec2 * Math.PI / 180;
+            const cosSep = Math.sin(dec1Rad) * Math.sin(dec2Rad) +
+                           Math.cos(dec1Rad) * Math.cos(dec2Rad) * Math.cos(ra1Rad - ra2Rad);
+            const sepRad = Math.acos(Math.min(Math.max(cosSep, -1), 1));
+            return sepRad * 180 / Math.PI;
+        }
+
+        function computeMoonData(start, end) {
+            const data = [];
+            function formatDateNatural(date) {
+                const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                const dayName = days[date.getUTCDay()];
+                const year = date.getUTCFullYear();
+                const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+                const day = String(date.getUTCDate()).padStart(2, '0');
+                const hours = String(date.getUTCHours()).padStart(2, '0');
+                const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+                return `${dayName} ${year}-${month}-${day} ${hours}:${minutes}z`;
+            }
+
+            for (let dt = new Date(start); dt <= end; dt.setUTCDate(dt.getUTCDate() + 1)) {
+                [0, 12].forEach(hour => {
+                    const dtSample = new Date(dt);
+                    dtSample.setUTCHours(hour, 0, 0, 0);
+                    try {
+                        const astroTime = Astronomy.MakeTime(dtSample);
+                        const libration = Astronomy.Libration(astroTime);
+                        const dist_km = libration.dist_km;
+                        const moonGeo = Astronomy.GeoVector(Astronomy.Body.Moon, astroTime, true);
+                        const sunGeo = Astronomy.GeoVector(Astronomy.Body.Sun, astroTime, true);
+                        const moonEq = Astronomy.EquatorFromVector(moonGeo);
+                        const sunEq = Astronomy.EquatorFromVector(sunGeo);
+                        const dec = moonEq.dec;
+                        const moon_ra = moonEq.ra;
+                        const extra_loss = 40 * Math.log10(dist_km / PERIGEE_DISTANCE_KM);
+                        const sun_sep = angularSeparation(moon_ra, dec, sunEq.ra, sunEq.dec);
+                        const gc_sep = angularSeparation(moon_ra, dec, GC_RA_HOURS, GC_DEC);
+                        data.push({
+                            date: new Date(dtSample),
+                            dateStr: formatDateNatural(dtSample),
+                            dec,
+                            dist: dist_km,
+                            extra_loss,
+                            sun_sep,
+                            gc_sep
+                        });
+                    } catch (e) {
+                        console.warn(`Error computing data for ${dtSample.toISOString()}: ${e.message}`);
+                    }
+                });
+            }
+            data.sort((a, b) => a.date - b.date);
+            return data;
+        }
+
+        function createAnnotations(data, start, end) {
+            const annotations = [];
+            function dateToStrWithHours(date) {
+                return date.toISOString().slice(0, 16);
+            }
+            function interpolateCrossingTime(d1, d2, sep1, sep2, threshold) {
+                const t1 = d1.date.getTime();
+                const t2 = d2.date.getTime();
+                const fraction = (threshold - sep1) / (sep2 - sep1);
+                const interpolatedTime = t1 + fraction * (t2 - t1);
+                return new Date(interpolatedTime);
+            }
+
+            let is_close_sun = data.map(d => d.sun_sep < 10);
+            let startIdx = null;
+            for (let i = 0; i < data.length; i++) {
+                if (is_close_sun[i] && startIdx === null) {
+                    startIdx = i;
+                } else if (!is_close_sun[i] && startIdx !== null) {
+                    let barStart = data[startIdx].date;
+                    let barEnd = data[i - 1].date;
+                    if (startIdx > 0 && data[startIdx - 1].sun_sep >= 10) {
+                        barStart = interpolateCrossingTime(data[startIdx - 1], data[startIdx], data[startIdx - 1].sun_sep, data[startIdx].sun_sep, 10);
+                    }
+                    if (i < data.length && data[i].sun_sep >= 10) {
+                        barEnd = interpolateCrossingTime(data[i - 1], data[i], data[i - 1].sun_sep, data[i].sun_sep, 10);
+                    } else {
+                        barEnd = new Date(data[i - 1].date);
+                        barEnd.setUTCHours(barEnd.getUTCHours() + 12);
+                    }
+                    annotations.push({
+                        type: 'box',
+                        xScaleID: 'x',
+                        xMin: dateToStrWithHours(barStart),
+                        xMax: dateToStrWithHours(barEnd),
+                        yScaleID: 'yDec',
+                        yMin: -30,
+                        yMax: 30,
+                        backgroundColor: 'rgba(255, 165, 0, 0.4)',
+                        borderWidth: 0
+                    });
+                    startIdx = null;
+                }
+            }
+            if (startIdx !== null) {
+                let barStart = data[startIdx].date;
+                let barEnd = new Date(data[data.length - 1].date);
+                barEnd.setUTCHours(barEnd.getUTCHours() + 12);
+                if (startIdx > 0 && data[startIdx - 1].sun_sep >= 10) {
+                    barStart = interpolateCrossingTime(data[startIdx - 1], data[startIdx], data[startIdx - 1].sun_sep, data[startIdx].sun_sep, 10);
+                }
+                annotations.push({
+                    type: 'box',
+                    xScaleID: 'x',
+                    xMin: dateToStrWithHours(barStart),
+                    xMax: dateToStrWithHours(barEnd),
+                    yScaleID: 'yDec',
+                    yMin: -30,
+                    yMax: 30,
+                    backgroundColor: 'rgba(255, 165, 0, 0.4)',
+                    borderWidth: 0
+                });
+            }
+
+            let is_high_temp = data.map(d => d.gc_sep < 10);
+            startIdx = null;
+            for (let i = 0; i < data.length; i++) {
+                if (is_high_temp[i] && startIdx === null) {
+                    startIdx = i;
+                } else if (!is_high_temp[i] && startIdx !== null) {
+                    let barStart = data[startIdx].date;
+                    let barEnd = data[i - 1].date;
+                    if (startIdx > 0 && data[startIdx - 1].gc_sep >= 10) {
+                        barStart = interpolateCrossingTime(data[startIdx - 1], data[startIdx], data[startIdx - 1].gc_sep, data[startIdx].gc_sep, 10);
+                    }
+                    if (i < data.length && data[i].gc_sep >= 10) {
+                        barEnd = interpolateCrossingTime(data[i - 1], data[i], data[i - 1].gc_sep, data[i].gc_sep, 10);
+                    } else {
+                        barEnd = new Date(data[i - 1].date);
+                        barEnd.setUTCHours(barEnd.getUTCHours() + 12);
+                    }
+                    annotations.push({
+                        type: 'box',
+                        xScaleID: 'x',
+                        xMin: dateToStrWithHours(barStart),
+                        xMax: dateToStrWithHours(barEnd),
+                        yScaleID: 'yDec',
+                        yMin: -30,
+                        yMax: 30,
+                        backgroundColor: 'rgba(128, 128, 128, 0.4)',
+                        borderWidth: 0
+                    });
+                    startIdx = null;
+                }
+            }
+            if (startIdx !== null) {
+                let barStart = data[startIdx].date;
+                let barEnd = new Date(data[data.length - 1].date);
+                barEnd.setUTCHours(barEnd.getUTCHours() + 12);
+                if (startIdx > 0 && data[startIdx - 1].gc_sep >= 10) {
+                    barStart = interpolateCrossingTime(data[startIdx - 1], data[startIdx], data[startIdx - 1].gc_sep, data[startIdx].gc_sep, 10);
+                }
+                annotations.push({
+                    type: 'box',
+                    xScaleID: 'x',
+                    xMin: dateToStrWithHours(barStart),
+                    xMax: dateToStrWithHours(barEnd),
+                    yScaleID: 'yDec',
+                    yMin: -30,
+                    yMax: 30,
+                    backgroundColor: 'rgba(128, 128, 128, 0.4)',
+                    borderWidth: 0
+                });
+            }
+
+            let month_start = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1));
+            while (month_start < end) {
+                const monthStr = dateToStrWithHours(month_start);
+                if (month_start.getTime() !== start.getTime() && month_start.getTime() !== end.getTime()) {
+                    annotations.push({
+                        type: 'line',
+                        xScaleID: 'x',
+                        xMin: monthStr,
+                        xMax: monthStr,
+                        yScaleID: 'yDec',
+                        yMin: -30,
+                        yMax: 30,
+                        borderColor: 'gray',
+                        borderWidth: 1.5
+                    });
+                }
+                const ndays = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth() + 1, 0)).getUTCDate();
+                const mid_month = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth(), Math.floor(ndays / 2)));
+                const midStr = dateToStrWithHours(mid_month);
+                annotations.push({
+                    type: 'label',
+                    xScaleID: 'x',
+                    yScaleID: 'yDec',
+                    xValue: midStr,
+                    yValue: 38,
+                    content: month_start.toLocaleString('default', { month: 'long' }),
+                    font: { size: clamp(6, 1.5 * window.innerWidth / 100, 8), weight: 'bold' },
+                    color: 'black'
+                });
+                month_start = new Date(Date.UTC(month_start.getUTCFullYear(), month_start.getUTCMonth() + 1, 1));
+            }
+
+            let current = new Date(start.getTime());
+            while (current < end) {
+                const wd = current.getUTCDay();
+                const currentStr = dateToStrWithHours(current);
+                if (wd === 0 || wd === 6) {
+                    annotations.push({
+                        type: 'line',
+                        xScaleID: 'x',
+                        xMin: currentStr,
+                        xMax: currentStr,
+                        yScaleID: 'yDec',
+                        yMin: -30,
+                        yMax: 30,
+                        borderColor: 'gray',
+                        borderWidth: 1.5,
+                        borderDash: [5, 5],
+                        borderDashOffset: 0
+                    });
+                    if (wd === 6) {
+                        const sunday = new Date(current.getTime());
+                        sunday.setUTCDate(sunday.getUTCDate() + 1);
+                        const label = `${current.getUTCDate()}/${sunday.getUTCDate()}`;
+                        const mid = new Date(current.getTime());
+                        mid.setUTCHours(12);
+                        const midStr = dateToStrWithHours(mid);
+                        annotations.push({
+                            type: 'label',
+                            xScaleID: 'x',
+                            yScaleID: 'yDec',
+                            xValue: midStr,
+                            yValue: 33,
+                            content: label,
+                            font: { size: clamp(6, 1.5 * window.innerWidth / 100, 8) },
+                            color: 'black'
+                        });
+                    }
+                }
+                current.setUTCDate(current.getUTCDate() + 1);
+            }
+            return annotations;
+        }
+
+        // Helper function to hide all tooltips
+        function hideAllTooltips() {
+            charts.forEach((chart, index) => {
+                const canvas = document.getElementById(`chart${index + 1}`);
+                if (canvas) {
+                    const tooltipEl = canvas.parentNode.querySelector(`#chartjs-tooltip-${canvas.id}`);
+                    if (tooltipEl) {
+                        tooltipEl.style.opacity = '0';
+                    }
+                }
+            });
+        }
+
+        // External tooltip handler
+        function externalTooltipHandler(context) {
+            const tooltipModel = context.tooltip;
+            const chart = context.chart;
+            const canvas = chart.canvas;
+            const container = canvas.parentNode;
+            const tooltipId = 'chartjs-tooltip-' + canvas.id;
+            let tooltipEl = container.querySelector('#' + tooltipId);
+
+            // Create tooltip element if it doesn't exist
+            if (!tooltipEl) {
+                tooltipEl = document.createElement('div');
+                tooltipEl.id = tooltipId;
+                tooltipEl.className = 'chartjs-tooltip';
+                tooltipEl.style.position = 'absolute';
+                tooltipEl.style.pointerEvents = 'none';
+                tooltipEl.style.background = 'rgba(255,255,255,0.98)';
+                tooltipEl.style.border = '1px solid #ccc';
+                tooltipEl.style.borderRadius = '4px';
+                tooltipEl.style.padding = clamp(4, 1.5 * window.innerWidth / 100, 6) + 'px ' + clamp(6, 2 * window.innerWidth / 100, 8) + 'px';
+                tooltipEl.style.fontSize = clamp(9, 2 * window.innerWidth / 100, 11) + 'px';
+                tooltipEl.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)';
+                tooltipEl.style.transition = 'opacity 0.04s ease';
+                tooltipEl.style.whiteSpace = 'nowrap';
+                tooltipEl.style.zIndex = 2000;
+                tooltipEl.style.opacity = '0';
+                container.appendChild(tooltipEl);
+            }
+
+            // Hide all other tooltips
+            hideAllTooltips();
+
+            // Hide tooltip if opacity is 0 or no data points
+            if (tooltipModel.opacity === 0 || !tooltipModel.dataPoints || tooltipModel.dataPoints.length === 0) {
+                tooltipEl.style.opacity = '0';
+                return;
+            }
+
+            // Get data from the chart's dataset
+            const dataIndex = tooltipModel.dataPoints[0].dataIndex;
+            const dataset = chart.data.datasets;
+            const declinationData = dataset[0].data[dataIndex];
+            const extraLossData = dataset[1].data[dataIndex];
+            const originalData = chart.data.datasets[0].data[dataIndex].originalData;
+
+            if (!originalData) {
+                tooltipEl.style.opacity = '0';
+                return;
+            }
+
+            // Format date for display
+            function formatDateNatural(date) {
+                const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                const dayName = days[date.getUTCDay()];
+                const year = date.getUTCFullYear();
+                const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+                const day = String(date.getUTCDate()).padStart(2, '0');
+                const hours = String(date.getUTCHours()).padStart(2, '0');
+                const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+                return `${dayName} ${year}-${month}-${day} ${hours}:${minutes}z`;
+            }
+
+            // Update tooltip content first to get accurate dimensions
+            tooltipEl.innerHTML = `
+                <div style="font-weight:700;margin-bottom:${clamp(2, 1 * window.innerWidth / 100, 4)}px">${formatDateNatural(new Date(declinationData.x))}</div>
+                <div style="color:${COLOR_DECLINATION};margin-bottom:2px">Declination: ${originalData.dec.toFixed(2)}°</div>
+                <div style="color:${COLOR_LOSS};margin-bottom:2px">Extra Loss: ${originalData.extra_loss.toFixed(2)} dB</div>
+                <div style="color:#000;margin-bottom:2px">Distance: ${originalData.dist.toFixed(0)} km</div>
+                <div style="color:orange;margin-bottom:2px">Moon-Sun separation: ${originalData.sun_sep.toFixed(2)}°</div>
+                <div style="color:gray">Moon-GC separation: ${originalData.gc_sep.toFixed(2)}°</div>
+            `;
+
+            // Force a reflow to get accurate offsetWidth/Height
+            tooltipEl.style.visibility = 'hidden';
+            tooltipEl.style.display = 'block';
+            const ttWidth = tooltipEl.offsetWidth;
+            const ttHeight = tooltipEl.offsetHeight;
+            tooltipEl.style.visibility = 'visible';
+            tooltipEl.style.display = '';
+
+            // Position tooltip dynamically to avoid covering datapoints
+            const caretX = tooltipModel.caretX;
+            const caretY = tooltipModel.caretY;
+            const offset = 5; // small offset from the point
+            const padding = 5; // edge padding
+
+            // Horizontal positioning: side with more space
+            const leftSpace = caretX;
+            const rightSpace = canvas.width - caretX;
+            let hLeft;
+            if (leftSpace > rightSpace) {
+                // Prefer left
+                hLeft = caretX - ttWidth - offset;
+                if (hLeft < padding) {
+                    // Not enough space left, try right
+                    hLeft = caretX + offset;
+                    if (hLeft + ttWidth > canvas.width - padding) {
+                        // Still overflows, center
+                        hLeft = Math.max(padding, Math.min(canvas.width - ttWidth - padding, caretX - ttWidth / 2));
+                    }
+                }
+            } else {
+                // Prefer right
+                hLeft = caretX + offset;
+                if (hLeft + ttWidth > canvas.width - padding) {
+                    // Not enough space right, try left
+                    hLeft = caretX - ttWidth - offset;
+                    if (hLeft < padding) {
+                        // Still overflows, center
+                        hLeft = Math.max(padding, Math.min(canvas.width - ttWidth - padding, caretX - ttWidth / 2));
+                    }
+                }
+            }
+
+            // Vertical positioning: side with more space
+            const topSpace = caretY;
+            const bottomSpace = canvas.height - caretY;
+            let vTop;
+            if (topSpace > bottomSpace) {
+                // Prefer above
+                vTop = caretY - ttHeight - offset;
+                if (vTop < padding) {
+                    // Not enough above, try below
+                    vTop = caretY + offset;
+                    if (vTop + ttHeight > canvas.height - padding) {
+                        // Still overflows, place at top
+                        vTop = padding;
+                    }
+                }
+            } else {
+                // Prefer below
+                vTop = caretY + offset;
+                if (vTop + ttHeight > canvas.height - padding) {
+                    // Not enough below, try above
+                    vTop = caretY - ttHeight - offset;
+                    if (vTop < padding) {
+                        // Still overflows, place at bottom
+                        vTop = canvas.height - ttHeight - padding;
+                    }
+                }
+            }
+
+            tooltipEl.style.left = `${hLeft}px`;
+            tooltipEl.style.top = `${vTop}px`;
+            tooltipEl.style.transform = 'none';
+            tooltipEl.style.opacity = '1';
+        }
+
+        function createCharts(year) {
+            console.log(`Creating charts for year ${year} at ${new Date().toISOString()}`);
+
+            // Update the select element value without recreating it
+            const select = document.getElementById('year-input');
+            select.value = year;
+
+            const quarters = [
+                { start: new Date(Date.UTC(year, 0, 1)), end: new Date(Date.UTC(year, 3, 0)) },
+                { start: new Date(Date.UTC(year, 3, 1)), end: new Date(Date.UTC(year, 6, 0)) },
+                { start: new Date(Date.UTC(year, 6, 1)), end: new Date(Date.UTC(year, 9, 0)) },
+                { start: new Date(Date.UTC(year, 9, 1)), end: new Date(Date.UTC(year + 1, 0, 0)) }
+            ];
+
+            quarters.forEach((quarter, index) => {
+                if (charts[index]) {
+                    charts[index].destroy();
+                    charts[index] = null;
+                }
+
+                const data = computeMoonData(quarter.start, quarter.end);
+                if (!data || data.length === 0) {
+                    console.warn(`No data for quarter ${index + 1}`);
+                    return;
+                }
+                const annotations = createAnnotations(data, quarter.start, quarter.end);
+                const canvas = document.getElementById(`chart${index + 1}`);
+                if (!canvas) {
+                    console.error(`Canvas element chart${index + 1} not found`);
+                    return;
+                }
+                const ctx = canvas.getContext('2d');
+
+                // Attach original data to dataset for tooltip access
+                const declinationData = data.map(d => ({ x: d.date, y: d.dec, originalData: d }));
+                const extraLossData = data.map(d => ({ x: d.date, y: d.extra_loss, originalData: d }));
+
+                charts[index] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'Declination',
+                                data: declinationData,
+                                borderColor: COLOR_DECLINATION,
+                                borderWidth: clamp(1, 0.3 * window.innerWidth / 100, 1.5),
+                                pointRadius: 0,
+                                yAxisID: 'yDec'
+                            },
+                            {
+                                label: 'Extra Loss',
+                                data: extraLossData,
+                                borderColor: COLOR_LOSS,
+                                borderWidth: clamp(1, 0.3 * window.innerWidth / 100, 1.5),
+                                pointRadius: 0,
+                                yAxisID: 'yLoss'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: { unit: 'day', parser: 'yyyy-MM-dd\'T\'HH:mm', displayFormats: { day: 'MMM d' } },
+                                min: quarter.start,
+                                max: quarter.end,
+                                position: 'top',
+                                ticks: { display: false },
+                                grid: { display: false },
+                                border: { display: false }
+                            },
+                            yDec: {
+                                min: -30,
+                                max: 30,
+                                position: 'left',
+                                ticks: {
+                                    color: COLOR_DECLINATION,
+                                    font: { size: clamp(7, 2 * window.innerWidth / 100, 9) },
+                                    drawTicks: true,
+                                    tickLength: clamp(5, 2 * window.innerWidth / 100, 10)
+                                },
+                                grid: { display: true, color: 'rgba(0,0,0,0.3)', borderDash: [2,2], drawBorder: false },
+                                border: { display: true, color: COLOR_DECLINATION, width: clamp(0.8, 0.3 * window.innerWidth / 100, 1.2) }
+                            },
+                            yLoss: {
+                                min: 0,
+                                max: 2.4,
+                                reverse: true,
+                                position: 'right',
+                                ticks: {
+                                    color: COLOR_LOSS,
+                                    font: { size: clamp(7, 2 * window.innerWidth / 100, 9) },
+                                    drawTicks: true,
+                                    tickLength: clamp(5, 2 * window.innerWidth / 100, 10),
+                                    stepSize: 0.4,
+                                    callback: function(value) {
+                                        const allowedTicks = [0, 0.4, 0.8, 1.2, 1.6, 2, 2.4];
+                                        if (allowedTicks.includes(Number(value.toFixed(1)))) {
+                                            return value.toFixed(1);
+                                        }
+                                        return null;
+                                    }
+                                },
+                                grid: { display: false, drawBorder: false },
+                                border: { display: true, color: COLOR_LOSS, width: clamp(0.8, 0.3 * window.innerWidth / 100, 1.2) }
+                            }
+                        },
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                            axis: 'x'
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                enabled: false,
+                                displayColors: false,
+                                external: externalTooltipHandler
+                            },
+                            annotation: {
+                                clip: false,
+                                annotations: annotations
+                            }
+                        },
+                        layout: {
+                            padding: {
+                                top: clamp(40, 10 * window.innerWidth / 100, 60),
+                                bottom: clamp(5, 2 * window.innerWidth / 100, 10),
+                                left: clamp(10, 3 * window.innerWidth / 100, 20),
+                                right: clamp(15, 4 * window.innerWidth / 100, 30)
+                            }
+                        },
+                        elements: { line: { tension: 0 } }
+                    }
+                });
+            });
+        }
+
+        // Initialize charts with current year
+        document.addEventListener('DOMContentLoaded', () => {
+            populateYearDropdown();
+            createCharts(new Date().getUTCFullYear());
+            // Prevent context menu on chart containers
+            document.querySelectorAll('.chart-container, .chart-container canvas').forEach(element => {
+                element.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                });
+            });
+            // Add event listener for year input
+            document.getElementById('year-input').addEventListener('change', (event) => {
+                const errorEl = document.getElementById('error-message');
+                const year = parseInt(event.target.value);
+                if (year >= 1900 && year <= 2100) {
+                    errorEl.style.display = 'none';
+                    errorEl.textContent = '';
+                    createCharts(year);
+                } else {
+                    errorEl.style.display = 'block';
+                    errorEl.textContent = 'Please select a year between 1900 and 2100';
+                    event.target.value = new Date().getUTCFullYear();
+                    createCharts(new Date().getUTCFullYear());
+                }
+            });
+        });
+
+        // Add touch event listener to hide tooltips
+        let touchTimeout;
+        document.addEventListener('touchend', () => {
+            clearTimeout(touchTimeout);
+            touchTimeout = setTimeout(hideAllTooltips, 1000);
+        });
+
+        // Redraw charts on window resize with debouncing and size check
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const currentWidth = window.innerWidth;
+                const currentHeight = window.innerHeight;
+                const widthDiff = Math.abs(currentWidth - lastWindowSize.width);
+                const heightDiff = Math.abs(currentHeight - lastWindowSize.height);
+
+                // Only redraw if size change is significant (e.g., >10 pixels)
+                if (widthDiff > 10 || heightDiff > 10) {
+                    const year = parseInt(document.getElementById('year-input').value) || new Date().getUTCFullYear();
+                    createCharts(year);
+                    lastWindowSize = { width: currentWidth, height: currentHeight };
+                    console.log(`Redrawing charts due to significant resize: width=${currentWidth}, height=${currentHeight}`);
+                }
+            }, 300);
+        });
+    </script>
+</body>
+</html>
