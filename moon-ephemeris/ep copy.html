@@ -239,13 +239,6 @@
                 });
             });
             createCharts(new Date().getUTCFullYear());
-
-            // Hide tooltips on touch outside charts (for mobile persistence)
-            document.addEventListener('touchstart', (e) => {
-                if (!e.target.closest('.chart-container')) {
-                    hideAllTooltips();
-                }
-            }, { passive: true });
         });
 
         function angularSeparation(ra1, dec1, ra2, dec2) {
@@ -518,8 +511,6 @@
             const tooltipId = 'chartjs-tooltip-' + canvas.id;
             let tooltipEl = container.querySelector('#' + tooltipId);
 
-            const isMobile = window.innerWidth <= 600;
-
             // Create tooltip element if it doesn't exist
             if (!tooltipEl) {
                 tooltipEl = document.createElement('div');
@@ -543,18 +534,8 @@
             // Hide all other tooltips
             hideAllTooltips();
 
-            // Hide tooltip if no data points
-            if (!tooltipModel.dataPoints || tooltipModel.dataPoints.length === 0) {
-                tooltipEl.style.opacity = '0';
-                return;
-            }
-
-            // On mobile, ignore opacity=0 to keep tooltip visible until touch outside
-            if (tooltipModel.opacity === 0 && isMobile) {
-                return;
-            }
-
-            if (tooltipModel.opacity === 0) {
+            // Hide tooltip if opacity is 0 or no data points
+            if (tooltipModel.opacity === 0 || !tooltipModel.dataPoints || tooltipModel.dataPoints.length === 0) {
                 tooltipEl.style.opacity = '0';
                 return;
             }
@@ -835,6 +816,13 @@
                     createCharts(new Date().getUTCFullYear());
                 }
             });
+        });
+
+        // Add touch event listener to hide tooltips
+        let touchTimeout;
+        document.addEventListener('touchend', () => {
+            clearTimeout(touchTimeout);
+            touchTimeout = setTimeout(hideAllTooltips, 1000);
         });
 
         // Redraw charts on window resize with debouncing and size check
