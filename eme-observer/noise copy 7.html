@@ -551,9 +551,6 @@
           scene.add(moonTrajectoryGroup);
           scene.add(sunTrajectoryGroup);
 
-          const TRAJECTORY_SCALE = 1.01;
-          const MARKER_SCALE = 1.01;
-
           function getColor(noise) {
             const range = maxNoise - minNoise;
             const norm = range === 0 ? 0.5 : (noise - minNoise) / range;
@@ -838,7 +835,6 @@
           }
 
           function updateMoonMarker() {
-            let markerPos;
             if (isRealTime) {
               if (!currentRealTimeData) {
                 if (moonMarker) moonMarker.visible = false;
@@ -849,7 +845,15 @@
                 if (moonMarker) moonMarker.visible = false;
                 return false;
               }
-              markerPos = moonData.pos.clone().multiplyScalar(MARKER_SCALE);
+              if (!moonMarker) {
+                const geom = new THREE.SphereGeometry(0.03);
+                const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                moonMarker = new THREE.Mesh(geom, mat);
+                scene.add(moonMarker);
+              }
+              moonMarker.visible = true;
+              moonMarker.position.copy(moonData.pos);
+              return true;
             } else {
               if (!moonPositions.length || !moonPositions[currentTimeIndex]) {
                 if (moonMarker) moonMarker.visible = false;
@@ -860,21 +864,19 @@
                 if (moonMarker) moonMarker.visible = false;
                 return false;
               }
-              markerPos = moonData.position.clone().multiplyScalar(MARKER_SCALE);
+              if (!moonMarker) {
+                const geom = new THREE.SphereGeometry(0.03);
+                const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                moonMarker = new THREE.Mesh(geom, mat);
+                scene.add(moonMarker);
+              }
+              moonMarker.visible = true;
+              moonMarker.position.copy(moonData.position);
+              return true;
             }
-            if (!moonMarker) {
-              const geom = new THREE.SphereGeometry(0.03);
-              const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-              moonMarker = new THREE.Mesh(geom, mat);
-              scene.add(moonMarker);
-            }
-            moonMarker.visible = true;
-            moonMarker.position.copy(markerPos);
-            return true;
           }
 
           function updateSunMarker() {
-            let markerPos;
             if (isRealTime) {
               if (!currentRealTimeData || !showSunCheckbox.checked) {
                 if (sunMarker) sunMarker.visible = false;
@@ -885,7 +887,15 @@
                 if (sunMarker) sunMarker.visible = false;
                 return false;
               }
-              markerPos = sunData.pos.clone().multiplyScalar(MARKER_SCALE);
+              if (!sunMarker) {
+                const geom = new THREE.SphereGeometry(0.02);
+                const mat = new THREE.MeshBasicMaterial({ color: 0xffa500 });
+                sunMarker = new THREE.Mesh(geom, mat);
+                scene.add(sunMarker);
+              }
+              sunMarker.visible = true;
+              sunMarker.position.copy(sunData.pos);
+              return true;
             } else {
               if (!sunPositions.length || !showSunCheckbox.checked || !sunPositions[currentTimeIndex]) {
                 if (sunMarker) sunMarker.visible = false;
@@ -896,17 +906,16 @@
                 if (sunMarker) sunMarker.visible = false;
                 return false;
               }
-              markerPos = sunData.position.clone().multiplyScalar(MARKER_SCALE);
+              if (!sunMarker) {
+                const geom = new THREE.SphereGeometry(0.02);
+                const mat = new THREE.MeshBasicMaterial({ color: 0xffa500 });
+                sunMarker = new THREE.Mesh(geom, mat);
+                scene.add(sunMarker);
+              }
+              sunMarker.visible = true;
+              sunMarker.position.copy(sunData.position);
+              return true;
             }
-            if (!sunMarker) {
-              const geom = new THREE.SphereGeometry(0.02);
-              const mat = new THREE.MeshBasicMaterial({ color: 0xffa500 });
-              sunMarker = new THREE.Mesh(geom, mat);
-              scene.add(sunMarker);
-            }
-            sunMarker.visible = true;
-            sunMarker.position.copy(markerPos);
-            return true;
           }
 
           function updateInfoBox() {
@@ -1443,7 +1452,6 @@
               const tubeMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
               const tube = new THREE.Mesh(tubeGeom, tubeMat);
               tube.userData = { isMoonTrajectory: true };
-              tube.scale.setScalar(TRAJECTORY_SCALE);
               moonTrajectoryGroup.add(tube);
             });
 
@@ -1454,7 +1462,6 @@
               const tubeMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
               const tube = new THREE.Mesh(tubeGeom, tubeMat);
               tube.userData = { isCommonMoonTrajectory: true };
-              tube.scale.setScalar(TRAJECTORY_SCALE);
               moonTrajectoryGroup.add(tube);
             });
 
@@ -1465,7 +1472,6 @@
               const tubeMat = new THREE.MeshBasicMaterial({ color: 0xffa500 });
               const tube = new THREE.Mesh(tubeGeom, tubeMat);
               tube.userData = { isSunTrajectory: true };
-              tube.scale.setScalar(TRAJECTORY_SCALE);
               sunTrajectoryGroup.add(tube);
             });
 
