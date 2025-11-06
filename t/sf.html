@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SFU Fetch Test</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f6f6f6;
+      color: #222;
+      padding: 2rem;
+    }
+    pre {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    .status {
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>NOAA SFU Fetch Test</h1>
+  <p>This page tests whether your browser can fetch the solar flux data directly from NOAA’s HTTPS server.</p>
+
+  <div class="status" id="status">Fetching...</div>
+  <pre id="output"></pre>
+
+  <script>
+    const url = 'https://services.swpc.noaa.gov/text/solar_radio_flux.txt';
+    const statusEl = document.getElementById('status');
+    const outputEl = document.getElementById('output');
+
+    async function testFetch() {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const text = await res.text();
+        statusEl.textContent = '✅ Fetch succeeded! (CORS OK)';
+        outputEl.textContent = text.slice(0, 2000) + '\n\n... (truncated)';
+        console.log('Full text:', text);
+      } catch (err) {
+        statusEl.textContent = '❌ Fetch failed: ' + err.message;
+        outputEl.textContent = 'If you see a CORS error in the console, the browser is blocking this request.';
+        console.error(err);
+      }
+    }
+
+    testFetch();
+  </script>
+</body>
+</html>
+
