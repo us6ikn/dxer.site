@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7YST3WTEH3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-7YST3WTEH3');
+    </script>
+    <meta charset="UTF-8" />
+    <title>EME Noise Mapper – User Guide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        
+        <meta name="description" content="Learn how to use the EME Noise Mapper tool to plan Moonbounce QSOs on all bands from 432MHz and above. This user guide covers features like moon tracking, Dpol, elevation charts, and station tables." />
+        <meta name="keywords" content="EME, Moonbounce, User Guide, Ham Radio, moon ephemeris, Polarization Offset, Signal Loss, Amateur Radio Tools" />
+        <meta name="author" content="SA5IKN" />
+        <meta name="robots" content="index, follow" />
+        
+        <!-- Open Graph -->
+        <meta property="og:title" content="EME Noise Mapper – User Guide" />
+        <meta property="og:type" content="article" />
+        <meta property="og:description" content="Step-by-step user guide for EME Noise Mapper. Learn to use the moon tracking map, signal loss charts, and DX tools for Moonbounce on all bands." />
+        <meta property="og:image" content="/social/eme-observer.jpg" />
+        <meta property="og:url" content="https://dxer.site/eme-observer/user-guide.html" />
+        
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="EME Noise Mapper – How to Use the Tool" />
+        <meta name="twitter:description" content="Tutorial and guide for using EME Noise Mapper for amateur radio Moonbounce planning." />
+        <meta name="twitter:image" content="/social/eme-observer.jpg" />
+        
+        <!-- Canonical URL -->
+        <link rel="canonical" href="https://dxer.site/eme-observer/user-guide.html" />
+        
+        <!-- Favicon & Icons -->
+        <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png" />
+        <link rel="manifest" href="/assets/site.webmanifest" />
+        <link rel="shortcut icon" href="/assets/favicon.ico" />
+        
+        <!-- Optional Structured Data -->
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "TechArticle",
+                "name": "EME Noise Mapper – User Guide",
+                "url": "https://dxer.site/eme-observer/user-guide.html",
+                "description": "Step-by-step instructions for using the EME Noise Mapper tool for planning Moonbounce QSOs. Learn about moon tracking, Dpol, signal loss, station maps and sked planning.",
+                "author": {
+                    "@type": "Person",
+                    "name": "SA5IKN"
+                },
+                "inLanguage": "en",
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "dxer.site"
+                }
+            }
+        </script>
+        
+        <style>
+            html, body {
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+            
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f9;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                flex-direction: column;
+                min-height: 100vh;
+                overflow-x: hidden;
+            }
+            
+            .top-bar {
+                width: 100%;
+                background-color: #ffffff;
+                padding: 20px 0;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            }
+            
+            .top-content {
+                max-width: 800px;
+                padding: 0 10px;
+                margin: 0 auto;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            
+            .app-meta {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                text-align: right;
+                margin-bottom: 15px;
+                line-height: 1.1;
+            }
+            
+            .creator-label {
+                font-size: 0.9rem;
+                color: #555;
+                font-style: italic;
+                margin-bottom: -4px;
+            }
+            
+            .app-name {
+                font-size: 1.8rem;
+                font-weight: 600;
+                color: #2c3e50;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: -2px;
+            }
+            
+            .button-container {
+                display: flex;
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-top: 10px;
+            }
+            
+            .button-container button {
+                background-color: #0056b3;
+                color: white;
+                border: none;
+                padding: 10px 24px;
+                font-size: 15px;
+                cursor: pointer;
+                border-radius: 6px;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                transition: background-color 0.3s ease;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            
+            .button-container button:hover {
+                background-color: #00408a;
+            }
+            
+            .container {
+                width: 100%;
+                max-width: 800px;
+                margin: 20px auto;
+                background-color: #fff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+            }
+            img {
+                display: block;
+                max-width: 100%;
+                height: auto;
+            }
+            
+            
+            h1, h2, h3 {
+                text-align: left;
+                color: #333;
+                margin-top: 30px;
+            }
+            
+            h1 {
+                text-align: center;
+            }
+            
+            nav ul {
+                list-style: none;
+                padding-left: 0;
+                line-height: 1.8;
+            }
+            
+            nav ul a {
+                text-decoration: none;
+                color: #0056b3;
+            }
+            
+            nav ul a:hover {
+                text-decoration: underline;
+            }
+            
+            section p {
+                color: #333;
+                line-height: 1.6;
+            }
+            
+            @media (max-width: 768px) {
+                .button-container button {
+                    width: 140px;
+                    font-size: 14px;
+                }
+                
+                .app-name {
+                    font-size: 1.3rem;
+                }
+                
+                .creator-label {
+                    font-size: 0.75rem;
+                }
+                
+                .app-meta {
+                    align-items: flex-end;
+                    text-align: right;
+                    margin-bottom: 12px;
+                }
+                
+                .container {
+                    width: 100%;
+                    padding: 10px;
+                }
+                
+                h1, h2, h3 {
+                    font-size: 1.2em;
+                }
+            }
+            
+            @media (max-width: 600px) {
+                .button-container {
+                    flex-wrap: nowrap;
+                    overflow-x: auto;
+                    gap: 8px;
+                    justify-content: flex-start;
+                }
+                
+                .button-container button {
+                    flex-shrink: 0;
+                    padding: 6px 12px;
+                    font-size: 12px;
+                    width: auto;
+                    white-space: nowrap;
+                }
+            }
+            
+            #backToTop {
+                position: fixed;
+                bottom: 30px;
+                right: 30px;
+                z-index: 100;
+                width: 48px;
+                height: 48px;
+                font-size: 20px;
+                line-height: 48px; /* vertically center the text */
+                text-align: center;
+                border: none;
+                outline: none;
+                background-color: #0056b3;
+                color: white;
+                cursor: pointer;
+                border-radius: 50%;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                display: none;
+                padding: 0; /* Remove padding to avoid distortion */
+                transition: background-color 0.3s ease;
+            }
+            
+            #backToTop:hover {
+                background-color: #00408a;
+            }
+            .button-container {
+                box-sizing: border-box;
+            }
+            *, *::before, *::after {
+                box-sizing: border-box;
+            }
+            
+        </style>
+        
+        <style>
+          #support {
+            background-color: #eaf0fb;
+            border-left: 4px solid #0056b3;
+            margin: 20px auto;
+          }
+
+          #support h2 {
+            color: #0056b3;
+            text-align: center;
+          }
+
+          #support ul {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #333;
+            margin-left: 20px;
+          }
+
+          #support ul li {
+            margin-bottom: 4px;
+          }
+
+          #support p {
+            color: #333;
+            line-height: 1.6;
+          }
+        </style>
+
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="top-content">
+      <div class="app-meta">
+        <div class="creator-label">by SA5IKN</div>
+        <div class="app-name">EME Noise Mapper</div>
+      </div>
+      <div class="button-container">
+        <button onclick="location.href='/eme-observer/'">Map View</button>
+        <button onclick="location.href='table.html'">Table View</button>
+        <button onclick="window.location.href='statistics.html'">Statistics</button>
+        <button onclick="location.href='datasubmission.html'">Add/Edit</button>
+        <button onclick="location.href='/'">🏠</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guide Content -->
+  <div class="container">
+    <h1>User Guide</h1>
+
+    <!-- Table of Contents -->
+    <nav>
+      <ul>
+        <li><a href="#about">About EME Noise Mapper</a></li>
+        <li><a href="#accuracy">Data and Accuracy</a></li>
+        <li><a href="#quickstart">Quick Start</a>
+          <ul style="padding-left: 1em;">
+              <li>
+                <a href="#map-view">Map View</a>
+                <ul style="padding-left: 1.2em;">
+                  <li><a href="#date-time-controls">Control Panel</a></li>
+                  <li><a href="#daily-moon-data">Daily Moon Data Chart</a></li>
+                  <li><a href="#my-location-chart">My Location Chart</a></li>
+                  <li><a href="#dx-location-chart">DX Location Chart</a></li>
+                  <li><a href="#sked-chart">Sked Chart</a></li>
+                  <li><a href="#autotracking">Realtime Tracking Mode</a></li>
+                  <li><a href="#station-map">Station Map and Station Profiles</a></li>
+                </ul>
+              </li>
+            <li><a href="#table-view">Table View</a></li>
+            <li><a href="#statistics">Statistics</a></li>
+          </ul>
+        </li>
+        <li><a href="#mobile-experience">Mobile experience</a></li>
+        <li><a href="#other-bands">Use on Bands Below 432 MHz</a></li>
+        <li><a href="#dpol">A note on Spatial Polarisation Offset (Dpol)</a></li>
+        <li><a href="#support">Support EME Observer</a></li>
+      </ul>
+    </nav>
+
+    <!-- Sections -->
+    <div itemprop="articleBody">
+    <section id="about">
+      <h2>About EME Noise Mapper</h2>
+      <p>
+        <strong>EME Noise Mapper</strong> is a web application that provides an interactive map of Earth-Moon-Earth (EME) stations and enables one-click sked planning and real-time tracking of moon footprint and conditions. It delivers high-resolution lunar ephemeris data and displays key signal-path characteristics, including additional path loss, libration rate, Doppler spread, and polarization offset, together with station profiles and statistical summaries.
+        EME Observer currently supports all EME bands from 432&nbsp;MHz to 76GHz. Planning is also available for 144&nbsp;MHz and 50&nbsp;MHz, but station profiles are not currently included for these bands.
+      </p>
+
+      <figure style="margin-top: 10px; text-align: center;">
+        <a href="images/eme-noise-mapper-001.jpg" target="_blank" rel="noopener">
+          <img
+            src="images/eme-noise-mapper-001.jpg"
+            alt="EME Noise Mapper"
+            loading="lazy"
+            width="800"
+            height="450"
+            style="max-width: 100%; height: auto; border-radius: 8px;"
+          />
+        </a>
+        <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+          EME Noise Mapper
+        </figcaption>
+      </figure>
+     
+     <p><strong>Key features include:</strong></p>
+     <ul>
+       <li>Station locations with details such as transmit power, antennas, QRZ.com links, personal websites, email addresses, and station images (where available)</li>
+       <li>One-click EME planner for all bands, 432&nbsp;MHz and above, featuring visualizations of common Moon windows and signal-path characteristics - supports both Manual and Realtime tracking modes (1-minute tracking steps)</li>
+       <li>Moon footprint, sublunar point, CQ Zones and QTH Locators overlay</li>
+       <li>Moon distance, declination, and additional path loss</li>
+       <li>Moon azimuth, elevation, topocentric libration rate, and Doppler spread on selected EME band for both your and the DX locations</li>
+       <li>Relative libration rate, Doppler width (DXWidth), and spatial polarization offset (Dpol) between your and the DX locations</li>
+       <li>Accurate Moonrise and Moonset times for your location and DX stations</li>
+       <li>Moon–Sun angular separation and Moon-Sagittarius A separation for bands below 1&nbsp;GHz, both with visual markers denoting potentially poor conditions</li>
+       <li>Tabular station view with technical and contact details, including multi-field search capability</li>
+       <li>Summary statistics covering power levels, antenna sizes, and DXCC distribution</li>
+     </ul>
+
+     <p>
+       EME Observer was originally developed for personal use, tailored to the rhythm of my lifestyle and portable EME operation, which I enjoy most. Thanks to the support of the vibrant and dynamic EME community, EME Observer has grown into a full-featured EME planner and station map for all bands, from 432&nbsp;MHz and above. It is platform-independent and performs equally well on desktop and mobile devices, making it easy to plan EME activity on the go.
+       <br><br>
+       EME Observer is <strong>not</strong> a link budget calculator. It will not tell you whether a QSO is possible with your particular setup, but understanding the data it presents can significantly improve your chances.
+     </p>
+
+      
+    </section>
+
+    <section id="accuracy">
+      <h2>Data and Accuracy</h2>
+      <p>
+        EME Observer performs astronomical calculations using the <em>Astronomy Engine</em>, built on the VSOP87 and NOVAS C 3.1 models. In certain areas, an optimized version of the Meeus algorithm is used to improve performance without noticeable reduction in precision. See also <a href="#licenses">licenses and credits.</a>
+      </p>
+      <p>
+        All computations have been thoroughly validated against the <em>Skyfield</em> Python library using the DE421 ephemeris from NASA Jet Propulsion Laboratory (JPL). EME Observer achieves positional accuracy within 1&nbsp;arcminute (0.017°), fully meeting the precision requirements for QSO planning and analysis across all EME bands, including the highest microwave frequencies.
+      </p>
+      <p>
+        Doppler spread calculations are based on methods described by <a href="https://wsjt.sourceforge.io/EME2010_K1JT.pdf" target="_blank" rel="noopener">J. Taylor K1JT, 2010</a>, and spatial polarization offset (Dpol) follows the WSJT-X algorithm.
+      </p>
+      
+      <h3 id="station-data">Station Data</h3>
+      <p>
+        Station data is contributed by the community. EME Observer's database builds upon the excellent and dedicated work of Jan PA0PLY, who maintains a comprehensive list of active EME stations.
+        <br><br>
+        To add or update a station, please submit your information through the <a href="https://www.pa0ply.nl/eme-directory/" target="_blank" rel="noopener">PA0PLY EME Directory</a>. Only include stations that have transmit (TX) capability and have completed at least one EME QSO on the band for which you are submitting data.
+        <br><br>
+        To include a station image in the EME Observer station profiles, please send the image to Max SA5IKN, using the email address listed on <a href="https://www.qrz.com/db/SA5IKN" target="_blank" rel="noopener">his QRZ.com profile</a>. Please specify which band the picture is intended for. Each band can use a dedicated image, or the same image can be applied across all bands.
+      </p>
+
+    </section>
+
+    <section id="quickstart">
+      <h2>Quick Start</h2>
+      <p>
+      EME Observer offers three display modes: Map View, Table View, and Statistics View.
+      </p>
+      
+      <h3 id="map-view">Map View</h3>
+      <figure style="margin-top: 10px; text-align: center;">
+        <div style="
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 16px;
+        ">
+          <!-- Subfigure 1 -->
+          <div style="flex: 1 1 250px; max-width: 350px;">
+            <a href="images/eme-observer-main-screen.jpg" target="_blank" rel="noopener">
+              <img
+                src="images/eme-observer-main-screen.jpg"
+                alt="EME Observer - default map view"
+                loading="lazy"
+                width="350"
+                height="200"
+                style="max-width: 100%; height: auto; border-radius: 8px;"
+              />
+            </a>
+            <figcaption style="margin-top: 4px; font-size: 0.9em; color: #555;">
+              EME Observer – default map view
+            </figcaption>
+          </div>
+
+          <!-- Subfigure 2 -->
+          <div style="flex: 1 1 250px; max-width: 350px;">
+            <a href="images/eme-observer-qth-locator-overlay.jpg" target="_blank" rel="noopener">
+              <img
+                src="images/eme-observer-qth-locator-overlay.jpg"
+                alt="EME Observer - map view with responsive QTH locator overlay"
+                loading="lazy"
+                width="350"
+                height="200"
+                style="max-width: 100%; height: auto; border-radius: 8px;"
+              />
+            </a>
+            <figcaption style="margin-top: 4px; font-size: 0.9em; color: #555;">
+              EME Observer – map view with responsive QTH locator overlay
+            </figcaption>
+          </div>
+
+          <!-- Subfigure 3 -->
+          <div style="flex: 1 1 250px; max-width: 350px;">
+            <a href="images/eme-observer-cq-zones.jpg" target="_blank" rel="noopener">
+              <img
+                src="images/eme-observer-cq-zones.jpg"
+                alt="EME Observer - map view with CQ zones overlay"
+                loading="lazy"
+                width="350"
+                height="200"
+                style="max-width: 100%; height: auto; border-radius: 8px;"
+              />
+            </a>
+            <figcaption style="margin-top: 4px; font-size: 0.9em; color: #555;">
+              EME Observer – map view with CQ zones overlay
+            </figcaption>
+          </div>
+        </div>
+      </figure>
+
+      <p>
+        <strong>Map View</strong> is the default display in EME Observer. When the application loads, the <em>My Locator</em> and <em>DX Locator</em> fields are blank, and the date and time are automatically set to the current UTC time, rounded to the nearest 5 minutes.
+        <br><br>
+        You can adjust the date using the date picker or its arrow controls, and change the time by moving the time slider. As you move the slider, the Moon footprint updates in 5-minute increments. The Moon icon marks the sublunar point - the location on Earth where the Moon is directly overhead.
+        <br><br>
+        You can enable the realtime mode by pressing the Track button. Additional map layers, QTH locator grids or CQ Zones, can be enabled via the <strong>Map Layers</strong> icon located in the upper-right corner of the screen.
+      </p>
+
+      
+      <h4 id="date-time-controls">Control Panel</h4>
+      <figure style="margin-top: 10px; text-align: center;">
+        <a href="images/controls.jpg" target="_blank" rel="noopener">
+          <img
+            src="images/controls.jpg"
+            alt="Control panel of EME Observer"
+            loading="lazy"
+            width="800"
+            height="450"
+            style="max-width: 100%; height: auto; border-radius: 8px;"
+          />
+        </a>
+        <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+          Control panel of EME Observer
+        </figcaption>
+      </figure>
+      <p>
+        The Control Panel in <strong>EME Observer</strong> provides quick access to all essential settings and tools. It includes:
+      </p>
+      <ul>
+          <li><strong>Time &amp; Date Controls</strong> — set the UTC date and time for planning or tracking</li>
+          <li><strong>Band Selector</strong> — choose the operating band: 432&nbsp;MHz, 1296&nbsp;MHz, 2320&nbsp;MHz, 3400&nbsp;MHz, 5760&nbsp;MHz, 10&nbsp;GHz, 24&nbsp;GHz, 47&nbsp;GHz, or 76&nbsp;GHz</li>
+          <li><strong>Mode Selector</strong> — toggle between <em>Manual (Planning)</em> mode and <em>Realtime Tracking</em> mode using the “Track” button</li>
+          <li><strong>QTH Locator Fields</strong> — enter your station grid and the DX station grid</li>
+          <li><strong>View Buttons</strong> — switch to <em>Table View</em> to browse station records or <em>Statistics View</em> to analyze station and DXCC data</li>
+          <li><strong>Quick Links</strong> — access the station submission page and this user guide</li>
+          <li><strong>Hide Panel Button</strong> (&#x2190;) — collapse the Control Panel and charts for improved map visibility, especially on mobile devices</li>
+        <li><strong>“Annual” Button</strong> (next to the Moon Data Chart) — open printable annual lunar ephemeris PDFs and an interactive yearly ephemeris overview</li>
+      </ul>
+      
+      <h4 id="daily-moon-data">Daily Moon Data Chart</h4>
+      <figure style="margin-top: 10px; text-align: center;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px;">
+          <!-- Subfigure 1 -->
+          <div style="flex: 1 1 380px; max-width: 800px;">
+            <a href="images/moon-data-chart.jpg" target="_blank" rel="noopener">
+              <img
+                src="images/moon-data-chart.jpg"
+                alt="Moon data chart for bands above 1 GHz"
+                loading="lazy"
+                width="800"
+                height="450"
+                style="max-width: 100%; height: auto; border-radius: 8px;"
+              />
+            </a>
+            <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+              Moon data chart appearance for bands above 1&nbsp;GHz
+            </figcaption>
+          </div>
+
+          <!-- Subfigure 2 -->
+          <div style="flex: 1 1 380px; max-width: 800px;">
+            <a href="images/moon-data-chart-432MHz.jpg" target="_blank" rel="noopener">
+              <img
+                src="images/moon-data-chart-432MHz.jpg"
+                alt="Moon data chart for bands below 1 GHz"
+                loading="lazy"
+                width="800"
+                height="450"
+                style="max-width: 100%; height: auto; border-radius: 8px;"
+              />
+            </a>
+            <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+              Moon data chart appearance for bands below 1&nbsp;GHz
+            </figcaption>
+          </div>
+        </div>
+      </figure>
+
+      <p>
+        When the page first loads and no QTH locator has been entered by the user, the <strong>Moon Data Chart</strong> is the only chart displayed. It presents <em>geocentric</em> (Earth-centered) Moon data, which does not depend on any station location. The chart spans a period of <strong>one month</strong>, with the <strong>X-axis representing calendar dates</strong>, and displays:
+      </p>
+      <ul>
+        <li><strong>Moon distance</strong></li>
+        <li><strong>Moon declination</strong></li>
+        <li><strong>Additional path loss</strong> relative to the minimum path loss at perigee</li>
+        <li><strong>Moon–Sun angular separation (M-Sun)</strong> — the width of the orange marker indicates times when the Moon–Sun separation is below 10&nbsp;degrees</li>
+        <li><strong>Moon–Sagittarius&nbsp;A angular separation (M-SgrA)</strong> — for bands below 1&nbsp;GHz (see bottom screenshot), the width of the violet marker indicates times when the Moon–Sagittarius&nbsp;A separation is below 10&nbsp;degrees</li>
+      </ul>
+      <p>
+        The vertical <strong>black bar</strong> on the chart represents the selected date and acts as a <strong>time marker</strong>. You can adjust the date using the <strong>date picker</strong> or its arrow controls.
+      </p>
+      <p>
+        Each curve and its corresponding Y-axis are <strong>color-coded</strong>, as are the numerical values displayed above the chart for the current Moon distance, declination, and additional path loss. In <em>Manual</em> mode, these values update in <strong>5-minute intervals</strong> as you move the time slider, while in <em>Realtime Tracking</em> mode, they automatically update every minute.
+      </p>
+
+      
+      <h4 id="my-location-chart">My Location Chart</h4>
+      <figure style="margin-top: 10px; text-align: center;">
+        <a href="images/my-locator-chart.jpg" target="_blank" rel="noopener">
+          <img
+            src="images/my-locator-chart.jpg"
+            alt="My Location Chart"
+            loading="lazy"
+            width="800"
+            height="450"
+            style="max-width: 100%; height: auto; border-radius: 8px;"
+          />
+        </a>
+        <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+          My Location Chart (example for 10&nbsp;GHz)
+        </figcaption>
+      </figure>
+
+      <p>
+        The <strong>My Location Chart</strong> becomes visible once a valid 6-character QTH locator is entered in the <em>My Locator</em> field. This chart displays <em>topocentric</em> data specific to the user's location:
+      </p>
+      <ul>
+        <li><strong>Moon elevation</strong> (and azimuth, shown above the graph)</li>
+        <li><strong>Moonrise and Moonset times</strong></li>
+        <li><strong>Topocentric libration rate</strong></li>
+        <li><strong>Doppler spread</strong> for the selected band (equivalent to “Width” in the Astronomical Data window of WSJT-X)</li>
+      </ul>
+      <p>
+        The X-axis represents time in <strong>5-minute intervals</strong>, and the <strong>black vertical line</strong> serves as a time marker that updates as you move the time slider in <em>Manual</em> mode or automatically in <em>Realtime Tracking</em> mode.
+      </p>
+      <p>
+        Each curve on the chart is <strong>color-coded</strong> to match its corresponding Y-axis. The current values for Moon elevation, azimuth, libration rate, and full limb-to-limb Doppler spread are displayed above the chart in matching colors for quick reference.
+      </p>
+
+      <h4 id="dx-location-chart">DX Location Chart</h4>
+      <figure style="margin-top: 10px; text-align: center;">
+        <a href="images/dx-locator-chart.jpg" target="_blank" rel="noopener">
+          <img
+            src="images/dx-locator-chart.jpg"
+            alt="DX Location Chart"
+            loading="lazy"
+            width="800"
+            height="450"
+            style="max-width: 100%; height: auto; border-radius: 8px;"
+          />
+        </a>
+        <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+          DX Location Chart (example for 10&nbsp;GHz)
+        </figcaption>
+      </figure>
+
+      <p>
+        The <strong>DX Location Chart</strong> appears when a valid 6-character QTH locator is entered for the DX station. It shares the same layout and visual style as the <em>My Location</em> chart.
+      </p>
+      <p>
+        When both charts are visible, you can compare Moon visibility for your own station and the DX station, helping identify overlapping Moon windows for potential QSOs.
+        The DX locator can be entered manually or automatically by clicking a station marker on the map and selecting the green <strong>Sked</strong> button next to the station’s locator.
+      </p>
+
+
+      <h4 id="sked-chart">Sked Chart</h4>
+      <figure style="margin-top: 10px; text-align: center;">
+        <a href="images/sked-chart.jpg" target="_blank" rel="noopener">
+          <img
+            src="images/sked-chart.jpg"
+            alt="Sked data chart"
+            loading="lazy"
+            width="800"
+            height="450"
+            style="max-width: 100%; height: auto; border-radius: 8px;"
+          />
+        </a>
+        <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+          Sked Chart (example for 10&nbsp;GHz)
+        </figcaption>
+      </figure>
+      <p>
+        The <strong>Sked Chart</strong> becomes visible when valid 6-character QTH locators are entered in both the <em>My Locator</em> and <em>DX Locator</em> fields. It displays key signal path metrics for the common Moon window (sked) between the two stations (computed as vectors):
+        <strong>Relative Libration Rate</strong> (Rel&nbsp;LR), <strong>Relative Doppler Spread</strong> for the selected band (DX&nbsp;Width), and <strong>Spatial Polarization Offset</strong> (Dpol).
+      </p>
+      <p>
+        As with the other charts, each curve and its corresponding Y-axis are <strong>color-coded</strong>, as are the numerical values shown above the chart. These parameters are defined as follows:
+      </p>
+      <ul>
+        <li><strong>Rel LR</strong> – Relative libration rate between the two stations</li>
+        <li><strong>DX Width</strong> – Relative Doppler spread for the selected band (equivalent to <em>DXWid</em> in WSJT-X)</li>
+        <li><strong>Dpol</strong> – Spatial polarization offset in degrees (equivalent to <em>Dpol</em> in WSJT-X)</li>
+      </ul>
+
+      <h4 id="autotracking">Realtime Tracking Mode</h4>
+
+      <figure style="margin-top: 10px; text-align: center;">
+        <a href="images/realtime-tracking.jpg" target="_blank" rel="noopener">
+          <img
+            src="images/realtime-tracking.jpg"
+            alt="Realtime Tracking Mode in EME Observer"
+            loading="lazy"
+            width="800"
+            height="450"
+            style="max-width: 100%; height: auto; border-radius: 8px;"
+          />
+        </a>
+        <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+            Realtime Tracking Mode in EME Observer
+        </figcaption>
+      </figure>
+
+      <p>
+        EME Observer includes a <strong>Realtime Tracking</strong> mode, which can be activated by pressing the <em>Track</em> button.
+        In this mode, the map and all metrics displayed on the charts and above them are updated at <strong>1-minute intervals</strong>.
+        This frequency is sufficient for assesment of the current Moon footprint and conditions, for example during contests or when running schedules.
+        When Realtime Tracking mode is active, the time and date controls are greyed out, as shown in the screenshot above.
+        To return to <em>Manual</em> mode for standard EME planning, click the <em>Stop</em> button.
+      </p>
+
+
+      <h4 id="station-map">Station Map and Station Profiles</h4>
+      <figure style="margin-top: 10px; text-align: center;">
+        <a href="images/station-profile.jpg" target="_blank" rel="noopener">
+          <img
+            src="images/station-profile.jpg"
+            alt="Station and footprint view with a station profile"
+            loading="lazy"
+            width="800"
+            height="450"
+            style="max-width: 100%; height: auto; border-radius: 8px;"
+          />
+        </a>
+        <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+            Station and footprint view with a station profile
+        </figcaption>
+      </figure>
+      <p>
+        The map displays EME stations for the selected band using four distinct marker types:
+      </p>
+      <ul style="list-style: none; padding-left: 0; font-size: 0.95em;">
+        <li style="display: flex; align-items: center; margin-bottom: 8px;">
+          <img src="images/EME_home.png" alt="Home station icon" style="width: 24px; height: 24px; margin-right: 10px;" />
+          Home station (active) – a fixed-location EME station
+        </li>
+        <li style="display: flex; align-items: center; margin-bottom: 8px;">
+          <img src="images/EME_inactive.png" alt="Home station (not active) icon" style="width: 24px; height: 24px; margin-right: 10px;" />
+          Home station (not active) – not active but known to QRV in the past
+        </li>
+        <li style="display: flex; align-items: center; margin-bottom: 8px;">
+          <img src="images/EME_dxped2.png" alt="DXpedition icon" style="width: 24px; height: 24px; margin-right: 10px;" />
+          DXpedition – a portable station operating outside its home QTH locator
+        </li>
+        <li style="display: flex; align-items: center;">
+          <img src="images/EME_SK.png" alt="Silent Key icon" style="width: 24px; height: 24px; margin-right: 10px;" />
+          Silent Key – a station formerly active, now marked in memoriam
+        </li>
+      </ul>
+      <p>
+        Clicking a marker opens an info window with the station profile. This includes the callsign, operator name, and QTH locator, along with a green <strong>Sked</strong> button for one-click sked planning. Where available, you will also see details such as antenna size, transmit power, website link, station photo, and a dedicated <strong>QRZ</strong> button for direct access to the operator’s QRZ.com page. The blue <strong>Email</strong> button opens your default email client with the station’s address pre-filled, making it easy to arrange a sked.
+      </p>
+
+
+      <h3 id="table-view">Table View</h3>
+
+      <figure style="margin-top: 10px; text-align: center;">
+        <a href="images/table-view.jpg" target="_blank" rel="noopener">
+          <img
+            src="images/table-view.jpg"
+            alt="Screenshot of EME Observer Table View showing station data"
+            loading="lazy"
+            width="800"
+            height="450"
+            style="max-width: 100%; height: auto; border-radius: 8px;"
+          />
+        </a>
+        <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+          Table View displaying EME station data
+        </figcaption>
+      </figure>
+
+      <p>
+        The <strong>Table View</strong> can be accessed by clicking the <em>Table View</em> button in the Control Panel. This mode provides a detailed, sortable, and customizable table of EME stations for each band, which can be selected via a drop-down menu.
+        Each row presents key station information: callsign, QTH locator, DXCC entity, antenna type, transmit power, and any available notes.
+        When contact details are provided, <strong>Email</strong>, <strong>QRZ</strong>, and <strong>Website</strong> buttons are shown, allowing quick access to external resources or direct communication.
+      </p>
+
+      <p>
+        The table includes a full-text search across all columns, making it easy to filter stations by DXCC prefix, power level, antenna type or size, and other parameters.
+        You can sort by any column or combine search criteria to efficiently locate stations of interest.
+      </p>
+
+      <h3 id="statistics">Statistics View</h3>
+
+      <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 20px;">
+        <figure style="flex: 1; min-width: 100px; max-width: 32%; text-align: center;">
+          <a href="images/statistics-001.jpg" target="_blank" rel="noopener">
+            <img
+              src="images/statistics-001.jpg"
+              alt="EME station statistics showing antenna size and transmit power distribution"
+              style="width: 100%; height: auto; border-radius: 8px;"
+              loading="lazy"
+            />
+          </a>
+          <figcaption style="font-size: 0.85em; color: #555; margin-top: 6px;">
+            EME station statistics: antenna size and transmit power
+          </figcaption>
+        </figure>
+
+        <figure style="flex: 1; min-width: 100px; max-width: 32%; text-align: center;">
+          <a href="images/statistics-002.jpg" target="_blank" rel="noopener">
+            <img
+              src="images/statistics-002.jpg"
+              alt="EME station DXCC distribution chart"
+              style="width: 100%; height: auto; border-radius: 8px;"
+              loading="lazy"
+            />
+          </a>
+          <figcaption style="font-size: 0.85em; color: #555; margin-top: 6px;">
+            EME station DXCC statistics
+          </figcaption>
+        </figure>
+      </div>
+
+      <p>
+        The <strong>Statistics View</strong> can be accessed from the Control Panel.
+        This mode displays dynamic charts illustrating the distribution of stations by antenna size, transmit power, and DXCC entity. These statistics are automatically refreshed whenever station data is added or updated. Select band via the band selector.
+      </p>
+
+      
+    </section>
+    
+    <section id="mobile-experience">
+        <h2>Mobile experience</h2>
+        <p>
+          <strong>EME Observer</strong> features a responsive design optimized for mobile devices, presenting all essential data in a compact, touch-friendly layout. The screenshots below show the interface as displayed on an iPhone Pro. On smaller screens, vertical scrolling is enabled for charts, allowing users to explore data easily while key controls remain fixed for quick access. The control panel can be minimized using the <em>Hide Panel</em> button (&#x2190;), making it easier to explore the map, Moon footprint, CQ Zones, QTH Locators, and station profiles. One-click sked planning functions identically to the desktop version and so does the Realtime Tracking Mode.
+        </p>
+
+    <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 30px;">
+        
+      <figure style="flex: 1; min-width: 100px; max-width: 23%; text-align: center;">
+        <a href="images/mobile-001.jpg" target="_blank" rel="noopener">
+          <img src="images/mobile-001.jpg" alt="Map view on mobile" style="width: 100%; height: auto; border-radius: 8px;" loading="lazy" />
+        </a>
+        <figcaption style="font-size: 0.85em; color: #555; margin-top: 6px;">Default Map View</figcaption>
+      </figure>
+      
+      <figure style="flex: 1; min-width: 100px; max-width: 23%; text-align: center;">
+        <a href="images/mobile-002.jpg" target="_blank" rel="noopener">
+          <img src="images/mobile-002.jpg" alt="Moon data mobile view" style="width: 100%; height: auto; border-radius: 8px;" loading="lazy" />
+        </a>
+        <figcaption style="font-size: 0.85em; color: #555; margin-top: 6px;">Moon Data (Station and DX)</figcaption>
+      </figure>
+      
+      <figure style="flex: 1; min-width: 100px; max-width: 23%; text-align: center;">
+        <a href="images/mobile-003.jpg" target="_blank" rel="noopener">
+          <img src="images/mobile-003.jpg" alt="Sked chart on mobile" style="width: 100%; height: auto; border-radius: 8px;" loading="lazy" />
+        </a>
+        <figcaption style="font-size: 0.85em; color: #555; margin-top: 6px;">Sked Chart View</figcaption>
+      </figure>
+
+      <figure style="flex: 1; min-width: 100px; max-width: 23%; text-align: center;">
+        <a href="images/mobile-004.jpg" target="_blank" rel="noopener">
+          <img src="images/mobile-004.jpg" alt="Moon Footprint and QTH Locators" style="width: 100%; height: auto; border-radius: 8px;" loading="lazy" />
+        </a>
+        <figcaption style="font-size: 0.85em; color: #555; margin-top: 6px;">Moon Footprint and QTH Locators</figcaption>
+      </figure>
+      
+      <figure style="flex: 1; min-width: 100px; max-width: 23%; text-align: center;">
+        <a href="images/mobile-005.jpg" target="_blank" rel="noopener">
+          <img src="images/mobile-005.jpg" alt="Station Profile" style="width: 100%; height: auto; border-radius: 8px;" loading="lazy" />
+        </a>
+        <figcaption style="font-size: 0.85em; color: #555; margin-top: 6px;">Station Profile</figcaption>
+      </figure>
+      
+      <figure style="flex: 1; min-width: 100px; max-width: 23%; text-align: center;">
+        <a href="images/mobile-006.jpg" target="_blank" rel="noopener">
+          <img src="images/mobile-006.jpg" alt="Moon Footprint and CQ Zones" style="width: 100%; height: auto; border-radius: 8px;" loading="lazy" />
+        </a>
+        <figcaption style="font-size: 0.85em; color: #555; margin-top: 6px;">Moon Footprint and CQ Zones</figcaption>
+      </figure>
+      
+      <figure style="flex: 1; min-width: 100px; max-width: 23%; text-align: center;">
+        <a href="images/mobile-007.jpg" target="_blank" rel="noopener">
+          <img src="images/mobile-007.jpg" alt="Table view mobile layout" style="width: 100%; height: auto; border-radius: 8px;" loading="lazy" />
+        </a>
+        <figcaption style="font-size: 0.85em; color: #555; margin-top: 6px;">Table View with Details</figcaption>
+      </figure>
+      
+      <figure style="flex: 1; min-width: 100px; max-width: 23%; text-align: center;">
+        <a href="images/mobile-008.jpg" target="_blank" rel="noopener">
+          <img src="images/mobile-008.jpg" alt="Station statistics mobile view" style="width: 100%; height: auto; border-radius: 8px;" loading="lazy" />
+        </a>
+        <figcaption style="font-size: 0.85em; color: #555; margin-top: 6px;">Station Statistics</figcaption>
+      </figure>
+    </div>
+
+  </section>
+    <section>
+        <h2 id="other-bands">Use on Bands Below 432 MHz</h2>
+
+        <p>
+          Although <strong>EME Observer</strong> is primarily designed for planning EME QSOs on bands from 432&nbsp;MHz and above, many of its tools and metrics are also useful for lower EME bands, such as 144&nbsp;MHz and 50&nbsp;MHz.
+          These include the Moon footprint, Earth–Moon distance, additional path loss, lunar declination, elevation and azimuth charts, moonrise and moonset times, and polarization offset.
+          For convenience, when planning QSOs on lower bands, you may select 432&nbsp;MHz in the band selector to enable the display of Moon–Sagittarius A separation, with markers denoting times when high sky temperature can degrade the system performance.
+        </p>
+
+        <p>
+          The effects of lunar libration are frequency-dependent, varying both qualitatively and quantitatively with the operating band.
+          On lower bands, this appears as Doppler fading, while on higher bands it manifests as Doppler spreading.
+        </p>
+
+    </section>
+    
+    <section>
+    <h2 id="dpol">A note on Spatial Polarisation Offset (Dpol)</h2>
+    <p>
+        For certain EME path geometries, the plot of the Spatial Polarization Offset may exhibit abrupt transitions, with the Dpol value rapidly changing sign near ±90 degrees (see the center and bottom plots in the figure below). The Dpol values displayed by EME Observer are consistent with those reported by WSJT-X. When instantaneous values from WSJT-X or the VK3UM EME Planner are plotted, similar abrupt transitions can be observed. For more details, see <a href="https://groups.io/g/wsjtgroup/topic/spatial_polarisation_offset/113906411" target="_blank" rel="noopener">this discussion</a>.
+    </p>
+
+    <figure style="margin-top: 10px; display: flex; flex-direction: column; align-items: center;">
+      <a href="images/dpol.jpg" target="_blank" rel="noopener">
+        <img
+          src="images/dpol.jpg"
+          alt="Spatial Polarisation Offset (Dpol) behaviour under different EME path geometries"
+          loading="lazy"
+          width="500"
+          height="450"
+          style="max-width: 100%; height: auto; border-radius: 8px;"
+        />
+      </a>
+      <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555; text-align: center;">
+        Spatial Polarisation Offset (Dpol) behaviour under different EME path geometries
+      </figcaption>
+    </figure>
+
+
+    </section>
+    
+    <section id="support">
+      <div class="container">
+        <h2>Support EME Observer</h2>
+        <p>
+          If you enjoy using EME Observer and want to help cover website costs, you can contribute in one of these ways:
+        </p>
+        <ul>
+          <li>
+            <strong>PayPal (Friends & Family):</strong> Send your contribution directly to SA5IKN's email:
+            <a href="https://qrz.com/db/sa5ikn">shown on QRZ.com</a>.
+            Using Friends & Family avoids fees, so your full support goes to the project.
+          </li>
+          <li>
+            <strong>Ko-fi:</strong> Support via Ko-fi quickly and easily:
+            <div id="kofi-widget">
+              <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+              <script type='text/javascript'>
+                kofiwidget2.init('Support me on Ko-fi', '#72a4f2', 'F2F8K2YK7');
+                kofiwidget2.draw();
+              </script>
+            </div>
+          </li>
+        </ul>
+
+        <p>
+          <strong>Current supporters:</strong>
+        </p>
+        <ul>
+          <li>F2CT</li>
+          <li>ON5TA</li>
+          <li>F5JWF</li>
+          <li>F6IJI</li>
+        </ul>
+
+        <p>Every contribution, big or small, helps keep EME Observer online and available for the community. Thank you for your support!</p>
+      </div>
+    </section>
+    
+    <section id="licenses">
+      <h2>Licenses and Credits</h2>
+      <p>
+        <strong>EME Observer</strong><br>
+        © 2025 Max Romensky (SA5IKN). All rights reserved.<br>
+      </p>
+
+      <p>This application incorporates the following third-party components:</p>
+
+      <ul>
+          <li>
+            NASA JPL DE421 Ephemeris - Public domain data provided by NASA’s Jet Propulsion Laboratory.
+          </li>
+          <li>
+            Skyfield © 2014-2025 Brandon Rhodes and contributors - Licensed under the
+            <a href="MIT-license.txt" target="_blank" rel="noopener">MIT License</a>.
+          </li>
+        <li>
+          Astronomy Engine © 2019-2025 Don Cross - Licensed under the
+          <a href="MIT-license.txt" target="_blank" rel="noopener">MIT License</a>.
+        </li>
+        <li>
+          CQ Zones and Maidenhead Layers © 2025 HA8TKS - Licensed under the
+          <a href="MIT-license.txt" target="_blank" rel="noopener">MIT License</a>.
+        </li>
+        <li>
+          Great Circle Plugin © 2018 Alex Wellerstein - Licensed under the
+          <a href="MIT-license.txt" target="_blank" rel="noopener">MIT License</a>.
+        </li>
+        <li>
+          EME Directory - Public domain data provided by Jan Kappert (PA0PLY).
+        </li>
+      </ul>
+
+      <p>
+        Certain astronomical algorithms implemented in EME Observer are based on
+        methods published in <em>Astronomical Algorithms</em> (2nd Edition, 1998) by Jean Meeus.
+        These are mathematical in nature and are not subject to copyright.
+      </p>
+
+      </p>
+    </section>
+
+
+    
+  </div>
+  </div>
+  <button id="backToTop" title="Back to top">↑</button>
+  <script>
+    const btn = document.getElementById("backToTop");
+
+    // Show button when scrolling down
+    window.onscroll = function () {
+      if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
+        btn.style.display = "block";
+      } else {
+        btn.style.display = "none";
+      }
+    };
+
+    // Scroll to top when clicked
+    btn.onclick = function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+  </script>
+  <!-- Ko-Fi -->
+  <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+  <script src="kofi.js"></script>
+</body>
+</html>

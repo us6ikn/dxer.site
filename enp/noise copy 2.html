@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+      <title>Sky Observer</title>
+      <style>
+        body {
+          margin: 0;
+          overflow: hidden;
+          width: 100%;
+          height: 100vh;
+          background: #000;
+        }
+        canvas {
+          display: block;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+        }
+        
+        html, body {
+          touch-action: none;
+          width: 100%;
+          height: 100%;
+        }
+
+        button {
+          min-width: 44px;
+          min-height: 44px;
+        }
+
+        #infoBox {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          left: auto;
+          padding: 10px;
+          background: rgba(0,0,0,0.7);
+          color: #fff;
+          font-family: monospace;
+          font-size: 12px;
+          display: none;
+          max-width: 80vw;
+          z-index: 10;
+          text-align: right;
+          width: fit-content;
+        }
+
+        @media (max-width: 600px), (orientation: portrait) {
+          #infoBox {
+            font-size: 14px;
+            padding: 16px;
+            top: 15px;
+            right: 15px;
+            left: auto;
+            text-align: right;
+            width: fit-content;
+            max-width: 90vw;
+            line-height: 1.4;
+          }
+        }
+
+        #moonTimeControls button {
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          border-radius: 12px;
+          color: white;
+          font-size: 24px;
+          font-family: sans-serif;
+          padding: 10px 20px;
+          cursor: pointer;
+          transition: background 0.2s, transform 0.2s;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        #trackButton {
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          border-radius: 12px;
+          color: white;
+          font-size: 24px;
+          font-family: sans-serif;
+          padding: 10px 20px;
+          cursor: pointer;
+          transition: background 0.2s, transform 0.2s;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        #moonTimeControls button:hover, #trackButton:hover {
+          background: rgba(255, 255, 255, 0.2);
+          transform: scale(1.05);
+        }
+
+        #moonTimeControls button:active, #trackButton:active {
+          background: rgba(255, 255, 255, 0.3);
+          transform: scale(0.97);
+        }
+
+        #trackButton:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        #moonTimeControls {
+          position: absolute;
+          bottom: 10px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 20;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+        }
+
+        #moonTimeDisplay {
+          color: white;
+          font-family: 'Courier New', monospace;
+          font-size: 20px;
+          padding: 8px 12px;
+          border-radius: 8px;
+          background-color: rgba(0, 0, 0, 0.4);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #prevDate, #nextDate {
+          padding: 1px 6px;
+          font-size: 10px;
+          line-height: 1.2;
+          min-height: 20px;
+          width: 24px;
+          border-radius: 4px;
+          background: #444;
+          color: white;
+          border: none;
+          cursor: pointer;
+          transition: background 0.2s, transform 0.2s;
+        }
+        #prevDate:hover, #nextDate:hover {
+          background: rgba(255, 255, 255, 0.2);
+          transform: scale(1.05);
+        }
+        #prevDate:active, #nextDate:active {
+          background: rgba(255, 255, 255, 0.3);
+          transform: scale(0.97);
+        }
+
+        #timeSlider {
+          -webkit-appearance: none;
+          appearance: none;
+          background: rgba(255, 255, 255, 0.3);
+          height: 12px;
+          border-radius: 6px;
+          outline: none;
+          width: 80vw;
+          max-width: 300px;
+          touch-action: pan-y;
+          z-index: 30;
+        }
+        #timeSlider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          background: #fff;
+          border-radius: 50%;
+          cursor: pointer;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        #timeSlider::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          background: #fff;
+          border-radius: 50%;
+          cursor: pointer;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        #timeSlider:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        #colorBarContainer {
+          position: absolute;
+          bottom: 180px;
+          right: 10px;
+          z-index: 30;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          font-family: 'Segoe UI', sans-serif;
+          font-size: 12px;
+          color: white;
+          width: 40px;
+          height: auto;
+          top: auto;
+          left: auto;
+        }
+
+        #colorBar {
+          width: 20px !important;
+          height: 100px !important;
+          border: 1px solid rgba(255,255,255,0.3);
+          z-index: 30;
+        }
+
+        #maxNoiseLabel {
+          position: absolute;
+          top: -18px;
+          left: 50%;
+          transform: translateX(-50%);
+          text-align: center;
+          width: 100%;
+          z-index: 31;
+          background: rgba(0,0,0,0.6);
+          padding: 2px 4px;
+          border-radius: 2px;
+          line-height: 1.2;
+        }
+
+        #minNoiseLabel {
+          position: absolute;
+          bottom: -18px;
+          left: 50%;
+          transform: translateX(-50%);
+          text-align: center;
+          width: 100%;
+          z-index: 31;
+          background: rgba(0,0,0,0.6);
+          padding: 2px 4px;
+          border-radius: 2px;
+          line-height: 1.2;
+        }
+
+        @media (max-width: 600px), (orientation: portrait) {
+          #colorBarContainer {
+            position: absolute;
+            bottom: 90px;
+            right: 10px;
+            font-size: 10px;
+            width: 40px;
+            height: auto;
+            top: auto;
+            left: auto;
+          }
+          #colorBar {
+            width: 20px !important;
+            height: 120px !important;
+          }
+          #maxNoiseLabel {
+            top: -16px;
+            font-size: 10px;
+            padding: 1px 3px;
+          }
+          #minNoiseLabel {
+            bottom: -16px;
+            font-size: 10px;
+            padding: 1px 3px;
+          }
+        }
+
+        @media (max-height: 500px) {
+          #colorBarContainer {
+            position: absolute;
+            bottom: 80px;
+            right: 10px;
+            width: 40px;
+            height: auto;
+            top: auto;
+            left: auto;
+          }
+          #colorBar {
+            height: 100px !important;
+          }
+          #maxNoiseLabel {
+            top: -16px;
+            font-size: 10px;
+            padding: 1px 3px;
+          }
+          #minNoiseLabel {
+            bottom: -16px;
+            font-size: 10px;
+            padding: 1px 3px;
+          }
+        }
+      </style>
+    </head>
+    <body>
+        <div style="position: absolute; top: 8px; left: 8px; z-index: 30; font-family: 'Segoe UI', sans-serif;">
+          <div style="display: flex; flex-direction: row; align-items: flex-end; gap: 8px;">
+            <div style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1;">
+              <div style="font-size: 10px; color: #aaa; padding-right: 2px;">
+                by SA5IKN
+              </div>
+              <div style="font-size: 16px; color: white; font-weight: 600; background: rgba(0, 0, 0, 0.6); padding: 2px 4px; border-radius: 2px;">
+                Sky Observer
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: row; gap: 4px;">
+              <a href="https://dxer.site" target="_blank" title="Go to homepage"
+                 style="text-decoration: none; font-size: 16px; background: rgba(255,255,255,0.1); color: white; padding: 2px 6px; border-radius: 4px;">
+                🏠
+              </a>
+              <a href="https://dxer.site/eme-observer/" target="_blank" title="Go to EME Observer"
+                 style="text-decoration: none; font-size: 16px; background: rgba(255,255,255,0.1); color: white; padding: 2px 6px; border-radius: 4px;">
+                🗺️
+              </a>
+              <a href="https://dxer.site/sky-observer-faq.html" target="_blank" title="Open FAQ"
+                 style="text-decoration: none; font-size: 16px; background: rgba(255,255,255,0.1); color: white; padding: 2px 6px; border-radius: 4px;">
+                ❓
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div id="controlPanel" style="
+          position: absolute;
+          top: 36px;
+          left: 8px;
+          z-index: 20;
+          background: rgba(0,0,0,0.6);
+          padding: 6px 8px;
+          border-radius: 8px;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          font-family: 'Segoe UI', sans-serif;
+          font-size: 12px;
+          color: white;
+          max-width: 160px;
+        ">
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <label for="gridInput">My locator:</label>
+            <input type="text" id="gridInput" maxlength="6" placeholder="e.g. JO89tt"
+                   style="width: 60px; font-size: 11px; padding: 2px 4px; border-radius: 4px; border: none;">
+          </div>
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <label for="dxGridInput">DX locator:</label>
+            <input type="text" id="dxGridInput" maxlength="6" placeholder="e.g. FN20as"
+                   style="width: 60px; font-size: 11px; padding: 2px 4px; border-radius: 4px; border: none;">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <label for="csvUpload">
+              CSV <span style="font-size: 9px; color: #ccc;">(e.g. from SkyScanner)</span>:
+            </label>
+            <input type="file" id="csvUpload" accept=".csv"
+                   style="font-size: 10px; padding: 2px 0px; color: white;">
+          </div>
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <button id="prevDate">&lt;</button>
+            <input type="date" id="datePicker"
+                   style="font-size: 11px; padding: 2px 4px; border-radius: 4px; border: none; width: 100px;">
+            <button id="nextDate">&gt;</button>
+          </div>
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <input type="checkbox" id="showSun" style="width: 14px; height: 14px;">
+            <label for="showSun">Show sun</label>
+          </div>
+          <div id="demoStatus" style="color: red; font-weight: bold; margin-top: 10px;">
+            Demo loaded!
+          </div>
+        </div>
+
+        <div id="moonTimeControls" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+          <span id="moonTimeDisplay" style="color: white; font-family: 'Courier New', monospace; font-size: 18px; padding: 8px 12px; border-radius: 8px; background-color: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.2);">
+            --:-- UTC
+          </span>
+          <input type="range" id="timeSlider" min="0" max="0" value="0" aria-label="Select time for moon and sun position" role="slider" tabindex="0" style="width: 80vw; max-width: 300px; accent-color: #fff; cursor: pointer;">
+          <button id="trackButton">Track</button>
+        </div>
+
+        <div id="colorBarContainer" style="
+          position: absolute;
+          bottom: 180px;
+          right: 10px;
+          z-index: 30;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          font-family: 'Segoe UI', sans-serif;
+          font-size: 12px;
+          color: white;
+          width: 40px;
+          height: auto;
+          top: auto;
+          left: auto;
+        ">
+          <div id="maxNoiseLabel" style="position: absolute; top: -35px; left: 50%; transform: translateX(-75%); text-align: center; width: 100%; z-index: 31; background: rgba(0,0,0,0.6); padding: 2px 4px; border-radius: 2px; line-height: 1.2;">-- dB</div>
+          <canvas id="colorBar" width="20" height="200" style="border: 1px solid rgba(255,255,255,0.3); z-index: 30;"></canvas>
+          <div id="minNoiseLabel" style="position: absolute; bottom: -145px; left: 50%; transform: translateX(-75%); text-align: center; width: 100%; z-index: 31; background: rgba(0,0,0,0.6); padding: 2px 4px; border-radius: 2px; line-height: 1.2;">-- dB</div>
+        </div>
+
+        <script src="a.ob.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/build/three.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/controls/OrbitControls.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/loaders/FontLoader.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/geometries/TextGeometry.js"></script>
+
+        <script>
+          const scene = new THREE.Scene();
+          const moonTrajectoryGroup = new THREE.Group();
+          const sunTrajectoryGroup = new THREE.Group();
+          
+          let moonPositions = [];
+          let dxMoonPositions = [];
+          let sunPositions = [];
+          let commonMoonWindow = [];
+          let currentTimeIndex = 0;
+          let moonMarker = null;
+          let sunMarker = null;
+          let azStep = 5;
+          let elStep = 5;
+          let isRealTime = false;
+          let currentRealTimeData = null;
+          let autoTracking = false;
+          let trackingTimeout = null;
+          let trackingInterval = null;
+          
+          const moonTimeDisplay = document.getElementById('moonTimeDisplay');
+          const timeSlider = document.getElementById('timeSlider');
+          const datePicker = document.getElementById('datePicker');
+          const prevDateBtn = document.getElementById('prevDate');
+          const nextDateBtn = document.getElementById('nextDate');
+          const gridInput = document.getElementById('gridInput');
+          const dxGridInput = document.getElementById('dxGridInput');
+          const showSunCheckbox = document.getElementById('showSun');
+          const demoStatus = document.getElementById('demoStatus');
+          const colorBarCanvas = document.getElementById('colorBar');
+          const colorBarContext = colorBarCanvas.getContext('2d');
+          const minNoiseLabel = document.getElementById('minNoiseLabel');
+          const maxNoiseLabel = document.getElementById('maxNoiseLabel');
+          const colorBarContainer = document.getElementById('colorBarContainer');
+          const trackButton = document.getElementById('trackButton');
+
+          const renderer = new THREE.WebGLRenderer({ antialias: true });
+          renderer.setSize(window.innerWidth, window.innerHeight);
+          document.body.appendChild(renderer.domElement);
+
+          const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+          const defaultDistance = 2;
+          const defaultAzRad = THREE.MathUtils.degToRad(180);
+          const defaultElRad = THREE.MathUtils.degToRad(30);
+          camera.position.set(
+            defaultDistance * Math.cos(defaultElRad) * Math.sin(defaultAzRad),
+            defaultDistance * Math.sin(defaultElRad),
+            defaultDistance * Math.cos(defaultElRad) * Math.cos(defaultAzRad)
+          );
+          camera.lookAt(0, 0, 0);
+
+          const controls = new THREE.OrbitControls(camera, renderer.domElement);
+          controls.enableDamping = true;
+          controls.target.set(0, 0, 0);
+          controls.rotateSpeed = 0.5;
+          controls.zoomSpeed = 0.5;
+          controls.panSpeed = 0.5;
+          controls.update();
+
+          function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            drawColorBar();
+          }
+
+          window.addEventListener('resize', onWindowResize);
+          window.addEventListener('orientationchange', onWindowResize);
+
+          const raycaster = new THREE.Raycaster();
+          const mouse = new THREE.Vector2();
+          let spheres = [];
+          let minNoise = Infinity, maxNoise = -Infinity;
+          const rawPoints = [];
+
+          scene.add(moonTrajectoryGroup);
+          scene.add(sunTrajectoryGroup);
+
+          function getColor(noise) {
+            const range = maxNoise - minNoise;
+            const norm = range === 0 ? 0.5 : (noise - minNoise) / range;
+            return new THREE.Color().setHSL(0.7 - norm * 0.7, 1.0, 0.5);
+          }
+
+          function calculateStepSizes() {
+            if (!rawPoints.length) {
+              return { azStep: 5, elStep: 5 };
+            }
+
+            const azValues = [...new Set(rawPoints.map(p => p.az))].sort((a, b) => a - b);
+            const elValues = [...new Set(rawPoints.map(p => p.el))].sort((a, b) => a - b);
+
+            const azDiffs = azValues.slice(1).map((v, i) => v - azValues[i]).filter(d => d > 0);
+            const elDiffs = elValues.slice(1).map((v, i) => v - elValues[i]).filter(d => d > 0);
+
+            const azStep = azDiffs.length ? Math.min(...azDiffs) : 5;
+            const elStep = elDiffs.length ? Math.min(...elDiffs) : 5;
+
+            return { azStep, elStep };
+          }
+
+          function interpolateNoiseAtPosition(azimuth, elevation) {
+            if (!rawPoints.length) {
+              return null;
+            }
+
+            const maxDistance = Math.max(azStep, elStep) * 1.0;
+            const maxClosestDistance = 6;
+            const minPoints = 1;
+
+            const pointsWithDistance = rawPoints.map(point => {
+              const dAz = Math.abs(point.az - azimuth);
+              const dEl = Math.abs(point.el - elevation);
+              const distance = Math.sqrt(dAz * dAz + dEl * dEl);
+              return { ...point, distance };
+            });
+
+            const nearbyPoints = pointsWithDistance.filter(p => p.distance <= maxDistance);
+
+            if (nearbyPoints.length >= minPoints) {
+              if (nearbyPoints.length === 1) {
+                return { noise: nearbyPoints[0].noise };
+              }
+
+              let totalWeight = 0;
+              let weightedNoise = 0;
+              nearbyPoints.forEach(point => {
+                const weight = 1 / (point.distance * point.distance + 1e-6);
+                weightedNoise += weight * point.noise;
+                totalWeight += weight;
+              });
+
+              if (totalWeight === 0) {
+                return null;
+              }
+
+              const interpolatedNoise = weightedNoise / totalWeight;
+              return { noise: Math.max(minNoise, Math.min(maxNoise, interpolatedNoise)) };
+            }
+
+            const closestPoint = pointsWithDistance.reduce((min, p) => p.distance < min.distance ? p : min, pointsWithDistance[0]);
+            if (closestPoint.distance <= maxClosestDistance) {
+              return { noise: closestPoint.noise };
+            }
+            return null;
+          }
+
+          function getCurrentPositions() {
+            const now = new Date();
+            const grid = gridInput.value || 'JO89tt';
+            const coords = maidenheadToLatLon(grid);
+            if (!coords) return null;
+            const observer = new Astronomy.Observer(coords.lat, coords.lon, 0);
+
+            // Moon
+            const moonEq = Astronomy.Equator(Astronomy.Body.Moon, now, observer, true, false);
+            const moonHor = Astronomy.Horizon(now, observer, moonEq.ra, moonEq.dec, 'normal');
+            const moonEl = moonHor.altitude;
+            const moonAz = moonHor.azimuth;
+            const azRadMoon = THREE.MathUtils.degToRad(360 - moonAz);
+            const elRadMoon = THREE.MathUtils.degToRad(Math.max(moonEl, 0));
+            const r = 1;
+            const xMoon = r * Math.cos(elRadMoon) * Math.sin(azRadMoon);
+            const yMoon = r * Math.sin(elRadMoon);
+            const zMoon = r * Math.cos(elRadMoon) * Math.cos(azRadMoon);
+            const moonPos = new THREE.Vector3(xMoon, yMoon, zMoon);
+
+            // Sun
+            let sunEl = -1;
+            let sunAz = 0;
+            let sunPos = new THREE.Vector3();
+            if (showSunCheckbox.checked) {
+              const sunEq = Astronomy.Equator(Astronomy.Body.Sun, now, observer, true, false);
+              const sunHor = Astronomy.Horizon(now, observer, sunEq.ra, sunEq.dec, 'normal');
+              sunEl = sunHor.altitude;
+              sunAz = sunHor.azimuth;
+              const azRadSun = THREE.MathUtils.degToRad(360 - sunAz);
+              const elRadSun = THREE.MathUtils.degToRad(Math.max(sunEl, 0));
+              const xSun = r * Math.cos(elRadSun) * Math.sin(azRadSun);
+              const ySun = r * Math.sin(elRadSun);
+              const zSun = r * Math.cos(elRadSun) * Math.cos(azRadSun);
+              sunPos = new THREE.Vector3(xSun, ySun, zSun);
+            }
+
+            // DX Moon
+            let dxMoon = null;
+            const dxGrid = dxGridInput.value;
+            if (dxGrid && isValidGrid(dxGrid)) {
+              const dxCoords = maidenheadToLatLon(dxGrid);
+              const dxObserver = new Astronomy.Observer(dxCoords.lat, dxCoords.lon, 0);
+              const dxMoonEq = Astronomy.Equator(Astronomy.Body.Moon, now, dxObserver, true, false);
+              const dxMoonHor = Astronomy.Horizon(now, dxObserver, dxMoonEq.ra, dxMoonEq.dec, 'normal');
+              const dxMoonAz = dxMoonHor.azimuth;
+              const dxMoonEl = dxMoonHor.altitude;
+              dxMoon = { az: dxMoonAz, el: dxMoonEl };
+            }
+
+            return {
+              moon: { pos: moonPos, az: moonAz, el: moonEl, time: now },
+              sun: { pos: sunPos, az: sunAz, el: sunEl, time: now },
+              dxMoon
+            };
+          }
+
+          function isTrackable() {
+            const data = getCurrentPositions();
+            if (!data) return false;
+            const moonUp = data.moon.el > 0;
+            const sunUp = showSunCheckbox.checked && data.sun.el > 0;
+            return moonUp || sunUp;
+          }
+
+          function updateTrackButtonState() {
+            const trackable = isTrackable();
+            trackButton.disabled = !trackable && !autoTracking;
+          }
+
+          function updateTracking() {
+            if (!autoTracking) return;
+            currentRealTimeData = getCurrentPositions();
+            updateMoonMarker();
+            updateSunMarker();
+            updateTimeDisplay();
+            updateTrackButtonState();
+          }
+
+          function startTracking() {
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            if (datePicker.value !== todayStr) {
+              datePicker.value = todayStr;
+              addTrajectories(todayStr);
+            }
+            currentRealTimeData = getCurrentPositions();
+            isRealTime = true;
+            timeSlider.disabled = true;
+            trackButton.textContent = 'Stop';
+            autoTracking = true;
+            const now = new Date();
+            const seconds = now.getUTCSeconds();
+            const msToNextMinute = (60 - seconds) * 1000 - now.getUTCMilliseconds();
+            if (msToNextMinute > 0) {
+              trackingTimeout = setTimeout(() => {
+                updateTracking();
+                trackingInterval = setInterval(updateTracking, 60000);
+              }, msToNextMinute);
+            } else {
+              updateTracking();
+              trackingInterval = setInterval(updateTracking, 60000);
+            }
+          }
+
+          function stopTracking() {
+            if (trackingInterval) clearInterval(trackingInterval);
+            if (trackingTimeout) clearTimeout(trackingTimeout);
+            autoTracking = false;
+            isRealTime = false;
+            currentRealTimeData = null;
+            timeSlider.disabled = moonPositions.length === 0;
+            trackButton.textContent = 'Track';
+            const now = new Date();
+            const nowMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
+            const index = Math.round(nowMinutes / 10);
+            if (index >= 0 && index < moonPositions.length) {
+              currentTimeIndex = index;
+            }
+            updateTimeSlider();
+            updateTrackButtonState();
+          }
+
+          function drawColorBar() {
+            if (minNoise === Infinity || maxNoise === -Infinity) {
+              colorBarContainer.style.display = 'none';
+              return;
+            }
+            colorBarContainer.style.display = 'flex';
+
+            minNoiseLabel.textContent = `${minNoise.toFixed(2)} dB`;
+            maxNoiseLabel.textContent = `${maxNoise.toFixed(2)} dB`;
+
+            const dpr = window.devicePixelRatio || 1;
+            const computedStyle = getComputedStyle(colorBarCanvas);
+            const canvasWidth = parseFloat(computedStyle.width);
+            const canvasHeight = parseFloat(computedStyle.height);
+            colorBarCanvas.width = canvasWidth * dpr;
+            colorBarCanvas.height = canvasHeight * dpr;
+            colorBarContext.scale(dpr, dpr);
+
+            colorBarContext.save();
+            colorBarContext.setTransform(1, 0, 0, 1, 0, 0);
+            colorBarContext.clearRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
+
+            const gradient = colorBarContext.createLinearGradient(0, colorBarCanvas.height, 0, 0);
+            for (let i = 0; i <= 1; i += 0.1) {
+              const norm = i;
+              const color = new THREE.Color().setHSL(0.7 - norm * 0.7, 1.0, 0.5);
+              gradient.addColorStop(i, `#${color.getHexString()}`);
+            }
+            colorBarContext.fillStyle = gradient;
+            colorBarContext.fillRect(0, 0, colorBarCanvas.width, colorBarCanvas.height);
+
+            let az, el;
+            let showMarker = false;
+            if (isRealTime && currentRealTimeData && currentRealTimeData.moon.el > 0 && rawPoints.length) {
+              showMarker = true;
+              az = currentRealTimeData.moon.az;
+              el = currentRealTimeData.moon.el;
+            } else if (!isRealTime && moonPositions.length && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0 && rawPoints.length) {
+              showMarker = true;
+              const moonData = moonPositions[currentTimeIndex];
+              az = moonData.azimuth;
+              el = moonData.elevation;
+            }
+
+            if (showMarker) {
+              const noisePoint = interpolateNoiseAtPosition(az, el);
+              if (noisePoint) {
+                const noise = noisePoint.noise;
+                const norm = (maxNoise - minNoise) === 0 ? 0.5 : (noise - minNoise) / (maxNoise - minNoise);
+                let y = colorBarCanvas.height * (1 - norm);
+                y = Math.max(2 * dpr, Math.min(colorBarCanvas.height - 2 * dpr, y));
+
+                const isMobile = window.innerWidth <= 600 || window.matchMedia("(orientation: portrait)").matches;
+                const triangleSize = isMobile ? 12 : 18;
+                const textOffset = isMobile ? 14 : 22;
+                const fontSize = isMobile ? 12 : 14;
+
+                colorBarContext.strokeStyle = '#000000';
+                colorBarContext.lineWidth = 2 * dpr;
+                colorBarContext.beginPath();
+                colorBarContext.moveTo(colorBarCanvas.width, y);
+                colorBarContext.lineTo(colorBarCanvas.width + triangleSize * dpr, y - (triangleSize / 2) * dpr);
+                colorBarContext.lineTo(colorBarCanvas.width + triangleSize * dpr, y + (triangleSize / 2) * dpr);
+                colorBarContext.closePath();
+                colorBarContext.stroke();
+
+                colorBarContext.fillStyle = '#ffffff';
+                colorBarContext.fill();
+
+                colorBarContext.fillStyle = '#ffffff';
+                colorBarContext.strokeStyle = '#000000';
+                colorBarContext.lineWidth = 1 * dpr;
+                colorBarContext.font = `bold ${fontSize * dpr}px Segoe UI`;
+                colorBarContext.textAlign = 'left';
+                colorBarContext.textBaseline = 'middle';
+                colorBarContext.strokeText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + textOffset * dpr, y);
+                colorBarContext.fillText(`${noise.toFixed(2)} dB`, colorBarCanvas.width + textOffset * dpr, y);
+
+                colorBarContext.fillStyle = '#ff0000';
+                colorBarContext.fillRect(0, y - 2 * dpr, 5 * dpr, 4 * dpr);
+              }
+            }
+
+            colorBarContext.restore();
+          }
+
+          function updateMoonMarker() {
+            if (isRealTime) {
+              if (!currentRealTimeData) {
+                if (moonMarker) moonMarker.visible = false;
+                return false;
+              }
+              const moonData = currentRealTimeData.moon;
+              if (moonData.el <= 0) {
+                if (moonMarker) moonMarker.visible = false;
+                return false;
+              }
+              if (!moonMarker) {
+                const geom = new THREE.SphereGeometry(0.03);
+                const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                moonMarker = new THREE.Mesh(geom, mat);
+                scene.add(moonMarker);
+              }
+              moonMarker.visible = true;
+              moonMarker.position.copy(moonData.pos);
+              return true;
+            } else {
+              if (!moonPositions.length || !moonPositions[currentTimeIndex]) {
+                if (moonMarker) moonMarker.visible = false;
+                return false;
+              }
+              const moonData = moonPositions[currentTimeIndex];
+              if (moonData.elevation <= 0) {
+                if (moonMarker) moonMarker.visible = false;
+                return false;
+              }
+              if (!moonMarker) {
+                const geom = new THREE.SphereGeometry(0.03);
+                const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                moonMarker = new THREE.Mesh(geom, mat);
+                scene.add(moonMarker);
+              }
+              moonMarker.visible = true;
+              moonMarker.position.copy(moonData.position);
+              return true;
+            }
+          }
+
+          function updateSunMarker() {
+            if (isRealTime) {
+              if (!currentRealTimeData || !showSunCheckbox.checked) {
+                if (sunMarker) sunMarker.visible = false;
+                return false;
+              }
+              const sunData = currentRealTimeData.sun;
+              if (sunData.el <= 0) {
+                if (sunMarker) sunMarker.visible = false;
+                return false;
+              }
+              if (!sunMarker) {
+                const geom = new THREE.SphereGeometry(0.02);
+                const mat = new THREE.MeshBasicMaterial({ color: 0xffa500 });
+                sunMarker = new THREE.Mesh(geom, mat);
+                scene.add(sunMarker);
+              }
+              sunMarker.visible = true;
+              sunMarker.position.copy(sunData.pos);
+              return true;
+            } else {
+              if (!sunPositions.length || !showSunCheckbox.checked || !sunPositions[currentTimeIndex]) {
+                if (sunMarker) sunMarker.visible = false;
+                return false;
+              }
+              const sunData = sunPositions[currentTimeIndex];
+              if (sunData.elevation <= 0) {
+                if (sunMarker) sunMarker.visible = false;
+                return false;
+              }
+              if (!sunMarker) {
+                const geom = new THREE.SphereGeometry(0.02);
+                const mat = new THREE.MeshBasicMaterial({ color: 0xffa500 });
+                sunMarker = new THREE.Mesh(geom, mat);
+                scene.add(sunMarker);
+              }
+              sunMarker.visible = true;
+              sunMarker.position.copy(sunData.position);
+              return true;
+            }
+          }
+
+          function updateInfoBox() {
+            let html = '';
+            if (isRealTime) {
+              if (!currentRealTimeData) {
+                infoBox.innerHTML = 'No data';
+                infoBox.style.display = 'block';
+                return;
+              }
+              const data = currentRealTimeData;
+              // Moon
+              if (data.moon.el > 0) {
+                const noisePoint = interpolateNoiseAtPosition(data.moon.az, data.moon.el);
+                const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A';
+                html += `
+                  <b>Moon</b><br>
+                  Az: ${data.moon.az.toFixed(1)}° El: ${data.moon.el.toFixed(1)}°<br>
+                  ${noiseText}
+                `;
+              } else {
+                html += `
+                  <b>Moon</b><br>
+                  Moon below horizon
+                `;
+              }
+              // DX Moon
+              if (data.dxMoon) {
+                html += `<br>`;
+                if (data.dxMoon.el > 0) {
+                  html += `
+                    <b>DX Moon</b><br>
+                    Az: ${data.dxMoon.az.toFixed(1)}° El: ${data.dxMoon.el.toFixed(1)}°
+                  `;
+                  if (data.moon.el > 0 && data.dxMoon.el > 0) {
+                    html += `<br><span style="color: lime;">Common window</span>`;
+                  }
+                } else {
+                  html += `
+                    <b>DX Moon</b><br>
+                    DX Moon below horizon
+                  `;
+                }
+              }
+              // Sun
+              if (showSunCheckbox.checked) {
+                html += `<br>`;
+                if (data.sun.el > 0) {
+                  html += `
+                    <b>Sun</b><br>
+                    Az: ${data.sun.az.toFixed(1)}° El: ${data.sun.el.toFixed(1)}°
+                  `;
+                } else {
+                  html += `
+                    <b>Sun</b><br>
+                    Sun below horizon
+                  `;
+                }
+              }
+            } else {
+              if (moonPositions.length && moonPositions[currentTimeIndex]) {
+                const moonData = moonPositions[currentTimeIndex];
+                if (moonData.elevation > 0) {
+                  const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
+                  const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A';
+                  html += `
+                    <b>Moon</b><br>
+                    Az: ${moonData.azimuth.toFixed(1)}° El: ${moonData.elevation.toFixed(1)}°<br>
+                    ${noiseText}
+                  `;
+                } else {
+                  html += `
+                    <b>Moon</b><br>
+                    Moon below horizon
+                  `;
+                }
+              } else {
+                html += `
+                  <b>Moon</b><br>
+                  Moon below horizon
+                `;
+              }
+
+              if (dxMoonPositions.length && dxMoonPositions[currentTimeIndex]) {
+                const dxMoonData = dxMoonPositions[currentTimeIndex];
+                html += `<br>`;
+                if (dxMoonData.elevation > 0) {
+                  html += `
+                    <b>DX Moon</b><br>
+                    Az: ${dxMoonData.azimuth.toFixed(1)}° El: ${dxMoonData.elevation.toFixed(1)}°
+                  `;
+                } else {
+                  html += `
+                    <b>DX Moon</b><br>
+                    DX Moon below horizon
+                  `;
+                }
+              }
+
+              if (showSunCheckbox.checked && sunPositions.length && sunPositions[currentTimeIndex]) {
+                const sunData = sunPositions[currentTimeIndex];
+                html += `<br>`;
+                if (sunData.elevation > 0) {
+                  html += `
+                    <b>Sun</b><br>
+                    Az: ${sunData.azimuth.toFixed(1)}° El: ${sunData.elevation.toFixed(1)}°
+                  `;
+                } else {
+                  html += `
+                    <b>Sun</b><br>
+                    Sun below horizon
+                  `;
+                }
+              } else if (showSunCheckbox.checked) {
+                html += `
+                  <br><b>Sun</b><br>
+                  Sun below horizon
+                `;
+              }
+            }
+            infoBox.innerHTML = html;
+            infoBox.style.display = 'block';
+          }
+
+          function updateTimeDisplay() {
+            let time, moonVisible, sunVisible;
+            if (isRealTime) {
+              if (!currentRealTimeData) {
+                moonTimeDisplay.textContent = '--:-- UTC';
+                updateInfoBox();
+                drawColorBar();
+                return;
+              }
+              time = currentRealTimeData.moon.time;
+              moonVisible = currentRealTimeData.moon.el > 0;
+              sunVisible = showSunCheckbox.checked && currentRealTimeData.sun.el > 0;
+            } else {
+              if (!moonPositions.length || !moonPositions[currentTimeIndex]) {
+                moonTimeDisplay.textContent = '--:-- UTC';
+                updateInfoBox();
+                drawColorBar();
+                return;
+              }
+              time = moonPositions[currentTimeIndex].time;
+              moonVisible = moonPositions[currentTimeIndex].elevation > 0;
+              sunVisible = showSunCheckbox.checked && sunPositions[currentTimeIndex]?.elevation > 0;
+            }
+
+            if (moonVisible || sunVisible) {
+              const hours = String(time.getUTCHours()).padStart(2, '0');
+              const minutes = String(time.getUTCMinutes()).padStart(2, '0');
+              moonTimeDisplay.textContent = `${hours}:${minutes} UTC`;
+            } else {
+              moonTimeDisplay.textContent = '--:-- UTC';
+            }
+            updateInfoBox();
+            drawColorBar();
+          }
+
+          function updateTimeSlider() {
+            if (isRealTime) return;
+            timeSlider.min = 0;
+            timeSlider.max = moonPositions.length - 1 || 0;
+            timeSlider.value = currentTimeIndex;
+            timeSlider.disabled = moonPositions.length === 0;
+            updateMoonMarker();
+            updateSunMarker();
+            updateTimeDisplay();
+          }
+
+          function changeTime(index) {
+            if (isRealTime || !moonPositions.length) return;
+            currentTimeIndex = Math.max(0, Math.min(index, moonPositions.length - 1));
+            updateMoonMarker();
+            updateSunMarker();
+            updateTimeDisplay();
+          }
+
+          function changeDate(days) {
+            if (isRealTime) {
+              stopTracking();
+            }
+            let currentDate = datePicker.value ? new Date(datePicker.value) : new Date();
+            currentDate.setUTCDate(currentDate.getUTCDate() + days);
+            const year = currentDate.getUTCFullYear();
+            const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0');
+            const day = String(currentDate.getUTCDate()).padStart(2, '0');
+            datePicker.value = `${year}-${month}-${day}`;
+            addTrajectories(datePicker.value);
+          }
+
+          timeSlider.addEventListener('input', (e) => {
+            if (isRealTime) return;
+            e.stopPropagation();
+            changeTime(parseInt(e.target.value));
+          });
+
+          timeSlider.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+            controls.enabled = false;
+          });
+
+          timeSlider.addEventListener('touchend', (e) => {
+            e.stopPropagation();
+            controls.enabled = true;
+          });
+
+          timeSlider.addEventListener('touchcancel', (e) => {
+            e.stopPropagation();
+            controls.enabled = true;
+          });
+
+          datePicker.addEventListener('change', (e) => {
+            if (isRealTime) {
+              stopTracking();
+            }
+            const selectedDate = e.target.value;
+            if (selectedDate) {
+              addTrajectories(selectedDate);
+            }
+          });
+
+          prevDateBtn.addEventListener('click', () => changeDate(-1));
+          nextDateBtn.addEventListener('click', () => changeDate(1));
+
+          showSunCheckbox.addEventListener('change', () => {
+            sunTrajectoryGroup.visible = showSunCheckbox.checked;
+            if (isRealTime) {
+              updateTracking();
+            } else {
+              updateSunMarker();
+              updateTimeDisplay();
+            }
+            updateTrackButtonState();
+          });
+
+          trackButton.addEventListener('click', () => {
+            if (autoTracking) {
+              stopTracking();
+            } else {
+              if (isTrackable()) {
+                startTracking();
+              }
+            }
+          });
+
+          function isValidGrid(locator) {
+            if (!locator || locator.length < 4 || locator.length > 6) return false;
+            locator = locator.toUpperCase();
+            const regex = /^[A-R]{2}[0-9]{2}([A-X]{2})?$/;
+            return regex.test(locator);
+          }
+
+          gridInput.addEventListener('input', () => {
+            const grid = gridInput.value;
+            if (!isValidGrid(grid)) {
+              gridInput.style.borderColor = 'red';
+              if (isRealTime) {
+                stopTracking();
+              }
+              return;
+            }
+            gridInput.style.borderColor = '#fff';
+            localStorage.setItem('skyObserverGrid', grid);
+            if (isRealTime) {
+              updateTracking();
+            } else {
+              const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
+              addTrajectories(dateVal);
+            }
+          });
+
+          dxGridInput.addEventListener('input', () => {
+            const dxGrid = dxGridInput.value;
+            if (dxGrid && isValidGrid(dxGrid)) {
+              dxGridInput.style.borderColor = '#fff';
+            } else if (dxGrid) {
+              dxGridInput.style.borderColor = 'red';
+            } else {
+              dxGridInput.style.borderColor = '#fff';
+            }
+            if (isRealTime) {
+              updateTracking();
+            } else {
+              const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
+              addTrajectories(dateVal);
+            }
+          });
+
+          function maidenheadToLatLon(locator) {
+            if (!locator || locator.length < 4) return null;
+            locator = locator.toUpperCase();
+            const A = 'A'.charCodeAt(0);
+            let lon = (locator.charCodeAt(0) - A) * 20 - 180;
+            let lat = (locator.charCodeAt(1) - A) * 10 - 90;
+            lon += parseInt(locator[2]) * 2;
+            lat += parseInt(locator[3]) * 1;
+            if (locator.length >= 6) {
+              lon += (locator.charCodeAt(4) - A) * 5 / 60;
+              lat += (locator.charCodeAt(5) - A) * 2.5 / 60;
+            }
+            lon += 2.5 / 60;
+            lat += 1.25 / 60;
+            return { lat, lon };
+          }
+
+          const infoBox = document.createElement('div');
+          infoBox.id = 'infoBox';
+          document.body.appendChild(infoBox);
+
+          function addAzimuthCompass() {
+            const compassRadius = 1.05;
+            const labelDistance = 1.2;
+            const compassGroup = new THREE.Group();
+
+            const fontLoader = new THREE.FontLoader();
+            fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+              const directions = [
+                { label: 'N', az: 0, color: 0xff0000 },
+                { label: 'E', az: 90, color: 0xffffff },
+                { label: 'S', az: 180, color: 0xffffff },
+                { label: 'W', az: 270, color: 0xffffff }
+              ];
+
+              directions.forEach(dir => {
+                const azRad = THREE.MathUtils.degToRad(360 - dir.az);
+                const x = labelDistance * Math.sin(azRad);
+                const z = labelDistance * Math.cos(azRad);
+                const y = 0;
+
+                const textGeom = new THREE.TextGeometry(dir.label, {
+                  font: font,
+                  size: 0.1,
+                  height: 0.001
+                });
+                const textMat = new THREE.MeshBasicMaterial({ color: dir.color });
+                const text = new THREE.Mesh(textGeom, textMat);
+                text.position.set(x, y, z);
+                text.lookAt(0, 0, 0);
+                compassGroup.add(text);
+              });
+
+              const ringGeom = new THREE.RingGeometry(compassRadius - 0.002, compassRadius + 0.002, 256);
+              const ringMat = new THREE.MeshBasicMaterial({
+                color: 0xffffff,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.9
+              });
+              const ring = new THREE.Mesh(ringGeom, ringMat);
+              ring.rotation.x = -Math.PI / 2;
+              ring.position.y = 0;
+              compassGroup.add(ring);
+
+              for (let i = 0; i < 360; i += 10) {
+                const angle = THREE.MathUtils.degToRad(360 - i);
+                const isMajor = i % 30 === 0;
+                const outer = compassRadius + 0.02;
+                const inner = compassRadius - (isMajor ? 0.05 : 0.02);
+
+                const x1 = inner * Math.cos(angle);
+                const z1 = inner * Math.sin(angle);
+                const x2 = outer * Math.cos(angle);
+                const z2 = outer * Math.sin(angle);
+
+                const tickGeom = new THREE.BufferGeometry().setFromPoints([
+                  new THREE.Vector3(x1, 0, z1),
+                  new THREE.Vector3(x2, 0, z2)
+                ]);
+                const tickMat = new THREE.LineBasicMaterial({
+                  color: 0xffffff,
+                  transparent: true,
+                  opacity: isMajor ? 1.0 : 0.5
+                });
+                const tick = new THREE.Line(tickGeom, tickMat);
+                compassGroup.add(tick);
+
+                if (isMajor && ![0, 90, 180, 270].includes(i)) {
+                  const labelDist = compassRadius + 0.1;
+                  const lx = labelDist * Math.sin(angle);
+                  const lz = labelDist * Math.cos(angle);
+
+                  const degGeom = new THREE.TextGeometry(i.toString(), {
+                    font: font,
+                    size: 0.045,
+                    height: 0.001
+                  });
+                  const degMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                  const label = new THREE.Mesh(degGeom, degMat);
+                  label.position.set(lx, 0, lz);
+                  label.lookAt(0, 0, 0);
+                  label.rotation.y += Math.PI;
+                  compassGroup.add(label);
+                }
+              }
+
+              scene.add(compassGroup);
+            }, undefined, (error) => {});
+          }
+
+          function addTrajectories(selectedDate) {
+            if (isRealTime) return;
+            const grid = gridInput.value || 'JO89tt';
+            const dxGrid = dxGridInput.value;
+            const coords = maidenheadToLatLon(grid);
+            let dxCoords = null;
+            if (dxGrid && isValidGrid(dxGrid)) {
+              dxCoords = maidenheadToLatLon(dxGrid);
+              dxGridInput.style.borderColor = '#fff';
+            } else if (dxGrid) {
+              dxGridInput.style.borderColor = 'red';
+            } else {
+              dxGridInput.style.borderColor = '#fff';
+            }
+
+            if (!coords) {
+              gridInput.style.borderColor = 'red';
+              gridInput.value = 'JO89tt';
+              localStorage.setItem('skyObserverGrid', 'JO89tt');
+              return addTrajectories(selectedDate);
+            }
+
+            const lat = coords.lat;
+            const lon = coords.lon;
+            const observer = new Astronomy.Observer(lat, lon, 0);
+            let dxObserver = null;
+            if (dxCoords) {
+              dxObserver = new Astronomy.Observer(dxCoords.lat, dxCoords.lon, 0);
+            }
+
+            const date = selectedDate ? new Date(selectedDate) : new Date();
+            const startOfDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+            const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
+
+            moonTrajectoryGroup.clear();
+            sunTrajectoryGroup.clear();
+            if (moonMarker) scene.remove(moonMarker);
+            if (sunMarker) scene.remove(sunMarker);
+            moonMarker = null;
+            sunMarker = null;
+            moonPositions = [];
+            dxMoonPositions = [];
+            sunPositions = [];
+            commonMoonWindow = [];
+            currentTimeIndex = 0;
+
+            let moonSegment = [];
+            let sunSegment = [];
+            let commonMoonSegment = [];
+            const moonSegments = [];
+            const sunSegments = [];
+            const commonMoonSegments = [];
+
+            let firstMoonVisibleIndex = -1;
+            let firstSunVisibleIndex = -1;
+
+            for (let minutes = 0; minutes < 1440; minutes += 10) {
+              const time = new Date(startOfDay.getTime() + minutes * 60 * 1000);
+              if (time >= endOfDay) break;
+
+              const moonEq = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, false);
+              const moonHor = Astronomy.Horizon(time, observer, moonEq.ra, moonEq.dec, 'normal');
+              const moonElevationDeg = moonHor.altitude;
+              const moonAzimuthDeg = moonHor.azimuth;
+
+              const azRadMoon = THREE.MathUtils.degToRad(360 - moonAzimuthDeg);
+              const elRadMoon = THREE.MathUtils.degToRad(Math.max(moonElevationDeg, 0));
+              const r = 1;
+              const xMoon = r * Math.cos(elRadMoon) * Math.sin(azRadMoon);
+              const yMoon = r * Math.sin(elRadMoon);
+              const zMoon = r * Math.cos(elRadMoon) * Math.cos(azRadMoon);
+              const moonPoint = new THREE.Vector3(xMoon, yMoon, zMoon);
+
+              if (moonElevationDeg > 0) {
+                moonSegment.push(moonPoint);
+                if (firstMoonVisibleIndex === -1) firstMoonVisibleIndex = minutes / 10;
+              } else {
+                if (moonSegment.length > 1) moonSegments.push(moonSegment);
+                moonSegment = [];
+              }
+              moonPositions.push({ time, position: moonPoint, azimuth: moonAzimuthDeg, elevation: moonElevationDeg });
+
+              let isCommon = false;
+              if (dxObserver) {
+                const dxMoonEq = Astronomy.Equator(Astronomy.Body.Moon, time, dxObserver, true, false);
+                const dxMoonHor = Astronomy.Horizon(time, dxObserver, dxMoonEq.ra, dxMoonEq.dec, 'normal');
+                const dxMoonElevationDeg = dxMoonHor.altitude;
+                const dxMoonAzimuthDeg = dxMoonHor.azimuth;
+
+                if (dxMoonElevationDeg > 0 && moonElevationDeg > 0) {
+                  commonMoonSegment.push(moonPoint);
+                  isCommon = true;
+                }
+                dxMoonPositions.push({ time, azimuth: dxMoonAzimuthDeg, elevation: dxMoonElevationDeg });
+              }
+
+              if (isCommon) {
+                commonMoonWindow.push({ time, index: minutes / 10 });
+              } else if (commonMoonSegment.length > 1) {
+                commonMoonSegments.push(commonMoonSegment);
+                commonMoonSegment = [];
+              }
+
+              const sunEq = Astronomy.Equator(Astronomy.Body.Sun, time, observer, true, false);
+              const sunHor = Astronomy.Horizon(time, observer, sunEq.ra, sunEq.dec, 'normal');
+              const sunElevationDeg = sunHor.altitude;
+              const sunAzimuthDeg = sunHor.azimuth;
+
+              const azRadSun = THREE.MathUtils.degToRad(360 - sunAzimuthDeg);
+              const elRadSun = THREE.MathUtils.degToRad(Math.max(sunElevationDeg, 0));
+              const xSun = r * Math.cos(elRadSun) * Math.sin(azRadSun);
+              const ySun = r * Math.sin(elRadSun);
+              const zSun = r * Math.cos(elRadSun) * Math.cos(azRadSun);
+              const sunPoint = new THREE.Vector3(xSun, ySun, zSun);
+
+              if (sunElevationDeg > 0) {
+                sunSegment.push(sunPoint);
+                if (firstSunVisibleIndex === -1) firstSunVisibleIndex = minutes / 10;
+              } else {
+                if (sunSegment.length > 1) sunSegments.push(sunSegment);
+                sunSegment = [];
+              }
+              sunPositions.push({ time, position: sunPoint, azimuth: sunAzimuthDeg, elevation: sunElevationDeg });
+            }
+
+            if (moonSegment.length > 1) moonSegments.push(moonSegment);
+            if (sunSegment.length > 1) sunSegments.push(sunSegment);
+            if (commonMoonSegment.length > 1) commonMoonSegments.push(commonMoonSegment);
+
+            moonSegments.forEach(seg => {
+              const geom = new THREE.BufferGeometry().setFromPoints(seg);
+              const mat = new THREE.LineBasicMaterial({ color: 0xffff00 });
+              const line = new THREE.Line(geom, mat);
+              line.userData = { isMoonTrajectory: true };
+              moonTrajectoryGroup.add(line);
+            });
+
+            commonMoonSegments.forEach(seg => {
+              const geom = new THREE.BufferGeometry().setFromPoints(seg);
+              const mat = new THREE.LineBasicMaterial({ color: 0x00ff00, linewidth: 1 });
+              const line = new THREE.Line(geom, mat);
+              line.userData = { isCommonMoonTrajectory: true };
+              moonTrajectoryGroup.add(line);
+            });
+
+            sunSegments.forEach(seg => {
+              const geom = new THREE.BufferGeometry().setFromPoints(seg);
+              const mat = new THREE.LineBasicMaterial({ color: 0xffa500 });
+              const line = new THREE.Line(geom, mat);
+              line.userData = { isSunTrajectory: true };
+              sunTrajectoryGroup.add(line);
+            });
+
+            sunTrajectoryGroup.visible = showSunCheckbox.checked;
+
+            if (firstMoonVisibleIndex !== -1) {
+              currentTimeIndex = firstMoonVisibleIndex;
+            } else if (showSunCheckbox.checked && firstSunVisibleIndex !== -1) {
+              currentTimeIndex = firstSunVisibleIndex;
+            } else {
+              currentTimeIndex = 72;
+            }
+            updateTimeSlider();
+          }
+
+          window.addTrajectories = addTrajectories;
+
+          function parseCsvData(csvText, csvSource) {
+            if (isRealTime) {
+              stopTracking();
+            }
+            Papa.parse(csvText, {
+              header: true,
+              delimiter: ";",
+              skipEmptyLines: true,
+              complete: function (results) {
+                rawPoints.length = 0;
+                spheres.forEach(s => scene.remove(s));
+                spheres.length = 0;
+                minNoise = Infinity;
+                maxNoise = -Infinity;
+
+                const headers = results.meta.fields;
+                const requiredColumns = ['Azimuth', 'Elevation', 'Noise'];
+                const hasRequiredColumns = requiredColumns.every(col => headers.includes(col));
+                if (!hasRequiredColumns) {
+                  demoStatus.textContent = 'Error: CSV must contain Azimuth, Elevation, and Noise columns';
+                  demoStatus.style.color = 'red';
+                  demoStatus.style.display = 'block';
+                  return;
+                }
+
+                results.data.forEach(row => {
+                  if (row.Valid !== undefined && row.Valid !== "True") return;
+
+                  const az = parseFloat(row.Azimuth?.replace(",", "."));
+                  const el = parseFloat(row.Elevation?.replace(",", "."));
+                  const noise = parseFloat(row.Noise?.replace(",", "."));
+
+                  if (isNaN(az) || isNaN(el) || isNaN(noise)) return;
+
+                  minNoise = Math.min(minNoise, noise);
+                  maxNoise = Math.max(maxNoise, noise);
+
+                  rawPoints.push({ az, el, noise });
+                });
+
+                if (rawPoints.length === 0) {
+                  demoStatus.textContent = 'Error: No valid data points in CSV';
+                  demoStatus.style.color = 'red';
+                  demoStatus.style.display = 'block';
+                  return;
+                }
+
+                const steps = calculateStepSizes();
+                azStep = steps.azStep;
+                elStep = steps.elStep;
+
+                rawPoints.forEach(point => {
+                  const azRad = THREE.MathUtils.degToRad(360 - point.az);
+                  const elRad = THREE.MathUtils.degToRad(point.el);
+                  const r = 1;
+
+                  const x = r * Math.cos(elRad) * Math.sin(azRad);
+                  const y = r * Math.sin(elRad);
+                  const z = r * Math.cos(elRad) * Math.cos(azRad);
+
+                  const geometry = new THREE.SphereGeometry(0.02, 8, 8);
+                  const material = new THREE.MeshBasicMaterial({ color: getColor(point.noise) });
+
+                  const sphere = new THREE.Mesh(geometry, material);
+                  sphere.position.set(x, y, z);
+
+                  sphere.userData = {
+                    azimuth: point.az,
+                    elevation: point.el,
+                    noise: point.noise
+                  };
+
+                  spheres.push(sphere);
+                  scene.add(sphere);
+                });
+
+                let isCompleteDome = false;
+                if (rawPoints.length > 0) {
+                  const azValues = [...new Set(rawPoints.map(p => p.az))].sort((a, b) => a - b);
+                  const elValues = [...new Set(rawPoints.map(p => p.el))].sort((a, b) => a - b);
+                  const azRange = azValues[azValues.length - 1] - azValues[0];
+                  const elRange = elValues[elValues.length - 1] - elValues[0];
+                  isCompleteDome = azRange > 300 && elRange > 80;
+                }
+
+                if (!rawPoints.length || isCompleteDome) {
+                  const distance = 2;
+                  const azRad = THREE.MathUtils.degToRad(180);
+                  const elRad = THREE.MathUtils.degToRad(30);
+                  camera.position.set(
+                    distance * Math.cos(elRad) * Math.sin(azRad),
+                    distance * Math.sin(elRad),
+                    distance * Math.cos(elRad) * Math.cos(azRad)
+                  );
+                  camera.lookAt(0, 0, 0);
+                  controls.target.set(0, 0, 0);
+                } else {
+                  const boundingBox = new THREE.Box3();
+                  spheres.forEach(s => boundingBox.expandByPoint(s.position));
+
+                  const center = new THREE.Vector3();
+                  boundingBox.getCenter(center);
+
+                  const size = new THREE.Vector3();
+                  boundingBox.getSize(size);
+                  const maxDim = Math.max(size.x, size.y, size.z) || 2;
+
+                  let avgPosition = new THREE.Vector3();
+                  spheres.forEach(s => avgPosition.add(s.position));
+                  avgPosition.divideScalar(spheres.length);
+
+                  const directionToData = avgPosition.clone().normalize();
+                  const distance = maxDim * 2;
+                  camera.position.copy(directionToData.clone().multiplyScalar(distance));
+                  camera.lookAt(center);
+                  controls.target.copy(center);
+                }
+
+                controls.update();
+                addAzimuthCompass();
+                updateTimeDisplay();
+
+                if (csvSource === 'demo') {
+                  demoStatus.textContent = 'Demo loaded!';
+                  demoStatus.style.color = 'red';
+                  demoStatus.style.display = 'block';
+                } else if (csvSource === 'stored') {
+                  demoStatus.textContent = 'Stored CSV loaded';
+                  demoStatus.style.color = 'blue';
+                  demoStatus.style.display = 'block';
+                } else {
+                  demoStatus.textContent = 'CSV loaded!';
+                  demoStatus.style.color = 'blue';
+                  demoStatus.style.display = 'block';
+                }
+              },
+              error: function (error) {
+                demoStatus.textContent = 'Error: Invalid CSV format';
+                demoStatus.style.color = 'red';
+                demoStatus.style.display = 'block';
+              }
+            });
+          }
+
+          const storedGrid = localStorage.getItem('skyObserverGrid');
+          if (storedGrid && isValidGrid(storedGrid)) {
+            gridInput.value = storedGrid;
+            gridInput.style.borderColor = '#fff';
+          } else {
+            gridInput.value = 'JO89tt';
+            localStorage.setItem('skyObserverGrid', 'JO89tt');
+          }
+
+          const storedCsv = localStorage.getItem('skyObserverCsv');
+          if (storedCsv) {
+            parseCsvData(storedCsv, 'stored');
+          } else {
+            fetch('2025-05-29_20.44.04.csv')
+              .then(response => response.text())
+              .then(csv => parseCsvData(csv, 'demo'))
+              .catch(error => {
+                console.error('Error loading demo CSV:', error);
+                const distance = 2;
+                const azRad = THREE.MathUtils.degToRad(180);
+                const elRad = THREE.MathUtils.degToRad(30);
+                camera.position.set(
+                  distance * Math.cos(elRad) * Math.sin(azRad),
+                  distance * Math.sin(elRad),
+                  distance * Math.cos(elRad) * Math.cos(azRad)
+                );
+                camera.lookAt(0, 0, 0);
+                controls.target.set(0, 0, 0);
+                controls.update();
+                addAzimuthCompass();
+                addTrajectories();
+              });
+          }
+
+          document.getElementById('csvUpload').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (event) {
+              const csvText = event.target.result;
+              localStorage.setItem('skyObserverCsv', csvText);
+              parseCsvData(csvText, 'uploaded');
+            };
+            reader.readAsText(file);
+          });
+
+          window.addEventListener('click', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects([
+              ...spheres,
+              moonMarker,
+              sunMarker
+            ].filter(obj => obj !== null));
+
+            if (intersects.length > 0) {
+              const clickedObject = intersects[0].object;
+
+              if (clickedObject === moonMarker) {
+                if (isRealTime && currentRealTimeData && currentRealTimeData.moon.el > 0) {
+                  const moonData = currentRealTimeData.moon;
+                  const noisePoint = interpolateNoiseAtPosition(moonData.az, moonData.el);
+                  const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A (Outside Dome)';
+                  infoBox.innerHTML = `
+                    <b>Moon</b><br>
+                    Az: ${moonData.az.toFixed(1)}° El: ${moonData.el.toFixed(1)}°<br>
+                    ${noiseText}
+                  `;
+                  infoBox.style.display = 'block';
+                } else if (!isRealTime && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0) {
+                  const moonData = moonPositions[currentTimeIndex];
+                  const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
+                  const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A (Outside Dome)';
+                  infoBox.innerHTML = `
+                    <b>Moon</b><br>
+                    Az: ${moonData.azimuth.toFixed(1)}° El: ${moonData.elevation.toFixed(1)}°<br>
+                    ${noiseText}
+                  `;
+                  infoBox.style.display = 'block';
+                }
+              } else if (clickedObject === sunMarker && showSunCheckbox.checked) {
+                if (isRealTime && currentRealTimeData && currentRealTimeData.sun.el > 0) {
+                  const sunData = currentRealTimeData.sun;
+                  infoBox.innerHTML = `
+                    <b>Sun</b><br>
+                    Az: ${sunData.az.toFixed(1)}° El: ${sunData.el.toFixed(1)}°
+                  `;
+                  infoBox.style.display = 'block';
+                } else if (!isRealTime && sunPositions[currentTimeIndex] && sunPositions[currentTimeIndex].elevation > 0) {
+                  const sunData = sunPositions[currentTimeIndex];
+                  infoBox.innerHTML = `
+                    <b>Sun</b><br>
+                    Az: ${sunData.azimuth.toFixed(1)}° El: ${sunData.elevation.toFixed(1)}°
+                  `;
+                  infoBox.style.display = 'block';
+                }
+              } else if (clickedObject.userData?.noise !== undefined) {
+                const { azimuth, elevation, noise } = clickedObject.userData;
+                infoBox.innerHTML = `
+                  <b>Measurement</b><br>
+                  Az: ${azimuth.toFixed(1)}° El: ${elevation.toFixed(1)}°<br>
+                  Noise: ${noise.toFixed(2)} dB
+                `;
+                infoBox.style.display = 'block';
+              }
+            } else {
+              updateInfoBox();
+            }
+          });
+
+          window.addEventListener('touchend', (event) => {
+            const touch = event.changedTouches[0];
+            if (!touch) return;
+
+            mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (touch.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects([
+              ...spheres,
+              moonMarker,
+              sunMarker
+            ].filter(obj => obj !== null));
+
+            if (intersects.length > 0) {
+              const clickedObject = intersects[0].object;
+
+              if (clickedObject === moonMarker) {
+                if (isRealTime && currentRealTimeData && currentRealTimeData.moon.el > 0) {
+                  const moonData = currentRealTimeData.moon;
+                  const noisePoint = interpolateNoiseAtPosition(moonData.az, moonData.el);
+                  const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A (Outside Dome)';
+                  infoBox.innerHTML = `
+                    <b>Moon</b><br>
+                    Az: ${moonData.az.toFixed(1)}° El: ${moonData.el.toFixed(1)}°<br>
+                    ${noiseText}
+                  `;
+                  infoBox.style.display = 'block';
+                } else if (!isRealTime && moonPositions[currentTimeIndex] && moonPositions[currentTimeIndex].elevation > 0) {
+                  const moonData = moonPositions[currentTimeIndex];
+                  const noisePoint = interpolateNoiseAtPosition(moonData.azimuth, moonData.elevation);
+                  const noiseText = noisePoint ? `Noise: ${noisePoint.noise.toFixed(2)} dB` : 'Noise: N/A (Outside Dome)';
+                  infoBox.innerHTML = `
+                    <b>Moon</b><br>
+                    Az: ${moonData.azimuth.toFixed(1)}° El: ${moonData.elevation.toFixed(1)}°<br>
+                    ${noiseText}
+                  `;
+                  infoBox.style.display = 'block';
+                }
+              } else if (clickedObject === sunMarker && showSunCheckbox.checked) {
+                if (isRealTime && currentRealTimeData && currentRealTimeData.sun.el > 0) {
+                  const sunData = currentRealTimeData.sun;
+                  infoBox.innerHTML = `
+                    <b>Sun</b><br>
+                    Az: ${sunData.az.toFixed(1)}° El: ${sunData.el.toFixed(1)}°
+                  `;
+                  infoBox.style.display = 'block';
+                } else if (!isRealTime && sunPositions[currentTimeIndex] && sunPositions[currentTimeIndex].elevation > 0) {
+                  const sunData = sunPositions[currentTimeIndex];
+                  infoBox.innerHTML = `
+                    <b>Sun</b><br>
+                    Az: ${sunData.azimuth.toFixed(1)}° El: ${sunData.elevation.toFixed(1)}°
+                  `;
+                  infoBox.style.display = 'block';
+                }
+              } else if (clickedObject.userData?.noise !== undefined) {
+                const { azimuth, elevation, noise } = clickedObject.userData;
+                infoBox.innerHTML = `
+                  <b>Measurement</b><br>
+                  Az: ${azimuth.toFixed(1)}° El: ${elevation.toFixed(1)}°<br>
+                  Noise: ${noise.toFixed(2)} dB
+                `;
+                infoBox.style.display = 'block';
+              }
+            } else {
+              updateInfoBox();
+            }
+          });
+
+          function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+          }
+
+          animate();
+
+          const today = new Date();
+          const year = today.getUTCFullYear();
+          const month = String(today.getUTCMonth() + 1).padStart(2, '0');
+          const day = String(today.getUTCDate()).padStart(2, '0');
+          datePicker.value = `${year}-${month}-${day}`;
+          addTrajectories();
+          updateTrackButtonState();
+        </script>
+    </body>
+</html>
