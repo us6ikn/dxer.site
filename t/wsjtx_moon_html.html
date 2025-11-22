@@ -2,139 +2,150 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>WSJT-X Moon Tracker JS</title>
+<title>Moon Tracker (WSJT-X precision)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
-body { font-family:sans-serif; padding:20px; }
-label, input, button { display:block; margin:8px 0; }
-.result { margin-top:16px; font-family:monospace; white-space:pre; }
+  body { font-family: system-ui, sans-serif; padding: 24px; background:#f7f9fc; color:#111;}
+  .card { background:white; border-radius:10px; padding:18px; max-width:720px; margin:0 auto; box-shadow:0 6px 18px rgba(15,30,50,0.06);}
+  h1 { margin-bottom:8px; font-size:20px;}
+  label{display:block;margin-top:12px;font-weight:600;}
+  input[type=text],input[type=datetime-local]{width:100%;padding:10px 12px;font-size:14px;border-radius:6px;border:1px solid #d7e0ea;box-sizing:border-box;}
+  .muted {color:#556; font-size:13px;}
+  button{margin-top:12px;padding:10px 14px;font-weight:600;background:#0b79ff;color:#fff;border:0;border-radius:8px;cursor:pointer;}
+  button:active{transform:translateY(1px);}
+  .result{margin-top:16px;padding:12px;background:#f2f8ff;border-radius:8px;font-family:monospace;white-space:pre-line;}
+  .error{color:#a00;margin-top:8px;}
 </style>
 </head>
 <body>
+<div class="card">
+  <h1>Moon Tracker (WSJT-X precision)</h1>
+  <div class="muted">Enter a 6-character Maidenhead QTH locator and UTC date/time.</div>
 
-<h2>Moon Tracker (WSJT-X precision)</h2>
-<label>QTH Locator (6 chars): <input id="locator" value="JO32LR"></label>
-<label>Date & Time (UTC): <input type="datetime-local" id="datetime"></label>
-<button id="compute">Compute</button>
+  <label for="locator">Maidenhead locator (6 chars)</label>
+  <input id="locator" type="text" maxlength="6" placeholder="e.g. JO32LR" value="JO32LR">
 
-<div class="result" id="output"></div>
+  <label for="datetime">Date & Time</label>
+  <input id="datetime" type="datetime-local">
 
-<script>
-// ----- Utilities -----
-function deg2rad(d){ return d * Math.PI / 180; }
-function rad2deg(r){ return r * 180 / Math.PI; }
-function normalizeDeg(d){ let x=d%360; return x<0?x+360:x; }
+  <button id="go">Compute</button>
+  <div id="error" class="error" role="status" aria-live="polite"></div>
+  <div id="out" class="result" aria-live="polite">
+    Az: —°
+    El: —°
+    RA: — hours
+    Dec: —°
+    Distance: — km
+    VR: — km/s
+  </div>
+</div>
 
-// Convert Maidenhead locator to lat/lon
-function maidenheadToLatLon(locator){
-    locator = locator.toUpperCase().padEnd(6,'A').slice(0,6);
-    const A = 'A'.charCodeAt(0);
-    let lon = (locator.charCodeAt(0)-A)*20 -180;
-    let lat = (locator.charCodeAt(1)-A)*10 -90;
-    lon += parseInt(locator[2])*2 + (locator.charCodeAt(4)-A + 0.5)*(2/24);
-    lat += parseInt(locator[3])*1 + (locator.charCodeAt(5)-A + 0.5)*(1/24);
-    return {lat, lon};
-}
-
-// Julian Date from UTC Date object
+<script type="module">
+//------------------------ Utilities ------------------------
+function deg2rad(d){return d*Math.PI/180;}
+function rad2deg(r){return r*180/Math.PI;}
+function normalizeDeg(d){let x=d%360;if(x<0)x+=360;return x;}
 function julianDate(date){
-    let Y=date.getUTCFullYear();
-    let M=date.getUTCMonth()+1;
-    let D=date.getUTCDate();
-    const h=date.getUTCHours();
-    const m=date.getUTCMinutes();
-    const s=date.getUTCSeconds() + date.getUTCMilliseconds()/1000;
-    if(M<=2){Y-=1; M+=12;}
-    const A=Math.floor(Y/100);
-    const B=2-A+Math.floor(A/4);
-    const JD0 = Math.floor(365.25*(Y+4716)) + Math.floor(30.6001*(M+1)) + D + B -1524.5;
-    return JD0 + (h + m/60 + s/3600)/24;
+    let Y=date.getUTCFullYear(),M=date.getUTCMonth()+1,D=date.getUTCDate(),
+        h=date.getUTCHours(),m=date.getUTCMinutes(),s=date.getUTCSeconds()+date.getUTCMilliseconds()/1000;
+    if(M<=2){Y-=1;M+=12;}
+    let A=Math.floor(Y/100),B=2-A+Math.floor(A/4);
+    let JD0=Math.floor(365.25*(Y+4716))+Math.floor(30.6001*(M+1))+D+B-1524.5;
+    return JD0+(h+m/60+s/3600)/24.0;
+}
+function lstHours(JD,lonEast){
+    const JD0=Math.floor(JD+0.5)-0.5,H=(JD-JD0)*24.0,D=JD-2451545.0,D0=JD0-2451545.0,T=D0/36525.0;
+    let GMST=6.697374558 + 0.06570982441908*D0 + 1.00273790935*H + 0.000026*T*T;
+    GMST=GMST%24;if(GMST<0)GMST+=24;
+    let LST=GMST + lonEast/15.0;LST=LST%24;if(LST<0)LST+=24;
+    return LST;
+}
+function maidenheadToLatLon(locator){
+    let s=(locator||'').trim().toUpperCase();
+    if(s.length<6)s=s.padEnd(6,'A');s=s.slice(0,6);
+    const A='A'.charCodeAt(0);
+    let lonField=s.charCodeAt(0)-A,latField=s.charCodeAt(1)-A;
+    let lon=lonField*20-180,lat=latField*10-90;
+    const lonSq=parseInt(s[2],10),latSq=parseInt(s[3],10);
+    lon+=lonSq*2;lat+=latSq*1;
+    const lonSub=s.charCodeAt(4)-A,latSub=s.charCodeAt(5)-A;
+    lon+=(lonSub+0.5)*(2/24);lat+=(latSub+0.5)*(1/24);
+    return {lat,lon};
 }
 
-// ----- Moon Ephemeris (simplified WSJT-X style) -----
-function ephemMoon(jd, lonRad, latRad, heightKm=0.04){
-    // Compact analytic lunar position (Meeus-style truncated series)
-    // Returns topocentric RA (hours), Dec (deg), Az/El (deg), vr (km/s), techo (s)
-    const T = (jd - 2451545.0)/36525.0;
-
-    // Moon mean elements (deg)
-    let L0 = normalizeDeg(218.3164477 + 481267.88123421*T -0.0015786*T*T + T*T*T/538841 - T*T*T*T/65194000);
-    let D = normalizeDeg(297.8501921 + 445267.1114034*T -0.0018819*T*T + T*T*T/545868 - T*T*T*T/113065000);
-    let M = normalizeDeg(357.5291092 + 35999.0502909*T -0.0001536*T*T + T*T*T/24490000);
-    let Mp = normalizeDeg(134.9633964 + 477198.8675055*T + 0.0087414*T*T + T*T*T/69699 - T*T*T*T/14712000);
-    let F = normalizeDeg(93.2720950 + 483202.0175233*T -0.0036539*T*T - T*T*T/3526000 + T*T*T*T/863310000);
-
-    // Principal terms of lunar longitude (truncated)
-    const L_terms = [
-      [0,0,1,0,6288774],[2,0,-1,0,1274027],[2,0,0,0,658314],[0,0,2,0,213618],
-      [0,1,0,0,-185116],[0,0,0,2,-114332]
-    ];
-
-    function evalSeries(terms,D,M,Mp,F){
-        let s=0;
-        for(const [d,m,mp,f,A] of terms){
-            const arg = deg2rad(d*D + m*M + mp*Mp + f*F);
-            s += A*Math.sin(arg);
-        }
-        return s/1e6;
+//------------------------ Moon calculation ------------------------
+// Truncated Meeus lunar series
+function moonPositionJD(JD){
+    const T=(JD-2451545.0)/36525;
+    const D=normalizeDeg(297.8501921 + 445267.1114034*T -0.0018819*T*T + T*T*T/545868 - T*T*T*T/113065000);
+    const M=normalizeDeg(357.5291092 + 35999.0502909*T -0.0001536*T*T + T*T*T/24490000);
+    const Mp=normalizeDeg(134.9633964 + 477198.8675055*T + 0.0087414*T*T + T*T*T/69699 - T*T*T*T/14712000);
+    const F=normalizeDeg(93.2720950 + 483202.0175233*T -0.0036539*T*T - T*T*T/3526000 + T*T*T*T/863310000);
+    const Om=normalizeDeg(125.0445479 -1934.1362891*T +0.0020754*T*T + T*T*T/467441 - T*T*T*T/60616000);
+    const L_terms=[[0,0,1,0,6288774],[2,0,-1,0,1274027],[2,0,0,0,658314],[0,0,2,0,213618]];
+    const B_terms=[[0,0,0,1,5128122],[0,0,1,1,280602],[0,0,1,-1,277693],[2,0,0,-1,173237]];
+    const R_terms=[[0,0,1,0,-20905355],[2,0,-1,0,-3699111],[2,0,0,0,-2955968],[0,0,2,0,-569925]];
+    function evalSeries(terms,Ddeg,Mdeg,Mpdeg,Fdeg){
+        let s=0;for(const t of terms){const arg=deg2rad(t[0]*Ddeg+t[1]*Mdeg+t[2]*Mpdeg+t[3]*Fdeg);s+=t[4]*Math.sin(arg);}return s;
     }
-
-    const L = normalizeDeg(L0 + evalSeries(L_terms,D,M,Mp,F));
-    const B = evalSeries([[0,0,0,1,5128122],[0,0,1,1,280602],[0,0,1,-1,277693]],D,M,Mp,F);
-    const R = 385000.56 + evalSeries([[0,0,1,0,-20905355],[2,0,-1,0,-3699111],[2,0,0,0,-2955968]],D,M,Mp,F)/1000;
-
-    // Ecliptic → Equatorial
-    const eps = deg2rad(23.439291 - 0.0130042*T); // mean obliquity
-    const lam = deg2rad(L), beta = deg2rad(B);
-    const x = R*Math.cos(beta)*Math.cos(lam);
-    const y = R*Math.cos(beta)*Math.sin(lam);
-    const z = R*Math.sin(beta);
-
-    const xe = x;
-    const ye = y*Math.cos(eps) - z*Math.sin(eps);
-    const ze = y*Math.sin(eps) + z*Math.cos(eps);
-
-    const ra = normalizeDeg(rad2deg(Math.atan2(ye, xe)))/15; // hours
-    const dec = rad2deg(Math.atan2(ze, Math.sqrt(xe*xe + ye*ye)));
-
-    // Topocentric parallax correction
-    const parallax = Math.asin(6378.137/R); // rad
-    const lat = latRad;
-    const H = 0; // simplified HA=0 for now
-    const sinEl = Math.sin(lat)*Math.sin(deg2rad(dec)) + Math.cos(lat)*Math.cos(deg2rad(dec))*Math.cos(H);
-    const El = rad2deg(Math.asin(sinEl));
-    const cosAz = (Math.sin(deg2rad(dec)) - Math.sin(lat)*Math.sin(deg2rad(El)))/(Math.cos(lat)*Math.cos(deg2rad(El)));
-    const sinAz = -Math.cos(deg2rad(dec))*Math.sin(H)/Math.cos(deg2rad(El));
-    const Az = rad2deg(Math.atan2(sinAz, cosAz));
-
-    const vr = 0; // approximate, km/s
-    const techo = R/299792.458; // light travel time in seconds
-
-    return {RA:ra, Dec:dec, Az, El, vr, techo};
+    function evalR(terms,Ddeg,Mdeg,Mpdeg,Fdeg){let s=0;for(const t of terms){const arg=deg2rad(t[0]*Ddeg+t[1]*Mdeg+t[2]*Mpdeg+t[3]*Fdeg);s+=t[4]*Math.cos(arg);}return 385000.56+s/1000;}
+    const L0=normalizeDeg(218.3164477 + 481267.88123421*T -0.0015786*T*T + T*T*T/538841 - T*T*T*T/65194000);
+    const L=normalizeDeg(L0 + evalSeries(L_terms,D,M,Mp,F)/1e6);
+    const B=evalSeries(B_terms,D,M,Mp,F)/1e6;
+    const R=evalR(R_terms,D,M,Mp,F);
+    return {L:deg2rad(L),B:deg2rad(B),R};
+}
+function moonAzElJD(JD,lat,lon){
+    const {L,B,R}=moonPositionJD(JD);
+    const eps=deg2rad(23.439291 - 0.0130042*((JD-2451545.0)/36525));
+    const xg=R*Math.cos(B)*Math.cos(L), yg=R*Math.cos(B)*Math.sin(L), zg=R*Math.sin(B);
+    const xe=xg, ye=yg*Math.cos(eps)-zg*Math.sin(eps), ze=yg*Math.sin(eps)+zg*Math.cos(eps);
+    const raRad=Math.atan2(ye,xe), decRad=Math.atan2(ze,Math.sqrt(xe*xe+ye*ye));
+    const raHours=normalizeDeg(rad2deg(raRad))/15.0;
+    const decDeg=rad2deg(decRad);
+    const latRad=deg2rad(lat);
+    const lst=lstHours(JD,lon);
+    const haRad=deg2rad((lst*15 - rad2deg(raRad))%360);
+    const sinEl=Math.sin(latRad)*Math.sin(decRad)+Math.cos(latRad)*Math.cos(decRad)*Math.cos(haRad);
+    const El=Math.asin(sinEl);
+    const cosAz=(Math.sin(decRad)-Math.sin(El)*Math.sin(latRad))/(Math.cos(El)*Math.cos(latRad));
+    const sinAz=-Math.cos(decRad)*Math.sin(haRad)/Math.cos(El);
+    let Az=Math.atan2(sinAz,cosAz); if(Az<0)Az+=2*Math.PI;
+    const vr=0; // approximate: line-of-sight radial velocity (can refine with observer motion)
+    return {Az:rad2deg(Az),El:rad2deg(El),RA:raHours,Dec:decDeg,R,R,VR:vr};
 }
 
-// ----- Main Moon Az/El wrapper -----
-function moonAzEl(locator, dateUTC){
-    const {lat, lon} = maidenheadToLatLon(locator);
-    const jd = julianDate(dateUTC);
-    return ephemMoon(jd, deg2rad(lon), deg2rad(lat));
+//------------------------ UI wiring ------------------------
+const locatorInput=document.getElementById('locator');
+const datetimeInput=document.getElementById('datetime');
+const out=document.getElementById('out');
+const errorDiv=document.getElementById('error');
+const go=document.getElementById('go');
+
+// Default UTC datetime
+(function(){const now=new Date();datetimeInput.value=now.toISOString().slice(0,16);})();
+
+function computeMoonUI(){
+    errorDiv.textContent='';
+    try{
+        const loc=locatorInput.value.trim().toUpperCase();
+        if(!/^[A-R][A-R][0-9][0-9][A-X][A-X]$/.test(loc))throw new Error('Locator must be 6 chars AA00aa');
+        const dtVal=datetimeInput.value;
+        if(!dtVal)throw new Error('Please enter date/time');
+        const dateObj=new Date(dtVal+'Z');
+        if(isNaN(dateObj.getTime()))throw new Error('Invalid date/time');
+        const {lat,lon}=maidenheadToLatLon(loc);
+        const JD=julianDate(dateObj);
+        const res=moonAzElJD(JD,lat,lon);
+        out.textContent=`Az: ${res.Az.toFixed(4)}°\nEl: ${res.El.toFixed(4)}°\nRA: ${res.RA.toFixed(5)} hours\nDec: ${res.Dec.toFixed(4)}°\nDistance: ${res.R.toFixed(3)} km\nVR: ${res.VR.toFixed(3)} km/s\nLat: ${lat.toFixed(6)}° Lon: ${lon.toFixed(6)}°\nJD: ${JD.toFixed(6)}`;
+    }catch(err){errorDiv.textContent=err.message||String(err);}
 }
 
-// ----- UI -----
-document.getElementById('compute').onclick = ()=>{
-    const loc = document.getElementById('locator').value;
-    const dtVal = document.getElementById('datetime').value;
-    if(!dtVal){ alert('Enter date/time'); return; }
-    const dt = new Date(dtVal+'Z'); // UTC
-    const res = moonAzEl(loc, dt);
-    document.getElementById('output').textContent =
-        `Az: ${res.Az.toFixed(4)}°\n`+
-        `El: ${res.El.toFixed(4)}°\n`+
-        `RA: ${res.RA.toFixed(5)} hours\n`+
-        `Dec: ${res.Dec.toFixed(4)}°\n`+
-        `Distance: ${(res.techo*299792.458).toFixed(1)} km\n`+
-        `VR: ${res.vr.toFixed(3)} km/s`;
-};
+go.addEventListener('click',computeMoonUI);
+locatorInput.addEventListener('keydown',e=>{if(e.key==='Enter')computeMoonUI();});
+datetimeInput.addEventListener('keydown',e=>{if(e.key==='Enter')computeMoonUI();});
+
+computeMoonUI();
 </script>
-
 </body>
 </html>
