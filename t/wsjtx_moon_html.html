@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Moon Az/El</title></head>
+<body>
+  <script type="module">
+    import { moonAzEl } from './wsjtx_moon.js';
+    const res = moonAzEl("FN20hq", new Date());
+    console.log('Azimuth:', res.az.toFixed(4), 'deg');
+    console.log('Elevation:', res.el.toFixed(4), 'deg');
+    console.log('RA (hours):', res.ra_hours.toFixed(5));
+    console.log('Dec (deg):', res.dec_deg.toFixed(4));
+    console.log('Distance (km):', res.distance_km.toFixed(3));
+  </script>
+</body>
+</html>
+
