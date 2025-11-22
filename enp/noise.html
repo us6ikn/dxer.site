@@ -627,7 +627,6 @@
             const now = new Date();
             const grid = gridInput.value || 'JO89tt';
             const coords = maidenheadToLatLon(grid);
-            console.log(coords);
             if (!coords) return null;
             const observer = new Astronomy.Observer(coords.lat, coords.lon, 0);
 
