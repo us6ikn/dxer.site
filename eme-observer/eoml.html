@@ -2990,6 +2990,8 @@
         currentDate.setDate(currentDate.getDate() + days);
         dateInput.valueAsDate = currentDate;
         dateInput.value = currentDate.toISOString().slice(0,10);
+        const changeEvent = new Event('change', { bubbles: true });
+        dateInput.dispatchEvent(changeEvent);
         updateChart(hourIndex, false);
     }
 
