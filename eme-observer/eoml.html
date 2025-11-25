@@ -76,951 +76,949 @@
                                                                             font-family: 'Inter', Arial, sans-serif;
                                                                         }
 
-                                                                        #chartWrapper, #dxChartWrapper, #relativeChartWrapper, #moonChartWrapper {
-                                                                            width: 100%;
-                                                                            max-width: 600px;
-                                                                            height: 180px;
-                                                                            margin-top: 6px;
-                                                                            background-color: rgba(255, 255, 255, 0.85);
-                                                                            border-radius: 6px;
-                                                                            box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
-                                                                            overflow: hidden;
-                                                                            position: relative;
-                                                                            box-sizing: border-box;
-                                                                            display: none;
-                                                                        }
-
-                                                                        #moonChartWrapper {
-                                                                            display: block;
-                                                                        }
-
-                                                                        #moonDistanceChart {
-                                                                            height: calc(100% - 40px);
-                                                                            padding-bottom: 20px;
-                                                                        }
-
-                                                                        /* Annual Button for Moon Chart */
-                                                                        .annual-button {
-                                                                            position: absolute;
-                                                                            top: 145px;
-                                                                            right: 2px;
-                                                                            background-color: #0078d4;
-                                                                            color: white;
-                                                                            border: none;
-                                                                            border-radius: 4px;
-                                                                            padding: 4px 8px;
-                                                                            font-size: 12px;
-                                                                            font-weight: 600;
-                                                                            cursor: pointer;
-                                                                            transition: background 0.2s ease;
-                                                                            text-decoration: none;
-                                                                            display: inline-flex;
-                                                                            align-items: center;
-                                                                            justify-content: center;
-                                                                            min-height: 24px;
-                                                                            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-                                                                            z-index: 10;
-                                                                        }
-
-                                                                        .annual-button:hover {
-                                                                            background-color: #005fa3;
-                                                                            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-                                                                        }
-
-                                                                        /* Reverted to original chart label styles */
-                                                                        #chartLabel, #dxchartLabel, #relativeChartLabel, #moonChartLabel {
-                                                                            text-align: center;
-                                                                            margin-bottom: 0px;
-                                                                            font-weight: normal;
-                                                                            font-size: 11px;
-                                                                            font-family: 'Arial, sans-serif';
-                                                                            white-space: nowrap;
-                                                                            overflow: hidden;
-                                                                            text-overflow: ellipsis;
-                                                                            max-width: 100%;
-                                                                            padding: 2px 0;
-                                                                        }
-
-                                                                        #map {
-                                                                            height: 100dvh;
-                                                                            width: 100%;
-                                                                            z-index: 0;
-                                                                        }
-
-                                                                        /* Core Panel Styling - Professional Floating Design */
-                                                                        #controls {
-                                                                            position: absolute;
-                                                                            top: 15px;
-                                                                            left: 20px;
-                                                                            z-index: 5;
-                                                                            background-color: rgba(255, 255, 255, 0.9);
-                                                                            padding: 14px 18px;
-                                                                            border-radius: 10px;
-                                                                            box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.35);
-                                                                            max-width: 95vw;
-                                                                            max-height: 90vh;
-                                                                            display: flex;
-                                                                            flex-direction: column;
-                                                                            box-sizing: border-box;
-                                                                            transition: transform 0.3s ease;
-                                                                            min-width: 280px; /* Ensures readability */
-                                                                        }
-
-                                                                        #fixed-controls {
-                                                                            position: sticky;
-                                                                            top: 0;
-                                                                            z-index: 10;
-                                                                            background-color: inherit;
-                                                                            padding-bottom: 12px;
-                                                                            display: flex;
-                                                                            flex-direction: column;
-                                                                            gap: 6px; /* Reduced for less vertical space */
-                                                                            border-bottom: 1px solid rgba(0, 0, 0, 0.1); /* Subtle section divider */
-                                                                        }
-
-                                                                        #scrollable-controls {
-                                                                            flex: 1;
-                                                                            overflow-y: auto;
-                                                                            max-height: calc(90vh - 180px); /* Adjusted for header + inline elements */
-                                                                            padding-right: 5px;
-                                                                        }
-
-                                                                        #scrollable-controls::-webkit-scrollbar {
-                                                                            width: 6px;
-                                                                        }
-
-                                                                        #scrollable-controls::-webkit-scrollbar-thumb {
-                                                                            background-color: rgba(0, 120, 212, 0.5);
-                                                                            border-radius: 3px;
-                                                                        }
-
-                                                                        #scrollable-controls::-webkit-scrollbar-track {
-                                                                            background: transparent;
-                                                                        }
-
-                                                                        /* Header - Mimic Example's Title Block */
-                                                                        .app-name-wrapper {
-                                                                            display: flex;
-                                                                            flex-direction: column;
-                                                                            align-items: flex-start; /* Align left for better flow */
-                                                                            position: relative;
-                                                                            margin-bottom: 0px; /* Reduced */
-                                                                            padding-bottom: 0px; /* Reduced */
-                                                                            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-                                                                            width: fit-content;
-                                                                        }
-
-                                                                        .creator-label {
-                                                                            font-size: 11px;
-                                                                            color: #666;
-                                                                            font-weight: 500;
-                                                                            margin-bottom: 2px;
-                                                                            text-align: right;
-                                                                            width: 100%;
-                                                                        }
-
-                                                                        .app-name {
-                                                                            font-size: 16px;
-                                                                            font-weight: 700;
-                                                                            color: #2c3e50;
-                                                                            letter-spacing: 0.5px;
-                                                                        }
-
-                                                                        /* Date/Time Controls */
-                                                                        #date-container {
-                                                                            display: flex;
-                                                                            align-items: center;
-                                                                            justify-content: space-between;
-                                                                            flex-wrap: wrap;
-                                                                            gap: 8px;
-                                                                            margin-top: 4px;
-                                                                        }
-
-                                                                        input[type="date"] {
-                                                                            width: auto;
-                                                                            max-width: 160px;
-                                                                            padding: 5px 6px;
-                                                                            font-size: 13px;
-                                                                            border: 1px solid #ccc;
-                                                                            border-radius: 5px;
-                                                                            background: white;
-                                                                        }
-
-                                                                        #prevDay, #nextDay {
-                                                                            background-color: #0078d4;
-                                                                            color: white;
-                                                                            border: none;
-                                                                            border-radius: 5px;
-                                                                            padding: 4px 8px; /* Reduced vertical padding */
-                                                                            cursor: pointer;
-                                                                            font-size: 12px;
-                                                                            font-weight: 600;
-                                                                            transition: background 0.2s ease;
-                                                                            min-width: 24px;
-                                                                            min-height: 24px; /* Reduced min-height */
-                                                                            display: flex;
-                                                                            align-items: center;
-                                                                            justify-content: center;
-                                                                        }
-
-                                                                        #prevDay:hover, #nextDay:hover {
-                                                                            background-color: #005fa3;
-                                                                        }
-
-                                                                        #hour-value {
-                                                                            font-size: 13px;
-                                                                            font-weight: 500;
-                                                                            color: #333;
-                                                                            white-space: nowrap;
-                                                                            width: 70px; /* Fixed width to prevent movement */
-                                                                        }
-
-                                                                        /* Time Slider */
-                                                                        #hour {
-                                                                            width: 100%;
-                                                                            margin-top: 5px;
-                                                                            -webkit-appearance: none;
-                                                                            appearance: none;
-                                                                            height: 6px; /* Thinner for modern look */
-                                                                            background: #e9ecef;
-                                                                            border-radius: 3px;
-                                                                            outline: none;
-                                                                            transition: background 0.3s ease;
-                                                                        }
-
-                                                                        #hour::-webkit-slider-thumb {
-                                                                            -webkit-appearance: none;
-                                                                            appearance: none;
-                                                                            width: 16px;
-                                                                            height: 16px;
-                                                                            background: #0078d4;
-                                                                            border-radius: 50%;
-                                                                            cursor: pointer;
-                                                                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-                                                                        }
-
-                                                                        #hour::-moz-range-thumb {
-                                                                            width: 16px;
-                                                                            height: 16px;
-                                                                            background: #0078d4;
-                                                                            border-radius: 50%;
-                                                                            cursor: pointer;
-                                                                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-                                                                        }
-
-                                                                        #hour:hover {
-                                                                            background: #dee2e6;
-                                                                        }
-
-                                                                        /* Locator Inputs */
-                                                                        .locator-group {
-                                                                            display: flex;
-                                                                            gap: 12px;
-                                                                            flex-wrap: wrap;
-                                                                            align-items: center;
-                                                                        }
-
-                                                                        .locator-input {
-                                                                            display: flex;
-                                                                            align-items: center;
-                                                                            gap: 6px;
-                                                                            flex: 1;
-                                                                            min-width: 80px;
-                                                                        }
-
-                                                                        .locator-input label {
-                                                                            font-size: 12 px;
-                                                                            font-weight: 600;
-                                                                            color: #333;
-                                                                            white-space: nowrap;
-                                                                            line-height: 1;
-                                                                        }
-
-                                                                        .locator-input input {
-                                                                            flex: 1;
-                                                                            font-size: 12px;
-                                                                            padding: 4px 5px;
-                                                                            border: 1px solid #ccc;
-                                                                            border-radius: 5px;
-                                                                            background: white;
-                                                                            max-width: 80px; /* Reduced */
-                                                                        }
-
-                                                                        /* Buttons - Unified Professional Style */
-                                                                        .button-group, .button-group-infowindow {
-                                                                            display: flex;
-                                                                            gap: 6px;
-                                                                            margin-top: 8px;
-                                                                            flex-wrap: wrap;
-                                                                            justify-content: center;
-                                                                        }
-                                                                        
-                                                                        /* Ensure popup content is wide enough for images */
-                                                                        .leaflet-popup-content {
-                                                                            min-width: 275px !important; /* Slightly less than 300px to account for padding */
-                                                                            max-width: 300px !important; /* Reinforce Leaflet's default max-width */
-                                                                            box-sizing: border-box; /* Ensure padding is included in width calculations */
-                                                                        }
-
-                                                                        /* Style the image container to prevent overflow */
-                                                                        #image-container {
-                                                                            width: 100%; /* Ensure container spans full popup width */
-                                                                            overflow: hidden; /* Prevent image from overflowing container */
-                                                                            margin-top: 5px; /* Spacing above container */
-                                                                        }
-
-                                                                        /* Constrain images within the container */
-                                                                        #image-container img {
-                                                                            max-width: 100%; /* Fit within container */
-                                                                            height: auto; /* Maintain aspect ratio */
-                                                                            display: block; /* Prevent inline spacing issues */
-                                                                            margin: 0 auto; /* Center the image */
-                                                                        }
-
-                                                                        .nav-button, .sked-button, .email-button, .qrz-button, .auto-track-button {
-                                                                            background-color: #0078d4;
-                                                                            color: white !important;
-                                                                            border: none;
-                                                                            border-radius: 6px;
-                                                                            padding: 4px 8px; /* Reduced vertical padding for less height */
-                                                                            cursor: pointer;
-                                                                            font-size: 12px;
-                                                                            font-weight: 600;
-                                                                            transition: background 0.2s ease, box-shadow 0.2s ease;
-                                                                            text-decoration: none;
-                                                                            display: inline-flex;
-                                                                            align-items: center;
-                                                                            justify-content: center;
-                                                                            min-height: 24px; /* Reduced from 32px for compact feel */
-                                                                            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-                                                                        }
-                                                                        
-                                                                        .auto-track-button {
-                                                                            min-height: 32px;
-                                                                            max-width: 50px; /* Reduced from 32px for compact feel */
-                                                                        }
-
-                                                                        .nav-button:hover, .sked-button:hover, .email-button:hover, .qrz-button:hover, .auto-track-button:hover {
-                                                                            background-color: #005fa3;
-                                                                            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-                                                                        }
-
-                                                                        .nav-button:focus, .sked-button:focus, .email-button:focus, .qrz-button:focus, .auto-track-button:focus {
-                                                                            outline: none;
-                                                                            box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.3);
-                                                                        }
-
-                                                                        /* Specific Button Overrides */
-                                                                        .sked-button {
-                                                                            background-color: #28a745;
-                                                                        }
-
-                                                                        .sked-button:hover {
-                                                                            background-color: #218838;
-                                                                        }
-
-                                                                        .email-button {
-                                                                            background-color: #17a2b8;
-                                                                        }
-
-                                                                        .email-button:hover {
-                                                                            background-color: #138496;
-                                                                        }
-
-                                                                        .qrz-button {
-                                                                            background-color: #fd7e14;
-                                                                        }
-
-                                                                        .qrz-button:hover {
-                                                                            background-color: #e86c12;
-                                                                        }
-
-                                                                        .auto-track-button {
-                                                                            background-color: #0078d4;
-                                                                            padding: 4px 8px; /* Consistent reduced padding */
-                                                                            font-size: 11px;
-                                                                        }
-
-                                                                        .auto-track-button.active {
-                                                                            background-color: #0078d4;
-                                                                            font-weight: 700;
-                                                                        }
-
-                                                                        .nav-button.icon-button {
-                                                                            padding: 2px; /* Reduced for icons */
-                                                                            width: auto;
-                                                                            min-width: 24px; /* Reduced */
-                                                                            height: 24px; /* Reduced */
-                                                                            font-size: 12px; /* Reduced for icons */
-                                                                        }
-
-                                                                        .nav-button.icon-button svg {
-                                                                            width: 14px; /* Reduced */
-                                                                            height: 14px;
-                                                                            fill: currentColor;
-                                                                        }
-
-                                                                        .icon-button.active {
-                                                                            background-color: #005fa3;
-                                                                        }
-
-                                                                        /* Band Select */
-                                                                        .band-select {
-                                                                            font-size: 13px;
-                                                                            font-weight: 600;
-                                                                            color: #333;
-                                                                            padding: 5px 8px;
-                                                                            border: 1px solid #ccc;
-                                                                            border-radius: 5px;
-                                                                            background-color: white;
-                                                                            cursor: pointer;
-                                                                        }
-
-                                                                        .band-select:focus {
-                                                                            outline: none;
-                                                                            border-color: #0078d4;
-                                                                            box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.3);
-                                                                        }
-
-                                                                        .button-band-group {
-                                                                            display: flex;
-                                                                            align-items: center;
-                                                                            gap: 8px;
-                                                                            margin-top: 0px; /* Reduced */
-                                                                        }
-
-                                                                        /* Labels and Metrics - Preserve Original Colors, Refine Typography */
-                                                                        label {
-                                                                            font-weight: 600;
-                                                                            font-size: 13px;
-                                                                            color: #333;
-                                                                            margin-bottom: 6px;
-                                                                            display: block;
-                                                                        }
-
-                                                                        .metric-label {
-                                                                            font-weight: bold;
-                                                                        }
-
-                                                                        .metric-distance {
-                                                                            color: #24a148;
-                                                                        }
-
-                                                                        .metric-declination {
-                                                                            color: #ff832b;
-                                                                        }
-
-                                                                        .metric-pathloss {
-                                                                            color: #24a148;
-                                                                        }
-
-                                                                        .metric-separator {
-                                                                            color: #666;
-                                                                            margin: 0 4px;
-                                                                        }
-
-                                                                        .metric-elevation {
-                                                                            color: rgba(0, 0, 255, 0.6);
-                                                                        }
-
-                                                                        .metric-azimuth {
-                                                                            color: #444;
-                                                                        }
-
-                                                                        .metric-libration {
-                                                                            color: #ff0000;
-                                                                        }
-
-                                                                        .metric-doppler {
-                                                                            color: green;
-                                                                        }
-
-                                                                        .metric-locator {
-                                                                            color: #000;
-                                                                            font-weight: bold;
-                                                                        }
-
-                                                                        .metric-rel-libration {
-                                                                            color: red;
-                                                                            font-weight: bold;
-                                                                        }
-
-                                                                        .metric-rel-doppler {
-                                                                            color: green;
-                                                                            font-weight: bold;
-                                                                        }
-
-                                                                        .metric-poloffset {
-                                                                            color: blue;
-                                                                            font-weight: bold;
-                                                                        }
-
-                                                                        .metric-sun-sep {
-                                                                            color: #ff832b; /* Yellow for Sun separation */
-                                                                            font-weight: bold;
-                                                                        }
-
-                                                                        .metric-sgra-sep {
-                                                                            color: #800080; /* Purple for Sgr A separation */
-                                                                            font-weight: bold;
-                                                                        }
-
-                                                                        /* Popup and Other Existing Rules (Unchanged for Functionality) */
-                                                                        #image-container, .leaflet-popup-content {
-                                                                            /* Your existing rules here - unchanged */
-                                                                        }
-
-                                                                        .leaflet-control-layers {
-                                                                            /* Your existing rules here - unchanged */
-                                                                        }
-
-                                                                        /* Folded Panel and Show Button */
-                                                                        #controls.folded {
-                                                                            transform: translateX(calc(-100% + 30px));
-                                                                            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
-                                                                        }
-
-                                                                        #showControlsPanel {
-                                                                            position: fixed;
-                                                                            top: 50%;
-                                                                            left: 20px;
-                                                                            transform: translateY(-50%);
-                                                                            width: 24px;
-                                                                            height: 24px;
-                                                                            padding: 0;
-                                                                            background-color: #0078d4;
-                                                                            color: white;
-                                                                            border: none;
-                                                                            border-radius: 6px;
-                                                                            font-size: 14px;
-                                                                            font-weight: 600;
-                                                                            cursor: pointer;
-                                                                            transition: background 0.2s ease, transform 0.2s ease;
-                                                                            display: none;
-                                                                            align-items: center;
-                                                                            justify-content: center;
-                                                                            z-index: 1000;
-                                                                            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-                                                                        }
-
-                                                                        #showControlsPanel.visible {
-                                                                            display: flex;
-                                                                        }
-
-                                                                        #showControlsPanel:hover {
-                                                                            background-color: #005fa3;
-                                                                            transform: translateY(-50%) scale(1.05);
-                                                                        }
-
-                                                                        /* Disabled States */
-                                                                        #hour:disabled, #date:disabled, #prevDay:disabled, #nextDay:disabled {
-                                                                            background: #e9ecef;
-                                                                            color: #6c757d;
-                                                                            cursor: not-allowed;
-                                                                            opacity: 0.6;
-                                                                        }
-
-                                                                        /* --- CLEAN INLINE HEADER LAYOUT --- */
-                                                                        .app-header-row {
-                                                                            display: flex;
-                                                                            align-items: center;
-                                                                            justify-content: space-between;
-                                                                            flex-wrap: wrap;
-                                                                            gap: 4px;
-                                                                            padding-bottom: 0px; /* Reduced */
-                                                                            margin-bottom: 0px; /* Reduced */
-                                                                        }
-
-                                                                        .app-name-wrapper {
-                                                                            display: flex;
-                                                                            flex-direction: column;
-                                                                            align-items: flex-start;
-                                                                            line-height: 1.1;
-                                                                        }
-
-                                                                        /* --- INLINE DATE/TIME --- */
-                                                                        #date-container-inline {
-                                                                            display: flex;
-                                                                            align-items: center;
-                                                                            gap: 6px;
-                                                                        }
-
-                                                                        #date-container-inline input[type="date"] {
-                                                                            width: auto;
-                                                                            padding: 4px 6px;
-                                                                            font-size: 13px;
-                                                                            border: 1px solid #ccc;
-                                                                            border-radius: 5px;
-                                                                            height: 28px;
-                                                                            min-height: 28px;
-                                                                            box-sizing: border-box;
-                                                                        }
-
-                                                                        #date-container-inline .icon-only {
-                                                                            background-color: #0078d4;
-                                                                            color: white;
-                                                                            border: none;
-                                                                            border-radius: 5px;
-                                                                            padding: 4px;
-                                                                            display: flex;
-                                                                            align-items: center;
-                                                                            justify-content: center;
-                                                                            width: 24px;
-                                                                            cursor: pointer;
-                                                                            transition: background 0.2s ease;
-                                                                        }
-
-                                                                        #date-container-inline .icon-only:hover {
-                                                                            background-color: #005fa3;
-                                                                        }
-
-                                                                        /* --- UNIFIED BUTTON ROW --- */
-                                                                        .combined-nav {
-                                                                            display: flex;
-                                                                            align-items: center;
-                                                                            flex-wrap: wrap;
-                                                                            gap: 6px;
-                                                                            justify-content: flex-start;
-                                                                            margin-top: 0px; /* Reduced */
-                                                                        }
-
-                                                                        /* --- UNIFIED BUTTON AND SELECT HEIGHTS --- */
+                                                                    #chartWrapper, #dxChartWrapper, #relativeChartWrapper, #moonChartWrapper {
+                                                                        width: 100%;
+                                                                        max-width: 600px;
+                                                                        height: 180px;
+                                                                        margin-top: 6px;
+                                                                        background-color: rgba(255, 255, 255, 0.85);
+                                                                        border-radius: 6px;
+                                                                        box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
+                                                                        overflow: hidden;
+                                                                        position: relative;
+                                                                        box-sizing: border-box;
+                                                                        display: none;
+                                                                    }
+
+                                                                    #moonChartWrapper {
+                                                                        display: block;
+                                                                    }
+
+                                                                    #moonDistanceChart {
+                                                                        height: calc(100% - 40px);
+                                                                        padding-bottom: 20px;
+                                                                    }
+
+                                                                    /* Annual Button for Moon Chart */
+                                                                    .annual-button {
+                                                                        position: absolute;
+                                                                        top: 145px;
+                                                                        right: 2px;
+                                                                        background-color: #0078d4;
+                                                                        color: white;
+                                                                        border: none;
+                                                                        border-radius: 4px;
+                                                                        padding: 4px 8px;
+                                                                        font-size: 12px;
+                                                                        font-weight: 600;
+                                                                        cursor: pointer;
+                                                                        transition: background 0.2s ease;
+                                                                        text-decoration: none;
+                                                                        display: inline-flex;
+                                                                        align-items: center;
+                                                                        justify-content: center;
+                                                                        min-height: 24px;
+                                                                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                                                                        z-index: 10;
+                                                                    }
+
+                                                                    .annual-button:hover {
+                                                                        background-color: #005fa3;
+                                                                        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+                                                                    }
+
+                                                                    /* Reverted to original chart label styles */
+                                                                    #chartLabel, #dxchartLabel, #relativeChartLabel, #moonChartLabel {
+                                                                        text-align: center;
+                                                                        margin-bottom: 0px;
+                                                                        font-weight: normal;
+                                                                        font-size: 11px;
+                                                                        font-family: 'Arial, sans-serif';
+                                                                        white-space: nowrap;
+                                                                        overflow: hidden;
+                                                                        text-overflow: ellipsis;
+                                                                        max-width: 100%;
+                                                                        padding: 2px 0;
+                                                                    }
+
+                                                                    #map {
+                                                                        height: 100dvh;
+                                                                        width: 100%;
+                                                                        z-index: 0;
+                                                                    }
+
+                                                                    /* Core Panel Styling - Professional Floating Design */
+                                                                    #controls {
+                                                                        position: absolute;
+                                                                        top: 15px;
+                                                                        left: 20px;
+                                                                        z-index: 5;
+                                                                        background-color: rgba(255, 255, 255, 0.9);
+                                                                        padding: 14px 18px;
+                                                                        border-radius: 10px;
+                                                                        box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.35);
+                                                                        max-width: 95vw;
+                                                                        max-height: 90vh;
+                                                                        display: flex;
+                                                                        flex-direction: column;
+                                                                        box-sizing: border-box;
+                                                                        transition: transform 0.3s ease;
+                                                                        min-width: 280px; /* Ensures readability */
+                                                                    }
+
+                                                                    #fixed-controls {
+                                                                        position: sticky;
+                                                                        top: 0;
+                                                                        z-index: 10;
+                                                                        background-color: inherit;
+                                                                        padding-bottom: 12px;
+                                                                        display: flex;
+                                                                        flex-direction: column;
+                                                                        gap: 6px; /* Reduced for less vertical space */
+                                                                        border-bottom: 1px solid rgba(0, 0, 0, 0.1); /* Subtle section divider */
+                                                                    }
+
+                                                                    #scrollable-controls {
+                                                                        flex: 1;
+                                                                        overflow-y: auto;
+                                                                        max-height: calc(90vh - 180px); /* Adjusted for header + inline elements */
+                                                                        padding-right: 5px;
+                                                                    }
+
+                                                                    #scrollable-controls::-webkit-scrollbar {
+                                                                        width: 6px;
+                                                                    }
+
+                                                                    #scrollable-controls::-webkit-scrollbar-thumb {
+                                                                        background-color: rgba(0, 120, 212, 0.5);
+                                                                        border-radius: 3px;
+                                                                    }
+
+                                                                    #scrollable-controls::-webkit-scrollbar-track {
+                                                                        background: transparent;
+                                                                    }
+
+                                                                    /* Header - Mimic Example's Title Block */
+                                                                    .app-name-wrapper {
+                                                                        display: flex;
+                                                                        flex-direction: column;
+                                                                        align-items: flex-start; /* Align left for better flow */
+                                                                        position: relative;
+                                                                        margin-bottom: 0px; /* Reduced */
+                                                                        padding-bottom: 0px; /* Reduced */
+                                                                        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+                                                                        width: fit-content;
+                                                                    }
+
+                                                                    .creator-label {
+                                                                        font-size: 11px;
+                                                                        color: #666;
+                                                                        font-weight: 500;
+                                                                        margin-bottom: 2px;
+                                                                        text-align: right;
+                                                                        width: 100%;
+                                                                    }
+
+                                                                    .app-name {
+                                                                        font-size: 16px;
+                                                                        font-weight: 700;
+                                                                        color: #2c3e50;
+                                                                        letter-spacing: 0.5px;
+                                                                    }
+
+                                                                    /* Date/Time Controls */
+                                                                    #date-container {
+                                                                        display: flex;
+                                                                        align-items: center;
+                                                                        justify-content: space-between;
+                                                                        flex-wrap: wrap;
+                                                                        gap: 8px;
+                                                                        margin-top: 4px;
+                                                                    }
+
+                                                                    input[type="date"] {
+                                                                        width: auto;
+                                                                        max-width: 160px;
+                                                                        padding: 5px 6px;
+                                                                        font-size: 13px;
+                                                                        border: 1px solid #ccc;
+                                                                        border-radius: 5px;
+                                                                        background: white;
+                                                                    }
+
+                                                                    #prevDay, #nextDay {
+                                                                        background-color: #0078d4;
+                                                                        color: white;
+                                                                        border: none;
+                                                                        border-radius: 5px;
+                                                                        padding: 4px 8px; /* Reduced vertical padding */
+                                                                        cursor: pointer;
+                                                                        font-size: 12px;
+                                                                        font-weight: 600;
+                                                                        transition: background 0.2s ease;
+                                                                        min-width: 24px;
+                                                                        min-height: 24px; /* Reduced min-height */
+                                                                        display: flex;
+                                                                        align-items: center;
+                                                                        justify-content: center;
+                                                                    }
+
+                                                                    #prevDay:hover, #nextDay:hover {
+                                                                        background-color: #005fa3;
+                                                                    }
+
+                                                                    #hour-value {
+                                                                        font-size: 13px;
+                                                                        font-weight: 500;
+                                                                        color: #333;
+                                                                        white-space: nowrap;
+                                                                        width: 70px; /* Fixed width to prevent movement */
+                                                                    }
+
+                                                                    /* Time Slider */
+                                                                    #hour {
+                                                                        width: 100%;
+                                                                        margin-top: 5px;
+                                                                        -webkit-appearance: none;
+                                                                        appearance: none;
+                                                                        height: 6px; /* Thinner for modern look */
+                                                                        background: #e9ecef;
+                                                                        border-radius: 3px;
+                                                                        outline: none;
+                                                                        transition: background 0.3s ease;
+                                                                    }
+
+                                                                    #hour::-webkit-slider-thumb {
+                                                                        -webkit-appearance: none;
+                                                                        appearance: none;
+                                                                        width: 16px;
+                                                                        height: 16px;
+                                                                        background: #0078d4;
+                                                                        border-radius: 50%;
+                                                                        cursor: pointer;
+                                                                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                                                                    }
+
+                                                                    #hour::-moz-range-thumb {
+                                                                        width: 16px;
+                                                                        height: 16px;
+                                                                        background: #0078d4;
+                                                                        border-radius: 50%;
+                                                                        cursor: pointer;
+                                                                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                                                                    }
+
+                                                                    #hour:hover {
+                                                                        background: #dee2e6;
+                                                                    }
+
+                                                                    /* Locator Inputs */
+                                                                    .locator-group {
+                                                                        display: flex;
+                                                                        gap: 12px;
+                                                                        flex-wrap: wrap;
+                                                                        align-items: center;
+                                                                    }
+
+                                                                    .locator-input {
+                                                                        display: flex;
+                                                                        align-items: center;
+                                                                        gap: 6px;
+                                                                        flex: 1;
+                                                                        min-width: 80px;
+                                                                    }
+
+                                                                    .locator-input label {
+                                                                        font-size: 12 px;
+                                                                        font-weight: 600;
+                                                                        color: #333;
+                                                                        white-space: nowrap;
+                                                                        line-height: 1;
+                                                                    }
+
+                                                                    .locator-input input {
+                                                                        flex: 1;
+                                                                        font-size: 12px;
+                                                                        padding: 4px 5px;
+                                                                        border: 1px solid #ccc;
+                                                                        border-radius: 5px;
+                                                                        background: white;
+                                                                        max-width: 80px; /* Reduced */
+                                                                    }
+
+                                                                    /* Buttons - Unified Professional Style */
+                                                                    .button-group, .button-group-infowindow {
+                                                                        display: flex;
+                                                                        gap: 6px;
+                                                                        margin-top: 8px;
+                                                                        flex-wrap: wrap;
+                                                                        justify-content: center;
+                                                                    }
+                                                                    
+                                                                    /* Ensure popup content is wide enough for images */
+                                                                    .leaflet-popup-content {
+                                                                        min-width: 275px !important; /* Slightly less than 300px to account for padding */
+                                                                        max-width: 300px !important; /* Reinforce Leaflet's default max-width */
+                                                                        box-sizing: border-box; /* Ensure padding is included in width calculations */
+                                                                    }
+
+                                                                    /* Style the image container to prevent overflow */
+                                                                    #image-container {
+                                                                        width: 100%; /* Ensure container spans full popup width */
+                                                                        overflow: hidden; /* Prevent image from overflowing container */
+                                                                        margin-top: 5px; /* Spacing above container */
+                                                                    }
+
+                                                                    /* Constrain images within the container */
+                                                                    #image-container img {
+                                                                        max-width: 100%; /* Fit within container */
+                                                                        height: auto; /* Maintain aspect ratio */
+                                                                        display: block; /* Prevent inline spacing issues */
+                                                                        margin: 0 auto; /* Center the image */
+                                                                    }
+
+                                                                    .nav-button, .sked-button, .email-button, .qrz-button, .auto-track-button {
+                                                                        background-color: #0078d4;
+                                                                        color: white !important;
+                                                                        border: none;
+                                                                        border-radius: 6px;
+                                                                        padding: 4px 8px; /* Reduced vertical padding for less height */
+                                                                        cursor: pointer;
+                                                                        font-size: 12px;
+                                                                        font-weight: 600;
+                                                                        transition: background 0.2s ease, box-shadow 0.2s ease;
+                                                                        text-decoration: none;
+                                                                        display: inline-flex;
+                                                                        align-items: center;
+                                                                        justify-content: center;
+                                                                        min-height: 24px; /* Reduced from 32px for compact feel */
+                                                                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                                                                    }
+                                                                    
+                                                                    .auto-track-button {
+                                                                        min-height: 32px;
+                                                                        max-width: 50px; /* Reduced from 32px for compact feel */
+                                                                    }
+
+                                                                    .nav-button:hover, .sked-button:hover, .email-button:hover, .qrz-button:hover, .auto-track-button:hover {
+                                                                        background-color: #005fa3;
+                                                                        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+                                                                    }
+
+                                                                    .nav-button:focus, .sked-button:focus, .email-button:focus, .qrz-button:focus, .auto-track-button:focus {
+                                                                        outline: none;
+                                                                        box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.3);
+                                                                    }
+
+                                                                    /* Specific Button Overrides */
+                                                                    .sked-button {
+                                                                        background-color: #28a745;
+                                                                    }
+
+                                                                    .sked-button:hover {
+                                                                        background-color: #218838;
+                                                                    }
+
+                                                                    .email-button {
+                                                                        background-color: #17a2b8;
+                                                                    }
+
+                                                                    .email-button:hover {
+                                                                        background-color: #138496;
+                                                                    }
+
+                                                                    .qrz-button {
+                                                                        background-color: #fd7e14;
+                                                                    }
+
+                                                                    .qrz-button:hover {
+                                                                        background-color: #e86c12;
+                                                                    }
+
+                                                                    .auto-track-button {
+                                                                        background-color: #0078d4;
+                                                                        padding: 4px 8px; /* Consistent reduced padding */
+                                                                        font-size: 11px;
+                                                                    }
+
+                                                                    .auto-track-button.active {
+                                                                        background-color: #0078d4;
+                                                                        font-weight: 700;
+                                                                    }
+
+                                                                    .nav-button.icon-button {
+                                                                        padding: 2px; /* Reduced for icons */
+                                                                        width: auto;
+                                                                        min-width: 24px; /* Reduced */
+                                                                        height: 24px; /* Reduced */
+                                                                        font-size: 12px; /* Reduced for icons */
+                                                                    }
+
+                                                                    .nav-button.icon-button svg {
+                                                                        width: 14px; /* Reduced */
+                                                                        height: 14px;
+                                                                        fill: currentColor;
+                                                                    }
+
+                                                                    .icon-button.active {
+                                                                        background-color: #005fa3;
+                                                                    }
+
+                                                                    /* Band Select */
+                                                                    .band-select {
+                                                                        font-size: 13px;
+                                                                        font-weight: 600;
+                                                                        color: #333;
+                                                                        padding: 5px 8px;
+                                                                        border: 1px solid #ccc;
+                                                                        border-radius: 5px;
+                                                                        background-color: white;
+                                                                        cursor: pointer;
+                                                                    }
+
+                                                                    .band-select:focus {
+                                                                        outline: none;
+                                                                        border-color: #0078d4;
+                                                                        box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.3);
+                                                                    }
+
+                                                                    .button-band-group {
+                                                                        display: flex;
+                                                                        align-items: center;
+                                                                        gap: 8px;
+                                                                        margin-top: 0px; /* Reduced */
+                                                                    }
+
+                                                                    /* Labels and Metrics - Preserve Original Colors, Refine Typography */
+                                                                    label {
+                                                                        font-weight: 600;
+                                                                        font-size: 13px;
+                                                                        color: #333;
+                                                                        margin-bottom: 6px;
+                                                                        display: block;
+                                                                    }
+
+                                                                    .metric-label {
+                                                                        font-weight: bold;
+                                                                    }
+
+                                                                    .metric-distance {
+                                                                        color: #24a148;
+                                                                    }
+
+                                                                    .metric-declination {
+                                                                        color: #ff832b;
+                                                                    }
+
+                                                                    .metric-pathloss {
+                                                                        color: #24a148;
+                                                                    }
+
+                                                                    .metric-separator {
+                                                                        color: #666;
+                                                                        margin: 0 4px;
+                                                                    }
+
+                                                                    .metric-elevation {
+                                                                        color: rgba(0, 0, 255, 0.6);
+                                                                    }
+
+                                                                    .metric-azimuth {
+                                                                        color: #444;
+                                                                    }
+
+                                                                    .metric-libration {
+                                                                        color: #ff0000;
+                                                                    }
+
+                                                                    .metric-doppler {
+                                                                        color: green;
+                                                                    }
+
+                                                                    .metric-locator {
+                                                                        color: #000;
+                                                                        font-weight: bold;
+                                                                    }
+
+                                                                    .metric-rel-libration {
+                                                                        color: red;
+                                                                        font-weight: bold;
+                                                                    }
+
+                                                                    .metric-rel-doppler {
+                                                                        color: green;
+                                                                        font-weight: bold;
+                                                                    }
+
+                                                                    .metric-poloffset {
+                                                                        color: blue;
+                                                                        font-weight: bold;
+                                                                    }
+
+                                                                    .metric-sun-sep {
+                                                                        color: #ff832b; /* Yellow for Sun separation */
+                                                                        font-weight: bold;
+                                                                    }
+
+                                                                    .metric-sgra-sep {
+                                                                        color: #800080; /* Purple for Sgr A separation */
+                                                                        font-weight: bold;
+                                                                    }
+
+                                                                    /* Popup and Other Existing Rules (Unchanged for Functionality) */
+                                                                    #image-container, .leaflet-popup-content {
+                                                                        /* Your existing rules here - unchanged */
+                                                                    }
+
+                                                                    .leaflet-control-layers {
+                                                                        /* Your existing rules here - unchanged */
+                                                                    }
+
+                                                                    /* Folded Panel and Show Button */
+                                                                    #controls.folded {
+                                                                        transform: translateX(calc(-100% + 30px));
+                                                                        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+                                                                    }
+
+                                                                    #showControlsPanel {
+                                                                        position: fixed;
+                                                                        top: 50%;
+                                                                        left: 20px;
+                                                                        transform: translateY(-50%);
+                                                                        width: 24px;
+                                                                        height: 24px;
+                                                                        padding: 0;
+                                                                        background-color: #0078d4;
+                                                                        color: white;
+                                                                        border: none;
+                                                                        border-radius: 6px;
+                                                                        font-size: 14px;
+                                                                        font-weight: 600;
+                                                                        cursor: pointer;
+                                                                        transition: background 0.2s ease, transform 0.2s ease;
+                                                                        display: none;
+                                                                        align-items: center;
+                                                                        justify-content: center;
+                                                                        z-index: 1000;
+                                                                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                                                                    }
+
+                                                                    #showControlsPanel.visible {
+                                                                        display: flex;
+                                                                    }
+
+                                                                    #showControlsPanel:hover {
+                                                                        background-color: #005fa3;
+                                                                        transform: translateY(-50%) scale(1.05);
+                                                                    }
+
+                                                                    /* Disabled States */
+                                                                    #hour:disabled, #date:disabled, #prevDay:disabled, #nextDay:disabled {
+                                                                        background: #e9ecef;
+                                                                        color: #6c757d;
+                                                                        cursor: not-allowed;
+                                                                        opacity: 0.6;
+                                                                    }
+
+                                                                    /* --- CLEAN INLINE HEADER LAYOUT --- */
+                                                                    .app-header-row {
+                                                                        display: flex;
+                                                                        align-items: center;
+                                                                        justify-content: space-between;
+                                                                        flex-wrap: wrap;
+                                                                        gap: 4px;
+                                                                        padding-bottom: 0px; /* Reduced */
+                                                                        margin-bottom: 0px; /* Reduced */
+                                                                    }
+
+                                                                    .app-name-wrapper {
+                                                                        display: flex;
+                                                                        flex-direction: column;
+                                                                        align-items: flex-start;
+                                                                        line-height: 1.1;
+                                                                    }
+
+                                                                    /* --- INLINE DATE/TIME --- */
+                                                                    #date-container-inline {
+                                                                        display: flex;
+                                                                        align-items: center;
+                                                                        gap: 6px;
+                                                                    }
+
+                                                                    #date-container-inline input[type="date"] {
+                                                                        width: auto;
+                                                                        padding: 4px 6px;
+                                                                        font-size: 13px;
+                                                                        border: 1px solid #ccc;
+                                                                        border-radius: 5px;
+                                                                        height: 28px;
+                                                                        min-height: 28px;
+                                                                        box-sizing: border-box;
+                                                                    }
+
+                                                                    #date-container-inline .icon-only {
+                                                                        background-color: #0078d4;
+                                                                        color: white;
+                                                                        border: none;
+                                                                        border-radius: 5px;
+                                                                        padding: 4px;
+                                                                        display: flex;
+                                                                        align-items: center;
+                                                                        justify-content: center;
+                                                                        width: 24px;
+                                                                        cursor: pointer;
+                                                                        transition: background 0.2s ease;
+                                                                    }
+
+                                                                    #date-container-inline .icon-only:hover {
+                                                                        background-color: #005fa3;
+                                                                    }
+
+                                                                    /* --- UNIFIED BUTTON ROW --- */
+                                                                    .combined-nav {
+                                                                        display: flex;
+                                                                        align-items: center;
+                                                                        flex-wrap: wrap;
+                                                                        gap: 6px;
+                                                                        justify-content: flex-start;
+                                                                        margin-top: 0px; /* Reduced */
+                                                                    }
+                                                                    
+                                                                    /* --- UNIFIED BUTTON AND SELECT HEIGHTS --- */
+                                                                    .control-button,
+                                                                    .icon-button,
+                                                                    .control-select,
+                                                                    #date-container-inline .icon-only {
+                                                                        height: 28px;
+                                                                        min-height: 28px;
+                                                                        display: flex;
+                                                                        align-items: center;
+                                                                        justify-content: center;
+                                                                        border-radius: 5px;
+                                                                        border: none;
+                                                                        background-color: #0078d4;
+                                                                        color: white;
+                                                                        cursor: pointer;
+                                                                        transition: background 0.2s ease;
+                                                                        padding: 0 6px;
+                                                                        box-sizing: border-box;
+                                                                    }
+
+                                                                    .control-button:hover,
+                                                                    .icon-button:hover,
+                                                                    #date-container-inline .icon-only:hover {
+                                                                        background-color: #005fa3;
+                                                                    }
+
+                                                                    .icon-button svg {
+                                                                        width: 16px;
+                                                                        height: 16px;
+                                                                    }
+
+                                                                    .control-select {
+                                                                        font-size: 13px;
+                                                                        color: #333;
+                                                                        background-color: #fff;
+                                                                        border: 1px solid #ccc;
+                                                                        cursor: pointer;
+                                                                        padding: 0 4px;
+                                                                    }
+
+                                                                    /* --- ROW ALIGNMENT --- */
+                                                                    .combined-nav {
+                                                                        display: flex;
+                                                                        align-items: center;
+                                                                        flex-wrap: wrap;
+                                                                        gap: 4px;
+                                                                        justify-content: flex-start;
+                                                                        margin-top: 0px; /* Reduced */
+                                                                    }
+
+                                                                    .control-button {
+                                                                        min-width: 60px; /* Fixed width to prevent layout shift on text change */
+                                                                    }
+
+                                                                    /* 1. DESKTOP – make buttons larger & give the panel breathing room */
+                                                                    @media (min-width: 601px) {
+                                                                        #controls { padding: 18px 22px; }     /* a little more inner space */
+
+                                                                        /* ---- unified button size (nav, sked, email, qrz, track, …) ---- */
+                                                                        .nav-button,
+                                                                        .auto-track-button,
                                                                         .control-button,
                                                                         .icon-button,
                                                                         .control-select,
-                                                                        #date-container-inline .icon-only {
-                                                                            height: 28px;
-                                                                            min-height: 28px;
-                                                                            display: flex;
-                                                                            align-items: center;
-                                                                            justify-content: center;
-                                                                            border-radius: 5px;
-                                                                            border: none;
-                                                                            background-color: #0078d4;
-                                                                            color: white;
-                                                                            cursor: pointer;
-                                                                            transition: background 0.2s ease;
-                                                                            padding: 0 6px;
-                                                                            box-sizing: border-box;
+                                                                        #date-container-inline .icon-only,
+                                                                        #prevDay,
+                                                                        #nextDay {
+                                                                            min-height: 32px !important;      /* taller, easier to tap */
+                                                                            padding: 6px 12px !important;    /* more horizontal space */
+                                                                            font-size: 13px !important;      /* readable text */
                                                                         }
 
-                                                                        .control-button:hover,
-                                                                        .icon-button:hover,
-                                                                        #date-container-inline .icon-only:hover {
-                                                                            background-color: #005fa3;
-                                                                        }
-
-                                                                        .icon-button svg {
-                                                                            width: 16px;
-                                                                            height: 16px;
-                                                                        }
-
-                                                                        .control-select {
-                                                                            font-size: 13px;
-                                                                            color: #333;
-                                                                            background-color: #fff;
-                                                                            border: 1px solid #ccc;
-                                                                            cursor: pointer;
-                                                                            padding: 0 4px;
-                                                                        }
-
-                                                                        /* --- ROW ALIGNMENT --- */
-                                                                        .combined-nav {
-                                                                            display: flex;
-                                                                            align-items: center;
-                                                                            flex-wrap: wrap;
-                                                                            gap: 4px;
-                                                                            justify-content: flex-start;
-                                                                            margin-top: 0px; /* Reduced */
-                                                                        }
-
-                                                                        .control-button {
-                                                                            min-width: 60px; /* Fixed width to prevent layout shift on text change */
-                                                                        }
-
-                                                                        /* 1. DESKTOP – make buttons larger & give the panel breathing room */
-                                                                        @media (min-width: 601px) {
-                                                                            #controls { padding: 18px 22px; }     /* a little more inner space */
-
-                                                                            /* ---- unified button size (nav, sked, email, qrz, track, …) ---- */
-                                                                            .nav-button,
-                                                                            .auto-track-button,
-                                                                            .control-button,
-                                                                            .icon-button,
-                                                                            .control-select,
-                                                                            #date-container-inline .icon-only,
-                                                                            #prevDay,
-                                                                            #nextDay {
-                                                                                min-height: 32px !important;      /* taller, easier to tap */
-                                                                                padding: 6px 12px !important;    /* more horizontal space */
-                                                                                font-size: 13px !important;      /* readable text */
-                                                                            }
-
-                                                                            /* icon-only buttons keep a square shape but grow a bit */
-                                                                            .icon-button,
-                                                                            .icon-only,
-                                                                            #date-container-inline .icon-only,
-                                                                            #prevDay,
-                                                                            #nextDay {
-                                                                                min-width: 32px !important;
-                                                                                width: 32px !important;
-                                                                                height: 32px !important;
-                                                                                padding: 0 !important;
-                                                                            }
-                                                                            .icon-button svg,
-                                                                            .icon-only svg,
-                                                                            #date-container-inline .icon-only svg {
-                                                                                width: 18px;
-                                                                                height: 18px;
-                                                                            }
-
-                                                                            /* band selector & date input */
-                                                                            #bandSelect,
-                                                                            input[type="date"] { height: 32px; font-size: 13px; }
-
-                                                                            /* locator inputs */
-                                                                            .locator-input input { max-width: 60px; padding: 6px 8px; }
-
-                                                                            /* reduce the vertical gap between rows */
-                                                                            .combined-nav { gap: 8px; }
-                                                                            .button-band-group { gap: 10px; }
-                                                                        }
-
-                                                                        /* 2. MOBILE – shrink buttons *only* on very narrow screens */
-                                                                        @media (max-width: 600px) {
-                                                                            #controls { padding: 12px 14px; left: 10px; top: 10px; min-width: 260px; }
-
-                                                                            .nav-button,
-                                                                            .sked-button,
-                                                                            .email-button,
-                                                                            .qrz-button,
-                                                                            .auto-track-button,
-                                                                            .control-button,
-                                                                            .icon-button,
-                                                                            .control-select,
-                                                                            #date-container-inline .icon-only,
-                                                                            #prevDay,
-                                                                            #nextDay {
-                                                                                min-height: 24px !important;
-                                                                                padding: 2px 4px !important;
-                                                                                font-size: 10px !important;
-                                                                            }
-                                                                            
-                                                                            .auto-track-button {
-                                                                                height: 26px !important;
-                                                                                padding: 2px 4px !important;
-                                                                                font-size: 10px !important;
-                                                                            }
-
-                                                                            .icon-button,
-                                                                            .icon-only,
-                                                                            #date-container-inline .icon-only,
-                                                                            #prevDay,
-                                                                            #nextDay {
-                                                                                min-width: 26px !important;
-                                                                                width: 26px !important;
-                                                                                height: 26px !important;
-                                                                                padding: 0 !important;
-                                                                            }
-                                                                            .icon-button svg,
-                                                                            .icon-only svg,
-                                                                            #date-container-inline .icon-only svg {
-                                                                                width: 14px;
-                                                                                height: 14px;
-                                                                            }
-
-                                                                            #bandSelect,
-                                                                            input[type="date"] { height: 20px; font-size: 11px; }
-
-                                                                            .locator-input input { max-width: 60px; }
-
-                                                                            .app-name { font-size: 14px; }
-                                                                            .creator-label { font-size: 10px; }
-                                                                            .combined-nav { gap: 4px; }
-                                                                            #date-container-inline { gap: 4px; }
-                                                                            #date-container-inline .icon-only { width: 24px; height: 24px; padding: 2px; }
-                                                                            input[type="date"] { font-size: 12px; padding: 2px 4px; height: 24px; }
-                                                                            #hour-value { font-size: 12px; }
-                                                                            .app-header-row { flex-wrap: nowrap; gap: 2px; }
-                                                                        }
-
-                                                                        /* 3. Keep the “folded” panel behaviour untouched */
-                                                                        #controls.folded { transform: translateX(calc(-100% + 34px)); }
-                                                                        #showControlsPanel { width: 30px; height: 30px; font-size: 16px; }
-
-                                                                        /* 4. ICON-ONLY BUTTONS (prev/next day, nav icons, panel toggle) */
+                                                                        /* icon-only buttons keep a square shape but grow a bit */
+                                                                        .icon-button,
                                                                         .icon-only,
-                                                                        .combined-nav .icon-button,
-                                                                        #toggleControlsPanel {
-                                                                            /* same base size on every screen */
-                                                                            width: 28px !important;   /* mobile default */
-                                                                            height: 28px !important;
+                                                                        #date-container-inline .icon-only,
+                                                                        #prevDay,
+                                                                        #nextDay {
+                                                                            min-width: 32px !important;
+                                                                            width: 32px !important;
+                                                                            height: 32px !important;
                                                                             padding: 0 !important;
-                                                                            display: flex;
-                                                                            align-items: center;
-                                                                            justify-content: center;
+                                                                        }
+                                                                        .icon-button svg,
+                                                                        .icon-only svg,
+                                                                        #date-container-inline .icon-only svg {
+                                                                            width: 18px;
+                                                                            height: 18px;
                                                                         }
 
-                                                                        /* 5. SVG SIZE – responsive but never tiny on larger screens */
+                                                                        /* band selector & date input */
+                                                                        #bandSelect,
+                                                                        input[type="date"] { height: 32px; font-size: 13px; }
+
+                                                                        /* locator inputs */
+                                                                        .locator-input input { max-width: 60px; padding: 6px 8px; }
+
+                                                                        /* reduce the vertical gap between rows */
+                                                                        .combined-nav { gap: 8px; }
+                                                                        .button-band-group { gap: 10px; }
+                                                                    }
+
+                                                                    /* 2. MOBILE – shrink buttons *only* on very narrow screens */
+                                                                    @media (max-width: 600px) {
+                                                                        #controls { padding: 12px 14px; left: 10px; top: 10px; min-width: 260px; }
+
+                                                                        .nav-button,
+                                                                        .sked-button,
+                                                                        .email-button,
+                                                                        .qrz-button,
+                                                                        .auto-track-button,
+                                                                        .control-button,
+                                                                        .icon-button,
+                                                                        .control-select,
+                                                                        #date-container-inline .icon-only,
+                                                                        #prevDay,
+                                                                        #nextDay {
+                                                                            min-height: 24px !important;
+                                                                            padding: 2px 4px !important;
+                                                                            font-size: 10px !important;
+                                                                        }
+                                                                        
+                                                                        .auto-track-button {
+                                                                            height: 26px !important;
+                                                                            padding: 2px 4px !important;
+                                                                            font-size: 10px !important;
+                                                                        }
+
+                                                                        .icon-button,
+                                                                        .icon-only,
+                                                                        #date-container-inline .icon-only,
+                                                                        #prevDay,
+                                                                        #nextDay {
+                                                                            min-width: 26px !important;
+                                                                            width: 26px !important;
+                                                                            height: 26px !important;
+                                                                            padding: 0 !important;
+                                                                        }
+                                                                        .icon-button svg,
+                                                                        .icon-only svg,
+                                                                        #date-container-inline .icon-only svg {
+                                                                            width: 14px;
+                                                                            height: 14px;
+                                                                        }
+
+                                                                        #bandSelect,
+                                                                        input[type="date"] { height: 20px; font-size: 11px; }
+
+                                                                        .locator-input input { max-width: 60px; }
+
+                                                                        .app-name { font-size: 14px; }
+                                                                        .creator-label { font-size: 10px; }
+                                                                        .combined-nav { gap: 4px; }
+                                                                        #date-container-inline { gap: 4px; }
+                                                                        #date-container-inline .icon-only { width: 24px; height: 24px; padding: 2px; }
+                                                                        input[type="date"] { font-size: 12px; padding: 2px 4px; height: 24px; }
+                                                                        #hour-value { font-size: 12px; }
+                                                                        .app-header-row { flex-wrap: nowrap; gap: 2px; }
+                                                                    }
+
+                                                                    /* 3. Keep the “folded” panel behaviour untouched */
+                                                                    #controls.folded { transform: translateX(calc(-100% + 34px)); }
+                                                                    #showControlsPanel { width: 30px; height: 30px; font-size: 16px; }
+
+                                                                    /* 4. ICON-ONLY BUTTONS (prev/next day, nav icons, panel toggle) */
+                                                                    .icon-only,
+                                                                    .combined-nav .icon-button,
+                                                                    #toggleControlsPanel {
+                                                                        /* same base size on every screen */
+                                                                        width: 28px !important;   /* mobile default */
+                                                                        height: 28px !important;
+                                                                        padding: 0 !important;
+                                                                        display: flex;
+                                                                        align-items: center;
+                                                                        justify-content: center;
+                                                                    }
+
+                                                                    /* 5. SVG SIZE – responsive but never tiny on larger screens */
+                                                                    .icon-only svg,
+                                                                    .combined-nav .icon-button svg,
+                                                                    #toggleControlsPanel svg {
+                                                                        width: 16px;   /* desktop / tablet */
+                                                                        height: 16px;
+                                                                        fill: currentColor;
+                                                                    }
+
+                                                                    /* 6. MOBILE – keep the original tiny icons (they already looked good) */
+                                                                    @media (max-width: 600px) {
                                                                         .icon-only svg,
                                                                         .combined-nav .icon-button svg,
                                                                         #toggleControlsPanel svg {
-                                                                            width: 16px;   /* desktop / tablet */
-                                                                            height: 16px;
-                                                                            fill: currentColor;
+                                                                            width: 14px;
+                                                                            height: 14px;
                                                                         }
+                                                                    }
 
-                                                                        /* 6. MOBILE – keep the original tiny icons (they already looked good) */
-                                                                        @media (max-width: 600px) {
-                                                                            .icon-only svg,
-                                                                            .combined-nav .icon-button svg,
-                                                                            #toggleControlsPanel svg {
-                                                                                width: 14px;
-                                                                                height: 14px;
-                                                                            }
+                                                                    /* 7. DESKTOP – make the *buttons* a little bigger (optional) */
+                                                                    @media (min-width: 601px) {
+                                                                        .icon-only,
+                                                                        .combined-nav .icon-button,
+                                                                        #toggleControlsPanel {
+                                                                            width: 32px !important;
+                                                                            height: 32px !important;
                                                                         }
-
-                                                                        /* 7. DESKTOP – make the *buttons* a little bigger (optional) */
-                                                                        @media (min-width: 601px) {
-                                                                            .icon-only,
-                                                                            .combined-nav .icon-button,
-                                                                            #toggleControlsPanel {
-                                                                                width: 32px !important;
-                                                                                height: 32px !important;
-                                                                            }
-                                                                            .icon-only svg,
-                                                                            .combined-nav .icon-button svg,
-                                                                            #toggleControlsPanel svg {
-                                                                                width: 18px;   /* slightly larger on big screens */
-                                                                                height: 18px;
-                                                                            }
+                                                                        .icon-only svg,
+                                                                        .combined-nav .icon-button svg,
+                                                                        #toggleControlsPanel svg {
+                                                                            width: 18px;   /* slightly larger on big screens */
+                                                                            height: 18px;
                                                                         }
-                                                                    </style>
-                                                                    
-    </head>
-    <body>
-        <div id="map"></div>
-        <div id="controls">
-            <div id="fixed-controls">
-                <!-- Header + Inline Date/Time -->
-                <div class="app-header-row">
-                    <div class="app-name-wrapper">
-                        <div class="app-name">EME Observer</div>
-                        <div class="creator-label">by SA5IKN</div>
-                    </div>
-                    <div id="date-container-inline">
-                        <button id="prevDay" title="Previous Day" class="icon-only">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-                            </svg>
-                        </button>
-                        <input type="date" id="date" />
-                        <button id="nextDay" title="Next Day" class="icon-only">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                                <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
-                            </svg>
-                        </button>
-                        <span id="hour-value">UTC: 00:00</span>
-                    </div>
+                                                                    }
+                                                                </style>
+                                                                
+</head>
+<body>
+    <div id="map"></div>
+    <div id="controls">
+        <div id="fixed-controls">
+            <!-- Header + Inline Date/Time -->
+            <div class="app-header-row">
+                <div class="app-name-wrapper">
+                    <div class="app-name">EME Observer</div>
+                    <div class="creator-label">by SA5IKN</div>
                 </div>
-
-                <!-- Band + Track + Nav Buttons -->
-                <div class="button-band-group combined-nav">
-                    <button id="realTimeButton" class="auto-track-button">Track</button>
-                    <select id="bandSelect" class="control-select">
-                        <option value="432MHz">432MHz</option>
-                        <option value="1296MHz">1296MHz</option>
-                        <option value="2320MHz">2320MHz</option>
-                        <option value="3400MHz">3400MHz</option>
-                        <option value="5760MHz">5760MHz</option>
-                        <option value="10GHz" selected>10GHz</option>
-                        <option value="24GHz">24GHz</option>
-                        <option value="47GHz">47GHz</option>
-                        <option value="76GHz">76GHz</option>
-                    </select>
-
-                    <!-- Nav Buttons Inline -->
-                    <button id="activeStationsButton" class="icon-button" title="Toggle All/Active Stations">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
-                        </svg>
-                    </button>
-                    <a href="statistics.html" class="icon-button" title="Statistics">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M5 9h2v10H5zM11 4h2v15h-2zM17 12h2v7h-2z"/>
-                        </svg>
-                    </a>
-                    <a href="table.html" class="icon-button" title="Table">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M3 3v18h18V3H3zm16 4H5V5h14v2zm0 4H5V9h14v2zm0 4H5v-2h14v2zm0 4H5v-2h14v2z"/>
-                        </svg>
-                    </a>
-                    <a href="datasubmission.html" class="icon-button" title="Add Station">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                        </svg>
-                    </a>
-                    <a href="/" class="icon-button" title="Home">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 3l9 9h-3v9h-12v-9h-3l9-9z"/>
-                        </svg>
-                    </a>
-                    <a href="user-guide.html" class="icon-button" title="Help">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4zm-1 16h2v-2h-2v2z"/>
-                        </svg>
-                    </a>
-                    <button id="toggleControlsPanel" class="icon-button" title="Toggle Controls">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <div id="date-container-inline">
+                    <button id="prevDay" title="Previous Day" class="icon-only">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
                         </svg>
                     </button>
-                </div>
-
-                <!-- Time Slider -->
-                <input type="range" id="hour" min="0" max="287" value="0" step="1" />
-
-                <!-- Locators -->
-                <div class="locator-group">
-                    <div class="locator-input">
-                        <label for="qth">My Locator:</label>
-                        <input type="text" id="qth" maxlength="6" placeholder="eg JO89tt" />
-                    </div>
-                    <div class="locator-input">
-                        <label for="dx">DX Locator:</label>
-                        <input type="text" id="dx" maxlength="6" placeholder="eg IO91vm" />
-                    </div>
+                    <input type="date" id="date" />
+                    <button id="nextDay" title="Next Day" class="icon-only">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                            <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+                        </svg>
+                    </button>
+                    <span id="hour-value">UTC: 00:00</span>
                 </div>
             </div>
 
-            <!-- Scrollable Controls (Charts unchanged) -->
-            <div id="scrollable-controls">
-                <div id="chartWrapper" style="display: none;">
-                    <div id="chartLabel"></div>
-                    <canvas id="declinationChart"></canvas>
+            <!-- Band + Track + Nav Buttons -->
+            <div class="button-band-group combined-nav">
+                <button id="realTimeButton" class="auto-track-button">Track</button>
+                <select id="bandSelect" class="control-select">
+                    <option value="432MHz">432MHz</option>
+                    <option value="1296MHz">1296MHz</option>
+                    <option value="2320MHz">2320MHz</option>
+                    <option value="3400MHz">3400MHz</option>
+                    <option value="5760MHz">5760MHz</option>
+                    <option value="10GHz" selected>10GHz</option>
+                    <option value="24GHz">24GHz</option>
+                    <option value="47GHz">47GHz</option>
+                    <option value="76GHz">76GHz</option>
+                </select>
+
+                <!-- Nav Buttons Inline -->
+                <button id="activeStationsButton" class="icon-button" title="Toggle All/Active Stations">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+                    </svg>
+                </button>
+                <a href="statistics.html" class="icon-button" title="Statistics">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M5 9h2v10H5zM11 4h2v15h-2zM17 12h2v7h-2z"/>
+                    </svg>
+                </a>
+                <a href="table.html" class="icon-button" title="Table">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 3v18h18V3H3zm16 4H5V5h14v2zm0 4H5V9h14v2zm0 4H5v-2h14v2zm0 4H5v-2h14v2z"/>
+                    </svg>
+                </a>
+                <a href="datasubmission.html" class="icon-button" title="Add Station">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                    </svg>
+                </a>
+                <a href="/" class="icon-button" title="Home">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 3l9 9h-3v9h-12v-9h-3l9-9z"/>
+                    </svg>
+                </a>
+                <a href="user-guide.html" class="icon-button" title="Help">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4zm-1 16h2v-2h-2v2z"/>
+                    </svg>
+                </a>
+                <button id="toggleControlsPanel" class="icon-button" title="Toggle Controls">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Time Slider -->
+            <input type="range" id="hour" min="0" max="287" value="0" step="1" />
+
+            <!-- Locators -->
+            <div class="locator-group">
+                <div class="locator-input">
+                    <label for="qth">My Locator:</label>
+                    <input type="text" id="qth" maxlength="6" placeholder="eg JO89tt" />
                 </div>
-                <div id="dxChartWrapper" style="display: none;">
-                    <div id="dxchartLabel"></div>
-                    <canvas id="dxDeclinationChart"></canvas>
-                </div>
-                <div id="relativeChartWrapper" style="display: none;">
-                    <div id="relativeChartLabel"></div>
-                    <canvas id="relativeDataChart"></canvas>
-                </div>
-                <div id="moonChartWrapper" style="display: block;">
-                    <a href="https://eme.radio/moon-ephemeris" class="annual-button" target="_blank">Annual</a>
-                    <div id="moonChartLabel"></div>
-                    <canvas id="moonDistanceChart"></canvas>
+                <div class="locator-input">
+                    <label for="dx">DX Locator:</label>
+                    <input type="text" id="dx" maxlength="6" placeholder="eg IO91vm" />
                 </div>
             </div>
         </div>
-        <button id="showControlsPanel" style="display: none;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
-            </svg>
-        </button>
-    
-<script src="chart.js"></script>
+
+        <!-- Scrollable Controls (Charts unchanged) -->
+        <div id="scrollable-controls">
+            <div id="chartWrapper" style="display: none;">
+                <div id="chartLabel"></div>
+                <canvas id="declinationChart"></canvas>
+            </div>
+            <div id="dxChartWrapper" style="display: none;">
+                <div id="dxchartLabel"></div>
+                <canvas id="dxDeclinationChart"></canvas>
+            </div>
+            <div id="relativeChartWrapper" style="display: none;">
+                <div id="relativeChartLabel"></div>
+                <canvas id="relativeDataChart"></canvas>
+            </div>
+            <div id="moonChartWrapper" style="display: block;">
+                <a href="https://eme.radio/moon-ephemeris" class="annual-button" target="_blank">Annual</a>
+                <div id="moonChartLabel"></div>
+                <canvas id="moonDistanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <button id="showControlsPanel" style="display: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+            <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+        </svg>
+    </button><script src="chart.js"></script>
 <script src="chartjs-plugin-annotation@1.4.0"></script>
 <script src="l.ob.js"></script>
 <script src="/leaflet/Leaflet.greatCircle.js"></script>
@@ -1044,6 +1042,8 @@
     let realTimeInterval = null; // Store the interval ID for real-time updates
     let isRealTimeMode = false; // Track real-time mode state
     let moonDayData = { date: null, data: [], labels: [] };
+    let qthMarker = null;
+    let dxMarker = null;
 
     // NEW: Caches for day data to avoid recompute
     let qthDayData = { date: null, libration: [], elevations: [], azimuths: [], dopplers: [], rates: [] };
@@ -2592,8 +2592,7 @@
                                                             <div>Power: ${power}</div>
                                                             <div>Website: <a href="${website}" target="_blank">${displayWebsite}</a></div>
                                                             <div id="image-container-${sanitizedCallsign}">
-                                                                Station Picture (clickable):<br>
-
+                                                                Station Picture (clickable):
                                                                 <a id="image-link-${sanitizedCallsign}" href="${bandSpecificImageUrl}" target="_blank">
                                                                     <img id="station-image-${sanitizedCallsign}" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA" alt="${callsign} station"/>
                                                                 </a>
@@ -3123,6 +3122,17 @@
                                                         }
                                                         chartLabel.innerHTML = '<span class="metric-locator">Error computing QTH data</span>';
                                                     }
+                                                    const {lat, lon} = qthToLatLon(locator);
+                                                    if (qthMarker) {
+                                                        qthMarker.setLatLng([lat, lon]);
+                                                    } else {
+                                                        qthMarker = L.circleMarker([lat, lon], {
+                                                            radius: 5,
+                                                            color: 'red',
+                                                            fillColor: 'red',
+                                                            fillOpacity: 1
+                                                        }).addTo(map).bindPopup('My Locator');
+                                                    }
                                                 } else {
                                                     document.getElementById("chartWrapper").style.display = "none";
                                                     if (chart) {
@@ -3132,6 +3142,10 @@
                                                     // Invalidate relDayData when QTH is invalid
                                                     relDayData.date = null;
                                                     chartLabel.innerHTML = '<span class="metric-locator">Enter valid QTH</span>';
+                                                    if (qthMarker) {
+                                                        qthMarker.remove();
+                                                        qthMarker = null;
+                                                    }
                                                 }
                                             });
 
@@ -3167,6 +3181,17 @@
                                                         }
                                                         dxChartLabel.innerHTML = '<span class="metric-locator">Error computing DX data</span>';
                                                     }
+                                                    const {lat, lon} = qthToLatLon(locator);
+                                                    if (dxMarker) {
+                                                        dxMarker.setLatLng([lat, lon]);
+                                                    } else {
+                                                        dxMarker = L.circleMarker([lat, lon], {
+                                                            radius: 5,
+                                                            color: 'blue',
+                                                            fillColor: 'blue',
+                                                            fillOpacity: 1
+                                                        }).addTo(map).bindPopup('DX Locator');
+                                                    }
                                                 } else {
                                                     document.getElementById("dxChartWrapper").style.display = "none";
                                                     if (dxChart) {
@@ -3176,6 +3201,10 @@
                                                     // Invalidate relDayData when DX is invalid
                                                     relDayData.date = null;
                                                     document.getElementById('dxchartLabel').innerHTML = '<span class="metric-locator">Enter valid DX</span>';
+                                                    if (dxMarker) {
+                                                        dxMarker.remove();
+                                                        dxMarker = null;
+                                                    }
                                                 }
                                             });
 
@@ -3259,3 +3288,4 @@
 <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
 <script src="/kofi.js"></script></body>
 </html>
+
