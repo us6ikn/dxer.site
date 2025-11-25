@@ -2911,156 +2911,70 @@
         return annotations;
     }
 
-                                            function formatTimeUTC(date) {
-                                                            if (!date) return 'N/A';
-                                                            return `${String(date.getUTCHours()).padStart(2,'0')}:${String(date.getUTCMinutes()).padStart(2,'0')}z`;
-                                                        }
+    function timeToChartIndex(date) {
+        if (!(date instanceof Date)) throw new Error("Expected a Date object");
+        let hours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
+        if (hours >= 23.9167) {
+            hours = 23.9167;
+        }
+        return hours * 12;
+    }
 
-                                                        function timeToChartIndex(date) {
-                                                            if (!(date instanceof Date)) return null;
-                                                            const hours = date.getUTCHours() + date.getUTCMinutes()/60 + date.getUTCSeconds()/3600;
-                                                            return Math.round(hours * 12);
-                                                        }
+    function getSkedAnnotations(dateStr, qthLat, qthLon, dxLat, dxLon) {
+        const annotations = {};
+        const targetDateStr = dateStr.slice(0, 10);
+        const jsDate = new Date(`${dateStr}T00:00:00Z`);
+        const astroTime = Astronomy.MakeTime(jsDate);
 
-                                            function getSkedAnnotations(dateStr, qthLat, qthLon, dxLat, dxLon) {
-                                                const annotations = {};
+        const qthObserver = new Astronomy.Observer(qthLat, qthLon, 0);
+        const dxObserver = new Astronomy.Observer(dxLat, dxLon, 0);
 
-                                                // --- Make sure we work with proper Date objects ---
-                                                const targetDate = new Date(dateStr + "T00:00:00Z");           // e.g. 2025-11-25T00:00:00Z
-                                                const prevDate   = new Date(targetDate);
-                                                prevDate.setUTCDate(prevDate.getUTCDate() - 1);
-                                                const nextDate   = new Date(targetDate);
-                                                nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+        let qthRiseEvent = null, qthSetEvent = null, dxRiseEvent = null, dxSetEvent = null;
+        try {
+            qthRiseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObserver, +1, astroTime, 1.0);
+            qthSetEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObserver, -1, astroTime, 1.0);
+            dxRiseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObserver, +1, astroTime, 1.0);
+            dxSetEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObserver, -1, astroTime, 1.0);
+        } catch (e) {
+            console.warn(`Error calculating moonrise/set: ${e.message}`);
+            return annotations;
+        }
 
-                                                const targetDateStr = targetDate.toISOString().slice(0,10);
-                                                const prevDateStr   = prevDate.toISOString().slice(0,10);
-                                                const nextDateStr   = nextDate.toISOString().slice(0,10);
+        function formatTimeUTC(date) {
+            if (!date) return 'N/A';
+            return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}z`;
+        }
 
-                                                const qthObs = new Astronomy.Observer(qthLat, qthLon, 0);
-                                                const dxObs  = new Astronomy.Observer(dxLat, dxLon, 0);
+        function timeToChartIndex(date) {
+            if (!(date instanceof Date)) return null;
+            const hours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
+            let index = Math.round(hours * 12);
+            if (index < 0) index = 0;
+            if (index > 287) index = 287;
+            return index;
+        }
 
-                                                const dayStart = Astronomy.MakeTime(targetDate);
-                                                const searchStart = Astronomy.MakeTime(dayStart.date);
-                                                searchStart.AddDays(-1);
-                                                const searchEnd = Astronomy.MakeTime(dayStart.date);
-                                                searchEnd.AddDays(+1.5);
+        let skedStartTime = null, skedEndTime = null;
+        if (qthRiseEvent && qthSetEvent && dxRiseEvent && dxSetEvent &&
+            qthRiseEvent.date && qthSetEvent.date && dxRiseEvent.date && dxSetEvent.date) {
+            const qthRise = qthRiseEvent.date;
+            const qthSet = qthSetEvent.date;
+            const dxRise = dxRiseEvent.date;
+            const dxSet = dxSetEvent.date;
 
-                                                let qthRise = null, qthSet = null, dxRise = null, dxSet = null;
+            const isSameDay = (date) => date.toISOString().slice(0, 10) === targetDateStr;
 
-                                                try {
-                                                    const r1 = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, +1, searchStart, 2);
-                                                    const s1 = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, -1, searchStart, 2);
-                                                    const r2 = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  +1, searchStart, 2);
-                                                    const s2 = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  -1, searchStart, 2);
+            if (isSameDay(qthRise) && isSameDay(qthSet) && isSameDay(dxRise) && isSameDay(dxSet)) {
+                // Sked start is the later of the two rise times
+                skedStartTime = qthRise > dxRise ? qthRise : dxRise;
+                // Sked end is the earlier of the two set times
+                skedEndTime = qthSet < dxSet ? qthSet : dxSet;
+            }
+        }
 
-                                                    // Accept events from the target day, or just before/after midnight
-                                                    const dateStr = d => d.date.toISOString().slice(0,10);
-
-                                                    if (r1) {
-                                                        const ds = dateStr(r1);
-                                                        if (ds === targetDateStr || ds === prevDateStr) qthRise = r1.date;
-                                                    }
-                                                    if (s1) {
-                                                        const ds = dateStr(s1);
-                                                        if (ds === targetDateStr || ds === nextDateStr) qthSet = s1.date;
-                                                    }
-                                                    if (r2) {
-                                                        const ds = dateStr(r2);
-                                                        if (ds === targetDateStr || ds === prevDateStr) dxRise = r2.date;
-                                                    }
-                                                    if (s2) {
-                                                        const ds = dateStr(s2);
-                                                        if (ds === targetDateStr || ds === nextDateStr) dxSet = s2.date;
-                                                    }
-                                                } catch (e) {
-                                                    console.warn("Sked annotation error:", e);
-                                                }
-
-                                                const windows = [];
-
-                                                if (qthRise && qthSet && dxRise && dxSet) {
-                                                    const starts = [qthRise, dxRise].sort((a,b) => a - b);
-                                                    const ends   = [qthSet,  dxSet ].sort((a,b) => a - b);
-
-                                                    // Primary common window (most common)
-                                                    const win1Start = starts[1];   // later rise
-                                                    const win1End   = ends[0];     // earlier set
-                                                    if (win1Start < win1End) {
-                                                        windows.push({start: win1Start, end: win1End});
-                                                    }
-
-                                                    // Very rare second window (moon up all night at one station)
-                                                    if (ends[0] < starts[1]) {
-                                                        const win2Start = Math.max(qthRise, dxRise);
-                                                        const win2End   = Math.min(qthSet,  dxSet);
-                                                        if (win2Start < win2End) {
-                                                            windows.push({start: win2Start, end: win2End});
-                                                        }
-                                                    }
-                                                }
-
-                                                // --- Draw all windows ---
-                                                windows.forEach((win, i) => {
-                                                    const startIdx = timeToChartIndex(win.start);
-                                                    const endIdx   = timeToChartIndex(win.end);
-
-                                                    if (startIdx === null || endIdx === null) return;
-
-                                                    // Green semi-transparent box for the whole window
-                                                    annotations[`skedBox${i}`] = {
-                                                        type: 'box',
-                                                        xScaleID: 'x',
-                                                        xMin: startIdx,
-                                                        xMax: endIdx,
-                                                        backgroundColor: 'rgba(0, 220, 0, 0.22)',
-                                                        borderColor: 'rgba(0, 150, 0, 0.9)',
-                                                        borderWidth: 1.5
-                                                    };
-
-                                                    // Start line + label
-                                                    annotations[`skedStart${i}`] = {
-                                                        type: 'line',
-                                                        mode: 'vertical',
-                                                        scaleID: 'x',
-                                                        value: startIdx,
-                                                        borderColor: '#00C000',
-                                                        borderWidth: 2,
-                                                        label: {
-                                                            content: [`Sked Start`, formatTimeUTC(win.start)],
-                                                            enabled: true,
-                                                            position: 'top',
-                                                            backgroundColor: 'rgba(0, 180, 0, 0.95)',
-                                                            color: 'white',
-                                                            font: { size: 11, weight: 'bold' },
-                                                            padding: 4,
-                                                            cornerRadius: 4
-                                                        }
-                                                    };
-
-                                                    // End line + label
-                                                    annotations[`skedEnd${i}`] = {
-                                                        type: 'line',
-                                                        mode: 'vertical',
-                                                        scaleID: 'x',
-                                                        value: endIdx,
-                                                        borderColor: '#00C000',
-                                                        borderWidth: 2,
-                                                        label: {
-                                                            content: [`Sked End`, formatTimeUTC(win.end)],
-                                                            enabled: true,
-                                                            position: 'top',
-                                                            backgroundColor: 'rgba(0, 180, 0, 0.95)',
-                                                            color: 'white',
-                                                            font: { size: 11, weight: 'bold' },
-                                                            padding: 4,
-                                                            cornerRadius: 4
-                                                        }
-                                                    };
-                                                });
-
-                                                return annotations;
-                                            }
-
+        // No annotations for sked start/end as per user request
+        return annotations;
+    }
 
     document.getElementById("hour").addEventListener("input", () => {
         hourIndex = parseInt(document.getElementById("hour").value);
@@ -3103,31 +3017,61 @@
                                             });
 
                                             window.onload = () => {
-                                                            initMap();
+                                                // Initialize map first
+                                                initMap();
 
-                                                            const now = new Date();
-                                                            const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-                                                            document.getElementById('date').valueAsDate = utcDate;
-                                                            document.getElementById('date').value = utcDate.toISOString().slice(0,10);
+                                                const now = new Date();
+                                                const utcHours = now.getUTCHours();
+                                                const utcMinutes = now.getUTCMinutes();
 
-                                                            let roundedHour = now.getUTCHours();
-                                                            let roundedMinutes = Math.round(now.getUTCMinutes() / 5) * 5;
-                                                            if (roundedMinutes >= 60) { roundedMinutes = 0; roundedHour++; }
-                                                            if (roundedHour >= 24) { roundedHour -= 24; utcDate.setUTCDate(utcDate.getUTCDate() + 1); }
+                                                const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+                                                document.getElementById('date').valueAsDate = utcDate;
+                                                document.getElementById('date').value = utcDate.toISOString().slice(0,10);
 
-                                                            hourIndex = roundedHour * 12 + (roundedMinutes / 5);
-                                                            document.getElementById('hour').value = hourIndex;
-                                                            document.getElementById('hour-value').textContent = `UTC: ${String(roundedHour).padStart(2,'0')}:${String(roundedMinutes).padStart(2,'0')}`;
+                                                let roundedHour = utcHours;
+                                                let roundedMinutes = Math.round(utcMinutes / 5) * 5;
+                                                if (roundedMinutes >= 60) {
+                                                    roundedMinutes = 0;
+                                                    roundedHour += 1;
+                                                }
+                                                if (roundedHour >= 24) {
+                                                    roundedHour -= 24;
+                                                    utcDate.setUTCDate(utcDate.getUTCDate() + 1);
+                                                    document.getElementById('date').valueAsDate = utcDate;
+                                                    document.getElementById('date').value = utcDate.toISOString().slice(0,10);
+                                                }
 
-                                                            isRealTimeMode = false;
-                                                            document.getElementById('realTimeButton').classList.remove('active');
-                                                            document.getElementById('realTimeButton').textContent = 'Track';
+                                                hourIndex = roundedHour * 12 + (roundedMinutes / 5);
+                                                document.getElementById('hour').value = hourIndex;
+                                                document.getElementById('hour-value').textContent =
+                                                    `UTC: ${String(roundedHour).padStart(2, '0')}:${String(roundedMinutes).padStart(2, '0')}`;
 
-                                                            updateBand(document.getElementById('bandSelect').value);
-                                                            updateMap(now);
-                                                            updateMoonChart(now);
-                                                            updateChart(hourIndex, false);
-                                                        };
+                                                document.getElementById('showControlsPanel').classList.remove('visible');
+
+                                                // Ensure real-time mode is off initially
+                                                isRealTimeMode = false;
+                                                document.getElementById('realTimeButton').classList.remove('active');
+                                                document.getElementById('realTimeButton').textContent = 'Track';
+
+                                                const qthInput = document.getElementById('qth').value.trim().toUpperCase();
+                                                const dxInput = document.getElementById('dx').value.trim().toUpperCase();
+                                                if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
+                                                    computeLibrationForDay(qthInput, document.getElementById('date').value, 'qth');
+                                                    computeFullDayData(qthDayData, qthInput, document.getElementById('date').value, true);
+                                                }
+                                                if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
+                                                    computeLibrationForDay(dxInput, document.getElementById('date').value, 'dx');
+                                                    computeFullDayData(dxDayData, dxInput, document.getElementById('date').value, false);
+                                                }
+
+                                                // Initialize band (this calls updateMarkers, which needs map to be initialized)
+                                                updateBand(document.getElementById('bandSelect').value);
+
+                                                const currentNow = new Date();
+                                                updateMap(currentNow);
+                                                updateMoonChart(currentNow);
+                                                updateChart(hourIndex, false);
+                                            };
                                                 
     window.addEventListener('unload', () => {
       stopRealTimeUpdates();
