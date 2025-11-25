@@ -3126,9 +3126,9 @@
                                                     if (qthMarker) {
                                                         qthMarker.setLatLng([lat, lon]);
                                                     } else {
-                                                        var qthMarker = L.marker([lat, lon])
+                                                        qthMarker = L.marker([lat, lon])
                                                             .addTo(map)
-                                                            .bindPopup('My Locator');
+                                                            .bindPopup(`My Locator: ${locator}`);
 
                                                     }
                                                 } else {
