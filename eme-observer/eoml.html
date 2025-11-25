@@ -2911,16 +2911,18 @@
         return annotations;
     }
 
-    function timeToChartIndex(date) {
-        if (!(date instanceof Date)) throw new Error("Expected a Date object");
-        let hours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
-        if (hours >= 23.9167) {
-            hours = 23.9167;
-        }
-        return hours * 12;
-    }
+                                            function formatTimeUTC(date) {
+                                                            if (!date) return 'N/A';
+                                                            return `${String(date.getUTCHours()).padStart(2,'0')}:${String(date.getUTCMinutes()).padStart(2,'0')}z`;
+                                                        }
 
-                                            function getSkedAnnotations(dateStr, qthLat, qthLon, dxLat, dxLon) {
+                                                        function timeToChartIndex(date) {
+                                                            if (!(date instanceof Date)) return null;
+                                                            const hours = date.getUTCHours() + date.getUTCMinutes()/60 + date.getUTCSeconds()/3600;
+                                                            return Math.round(hours * 12);
+                                                        }
+
+                                                        function getSkedAnnotations(dateStr, qthLat, qthLon, dxLat, dxLon) {
                                                             const annotations = {};
                                                             const targetDateStr = dateStr.slice(0,10);
 
@@ -3034,41 +3036,6 @@
                                                             return annotations;
                                                         }
 
-        function formatTimeUTC(date) {
-            if (!date) return 'N/A';
-            return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}z`;
-        }
-
-        function timeToChartIndex(date) {
-            if (!(date instanceof Date)) return null;
-            const hours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
-            let index = Math.round(hours * 12);
-            if (index < 0) index = 0;
-            if (index > 287) index = 287;
-            return index;
-        }
-
-        let skedStartTime = null, skedEndTime = null;
-        if (qthRiseEvent && qthSetEvent && dxRiseEvent && dxSetEvent &&
-            qthRiseEvent.date && qthSetEvent.date && dxRiseEvent.date && dxSetEvent.date) {
-            const qthRise = qthRiseEvent.date;
-            const qthSet = qthSetEvent.date;
-            const dxRise = dxRiseEvent.date;
-            const dxSet = dxSetEvent.date;
-
-            const isSameDay = (date) => date.toISOString().slice(0, 10) === targetDateStr;
-
-            if (isSameDay(qthRise) && isSameDay(qthSet) && isSameDay(dxRise) && isSameDay(dxSet)) {
-                // Sked start is the later of the two rise times
-                skedStartTime = qthRise > dxRise ? qthRise : dxRise;
-                // Sked end is the earlier of the two set times
-                skedEndTime = qthSet < dxSet ? qthSet : dxSet;
-            }
-        }
-
-        // No annotations for sked start/end as per user request
-        return annotations;
-    }
 
     document.getElementById("hour").addEventListener("input", () => {
         hourIndex = parseInt(document.getElementById("hour").value);
