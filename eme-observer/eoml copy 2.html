@@ -2920,144 +2920,61 @@
         return hours * 12;
     }
 
-                                            function getSkedAnnotations(dateStr, qthLat, qthLon, dxLat, dxLon) {
-                                                const annotations = {};
-                                                const targetDateStr = dateStr.slice(0,10);
+    function getSkedAnnotations(dateStr, qthLat, qthLon, dxLat, dxLon) {
+        const annotations = {};
+        const targetDateStr = dateStr.slice(0, 10);
+        const jsDate = new Date(`${dateStr}T00:00:00Z`);
+        const astroTime = Astronomy.MakeTime(jsDate);
 
-                                                const qthObs = new Astronomy.Observer(qthLat, qthLon, 0);
-                                                const dxObs  = new Astronomy.Observer(dxLat, dxLon, 0);
+        const qthObserver = new Astronomy.Observer(qthLat, qthLon, 0);
+        const dxObserver = new Astronomy.Observer(dxLat, dxLon, 0);
 
-                                                const dayStart = Astronomy.MakeTime(new Date(`${dateStr}T00:00:00Z`));
+        let qthRiseEvent = null, qthSetEvent = null, dxRiseEvent = null, dxSetEvent = null;
+        try {
+            qthRiseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObserver, +1, astroTime, 1.0);
+            qthSetEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObserver, -1, astroTime, 1.0);
+            dxRiseEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObserver, +1, astroTime, 1.0);
+            dxSetEvent = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObserver, -1, astroTime, 1.0);
+        } catch (e) {
+            console.warn(`Error calculating moonrise/set: ${e.message}`);
+            return annotations;
+        }
 
-                                                // Search rise/set for a ±1.5 day window so we catch events that spill over midnight
-                                                const searchStart = Astronomy.MakeTime(dayStart.date);
-                                                searchStart.AddDays(-1);
-                                                const searchEnd = Astronomy.MakeTime(dayStart.date);
-                                                searchEnd.AddDays(+1.5);
+        function formatTimeUTC(date) {
+            if (!date) return 'N/A';
+            return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}z`;
+        }
 
-                                                let qthRise = null, qthSet = null, dxRise = null, dxSet = null;
+        function timeToChartIndex(date) {
+            if (!(date instanceof Date)) return null;
+            const hours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
+            let index = Math.round(hours * 12);
+            if (index < 0) index = 0;
+            if (index > 287) index = 287;
+            return index;
+        }
 
-                                                try {
-                                                    const r1 = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, +1, searchStart, 2);
-                                                    const s1 = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, -1, searchStart, 2);
-                                                    const r2 = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  +1, searchStart, 2);
-                                                    const s2 = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  -1, searchStart, 2);
+        let skedStartTime = null, skedEndTime = null;
+        if (qthRiseEvent && qthSetEvent && dxRiseEvent && dxSetEvent &&
+            qthRiseEvent.date && qthSetEvent.date && dxRiseEvent.date && dxSetEvent.date) {
+            const qthRise = qthRiseEvent.date;
+            const qthSet = qthSetEvent.date;
+            const dxRise = dxRiseEvent.date;
+            const dxSet = dxSetEvent.date;
 
-                                                    // Keep only the events that belong to the selected day (or spill into it)
-                                                    const isOurDay = d => d.toISOString().slice(0,10) === targetDateStr;
+            const isSameDay = (date) => date.toISOString().slice(0, 10) === targetDateStr;
 
-                                                    if (r1 && isOurDay(r1.date)) qthRise = r1.date;
-                                                    if (s1 && isOurDay(s1.date)) qthSet  = s1.date;
-                                                    if (r2 && isOurDay(r2.date)) dxRise  = r2.date;
-                                                    if (s2 && isOurDay(s2.date)) dxSet   = s2.date;
+            if (isSameDay(qthRise) && isSameDay(qthSet) && isSameDay(dxRise) && isSameDay(dxSet)) {
+                // Sked start is the later of the two rise times
+                skedStartTime = qthRise > dxRise ? qthRise : dxRise;
+                // Sked end is the earlier of the two set times
+                skedEndTime = qthSet < dxSet ? qthSet : dxSet;
+            }
+        }
 
-                                                    // Also accept events that happen just before/after midnight of the selected day
-                                                    const prevDay = new Date(targetDateStr);
-                                                    prevDay.setDate(prevDay.getDate()-1);
-                                                    const nextDay = new Date(targetDateStr);
-                                                    nextDay.setDate(nextDay.getDate()+1);
-                                                    const prevStr = prevDay.toISOString().slice(0,10);
-                                                    const nextStr = nextDay.toISOString().slice(0,10);
-
-                                                    if (!qthRise && r1 && r1.date.toISOString().slice(0,10) === prevStr) qthRise = r1.date;
-                                                    if (!qthSet  && s1 && s1.date.toISOString().slice(0,10) === nextStr) qthSet  = s1.date;
-                                                    if (!dxRise  && r2 && r2.date.toISOString().slice(0,10) === prevStr) dxRise  = r2.date;
-                                                    if (!dxSet   && s2 && s2.date.toISOString().slice(0,10) === nextStr) dxSet   = s2.date;
-
-                                                } catch(e) {
-                                                    console.warn("Sked annotation error:", e);
-                                                }
-
-                                                // -------------------------------------------------------
-                                                // Build list of common windows (can be 0-2 per day)
-                                                // -------------------------------------------------------
-                                                const windows = [];
-
-                                                if (qthRise && qthSet && dxRise && dxSet) {
-                                                    const starts = [qthRise, dxRise].sort((a,b)=>a-b);
-                                                    const ends   = [qthSet,  dxSet ].sort((a,b)=>a-b);
-
-                                                    // First possible window
-                                                    const win1Start = starts[1];           // later rise
-                                                    const win1End   = ends[0];            // earlier set
-                                                    if (win1Start < win1End) {
-                                                        windows.push({start: win1Start, end: win1End});
-                                                    }
-
-                                                    // Second possible window (when one station has moon all night)
-                                                    // – the moon sets at one station after the other has already risen again
-                                                    if (ends[0] < starts[1] && qthRise < dxSet && dxRise < qthSet) {
-                                                        // very rare, but technically possible on extreme latitudes
-                                                        const win2Start = Math.max(qthRise, dxRise);
-                                                        const win2End   = Math.min(qthSet,  dxSet);
-                                                        if (win2Start < win2End) windows.push({start: win2Start, end: win2End});
-                                                    }
-                                                }
-
-                                                // -------------------------------------------------------
-                                                // Draw the windows
-                                                // -------------------------------------------------------
-                                                windows.forEach((win, i) => {
-                                                    const startIdx = timeToChartIndex(win.start);
-                                                    const endIdx   = timeToChartIndex(win.end);
-
-                                                    if (startIdx === null || endIdx === null) return;
-
-                                                    // Green transparent box for the whole window
-                                                    annotations[`skedBox${i}`] = {
-                                                        type: 'box',
-                                                        xScaleID: 'x',
-                                                        xMin: startIdx,
-                                                        xMax: endIdx,
-                                                        backgroundColor: 'rgba(0, 200, 0, 0.25)',
-                                                        borderColor: 'rgba(0, 150, 0, 0.8)',
-                                                        borderWidth: 1,
-                                                        label: { enabled: false }
-                                                    };
-
-                                                    // Start line + label
-                                                    annotations[`skedStart${i}`] = {
-                                                        type: 'line',
-                                                        mode: 'vertical',
-                                                        scaleID: 'x',
-                                                        value: startIdx,
-                                                        borderColor: '#00C000',
-                                                        borderWidth: 2,
-                                                        label: {
-                                                            content: [`Sked start`, formatTimeUTC(win.start)],
-                                                            enabled: true,
-                                                            position: 'top',
-                                                            backgroundColor: 'rgba(0, 180, 0, 0.9)',
-                                                            color: 'white',
-                                                            font: { size: 11, weight: 'bold' },
-                                                            padding: 4,
-                                                            cornerRadius: 4
-                                                        }
-                                                    };
-
-                                                    // End line + label
-                                                    annotations[`skedEnd${i}`] = {
-                                                        type: 'line',
-                                                        mode: 'vertical',
-                                                        scaleID: 'x',
-                                                        value: endIdx,
-                                                        borderColor: '#00C000',
-                                                        borderWidth: 2,
-                                                        label: {
-                                                            content: [`Sked end`, formatTimeUTC(win.end)],
-                                                            enabled: true,
-                                                            position: 'top',
-                                                            backgroundColor: 'rgba(0, 180, 0, 0.9)',
-                                                            color: 'white',
-                                                            font: { size: 11, weight: 'bold' },
-                                                            padding: 4,
-                                                            cornerRadius: 4
-                                                        }
-                                                    };
-                                                });
-
-                                                return annotations;
-                                            }
+        // No annotations for sked start/end as per user request
+        return annotations;
+    }
 
     document.getElementById("hour").addEventListener("input", () => {
         hourIndex = parseInt(document.getElementById("hour").value);
