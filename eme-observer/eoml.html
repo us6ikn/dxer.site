@@ -3129,7 +3129,6 @@
                                                         qthMarker = L.marker([lat, lon])
                                                             .addTo(map)
                                                             .bindPopup(`My Locator: ${locator}`);
-
                                                     }
                                                 } else {
                                                     document.getElementById("chartWrapper").style.display = "none";
@@ -3183,12 +3182,10 @@
                                                     if (dxMarker) {
                                                         dxMarker.setLatLng([lat, lon]);
                                                     } else {
-                                                        dxMarker = L.circleMarker([lat, lon], {
-                                                            radius: 5,
-                                                            color: 'blue',
-                                                            fillColor: 'blue',
-                                                            fillOpacity: 1
-                                                        }).addTo(map).bindPopup('DX Locator');
+                                                        dxMarker = L.marker([lat, lon])
+                                                            .addTo(map)
+                                                            .bindPopup(`DX Locator: ${dxLocator}`);
+
                                                     }
                                                 } else {
                                                     document.getElementById("dxChartWrapper").style.display = "none";
