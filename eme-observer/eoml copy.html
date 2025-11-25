@@ -3080,17 +3080,6 @@
     const qthInputElem = document.getElementById("qth");
     const dxInputElem = document.getElementById("dx");
 
-    function getCurrentIndex() {
-      if (isRealTimeMode) {
-        const now = new Date();
-        const hour = now.getUTCHours();
-        const minute = now.getUTCMinutes();
-        return hour * 12 + (minute / 5);
-      } else {
-        return hourIndex;
-      }
-    }
-
                                             qthInputElem.addEventListener("input", () => {
                                                 const locator = qthInputElem.value.trim().toUpperCase();
                                                 const chartLabel = document.getElementById('chartLabel');
@@ -3111,7 +3100,7 @@
                                                             chartLabel.innerHTML = '<span class="metric-locator">No data for QTH</span>';
                                                         } else {
                                                             setTimeout(() => {
-                                                                updateChart(getCurrentIndex(), isRealTimeMode);
+                                                                updateChart(hourIndex, isRealTimeMode);
                                                             }, 0);
                                                         }
                                                     } catch (e) {
@@ -3155,7 +3144,7 @@
                                                             dxChartLabel.innerHTML = '<span class="metric-locator">No data for DX</span>';
                                                         } else {
                                                             setTimeout(() => {
-                                                                updateChart(getCurrentIndex(), isRealTimeMode);
+                                                                updateChart(hourIndex, isRealTimeMode);
                                                             }, 0);
                                                         }
                                                     } catch (e) {
