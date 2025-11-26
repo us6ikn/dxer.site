@@ -2983,7 +2983,7 @@
     }
 
                                             function getCommonWindows(qthLoc, dxLoc, dateStr) {
-
+                                                // Validation
                                                 if (!qthLoc || !dxLoc ||
                                                     !/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthLoc) ||
                                                     !/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxLoc)) {
@@ -2991,61 +2991,146 @@
                                                 }
 
                                                 const MS_DAY = 24 * 60 * 60 * 1000;
-
                                                 const qth = qthToLatLon(qthLoc);
                                                 const dx  = qthToLatLon(dxLoc);
-
                                                 const qthObs = new Astronomy.Observer(qth.lat, qth.lon, 0);
                                                 const dxObs  = new Astronomy.Observer(dx.lat,  dx.lon,  0);
 
+                                                // UTC day boundaries
                                                 const dayStartDate = new Date(`${dateStr}T00:00:00Z`);
                                                 const dayStart = dayStartDate.getTime();
                                                 const dayEnd   = dayStart + MS_DAY;
 
-                                                const timeRef = Astronomy.MakeTime(dayStartDate);
-
-                                                let qthRise, qthSet, dxRise, dxSet;
-
-                                                try {
-                                                    qthRise = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, +1, timeRef, 2.0)?.date;
-                                                    qthSet  = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, -1, timeRef, 2.0)?.date;
-                                                    dxRise  = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  +1, timeRef, 2.0)?.date;
-                                                    dxSet   = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  -1, timeRef, 2.0)?.date;
-                                                } catch (e) {
-                                                    console.warn("Rise/set search failed:", e);
-                                                    return [];
-                                                }
-
-                                                if (!qthRise || !qthSet || !dxRise || !dxSet) return [];
-
-                                                // Normalize intervals (rise < set)
-                                                const normalize = (riseDate, setDate) => {
-                                                    let rise = new Date(riseDate);
-                                                    let set  = new Date(setDate);
-                                                    if (set <= rise) set = new Date(set.getTime() + MS_DAY);
-                                                    return { rise, set };
+                                                // Helper to safely call SearchRiseSet and return Date or null
+                                                const searchEvent = (body, obs, direction, timeObj) => {
+                                                    try {
+                                                        return Astronomy.SearchRiseSet(body, obs, direction, timeObj, 2.0)?.date || null;
+                                                    } catch (e) {
+                                                        // on failure return null to allow graceful fallback
+                                                        console.warn("SearchRiseSet error:", e);
+                                                        return null;
+                                                    }
                                                 };
 
-                                                const qthPair = normalize(qthRise, qthSet);
-                                                const dxPair  = normalize(dxRise, dxSet);
+                                                // Collect several rises and sets around the day for an observer.
+                                                // We take events from (dayStart - 1d) up to (dayEnd + 1d) by repeatedly asking
+                                                // for the next rise (direction +1) and next set (direction -1).
+                                                const collectEventsForObserver = (obs) => {
+                                                    const events = []; // {type: 'rise'|'set', date: Date}
 
-                                                // Compute full overlap (NO CLAMPING)
-                                                const overlapStart = new Date(Math.max(qthPair.rise, dxPair.rise));
-                                                const overlapEnd   = new Date(Math.min(qthPair.set,  dxPair.set));
+                                                    // collect rises: start search from dayStart - 1 day
+                                                    let t = new Date(dayStart - MS_DAY);
+                                                    for (let i = 0; i < 6; i++) { // 6 gives ample coverage across boundaries
+                                                        const tm = Astronomy.MakeTime(t);
+                                                        const r = searchEvent(Astronomy.Body.Moon, obs, +1, tm);
+                                                        if (!r) break;
+                                                        events.push({ type: 'rise', date: new Date(r) });
+                                                        // advance just past this rise to find the next one
+                                                        t = new Date(r.getTime() + 1000);
+                                                        // stop if we've gathered well past the day end
+                                                        if (t.getTime() > dayEnd + MS_DAY) break;
+                                                    }
 
-                                                if (overlapStart >= overlapEnd) return [];
+                                                    // collect sets similarly
+                                                    t = new Date(dayStart - MS_DAY);
+                                                    for (let i = 0; i < 6; i++) {
+                                                        const tm = Astronomy.MakeTime(t);
+                                                        const s = searchEvent(Astronomy.Body.Moon, obs, -1, tm);
+                                                        if (!s) break;
+                                                        events.push({ type: 'set', date: new Date(s) });
+                                                        t = new Date(s.getTime() + 1000);
+                                                        if (t.getTime() > dayEnd + MS_DAY) break;
+                                                    }
 
-                                                // Calculate day offsets for display
-                                                const offsetFor = (t) =>
-                                                    (t < dayStart ? -1 : (t >= dayEnd ? +1 : 0));
+                                                    // Sort events chronologically
+                                                    events.sort((a, b) => a.date.getTime() - b.date.getTime());
 
-                                                return [{
-                                                    start: overlapStart,
-                                                    end:   overlapEnd,
-                                                    dayOffsetStart: offsetFor(overlapStart.getTime()),
-                                                    dayOffsetEnd:   offsetFor(overlapEnd.getTime())
-                                                }];
+                                                    // Pair rises with the next set to generate moon-up intervals.
+                                                    // We allow that the very first event could be a 'set' (meaning the rise was earlier),
+                                                    // in which case we try to locate a preceding rise from our collected rises.
+                                                    const risesOnly = events.filter(e => e.type === 'rise').map(e => e.date.getTime());
+                                                    const setsOnly  = events.filter(e => e.type === 'set').map(e => e.date.getTime());
+
+                                                    // Build event stream from merged sorted list (we already have 'events')
+                                                    const intervals = [];
+                                                    let currentRise = null;
+
+                                                    for (const ev of events) {
+                                                        if (ev.type === 'rise') {
+                                                            // start new interval if none open
+                                                            if (!currentRise) currentRise = ev.date;
+                                                            // if a rise occurs while one is already open, ignore duplicate/malformed rises
+                                                        } else { // ev.type === 'set'
+                                                            if (currentRise) {
+                                                                // normal case: we have a rise followed by a set
+                                                                const rise = new Date(currentRise.getTime());
+                                                                const set  = new Date(ev.date.getTime());
+                                                                if (set.getTime() > rise.getTime()) {
+                                                                    intervals.push({ start: rise, end: set });
+                                                                }
+                                                                currentRise = null;
+                                                            } else {
+                                                                // set without a recorded rise in the scanned window:
+                                                                // try to find the nearest earlier rise (from risesOnly) that is < set
+                                                                // This handles the case "rise yesterday, set today (start before our window)"
+                                                                const earlierRises = risesOnly.filter(rt => rt < ev.date.getTime());
+                                                                if (earlierRises.length > 0) {
+                                                                    const riseTs = earlierRises[earlierRises.length - 1];
+                                                                    intervals.push({ start: new Date(riseTs), end: new Date(ev.date) });
+                                                                } else {
+                                                                    // nothing we can pair — skip
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+
+                                                    // If a rise remained open at the end, attempt to find its matching set (should be in setsOnly)
+                                                    if (currentRise) {
+                                                        const futureSets = setsOnly.filter(st => st > currentRise.getTime());
+                                                        if (futureSets.length > 0) {
+                                                            intervals.push({ start: new Date(currentRise.getTime()), end: new Date(futureSets[0]) });
+                                                            currentRise = null;
+                                                        }
+                                                    }
+
+                                                    // Finally filter intervals to those that actually overlap the requested UTC day
+                                                    const overlapsDay = iv => (iv.start.getTime() < dayEnd) && (iv.end.getTime() > dayStart);
+                                                    return intervals.filter(overlapsDay);
+                                                };
+
+                                                const qthIntervals = collectEventsForObserver(qthObs); // array of {start, end}
+                                                const dxIntervals  = collectEventsForObserver(dxObs);
+
+                                                // If either has no intervals that touch the day, no common window
+                                                if (!qthIntervals.length || !dxIntervals.length) return [];
+
+                                                // Intersect the two interval lists to produce all overlapping windows
+                                                const windows = [];
+                                                for (const a of qthIntervals) {
+                                                    for (const b of dxIntervals) {
+                                                        const s = Math.max(a.start.getTime(), b.start.getTime());
+                                                        const e = Math.min(a.end.getTime(),   b.end.getTime());
+                                                        if (s < e) {
+                                                            // compute day offsets relative to the requested day for display
+                                                            const offsetForTs = (ts) => (ts < dayStart ? -1 : (ts >= dayEnd ? +1 : 0));
+                                                            const startDate = new Date(s);
+                                                            const endDate   = new Date(e);
+                                                            windows.push({
+                                                                start: startDate,
+                                                                end:   endDate,
+                                                                dayOffsetStart: offsetForTs(s),
+                                                                dayOffsetEnd:   offsetForTs(e)
+                                                            });
+                                                        }
+                                                    }
+                                                }
+
+                                                // Sort windows by start time for convenience
+                                                windows.sort((A, B) => A.start.getTime() - B.start.getTime());
+
+                                                return windows;
                                             }
+
 
 
                                             
