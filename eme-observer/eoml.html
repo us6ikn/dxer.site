@@ -2993,18 +2993,17 @@
                                                 const qthObs = new Astronomy.Observer(qth.lat, qth.lon, 0);
                                                 const dxObs  = new Astronomy.Observer(dx.lat,  dx.lon,  0);
 
-                                                // Start search from 12 hours before the selected day to catch early rise/set
-                                                const searchStart = Astronomy.MakeTime(new Date(`${dateStr}T00:00:00Z`));
-                                                searchStart.AddHours(-12);
+                                                // Start searching from 12 hours before midnight of the selected day
+                                                const midnight = Astronomy.MakeTime(new Date(`${dateStr}T00:00:00Z`));
+                                                const searchStart = midnight.AddDays(-0.5);  // ← This is the correct way!
 
                                                 let qthRise = null, qthSet = null, dxRise = null, dxSet = null;
 
                                                 try {
-                                                    // Find next rise and next set after searchStart
-                                                    const qr = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, +1, searchStart, 2.0);
-                                                    const qs = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, -1, searchStart, 2.0);
-                                                    const dr = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  +1, searchStart, 2.0);
-                                                    const ds = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  -1, searchStart, 2.0);
+                                                    const qr = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, +1, searchStart, 3.0);
+                                                    const qs = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, -1, searchStart, 3.0);
+                                                    const dr = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  +1, searchStart, 3.0);
+                                                    const ds = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  -1, searchStart, 3.0);
 
                                                     qthRise = qr?.date;
                                                     qthSet  = qs?.date;
@@ -3025,7 +3024,7 @@
                                                         const dayStart = new Date(`${dateStr}T00:00:00Z`).getTime();
                                                         const dayEnd   = dayStart + 24 * 60 * 60 * 1000;
 
-                                                        // Keep window if any part overlaps with the selected day
+                                                        // Keep window if any part overlaps the selected day
                                                         if (commonEnd.getTime() > dayStart && commonStart.getTime() < dayEnd) {
                                                             windows.push({ start: commonStart, end: commonEnd });
                                                         }
