@@ -2954,51 +2954,56 @@
                                                     const startTime = w.start.getTime();
                                                     const endTime   = w.end.getTime();
 
-                                                    const position = i % 2 === 0 ? 'top' : 'bottom';
-                                                    const yAdjust  = i % 1 === 0 ? -4 : 4;
+                                                    // Base vertical position per window (alternates top/bottom for multiple windows)
+                                                    const basePosition = i % 2 === 0 ? 'top' : 'bottom';
 
-                                                    // === START LINE: only if inside today ===
+                                                    // Start label: always slightly above the line
                                                     if (startTime >= dayStart && startTime <= dayEnd) {
                                                         annotations[`skedStart${i}`] = {
                                                             type: 'line',
                                                             scaleID: 'x',
                                                             value: index(w.start),
-                                                            borderColor: 'rgba(0,200,0,0.95)',
+                                                            borderColor: 'rgba(0, 220, 0, 0.95)',
                                                             borderWidth: 1,
                                                             borderDash: [8, 5],
                                                             label: {
                                                                 content: format(w.start),
                                                                 enabled: true,
-                                                                position: position,
-                                                                yAdjust: yAdjust,
-                                                                backgroundColor: 'rgba(0,140,0,0.92)',
-                                                                color: '#fff',
-                                                                font: { size: 10.5, weight: 'bold' },
-                                                                padding: 4,
-                                                                cornerRadius: 4
+                                                                position: basePosition,
+                                                                yAdjust: basePosition === 'top' ? -8 : 8,        // Push further away
+                                                                backgroundColor: 'rgba(0, 140, 0, 0.95)',
+                                                                color: '#ffffff',
+                                                                font: { size: 11, weight: 'bold', family: 'Arial, sans-serif' },
+                                                                padding: { top: 4, bottom: 4, left: 6, right: 6 },
+                                                                cornerRadius: 5,
+                                                                borderWidth: 1,
+                                                                borderColor: 'rgba(255,255,255,0.3)'
                                                             }
                                                         };
                                                     }
 
-                                                    // === END LINE: only if inside today ===
+                                                    // End label: always slightly below the line (opposite side of start)
                                                     if (endTime >= dayStart && endTime <= dayEnd) {
+                                                        const endPosition = basePosition === 'top' ? 'bottom' : 'top';  // opposite side
                                                         annotations[`skedEnd${i}`] = {
                                                             type: 'line',
                                                             scaleID: 'x',
                                                             value: index(w.end),
-                                                            borderColor: 'rgba(220,0,0,0.95)',
+                                                            borderColor: 'rgba(230, 0, 0, 0.95)',
                                                             borderWidth: 1,
                                                             borderDash: [8, 5],
                                                             label: {
                                                                 content: format(w.end),
                                                                 enabled: true,
-                                                                position: position,
-                                                                yAdjust: yAdjust,
-                                                                backgroundColor: 'rgba(180,0,0,0.92)',
-                                                                color: '#fff',
-                                                                font: { size: 10.5, weight: 'bold' },
-                                                                padding: 4,
-                                                                cornerRadius: 4
+                                                                position: endPosition,
+                                                                yAdjust: endPosition === 'top' ? -8 : 8,
+                                                                backgroundColor: 'rgba(180, 0, 0, 0.95)',
+                                                                color: '#ffffff',
+                                                                font: { size: 11, weight: 'bold', family: 'Arial, sans-serif' },
+                                                                padding: { top: 4, bottom: 4, left: 6, right: 6 },
+                                                                cornerRadius: 5,
+                                                                borderWidth: 1,
+                                                                borderColor: 'rgba(255,255,255,0.3)'
                                                             }
                                                         };
                                                     }
