@@ -2983,31 +2983,36 @@
     }
 
                                             function getCommonWindows(qthLoc, dxLoc, dateStr) {
+
+                                                // --- Validate QTH / DX ---------------------------------------------------
                                                 if (!qthLoc || !dxLoc ||
                                                     !/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthLoc) ||
                                                     !/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxLoc)) {
                                                     return [];
                                                 }
 
+                                                const MS_DAY = 24 * 60 * 60 * 1000;
+
+                                                // --- Convert locators ----------------------------------------------------
                                                 const qth = qthToLatLon(qthLoc);
                                                 const dx  = qthToLatLon(dxLoc);
 
                                                 const qthObs = new Astronomy.Observer(qth.lat, qth.lon, 0);
                                                 const dxObs  = new Astronomy.Observer(dx.lat,  dx.lon,  0);
-                                                const time   = Astronomy.MakeTime(new Date(`${dateStr}T00:00:00Z`));
 
-                                                let qthRise = null, qthSet = null, dxRise = null, dxSet = null;
+                                                // Reference = start of the given UTC day
+                                                const dayStartDate = new Date(`${dateStr}T00:00:00Z`);
+                                                const dayStart = dayStartDate.getTime();
+                                                const dayEnd   = dayStart + MS_DAY;
+                                                const timeRef  = Astronomy.MakeTime(dayStartDate);
 
+                                                // --- Fetch next rise/set relative to day start ---------------------------
+                                                let qthRise, qthSet, dxRise, dxSet;
                                                 try {
-                                                    qthRise = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, +1, time, 2.0)?.date;
-                                                    qthSet  = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, -1, time, 2.0)?.date;
-                                                    dxRise  = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  +1, time, 2.0)?.date;
-                                                    dxSet   = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  -1, time, 2.0)?.date;
-                                                    console.log("qthRise UTC:", qthRise.toISOString());
-                                                    console.log("qthSet UTC:", qthSet.toISOString());
-                                                    console.log("dxRise UTC:", dxRise.toISOString());
-                                                    console.log("dxSet UTC:", dxSet.toISOString());
-
+                                                    qthRise = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, +1, timeRef, 2.0)?.date;
+                                                    qthSet  = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, -1, timeRef, 2.0)?.date;
+                                                    dxRise  = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  +1, timeRef, 2.0)?.date;
+                                                    dxSet   = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  -1, timeRef, 2.0)?.date;
                                                 } catch (e) {
                                                     console.warn("Rise/set search failed:", e);
                                                     return [];
@@ -3015,30 +3020,48 @@
 
                                                 if (!qthRise || !qthSet || !dxRise || !dxSet) return [];
 
-                                                const dayStart = new Date(`${dateStr}T00:00:00Z`).getTime();
-                                                const dayEnd   = dayStart + 24*60*60*1000;
+                                                // --- Normalize rise/set to guaranteed chronological order ----------------
+                                                const normalizePair = (riseDate, setDate) => {
+                                                    let rise = new Date(riseDate.getTime());
+                                                    let set  = new Date(setDate.getTime());
 
-                                                const overlapsDay = (rise, set) => rise.getTime() < dayEnd && set.getTime() > dayStart;
-
-                                                let commonStart = null;
-                                                let commonEnd   = null;
-
-                                                if (overlapsDay(qthRise, qthSet) && overlapsDay(dxRise, dxSet)) {
-                                                    commonStart = new Date(Math.max(qthRise.getTime(), dxRise.getTime()));
-                                                    commonEnd   = new Date(Math.min(qthSet.getTime(),  dxSet.getTime()));
-
-                                                    if (commonStart >= commonEnd) {
-                                                        commonStart = commonEnd = null;
+                                                    // If set happens earlier in UTC than rise, set must belong to next day
+                                                    if (set.getTime() <= rise.getTime()) {
+                                                        set = new Date(set.getTime() + MS_DAY);
                                                     }
-                                                }
 
-                                                const windows = [];
-                                                if (commonStart && commonEnd) {
-                                                    windows.push({ start: commonStart, end: commonEnd });
+                                                    return { rise, set };
+                                                };
+
+                                                const qthPair = normalizePair(qthRise, qthSet);
+                                                const dxPair  = normalizePair(dxRise, dxSet);
+
+                                                // --- Interval overlap helper --------------------------------------------
+                                                const overlapsDay = (rise, set) =>
+                                                    (rise.getTime() < dayEnd) && (set.getTime() > dayStart);
+
+                                                let windows = [];
+
+                                                // Both stations must have some "moon up" time that overlaps this UTC day
+                                                if (overlapsDay(qthPair.rise, qthPair.set) &&
+                                                    overlapsDay(dxPair.rise, dxPair.set)) {
+
+                                                    // Compute the true intersection of their intervals
+                                                    const start = Math.max(qthPair.rise.getTime(), dxPair.rise.getTime());
+                                                    const end   = Math.min(qthPair.set.getTime(),  dxPair.set.getTime());
+
+                                                    if (start < end) {
+                                                        // Clamp to UTC day boundaries
+                                                        const commonStart = new Date(Math.max(start, dayStart));
+                                                        const commonEnd   = new Date(Math.min(end,   dayEnd));
+
+                                                        windows.push({ start: commonStart, end: commonEnd });
+                                                    }
                                                 }
 
                                                 return windows;
                                             }
+
                                             
     document.getElementById("hour").addEventListener("input", () => {
         hourIndex = parseInt(document.getElementById("hour").value);
