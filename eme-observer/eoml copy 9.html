@@ -1914,16 +1914,15 @@
 
       // Relative current
       let currentRelRate = null, currentRelDoppler = null, currentPolOffset = null;
-      // Relative current (for label) – uses interpolation on full 288-point data
       if (qthValid && dxValid) {
-          const floorIdx = Math.floor(index);
-          const ceilIdx = Math.ceil(index);
-          const frac = index - floorIdx;
-          const relFloor = computeRelativeAtIndex(floorIdx, qthDayData, dxDayData);
-          const relCeil = computeRelativeAtIndex(ceilIdx, qthDayData, dxDayData);
-          currentRelRate = interpolate(relFloor.libration * 1000, relCeil.libration * 1000, frac);
-          currentRelDoppler = interpolate(relFloor.doppler, relCeil.doppler, frac);
-          currentPolOffset = interpolate(relFloor.pol, relCeil.pol, frac);
+        const floorIdx = Math.floor(index);
+        const ceilIdx = Math.ceil(index);
+        const frac = index - floorIdx;
+        const relFloor = computeRelativeAtIndex(floorIdx, qthDayData, dxDayData);
+        const relCeil = computeRelativeAtIndex(ceilIdx, qthDayData, dxDayData);
+        currentRelRate = interpolate(relFloor.libration * 1000, relCeil.libration * 1000, frac);
+        currentRelDoppler = interpolate(relFloor.doppler, relCeil.doppler, frac);
+        currentPolOffset = interpolate(relFloor.pol, relCeil.pol, frac);
       }
 
       // Chart data from caches
@@ -1935,30 +1934,24 @@
       const dxElevs = dxDayData.elevations || Array(288).fill(null);
       const dxDopps = dxDayData.dopplers || Array(288).fill(null);
 
-      // === RELATIVE CHART DATA – ALWAYS 5-MINUTE RESOLUTION (288 points) ===
       let relLibrations = Array(288).fill(null);
       let relDopplers = Array(288).fill(null);
       let polOffsets = Array(288).fill(null);
-
-      if (qthValid && dxValid) {
-          // Always recompute at full 5-minute resolution
-          // (removes the old date-check that caused 30-min stepping)
-          for (let i = 0; i < 288; i++) {
-              const rel = computeRelativeAtIndex(i, qthDayData, dxDayData);
-              relLibrations[i] = rel.libration ? rel.libration * 1000 : null;
-              relDopplers[i] = rel.doppler;
-              polOffsets[i] = rel.pol;
-          }
-          // Update cache so we don't recompute unnecessarily on slider move
-          relDayData.date = dateStr;
-          relDayData.libration = relLibrations;
-          relDayData.dopplers = relDopplers;
-          relDayData.polOffsets = polOffsets;
-      } else if (relDayData.date === dateStr) {
-          // Reuse cached full-resolution data
-          relLibrations = relDayData.libration;
-          relDopplers = relDayData.dopplers;
-          polOffsets = relDayData.polOffsets;
+      if (qthValid && dxValid && relDayData.date !== dateStr) {
+        for (let i = 0; i < 288; i++) {
+          const rel = computeRelativeAtIndex(i, qthDayData, dxDayData);
+          relLibrations[i] = rel.libration ? rel.libration * 1000 : null;
+          relDopplers[i] = rel.doppler;
+          polOffsets[i] = rel.pol;
+        }
+        relDayData.date = dateStr;
+        relDayData.libration = relLibrations;
+        relDayData.dopplers = relDopplers;
+        relDayData.polOffsets = polOffsets;
+      } else if (qthValid && dxValid) {
+        relLibrations = relDayData.libration;
+        relDopplers = relDayData.dopplers;
+        polOffsets = relDayData.polOffsets;
       }
 
       const labels = Array(288).fill('').map((_, i) => {
