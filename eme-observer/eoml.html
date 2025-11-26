@@ -3000,13 +3000,14 @@
 
                                                 try {
                                                     qthRise = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, +1, time, 2.0)?.date;
-                                                    console.log(qthRise);
                                                     qthSet  = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, -1, time, 2.0)?.date;
-                                                    console.log(qthSet);
                                                     dxRise  = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  +1, time, 2.0)?.date;
-                                                    console.log(dxRise);
                                                     dxSet   = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  -1, time, 2.0)?.date;
-                                                    console.log(dxSet);
+                                                    console.log("qthRise UTC:", qthRise.toISOString());
+                                                    console.log("qthSet UTC:", qthSet.toISOString());
+                                                    console.log("dxRise UTC:", dxRise.toISOString());
+                                                    console.log("dxSet UTC:", dxSet.toISOString());
+
                                                 } catch (e) {
                                                     console.warn("Rise/set search failed:", e);
                                                     return [];
