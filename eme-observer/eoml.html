@@ -2398,6 +2398,7 @@
       const exactTime = isRealtime ? new Date() : new Date(`${dateStr}T${Math.floor(index / 12).toString().padStart(2, '0')}:${String((index % 12) * 5).padStart(2, '0')}:00Z`);
       updateMap(exactTime);
       updateMoonChart(exactTime);
+      if (dxMarker) updateDxPopup();   // ← This is the missing piece!
     }
 
                                             function startRealTimeUpdates() {
