@@ -2389,10 +2389,6 @@
         }
         document.getElementById('relativeChartLabel').innerHTML = '<span class="metric-locator">Enter valid QTH and DX</span>';
       }
-      // At the very end, just before the final map/moon updates:
-              if (qthValid && dxValid) {
-                  setTimeout(updateDxPopup, 0);
-              }
 
       // Update map and moon chart with exact time
       const exactTime = isRealtime ? new Date() : new Date(`${dateStr}T${Math.floor(index / 12).toString().padStart(2, '0')}:${String((index % 12) * 5).padStart(2, '0')}:00Z`);
@@ -2463,7 +2459,6 @@
                                                 }
                                                 updateChart(fractionalIndex, true);
                                                 updateQthPopup();
-                                                updateDxPopup();                 // ← added
                                             }
     
     function decodeEmail(obfuscated) {
@@ -2981,54 +2976,6 @@
         return annotations;
     }
 
-                                            function getCommonWindows(qthLoc, dxLoc, dateStr) {
-                                                    if (!qthLoc || !dxLoc || !/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthLoc) || !/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxLoc)) {
-                                                        return [];
-                                                    }
-
-                                                    const qth = qthToLatLon(qthLoc);
-                                                    const dx  = qthToLatLon(dxLoc);
-
-                                                    const qthObs = new Astronomy.Observer(qth.lat, qth.lon, 0);
-                                                    const dxObs  = new Astronomy.Observer(dx.lat,  dx.lon,  0);
-                                                    const time   = Astronomy.MakeTime(new Date(`${dateStr}T00:00:00Z`));
-
-                                                    let qthRise, qthSet, dxRise, dxSet;
-                                                    try {
-                                                        qthRise = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, +1, time, 1.0)?.date;
-                                                        qthSet  = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, -1, time, 1.0)?.date;
-                                                        dxRise  = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  +1, time, 1.0)?.date;
-                                                        dxSet   = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  -1, time, 1.0)?.date;
-                                                    } catch(e) { return []; }
-
-                                                    const windows = [];
-
-                                                    const addWindow = (start, end) => {
-                                                        if (start && end && start < end) windows.push({start, end});
-                                                    };
-
-                                                    const target = dateStr;
-
-                                                    // Most common case – all four events on the selected day
-                                                    if (qthRise?.toISOString().slice(0,10) === target &&
-                                                        qthSet?.toISOString().slice(0,10)  === target &&
-                                                        dxRise?.toISOString().slice(0,10)  === target &&
-                                                        dxSet?.toISOString().slice(0,10)   === target) {
-
-                                                        const commonStart = qthRise > dxRise ? qthRise : dxRise;
-                                                        const commonEnd   = qthSet  < dxSet  ? qthSet  : dxSet;
-                                                        addWindow(commonStart, commonEnd);
-                                                    }
-                                                    // Fallback – at least try to intersect whatever we have
-                                                    else if (qthRise && qthSet && dxRise && dxSet) {
-                                                        const s = qthRise > dxRise ? qthRise : dxRise;
-                                                        const e = qthSet  < dxSet  ? qthSet  : dxSet;
-                                                        addWindow(s, e);
-                                                    }
-
-                                                    return windows;
-                                                }
-                                            
     document.getElementById("hour").addEventListener("input", () => {
         hourIndex = parseInt(document.getElementById("hour").value);
         const hour = Math.floor(hourIndex / 12);
@@ -3070,7 +3017,6 @@
                                                 }
                                                 updateChart(hourIndex, false);
                                                 setTimeout(updateQthPopup, 0);  // Update after computations
-                                                setTimeout(updateDxPopup,  0);   // ← added
                                             });
 
                                             window.onload = () => {
@@ -3203,7 +3149,6 @@
                                                     }
                                                 }
                                                 setTimeout(updateQthPopup, 0);  // Update after computations
-                                                setTimeout(updateDxPopup,  0);
                                             });
 
                                             dxInputElem.addEventListener("input", () => {
@@ -3246,7 +3191,6 @@
                                                             .addTo(map)
                                                             .bindPopup(`DX Locator: ${locator}`);
                                                     }
-                                                    setTimeout(updateDxPopup, 0);
                                                 } else {
                                                     document.getElementById("dxChartWrapper").style.display = "none";
                                                     if (dxChart) {
@@ -3256,10 +3200,6 @@
                                                     // Invalidate relDayData when DX is invalid
                                                     relDayData.date = null;
                                                     document.getElementById('dxchartLabel').innerHTML = '<span class="metric-locator">Enter valid DX</span>';
-                                                    if (dxMarker) {
-                                                        dxMarker.remove();
-                                                        dxMarker = null;
-                                                    }
                                                     if (dxMarker) {
                                                         dxMarker.remove();
                                                         dxMarker = null;
@@ -3437,50 +3377,6 @@
 
                                                 qthMarker.bindPopup(popupContent);
                                             }
-                                            
-                                            function updateDxPopup() {
-                                                    if (!dxMarker) return;
-
-                                                    const locator = document.getElementById('dx').value.trim().toUpperCase();
-                                                    const dateStr = document.getElementById('date').value;
-
-                                                    if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-                                                        dxMarker.bindPopup(`DX Locator: ${locator} (invalid)`);
-                                                        return;
-                                                    }
-
-                                                    const qthLoc = document.getElementById('qth').value.trim().toUpperCase();
-                                                    const windows = getCommonWindows(qthLoc, locator, dateStr);
-
-                                                    const moonIcon = `<svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:middle;">
-                                                                        <path fill="currentColor" d="M12 2a9.93 9.93 0 0 0-7.06 2.94A10 10 0 1 0 22 12c0-.34-.02-.67-.05-1a8 8 0 0 1-9.95-9z"/>
-                                                                      </svg>`;
-
-                                                    let windowsHTML = '';
-                                                    if (windows.length === 0) {
-                                                        windowsHTML = '<div>No common moon window today</div>';
-                                                    } else {
-                                                        windows.forEach((w, i) => {
-                                                            const start = formatTimeUTC(w.start);
-                                                            const end   = formatTimeUTC(w.end);
-                                                            windowsHTML += `<div>${moonIcon} Window ${i+1}: ${start} – ${end}</div>`;
-                                                        });
-                                                    }
-
-                                                    const jsDate = new Date(`${dateStr}T00:00:00Z`);
-                                                    const dayOfWeek = jsDate.toLocaleString('en-US', {weekday:'long', timeZone:'UTC'});
-
-                                                    const popupContent = `
-                                                        DX Locator: ${locator}<br>
-                                                        <div style="height:4px"></div>
-                                                        ${dayOfWeek} ${dateStr}<br>
-                                                        <div style="height:8px"></div>
-                                                        <strong>Common Moon Windows (both ≥0°)</strong><br>
-                                                        ${windowsHTML}
-                                                    `;
-
-                                                    dxMarker.bindPopup(popupContent);
-                                                }
 
 </script>
 <!-- Ko-Fi -->
