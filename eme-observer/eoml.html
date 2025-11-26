@@ -2940,66 +2940,71 @@
                                                 if (windows.length === 0) return annotations;
 
                                                 const baseDate = new Date(`${dateStr}T00:00:00Z`);
-                                                const baseDay = baseDate.getUTCDate();
+                                                const baseDay  = baseDate.getUTCDate();
 
-                                                function suffixFor(dateObj) {
+                                                function suffix(dateObj) {
                                                     const d = dateObj.getUTCDate();
                                                     if (d === baseDay) return "";
                                                     return d > baseDay ? "(+1)" : "(-1)";
                                                 }
 
-                                                function formatTimeUTC(date) {
-                                                    return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}z`;
+                                                function format(time) {
+                                                    return `${String(time.getUTCHours()).padStart(2,'0')}:${String(time.getUTCMinutes()).padStart(2,'0')}${suffix(time)}`;
                                                 }
 
-                                                function timeToChartIndex(date) {
-                                                    const hours = date.getUTCHours() + date.getUTCMinutes() / 60;
-                                                    return hours * 12;
+                                                function index(time) {
+                                                    return (time.getUTCHours() + time.getUTCMinutes()/60) * 12;
                                                 }
 
-                                                windows.forEach((window, i) => {
-                                                    const startIdx = timeToChartIndex(window.start);
-                                                    const endIdx   = timeToChartIndex(window.end);
+                                                // We will alternate label position (top ↔ bottom) to avoid overlap
+                                                windows.forEach((w, i) => {
+                                                    const startIdx = index(w.start);
+                                                    const endIdx   = index(w.end);
 
-                                                    const startTimeStr = formatTimeUTC(window.start) + suffixFor(window.start);
-                                                    const endTimeStr   = formatTimeUTC(window.end)   + suffixFor(window.end);
+                                                    const startStr = format(w.start);
+                                                    const endStr   = format(w.end);
 
-                                                    // Start line (green)
+                                                    const position = i % 2 === 0 ? 'top' : 'bottom';     // alternate
+                                                    const yAdjust  = i % 2 === 0 ? -4 : 4;               // small offset so they don’t sit exactly on the line
+
+                                                    // Start line – green
                                                     annotations[`skedStart${i}`] = {
                                                         type: 'line',
                                                         scaleID: 'x',
                                                         value: startIdx,
-                                                        borderColor: 'rgba(0, 180, 0, 0.9)',
+                                                        borderColor: 'rgba(0,200,0,0.95)',
                                                         borderWidth: 2,
-                                                        borderDash: [6, 4],
+                                                        borderDash: [8, 5],
                                                         label: {
-                                                            content: `Start ${i+1}: ${startTimeStr}`,
+                                                            content: startStr,
                                                             enabled: true,
-                                                            position: 'top',
-                                                            backgroundColor: 'rgba(0, 140, 0, 0.9)',
-                                                            color: 'white',
-                                                            font: { size: 10, weight: 'bold' },
-                                                            padding: 4,
+                                                            position: position,
+                                                            yAdjust: yAdjust,
+                                                            backgroundColor: 'rgba(0,140,0,0.92)',
+                                                            color: '#fff',
+                                                            font: { size: 10.5, weight: 'bold', family: 'Arial' },
+                                                            padding: { top: 3, bottom: 3, left: 5, right: 5 },
                                                             cornerRadius: 4
                                                         }
                                                     };
 
-                                                    // End line (red)
+                                                    // End line – red
                                                     annotations[`skedEnd${i}`] = {
                                                         type: 'line',
                                                         scaleID: 'x',
                                                         value: endIdx,
-                                                        borderColor: 'rgba(200, 0, 0, 0.9)',
+                                                        borderColor: 'rgba(220,0,0,0.95)',
                                                         borderWidth: 2,
-                                                        borderDash: [6, 4],
+                                                        borderDash: [8, 5],
                                                         label: {
-                                                            content: `End ${i+1}: ${endTimeStr}`,
+                                                            content: endStr,
                                                             enabled: true,
-                                                            position: 'top',
-                                                            backgroundColor: 'rgba(180, 0, 0, 0.9)',
-                                                            color: 'white',
-                                                            font: { size: 10, weight: 'bold' },
-                                                            padding: 4,
+                                                            position: position,
+                                                            yAdjust: yAdjust,
+                                                            backgroundColor: 'rgba(180,0,0,0.92)',
+                                                            color: '#fff',
+                                                            font: { size: 10.5, weight: 'bold', family: 'Arial' },
+                                                            padding: { top: 3, bottom: 3, left: 5, right: 5 },
                                                             cornerRadius: 4
                                                         }
                                                     };
