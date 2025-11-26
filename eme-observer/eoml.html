@@ -2953,64 +2953,61 @@
                                                     return `${String(time.getUTCHours()).padStart(2,'0')}:${String(time.getUTCMinutes()).padStart(2,'0')}`;
                                                 }
 
-                                                function index(time) {
-                                                    return (time.getUTCHours() + time.getUTCMinutes()/60) * 12;
+                                                // CRITICAL: Use precise floating-point index (no truncation!)
+                                                function preciseIndex(time) {
+                                                    const hours = time.getUTCHours();
+                                                    const minutes = time.getUTCMinutes();
+                                                    const seconds = time.getUTCSeconds();
+                                                    return (hours + minutes/60 + seconds/3600) * 12;
                                                 }
 
                                                 windows.forEach((w, i) => {
                                                     const startTime = w.start.getTime();
                                                     const endTime   = w.end.getTime();
 
-                                                    // Base vertical position per window (alternates top/bottom for multiple windows)
                                                     const basePosition = i % 2 === 0 ? 'top' : 'bottom';
 
-                                                    // Start label: always slightly above the line
                                                     if (startTime >= dayStart && startTime <= dayEnd) {
                                                         annotations[`skedStart${i}`] = {
                                                             type: 'line',
                                                             scaleID: 'x',
-                                                            value: index(w.start),
+                                                            value: preciseIndex(w.start),           // ← exact time
                                                             borderColor: 'rgba(0, 220, 0, 0.95)',
-                                                            borderWidth: 1,
+                                                            borderWidth: 2,
                                                             borderDash: [8, 5],
                                                             label: {
                                                                 content: format(w.start),
                                                                 enabled: true,
                                                                 position: basePosition,
-                                                                yAdjust: basePosition === 'top' ? -8 : 8,        // Push further away
-                                                                backgroundColor: 'rgba(0, 140, 0, 0.0)',
-                                                                color: '#008000',
-                                                                font: { size: 11, weight: 'bold', family: 'Arial, sans-serif' },
-                                                                padding: { top: 4, bottom: 4, left: 6, right: 6 },
-                                                                cornerRadius: 5,
-                                                                borderWidth: 1,
-                                                                borderColor: 'rgba(255,255,255,0.3)'
+                                                                yAdjust: basePosition === 'top' ? -8 : 8,
+                                                                backgroundColor: 'rgba(0,140,0,0.92)',
+                                                                color: '#fff',
+                                                                font: { size: 11, weight: 'bold' },
+                                                                padding: 4,
+                                                                cornerRadius: 4
                                                             }
                                                         };
                                                     }
 
-                                                    // End label: always slightly below the line (opposite side of start)
                                                     if (endTime >= dayStart && endTime <= dayEnd) {
-                                                        const endPosition = basePosition === 'top' ? 'bottom' : 'top';  // opposite side
+                                                        const endPosition = basePosition === 'top' ? 'bottom' : 'top';
                                                         annotations[`skedEnd${i}`] = {
                                                             type: 'line',
                                                             scaleID: 'x',
-                                                            value: index(w.end),
+                                                            value: preciseIndex(w.end),             // ← exact time
                                                             borderColor: 'rgba(230, 0, 0, 0.95)',
-                                                            borderWidth: 1,
+                                                            borderWidth: 2,
                                                             borderDash: [8, 5],
                                                             label: {
                                                                 content: format(w.end),
                                                                 enabled: true,
                                                                 position: endPosition,
                                                                 yAdjust: endPosition === 'top' ? -8 : 8,
-                                                                backgroundColor: 'rgba(180, 0, 0, 0.0)',
-                                                                color: '#B31B1B',
-                                                                font: { size: 11, weight: 'bold', family: 'Arial, sans-serif' },
-                                                                padding: { top: 4, bottom: 4, left: 6, right: 6 },
-                                                                cornerRadius: 5,
-                                                                borderWidth: 1,
-                                                                borderColor: 'rgba(255,255,255,0.3)'
+                                                                backgroundColor: 'rgba(180,0,0,0.92)',
+                                                                color: '#fff',
+                                                                font: { size: 11, weight: 'bold' },
+                                                                padding: 4,
+                                                                cornerRadius: 4
                                                             }
                                                         };
                                                     }
@@ -3640,7 +3637,7 @@
                                                     <strong>Common Moon Windows</strong><br>
                                                     ${windowsHTML}
                                                     <div style="height:8px"></div>
-                                                    (-1) and (+1) denote previous and next UTC date, respectively
+                                                    (-1) and (+1) denote previous and next UTC day, respectively
                                                 `;
 
                                                 dxMarker.bindPopup(popupContent);
