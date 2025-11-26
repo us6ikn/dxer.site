@@ -3336,33 +3336,48 @@
         return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}z`;
     }
 
-    // New function to update qthMarker popup
-    function updateQthPopup() {
-        if (!qthMarker) return;
-        
-        const locator = document.getElementById('qth').value.trim().toUpperCase();
-        const dateStr = document.getElementById('date').value;
-        
-        const info = getLocatorInfo(locator, dateStr);
-        if (info.error) {
-            qthMarker.bindPopup(`My Locator: ${locator} (Invalid)`);
-            return;
-        }
-        
-        const popupContent = `
-          My Locator: ${locator}<br>
-          <div style="height:4px"></div>
-          ${info.dayOfWeek} ${info.formattedDate}<br>
-          <div style="height:4px"></div>
-          Moonrise: ${info.moonrise}<br>
-          Moonset: ${info.moonset}<br>
-          <div style="height:4px"></div>
-          Sunrise: ${info.sunrise}<br>
-          Sunset: ${info.sunset}
-        `;
+                                            function updateQthPopup() {
+                                                if (!qthMarker) return;
+                                                
+                                                const locator = document.getElementById('qth').value.trim().toUpperCase();
+                                                const dateStr = document.getElementById('date').value;
 
-        qthMarker.bindPopup(popupContent);
-    }
+                                                const info = getLocatorInfo(locator, dateStr);
+                                                if (info.error) {
+                                                    qthMarker.bindPopup(`My Locator: ${locator} (Invalid)`);
+                                                    return;
+                                                }
+
+                                                const moonIcon = `
+                                                  <svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:middle;">
+                                                    <path fill="currentColor" d="M12 2a9.93 9.93 0 0 0-7.06 2.94A10 10 0 1 0 22 12c0-.34-.02-.67-.05-1a8 8 0 0 1-9.95-9z"/>
+                                                  </svg>
+                                                `;
+
+                                                const sunIcon = `
+                                                  <svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:middle;">
+                                                    <path fill="currentColor" d="M12 4a1 1 0 0 1 1-1h0a1 1 0 1 1-2 0 1 1 0 0 1 1-1zm0 18a1 1 0 0 1 1 1h0a1 1 0 1 1-2 0 1 1 0 0 1 1-1zM4 11a1 1 0 0 1 1-1h0a1 1 0 1 1 0 2 1 1 0 0 1-1-1zm16 0a1 1 0 0 1 1-1h0a1 1 0 1 1 0 2 1 1 0 0 1-1-1zM5.64 5.64a1 1 0 0 1 1.41 0h0a1 1 0 1 1-1.41-1.41 1 1 0 0 1 0 1.41zm12.02 12.02a1 1 0 0 1 1.41 0h0a1 1 0 1 1-1.41 1.41 1 1 0 0 1 0-1.41zM5.64 18.36a1 1 0 0 1 1.41 0h0a1 1 0 1 1-1.41 1.41 1 1 0 0 1 0-1.41zm12.02-12.02a1 1 0 0 1 1.41 0h0a1 1 0 1 1-1.41-1.41 1 1 0 0 1 0 1.41zM12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/>
+                                                  </svg>
+                                                `;
+
+                                                const popupContent = `
+                                                  My Locator: ${locator}<br>
+                                                  <div style="height:4px"></div>
+                                                  ${info.dayOfWeek} ${info.formattedDate}<br>
+                                                  <div style="height:4px"></div>
+
+                                                  ${moonIcon} Moonrise: ${info.moonrise}<br>
+                                                  ${moonIcon} Moonset: ${info.moonset}<br>
+
+                                                  <div style="height:4px"></div>
+
+                                                  ${sunIcon} Sunrise: ${info.sunrise}<br>
+                                                  ${sunIcon} Sunset: ${info.sunset}
+                                                `;
+
+                                                qthMarker.bindPopup(popupContent);
+                                            }
+
 </script>
 <!-- Ko-Fi -->
 <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
