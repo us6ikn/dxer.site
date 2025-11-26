@@ -2992,40 +2992,44 @@
 
                                                 const qthObs = new Astronomy.Observer(qth.lat, qth.lon, 0);
                                                 const dxObs  = new Astronomy.Observer(dx.lat,  dx.lon,  0);
+                                                const time   = Astronomy.MakeTime(new Date(`${dateStr}T00:00:00Z`));
 
-                                                // Start searching from 12 hours before midnight of the selected day
-                                                const midnight = Astronomy.MakeTime(new Date(`${dateStr}T00:00:00Z`));
-                                                const searchStart = midnight.AddDays(-0.5);  // ← This is the correct way!
-
-                                                let qthRise = null, qthSet = null, dxRise = null, dxSet = null;
-
+                                                let qthRise, qthSet, dxRise, dxSet;
                                                 try {
-                                                    const qr = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, +1, searchStart, 3.0);
-                                                    const qs = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, -1, searchStart, 3.0);
-                                                    const dr = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  +1, searchStart, 3.0);
-                                                    const ds = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  -1, searchStart, 3.0);
+                                                    const qr = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, +1, time, 2.0); // search ±2 days
+                                                    const qs = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, -1, time, 2.0);
+                                                    const dr = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  +1, time, 2.0);
+                                                    const ds = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  -1, time, 2.0);
 
                                                     qthRise = qr?.date;
                                                     qthSet  = qs?.date;
                                                     dxRise  = dr?.date;
                                                     dxSet   = ds?.date;
-                                                } catch (e) {
+                                                } catch(e) {
                                                     console.warn("Rise/set search failed:", e);
                                                     return [];
                                                 }
 
                                                 const windows = [];
 
+                                                // Helper: convert Date to minutes since start of selected day
+                                                const dayStart = new Date(`${dateStr}T00:00:00Z`).getTime();
+                                                const toMinutes = d => (d.getTime() - dayStart) / (1000 * 60);
+
+                                                // Find overlapping interval between the two stations' moon visibility
                                                 if (qthRise && qthSet && dxRise && dxSet) {
+                                                    // Latest rise and earliest set define the common window
                                                     const commonStart = new Date(Math.max(qthRise.getTime(), dxRise.getTime()));
                                                     const commonEnd   = new Date(Math.min(qthSet.getTime(),  dxSet.getTime()));
 
+                                                    // Only add if start < end and overlaps with the selected 24h period at all
                                                     if (commonStart < commonEnd) {
-                                                        const dayStart = new Date(`${dateStr}T00:00:00Z`).getTime();
-                                                        const dayEnd   = dayStart + 24 * 60 * 60 * 1000;
+                                                        const winStartMin = toMinutes(commonStart);
+                                                        const winEndMin   = toMinutes(commonEnd);
+                                                        const dayStartMin = 0;
+                                                        const dayEndMin   = 24 * 60;
 
-                                                        // Keep window if any part overlaps the selected day
-                                                        if (commonEnd.getTime() > dayStart && commonStart.getTime() < dayEnd) {
+                                                        if (winEndMin > dayStartMin && winStartMin < dayEndMin) {
                                                             windows.push({ start: commonStart, end: commonEnd });
                                                         }
                                                     }
