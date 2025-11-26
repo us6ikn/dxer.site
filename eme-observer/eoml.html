@@ -3544,48 +3544,69 @@
                                             }
                                             
                                             function updateDxPopup() {
-                                                    if (!dxMarker) return;
+                                                if (!dxMarker) return;
 
-                                                    const locator = document.getElementById('dx').value.trim().toUpperCase();
-                                                    const dateStr = document.getElementById('date').value;
+                                                const locator = document.getElementById('dx').value.trim().toUpperCase();
+                                                const dateStr = document.getElementById('date').value;
 
-                                                    if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-                                                        dxMarker.bindPopup(`DX Locator: ${locator} (invalid)`);
-                                                        return;
-                                                    }
-
-                                                    const qthLoc = document.getElementById('qth').value.trim().toUpperCase();
-                                                    const windows = getCommonWindows(qthLoc, locator, dateStr);
-
-                                                    const moonIcon = `<svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:middle;">
-                                                                        <path fill="currentColor" d="M12 2a9.93 9.93 0 0 0-7.06 2.94A10 10 0 1 0 22 12c0-.34-.02-.67-.05-1a8 8 0 0 1-9.95-9z"/>
-                                                                      </svg>`;
-
-                                                    let windowsHTML = '';
-                                                    if (windows.length === 0) {
-                                                        windowsHTML = '<div>No common moon window today</div>';
-                                                    } else {
-                                                        windows.forEach((w, i) => {
-                                                            const start = formatTimeUTC(w.start);
-                                                            const end   = formatTimeUTC(w.end);
-                                                            windowsHTML += `<div>${moonIcon} Window ${i+1}: ${start} – ${end}</div>`;
-                                                        });
-                                                    }
-
-                                                    const jsDate = new Date(`${dateStr}T00:00:00Z`);
-                                                    const dayOfWeek = jsDate.toLocaleString('en-US', {weekday:'long', timeZone:'UTC'});
-
-                                                    const popupContent = `
-                                                        DX Locator: ${locator}<br>
-                                                        <div style="height:4px"></div>
-                                                        ${dayOfWeek} ${dateStr}<br>
-                                                        <div style="height:8px"></div>
-                                                        <strong>Common Moon Windows (both ≥0°)</strong><br>
-                                                        ${windowsHTML}
-                                                    `;
-
-                                                    dxMarker.bindPopup(popupContent);
+                                                if (!/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
+                                                    dxMarker.bindPopup(`DX Locator: ${locator} (invalid)`);
+                                                    return;
                                                 }
+
+                                                const qthLoc = document.getElementById('qth').value.trim().toUpperCase();
+                                                const windows = getCommonWindows(qthLoc, locator, dateStr);
+
+                                                const moonIcon = `<svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:middle;">
+                                                                    <path fill="currentColor" d="M12 2a9.93 9.93 0 0 0-7.06 2.94A10 10 0 1 0 22 12c0-.34-.02-.67-.05-1a8 8 0 0 1-9.95-9z"/>
+                                                                  </svg>`;
+
+                                                // --------------------------------------------------
+                                                // Helper: adds (-1) or (+1) when crossing midnight
+                                                // --------------------------------------------------
+                                                const baseDate = new Date(`${dateStr}T00:00:00Z`);
+                                                const baseDay = baseDate.getUTCDate();
+
+                                                function suffixFor(dateObj) {
+                                                    const d = dateObj.getUTCDate();
+                                                    if (d === baseDay) return "";      // same day
+                                                    if (d === baseDay + 1 || (baseDay === 31 && d === 1)) return "(+1)";
+                                                    if (d === baseDay - 1 || (baseDay === 1 && d >= 28)) return "(-1)";
+                                                    // Fallback for month rollover in both directions
+                                                    return d > baseDay ? "(+1)" : "(-1)";
+                                                }
+                                                // --------------------------------------------------
+
+                                                let windowsHTML = '';
+                                                if (windows.length === 0) {
+                                                    windowsHTML = '<div>No common moon window today</div>';
+                                                } else {
+                                                    windows.forEach((w, i) => {
+                                                        const start = formatTimeUTC(w.start);
+                                                        const end   = formatTimeUTC(w.end);
+
+                                                        const startSuffix = suffixFor(w.start);
+                                                        const endSuffix   = suffixFor(w.end);
+
+                                                        windowsHTML += `<div>${moonIcon} Window ${i+1}: ${start}${startSuffix} – ${end}${endSuffix}</div>`;
+                                                    });
+                                                }
+
+                                                const jsDate = new Date(`${dateStr}T00:00:00Z`);
+                                                const dayOfWeek = jsDate.toLocaleString('en-US', {weekday:'long', timeZone:'UTC'});
+
+                                                const popupContent = `
+                                                    DX Locator: ${locator}<br>
+                                                    <div style="height:4px"></div>
+                                                    ${dayOfWeek} ${dateStr}<br>
+                                                    <div style="height:8px"></div>
+                                                    <strong>Common Moon Windows</strong><br>
+                                                    ${windowsHTML}
+                                                `;
+
+                                                dxMarker.bindPopup(popupContent);
+                                            }
+
 
 </script>
 <!-- Ko-Fi -->
