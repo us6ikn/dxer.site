@@ -2278,129 +2278,123 @@
         }
       }
 
-      if (qthValid && dxValid) {
-          for (let i = 0; i < 288; i++) {
-              const rel = computeRelativeAtIndex(i, qthDayData, dxDayData);
-              relLibrations[i] = rel.libration ? rel.libration * 1000 : null;
-              relDopplers[i]   = rel.doppler;
-              polOffsets[i]    = rel.pol;
-          }
-          relDayData.date       = dateStr;
-          relDayData.libration  = relLibrations;
-          relDayData.dopplers   = relDopplers;
-          relDayData.polOffsets = polOffsets;
-      } else if (relDayData.date === dateStr) {
-          relLibrations = relDayData.libration;
-          relDopplers   = relDayData.dopplers;
-          polOffsets    = relDayData.polOffsets;
-      }
+      if (qthValid && dxValid && relLibrations.some(r => r != null)) {
+        document.getElementById("relativeChartWrapper").style.display = "block";
 
-      if (qthValid && dxValid) {
-          const floorIdx = Math.floor(index);
-          const ceilIdx  = Math.ceil(index);
-          const frac     = index - floorIdx;
-          const relFloor = computeRelativeAtIndex(floorIdx, qthDayData, dxDayData);
-          const relCeil  = computeRelativeAtIndex(ceilIdx,  qthDayData, dxDayData);
-          currentRelRate     = interpolate(relFloor.libration * 1000, relCeil.libration * 1000, frac);
-          currentRelDoppler  = interpolate(relFloor.doppler,       relCeil.doppler,       frac);
-          currentPolOffset   = interpolate(relFloor.pol,           relCeil.pol,           frac);
-      }
-
-      // === DECIDE WHETHER TO SHOW THE RELATIVE CHART ===
-      const windows = getCommonWindows(
-          document.getElementById('qth').value.trim().toUpperCase(),
-          document.getElementById('dx').value.trim().toUpperCase(),
-          dateStr
-      );
-      const hasCommonWindow = windows.length > 0;
-
-      const relativeAnnotation = {
-          timeMarker: {
-              type: 'line',
-              mode: 'vertical',
-              scaleID: 'x',
-              value: index,
-              borderColor: 'black',
-              borderWidth: 2,
-              label: { enabled: false }
-          }
-      };
-
-      if (qthValid && dxValid) {
-          try {
-              const skedAnnotations = getSkedAnnotations(dateStr, lat, lon, dxLat, dxLon);
-              Object.assign(relativeAnnotation, skedAnnotations);
-          } catch (e) {
-              console.warn(`Error getting sked annotations: ${e.message}`);
-          }
-      }
-
-      if (qthValid && dxValid && hasCommonWindow) {
-          document.getElementById("relativeChartWrapper").style.display = "block";
-
-          // Nice window summary in the label
-          let winText = '';
-          if (windows.length > 0) {
-              winText = windows.map(w => {
-                  const fmt = t => `${String(t.getUTCHours()).padStart(2,'0')}:${String(t.getUTCMinutes()).padStart(2,'0')}`;
-                  return `${fmt(w.start)}–${fmt(w.end)}`;
-              }).join(' | ');
-              winText = ` | Window${windows.length > 1 ? 's' : ''}: ${winText}`;
-          }
-
-          if (!relativeChart) {
-              relativeChart = new Chart(document.getElementById("relativeDataChart"), {
-                  type: 'line',
-                  data: {
-                      labels,
-                      datasets: [
-                          { label: "Relative Libration (×10⁻³ °/min)", data: relLibrations, borderColor: "red",    pointRadius: 0, borderWidth: 1.5, tension: 0.2, yAxisID: "y1" },
-                          { label: "Relative Spread, Hz",           data: relDopplers,   borderColor: "green",  pointRadius: 0, borderWidth: 1.5, tension: 0.2, yAxisID: "y2" },
-                          { label: "Polarization Offset (°)",       data: polOffsets,    borderColor: "blue",   pointRadius: 0, borderWidth: 1.5, tension: 0.2, yAxisID: "y3" }
-                      ]
-                  },
-                  options: {
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      scales: {
-                          x: { title: { display: true, text: "Time (UTC) UTC", font: { size: 10, family: 'Arial, sans-serif' } }, ticks: { font: { size: 10 } } },
-                          y1: { type: "linear", position: "right", title: { display: true, text: "Rel. Libration (×10⁻³ °/min)", color: "red" },  min: 0, max: 5, ticks: { stepSize: 1, color: "red" }, grid: { drawTicks: true, drawBorder: true } },
-                          y2: { type: "linear", position: "right", offset: true, title: { display: true, text: "Rel. Spread (Hz)", color: "green" }, min: 0, max: maxDoppler, grid: { drawOnChartArea: false }, ticks: { stepSize: Math.ceil(maxDoppler/6), color: "green", callback: v => Math.round(v) } },
-                          y3: { type: "linear", position: "left",  title: { display: true, text: "Polarization Offset (°)", color: "blue" }, min: -90, max: 90, grid: { drawOnChartArea: false }, ticks: { stepSize: 30, callback: v => v + "°", color: "blue" } }
-                      },
-                      plugins: {
-                          legend: { display: false },
-                          annotation: { annotations: relativeAnnotation }
-                      }
+        if (!relativeChart) {
+          relativeChart = new Chart(document.getElementById("relativeDataChart"), {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: "Relative Libration (×10⁻³ °/min)",
+                  data: relLibrations,
+                  borderColor: "red",
+                  pointRadius: 0,
+                  borderWidth: 1.5,
+                  tension: 0.2,
+                  yAxisID: "y1"
+                },
+                {
+                  label: "Relative Spread, Hz",
+                  data: relDopplers,
+                  borderColor: "green",
+                  pointRadius: 0,
+                  borderWidth: 1.5,
+                  tension: 0.2,
+                  yAxisID: "y2"
+                },
+                {
+                  label: "Polarization Offset (°)",
+                  data: polOffsets,
+                  borderColor: "blue",
+                  pointRadius: 0,
+                  borderWidth: 1.5,
+                  tension: 0.2,
+                  yAxisID: "y3"
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: {
+                  title: { display: true, text: "Time (UTC)", font: { size: 10, family: 'Arial, sans-serif' } },
+                  ticks: { font: { size: 10 } }
+                },
+                y1: {
+                  type: "linear",
+                  display: true,
+                  position: "right",
+                  title: { display: true, text: "Rel. Libration (×10⁻³ °/min)", color: "red", font: { size: 10, family: 'Arial, sans-serif' } },
+                  min: 0,
+                  max: 5,
+                  ticks: { stepSize: 1, color: "red", font: { size: 12 } },
+                  grid: { drawTicks: true, drawBorder: true }
+                },
+                y2: {
+                  type: "linear",
+                  display: true,
+                  position: "right",
+                  offset: true,
+                  title: { display: true, text: "Rel. Spread (Hz)", color: "green", font: { size: 12, family: 'Arial, sans-serif' } },
+                  min: 0,
+                  max: maxDoppler,
+                  grid: { drawOnChartArea: false },
+                  ticks: {
+                    stepSize: Math.ceil(maxDoppler / 6),
+                    color: "green",
+                    font: { size: 12 },
+                    callback: function(value) {
+                      return Math.round(value); // Format as integer
+                    }
                   }
-              });
-          } else {
-              relativeChart.data.labels = labels;
-              relativeChart.data.datasets[0].data = relLibrations;
-              relativeChart.data.datasets[1].data = relDopplers;
-              relativeChart.data.datasets[2].data = polOffsets;
-              relativeChart.options.plugins.annotation.annotations = relativeAnnotation;
-              relativeChart.options.plugins.annotation.annotations.timeMarker.value = index;
-              relativeChart.options.scales.y2.max = maxDoppler;
-              relativeChart.options.scales.y2.ticks.stepSize = Math.ceil(maxDoppler / 6);
-              relativeChart.update('none');
-          }
+                },
+                y3: {
+                  type: "linear",
+                  display: true,
+                  position: "left",
+                  title: { display: true, text: "Polarization Offset (°)", color: "blue", font: { size: 12, family: 'Arial, sans-serif' } },
+                  min: -90,
+                  max: 90,
+                  grid: { drawOnChartArea: false },
+                  ticks: { stepSize: 30, callback: val => val + "°", color: "blue", font: { size: 12 } }
+                }
+              },
+              plugins: {
+                legend: { display: false },
+                annotation: { annotations: relativeAnnotation }
+              }
+            }
+          });
+        } else {
+          relativeChart.data.labels = labels;
+          relativeChart.data.datasets[0].data = relLibrations;
+          relativeChart.data.datasets[1].data = relDopplers;
+          relativeChart.data.datasets[2].data = polOffsets;
+          relativeChart.options.plugins.annotation.annotations = relativeAnnotation;
+          relativeChart.options.plugins.annotation.annotations.timeMarker.value = index;
+          relativeChart.options.scales.y2.max = maxDoppler;
+          relativeChart.options.scales.y2.ticks.stepSize = Math.ceil(maxDoppler / 6);
+          relativeChart.update('none');
+        }
 
-          const relRateStr = currentRelRate != null ? (currentRelRate / 1000).toFixed(4) : null;
-          document.getElementById('relativeChartLabel').innerHTML =
-              `<span class="metric-label metric-rel-libration">Rel LR:</span> ${relRateStr != null ? relRateStr + '°/min' : 'N/A'}` +
-              ` <span class="metric-separator">|</span> ` +
-              `<span class="metric-label metric-rel-doppler">DX Width:</span> ${currentRelDoppler != null ? currentRelDoppler.toFixed(0) + ' Hz' : 'N/A'}` +
-              ` <span class="metric-separator">|</span> ` +
-              `<span class="metric-label metric-poloffset">Dpol:</span> ${currentPolOffset != null ? currentPolOffset.toFixed(1) + '°' : 'N/A'}` +
-              `<small style="color:#006400;font-weight:bold;">${winText}</small>`;
+        const relRateStr = currentRelRate != null ? (currentRelRate / 1000).toFixed(4) : null;
+        document.getElementById('relativeChartLabel').innerHTML =
+          `<span class="metric-label metric-rel-libration">Rel LR:</span> ${relRateStr != null ? relRateStr + '°/min' : 'N/A'}` +
+          `<span class="metric-separator"> | </span>` +
+          `<span class="metric-label metric-rel-doppler">DX Width:</span> ${currentRelDoppler != null ? currentRelDoppler.toFixed(0) + ' Hz' : 'N/A'}` +
+          `<span class="metric-separator"> | </span>` +
+          `<span class="metric-label metric-poloffset">Dpol:</span> ${currentPolOffset != null ? currentPolOffset.toFixed(1) + '°' : 'N/A'}`;
       } else {
-          document.getElementById("relativeChartWrapper").style.display = "none";
-          if (relativeChart) {
-              relativeChart.destroy();
-              relativeChart = null;
-          }
-          document.getElementById('relativeChartLabel').innerHTML = '<span class="metric-locator">Enter valid QTH and DX</span>';
+        document.getElementById("relativeChartWrapper").style.display = "none";
+        if (relativeChart) {
+          relativeChart.destroy();
+          relativeChart = null;
+        }
+        document.getElementById('relativeChartLabel').innerHTML = '<span class="metric-locator">Enter valid QTH and DX</span>';
       }
       // At the very end, just before the final map/moon updates:
               if (qthValid && dxValid) {
