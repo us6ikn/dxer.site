@@ -2939,75 +2939,69 @@
                                                 const windows = getCommonWindows(qthLoc, dxLoc, dateStr);
                                                 if (windows.length === 0) return annotations;
 
-                                                const baseDate = new Date(`${dateStr}T00:00:00Z`);
-                                                const baseDay  = baseDate.getUTCDate();
-
-                                                function suffix(dateObj) {
-                                                    const d = dateObj.getUTCDate();
-                                                    if (d === baseDay) return "";
-                                                    return d > baseDay ? "(+1)" : "(-1)";
-                                                }
+                                                const dayStart = new Date(`${dateStr}T00:00:00Z`).getTime();
+                                                const dayEnd   = new Date(`${dateStr}T23:59:59Z`).getTime();
 
                                                 function format(time) {
-                                                    return `${String(time.getUTCHours()).padStart(2,'0')}:${String(time.getUTCMinutes()).padStart(2,'0')}${suffix(time)}`;
+                                                    return `${String(time.getUTCHours()).padStart(2,'0')}:${String(time.getUTCMinutes()).padStart(2,'0')}`;
                                                 }
 
                                                 function index(time) {
                                                     return (time.getUTCHours() + time.getUTCMinutes()/60) * 12;
                                                 }
 
-                                                // We will alternate label position (top ↔ bottom) to avoid overlap
                                                 windows.forEach((w, i) => {
-                                                    const startIdx = index(w.start);
-                                                    const endIdx   = index(w.end);
+                                                    const startTime = w.start.getTime();
+                                                    const endTime   = w.end.getTime();
 
-                                                    const startStr = format(w.start);
-                                                    const endStr   = format(w.end);
+                                                    const position = i % 2 === 0 ? 'top' : 'bottom';
+                                                    const yAdjust  = i % 2 === 0 ? -4 : 4;
 
-                                                    const position = i % 2 === 0 ? 'top' : 'bottom';     // alternate
-                                                    const yAdjust  = i % 2 === 0 ? -4 : 4;               // small offset so they don’t sit exactly on the line
+                                                    // === START LINE: only if inside today ===
+                                                    if (startTime >= dayStart && startTime <= dayEnd) {
+                                                        annotations[`skedStart${i}`] = {
+                                                            type: 'line',
+                                                            scaleID: 'x',
+                                                            value: index(w.start),
+                                                            borderColor: 'rgba(0,200,0,0.95)',
+                                                            borderWidth: 2,
+                                                            borderDash: [8, 5],
+                                                            label: {
+                                                                content: format(w.start),
+                                                                enabled: true,
+                                                                position: position,
+                                                                yAdjust: yAdjust,
+                                                                backgroundColor: 'rgba(0,140,0,0.92)',
+                                                                color: '#fff',
+                                                                font: { size: 10.5, weight: 'bold' },
+                                                                padding: 4,
+                                                                cornerRadius: 4
+                                                            }
+                                                        };
+                                                    }
 
-                                                    // Start line – green
-                                                    annotations[`skedStart${i}`] = {
-                                                        type: 'line',
-                                                        scaleID: 'x',
-                                                        value: startIdx,
-                                                        borderColor: 'rgba(0,200,0,0.95)',
-                                                        borderWidth: 2,
-                                                        borderDash: [8, 5],
-                                                        label: {
-                                                            content: startStr,
-                                                            enabled: true,
-                                                            position: position,
-                                                            yAdjust: yAdjust,
-                                                            backgroundColor: 'rgba(0,140,0,0.92)',
-                                                            color: '#fff',
-                                                            font: { size: 10.5, weight: 'bold', family: 'Arial' },
-                                                            padding: { top: 3, bottom: 3, left: 5, right: 5 },
-                                                            cornerRadius: 4
-                                                        }
-                                                    };
-
-                                                    // End line – red
-                                                    annotations[`skedEnd${i}`] = {
-                                                        type: 'line',
-                                                        scaleID: 'x',
-                                                        value: endIdx,
-                                                        borderColor: 'rgba(220,0,0,0.95)',
-                                                        borderWidth: 2,
-                                                        borderDash: [8, 5],
-                                                        label: {
-                                                            content: endStr,
-                                                            enabled: true,
-                                                            position: position,
-                                                            yAdjust: yAdjust,
-                                                            backgroundColor: 'rgba(180,0,0,0.92)',
-                                                            color: '#fff',
-                                                            font: { size: 10.5, weight: 'bold', family: 'Arial' },
-                                                            padding: { top: 3, bottom: 3, left: 5, right: 5 },
-                                                            cornerRadius: 4
-                                                        }
-                                                    };
+                                                    // === END LINE: only if inside today ===
+                                                    if (endTime >= dayStart && endTime <= dayEnd) {
+                                                        annotations[`skedEnd${i}`] = {
+                                                            type: 'line',
+                                                            scaleID: 'x',
+                                                            value: index(w.end),
+                                                            borderColor: 'rgba(220,0,0,0.95)',
+                                                            borderWidth: 2,
+                                                            borderDash: [8, 5],
+                                                            label: {
+                                                                content: format(w.end),
+                                                                enabled: true,
+                                                                position: position,
+                                                                yAdjust: yAdjust,
+                                                                backgroundColor: 'rgba(180,0,0,0.92)',
+                                                                color: '#fff',
+                                                                font: { size: 10.5, weight: 'bold' },
+                                                                padding: 4,
+                                                                cornerRadius: 4
+                                                            }
+                                                        };
+                                                    }
                                                 });
 
                                                 return annotations;
