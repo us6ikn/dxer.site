@@ -2983,7 +2983,9 @@
     }
 
                                             function getCommonWindows(qthLoc, dxLoc, dateStr) {
-                                                if (!qthLoc || !dxLoc || !/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthLoc) || !/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxLoc)) {
+                                                if (!qthLoc || !dxLoc ||
+                                                    !/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthLoc) ||
+                                                    !/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxLoc)) {
                                                     return [];
                                                 }
 
@@ -2991,52 +2993,66 @@
                                                 const dx  = qthToLatLon(dxLoc);
 
                                                 const qthObs = new Astronomy.Observer(qth.lat, qth.lon, 0);
-                                                const dxObs  = new Astronomy.Observer(dx.lat,  dx.lon,  0);
-                                                const time   = Astronomy.MakeTime(new Date(`${dateStr}T00:00:00Z`));
+                                                const dxObs  = new Astronomy.Observer(dx.lat, dx.lon, 0);
 
-                                                let qthRise, qthSet, dxRise, dxSet;
-                                                try {
-                                                    const qr = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, +1, time, 3.0); // search ±2 days
-                                                    const qs = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, -1, time, 3.0);
-                                                    const dr = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  +1, time, 3.0);
-                                                    const ds = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  -1, time, 3.0);
+                                                const dayStart = Astronomy.MakeTime(new Date(`${dateStr}T00:00:00Z`));
+                                                const dayEnd   = Astronomy.MakeTime(new Date(`${dateStr}T23:59:59Z`));
 
-                                                    qthRise = qr?.date;
-                                                    qthSet  = qs?.date;
-                                                    dxRise  = dr?.date;
-                                                    dxSet   = ds?.date;
-                                                } catch(e) {
-                                                    console.warn("Rise/set search failed:", e);
-                                                    return [];
-                                                }
+                                                // Utility to find events around day boundaries
+                                                function getMoonWindow(obs) {
+                                                    const risePrev = Astronomy.SearchRiseSet(Astronomy.Body.Moon, obs, +1, dayStart, -2.0);
+                                                    const setPrev  = Astronomy.SearchRiseSet(Astronomy.Body.Moon, obs, -1, dayStart, -2.0);
+                                                    const riseNext = Astronomy.SearchRiseSet(Astronomy.Body.Moon, obs, +1, dayStart, +2.0);
+                                                    const setNext  = Astronomy.SearchRiseSet(Astronomy.Body.Moon, obs, -1, dayStart, +2.0);
 
-                                                const windows = [];
+                                                    // Convert to JS Dates for easier comparisons
+                                                    const rPrev = risePrev?.date, sPrev = setPrev?.date;
+                                                    const rNext = riseNext?.date, sNext = setNext?.date;
 
-                                                // Helper: convert Date to minutes since start of selected day
-                                                const dayStart = new Date(`${dateStr}T00:00:00Z`).getTime();
-                                                const toMinutes = d => (d.getTime() - dayStart) / (1000 * 60);
+                                                    const ds = new Date(dayStart.date);
+                                                    const de = new Date(dayEnd.date);
 
-                                                // Find overlapping interval between the two stations' moon visibility
-                                                if (qthRise && qthSet && dxRise && dxSet) {
-                                                    // Latest rise and earliest set define the common window
-                                                    const commonStart = new Date(Math.max(qthRise.getTime(), dxRise.getTime()));
-                                                    const commonEnd   = new Date(Math.min(qthSet.getTime(),  dxSet.getTime()));
-
-                                                    // Only add if start < end and overlaps with the selected 24h period at all
-                                                    if (commonStart < commonEnd) {
-                                                        const winStartMin = toMinutes(commonStart);
-                                                        const winEndMin   = toMinutes(commonEnd);
-                                                        const dayStartMin = 0;
-                                                        const dayEndMin   = 24 * 60;
-
-                                                        if (winEndMin > dayStartMin && winStartMin < dayEndMin) {
-                                                            windows.push({ start: commonStart, end: commonEnd });
-                                                        }
+                                                    // Determine if Moon is already up at 00:00
+                                                    let moonUpAtStart = false;
+                                                    if (rPrev && sPrev && rPrev < ds && sPrev > ds) {
+                                                        moonUpAtStart = true;
                                                     }
+
+                                                    // Pick correct rise and set pair
+                                                    let rise, set;
+
+                                                    if (moonUpAtStart) {
+                                                        // Moon already above horizon at 00:00 → rise came earlier, set later
+                                                        rise = rPrev;
+                                                        set  = sNext;
+                                                    } else {
+                                                        // Normal case: rise comes before set after 00:00
+                                                        rise = rNext;
+                                                        set  = sNext;
+                                                    }
+
+                                                    // Clamp into selected day window
+                                                    const start = new Date(Math.max(rise, ds));
+                                                    const end   = new Date(Math.min(set, de));
+
+                                                    if (end > start) {
+                                                        return { start, end };
+                                                    }
+                                                    return null;
                                                 }
 
-                                                return windows;
+                                                const qthWindow = getMoonWindow(qthObs);
+                                                const dxWindow  = getMoonWindow(dxObs);
+
+                                                if (!qthWindow || !dxWindow) return [];
+
+                                                // Overlap the two station windows
+                                                const start = new Date(Math.max(qthWindow.start, dxWindow.start));
+                                                const end   = new Date(Math.min(qthWindow.end, dxWindow.end));
+
+                                                return (end > start) ? [{ start, end }] : [];
                                             }
+
                                             
     document.getElementById("hour").addEventListener("input", () => {
         hourIndex = parseInt(document.getElementById("hour").value);
