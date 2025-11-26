@@ -2955,7 +2955,7 @@
                                                     const endTime   = w.end.getTime();
 
                                                     const position = i % 2 === 0 ? 'top' : 'bottom';
-                                                    const yAdjust  = i % 2 === 0 ? -4 : 4;
+                                                    const yAdjust  = i % 1 === 0 ? -4 : 4;
 
                                                     // === START LINE: only if inside today ===
                                                     if (startTime >= dayStart && startTime <= dayEnd) {
@@ -2964,7 +2964,7 @@
                                                             scaleID: 'x',
                                                             value: index(w.start),
                                                             borderColor: 'rgba(0,200,0,0.95)',
-                                                            borderWidth: 2,
+                                                            borderWidth: 1,
                                                             borderDash: [8, 5],
                                                             label: {
                                                                 content: format(w.start),
