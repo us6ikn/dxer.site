@@ -2278,11 +2278,6 @@
         }
       }
 
-      // === RELATIVE CHART DATA – ALWAYS 5-MINUTE RESOLUTION (288 points) ===
-      let relLibrations = Array(288).fill(null);
-      let relDopplers   = Array(288).fill(null);
-      let polOffsets    = Array(288).fill(null);
-
       if (qthValid && dxValid) {
           for (let i = 0; i < 288; i++) {
               const rel = computeRelativeAtIndex(i, qthDayData, dxDayData);
