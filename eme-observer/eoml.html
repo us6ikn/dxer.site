@@ -2999,7 +2999,6 @@
                                                 let qthRise = null, qthSet = null, dxRise = null, dxSet = null;
 
                                                 try {
-                                                    // Search ±2 days to be safe
                                                     qthRise = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, +1, time, 2.0)?.date;
                                                     qthSet  = Astronomy.SearchRiseSet(Astronomy.Body.Moon, qthObs, -1, time, 2.0)?.date;
                                                     dxRise  = Astronomy.SearchRiseSet(Astronomy.Body.Moon, dxObs,  +1, time, 2.0)?.date;
@@ -3012,25 +3011,17 @@
                                                 if (!qthRise || !qthSet || !dxRise || !dxSet) return [];
 
                                                 const dayStart = new Date(`${dateStr}T00:00:00Z`).getTime();
-                                                const dayEnd   = dayStart + 24 * 60 * 60 * 1000;
+                                                const dayEnd   = dayStart + 24*60*60*1000;
 
-                                                // Helper: does this moon-up period overlap with our 24 h window?
-                                                const overlapsDay = (rise, set) => {
-                                                    return rise.getTime() < dayEnd && set.getTime() > dayStart;
-                                                };
+                                                const overlapsDay = (rise, set) => rise.getTime() < dayEnd && set.getTime() > dayStart;
 
-                                                // Use the moon-up periods that actually overlap the selected day
                                                 let commonStart = null;
                                                 let commonEnd   = null;
 
                                                 if (overlapsDay(qthRise, qthSet) && overlapsDay(dxRise, dxSet)) {
-                                                    // Latest rise and earliest set → common window
                                                     commonStart = new Date(Math.max(qthRise.getTime(), dxRise.getTime()));
                                                     commonEnd   = new Date(Math.min(qthSet.getTime(),  dxSet.getTime()));
 
-                                                    ));
-
-                                                    // Final sanity check
                                                     if (commonStart >= commonEnd) {
                                                         commonStart = commonEnd = null;
                                                     }
