@@ -2092,30 +2092,23 @@
           chart.data.datasets[1].data = qthElevs;
           chart.data.datasets[2].data = qthDopps;
           chart.options.plugins.annotation.annotations = qthAnnotation;
-          chart.options.plugins.annotation.annotations.timeMarker.value = index;
+          chart.options.plugins.annotation.annotations.timeMarker.value = exactIndex;
           chart.options.scales.y3.max = maxDoppler;
           chart.options.scales.y3.ticks.stepSize = Math.ceil(maxDoppler / 6);
           chart.update('none');
         }
 
-        // Safety guard: treat tiny elevations (>= -0.1°) as valid (Astronomy.js sometimes returns -0.02° due to refraction model)
-        const isElevValid   = currentElevQth !== null && currentElevQth >= -0.1;
-        const isAzValid     = currentAzQth   !== null;
-        const isRateValid   = currentRateQth !== null && currentRateQth >= 0;
-        const isDopplerValid = currentDopplerQth !== null;
-
-        const rateStr = isRateValid ? (currentRateQth / 1000).toFixed(4) : null;
-
+        const rateStr = currentRateQth != null ? (currentRateQth / 1000).toFixed(4) : null;
         document.getElementById('chartLabel').innerHTML =
           `<span class="metric-locator">${qthInput}</span>` +
           `<span class="metric-separator"></span>` +
-          `<span class="metric-label metric-elevation">El:</span> ${isElevValid ? currentElevQth.toFixed(1) + '°' : 'N/A'}` +
+          `<span class="metric-label metric-elevation">El:</span> ${currentElevQth != null ? currentElevQth.toFixed(1) + '°' : 'N/A'}` +
           `<span class="metric-separator">|</span>` +
-          `<span class="metric-label metric-azimuth">Az:</span> ${isAzValid ? currentAzQth.toFixed(1) + '°' : 'N/A'}` +
+          `<span class="metric-label metric-azimuth">Az:</span> ${currentAzQth != null ? currentAzQth.toFixed(1) + '°' : 'N/A'}` +
           `<span class="metric-separator">|</span>` +
           `<span class="metric-label metric-libration">Libr:</span> ${rateStr != null ? rateStr + '°/min' : 'N/A'}` +
-          `<span/font class="metric-separator">|</span>` +
-          `<span class="metric-label metric-doppler">Spread:</span> ${isDopplerValid ? currentDopplerQth.toFixed(0) + ' Hz' : 'N/A'}`;
+          `<span class="metric-separator">|</span>` +
+          `<span class="metric-label metric-doppler">Spread:</span> ${currentDopplerQth != null ? currentDopplerQth.toFixed(0) + ' Hz' : 'N/A'}`;
       } else {
         document.getElementById("chartWrapper").style.display = "none";
         if (chart) {
@@ -2244,7 +2237,7 @@
           dxChart.data.datasets[1].data = dxElevs;
           dxChart.data.datasets[2].data = dxDopps;
           dxChart.options.plugins.annotation.annotations = dxAnnotation;
-          dxChart.options.plugins.annotation.annotations.timeMarker.value = index;
+          dxChart.options.plugins.annotation.annotations.timeMarker.value = exactIndex;
           dxChart.options.scales.y3.max = maxDoppler;
           dxChart.options.scales.y3.ticks.stepSize = Math.ceil(maxDoppler / 6);
           dxChart.update('none');
@@ -2388,7 +2381,7 @@
           relativeChart.data.datasets[1].data = relDopplers;
           relativeChart.data.datasets[2].data = polOffsets;
           relativeChart.options.plugins.annotation.annotations = relativeAnnotation;
-          relativeChart.options.plugins.annotation.annotations.timeMarker.value = index;
+          relativeChart.options.plugins.annotation.annotations.timeMarker.value = exactIndex;
           relativeChart.options.scales.y2.max = maxDoppler;
           relativeChart.options.scales.y2.ticks.stepSize = Math.ceil(maxDoppler / 6);
           relativeChart.update('none');
