@@ -1257,19 +1257,19 @@
             const elevationDeg = hor.altitude;
             const azimuthDeg = hor.azimuth;
 
+            const isAboveHorizon = elevationDeg >= 0;   // or >= -0.5 if you want to include refraction
+            elevations.push(isAboveHorizon ? elevationDeg : null);
+            azimuths.push(isAboveHorizon ? azimuthDeg : null);
+
             let rate = libData[i]?.rate ?? null;
             let doppler = null;
-            if (elevationDeg > 0 && rate != null) {
+            if (isAboveHorizon && rate != null) {
                 rates.push(rate * 1000);
                 const omegaRadSec = rate * (Math.PI / 180) / 60;
                 doppler = (4 * FREQUENCY_HZ * MOON_RADIUS * omegaRadSec) / SPEED_OF_LIGHT;
             } else {
                 rates.push(null);
-                doppler = null;
             }
-
-            elevations.push(elevationDeg > 0 ? elevationDeg : null);
-            azimuths.push(elevationDeg > 0 ? azimuthDeg : null);
             dopplers.push(doppler);
         }
 
@@ -1302,7 +1302,7 @@
 
         const qthElev = qthData.elevations[idx];
         const dxElev = dxData.elevations[idx];
-        if (qthElev < 1 || dxElev < 1) {
+        if (qthElev === null || dxElev === null || qthElev < 0.01 || dxElev < 0.01) {
             return { libration: null, doppler: null, pol: null };
         }
 
