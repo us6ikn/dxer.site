@@ -3856,16 +3856,12 @@
                                                     return;
                                                 }
 
-                                                noiseProfile = profile;
-
-                                                const path = new Array(288).fill(null);
-                                                const dateStr = document.getElementById("date").value;
                                                 const qth = document.getElementById("qth").value.trim().toUpperCase();
-
                                                 if (!qth || !/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qth)) {
-                                                    noiseAlongPath = path;
+                                                    noiseAlongPath = null;        // ← important: set to null, not an array of nulls
                                                     return;
                                                 }
+
 
                                                 let lat, lon;
                                                 try {
