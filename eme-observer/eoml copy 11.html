@@ -978,7 +978,7 @@
             </div>
 
             <!-- Time Slider -->
-            <input type="range" id="hour" min="0" max="1439" value="0" step="1" />
+            <input type="range" id="hour" min="0" max="287" value="0" step="1" />
 
             <!-- Locators -->
             <div class="locator-group">
@@ -1030,7 +1030,7 @@
     let rawData = [];
     let dxRawData = [];
     let moonDataForMonth = [];
-    let minuteIndex = 0;   // NEW: 0–1439 = one full day in 1-minute steps
+    let hourIndex = 0;
     let lat = 0;
     let lon = 0;
     let dxLat = 0;
@@ -1069,15 +1069,12 @@
     // Default to 10GHz
     let FREQUENCY_HZ = bandConfig['10GHz'].frequency;
 
-    let minuteIndex = 0; // Replace the old hourIndex with minuteIndex (0–1439)
-
+    // Helper function to update hour-value display
     function updateHourDisplay() {
-        const totalMinutes = minuteIndex;
-        const hour = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
+        const hour = Math.floor(hourIndex / 12);
+        const minutes = (hourIndex % 12) * 5;
         document.getElementById('hour-value').textContent = `UTC: ${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
     }
-
 
     function updateBand(band) {
         // Stop real-time updates and disable real-time mode
@@ -2452,7 +2449,7 @@
 
                                                 const hour = now.getUTCHours();
                                                 const minute = now.getUTCMinutes();
-                                                const fractionalIndex = hour + (minute / 60);
+                                                const fractionalIndex = hour * 12 + (minute / 5);
                                                 const displayHour = String(hour).padStart(2, '0');
                                                 const displayMin = String(minute).padStart(2, '0');
                                                 document.getElementById('hour-value').textContent = `UTC: ${displayHour}:${displayMin}`;
@@ -3174,11 +3171,13 @@
 
 
                                             
-                                            document.getElementById("hour").addEventListener("input", () => {
-                                                minuteIndex = parseInt(document.getElementById("hour").value); // 0–1439
-                                                updateHourDisplay();
-                                                updateChart(minuteIndex / 60, false); // Pass fractional hour (e.g. 12.5 = 12:30)
-                                            });
+    document.getElementById("hour").addEventListener("input", () => {
+        hourIndex = parseInt(document.getElementById("hour").value);
+        const hour = Math.floor(hourIndex / 12);
+        const minutes = (hourIndex % 12) * 5;
+        document.getElementById("hour-value").textContent = `UTC: ${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+        updateChart(hourIndex, false);
+    });
 
     function adjustDate(days) {
         const dateInput = document.getElementById("date");
@@ -3228,12 +3227,23 @@
                                                 document.getElementById('date').valueAsDate = utcDate;
                                                 document.getElementById('date').value = utcDate.toISOString().slice(0,10);
 
-                                                // === NEW: 1-minute precision from page load ===
-                                                const totalMinutes = utcHours * 60 + utcMinutes;
-                                                minuteIndex = totalMinutes;                        // 0 to 1439
-                                                document.getElementById('hour').value = minuteIndex;
-                                                updateHourDisplay();                               // shows exact current minute
-                                                // ===============================================
+                                                let roundedHour = utcHours;
+                                                let roundedMinutes = Math.round(utcMinutes / 5) * 5;
+                                                if (roundedMinutes >= 60) {
+                                                    roundedMinutes = 0;
+                                                    roundedHour += 1;
+                                                }
+                                                if (roundedHour >= 24) {
+                                                    roundedHour -= 24;
+                                                    utcDate.setUTCDate(utcDate.getUTCDate() + 1);
+                                                    document.getElementById('date').valueAsDate = utcDate;
+                                                    document.getElementById('date').value = utcDate.toISOString().slice(0,10);
+                                                }
+
+                                                hourIndex = roundedHour * 12 + (roundedMinutes / 5);
+                                                document.getElementById('hour').value = hourIndex;
+                                                document.getElementById('hour-value').textContent =
+                                                    `UTC: ${String(roundedHour).padStart(2, '0')}:${String(roundedMinutes).padStart(2, '0')}`;
 
                                                 document.getElementById('showControlsPanel').classList.remove('visible');
 
