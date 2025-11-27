@@ -1040,7 +1040,6 @@
             <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
         </svg>
     </button><script src="chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.2.0/dist/chartjs-chart-matrix.min.js"></script>
 <script src="chartjs-plugin-annotation@1.4.0"></script>
 <script src="l.ob.js"></script>
 <script src="/leaflet/Leaflet.greatCircle.js"></script>
@@ -3791,9 +3790,10 @@
                                                     }
 
                                                     localStorage.setItem("noiseProfile", JSON.stringify(noiseData));
-                                                        alert("Noise profile successfully loaded!");
-                                                        buildNoiseAlongMoonPath();
-                                                        updateChart(getCurrentIndex(), isRealTimeMode);
+                                                    alert("Noise profile successfully loaded!");
+                                                    buildNoiseAlongMoonPath();
+                                                    updateChart(getCurrentIndex(), isRealTimeMode);
+                                                };  // ← This was missing!
 
                                                 reader.readAsText(file);
                                             }
@@ -3841,70 +3841,7 @@
                                                 return json ? JSON.parse(json) : null;
                                             }
 
-                                            function buildNoiseMatrix() {
-                                                const profile = getNoiseProfile();
-                                                if (!profile || profile.length === 0) {
-                                                    noiseInterpolated = null;
-                                                    return;
-                                                }
-
-                                                noiseProfile = profile;
-
-                                                // We'll interpolate onto a regular grid:
-                                                // - Azimuth: 0° → 359° (1° resolution → 360 cols)
-                                                // - Elevation: 0° → 90° (you can change to 1° or 2° steps)
-                                                const AZ_STEPS = 360;
-                                                const EL_STEPS = 91;   // 0..90 inclusive
-
-                                                const matrix = Array(288).fill().map(() => Array(AZ_STEPS).fill(null));
-
-                                                // Simple nearest-neighbor + linear falloff (fast enough)
-                                                for (let t = 0; t < 288; t++) {
-                                                    const azValues = Array(AZ_STEPS).fill(null);
-                                                    const weights  = Array(AZ_STEPS).fill(0);
-
-                                                    for (const pt of profile) {
-                                                        const az = Math.round(pt.azimuth);
-                                                        if (az < 0 || az >= 360) continue;
-                                                        const el = pt.elevation;
-                                                        if (el < 0 || el > 90) continue;
-
-                                                        // Only use points that could be visible at this time (moon elevation > 0)
-                                                        // We'll still store all, but you can filter here if you want
-                                                        const dist = Math.abs(az - az); // dummy, will be replaced in weighted avg
-                                                        const w = 1.0 / (1.0 + dist * dist); // simple inverse distance weighting
-
-                                                        if (azValues[az] === null) {
-                                                            azValues[az] = pt.noise;
-                                                            weights[az]  = w;
-                                                        } else {
-                                                            azValues[az] += pt.noise * w;
-                                                            weights[az]  += w;
-                                                        }
-                                                    }
-
-                                                    // Normalize weighted average
-                                                    for (let az = 0; az < AZ_STEPS; az++) {
-                                                        if (weights[az] > 0) {
-                                                            azValues[az] /= weights[az];
-                                                        }
-                                                    }
-
-                                                    // Fill gaps with horizontal interpolation
-                                                    let last = null;
-                                                    for (let az = 0; az < AZ_STEPS + 5; az++) {  // +5 to wrap around
-                                                        const i = az % AZ_STEPS;
-                                                        if (azValues[i] !== null) {
-                                                            last = azValues[i];
-                                                        } else if (last !== null) {
-                                                            azValues[i] = last;
-                                                        }
-                                                    }
-                                                    matrix[t] = azValues.slice(0, AZ_STEPS);
-                                                }
-
-                                                noiseInterpolated = matrix;
-                                            }
+                                            
                                             function buildNoiseAlongMoonPath() {
                                                 const profile = getNoiseProfile();
                                                 if (!profile || profile.length === 0) {
