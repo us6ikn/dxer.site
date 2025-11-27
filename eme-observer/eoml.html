@@ -3319,8 +3319,12 @@
                                                     computeFullDayData(dxDayData, dxInput, document.getElementById("date").value, false);
                                                 }
                                                 updateChart(hourIndex, false);
-                                                setTimeout(updateQthPopup, 0);  // Update after computations
-                                                setTimeout(updateDxPopup,  0);   // ← added
+                                                if (getNoiseProfile()) {
+                                                        buildNoiseAlongMoonPath();
+                                                    }
+
+                                                    setTimeout(updateQthPopup, 0);
+                                                    setTimeout(updateDxPopup, 0);
                                             });
 
                                             window.onload = () => {
@@ -3422,10 +3426,11 @@
                                                         } else {
                                                             setTimeout(() => {
                                                                 updateChart(getCurrentIndex(), isRealTimeMode);
-                                                                // ADD THIS LINE HERE
-                                                                                    if (getNoiseProfile()) {
-                                                                                        buildNoiseAlongMoonPath();
-                                                            }, 0);
+
+                                                                if (getNoiseProfile()) {
+                                                                    buildNoiseAlongMoonPath();
+                                                                }
+                                                            }, 0);   // ← comma and 0 are OUTSIDE the function
                                                         }
                                                     } catch (e) {
                                                         console.error(`Error computing libration for QTH ${locator}: ${e.message}`);
