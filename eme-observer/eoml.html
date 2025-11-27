@@ -3262,7 +3262,7 @@
                                                 const currentNow = new Date();
                                                 updateMap(currentNow);
                                                 updateMoonChart(currentNow);
-                                                updateChart(hourIndex, false);
+                                                updateChart(minuteIndex / 60, false);
                                             };
                                                 
     window.addEventListener('unload', () => {
