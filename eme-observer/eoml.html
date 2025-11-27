@@ -1302,7 +1302,7 @@
 
         const qthElev = qthData.elevations[idx];
         const dxElev = dxData.elevations[idx];
-        if (qthElev === null || dxElev === null || qthElev < 0.01 || dxElev < 0.01) {
+        if (qthElev === null || dxElev === null || qthElev < -0.1 || dxElev < -0.1) {
             return { libration: null, doppler: null, pol: null };
         }
 
