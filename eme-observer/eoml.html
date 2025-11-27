@@ -1257,7 +1257,7 @@
             const elevationDeg = hor.altitude;
             const azimuthDeg = hor.azimuth;
 
-            const isAboveHorizon = elevationDeg >= 0;   // or >= -0.5 if you want to include refraction
+            const isAboveHorizon = elevationDeg >= -0.5;   // or >= -0.5 if you want to include refraction
             elevations.push(isAboveHorizon ? elevationDeg : null);
             azimuths.push(isAboveHorizon ? azimuthDeg : null);
 
