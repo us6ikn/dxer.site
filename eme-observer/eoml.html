@@ -1896,34 +1896,40 @@
       }
 
       // Get current values (interpolated if real-time)
+      // NEW — use the exact same time as the map/moon chart
+      const exactIndex = isRealtime
+          ? (new Date().getUTCHours() * 12 + new Date().getUTCMinutes() / 5)
+          : index;
+
       let currentElevQth = null, currentAzQth = null, currentRateQth = null, currentDopplerQth = null;
       if (qthValid) {
-        currentElevQth = getValueAtIndex(qthDayData.elevations, index);
-        currentAzQth = getValueAtIndex(qthDayData.azimuths, index);
-        currentRateQth = getValueAtIndex(qthDayData.rates, index);
-        currentDopplerQth = getValueAtIndex(qthDayData.dopplers, index);
+        currentElevQth     = getValueAtIndex(qthDayData.elevations, exactIndex);
+        currentAzQth       = getValueAtIndex(qthDayData.azimuths,   exactIndex);
+        currentRateQth     = getValueAtIndex(qthDayData.rates,       exactIndex);
+        currentDopplerQth  = getValueAtIndex(qthDayData.dopplers,    exactIndex);
       }
 
       let currentElevDx = null, currentAzDx = null, currentRateDx = null, currentDopplerDx = null;
       if (dxValid) {
-        currentElevDx = getValueAtIndex(dxDayData.elevations, index);
-        currentAzDx = getValueAtIndex(dxDayData.azimuths, index);
-        currentRateDx = getValueAtIndex(dxDayData.rates, index);
-        currentDopplerDx = getValueAtIndex(dxDayData.dopplers, index);
+        currentElevDx     = getValueAtIndex(dxDayData.elevations, exactIndex);
+        currentAzDx       = getValueAtIndex(dxDayData.azimuths,   exactIndex);
+        currentRateDx     = getValueAtIndex(dxDayData.rates,       exactIndex);
+        currentDopplerDx  = getValueAtIndex(dxDayData.dopplers,    exactIndex);
       }
 
       // Relative current
       let currentRelRate = null, currentRelDoppler = null, currentPolOffset = null;
       // Relative current (for label) – uses interpolation on full 288-point data
+      // For relative label — also use exactIndex
       if (qthValid && dxValid) {
-          const floorIdx = Math.floor(index);
-          const ceilIdx = Math.ceil(index);
-          const frac = index - floorIdx;
+          const floorIdx = Math.floor(exactIndex);
+          const ceilIdx = Math.ceil(exactIndex);
+          const frac = exactIndex - floorIdx;
           const relFloor = computeRelativeAtIndex(floorIdx, qthDayData, dxDayData);
-          const relCeil = computeRelativeAtIndex(ceilIdx, qthDayData, dxDayData);
-          currentRelRate = interpolate(relFloor.libration * 1000, relCeil.libration * 1000, frac);
-          currentRelDoppler = interpolate(relFloor.doppler, relCeil.doppler, frac);
-          currentPolOffset = interpolate(relFloor.pol, relCeil.pol, frac);
+          const relCeil  = computeRelativeAtIndex(ceilIdx,  qthDayData, dxDayData);
+          currentRelRate     = interpolate(relFloor.libration * 1000, relCeil.libration * 1000, frac);
+          currentRelDoppler  = interpolate(relFloor.doppler,         relCeil.doppler,         frac);
+          currentPolOffset   = interpolate(relFloor.pol,             relCeil.pol,             frac);
       }
 
       // Chart data from caches
