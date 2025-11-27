@@ -3723,6 +3723,11 @@
                                                 return table;
                                             }
 
+                                            function getNoiseProfile() {
+                                                const json = localStorage.getItem("noiseProfile");
+                                                return json ? JSON.parse(json) : null;
+                                            }
+
 
 </script>
 <!-- Ko-Fi -->
