@@ -2408,9 +2408,21 @@
               }
 
       // Update map and moon chart with exact time
-      const exactTime = isRealtime ? new Date() : new Date(`${dateStr}T${Math.floor(index / 12).toString().padStart(2, '0')}:${String((index % 12) * 5).padStart(2, '0')}:00Z`);
-      updateMap(exactTime);
-      updateMoonChart(exactTime);
+      // Use the SAME exact fractional time for everything
+      const now = new Date();
+      const currentTime = isRealtime
+          ? now
+          : new Date(Date.UTC(
+              parseInt(dateStr.substring(0,4)),
+              parseInt(dateStr.substring(5,7))-1,
+              parseInt(dateStr.substring(8,10)),
+              Math.floor(exactIndex / 12),
+              (exactIndex % 12) * 5,
+              0
+            ));
+
+      updateMap(currentTime);
+      updateMoonChart(currentTime);
       if (dxMarker) updateDxPopup();   // ← This is the missing piece!
     }
 
