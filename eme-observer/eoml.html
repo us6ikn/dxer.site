@@ -93,7 +93,7 @@
                                                                         #noiseChartWrapper {
                                                                             width: 100%;
                                                                             max-width: 600px;
-                                                                            height: 80px;                 /* ← thin! */
+                                                                            height: 100px;                /* nice and thin */
                                                                             margin-top: 6px;
                                                                             background-color: rgba(255, 255, 255, 0.85);
                                                                             border-radius: 6px;
@@ -101,10 +101,9 @@
                                                                             overflow: hidden;
                                                                             position: relative;
                                                                             box-sizing: border-box;
-                                                                            display: none;
                                                                         }
 
-                                                                        #noiseColormapChart {
+                                                                        #noiseCurveChart {
                                                                             height: 100%;
                                                                         }
                                                                         
@@ -1067,9 +1066,9 @@
     let moonDayData = { date: null, data: [], labels: [] };
     let qthMarker = null;
     let dxMarker = null;
-    let noiseChart = null;
-    let noiseProfile = [];           // raw points: [{azimuth, elevation, noise}]
-    let noiseInterpolated = null;    // 288 × 360 matrix (or 181 for 2° steps)
+    let noiseChart = null;           // will be a normal line chart now
+    let noiseProfile = [];           // raw CSV points
+    let noiseAlongPath = null;       // 288-point array: noise at Moon's azimuth at each time
 
     // NEW: Caches for day data to avoid recompute
     let qthDayData = { date: null, libration: [], elevations: [], azimuths: [], dopplers: [], rates: [] };
@@ -2429,135 +2428,83 @@
 
       // Update map and moon chart with exact time
       const exactTime = isRealtime ? new Date() : new Date(`${dateStr}T${Math.floor(index / 12).toString().padStart(2, '0')}:${String((index % 12) * 5).padStart(2, '0')}:00Z`);
-      // ============ NOISE COLORMAP CHART ============
+      // ============ NOISE CURVE CHART (lightweight) ============
       const noiseWrapper = document.getElementById("noiseChartWrapper");
-      if (noiseInterpolated) {
+
+      if (noiseAlongPath && noiseAlongPath.some(v => v !== null)) {
           noiseWrapper.style.display = "block";
 
-          const labels = Array(288).fill("").map((_, i) => {
+          const labels = Array(288).map((_, i) => {
               const h = Math.floor(i / 12);
               const m = (i % 12) * 5;
               return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
           });
 
-          // Find min/max for color scaling
-          let minNoise = Infinity, maxNoise = -Infinity;
-          for (const row of noiseInterpolated) {
-              for (const v of row) {
-                  if (v !== null) {
-                      minNoise = Math.min(minNoise, v);
-                      maxNoise = Math.max(maxNoise, v);
-                  }
-              }
-          }
-          if (!isFinite(minNoise)) minNoise = -30;
-          if (!isFinite(maxNoise)) maxNoise = 10;
-
-          // Build image data (Chart.js heatmap via canvas)
-          const imageData = noiseInterpolated.map(row =>
-              row.map(val => {
-                  if (val === null) return 'rgba(0,0,0,0)';
-                  const norm = Math.max(0, Math.min(1, (val - minNoise) / (maxNoise - minNoise)));
-                  // Viridis-like colormap (blue → green → yellow → red)
-                  const r = Math.round(255 * (norm > 0.5 ? (norm - 0.5) * 2 : 0));
-                  const g = Math.round(255 * (norm < 0.5 ? norm * 2 : 1 - (norm - 0.5) * 2));
-                  const b = Math.round(255 * (1 - norm));
-                  return `rgb(${r},${g},${b})`;
-              })
-          );
+          // Current noise value
+          const currentNoise = noiseAlongPath[Math.round(index)] || null;
 
           if (!noiseChart) {
-              noiseChart = new Chart(document.getElementById("noiseColormapChart"), {
-                  type: 'matrix',
+              noiseChart = new Chart(document.getElementById("noiseCurveChart"), {
+                  type: 'line',
                   data: {
+                      labels: labels,
                       datasets: [{
-                          label: 'Noise (dB)',
-                          data: imageData.flatMap((row, t) =>
-                              row.map((color, az) => ({ x: t, y: az, v: color }))
-                          ),
-                          backgroundColor(c) {
-                              const point = c.raw;
-                              return point ? point.v : 'transparent';
-                          },
-                          borderWidth: 0,
-                          hoverBackgroundColor: c => c.raw?.v || 'transparent',
-                          width: ({chart}) => (chart.chartArea || {}).width / 288 * 0.95,
-                          height: ({chart}) => (chart.chartArea || {}).height / 360
+                          label: 'Noise along Moon path (dB)',
+                          data: noiseAlongPath,
+                          borderColor: '#9c27b0',
+                          backgroundColor: 'rgba(156, 39, 176, 0.15)',
+                          fill: true,
+                          tension: 0.25,
+                          pointRadius: 0,
+                          borderWidth: 2
                       }]
                   },
                   options: {
                       responsive: true,
                       maintainAspectRatio: false,
                       scales: {
-                          x: {
-                              type: 'linear',
-                              position: 'top',
-                              min: 0,
-                              max: 287,
-                              ticks: {
-                                  stepSize: 36, // every 3 hours
-                                  callback: v => {
-                                      const h = Math.floor(v / 12);
-                                      return `${String(h).padStart(2,'0')}:00`;
-                                  },
-                                  font: { size: 10 }
-                              },
-                              title: { display: true, text: 'UTC Time →', font: { size: 11 } }
-                          },
+                          x: { display: false },
                           y: {
-                              type: 'linear',
-                              min: 0,
-                              max: 359,
-                              ticks: {
-                                  stepSize: 90,
-                                  callback: v => `${v}°`,
-                                  font: { size: 9 }
+                              title: {
+                                  display: true,
+                                  text: 'Noise (dB)',
+                                  color: '#9c27b0',
+                                  font: { size: 11 }
                               },
-                              title: { display: true, text: 'Azimuth →', font: { size: 11 } }
+                              ticks: { color: '#9c27b0', font: { size: 10 } }
                           }
                       },
                       plugins: {
-                          title: { display: false },
                           legend: { display: false },
-                          tooltip: {
-                              callbacks: {
-                                  label: ctx => {
-                                      if (!ctx.raw) return '';
-                                      const t = ctx.raw.x;
-                                      const az = ctx.raw.y;
-                                      const h = Math.floor(t/12), m = (t%12)*5;
-                                      const noiseVal = noiseInterpolated[t][az];
-                                      return `Az: ${az}° | ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')} | Noise: ${noiseVal !== null ? noiseVal.toFixed(1)+' dB' : '—'}`;
-                                  }
-                              }
-                          },
                           annotation: {
                               annotations: {
                                   timeMarker: {
                                       type: 'line',
                                       scaleID: 'x',
                                       value: index,
-                                      borderColor: 'rgba(255,255,255,0.9)',
+                                      borderColor: 'white',
                                       borderWidth: 2,
                                       borderDash: [6, 4]
                                   }
+                              }
+                          },
+                          tooltip: {
+                              callbacks: {
+                                  label: ctx => `Noise: ${ctx.parsed.y?.toFixed(1) ?? '—'} dB`
                               }
                           }
                       }
                   }
               });
           } else {
-              // Update data + marker
-              noiseChart.data.datasets[0].data = imageData.flatMap((row, t) =>
-                  row.map((color, az) => ({ x: t, y: az, v: color }))
-              );
+              noiseChart.data.datasets[0].data = noiseAlongPath;
               noiseChart.options.plugins.annotation.annotations.timeMarker.value = index;
               noiseChart.update('none');
           }
 
-          // Update label with min/max
+          // Update label with current value
           document.getElementById("noiseChartLabel").innerHTML =
-              `Noise Profile: ${minNoise.toFixed(1)} … ${maxNoise.toFixed(1)} dB`;
+              `Moon-path Noise: ${currentNoise !== null ? currentNoise.toFixed(1) + ' dB' : '—'}`;
       } else {
           noiseWrapper.style.display = "none";
           if (noiseChart) {
@@ -3433,9 +3380,8 @@
                                                 updateMoonChart(currentNow);
                                                 updateChart(hourIndex, false);
                                                 if (getNoiseProfile()) {
-                                                        buildNoiseMatrix();
-                                                        updateChart(getCurrentIndex(), isRealTimeMode); // refresh once to show the colormap
-                                                    }
+                                                    buildNoiseAlongMoonPath();
+                                                }
                                             };
                                                 
     window.addEventListener('unload', () => {
@@ -3845,12 +3791,9 @@
                                                     }
 
                                                     localStorage.setItem("noiseProfile", JSON.stringify(noiseData));
-                                                    alert("Noise profile successfully loaded!");
-
-                                                    // <<< ADD THIS >>>
-                                                    buildNoiseMatrix();
-                                                    updateChart(getCurrentIndex(), isRealTimeMode); // refresh charts
-                                                };
+                                                        alert("Noise profile successfully loaded!");
+                                                        buildNoiseAlongMoonPath();
+                                                        updateChart(getCurrentIndex(), isRealTimeMode);
 
                                                 reader.readAsText(file);
                                             }
@@ -3961,6 +3904,67 @@
                                                 }
 
                                                 noiseInterpolated = matrix;
+                                            }
+                                            function buildNoiseAlongMoonPath() {
+                                                const profile = getNoiseProfile();
+                                                if (!profile || profile.length === 0) {
+                                                    noiseAlongPath = null;
+                                                    return;
+                                                }
+
+                                                noiseProfile = profile;
+
+                                                // Pre-build a fast lookup: azimuth → noise (average over elevation if multiple)
+                                                const azMap = new Map(); // az → {sum, count}
+                                                for (const p of profile) {
+                                                    const azKey = Math.round(p.azimuth); // 0..359
+                                                    if (azKey < 0 || azKey > 359) continue;
+                                                    if (!azMap.has(azKey)) azMap.set(azKey, {sum: 0, count: 0});
+                                                    const entry = azMap.get(azKey);
+                                                    entry.sum += p.noise;
+                                                    entry.count++;
+                                                }
+                                                const azAvg = new Array(360).fill(null);
+                                                azMap.forEach((val, az) => {
+                                                    azAvg[az] = val.sum / val.count;
+                                                });
+
+                                                // Fill gaps with nearest neighbor
+                                                let last = null;
+                                                for (let az = 0; az < 360 + 10; az++) {
+                                                    const i = az % 360;
+                                                    if (azAvg[i] !== null) last = azAvg[i];
+                                                    else if (last !== null) azAvg[i] = last;
+                                                }
+
+                                                // Now sample noise at Moon's azimuth for each of the 288 time steps
+                                                const path = new Array(288).fill(null);
+
+                                                const dateStr = document.getElementById("date").value;
+                                                const qth = document.getElementById("qth").value.trim().toUpperCase();
+                                                if (!qth || !/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qth)) {
+                                                    noiseAlongPath = path;
+                                                    return;
+                                                }
+
+                                                const { lat, lon } = qthToLatLon(qth);
+                                                const observer = new Astronomy.Observer(lat, lon, 0);
+
+                                                for (let i = 0; i < 288; i++) {
+                                                    const hour = Math.floor(i / 12);
+                                                    const minute = (i % 12) * 5;
+                                                    const dt = new Date(`${dateStr}T${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}:00Z`);
+                                                    const time = Astronomy.MakeTime(dt);
+                                                    const moon = Astronomy.Horizon(time, observer,
+                                                        Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, false));
+                                                    
+                                                    if (moon.altitude > -2) {  // Moon is reasonably above horizon
+                                                        const az = Math.round(moon.azimuth);
+                                                        path[i] = azAvg[az] ?? null;
+                                                    }
+                                                }
+
+                                                noiseAlongPath = path;
                                             }
                                             
 </script>
