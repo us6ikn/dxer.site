@@ -1069,8 +1069,6 @@
     // Default to 10GHz
     let FREQUENCY_HZ = bandConfig['10GHz'].frequency;
 
-    let minuteIndex = 0; // Replace the old hourIndex with minuteIndex (0–1439)
-
     function updateHourDisplay() {
         const totalMinutes = minuteIndex;
         const hour = Math.floor(totalMinutes / 60);
