@@ -3651,6 +3651,66 @@
                                                 dxMarker.bindPopup(popupContent);
                                             }
 
+                                            function handleNoiseFile(event) {
+                                                const file = event.target.files[0];
+                                                if (!file) return;
+
+                                                const reader = new FileReader();
+
+                                                reader.onload = function(e) {
+                                                    const text = e.target.result;
+                                                    const noiseData = parseNoiseCsv(text);
+
+                                                    if (!noiseData || noiseData.length === 0) {
+                                                        alert("Noise profile could not be parsed.");
+                                                        return;
+                                                    }
+
+                                                    localStorage.setItem("noiseProfile", JSON.stringify(noiseData));
+                                                    alert("Noise profile successfully loaded!");
+                                                };
+
+                                                reader.readAsText(file);
+                                            }
+
+                                            function parseNoiseCsv(csvText) {
+                                                const delimiter = csvText.includes(";") ? ";" : ",";
+
+                                                const lines = csvText
+                                                    .split(/\r?\n/)
+                                                    .map(l => l.trim())
+                                                    .filter(l => l.length > 0);
+
+                                                if (lines.length < 2) return null;
+
+                                                const header = lines[0]
+                                                    .split(delimiter)
+                                                    .map(h => h.trim().toLowerCase());
+
+                                                const azIdx = header.indexOf("azimuth");
+                                                const elIdx = header.indexOf("elevation");
+                                                const noiseIdx = header.indexOf("noise");
+
+                                                if (azIdx < 0 || elIdx < 0 || noiseIdx < 0) return null;
+
+                                                const table = [];
+
+                                                for (let i = 1; i < lines.length; i++) {
+                                                    const parts = lines[i].split(delimiter).map(p => p.trim());
+                                                    if (parts.length < 3) continue;
+
+                                                    const az = parseFloat(parts[azIdx].replace(",", "."));
+                                                    const el = parseFloat(parts[elIdx].replace(",", "."));
+                                                    const noise = parseFloat(parts[noiseIdx].replace(",", "."));
+
+                                                    if (!isNaN(az) && !isNaN(el) && !isNaN(noise)) {
+                                                        table.push({ azimuth: az, elevation: el, noise: noise });
+                                                    }
+                                                }
+
+                                                return table;
+                                            }
+
 
 </script>
 <!-- Ko-Fi -->
