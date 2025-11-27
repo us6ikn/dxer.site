@@ -1166,7 +1166,7 @@
         const day = date.getUTCDate();
 
         const results = [];
-        for (let i = 0; i < 288; i++) {
+        for (let i = 0; i < 1439; i++) {
             const hour = Math.floor(i / 12);
             const minute = (i % 12) * 5;
             const dt = new Date(Date.UTC(year, month - 1, day, hour, minute));
@@ -1248,7 +1248,7 @@
         const dopplers = [];
         const rates = [];
 
-        for (let i = 0; i < 288; i++) {
+        for (let i = 0; i < 1439; i++) {
             const hour = Math.floor(i / 12);
             const minutes = (i % 12) * 5;
             const dt = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00Z`);
@@ -1870,7 +1870,7 @@
           rawData = computeLibrationForDay(qthInput, dateStr, 'qth');
           computeFullDayData(qthDayData, qthInput, dateStr, true);
         }
-        qthValid = qthDayData.libration.length === 288;
+        qthValid = qthDayData.libration.length === 1439;
         try {
           ({ lat, lon } = qthToLatLon(qthInput));
         } catch (e) {
@@ -1886,7 +1886,7 @@
           dxRawData = computeLibrationForDay(dxInput, dateStr, 'dx');
           computeFullDayData(dxDayData, dxInput, dateStr, false);
         }
-        dxValid = dxDayData.libration.length === 288;
+        dxValid = dxDayData.libration.length === 1439;
         try {
           ({ lat: dxLat, lon: dxLon } = qthToLatLon(dxInput));
         } catch (e) {
@@ -1928,23 +1928,23 @@
       }
 
       // Chart data from caches
-      const qthRates = qthDayData.rates || Array(288).fill(null);
-      const qthElevs = qthDayData.elevations || Array(288).fill(null);
-      const qthDopps = qthDayData.dopplers || Array(288).fill(null);
+      const qthRates = qthDayData.rates || Array(1439).fill(null);
+      const qthElevs = qthDayData.elevations || Array(1439).fill(null);
+      const qthDopps = qthDayData.dopplers || Array(1439).fill(null);
 
-      const dxRates = dxDayData.rates || Array(288).fill(null);
-      const dxElevs = dxDayData.elevations || Array(288).fill(null);
-      const dxDopps = dxDayData.dopplers || Array(288).fill(null);
+      const dxRates = dxDayData.rates || Array(1439).fill(null);
+      const dxElevs = dxDayData.elevations || Array(1439).fill(null);
+      const dxDopps = dxDayData.dopplers || Array(1439).fill(null);
 
       // === RELATIVE CHART DATA – ALWAYS 5-MINUTE RESOLUTION (288 points) ===
-      let relLibrations = Array(288).fill(null);
-      let relDopplers = Array(288).fill(null);
-      let polOffsets = Array(288).fill(null);
+      let relLibrations = Array(1439).fill(null);
+      let relDopplers = Array(1439).fill(null);
+      let polOffsets = Array(1439).fill(null);
 
       if (qthValid && dxValid) {
           // Always recompute at full 5-minute resolution
           // (removes the old date-check that caused 30-min stepping)
-          for (let i = 0; i < 288; i++) {
+          for (let i = 0; i < 1439; i++) {
               const rel = computeRelativeAtIndex(i, qthDayData, dxDayData);
               relLibrations[i] = rel.libration ? rel.libration * 1000 : null;
               relDopplers[i] = rel.doppler;
@@ -1962,7 +1962,7 @@
           polOffsets = relDayData.polOffsets;
       }
 
-      const labels = Array(288).fill('').map((_, i) => {
+      const labels = Array(1439).fill('').map((_, i) => {
           const hour = Math.floor(i / 12);
           const minutes = (i % 12) * 5;
           return `${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
