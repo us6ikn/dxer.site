@@ -106,6 +106,10 @@
                                                                         #noiseCurveChart {
                                                                             height: 100%;
                                                                         }
+                                                                        #noiseChartWrapper canvas {
+                                                                            width: 100% !important;
+                                                                            height: 100% !important;
+                                                                        }
                                                                         
                                                                     #moonChartWrapper {
                                                                         display: block;
@@ -3859,35 +3863,10 @@
 
                                                 noiseProfile = profile;
 
-                                                // Build azimuth → noise lookup
-                                                const azMap = new Map();
-                                                for (const p of profile) {
-                                                    const azKey = Math.round(p.azimuth);
-                                                    if (azKey < 0 || azKey > 359) continue;
-                                                    if (!azMap.has(azKey)) azMap.set(azKey, {sum: 0, count: 0});
-                                                    const e = azMap.get(azKey);
-                                                    e.sum += p.noise;
-                                                    e.count++;
-                                                }
-
-                                                const azAvg = new Array(360).fill(null);
-                                                azMap.forEach((val, az) => {
-                                                    azAvg[az] = val.sum / val.count;
-                                                });
-
-                                                // Fill gaps
-                                                let last = null;
-                                                for (let az = 0; az < 370; az++) {
-                                                    const i = az % 360;
-                                                    if (azAvg[i] !== null) last = azAvg[i];
-                                                    else if (last !== null) azAvg[i] = last;
-                                                }
-
                                                 const path = new Array(288).fill(null);
                                                 const dateStr = document.getElementById("date").value;
                                                 const qth = document.getElementById("qth").value.trim().toUpperCase();
 
-                                                // Critical safety check
                                                 if (!qth || !/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qth)) {
                                                     noiseAlongPath = path;
                                                     return;
@@ -3913,12 +3892,34 @@
                                                     try {
                                                         const eq = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, false);
                                                         const hor = Astronomy.Horizon(time, observer, eq.ra, eq.dec, 'normal');
+
+                                                        // Only compute noise when Moon is reasonably above horizon
                                                         if (hor.altitude > -2) {
-                                                            const az = Math.round(hor.azimuth);
-                                                            path[i] = azAvg[az] ?? null;
+                                                            const targetAz = hor.azimuth;
+                                                            const targetEl = hor.altitude;
+
+                                                            // Find nearest point in the CSV (simple nearest-neighbor)
+                                                            let bestDist = Infinity;
+                                                            let bestNoise = null;
+
+                                                            for (const p of profile) {
+                                                                const dAz = Math.min(
+                                                                    Math.abs(p.azimuth - targetAz),
+                                                                    360 - Math.abs(p.azimuth - targetAz)
+                                                                );
+                                                                const dEl = Math.abs(p.elevation - targetEl);
+                                                                const dist = Math.sqrt(dAz * dAz + dEl * dEl);
+
+                                                                if (dist < bestDist) {
+                                                                    bestDist = dist;
+                                                                    bestNoise = p.noise;
+                                                                }
+                                                            }
+
+                                                            path[i] = bestNoise;
                                                         }
                                                     } catch (e) {
-                                                        // Silently skip bad points
+                                                        // Skip bad points silently
                                                     }
                                                 }
 
