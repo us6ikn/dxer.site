@@ -1257,7 +1257,7 @@
             const elevationDeg = hor.altitude;
             const azimuthDeg = hor.azimuth;
 
-            const isAboveHorizon = elevationDeg >= -1;   // or >= -0.5 if you want to include refraction
+            const isAboveHorizon = elevationDeg >= 0;   // or >= -0.5 if you want to include refraction
             elevations.push(isAboveHorizon ? elevationDeg : null);
             azimuths.push(isAboveHorizon ? azimuthDeg : null);
 
@@ -1896,40 +1896,34 @@
       }
 
       // Get current values (interpolated if real-time)
-      // NEW — use the exact same time as the map/moon chart
-      const exactIndex = isRealtime
-          ? (new Date().getUTCHours() * 12 + new Date().getUTCMinutes() / 5)
-          : index;
-
       let currentElevQth = null, currentAzQth = null, currentRateQth = null, currentDopplerQth = null;
       if (qthValid) {
-        currentElevQth     = getValueAtIndex(qthDayData.elevations, exactIndex);
-        currentAzQth       = getValueAtIndex(qthDayData.azimuths,   exactIndex);
-        currentRateQth     = getValueAtIndex(qthDayData.rates,       exactIndex);
-        currentDopplerQth  = getValueAtIndex(qthDayData.dopplers,    exactIndex);
+        currentElevQth = getValueAtIndex(qthDayData.elevations, index);
+        currentAzQth = getValueAtIndex(qthDayData.azimuths, index);
+        currentRateQth = getValueAtIndex(qthDayData.rates, index);
+        currentDopplerQth = getValueAtIndex(qthDayData.dopplers, index);
       }
 
       let currentElevDx = null, currentAzDx = null, currentRateDx = null, currentDopplerDx = null;
       if (dxValid) {
-        currentElevDx     = getValueAtIndex(dxDayData.elevations, exactIndex);
-        currentAzDx       = getValueAtIndex(dxDayData.azimuths,   exactIndex);
-        currentRateDx     = getValueAtIndex(dxDayData.rates,       exactIndex);
-        currentDopplerDx  = getValueAtIndex(dxDayData.dopplers,    exactIndex);
+        currentElevDx = getValueAtIndex(dxDayData.elevations, index);
+        currentAzDx = getValueAtIndex(dxDayData.azimuths, index);
+        currentRateDx = getValueAtIndex(dxDayData.rates, index);
+        currentDopplerDx = getValueAtIndex(dxDayData.dopplers, index);
       }
 
       // Relative current
       let currentRelRate = null, currentRelDoppler = null, currentPolOffset = null;
       // Relative current (for label) – uses interpolation on full 288-point data
-      // For relative label — also use exactIndex
       if (qthValid && dxValid) {
-          const floorIdx = Math.floor(exactIndex);
-          const ceilIdx = Math.ceil(exactIndex);
-          const frac = exactIndex - floorIdx;
+          const floorIdx = Math.floor(index);
+          const ceilIdx = Math.ceil(index);
+          const frac = index - floorIdx;
           const relFloor = computeRelativeAtIndex(floorIdx, qthDayData, dxDayData);
-          const relCeil  = computeRelativeAtIndex(ceilIdx,  qthDayData, dxDayData);
-          currentRelRate     = interpolate(relFloor.libration * 1000, relCeil.libration * 1000, frac);
-          currentRelDoppler  = interpolate(relFloor.doppler,         relCeil.doppler,         frac);
-          currentPolOffset   = interpolate(relFloor.pol,             relCeil.pol,             frac);
+          const relCeil = computeRelativeAtIndex(ceilIdx, qthDayData, dxDayData);
+          currentRelRate = interpolate(relFloor.libration * 1000, relCeil.libration * 1000, frac);
+          currentRelDoppler = interpolate(relFloor.doppler, relCeil.doppler, frac);
+          currentPolOffset = interpolate(relFloor.pol, relCeil.pol, frac);
       }
 
       // Chart data from caches
@@ -2092,7 +2086,7 @@
           chart.data.datasets[1].data = qthElevs;
           chart.data.datasets[2].data = qthDopps;
           chart.options.plugins.annotation.annotations = qthAnnotation;
-          chart.options.plugins.annotation.annotations.timeMarker.value = exactIndex;
+          chart.options.plugins.annotation.annotations.timeMarker.value = index;
           chart.options.scales.y3.max = maxDoppler;
           chart.options.scales.y3.ticks.stepSize = Math.ceil(maxDoppler / 6);
           chart.update('none');
@@ -2237,7 +2231,7 @@
           dxChart.data.datasets[1].data = dxElevs;
           dxChart.data.datasets[2].data = dxDopps;
           dxChart.options.plugins.annotation.annotations = dxAnnotation;
-          dxChart.options.plugins.annotation.annotations.timeMarker.value = exactIndex;
+          dxChart.options.plugins.annotation.annotations.timeMarker.value = index;
           dxChart.options.scales.y3.max = maxDoppler;
           dxChart.options.scales.y3.ticks.stepSize = Math.ceil(maxDoppler / 6);
           dxChart.update('none');
@@ -2381,7 +2375,7 @@
           relativeChart.data.datasets[1].data = relDopplers;
           relativeChart.data.datasets[2].data = polOffsets;
           relativeChart.options.plugins.annotation.annotations = relativeAnnotation;
-          relativeChart.options.plugins.annotation.annotations.timeMarker.value = exactIndex;
+          relativeChart.options.plugins.annotation.annotations.timeMarker.value = index;
           relativeChart.options.scales.y2.max = maxDoppler;
           relativeChart.options.scales.y2.ticks.stepSize = Math.ceil(maxDoppler / 6);
           relativeChart.update('none');
@@ -2408,21 +2402,9 @@
               }
 
       // Update map and moon chart with exact time
-      // Use the SAME exact fractional time for everything
-      const now = new Date();
-      const currentTime = isRealtime
-          ? now
-          : new Date(Date.UTC(
-              parseInt(dateStr.substring(0,4)),
-              parseInt(dateStr.substring(5,7))-1,
-              parseInt(dateStr.substring(8,10)),
-              Math.floor(exactIndex / 12),
-              (exactIndex % 12) * 5,
-              0
-            ));
-
-      updateMap(currentTime);
-      updateMoonChart(currentTime);
+      const exactTime = isRealtime ? new Date() : new Date(`${dateStr}T${Math.floor(index / 12).toString().padStart(2, '0')}:${String((index % 12) * 5).padStart(2, '0')}:00Z`);
+      updateMap(exactTime);
+      updateMoonChart(exactTime);
       if (dxMarker) updateDxPopup();   // ← This is the missing piece!
     }
 
