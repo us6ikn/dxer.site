@@ -3329,7 +3329,19 @@
                                                         qthMarker = L.marker([lat, lon])
                                                             .addTo(map)
                                                             .bindPopup(`My Locator: ${locator}`);
+
+                                                        // Attach popup event listener ONCE, right after creating the marker
+                                                        qthMarker.on("popupopen", () => {
+                                                            const btn = document.getElementById("loadNoiseBtn");
+                                                            const fileInput = document.getElementById("noiseFileInput");
+
+                                                            if (btn && fileInput) {
+                                                                btn.addEventListener("click", () => fileInput.click());
+                                                                fileInput.addEventListener("change", handleNoiseFile);
+                                                            }
+                                                        });
                                                     }
+
                                                 } else {
                                                     document.getElementById("chartWrapper").style.display = "none";
                                                     if (chart) {
