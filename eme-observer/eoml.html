@@ -1131,8 +1131,8 @@
                 }
                 // Update charts with new data, ensuring real-time mode is off
                 if (!isRealTimeMode) {
-                    console.log(`updateBand: Updating chart with hourIndex=${hourIndex}, isRealTimeMode=${isRealTimeMode}`); // Debug log
-                    updateChart(hourIndex, false);
+                    console.log(`updateBand: Updating chart with hourIndex=${minuteIndex / 60}, isRealTimeMode=${isRealTimeMode}`);
+                    updateChart(minuteIndex / 60, false);
                 } else {
                     console.warn('updateBand: Skipped chart update due to unexpected real-time mode'); // Debug log
                 }
@@ -2403,7 +2403,12 @@
               }
 
       // Update map and moon chart with exact time
-      const exactTime = isRealtime ? new Date() : new Date(`${dateStr}T${Math.floor(index / 12).toString().padStart(2, '0')}:${String((index % 12) * 5).padStart(2, '0')}:00Z`);
+      const exactTime = isRealtime ? new Date() : (() => {
+          const totalMinutes = Math.round(index * 60);
+          const h = Math.floor(totalMinutes / 60);
+          const m = totalMinutes % 60;
+          return new Date(`${dateStr}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00Z`);
+      })();
       updateMap(exactTime);
       updateMoonChart(exactTime);
       if (dxMarker) updateDxPopup();   // ← This is the missing piece!
@@ -2815,7 +2820,7 @@
                                                     nextDayButton.disabled = false;
                                                     stopRealTimeUpdates();
                                                     updateHourDisplay();
-                                                    updateChart(hourIndex, false);
+                                                    updateChart(minuteIndex / 60, false);
                                                 }
                                             });
     
@@ -2868,7 +2873,7 @@
                     type: 'line',
                     mode: 'vertical',
                     scaleID: 'x',
-                    value: isLate ? 287 : index,
+                    value: isLate ? 1439 : index,
                     borderColor: 'blue',
                     borderWidth: 1,
                     label: {
@@ -2900,7 +2905,7 @@
                     type: 'line',
                     mode: 'vertical',
                     scaleID: 'x',
-                    value: isLate ? 287 : index,
+                    value: isLate ? 1439 : index,
                     borderColor: 'orange',
                     borderWidth: 1,
                     label: {
@@ -2931,7 +2936,7 @@
         if (hours >= 23.9167) {
             hours = 23.9167;
         }
-        return hours * 12;
+        return hours * 60;
     }
 
                                             function getSkedAnnotations(dateStr, qthLat, qthLon, dxLat, dxLon) {
@@ -2955,7 +2960,7 @@
                                                 }
 
                                                 function index(time) {
-                                                    return (time.getUTCHours() + time.getUTCMinutes()/60) * 12;
+                                                    return (time.getUTCHours() + time.getUTCMinutes()/60) * 60;
                                                 }
 
                                                 windows.forEach((w, i) => {
@@ -3186,7 +3191,7 @@
         dateInput.value = currentDate.toISOString().slice(0,10);
         const changeEvent = new Event('change', { bubbles: true });
         dateInput.dispatchEvent(changeEvent);
-        updateChart(hourIndex, false);
+        updateChart(minuteIndex / 60, false);
     }
 
     document.getElementById("prevDay").addEventListener("click", () => {
@@ -3209,7 +3214,7 @@
                                                     computeLibrationForDay(dxInput, document.getElementById("date").value, 'dx');
                                                     computeFullDayData(dxDayData, dxInput, document.getElementById("date").value, false);
                                                 }
-                                                updateChart(hourIndex, false);
+                                                updateChart(minuteIndex / 60, false);
                                                 setTimeout(updateQthPopup, 0);  // Update after computations
                                                 setTimeout(updateDxPopup,  0);   // ← added
                                             });
@@ -3274,7 +3279,7 @@
         const minute = now.getUTCMinutes();
         return hour * 12 + (minute / 5);
       } else {
-        return hourIndex;
+          return minuteIndex / 60;
       }
     }
 
