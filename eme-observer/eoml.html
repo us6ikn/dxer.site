@@ -1257,7 +1257,7 @@
             const elevationDeg = hor.altitude;
             const azimuthDeg = hor.azimuth;
 
-            const isAboveHorizon = elevationDeg >= -0.5;   // or >= -0.5 if you want to include refraction
+            const isAboveHorizon = elevationDeg >= -1;   // or >= -0.5 if you want to include refraction
             elevations.push(isAboveHorizon ? elevationDeg : null);
             azimuths.push(isAboveHorizon ? azimuthDeg : null);
 
@@ -1302,7 +1302,7 @@
 
         const qthElev = qthData.elevations[idx];
         const dxElev = dxData.elevations[idx];
-        if (qthElev === null || dxElev === null || qthElev < -0.1 || dxElev < -0.1) {
+        if (qthElev === null || dxElev === null || qthElev < -1 || dxElev < -1) {
             return { libration: null, doppler: null, pol: null };
         }
 
