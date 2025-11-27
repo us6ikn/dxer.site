@@ -3422,6 +3422,9 @@
                                                         } else {
                                                             setTimeout(() => {
                                                                 updateChart(getCurrentIndex(), isRealTimeMode);
+                                                                // ADD THIS LINE HERE
+                                                                                    if (getNoiseProfile()) {
+                                                                                        buildNoiseAlongMoonPath();
                                                             }, 0);
                                                         }
                                                     } catch (e) {
@@ -3851,40 +3854,49 @@
 
                                                 noiseProfile = profile;
 
-                                                // Pre-build a fast lookup: azimuth → noise (average over elevation if multiple)
-                                                const azMap = new Map(); // az → {sum, count}
+                                                // Build azimuth → noise lookup
+                                                const azMap = new Map();
                                                 for (const p of profile) {
-                                                    const azKey = Math.round(p.azimuth); // 0..359
+                                                    const azKey = Math.round(p.azimuth);
                                                     if (azKey < 0 || azKey > 359) continue;
                                                     if (!azMap.has(azKey)) azMap.set(azKey, {sum: 0, count: 0});
-                                                    const entry = azMap.get(azKey);
-                                                    entry.sum += p.noise;
-                                                    entry.count++;
+                                                    const e = azMap.get(azKey);
+                                                    e.sum += p.noise;
+                                                    e.count++;
                                                 }
+
                                                 const azAvg = new Array(360).fill(null);
                                                 azMap.forEach((val, az) => {
                                                     azAvg[az] = val.sum / val.count;
                                                 });
 
-                                                // Fill gaps with nearest neighbor
+                                                // Fill gaps
                                                 let last = null;
-                                                for (let az = 0; az < 360 + 10; az++) {
+                                                for (let az = 0; az < 370; az++) {
                                                     const i = az % 360;
                                                     if (azAvg[i] !== null) last = azAvg[i];
                                                     else if (last !== null) azAvg[i] = last;
                                                 }
 
-                                                // Now sample noise at Moon's azimuth for each of the 288 time steps
                                                 const path = new Array(288).fill(null);
-
                                                 const dateStr = document.getElementById("date").value;
                                                 const qth = document.getElementById("qth").value.trim().toUpperCase();
+
+                                                // Critical safety check
                                                 if (!qth || !/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qth)) {
                                                     noiseAlongPath = path;
                                                     return;
                                                 }
 
-                                                const { lat, lon } = qthToLatLon(qth);
+                                                let lat, lon;
+                                                try {
+                                                    ({ lat, lon } = qthToLatLon(qth));
+                                                } catch (e) {
+                                                    console.warn("Invalid QTH for noise path:", qth);
+                                                    noiseAlongPath = path;
+                                                    return;
+                                                }
+
                                                 const observer = new Astronomy.Observer(lat, lon, 0);
 
                                                 for (let i = 0; i < 288; i++) {
@@ -3892,12 +3904,16 @@
                                                     const minute = (i % 12) * 5;
                                                     const dt = new Date(`${dateStr}T${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}:00Z`);
                                                     const time = Astronomy.MakeTime(dt);
-                                                    const moon = Astronomy.Horizon(time, observer,
-                                                        Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, false));
-                                                    
-                                                    if (moon.altitude > -2) {  // Moon is reasonably above horizon
-                                                        const az = Math.round(moon.azimuth);
-                                                        path[i] = azAvg[az] ?? null;
+
+                                                    try {
+                                                        const eq = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, false);
+                                                        const hor = Astronomy.Horizon(time, observer, eq.ra, eq.dec, 'normal');
+                                                        if (hor.altitude > -2) {
+                                                            const az = Math.round(hor.azimuth);
+                                                            path[i] = azAvg[az] ?? null;
+                                                        }
+                                                    } catch (e) {
+                                                        // Silently skip bad points
                                                     }
                                                 }
 
