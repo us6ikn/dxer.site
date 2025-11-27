@@ -93,7 +93,7 @@
                                                                         #noiseChartWrapper {
                                                                             width: 100%;
                                                                             max-width: 600px;
-                                                                            height: 100px;                /* nice and thin */
+                                                                            height: 100px;                /* fixed height */
                                                                             margin-top: 6px;
                                                                             background-color: rgba(255, 255, 255, 0.85);
                                                                             border-radius: 6px;
@@ -101,12 +101,10 @@
                                                                             overflow: hidden;
                                                                             position: relative;
                                                                             box-sizing: border-box;
+                                                                            display: none;                /* will be set to block when data exists */
                                                                         }
 
-                                                                        #noiseCurveChart {
-                                                                            height: 100%;
-                                                                        }
-                                                                        
+                                                                        /* Let Chart.js control the canvas size – DO NOT override! */
                                                                         
                                                                     #moonChartWrapper {
                                                                         display: block;
