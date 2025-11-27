@@ -90,24 +90,6 @@
                                                                         display: none;
                                                                     }
 
-                                                                        #noiseChartWrapper {
-                                                                            width: 100%;
-                                                                            max-width: 600px;
-                                                                            height: 80px;                 /* ← thin! */
-                                                                            margin-top: 6px;
-                                                                            background-color: rgba(255, 255, 255, 0.85);
-                                                                            border-radius: 6px;
-                                                                            box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
-                                                                            overflow: hidden;
-                                                                            position: relative;
-                                                                            box-sizing: border-box;
-                                                                            display: none;
-                                                                        }
-
-                                                                        #noiseColormapChart {
-                                                                            height: 100%;
-                                                                        }
-                                                                        
                                                                     #moonChartWrapper {
                                                                         display: block;
                                                                     }
@@ -1017,10 +999,6 @@
                 <div id="chartLabel"></div>
                 <canvas id="declinationChart"></canvas>
             </div>
-            <div id="noiseChartWrapper" style="display: none;">
-                <div id="noiseChartLabel">Noise Profile (dB)</div>
-                <canvas id="noiseColormapChart"></canvas>
-            </div>
             <div id="dxChartWrapper" style="display: none;">
                 <div id="dxchartLabel"></div>
                 <canvas id="dxDeclinationChart"></canvas>
@@ -1066,9 +1044,6 @@
     let moonDayData = { date: null, data: [], labels: [] };
     let qthMarker = null;
     let dxMarker = null;
-    let noiseChart = null;
-    let noiseProfile = [];           // raw points: [{azimuth, elevation, noise}]
-    let noiseInterpolated = null;    // 288 × 360 matrix (or 181 for 2° steps)
 
     // NEW: Caches for day data to avoid recompute
     let qthDayData = { date: null, libration: [], elevations: [], azimuths: [], dopplers: [], rates: [] };
@@ -2428,142 +2403,6 @@
 
       // Update map and moon chart with exact time
       const exactTime = isRealtime ? new Date() : new Date(`${dateStr}T${Math.floor(index / 12).toString().padStart(2, '0')}:${String((index % 12) * 5).padStart(2, '0')}:00Z`);
-      // ============ NOISE COLORMAP CHART ============
-      const noiseWrapper = document.getElementById("noiseChartWrapper");
-      if (noiseInterpolated) {
-          noiseWrapper.style.display = "block";
-
-          const labels = Array(288).fill("").map((_, i) => {
-              const h = Math.floor(i / 12);
-              const m = (i % 12) * 5;
-              return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-          });
-
-          // Find min/max for color scaling
-          let minNoise = Infinity, maxNoise = -Infinity;
-          for (const row of noiseInterpolated) {
-              for (const v of row) {
-                  if (v !== null) {
-                      minNoise = Math.min(minNoise, v);
-                      maxNoise = Math.max(maxNoise, v);
-                  }
-              }
-          }
-          if (!isFinite(minNoise)) minNoise = -30;
-          if (!isFinite(maxNoise)) maxNoise = 10;
-
-          // Build image data (Chart.js heatmap via canvas)
-          const imageData = noiseInterpolated.map(row =>
-              row.map(val => {
-                  if (val === null) return 'rgba(0,0,0,0)';
-                  const norm = Math.max(0, Math.min(1, (val - minNoise) / (maxNoise - minNoise)));
-                  // Viridis-like colormap (blue → green → yellow → red)
-                  const r = Math.round(255 * (norm > 0.5 ? (norm - 0.5) * 2 : 0));
-                  const g = Math.round(255 * (norm < 0.5 ? norm * 2 : 1 - (norm - 0.5) * 2));
-                  const b = Math.round(255 * (1 - norm));
-                  return `rgb(${r},${g},${b})`;
-              })
-          );
-
-          if (!noiseChart) {
-              noiseChart = new Chart(document.getElementById("noiseColormapChart"), {
-                  type: 'matrix',
-                  data: {
-                      datasets: [{
-                          label: 'Noise (dB)',
-                          data: imageData.flatMap((row, t) =>
-                              row.map((color, az) => ({ x: t, y: az, v: color }))
-                          ),
-                          backgroundColor(c) {
-                              const point = c.raw;
-                              return point ? point.v : 'transparent';
-                          },
-                          borderWidth: 0,
-                          hoverBackgroundColor: c => c.raw?.v || 'transparent',
-                          width: ({chart}) => (chart.chartArea || {}).width / 288 * 0.95,
-                          height: ({chart}) => (chart.chartArea || {}).height / 360
-                      }]
-                  },
-                  options: {
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      scales: {
-                          x: {
-                              type: 'linear',
-                              position: 'top',
-                              min: 0,
-                              max: 287,
-                              ticks: {
-                                  stepSize: 36, // every 3 hours
-                                  callback: v => {
-                                      const h = Math.floor(v / 12);
-                                      return `${String(h).padStart(2,'0')}:00`;
-                                  },
-                                  font: { size: 10 }
-                              },
-                              title: { display: true, text: 'UTC Time →', font: { size: 11 } }
-                          },
-                          y: {
-                              type: 'linear',
-                              min: 0,
-                              max: 359,
-                              ticks: {
-                                  stepSize: 90,
-                                  callback: v => `${v}°`,
-                                  font: { size: 9 }
-                              },
-                              title: { display: true, text: 'Azimuth →', font: { size: 11 } }
-                          }
-                      },
-                      plugins: {
-                          title: { display: false },
-                          legend: { display: false },
-                          tooltip: {
-                              callbacks: {
-                                  label: ctx => {
-                                      if (!ctx.raw) return '';
-                                      const t = ctx.raw.x;
-                                      const az = ctx.raw.y;
-                                      const h = Math.floor(t/12), m = (t%12)*5;
-                                      const noiseVal = noiseInterpolated[t][az];
-                                      return `Az: ${az}° | ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')} | Noise: ${noiseVal !== null ? noiseVal.toFixed(1)+' dB' : '—'}`;
-                                  }
-                              }
-                          },
-                          annotation: {
-                              annotations: {
-                                  timeMarker: {
-                                      type: 'line',
-                                      scaleID: 'x',
-                                      value: index,
-                                      borderColor: 'rgba(255,255,255,0.9)',
-                                      borderWidth: 2,
-                                      borderDash: [6, 4]
-                                  }
-                              }
-                          }
-                      }
-                  }
-              });
-          } else {
-              // Update data + marker
-              noiseChart.data.datasets[0].data = imageData.flatMap((row, t) =>
-                  row.map((color, az) => ({ x: t, y: az, v: color }))
-              );
-              noiseChart.options.plugins.annotation.annotations.timeMarker.value = index;
-              noiseChart.update('none');
-          }
-
-          // Update label with min/max
-          document.getElementById("noiseChartLabel").innerHTML =
-              `Noise Profile: ${minNoise.toFixed(1)} … ${maxNoise.toFixed(1)} dB`;
-      } else {
-          noiseWrapper.style.display = "none";
-          if (noiseChart) {
-              noiseChart.destroy();
-              noiseChart = null;
-          }
-      }
       updateMap(exactTime);
       updateMoonChart(exactTime);
       if (dxMarker) updateDxPopup();   // ← This is the missing piece!
@@ -3431,10 +3270,6 @@
                                                 updateMap(currentNow);
                                                 updateMoonChart(currentNow);
                                                 updateChart(hourIndex, false);
-                                                if (getNoiseProfile()) {
-                                                        buildNoiseMatrix();
-                                                        updateChart(getCurrentIndex(), isRealTimeMode); // refresh once to show the colormap
-                                                    }
                                             };
                                                 
     window.addEventListener('unload', () => {
@@ -3845,10 +3680,6 @@
 
                                                     localStorage.setItem("noiseProfile", JSON.stringify(noiseData));
                                                     alert("Noise profile successfully loaded!");
-
-                                                    // <<< ADD THIS >>>
-                                                    buildNoiseMatrix();
-                                                    updateChart(getCurrentIndex(), isRealTimeMode); // refresh charts
                                                 };
 
                                                 reader.readAsText(file);
@@ -3897,71 +3728,7 @@
                                                 return json ? JSON.parse(json) : null;
                                             }
 
-                                            function buildNoiseMatrix() {
-                                                const profile = getNoiseProfile();
-                                                if (!profile || profile.length === 0) {
-                                                    noiseInterpolated = null;
-                                                    return;
-                                                }
 
-                                                noiseProfile = profile;
-
-                                                // We'll interpolate onto a regular grid:
-                                                // - Azimuth: 0° → 359° (1° resolution → 360 cols)
-                                                // - Elevation: 0° → 90° (you can change to 1° or 2° steps)
-                                                const AZ_STEPS = 360;
-                                                const EL_STEPS = 91;   // 0..90 inclusive
-
-                                                const matrix = Array(288).fill().map(() => Array(AZ_STEPS).fill(null));
-
-                                                // Simple nearest-neighbor + linear falloff (fast enough)
-                                                for (let t = 0; t < 288; t++) {
-                                                    const azValues = Array(AZ_STEPS).fill(null);
-                                                    const weights  = Array(AZ_STEPS).fill(0);
-
-                                                    for (const pt of profile) {
-                                                        const az = Math.round(pt.azimuth);
-                                                        if (az < 0 || az >= 360) continue;
-                                                        const el = pt.elevation;
-                                                        if (el < 0 || el > 90) continue;
-
-                                                        // Only use points that could be visible at this time (moon elevation > 0)
-                                                        // We'll still store all, but you can filter here if you want
-                                                        const dist = Math.abs(az - az); // dummy, will be replaced in weighted avg
-                                                        const w = 1.0 / (1.0 + dist * dist); // simple inverse distance weighting
-
-                                                        if (azValues[az] === null) {
-                                                            azValues[az] = pt.noise;
-                                                            weights[az]  = w;
-                                                        } else {
-                                                            azValues[az] += pt.noise * w;
-                                                            weights[az]  += w;
-                                                        }
-                                                    }
-
-                                                    // Normalize weighted average
-                                                    for (let az = 0; az < AZ_STEPS; az++) {
-                                                        if (weights[az] > 0) {
-                                                            azValues[az] /= weights[az];
-                                                        }
-                                                    }
-
-                                                    // Fill gaps with horizontal interpolation
-                                                    let last = null;
-                                                    for (let az = 0; az < AZ_STEPS + 5; az++) {  // +5 to wrap around
-                                                        const i = az % AZ_STEPS;
-                                                        if (azValues[i] !== null) {
-                                                            last = azValues[i];
-                                                        } else if (last !== null) {
-                                                            azValues[i] = last;
-                                                        }
-                                                    }
-                                                    matrix[t] = azValues.slice(0, AZ_STEPS);
-                                                }
-
-                                                noiseInterpolated = matrix;
-                                            }
-                                            
 </script>
 <!-- Ko-Fi -->
 <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
