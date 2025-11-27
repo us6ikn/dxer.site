@@ -90,22 +90,6 @@
                                                                         display: none;
                                                                     }
 
-                                                                        #noiseChartWrapper {
-                                                                            width: 100%;
-                                                                            max-width: 600px;
-                                                                            height: 100px;                /* fixed height */
-                                                                            margin-top: 6px;
-                                                                            background-color: rgba(255, 255, 255, 0.85);
-                                                                            border-radius: 6px;
-                                                                            box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
-                                                                            overflow: hidden;
-                                                                            position: relative;
-                                                                            box-sizing: border-box;
-                                                                            display: none;                /* will be set to block when data exists */
-                                                                        }
-
-                                                                        /* Let Chart.js control the canvas size – DO NOT override! */
-                                                                        
                                                                     #moonChartWrapper {
                                                                         display: block;
                                                                     }
@@ -1015,10 +999,6 @@
                 <div id="chartLabel"></div>
                 <canvas id="declinationChart"></canvas>
             </div>
-            <div id="noiseChartWrapper" style="display: none;">
-                <div id="noiseChartLabel">Moon-path Noise (dB)</div>
-                <canvas id="noiseCurveChart"></canvas>
-            </div>
             <div id="dxChartWrapper" style="display: none;">
                 <div id="dxchartLabel"></div>
                 <canvas id="dxDeclinationChart"></canvas>
@@ -1064,9 +1044,6 @@
     let moonDayData = { date: null, data: [], labels: [] };
     let qthMarker = null;
     let dxMarker = null;
-    let noiseChart = null;           // will be a normal line chart now
-    let noiseProfile = [];           // raw CSV points
-    let noiseAlongPath = null;       // 288-point array: noise at Moon's azimuth at each time
 
     // NEW: Caches for day data to avoid recompute
     let qthDayData = { date: null, libration: [], elevations: [], azimuths: [], dopplers: [], rates: [] };
@@ -2426,90 +2403,6 @@
 
       // Update map and moon chart with exact time
       const exactTime = isRealtime ? new Date() : new Date(`${dateStr}T${Math.floor(index / 12).toString().padStart(2, '0')}:${String((index % 12) * 5).padStart(2, '0')}:00Z`);
-      // ============ NOISE CURVE CHART (lightweight) ============
-      const noiseWrapper = document.getElementById("noiseChartWrapper");
-
-      if (noiseAlongPath && noiseAlongPath.some(v => v !== null)) {
-          noiseWrapper.style.display = "block";
-
-          const labels = Array(288).map((_, i) => {
-              const h = Math.floor(i / 12);
-              const m = (i % 12) * 5;
-              return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-          });
-
-          // Current noise value
-          const currentNoise = noiseAlongPath[Math.round(index)] || null;
-
-          if (!noiseChart) {
-              noiseChart = new Chart(document.getElementById("noiseCurveChart"), {
-                  type: 'line',
-                  data: {
-                      labels: labels,
-                      datasets: [{
-                          label: 'Noise along Moon path (dB)',
-                          data: noiseAlongPath,
-                          borderColor: '#9c27b0',
-                          backgroundColor: 'rgba(156, 39, 176, 0.15)',
-                          fill: true,
-                          tension: 0.25,
-                          pointRadius: 0,
-                          borderWidth: 2
-                      }]
-                  },
-                  options: {
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      scales: {
-                          x: { display: false },
-                          y: {
-                              title: {
-                                  display: true,
-                                  text: 'Noise (dB)',
-                                  color: '#9c27b0',
-                                  font: { size: 11 }
-                              },
-                              ticks: { color: '#9c27b0', font: { size: 10 } }
-                          }
-                      },
-                      plugins: {
-                          legend: { display: false },
-                          annotation: {
-                              annotations: {
-                                  timeMarker: {
-                                      type: 'line',
-                                      scaleID: 'x',
-                                      value: index,
-                                      borderColor: 'white',
-                                      borderWidth: 2,
-                                      borderDash: [6, 4]
-                                  }
-                              }
-                          },
-                          tooltip: {
-                              callbacks: {
-                                  label: ctx => `Noise: ${ctx.parsed.y?.toFixed(1) ?? '—'} dB`
-                              }
-                          }
-                      }
-                  }
-              });
-          } else {
-              noiseChart.data.datasets[0].data = noiseAlongPath;
-              noiseChart.options.plugins.annotation.annotations.timeMarker.value = index;
-              noiseChart.update('none');
-          }
-
-          // Update label with current value
-          document.getElementById("noiseChartLabel").innerHTML =
-              `Moon-path Noise: ${currentNoise !== null ? currentNoise.toFixed(1) + ' dB' : '—'}`;
-      } else {
-          noiseWrapper.style.display = "none";
-          if (noiseChart) {
-              noiseChart.destroy();
-              noiseChart = null;
-          }
-      }
       updateMap(exactTime);
       updateMoonChart(exactTime);
       if (dxMarker) updateDxPopup();   // ← This is the missing piece!
@@ -3318,12 +3211,8 @@
                                                     computeFullDayData(dxDayData, dxInput, document.getElementById("date").value, false);
                                                 }
                                                 updateChart(hourIndex, false);
-                                                if (getNoiseProfile()) {
-                                                        buildNoiseAlongMoonPath();
-                                                    }
-
-                                                    setTimeout(updateQthPopup, 0);
-                                                    setTimeout(updateDxPopup, 0);
+                                                setTimeout(updateQthPopup, 0);  // Update after computations
+                                                setTimeout(updateDxPopup,  0);   // ← added
                                             });
 
                                             window.onload = () => {
@@ -3381,9 +3270,6 @@
                                                 updateMap(currentNow);
                                                 updateMoonChart(currentNow);
                                                 updateChart(hourIndex, false);
-                                                if (getNoiseProfile()) {
-                                                    buildNoiseAlongMoonPath();
-                                                }
                                             };
                                                 
     window.addEventListener('unload', () => {
@@ -3425,11 +3311,7 @@
                                                         } else {
                                                             setTimeout(() => {
                                                                 updateChart(getCurrentIndex(), isRealTimeMode);
-
-                                                                if (getNoiseProfile()) {
-                                                                    buildNoiseAlongMoonPath();
-                                                                }
-                                                            }, 0);   // ← comma and 0 are OUTSIDE the function
+                                                            }, 0);
                                                         }
                                                     } catch (e) {
                                                         console.error(`Error computing libration for QTH ${locator}: ${e.message}`);
@@ -3447,19 +3329,7 @@
                                                         qthMarker = L.marker([lat, lon])
                                                             .addTo(map)
                                                             .bindPopup(`My Locator: ${locator}`);
-
-                                                        // Attach popup event listener ONCE, right after creating the marker
-                                                        qthMarker.on("popupopen", () => {
-                                                            const btn = document.getElementById("loadNoiseBtn");
-                                                            const fileInput = document.getElementById("noiseFileInput");
-
-                                                            if (btn && fileInput) {
-                                                                btn.addEventListener("click", () => fileInput.click());
-                                                                fileInput.addEventListener("change", handleNoiseFile);
-                                                            }
-                                                        });
                                                     }
-
                                                 } else {
                                                     document.getElementById("chartWrapper").style.display = "none";
                                                     if (chart) {
@@ -3700,17 +3570,12 @@
 
                                                   ${moonIcon} Moonrise: ${info.moonrise}<br>
                                                   ${moonIcon} Moonset: ${info.moonset}<br>
+
                                                   <div style="height:4px"></div>
 
                                                   ${sunIcon} Sunrise: ${info.sunrise}<br>
-                                                  ${sunIcon} Sunset: ${info.sunset}<br>
-
-                                                  <hr style="margin:6px 0;">
-                                                  <b>Noise Profile</b><br>
-                                                  <button id="loadNoiseBtn">Load CSV…</button>
-                                                  <input id="noiseFileInput" type="file" accept=".csv" style="display:none;">
+                                                  ${sunIcon} Sunset: ${info.sunset}
                                                 `;
-
 
                                                 qthMarker.bindPopup(popupContent);
                                             }
@@ -3781,142 +3646,7 @@
                                                 dxMarker.bindPopup(popupContent);
                                             }
 
-                                            function handleNoiseFile(event) {
-                                                const file = event.target.files[0];
-                                                if (!file) return;
 
-                                                const reader = new FileReader();
-
-                                                reader.onload = function(e) {
-                                                    const text = e.target.result;
-                                                    const noiseData = parseNoiseCsv(text);
-
-                                                    if (!noiseData || noiseData.length === 0) {
-                                                        alert("Noise profile could not be parsed.");
-                                                        return;
-                                                    }
-
-                                                    localStorage.setItem("noiseProfile", JSON.stringify(noiseData));
-                                                    alert("Noise profile successfully loaded!");
-                                                    buildNoiseAlongMoonPath();
-                                                    updateChart(getCurrentIndex(), isRealTimeMode);
-                                                };  // ← This was missing!
-
-                                                reader.readAsText(file);
-                                            }
-
-                                            function parseNoiseCsv(csvText) {
-                                                const delimiter = csvText.includes(";") ? ";" : ",";
-
-                                                const lines = csvText
-                                                    .split(/\r?\n/)
-                                                    .map(l => l.trim())
-                                                    .filter(l => l.length > 0);
-
-                                                if (lines.length < 2) return null;
-
-                                                const header = lines[0]
-                                                    .split(delimiter)
-                                                    .map(h => h.trim().toLowerCase());
-
-                                                const azIdx = header.indexOf("azimuth");
-                                                const elIdx = header.indexOf("elevation");
-                                                const noiseIdx = header.indexOf("noise");
-
-                                                if (azIdx < 0 || elIdx < 0 || noiseIdx < 0) return null;
-
-                                                const table = [];
-
-                                                for (let i = 1; i < lines.length; i++) {
-                                                    const parts = lines[i].split(delimiter).map(p => p.trim());
-                                                    if (parts.length < 3) continue;
-
-                                                    const az = parseFloat(parts[azIdx].replace(",", "."));
-                                                    const el = parseFloat(parts[elIdx].replace(",", "."));
-                                                    const noise = parseFloat(parts[noiseIdx].replace(",", "."));
-
-                                                    if (!isNaN(az) && !isNaN(el) && !isNaN(noise)) {
-                                                        table.push({ azimuth: az, elevation: el, noise: noise });
-                                                    }
-                                                }
-
-                                                return table;
-                                            }
-
-                                            function getNoiseProfile() {
-                                                const json = localStorage.getItem("noiseProfile");
-                                                return json ? JSON.parse(json) : null;
-                                            }
-
-                                            
-                                            function buildNoiseAlongMoonPath() {
-                                                const profile = getNoiseProfile();
-                                                if (!profile || profile.length === 0) {
-                                                    noiseAlongPath = null;
-                                                    return;
-                                                }
-
-                                                const qth = document.getElementById("qth").value.trim().toUpperCase();
-                                                if (!qth || !/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qth)) {
-                                                    noiseAlongPath = null;        // ← important: set to null, not an array of nulls
-                                                    return;
-                                                }
-
-
-                                                let lat, lon;
-                                                try {
-                                                    ({ lat, lon } = qthToLatLon(qth));
-                                                } catch (e) {
-                                                    console.warn("Invalid QTH for noise path:", qth);
-                                                    noiseAlongPath = path;
-                                                    return;
-                                                }
-
-                                                const observer = new Astronomy.Observer(lat, lon, 0);
-
-                                                for (let i = 0; i < 288; i++) {
-                                                    const hour = Math.floor(i / 12);
-                                                    const minute = (i % 12) * 5;
-                                                    const dt = new Date(`${dateStr}T${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}:00Z`);
-                                                    const time = Astronomy.MakeTime(dt);
-
-                                                    try {
-                                                        const eq = Astronomy.Equator(Astronomy.Body.Moon, time, observer, true, false);
-                                                        const hor = Astronomy.Horizon(time, observer, eq.ra, eq.dec, 'normal');
-
-                                                        // Only compute noise when Moon is reasonably above horizon
-                                                        if (hor.altitude > -2) {
-                                                            const targetAz = hor.azimuth;
-                                                            const targetEl = hor.altitude;
-
-                                                            // Find nearest point in the CSV (simple nearest-neighbor)
-                                                            let bestDist = Infinity;
-                                                            let bestNoise = null;
-
-                                                            for (const p of profile) {
-                                                                const dAz = Math.min(
-                                                                    Math.abs(p.azimuth - targetAz),
-                                                                    360 - Math.abs(p.azimuth - targetAz)
-                                                                );
-                                                                const dEl = Math.abs(p.elevation - targetEl);
-                                                                const dist = Math.sqrt(dAz * dAz + dEl * dEl);
-
-                                                                if (dist < bestDist) {
-                                                                    bestDist = dist;
-                                                                    bestNoise = p.noise;
-                                                                }
-                                                            }
-
-                                                            path[i] = bestNoise;
-                                                        }
-                                                    } catch (e) {
-                                                        // Skip bad points silently
-                                                    }
-                                                }
-
-                                                noiseAlongPath = path;
-                                            }
-                                            
 </script>
 <!-- Ko-Fi -->
 <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
