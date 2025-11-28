@@ -127,22 +127,29 @@
                                                                         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
                                                                     }
                                                                         
-                                                                        /* Dome button – same style as Annual button */
                                                                         .dome-button {
-                                                                            right: 60px;              /* moves it left of Annual */
-                                                                            padding: 3px 6px;         /* matches Annual height */
-                                                                            min-height: 24px;
-                                                                            display: inline-flex;
-                                                                            align-items: center;
-                                                                            justify-content: center;
+                                                                            right: 60px;
                                                                             position: absolute;
                                                                             top: 145px;
                                                                             z-index: 10;
+
+                                                                            /* match Annual button's internal height */
+                                                                            height: 24px;
+                                                                            padding: 4px 8px;
+
+                                                                            display: inline-flex;
+                                                                            align-items: center;
+                                                                            justify-content: center;
+
+                                                                            /* inherits all Annual button styles (background, radius, shadow) */
                                                                         }
 
                                                                         .dome-button svg {
+                                                                            height: 16px;   /* fits perfectly inside the 24px button */
+                                                                            width: auto;
                                                                             display: block;
                                                                         }
+
 
 
                                                                     /* Reverted to original chart label styles */
