@@ -692,19 +692,41 @@
 
       <ul>
         <li><strong>Dpol</strong> (blue) – Spatial polarization offset in degrees (equivalent to <em>Dpol</em> in WSJT-X)</li>
-        <li><strong>Rel&nbsp;LR</strong> (red) – Relative libration rate between the two stations (same as in VK3UM Libration Calculator)</li>
+        <li><strong>Rel&nbsp;LR</strong> (red) – Relative libration rate between the two stations</li>
         <li><strong>DX&nbsp;Width</strong> (green) – Relative Doppler spread for the selected band (equivalent to <em>DXWid</em> in WSJT-X)</li>
       </ul>
 
       <h4 id="locator-markers">Locator Markers</h4>
+
+      <figure style="margin-top: 10px; text-align: center;">
+        <a href="images/locator-markers-and-footprint.jpg" target="_blank" rel="noopener">
+          <img
+            src="images/locator-markers-and-footprint.jpg"
+            alt="My Locator and DX Locator markers with moon footprint."
+            loading="lazy"
+            width="800"
+            height="450"
+            style="max-width: 100%; height: auto; border-radius: 8px;"
+          />
+        </a>
+        <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+            My Locator and DX Locator markers with moon footprint. The DX locator info window is open.
+        </figcaption>
+      </figure>
+      
+      <p>
+        When a valid 6-character QTH locator is entered in the <em>My Locator</em> field, a marker indicating your station’s location is displayed on the map. Entering a valid locator in the <em>DX Locator</em> field adds a second marker identifying the DX station’s location.
+      </p>
+      
       <figure style="margin-top: 10px; text-align: center;">
         <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px;">
+
           <!-- Subfigure 1 -->
           <div style="flex: 1 1 380px; max-width: 300px;">
             <a href="images/dx_marker-0.jpg" target="_blank" rel="noopener">
               <img
                 src="images/dx_marker-0.jpg"
-                alt="Moon data chart for bands above 1 GHz"
+                alt="DX marker: no common moon windows"
                 loading="lazy"
                 width="800"
                 height="450"
@@ -712,7 +734,7 @@
               />
             </a>
             <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
-              Moon data chart appearance for bands above 1&nbsp;GHz
+              DX marker: no common moon windows
             </figcaption>
           </div>
 
@@ -721,7 +743,7 @@
             <a href="images/dx_marker-1.jpg" target="_blank" rel="noopener">
               <img
                 src="images/dx_marker-1.jpg"
-                alt="Moon data chart for bands below 1 GHz"
+                alt="DX marker: one common moon window"
                 loading="lazy"
                 width="800"
                 height="450"
@@ -729,16 +751,16 @@
               />
             </a>
             <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
-              Moon data chart appearance for bands below 1&nbsp;GHz
+              DX marker: one common moon window
             </figcaption>
           </div>
-          
+
           <!-- Subfigure 3 -->
           <div style="flex: 1 1 380px; max-width: 300px;">
             <a href="images/dx_marker-2.jpg" target="_blank" rel="noopener">
               <img
                 src="images/dx_marker-2.jpg"
-                alt="Moon data chart for bands below 1 GHz"
+                alt="DX marker: two common moon windows"
                 loading="lazy"
                 width="800"
                 height="450"
@@ -746,16 +768,16 @@
               />
             </a>
             <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
-              Moon data chart appearance for bands below 1&nbsp;GHz
+              DX marker: two common moon windows
             </figcaption>
           </div>
-          
+
           <!-- Subfigure 4 -->
           <div style="flex: 1 1 380px; max-width: 300px;">
             <a href="images/dx_marker-3.jpg" target="_blank" rel="noopener">
               <img
                 src="images/dx_marker-3.jpg"
-                alt="Moon data chart for bands below 1 GHz"
+                alt="DX marker: three common moon windows"
                 loading="lazy"
                 width="800"
                 height="450"
@@ -763,11 +785,26 @@
               />
             </a>
             <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
-              Moon data chart appearance for bands below 1&nbsp;GHz
+              DX marker: three common moon windows
             </figcaption>
           </div>
+
         </div>
       </figure>
+
+      <p>
+        Clicking the DX location marker opens an information window showing the DX locator, the selected day and date, and any common moon windows between the two QTH locators. If no common moon window exists for the selected date, the message <strong>No common moon window today</strong> is displayed.
+      </p>
+
+      <p>
+        Up to three common moon windows may occur within a 24-hour period, depending on the date. All times are given in UTC. Because a moon window may cross midnight, the notation <strong>(-1)</strong> and <strong>(+1)</strong> is used to indicate that the time corresponds to the previous or next UTC day, respectively.
+      </p>
+
+      <p>
+        Note that if the <em>Sked</em> button is used to select the DX station, the DX location marker may be hidden beneath the DX station information window. Close the information window to reveal the DX location marker.
+      </p>
+
+      
 
       <h4 id="autotracking">Realtime Tracking Mode</h4>
 
