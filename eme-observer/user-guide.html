@@ -352,8 +352,9 @@
                   <li><a href="#my-location-chart">My Location Chart</a></li>
                   <li><a href="#dx-location-chart">DX Location Chart</a></li>
                   <li><a href="#sked-chart">Sked Chart</a></li>
-                  <li><a href="#autotracking">Realtime Tracking Mode</a></li>
+                  <li><a href="#locator-markers">Locator Markers</a></li>
                   <li><a href="#station-map">Station Map and Station Profiles</a></li>
+                  <li><a href="#autotracking">Realtime Tracking Mode</a></li>
                 </ul>
               </li>
             <li><a href="#table-view">Table View</a></li>
@@ -362,6 +363,7 @@
         </li>
         <li><a href="#mobile-experience">Mobile experience</a></li>
         <li><a href="#other-bands">Use on Bands Below 432 MHz</a></li>
+        <li><a href="#libration">A Note on Libration Rate and Doppler Spread</a></li>
         <li><a href="#dpol">A note on Spatial Polarisation Offset (Dpol)</a></li>
         <li><a href="#support">Support EME Observer</a></li>
       </ul>
@@ -407,9 +409,7 @@
      </ul>
 
      <p>
-       EME Observer was originally developed for personal use, tailored to the rhythm of my lifestyle and portable EME operation, which I enjoy most. Thanks to the support of the vibrant and dynamic EME community, EME Observer has grown into a full-featured EME planner and station map for all bands, from 432&nbsp;MHz and above. It is platform-independent and performs equally well on desktop and mobile devices, making it easy to plan EME activity on the go.
-       <br><br>
-       EME Observer is <strong>not</strong> a link budget calculator. It will not tell you whether a QSO is possible with your particular setup, but understanding the data it presents can significantly improve your chances.
+       EME Observer is platform-independent and performs equally well on desktop and mobile devices, making it easy to plan EME activity on the go. Note that it is <strong>not</strong> a link budget calculator. It will not tell you whether a QSO is possible with your particular setup, but understanding the data it presents can significantly improve your chances.
      </p>
 
       
@@ -508,7 +508,7 @@
       <p>
         <strong>Map View</strong> is the default display in EME Observer. When the application loads, the <em>My Locator</em> and <em>DX Locator</em> fields are blank, and the date and time are automatically set to the current UTC time, rounded to the nearest 5 minutes.
         <br><br>
-        You can adjust the date using the date picker or its arrow controls, and change the time by moving the time slider. As you move the slider, the Moon footprint updates in 5-minute increments. The Moon icon marks the sublunar point - the location on Earth where the Moon is directly overhead.
+        You can adjust the date using the date picker or its arrow controls, and change the time by moving the time slider. As you move the slider, the Moon footprint updates in 5-minute increments (or 1-minute steps in the Realtime Tracking mode). The Moon icon marks the sublunar point - the location on Earth where the Moon is directly overhead.
         <br><br>
         You can enable the realtime mode by pressing the Track button. Additional map layers, QTH locator grids or CQ Zones, can be enabled via the <strong>Map Layers</strong> icon located in the upper-right corner of the screen.
       </p>
@@ -676,26 +676,32 @@
           Sked Chart (example for 10&nbsp;GHz)
         </figcaption>
       </figure>
+
       <p>
-        The <strong>Sked Chart</strong> becomes visible when valid 6-character QTH locators are entered in both the <em>My Locator</em> and <em>DX Locator</em> fields. It displays key signal path metrics for the common Moon window (sked) between the two stations (computed as vectors):
-        <strong>Relative Libration Rate</strong> (Rel&nbsp;LR), <strong>Relative Doppler Spread</strong> for the selected band (DX&nbsp;Width), and <strong>Spatial Polarization Offset</strong> (Dpol).
+        The <strong>Sked Chart</strong> becomes visible when valid 6-character QTH locators are entered in both the <em>My Locator</em> and <em>DX Locator</em> fields, and a common moon window exists between them on the selected date. The chart displays key signal-path metrics (computed as vectors) within these common moon windows: <strong>Relative Libration Rate</strong> (Rel&nbsp;LR), <strong>Relative Doppler Spread</strong> for the selected band (DX&nbsp;Width), and <strong>Spatial Polarization Offset</strong> (Dpol).
       </p>
+
       <p>
-        As with the other charts, each curve and its corresponding Y-axis are <strong>color-coded</strong>, as are the numerical values shown above the chart. These parameters are defined as follows:
+        The beginning and end of each common window are marked by green and red vertical lines, respectively. The corresponding start and end times appear in matching colors next to these markers. There may be one, two, or three common windows within a 24-hour period. If no common moon window exists, the Sked Chart is not displayed.
       </p>
+
+      <p>
+        As with the other charts, each curve and its associated Y-axis are <strong>color-coded</strong>, as are the numerical values shown above the chart. The displayed parameters are defined as follows:
+      </p>
+
       <ul>
-        <li><strong>Rel LR</strong> – Relative libration rate between the two stations</li>
-        <li><strong>DX Width</strong> – Relative Doppler spread for the selected band (equivalent to <em>DXWid</em> in WSJT-X)</li>
-        <li><strong>Dpol</strong> – Spatial polarization offset in degrees (equivalent to <em>Dpol</em> in WSJT-X)</li>
+        <li><strong>Dpol</strong> (blue) – Spatial polarization offset in degrees (equivalent to <em>Dpol</em> in WSJT-X)</li>
+        <li><strong>Rel&nbsp;LR</strong> (red) – Relative libration rate between the two stations</li>
+        <li><strong>DX&nbsp;Width</strong> (green) – Relative Doppler spread for the selected band (equivalent to <em>DXWid</em> in WSJT-X)</li>
       </ul>
 
-      <h4 id="autotracking">Realtime Tracking Mode</h4>
+      <h4 id="locator-markers">Locator Markers</h4>
 
       <figure style="margin-top: 10px; text-align: center;">
-        <a href="images/realtime-tracking.jpg" target="_blank" rel="noopener">
+        <a href="images/locator-markers-and-footprint.jpg" target="_blank" rel="noopener">
           <img
-            src="images/realtime-tracking.jpg"
-            alt="Realtime Tracking Mode in EME Observer"
+            src="images/locator-markers-and-footprint.jpg"
+            alt="My Locator and DX Locator markers with moon footprint."
             loading="lazy"
             width="800"
             height="450"
@@ -703,18 +709,99 @@
           />
         </a>
         <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
-            Realtime Tracking Mode in EME Observer
+            My Locator and DX Locator markers with moon footprint. The DX locator info window is open.
         </figcaption>
+      </figure>
+      
+      <p>
+        When a valid 6-character QTH locator is entered in the <em>My Locator</em> field, a marker indicating your station’s location is displayed on the map. Entering a valid locator in the <em>DX Locator</em> field adds a second marker identifying the DX station’s location.
+      </p>
+      
+      <figure style="margin-top: 10px; text-align: center;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px;">
+
+          <!-- Subfigure 1 -->
+          <div style="flex: 1 1 380px; max-width: 300px;">
+            <a href="images/dx_marker-0.jpg" target="_blank" rel="noopener">
+              <img
+                src="images/dx_marker-0.jpg"
+                alt="DX marker: no common moon windows"
+                loading="lazy"
+                width="800"
+                height="450"
+                style="max-width: 100%; height: auto; border-radius: 8px;"
+              />
+            </a>
+            <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+              DX marker: no common moon windows
+            </figcaption>
+          </div>
+
+          <!-- Subfigure 2 -->
+          <div style="flex: 1 1 380px; max-width: 300px;">
+            <a href="images/dx_marker-1.jpg" target="_blank" rel="noopener">
+              <img
+                src="images/dx_marker-1.jpg"
+                alt="DX marker: one common moon window"
+                loading="lazy"
+                width="800"
+                height="450"
+                style="max-width: 100%; height: auto; border-radius: 8px;"
+              />
+            </a>
+            <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+              DX marker: one common moon window
+            </figcaption>
+          </div>
+
+          <!-- Subfigure 3 -->
+          <div style="flex: 1 1 380px; max-width: 300px;">
+            <a href="images/dx_marker-2.jpg" target="_blank" rel="noopener">
+              <img
+                src="images/dx_marker-2.jpg"
+                alt="DX marker: two common moon windows"
+                loading="lazy"
+                width="800"
+                height="450"
+                style="max-width: 100%; height: auto; border-radius: 8px;"
+              />
+            </a>
+            <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+              DX marker: two common moon windows
+            </figcaption>
+          </div>
+
+          <!-- Subfigure 4 -->
+          <div style="flex: 1 1 380px; max-width: 300px;">
+            <a href="images/dx_marker-3.jpg" target="_blank" rel="noopener">
+              <img
+                src="images/dx_marker-3.jpg"
+                alt="DX marker: three common moon windows"
+                loading="lazy"
+                width="800"
+                height="450"
+                style="max-width: 100%; height: auto; border-radius: 8px;"
+              />
+            </a>
+            <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+              DX marker: three common moon windows
+            </figcaption>
+          </div>
+
+        </div>
       </figure>
 
       <p>
-        EME Observer includes a <strong>Realtime Tracking</strong> mode, which can be activated by pressing the <em>Track</em> button.
-        In this mode, the map and all metrics displayed on the charts and above them are updated at <strong>1-minute intervals</strong>.
-        This frequency is sufficient for assesment of the current Moon footprint and conditions, for example during contests or when running schedules.
-        When Realtime Tracking mode is active, the time and date controls are greyed out, as shown in the screenshot above.
-        To return to <em>Manual</em> mode for standard EME planning, click the <em>Stop</em> button.
+        Clicking the DX location marker opens an information window showing the DX locator, the selected day and date, and any common moon windows between the two QTH locators. If no common moon window exists for the selected date, the message <strong>No common moon window today</strong> is displayed.
       </p>
 
+      <p>
+        Up to three common moon windows may occur within a 24-hour period, depending on the date. All times are given in UTC. Because a moon window may cross midnight, the notation <strong>(-1)</strong> and <strong>(+1)</strong> is used to indicate that the time corresponds to the previous or next UTC day, respectively.
+      </p>
+
+      <p>
+        Note that if the <em>Sked</em> button is used to select the DX station, the DX location marker may be hidden beneath the DX station information window. Close the information window to reveal the DX location marker.
+      </p>
 
       <h4 id="station-map">Station Map and Station Profiles</h4>
       <figure style="margin-top: 10px; text-align: center;">
@@ -757,6 +844,31 @@
         Clicking a marker opens an info window with the station profile. This includes the callsign, operator name, and QTH locator, along with a green <strong>Sked</strong> button for one-click sked planning. Where available, you will also see details such as antenna size, transmit power, website link, station photo, and a dedicated <strong>QRZ</strong> button for direct access to the operator’s QRZ.com page. The blue <strong>Email</strong> button opens your default email client with the station’s address pre-filled, making it easy to arrange a sked.
       </p>
 
+      <h4 id="autotracking">Realtime Tracking Mode</h4>
+
+      <figure style="margin-top: 10px; text-align: center;">
+        <a href="images/realtime-tracking.jpg" target="_blank" rel="noopener">
+          <img
+            src="images/realtime-tracking.jpg"
+            alt="Realtime Tracking Mode in EME Observer"
+            loading="lazy"
+            width="800"
+            height="450"
+            style="max-width: 100%; height: auto; border-radius: 8px;"
+          />
+        </a>
+        <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+            Realtime Tracking Mode in EME Observer
+        </figcaption>
+      </figure>
+
+      <p>
+        EME Observer includes a <strong>Realtime Tracking</strong> mode, which can be activated by pressing the <em>Track</em> button.
+        In this mode, the map and all metrics displayed on the charts and above them are updated at <strong>1-minute intervals</strong>.
+        This frequency is sufficient for assesment of the current Moon footprint and conditions, for example during contests or when running schedules.
+        When Realtime Tracking mode is active, the time and date controls are greyed out, as shown in the screenshot above.
+        To return to <em>Manual</em> mode for standard EME planning, click the <em>Stop</em> button. Note that the Realtime Tracking mode automatically deactivates if band is changed.
+      </p>
 
       <h3 id="table-view">Table View</h3>
 
@@ -910,29 +1022,55 @@
     </section>
     
     <section>
-    <h2 id="dpol">A note on Spatial Polarisation Offset (Dpol)</h2>
-    <p>
-        For certain EME path geometries, the plot of the Spatial Polarization Offset may exhibit abrupt transitions, with the Dpol value rapidly changing sign near ±90 degrees (see the center and bottom plots in the figure below). The Dpol values displayed by EME Observer are consistent with those reported by WSJT-X. When instantaneous values from WSJT-X or the VK3UM EME Planner are plotted, similar abrupt transitions can be observed. For more details, see <a href="https://groups.io/g/wsjtgroup/topic/spatial_polarisation_offset/113906411" target="_blank" rel="noopener">this discussion</a>.
-    </p>
+      <h2 id="libration">A Note on Libration Rate and Doppler Spread</h2>
 
-    <figure style="margin-top: 10px; display: flex; flex-direction: column; align-items: center;">
-      <a href="images/dpol.jpg" target="_blank" rel="noopener">
-        <img
-          src="images/dpol.jpg"
-          alt="Spatial Polarisation Offset (Dpol) behaviour under different EME path geometries"
-          loading="lazy"
-          width="500"
-          height="450"
-          style="max-width: 100%; height: auto; border-radius: 8px;"
-        />
-      </a>
-      <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555; text-align: center;">
-        Spatial Polarisation Offset (Dpol) behaviour under different EME path geometries
-      </figcaption>
-    </figure>
+      <p>
+        EME Observer displays the full limb-to-limb lunar libration rate and Doppler spread. If the beamwidth of your antenna is smaller than the apparent angular diameter of the Moon in the sky (approximately 0.5 degrees), the libration rate and Doppler spread actually observed by your system will be reduced. Consequently, the relative (added as vectors) libration rate and relative Doppler spread between your location and the DX location will also be smaller. This effect becomes increasingly significant on higher microwave bands, where antenna beamwidth decreases as frequency increases.
+      </p>
 
-
+      <p>
+        The quantitative and qualitative effects of lunar libration vary strongly with frequency. On the lower EME bands, libration is relatively small and primarily manifests as Doppler fading. On the higher microwave bands, libration effects are much larger and appear as Doppler spread (also referred to in the EME literature as <em>Doppler spreading</em>, <em>libration spreading</em>, <em>signal smearing</em>, <em>signal width</em>, etc).
+      </p>
     </section>
+
+      
+    </section>
+    
+    <section>
+      <h2 id="dpol">A Note on Spatial Polarisation Offset (Dpol)</h2>
+
+      <p>
+        Spatial polarisation offset is especially important to consider on the higher EME bands, where antennas with linear polarisation are typically used and Faraday rotation is negligible. On the lower EME bands, where linear polarisation is also common, spatial polarisation offset interacts with Faraday rotation, and the two effects can combine either constructively or destructively. Knowing the Dpol value helps identify conditions where path non-reciprocity may occur. On bands where circular polarisation is used, both spatial polarisation offset and Faraday rotation effects are eliminated.
+      </p>
+      
+      <p>
+        Under certain EME path geometries, the plot of the Spatial Polarisation Offset (Dpol) may show abrupt transitions in which the value appears to flip sign near ±90 degrees (see the middle and lower panels in the example below). The Dpol values reported by EME Observer are consistent with those produced by WSJT-X. When instantaneous values from WSJT-X or the VK3UM EME Planner are plotted in the same way, similar transitions are observed.
+      </p>
+
+      <p>
+        These rapid sign changes do not represent sudden physical changes in polarization. Instead, they arise because the Dpol function is mathematically constrained (“wrapped”) to the ±90-degree range. As the true polarization angle passes beyond this range, the wrapped value appears to jump abruptly.
+        For additional details, see
+        <a href="https://groups.io/g/wsjtgroup/topic/spatial_polarisation_offset/113906411" target="_blank" rel="noopener">this discussion</a>.
+      </p>
+
+
+      <figure style="margin-top: 10px; display: flex; flex-direction: column; align-items: center;">
+        <a href="images/dpol.jpg" target="_blank" rel="noopener">
+          <img
+            src="images/dpol.jpg"
+            alt="Spatial Polarisation Offset (Dpol) behaviour under different EME path geometries"
+            loading="lazy"
+            width="500"
+            height="450"
+            style="max-width: 100%; height: auto; border-radius: 8px;"
+          />
+        </a>
+        <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555; text-align: center;">
+          Spatial Polarisation Offset (Dpol) behaviour under different EME path geometries
+        </figcaption>
+      </figure>
+    </section>
+
     
     <section id="support">
       <div class="container">
