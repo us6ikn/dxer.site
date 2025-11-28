@@ -352,6 +352,7 @@
                   <li><a href="#my-location-chart">My Location Chart</a></li>
                   <li><a href="#dx-location-chart">DX Location Chart</a></li>
                   <li><a href="#sked-chart">Sked Chart</a></li>
+                  <li><a href="#locator-markers">Locator Markers</a></li>
                   <li><a href="#autotracking">Realtime Tracking Mode</a></li>
                   <li><a href="#station-map">Station Map and Station Profiles</a></li>
                 </ul>
@@ -676,18 +677,97 @@
           Sked Chart (example for 10&nbsp;GHz)
         </figcaption>
       </figure>
+
       <p>
-        The <strong>Sked Chart</strong> becomes visible when valid 6-character QTH locators are entered in both the <em>My Locator</em> and <em>DX Locator</em> fields. It displays key signal path metrics for the common Moon window (sked) between the two stations (computed as vectors):
-        <strong>Relative Libration Rate</strong> (Rel&nbsp;LR), <strong>Relative Doppler Spread</strong> for the selected band (DX&nbsp;Width), and <strong>Spatial Polarization Offset</strong> (Dpol).
+        The <strong>Sked Chart</strong> becomes visible when valid 6-character QTH locators are entered in both the <em>My Locator</em> and <em>DX Locator</em> fields, and a common moon window exists between them on the selected date. The chart displays key signal-path metrics (computed as vectors) within these common moon windows: <strong>Relative Libration Rate</strong> (Rel&nbsp;LR), <strong>Relative Doppler Spread</strong> for the selected band (DX&nbsp;Width), and <strong>Spatial Polarization Offset</strong> (Dpol).
       </p>
+
       <p>
-        As with the other charts, each curve and its corresponding Y-axis are <strong>color-coded</strong>, as are the numerical values shown above the chart. These parameters are defined as follows:
+        The beginning and end of each common window are marked by green and red vertical lines, respectively. The corresponding start and end times appear in matching colors next to these markers. There may be one, two, or three common windows within a 24-hour period. If no common moon window exists, the Sked Chart is not displayed.
       </p>
+
+      <p>
+        As with the other charts, each curve and its associated Y-axis are <strong>color-coded</strong>, as are the numerical values shown above the chart. The displayed parameters are defined as follows:
+      </p>
+
       <ul>
-        <li><strong>Rel LR</strong> – Relative libration rate between the two stations</li>
-        <li><strong>DX Width</strong> – Relative Doppler spread for the selected band (equivalent to <em>DXWid</em> in WSJT-X)</li>
-        <li><strong>Dpol</strong> – Spatial polarization offset in degrees (equivalent to <em>Dpol</em> in WSJT-X)</li>
+        <li><strong>Dpol</strong> (blue) – Spatial polarization offset in degrees (equivalent to <em>Dpol</em> in WSJT-X)</li>
+        <li><strong>Rel&nbsp;LR</strong> (red) – Relative libration rate between the two stations (same as in VK3UM Libration Calculator)</li>
+        <li><strong>DX&nbsp;Width</strong> (green) – Relative Doppler spread for the selected band (equivalent to <em>DXWid</em> in WSJT-X)</li>
       </ul>
+
+      <h4 id="locator-markers">Locator Markers</h4>
+      <figure style="margin-top: 10px; text-align: center;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px;">
+          <!-- Subfigure 1 -->
+          <div style="flex: 1 1 380px; max-width: 300px;">
+            <a href="images/dx_marker-0.jpg" target="_blank" rel="noopener">
+              <img
+                src="images/dx_marker-0.jpg"
+                alt="Moon data chart for bands above 1 GHz"
+                loading="lazy"
+                width="800"
+                height="450"
+                style="max-width: 100%; height: auto; border-radius: 8px;"
+              />
+            </a>
+            <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+              Moon data chart appearance for bands above 1&nbsp;GHz
+            </figcaption>
+          </div>
+
+          <!-- Subfigure 2 -->
+          <div style="flex: 1 1 380px; max-width: 300px;">
+            <a href="images/dx_marker-1.jpg" target="_blank" rel="noopener">
+              <img
+                src="images/dx_marker-1.jpg"
+                alt="Moon data chart for bands below 1 GHz"
+                loading="lazy"
+                width="800"
+                height="450"
+                style="max-width: 100%; height: auto; border-radius: 8px;"
+              />
+            </a>
+            <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+              Moon data chart appearance for bands below 1&nbsp;GHz
+            </figcaption>
+          </div>
+          
+          <!-- Subfigure 3 -->
+          <div style="flex: 1 1 380px; max-width: 300px;">
+            <a href="images/dx_marker-2.jpg" target="_blank" rel="noopener">
+              <img
+                src="images/dx_marker-2.jpg"
+                alt="Moon data chart for bands below 1 GHz"
+                loading="lazy"
+                width="800"
+                height="450"
+                style="max-width: 100%; height: auto; border-radius: 8px;"
+              />
+            </a>
+            <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+              Moon data chart appearance for bands below 1&nbsp;GHz
+            </figcaption>
+          </div>
+          
+          <!-- Subfigure 4 -->
+          <div style="flex: 1 1 380px; max-width: 300px;">
+            <a href="images/dx_marker-3.jpg" target="_blank" rel="noopener">
+              <img
+                src="images/dx_marker-3.jpg"
+                alt="Moon data chart for bands below 1 GHz"
+                loading="lazy"
+                width="800"
+                height="450"
+                style="max-width: 100%; height: auto; border-radius: 8px;"
+              />
+            </a>
+            <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+              Moon data chart appearance for bands below 1&nbsp;GHz
+            </figcaption>
+          </div>
+        </div>
+      </figure>
 
       <h4 id="autotracking">Realtime Tracking Mode</h4>
 
@@ -712,7 +792,7 @@
         In this mode, the map and all metrics displayed on the charts and above them are updated at <strong>1-minute intervals</strong>.
         This frequency is sufficient for assesment of the current Moon footprint and conditions, for example during contests or when running schedules.
         When Realtime Tracking mode is active, the time and date controls are greyed out, as shown in the screenshot above.
-        To return to <em>Manual</em> mode for standard EME planning, click the <em>Stop</em> button.
+        To return to <em>Manual</em> mode for standard EME planning, click the <em>Stop</em> button. Note that the Realtime Tracking mode automatically deactivates if band is changed.
       </p>
 
 
