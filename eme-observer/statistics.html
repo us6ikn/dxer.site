@@ -356,6 +356,7 @@
     <div class="controls">
       <div class="filter-group">
         <select id="bandSelect" class="band-select">
+            <option value="222MHz">222MHz</option>
           <option value="432MHz">432MHz</option>
           <option value="1296MHz">1296MHz</option>
           <option value="2320MHz">2320MHz</option>
@@ -391,6 +392,7 @@
     const FILE_URL_BASE = ''; // Set this to the base URL if needed
 
     const bandConfig = {
+        '222MHz': { label: '222MHz', jsonFile: 'stn_222MHz.json' },
       '432MHz': { label: '432MHz', jsonFile: 'stn_432MHz.json' },
       '1296MHz': { label: '1296MHz', jsonFile: 'stn_1296MHz.json' },
       '2320MHz': { label: '2320MHz', jsonFile: 'stn_2320MHz.json' },
@@ -591,7 +593,7 @@
       // Update title
       tableTitle.textContent = `${bandConfig[band].label} EME Stations Statistics`;
 
-      const notReadyBands = ['432MHz', '76GHz'];
+      const notReadyBands = ['222MHz', '432MHz', '76GHz'];
       if (notReadyBands.includes(band)) {
         statsContent.style.display = 'none';
         statsMessage.style.display = 'block';
