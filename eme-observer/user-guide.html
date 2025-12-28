@@ -1035,11 +1035,11 @@
       </p>
       
       <p>
-        Under certain EME path geometries, the plot of the Spatial Polarisation Offset (Dpol) may show abrupt transitions in which the value appears to flip sign near ±90 degrees (see the middle and lower panels in the example below). The Dpol values reported by EME Observer are consistent with those produced by WSJT-X. When instantaneous values from WSJT-X or the VK3UM EME Planner are plotted in the same way, similar transitions are observed.
+        Under certain EME path geometries, the plot of the Spatial Polarisation Offset (Dpol) may show abrupt transitions in which the value appears to flip sign near ±90 degrees (see the middle and lower panels in the example below). The Dpol values reported by EME Observer are consistent with those produced by WSJT-X. When instantaneous values from WSJT-X are plotted in the same way, similar transitions are observed.
       </p>
 
       <p>
-        These rapid sign changes do not represent sudden physical changes in polarization. Instead, they arise because the Dpol function is mathematically constrained (“wrapped”) to the ±90-degree range. As the true polarization angle passes beyond this range, the wrapped value appears to jump abruptly.
+      These rapid sign changes do not represent sudden physical changes in polarization. Instead, they arise because the Dpol function is mathematically constrained (“wrapped”) to the ±90-degree range. As the true polarization angle passes beyond this range, the wrapped value appears to jump abruptly. This behaviour reflects the fact that linear polarisation angles separated by 180° are physically equivalent, only the phase is inverted, not the polarisation orientation.
         For additional details, see
         <a href="https://groups.io/g/wsjtgroup/topic/spatial_polarisation_offset/113906411" target="_blank" rel="noopener">this discussion</a>.
       </p>
