@@ -1,5 +1,3 @@
-<!-- header.html – Shared header with direct-access protection -->
-
 <div class="container mx-auto p-4 flex flex-col md:flex-row md:items-center md:justify-between relative">
   <!-- Profile Info -->
   <div class="flex items-start space-x-4">
@@ -90,36 +88,3 @@
     <li><a href="contact.html">Contact & QSL</a></li>
   </ul>
 </nav>
-
-<!-- Protection: Show friendly message if header.html is accessed directly -->
-<script>
-  // Only run if the page URL ends with header.html and it was loaded directly (no referrer or referrer is external)
-  if (window.location.pathname.endsWith('header.html') &&
-      (!document.referrer || new URL(document.referrer).origin !== window.location.origin)) {
-    
-    document.documentElement.innerHTML = `
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <meta name="robots" content="noindex">
-          <title>Technical File – SA5IKN</title>
-          <script src="https://cdn.tailwindcss.com"></script>
-        </head>
-        <body class="bg-gray-50 text-gray-800 flex items-center justify-center min-h-screen">
-          <div class="text-center p-8 max-w-md">
-            <h1 class="text-2xl font-bold mb-4">This is a technical include file</h1>
-            <p class="mb-6 text-gray-600">
-              This file (header.html) is used internally to build the site navigation.<br>
-              It is not meant to be viewed directly.
-            </p>
-            <a href="index.html" class="inline-block bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700">
-              Go to Home Page →
-            </a>
-          </div>
-        </body>
-      </html>
-    `;
-  }
-</script>
