@@ -101,8 +101,8 @@
           </footer>
 
         <script>
-          // Load the shared header with cache-busting (change the number when you update the menu)
-          fetch('header.html?v=1')  // ← bump this number (1 → 2 → 3 etc.) every time you change the menu
+            // Load the shared header with cache-busting (change the number manually when updated the menu)
+          fetch('header.html?v=1')  // ← bump this number (1 → 2 → 3 etc.)
             .then(response => {
               if (!response.ok) throw new Error('Header not found');
               return response.text();
@@ -136,10 +136,10 @@
                 profileImage.addEventListener('contextmenu', e => e.preventDefault());
               }
 
-              // === ACTIVE PAGE HIGHLIGHTING (place it here) ===
+              // === ACTIVE PAGE HIGHLIGHTING ===
               const currentPath = window.location.pathname.split('/').pop() || 'index.html';
               if (currentPath === '') {
-                // Handle root URL (e.g., https://dxer.site/)
+                // Handle root URL
                 currentPath = 'index.html';
               }
 
