@@ -160,21 +160,22 @@
                   profileImage.addEventListener('contextmenu', e => e.preventDefault());
                 }
 
-                // === ACTIVE PAGE HIGHLIGHTING (place it here) ===
-                const currentPath = window.location.pathname.split('/').pop() || 'index.html';
-                if (currentPath === '') {
-                  // Handle root URL (e.g., https://dxer.site/)
-                  currentPath = 'index.html';
+                // Active page highlighting
+                let currentFile = window.location.pathname.split('/').pop();
+                if (currentFile === '' || currentFile === 'index.html') {
+                  currentFile = 'index.html';
                 }
 
                 document.querySelectorAll('#shared-header a[href]').forEach(link => {
-                  const href = link.getAttribute('href');
-                  // Match exact filename or full URL if it's external (we only highlight internal pages)
-                  if (href && (href === currentPath || href.endsWith('/' + currentPath))) {
-                    link.classList.add('text-blue-600', 'font-bold');
+                  let href = link.getAttribute('href');
+                  // Strip any leading ./ or / for comparison
+                  if (href) {
+                    href = href.replace(/^\.\//, '').replace(/^\//, '');
+                    if (href === currentFile || href === 'index.html' && currentFile === 'index.html') {
+                      link.classList.add('text-blue-600', 'font-bold');
+                    }
                   }
                 });
-              })
               .catch(err => {
                 console.error('Failed to load header:', err);
                 document.getElementById('shared-header').innerHTML = '<p style="color:red;padding:1rem;">Menu failed to load.</p>';
