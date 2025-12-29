@@ -62,7 +62,7 @@
 
               <h2 class="text-lg font-semibold mb-2">If we had an HF, terrestrial VHF/UHF, or Satellite QSO:</h2>
               <p class="mb-4">
-                Please use the <a href="https://clublog.org/logsearch.php" target="_blank" class="text-blue-600 hover:underline">Club Log OQRS</a> service. Alternatively, you may send your card along with a self-addressed envelope (SAE) and 4 USD. Email me to obtain the correct mailing address.
+                Please use the <a href="https://clublog.org/logsearch.php" target="_blank" class="text-blue-600 hover:underline">Club Log OQRS</a> service. Alternatively, you may send your card along with a self-addressed envelope (SAE) and 5 USD. Email me to obtain the correct mailing address.
               </p>
               <p class="mb-6">
               I am not currently a member of any QSL bureau. Over more than 20 years of amateur radio activity across several countries, I have received and responded to approximately 150 kilograms of bureau QSL cards. While I greatly value the tradition, I now handle all QSL confirmations directly.
@@ -74,8 +74,18 @@
           </main>
 
           <footer class="bg-gray-100 text-center p-4 mt-10 text-sm text-gray-600">
-            © All rights reserved. SA5IKN M0SKN US6IKN EI6KC, 2025
+            © All rights reserved. SA5IKN M0SKN US6IKN EI6KC, <span id="copyright-year"></span>
           </footer>
+
+          <script>
+            // Automatically set the current year
+            document.addEventListener('DOMContentLoaded', () => {
+              const yearSpan = document.getElementById('copyright-year');
+              if (yearSpan) {
+                yearSpan.textContent = new Date().getFullYear();
+              }
+            });
+          </script>
           <script>
             // Load the shared header with cache-busting (change the number when you update the menu)
             fetch('header.html?v=1')  // ← bump this number (1 → 2 → 3 etc.) every time you change the menu
