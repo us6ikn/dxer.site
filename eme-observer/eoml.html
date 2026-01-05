@@ -2715,42 +2715,157 @@
 
                     setTimeout(() => {
                         const imageElement = document.getElementById(`station-image-${sanitizedCallsign}`);
+                        const imageLink = document.getElementById(`image-link-${sanitizedCallsign}`);
                         const placeholder = document.getElementById(`image-placeholder-${sanitizedCallsign}`);
 
-                        // Skip if already loaded or placeholder shown
-                        if (imageElement.src.includes('data:image') && !imageElement.src.includes('http')) {
-                            // Still default placeholder image → try loading real one
-                        } else if (placeholder.style.display === 'block') {
-                            return; // Already no image
-                        } else {
-                            return; // Already loaded successfully
-                        }
-
-                        // Only now attempt to load
+                        // Check for band-specific thumbnail
                         fetch(bandSpecificThumbUrl, { method: 'HEAD' })
                             .then(response => {
                                 if (response.ok) {
+                                    // Band-specific image exists
                                     imageElement.src = bandSpecificThumbUrl;
-                                    document.getElementById(`image-link-${sanitizedCallsign}`).href = bandSpecificImageUrl;
+                                    imageLink.href = bandSpecificImageUrl;
                                     placeholder.style.display = 'none';
                                 } else {
-                                    return fetch(genericThumbUrl, { method: 'HEAD' });
-                                }
-                            })
-                            .then(genericResponse => {
-                                if (genericResponse && genericResponse.ok) {
-                                    imageElement.src = genericThumbUrl;
-                                    document.getElementById(`image-link-${sanitizedCallsign}`).href = genericImageUrl;
-                                    placeholder.style.display = 'none';
-                                } else {
-                                    imageElement.remove();
-                                    placeholder.style.display = 'block';
+                                    // Fall back to generic thumbnail
+                                    return fetch(genericThumbUrl, { method: 'HEAD' })
+                                        .then(genericResponse => {
+                                            if (genericResponse.ok) {
+                                                imageElement.src = genericThumbUrl;
+                                                imageLink.href = genericImageUrl;
+                                                placeholder.style.display = 'none';
+                                            } else {
+                                                // No image available
+                                                imageElement.remove();
+                                                placeholder.style.display = 'block';
+                                            }
+                                        });
                                 }
                             })
                             .catch(() => {
-                                imageElement.remove();
-                                placeholder.style.display = 'block';
+                                // Error fetching band-specific image, try generic
+                                return fetch(genericThumbUrl, { method: 'HEAD' })
+                                    .then(genericResponse => {
+                                        if (genericResponse.ok) {
+                                            imageElement.src = genericThumbUrl;
+                                            imageLink.href = genericImageUrl;
+                                            placeholder.style.display = 'none';
+                                        } else {
+                                            imageElement.remove();
+                                            placeholder.style.display = 'block';
+                                        }
+                                    })
+                                    .catch(() => {
+                                        imageElement.remove();
+                                        placeholder.style.display = 'block';
+                                    });
                             });
+
+                            const skedButton = document.getElementById(`sked-${sanitizedCallsign}`);
+                            if (skedButton) {
+                                skedButton.addEventListener('click', () => {
+                                    const locator = skedButton.getAttribute('data-locator');
+                                    document.getElementById('dx').value = locator;
+
+                                    // Trigger input event so all calculations run
+                                    const inputEvent = new Event('input', { bubbles: true });
+                                    document.getElementById('dx').dispatchEvent(inputEvent);
+
+                                    // CRITICAL: Refresh the currently open popup (this station's)
+                                    // This forces windowsHTML to be recalculated with current QTH
+                                    if (marker.getPopup() && marker.getPopup().isOpen()) {
+                                        setTimeout(() => {
+                                            // === IMAGE LOADING (now runs after popup is fully rendered) ===
+                                            const imageElement = document.getElementById(`station-image-${sanitizedCallsign}`);
+                                            const imageLink = document.getElementById(`image-link-${sanitizedCallsign}`);
+                                            const placeholder = document.getElementById(`image-placeholder-${sanitizedCallsign}`);
+
+                                            if (imageElement && imageLink && placeholder) {
+                                                // Check for band-specific thumbnail
+                                                fetch(bandSpecificThumbUrl, { method: 'HEAD' })
+                                                    .then(response => {
+                                                        if (response.ok) {
+                                                            imageElement.src = bandSpecificThumbUrl;
+                                                            imageLink.href = bandSpecificImageUrl;
+                                                            placeholder.style.display = 'none';
+                                                        } else {
+                                                            return fetch(genericThumbUrl, { method: 'HEAD' })
+                                                                .then(genericResponse => {
+                                                                    if (genericResponse.ok) {
+                                                                        imageElement.src = genericThumbUrl;
+                                                                        imageLink.href = genericImageUrl;
+                                                                        placeholder.style.display = 'none';
+                                                                    } else {
+                                                                        imageElement.remove();
+                                                                        placeholder.style.display = 'block';
+                                                                    }
+                                                                });
+                                                        }
+                                                    })
+                                                    .catch(() => {
+                                                        return fetch(genericThumbUrl, { method: 'HEAD' })
+                                                            .then(genericResponse => {
+                                                                if (genericResponse.ok) {
+                                                                    imageElement.src = genericThumbUrl;
+                                                                    imageLink.href = genericImageUrl;
+                                                                    placeholder.style.display = 'none';
+                                                                } else {
+                                                                    imageElement.remove();
+                                                                    placeholder.style.display = 'block';
+                                                                }
+                                                            })
+                                                            .catch(() => {
+                                                                imageElement.remove();
+                                                                placeholder.style.display = 'block';
+                                                            });
+                                                    });
+                                            }
+
+                                            // === SKED BUTTON HANDLER (with popup refresh) ===
+                                            const skedButton = document.getElementById(`sked-${sanitizedCallsign}`);
+                                            if (skedButton) {
+                                                skedButton.addEventListener('click', () => {
+                                                    const locator = skedButton.getAttribute('data-locator');
+                                                    document.getElementById('dx').value = locator;
+
+                                                    const inputEvent = new Event('input', { bubbles: true });
+                                                    document.getElementById('dx').dispatchEvent(inputEvent);
+
+                                                    // Refresh popup to show updated common windows (and reload image)
+                                                    if (marker.getPopup() && marker.getPopup().isOpen()) {
+                                                        setTimeout(() => {
+                                                            marker.openPopup();
+                                                        }, 100);
+                                                    }
+                                                });
+                                            }
+
+                                            // Other button handlers (email, qrz) can stay as-is
+                                            const emailButton = document.getElementById(`email-${sanitizedCallsign}`);
+                                            if (emailButton) {
+                                                emailButton.addEventListener('click', () => {});
+                                            }
+
+                                            const qrzButton = document.getElementById(`qrz-${sanitizedCallsign}`);
+                                            if (qrzButton) {
+                                                qrzButton.addEventListener('click', () => {});
+                                            }
+                                        }, 100);
+                                    }
+                                });
+                            }
+
+                        const emailButton = document.getElementById(`email-${sanitizedCallsign}`);
+                        if (emailButton) {
+                            emailButton.addEventListener('click', () => {
+                            });
+                        }
+
+                        const qrzButton = document.getElementById(`qrz-${sanitizedCallsign}`);
+                        if (qrzButton) {
+                            qrzButton.addEventListener('click', () => {
+                            });
+                        }
                     }, 100);
                 });
             });
