@@ -2687,7 +2687,7 @@
                                 const endSuffix = suffixFor(w.end);
                                 windowsHTML += `<div>${moonIcon} Window ${i+1}: ${start}${startSuffix} – ${end}${endSuffix}</div>`;
                             });
-                            windowsHTML += '<div style="font-size:11px; color:#666; margin-top:4px; font-style:italic;">with your QTH</div></div>';
+                            windowsHTML += '<div style="font-size:11px; color:#666; margin-top:4px; font-style:italic;">(-1) and (+1) indicate the previous and next UTC day, respectively.</div></div>';
                         } else {
                             windowsHTML = '<div style="margin-top:10px; color:#666;"><em>No common window today with your QTH</em></div>';
                         }
@@ -3269,7 +3269,6 @@
             updateChart(hourIndex, false);
             setTimeout(updateQthPopup, 0);  // Update after computations
             setTimeout(updateDxPopup,  0);   // ← added
-            // Refresh any open station popups so they show updated windows for new date
             // Refresh any open station popups so they show updated windows for new date
             map.eachLayer(layer => {
                 if (layer instanceof L.Marker) {
