@@ -2726,55 +2726,25 @@
 
                 // Image loading + Sked button handler on popup open
                 marker.on('popupopen', () => {
-                    const imageElement = document.getElementById(`station-image-${sanitizedCallsign}`);
-                    const imageLink = document.getElementById(`image-link-${sanitizedCallsign}`);
-                    const placeholder = document.getElementById(`image-placeholder-${sanitizedCallsign}`);
-
-                    if (imageElement && imageLink && placeholder) {
-                        const currentBand = document.getElementById('bandSelect').value;
-                        fetch(`db/${sanitizedCallsign}_thumb-${currentBand}.jpg`, { method: 'HEAD' })
-                            .then(response => {
-                                if (response.ok) {
-                                    imageElement.src = `db/${sanitizedCallsign}_thumb-${currentBand}.jpg`;
-                                    imageLink.href = `db/${sanitizedCallsign}-${currentBand}.jpg`;
-                                    placeholder.style.display = 'none';
-                                } else {
-                                    return fetch(`db/${sanitizedCallsign}_thumb.jpg`, { method: 'HEAD' });
-                                }
-                            })
-                            .then(response => {
-                                if (response && response.ok) {
-                                    imageElement.src = `db/${sanitizedCallsign}_thumb.jpg`;
-                                    imageLink.href = `db/${sanitizedCallsign}.jpg`;
-                                    placeholder.style.display = 'none';
-                                } else {
-                                    imageElement.remove();
-                                    placeholder.style.display = 'block';
-                                }
-                            })
-                            .catch(() => {
-                                imageElement.remove();
-                                placeholder.style.display = 'block';
-                            });
-                    }
+                    loadStationImage(sanitizedCallsign);
 
                     // Sked button: fill DX field
                     // Sked button: fill DX field AND refresh popup immediately
                     const skedBtn = document.getElementById(`sked-${sanitizedCallsign}`);
                     if (skedBtn) {
-                        skedBtn.onclick = null; // prevent duplicate handlers
+                        skedBtn.onclick = null;
                         skedBtn.addEventListener('click', (e) => {
-                            e.stopPropagation(); // Prevent map click from closing popup
+                            e.stopPropagation();
 
-                            // Fill DX field and trigger calculations
                             document.getElementById('dx').value = locator.toUpperCase();
                             document.getElementById('dx').dispatchEvent(new Event('input', { bubbles: true }));
 
-                            // Refresh the already-open popup smoothly — NO closing, NO flash
                             if (marker.isPopupOpen()) {
                                 const popup = marker.getPopup();
                                 if (popup) {
-                                    popup.update(); // This re-runs the dynamic content function instantly
+                                    popup.update(); // Refresh content (including windows)
+                                    // Re-load image with possibly new band (if changed meanwhile)
+                                    setTimeout(() => loadStationImage(sanitizedCallsign), 50);
                                 }
                             }
                         });
@@ -3752,7 +3722,42 @@
 
                                                 dxMarker.bindPopup(popupContent);
                                             }
+                                                function loadStationImage(sanitizedCallsign) {
+                                                    const imageElement = document.getElementById(`station-image-${sanitizedCallsign}`);
+                                                    const imageLink = document.getElementById(`image-link-${sanitizedCallsign}`);
+                                                    const placeholder = document.getElementById(`image-placeholder-${sanitizedCallsign}`);
 
+                                                    if (!imageElement || !imageLink || !placeholder) return;
+
+                                                    const currentBand = document.getElementById('bandSelect').value;
+
+                                                    fetch(`db/${sanitizedCallsign}_thumb-${currentBand}.jpg`, { method: 'HEAD' })
+                                                        .then(response => {
+                                                            if (response.ok) {
+                                                                imageElement.src = `db/${sanitizedCallsign}_thumb-${currentBand}.jpg`;
+                                                                imageLink.href = `db/${sanitizedCallsign}-${currentBand}.jpg`;
+                                                                placeholder.style.display = 'none';
+                                                            } else {
+                                                                // Fallback to generic image
+                                                                return fetch(`db/${sanitizedCallsign}_thumb.jpg`, { method: 'HEAD' });
+                                                            }
+                                                        })
+                                                        .then(response => {
+                                                            if (response && response.ok) {
+                                                                imageElement.src = `db/${sanitizedCallsign}_thumb.jpg`;
+                                                                imageLink.href = `db/${sanitizedCallsign}.jpg`;
+                                                                placeholder.style.display = 'none';
+                                                            } else {
+                                                                // No image at all
+                                                                imageElement.remove();
+                                                                placeholder.style.display = 'block';
+                                                            }
+                                                        })
+                                                        .catch(() => {
+                                                            imageElement.remove();
+                                                            placeholder.style.display = 'block';
+                                                        });
+                                                }
 
 </script>
 <!-- Ko-Fi -->
