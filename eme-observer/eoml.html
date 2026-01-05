@@ -2762,13 +2762,21 @@
                     // Sked button: fill DX field AND refresh popup immediately
                     const skedBtn = document.getElementById(`sked-${sanitizedCallsign}`);
                     if (skedBtn) {
-                        skedBtn.onclick = null;
-                        skedBtn.addEventListener('click', () => {
+                        skedBtn.onclick = null; // prevent duplicate handlers
+                        skedBtn.addEventListener('click', (e) => {
+                            e.stopPropagation(); // Prevent map click from closing popup
+
+                            // Fill DX field and trigger calculations
                             document.getElementById('dx').value = locator.toUpperCase();
                             document.getElementById('dx').dispatchEvent(new Event('input', { bubbles: true }));
 
-                            // Refresh open popup instantly and smoothly
-                                marker.getPopup().update();
+                            // Refresh the already-open popup smoothly — NO closing, NO flash
+                            if (marker.isPopupOpen()) {
+                                const popup = marker.getPopup();
+                                if (popup) {
+                                    popup.update(); // This re-runs the dynamic content function instantly
+                                }
+                            }
                         });
                     }
                 });
