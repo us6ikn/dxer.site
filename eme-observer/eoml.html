@@ -2761,15 +2761,25 @@
                                     });
                             });
 
-                        const skedButton = document.getElementById(`sked-${sanitizedCallsign}`);
-                        if (skedButton) {
-                            skedButton.addEventListener('click', () => {
-                                const locator = skedButton.getAttribute('data-locator');
-                                document.getElementById('dx').value = locator;
-                                const inputEvent = new Event('input', { bubbles: true });
-                                document.getElementById('dx').dispatchEvent(inputEvent);
-                            });
-                        }
+                            const skedButton = document.getElementById(`sked-${sanitizedCallsign}`);
+                            if (skedButton) {
+                                skedButton.addEventListener('click', () => {
+                                    const locator = skedButton.getAttribute('data-locator');
+                                    document.getElementById('dx').value = locator;
+
+                                    // Trigger input event so all calculations run
+                                    const inputEvent = new Event('input', { bubbles: true });
+                                    document.getElementById('dx').dispatchEvent(inputEvent);
+
+                                    // CRITICAL: Refresh the currently open popup (this station's)
+                                    // This forces windowsHTML to be recalculated with current QTH
+                                    if (marker.getPopup() && marker.getPopup().isOpen()) {
+                                        setTimeout(() => {
+                                            marker.openPopup(); // re-renders popup with fresh windowsHTML
+                                        }, 100);
+                                    }
+                                });
+                            }
 
                         const emailButton = document.getElementById(`email-${sanitizedCallsign}`);
                         if (emailButton) {
