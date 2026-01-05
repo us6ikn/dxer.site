@@ -2643,80 +2643,25 @@
                 const displayWebsite = website.length > 30 ? website.slice(0, 30) + '...' : website;
                 const nameLine = Name ? `<div><strong>${Name}</strong></div>` : '';
 
-                // Construct band-specific and generic image URLs
                 const bandSpecificImageUrl = `db/${sanitizedCallsign}-${band}.jpg`;
                 const bandSpecificThumbUrl = `db/${sanitizedCallsign}_thumb-${band}.jpg`;
                 const genericImageUrl = `db/${sanitizedCallsign}.jpg`;
                 const genericThumbUrl = `db/${sanitizedCallsign}_thumb.jpg`;
 
-                // === NEW: Compute common windows if QTH is valid ===
-                let windowsHTML = '';
-                const currentQTH = document.getElementById('qth').value.trim().toUpperCase();
-                const dateStr = document.getElementById('date').value;
-
-                if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(currentQTH) && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-                    const windows = getCommonWindows(currentQTH, locator.toUpperCase(), dateStr);
-
-                    if (windows.length > 0) {
-                        const moonIcon = `<svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:middle;"><path fill="currentColor" d="M12 2a9.93 9.93 0 0 0-7.06 2.94A10 10 0 1 0 22 12c0-.34-.02-.67-.05-1a8 8 0 0 1-9.95-9z"/></svg>`;
-
-                        const baseDate = new Date(`${dateStr}T00:00:00Z`);
-                        const baseDay = baseDate.getUTCDate();
-
-                        function suffixFor(dateObj) {
-                            const d = dateObj.getUTCDate();
-                            if (d === baseDay) return "";
-                            return d > baseDay ? "(+1)" : "(-1)";
-                        }
-
-                        windowsHTML = '<div style="margin-top:10px;"><strong>Common Moon Windows</strong><br>';
-                        windows.forEach((w, i) => {
-                            const start = formatTimeUTC(w.start);
-                            const end = formatTimeUTC(w.end);
-                            const startSuffix = suffixFor(w.start);
-                            const endSuffix = suffixFor(w.end);
-                            windowsHTML += `<div>${moonIcon} Window ${i+1}: ${start}${startSuffix} – ${end}${endSuffix}</div>`;
-                        });
-                        windowsHTML += '<div style="font-size:11px; color:#666; margin-top:4px; font-style:italic;">with your QTH</div></div>';
-                    } else {
-                        windowsHTML = '<div style="margin-top:10px; color:#666;"><em>No common window today with your QTH</em></div>';
-                    }
-                }
-
-                const infoContent = `
-                    <div>
-                        <div style="font-weight:bold; font-size: 16px;">${callsignDisplay}</div>
-                        ${nameLine}
-                        <div class="button-group-infowindow">
-                            ${skedButton}${emailButton}${qrzButton}
-                        </div>
-                        <div>Locator: ${locator}</div>
-                        <div>Antenna: ${antenna}</div>
-                        <div>Power: ${power}</div>
-                        <div>Website: <a href="${website}" target="_blank">${displayWebsite}</a></div>
-                        ${windowsHTML}
-                        <div id="image-container-${sanitizedCallsign}" style="margin-top:10px;">
-                            Station Picture (clickable):
-                            <a id="image-link-${sanitizedCallsign}" href="${bandSpecificImageUrl}" target="_blank">
-                                <img id="station-image-${sanitizedCallsign}" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA" alt="${callsign} station"/>
-                            </a>
-                            <div id="image-placeholder-${sanitizedCallsign}" style="display:none;">
-                                <p><a href="datasubmission.html" target="_blank">Add Image</a></p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                marker.bindPopup(infoContent);
-
-                // Dynamic popup: content is generated fresh every time it opens
+                // === DYNAMIC POPUP ONLY – windows only shown if this station is currently in DX field ===
                 marker.bindPopup(() => {
                     const currentQTH = document.getElementById('qth').value.trim().toUpperCase();
+                    const currentDX = document.getElementById('dx').value.trim().toUpperCase();
                     const dateStr = document.getElementById('date').value;
                     const currentBand = document.getElementById('bandSelect').value;
 
+                    // Only show windows if this station's locator matches the current DX field
                     let windowsHTML = '';
-                    if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(currentQTH) && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
+                    const isThisStationSkedded = (currentDX === locator.toUpperCase());
+
+                    if (isThisStationSkedded &&
+                        /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(currentQTH) &&
+                        /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
                         const windows = getCommonWindows(currentQTH, locator.toUpperCase(), dateStr);
 
                         if (windows.length > 0) {
@@ -2745,11 +2690,6 @@
                         }
                     }
 
-                    const bandSpecificImageUrl = `db/${sanitizedCallsign}-${currentBand}.jpg`;
-                    const bandSpecificThumbUrl = `db/${sanitizedCallsign}_thumb-${currentBand}.jpg`;
-                    const genericImageUrl = `db/${sanitizedCallsign}.jpg`;
-                    const genericThumbUrl = `db/${sanitizedCallsign}_thumb.jpg`;
-
                     return `
                         <div>
                             <div style="font-weight:bold; font-size: 16px;">${callsignDisplay}</div>
@@ -2775,18 +2715,19 @@
                     `;
                 });
 
-                // Load image and set up buttons every time the popup opens
+                // Image loading + Sked button handler on popup open
                 marker.on('popupopen', () => {
                     const imageElement = document.getElementById(`station-image-${sanitizedCallsign}`);
                     const imageLink = document.getElementById(`image-link-${sanitizedCallsign}`);
                     const placeholder = document.getElementById(`image-placeholder-${sanitizedCallsign}`);
 
                     if (imageElement && imageLink && placeholder) {
-                        fetch(`db/${sanitizedCallsign}_thumb-${document.getElementById('bandSelect').value}.jpg`, { method: 'HEAD' })
+                        const currentBand = document.getElementById('bandSelect').value;
+                        fetch(`db/${sanitizedCallsign}_thumb-${currentBand}.jpg`, { method: 'HEAD' })
                             .then(response => {
                                 if (response.ok) {
-                                    imageElement.src = `db/${sanitizedCallsign}_thumb-${document.getElementById('bandSelect').value}.jpg`;
-                                    imageLink.href = `db/${sanitizedCallsign}-${document.getElementById('bandSelect').value}.jpg`;
+                                    imageElement.src = `db/${sanitizedCallsign}_thumb-${currentBand}.jpg`;
+                                    imageLink.href = `db/${sanitizedCallsign}-${currentBand}.jpg`;
                                     placeholder.style.display = 'none';
                                 } else {
                                     return fetch(`db/${sanitizedCallsign}_thumb.jpg`, { method: 'HEAD' });
@@ -2808,14 +2749,14 @@
                             });
                     }
 
-                    // Sked button: fill DX field (no need to manually refresh popup anymore)
-                    const skedButton = document.getElementById(`sked-${sanitizedCallsign}`);
-                    if (skedButton) {
-                        skedButton.onclick = null; // prevent duplicates
-                        skedButton.addEventListener('click', () => {
+                    // Sked button: fill DX field
+                    const skedBtn = document.getElementById(`sked-${sanitizedCallsign}`);
+                    if (skedBtn) {
+                        skedBtn.onclick = null;
+                        skedBtn.addEventListener('click', () => {
                             document.getElementById('dx').value = locator.toUpperCase();
                             document.getElementById('dx').dispatchEvent(new Event('input', { bubbles: true }));
-                            // Popup will auto-refresh next time it's opened because content is now dynamic
+                            // Next time popup opens, windows will appear because DX now matches
                         });
                     }
                 });
