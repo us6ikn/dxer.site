@@ -3270,92 +3270,88 @@
             setTimeout(updateDxPopup,  0);   // ← added
         });
 
-                                                window.onload = () => {
-                                                    // Initialize map first (includes async fetch of stations)
-                                                    initMap();
+        window.onload = () => {
+            // Initialize map first
+            initMap();
 
-                                                    const now = new Date();
-                                                    const utcHours = now.getUTCHours();
-                                                    const utcMinutes = now.getUTCMinutes();
+            const now = new Date();
+            const utcHours = now.getUTCHours();
+            const utcMinutes = now.getUTCMinutes();
 
-                                                    const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-                                                    document.getElementById('date').valueAsDate = utcDate;
-                                                    document.getElementById('date').value = utcDate.toISOString().slice(0,10);
+            const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+            document.getElementById('date').valueAsDate = utcDate;
+            document.getElementById('date').value = utcDate.toISOString().slice(0,10);
 
-                                                    let roundedHour = utcHours;
-                                                    let roundedMinutes = Math.round(utcMinutes / 5) * 5;
-                                                    if (roundedMinutes >= 60) {
-                                                        roundedMinutes = 0;
-                                                        roundedHour += 1;
-                                                    }
-                                                    if (roundedHour >= 24) {
-                                                        roundedHour -= 24;
-                                                        utcDate.setUTCDate(utcDate.getUTCDate() + 1);
-                                                        document.getElementById('date').valueAsDate = utcDate;
-                                                        document.getElementById('date').value = utcDate.toISOString().slice(0,10);
-                                                    }
+            let roundedHour = utcHours;
+            let roundedMinutes = Math.round(utcMinutes / 5) * 5;
+            if (roundedMinutes >= 60) {
+                roundedMinutes = 0;
+                roundedHour += 1;
+            }
+            if (roundedHour >= 24) {
+                roundedHour -= 24;
+                utcDate.setUTCDate(utcDate.getUTCDate() + 1);
+                document.getElementById('date').valueAsDate = utcDate;
+                document.getElementById('date').value = utcDate.toISOString().slice(0,10);
+            }
 
-                                                    hourIndex = roundedHour * 12 + (roundedMinutes / 5);
-                                                    document.getElementById('hour').value = hourIndex;
-                                                    document.getElementById('hour-value').textContent =
-                                                        `UTC: ${String(roundedHour).padStart(2, '0')}:${String(roundedMinutes).padStart(2, '0')}`;
+            hourIndex = roundedHour * 12 + (roundedMinutes / 5);
+            document.getElementById('hour').value = hourIndex;
+            document.getElementById('hour-value').textContent =
+                `UTC: ${String(roundedHour).padStart(2, '0')}:${String(roundedMinutes).padStart(2, '0')}`;
 
-                                                    document.getElementById('showControlsPanel').classList.remove('visible');
+            document.getElementById('showControlsPanel').classList.remove('visible');
 
-                                                    // Ensure real-time mode is off initially
-                                                    isRealTimeMode = false;
-                                                    document.getElementById('realTimeButton').classList.remove('active');
-                                                    document.getElementById('realTimeButton').textContent = 'Track';
+            // Ensure real-time mode is off initially
+            isRealTimeMode = false;
+            document.getElementById('realTimeButton').classList.remove('active');
+            document.getElementById('realTimeButton').textContent = 'Track';
 
-                                                    // Load last selected band
-                                                    const savedBand = localStorage.getItem('emeObserverLastBand');
-                                                    const bandSelect = document.getElementById('bandSelect');
-                                                    if (savedBand && bandConfig[savedBand]) {
-                                                        bandSelect.value = savedBand;
-                                                        FREQUENCY_HZ = bandConfig[savedBand].frequency;
-                                                    }
+            const qthInput = document.getElementById('qth').value.trim().toUpperCase();
+            const dxInput = document.getElementById('dx').value.trim().toUpperCase();
+            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(qthInput)) {
+                computeLibrationForDay(qthInput, document.getElementById('date').value, 'qth');
+                computeFullDayData(qthDayData, qthInput, document.getElementById('date').value, true);
+            }
+            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(dxInput)) {
+                computeLibrationForDay(dxInput, document.getElementById('date').value, 'dx');
+                computeFullDayData(dxDayData, dxInput, document.getElementById('date').value, false);
+            }
 
-                                                    // === CRITICAL FIX: Restore QTH only AFTER stations are loaded ===
-                                                    const currentBand = bandSelect.value;
-                                                    const jsonFile = bandConfig[currentBand].jsonFile;
+            // Load last selected band from localStorage
+                const savedBand = localStorage.getItem('emeObserverLastBand');
+                const bandSelect = document.getElementById('bandSelect');
+                
+                if (savedBand && bandConfig[savedBand]) {
+                    bandSelect.value = savedBand;
+                    // Optionally update the global frequency immediately
+                    FREQUENCY_HZ = bandConfig[savedBand].frequency;
+                }
+            
+            // Load last used QTH from localStorage
+            const savedQTH = localStorage.getItem('emeObserverLastQTH');
+            if (savedQTH && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(savedQTH)) {
+                document.getElementById('qth').value = savedQTH;
 
-                                                    fetch(jsonFile)
-                                                        .then(response => {
-                                                            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                                                            return response.json();
-                                                        })
-                                                        .then(data => {
-                                                            updateMarkers(data, isActiveStationsOnly);
+                // Trigger the same logic as if user typed it
+                const dateStr = document.getElementById("date").value;
+                computeLibrationForDay(savedQTH, dateStr, 'qth');
+                computeFullDayData(qthDayData, savedQTH, dateStr, true);
 
-                                                            // NOW it's safe: map is ready, stations are loaded
-                                                            const savedQTH = localStorage.getItem('emeObserverLastQTH');
-                                                            if (savedQTH && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(savedQTH)) {
-                                                                document.getElementById('qth').value = savedQTH;
+                const {lat, lon} = qthToLatLon(savedQTH);
+                qthMarker = L.marker([lat, lon]).addTo(map).bindPopup(`My Locator: ${savedQTH}`);
 
-                                                                const dateStr = document.getElementById("date").value;
+                // Charts will be updated below via updateChart()
+            }
+            
+            // Initialize band (this calls updateMarkers, which needs map to be initialized)
+            updateBand(document.getElementById('bandSelect').value);
 
-                                                                computeLibrationForDay(savedQTH, dateStr, 'qth');
-                                                                computeFullDayData(qthDayData, savedQTH, dateStr, true);
-
-                                                                const {lat, lon} = qthToLatLon(savedQTH);
-                                                                qthMarker = L.marker([lat, lon], { zIndexOffset: 1000 }) // optional: bring to front
-                                                                    .addTo(map)
-                                                                    .bindPopup(`My Locator: ${savedQTH}`);
-
-                                                                updateQthPopup(); // ensure popup content is correct
-                                                            }
-
-                                                            // Final updates
-                                                            const currentNow = new Date();
-                                                            updateMap(currentNow);
-                                                            updateMoonChart(currentNow);
-                                                            updateChart(hourIndex, false);
-                                                        })
-                                                        .catch(error => {
-                                                            console.error(`Error loading stations on startup:`, error);
-                                                            alert(`Failed to load station data. Please try again later.`);
-                                                        });
-                                                };
+            const currentNow = new Date();
+            updateMap(currentNow);
+            updateMoonChart(currentNow);
+            updateChart(hourIndex, false);
+        };
             
         window.addEventListener('unload', () => {
           stopRealTimeUpdates();
