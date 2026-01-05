@@ -2759,13 +2759,19 @@
                     }
 
                     // Sked button: fill DX field
+                    // Sked button: fill DX field AND refresh popup immediately
                     const skedBtn = document.getElementById(`sked-${sanitizedCallsign}`);
                     if (skedBtn) {
-                        skedBtn.onclick = null;
+                        skedBtn.onclick = null; // prevent duplicates
                         skedBtn.addEventListener('click', () => {
+                            // Fill DX field and trigger calculations
                             document.getElementById('dx').value = locator.toUpperCase();
                             document.getElementById('dx').dispatchEvent(new Event('input', { bubbles: true }));
-                            // Next time popup opens, windows will appear because DX now matches
+
+                            // Immediately refresh the open popup with new content (including windows)
+                            if (marker.isPopupOpen()) {
+                                marker.openPopup(); // This re-renders the dynamic content instantly
+                            }
                         });
                     }
                 });
