@@ -2649,20 +2649,23 @@
                 const genericThumbUrl = `db/${sanitizedCallsign}_thumb.jpg`;
 
                 // === DYNAMIC POPUP ONLY – windows only shown if this station is currently in DX field ===
+                // === DYNAMIC POPUP ONLY – windows shown only when this station is selected via Sked ===
                 marker.bindPopup(() => {
                     const currentQTH = document.getElementById('qth').value.trim().toUpperCase();
                     const currentDX = document.getElementById('dx').value.trim().toUpperCase();
                     const dateStr = document.getElementById('date').value;
                     const currentBand = document.getElementById('bandSelect').value;
 
-                    // Only show windows if this station's locator matches the current DX field
-                    let windowsHTML = '';
-                    const isThisStationSkedded = (currentDX === locator.toUpperCase());
+                    // Normalize the station's locator to uppercase for reliable comparison
+                    const stationLocatorUpper = locator.toUpperCase();
 
-                    if (isThisStationSkedded &&
+                    // Only show windows if the DX field currently contains this station's locator
+                    let windowsHTML = '';
+                    if (currentDX === stationLocatorUpper &&
                         /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(currentQTH) &&
-                        /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-                        const windows = getCommonWindows(currentQTH, locator.toUpperCase(), dateStr);
+                        /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(stationLocatorUpper)) {
+
+                        const windows = getCommonWindows(currentQTH, stationLocatorUpper, dateStr);
 
                         if (windows.length > 0) {
                             const moonIcon = `<svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:middle;"><path fill="currentColor" d="M12 2a9.93 9.93 0 0 0-7.06 2.94A10 10 0 1 0 22 12c0-.34-.02-.67-.05-1a8 8 0 0 1-9.95-9z"/></svg>`;
@@ -2689,6 +2692,12 @@
                             windowsHTML = '<div style="margin-top:10px; color:#666;"><em>No common window today with your QTH</em></div>';
                         }
                     }
+
+                    // Use current band for images
+                    const bandSpecificImageUrl = `db/${sanitizedCallsign}-${currentBand}.jpg`;
+                    const bandSpecificThumbUrl = `db/${sanitizedCallsign}_thumb-${currentBand}.jpg`;
+                    const genericImageUrl = `db/${sanitizedCallsign}.jpg`;
+                    const genericThumbUrl = `db/${sanitizedCallsign}_thumb.jpg`;
 
                     return `
                         <div>
