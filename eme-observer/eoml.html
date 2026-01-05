@@ -2761,22 +2761,23 @@
                     // Sked button: fill DX field
                     // Sked button: fill DX field AND refresh popup immediately
                     // Sked button: fill DX field AND update popup content instantly (no flash)
-                    // Sked button: fill DX field AND refresh popup content smoothly
                     const skedBtn = document.getElementById(`sked-${sanitizedCallsign}`);
                     if (skedBtn) {
-                        skedBtn.onclick = null;
+                        skedBtn.onclick = null; // prevent duplicates
                         skedBtn.addEventListener('click', () => {
-                            // Update DX field
+                            // Fill DX field and trigger all calculations
                             document.getElementById('dx').value = locator.toUpperCase();
                             document.getElementById('dx').dispatchEvent(new Event('input', { bubbles: true }));
 
-                            // Refresh popup content instantly if open — without closing it
+                            // If popup is open, update its content immediately without closing
                             if (marker.isPopupOpen()) {
                                 const popup = marker.getPopup();
                                 if (popup) {
-                                    // Call the dynamic content function again and update
-                                    popup.setContent(marker._popupOptions.content());
-                                    popup.update();
+                                    // Re-generate fresh content using the bound dynamic function
+                                    const newContent = marker.getPopup().options._content || marker._popup._content;
+                                    // Force re-render by setting content again
+                                    popup.setContent(marker.bindPopup()._content);
+                                    popup.update(); // Ensures layout is refreshed
                                 }
                             }
                         });
