@@ -3328,22 +3328,6 @@
                     FREQUENCY_HZ = bandConfig[savedBand].frequency;
                 }
             
-            // Load last used QTH from localStorage
-            const savedQTH = localStorage.getItem('emeObserverLastQTH');
-            if (savedQTH && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(savedQTH)) {
-                document.getElementById('qth').value = savedQTH;
-
-                // Trigger the same logic as if user typed it
-                const dateStr = document.getElementById("date").value;
-                computeLibrationForDay(savedQTH, dateStr, 'qth');
-                computeFullDayData(qthDayData, savedQTH, dateStr, true);
-
-                const {lat, lon} = qthToLatLon(savedQTH);
-                qthMarker = L.marker([lat, lon]).addTo(map).bindPopup(`My Locator: ${savedQTH}`);
-
-                // Charts will be updated below via updateChart()
-            }
-            
             // Initialize band (this calls updateMarkers, which needs map to be initialized)
             updateBand(document.getElementById('bandSelect').value);
 
@@ -3371,56 +3355,66 @@
           }
         }
 
-                                                qthInputElem.addEventListener("input", () => {
-                                                    const locator = qthInputElem.value.trim().toUpperCase();
-                                                    const chartLabel = document.getElementById('chartLabel');
+        qthInputElem.addEventListener("input", () => {
+            const locator = qthInputElem.value.trim().toUpperCase();
+            const chartLabel = document.getElementById('chartLabel');
+            if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
+                chartLabel.innerHTML = '<span class="metric-locator">Computing...</span>';
+                try {
+                    computeLibrationForDay(locator, document.getElementById("date").value, 'qth');
+                    computeFullDayData(qthDayData, locator, document.getElementById("date").value, true);
+                    // Invalidate relDayData to force recompute
+                    relDayData.date = null;
+                    if (qthDayData.libration.length === 0) {
+                        console.warn(`No data computed for QTH ${locator}`);
+                        document.getElementById("chartWrapper").style.display = "none";
+                        if (chart) {
+                            chart.destroy();
+                            chart = null;
+                        }
+                        chartLabel.innerHTML = '<span class="metric-locator">No data for QTH</span>';
+                    } else {
+                        setTimeout(() => {
+                            updateChart(getCurrentIndex(), isRealTimeMode);
+                        }, 0);
+                    }
+                } catch (e) {
+                    console.error(`Error computing libration for QTH ${locator}: ${e.message}`);
+                    document.getElementById("chartWrapper").style.display = "none";
+                    if (chart) {
+                        chart.destroy();
+                        chart = null;
+                    }
+                    chartLabel.innerHTML = '<span class="metric-locator">Error computing QTH data</span>';
+                }
+                const {lat, lon} = qthToLatLon(locator);
+                if (qthMarker) {
+                    qthMarker.setLatLng([lat, lon]);
+                } else {
+                    qthMarker = L.marker([lat, lon])
+                        .addTo(map)
+                        .bindPopup(`My Locator: ${locator}`);
+                }
+            } else {
+                document.getElementById("chartWrapper").style.display = "none";
+                if (chart) {
+                    chart.destroy();
+                    chart = null;
+                }
+                // Invalidate relDayData when QTH is invalid
+                relDayData.date = null;
+                chartLabel.innerHTML = '<span class="metric-locator">Enter valid QTH</span>';
+                if (qthMarker) {
+                    qthMarker.remove();
+                    qthMarker = null;
+                }
 
-                                                    if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-                                                        // Save valid locator to localStorage
-                                                        localStorage.setItem('emeObserverLastQTH', locator);
-
-                                                        chartLabel.innerHTML = '<span class="metric-locator">Computing...</span>';
-                                                        try {
-                                                            computeLibrationForDay(locator, document.getElementById("date").value, 'qth');
-                                                            computeFullDayData(qthDayData, locator, document.getElementById("date").value, true);
-                                                            relDayData.date = null; // Force relative chart recompute if needed
-                                                            if (qthDayData.libration.length === 0) {
-                                                                console.warn(`No data computed for QTH ${locator}`);
-                                                                document.getElementById("chartWrapper").style.display = "none";
-                                                                if (chart) { chart.destroy(); chart = null; }
-                                                                chartLabel.innerHTML = '<span class="metric-locator">No data for QTH</span>';
-                                                            } else {
-                                                                setTimeout(() => updateChart(getCurrentIndex(), isRealTimeMode), 0);
-                                                            }
-                                                        } catch (e) {
-                                                            console.error(`Error computing libration for QTH ${locator}: ${e.message}`);
-                                                            document.getElementById("chartWrapper").style.display = "none";
-                                                            if (chart) { chart.destroy(); chart = null; }
-                                                            chartLabel.innerHTML = '<span class="metric-locator">Error computing QTH data</span>';
-                                                        }
-
-                                                        const {lat, lon} = qthToLatLon(locator);
-                                                        if (qthMarker) {
-                                                            qthMarker.setLatLng([lat, lon]);
-                                                        } else {
-                                                            qthMarker = L.marker([lat, lon]).addTo(map).bindPopup(`My Locator: ${locator}`);
-                                                        }
-                                                    } else {
-                                                        // Only remove from storage if field is cleared (optional – keeps last good one otherwise)
-                                                        // Comment out next line if you want to keep last valid even after clearing
-                                                        localStorage.removeItem('emeObserverLastQTH');
-
-                                                        document.getElementById("chartWrapper").style.display = "none";
-                                                        if (chart) { chart.destroy(); chart = null; }
-                                                        relDayData.date = null;
-                                                        chartLabel.innerHTML = '<span class="metric-locator">Enter valid QTH</span>';
-                                                        if (qthMarker) { qthMarker.remove(); qthMarker = null; }
-
-                                                        updateChart(getCurrentIndex(), isRealTimeMode);
-                                                    }
-                                                    setTimeout(updateQthPopup, 0);
-                                                    setTimeout(updateDxPopup, 0);
-                                                });
+                // FIX: force relative chart to hide when My locator becomes invalid
+                updateChart(getCurrentIndex(), isRealTimeMode);
+            }
+            setTimeout(updateQthPopup, 0);
+            setTimeout(updateDxPopup, 0);
+        });
 
         dxInputElem.addEventListener("input", () => {
             const locator = dxInputElem.value.trim().toUpperCase();
