@@ -3270,9 +3270,19 @@
             setTimeout(updateQthPopup, 0);  // Update after computations
             setTimeout(updateDxPopup,  0);   // ← added
             // Refresh any open station popups so they show updated windows for new date
+            // Refresh any open station popups so they show updated windows for new date
             map.eachLayer(layer => {
-                if (layer instanceof L.Marker && layer.getPopup && layer.getPopup().isOpen()) {
-                    layer.openPopup(); // re-renders the popup with fresh content
+                if (layer instanceof L.Marker) {
+                    const popup = layer.getPopup();
+                    if (popup && popup.isOpen()) {
+                        layer.openPopup(); // re-renders dynamic content safely
+                        // Also reload the station image (band may have changed or fallback needed)
+                        const callsignMatch = layer.options.title?.match(/^[A-Z0-9/]+/);
+                        if (callsignMatch) {
+                            const sanitized = sanitizeCallsign(callsignMatch[0]);
+                            setTimeout(() => loadStationImage(sanitized), 100);
+                        }
+                    }
                 }
             });
         });
