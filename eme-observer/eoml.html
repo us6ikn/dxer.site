@@ -3752,12 +3752,15 @@
                                                             }
                                                         })
                                                         .then(response => {
-                                                            if (response && response.ok) {
+                                                            if (response === undefined) {
+                                                                // Band-specific succeeded — do nothing more (prevents accidental removal)
+                                                                return;
+                                                            }
+                                                            if (response.ok) {
                                                                 imageElement.src = `db/${sanitizedCallsign}_thumb.jpg`;
                                                                 imageLink.href = `db/${sanitizedCallsign}.jpg`;
                                                                 placeholder.style.display = 'none';
                                                             } else {
-                                                                // No image at all
                                                                 imageElement.remove();
                                                                 placeholder.style.display = 'block';
                                                             }
