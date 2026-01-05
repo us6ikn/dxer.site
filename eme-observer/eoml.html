@@ -2709,167 +2709,115 @@
 
                 marker.bindPopup(infoContent);
 
-                marker.on('click', () => {
-                    map.closePopup();
-                    marker.openPopup();
+                // Dynamic popup: content is generated fresh every time it opens
+                marker.bindPopup(() => {
+                    const currentQTH = document.getElementById('qth').value.trim().toUpperCase();
+                    const dateStr = document.getElementById('date').value;
+                    const currentBand = document.getElementById('bandSelect').value;
 
-                    setTimeout(() => {
-                        const imageElement = document.getElementById(`station-image-${sanitizedCallsign}`);
-                        const imageLink = document.getElementById(`image-link-${sanitizedCallsign}`);
-                        const placeholder = document.getElementById(`image-placeholder-${sanitizedCallsign}`);
+                    let windowsHTML = '';
+                    if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(currentQTH) && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
+                        const windows = getCommonWindows(currentQTH, locator.toUpperCase(), dateStr);
 
-                        // Check for band-specific thumbnail
-                        fetch(bandSpecificThumbUrl, { method: 'HEAD' })
+                        if (windows.length > 0) {
+                            const moonIcon = `<svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:middle;"><path fill="currentColor" d="M12 2a9.93 9.93 0 0 0-7.06 2.94A10 10 0 1 0 22 12c0-.34-.02-.67-.05-1a8 8 0 0 1-9.95-9z"/></svg>`;
+
+                            const baseDate = new Date(`${dateStr}T00:00:00Z`);
+                            const baseDay = baseDate.getUTCDate();
+
+                            function suffixFor(dateObj) {
+                                const d = dateObj.getUTCDate();
+                                if (d === baseDay) return "";
+                                return d > baseDay ? "(+1)" : "(-1)";
+                            }
+
+                            windowsHTML = '<div style="margin-top:10px;"><strong>Common Moon Windows</strong><br>';
+                            windows.forEach((w, i) => {
+                                const start = formatTimeUTC(w.start);
+                                const end = formatTimeUTC(w.end);
+                                const startSuffix = suffixFor(w.start);
+                                const endSuffix = suffixFor(w.end);
+                                windowsHTML += `<div>${moonIcon} Window ${i+1}: ${start}${startSuffix} – ${end}${endSuffix}</div>`;
+                            });
+                            windowsHTML += '<div style="font-size:11px; color:#666; margin-top:4px; font-style:italic;">with your QTH</div></div>';
+                        } else {
+                            windowsHTML = '<div style="margin-top:10px; color:#666;"><em>No common window today with your QTH</em></div>';
+                        }
+                    }
+
+                    const bandSpecificImageUrl = `db/${sanitizedCallsign}-${currentBand}.jpg`;
+                    const bandSpecificThumbUrl = `db/${sanitizedCallsign}_thumb-${currentBand}.jpg`;
+                    const genericImageUrl = `db/${sanitizedCallsign}.jpg`;
+                    const genericThumbUrl = `db/${sanitizedCallsign}_thumb.jpg`;
+
+                    return `
+                        <div>
+                            <div style="font-weight:bold; font-size: 16px;">${callsignDisplay}</div>
+                            ${nameLine}
+                            <div class="button-group-infowindow">
+                                ${skedButton}${emailButton}${qrzButton}
+                            </div>
+                            <div>Locator: ${locator}</div>
+                            <div>Antenna: ${antenna}</div>
+                            <div>Power: ${power}</div>
+                            <div>Website: <a href="${website}" target="_blank">${displayWebsite}</a></div>
+                            ${windowsHTML}
+                            <div id="image-container-${sanitizedCallsign}" style="margin-top:10px;">
+                                Station Picture (clickable):
+                                <a id="image-link-${sanitizedCallsign}" href="${bandSpecificImageUrl}" target="_blank">
+                                    <img id="station-image-${sanitizedCallsign}" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA" alt="${callsign} station"/>
+                                </a>
+                                <div id="image-placeholder-${sanitizedCallsign}" style="display:none;">
+                                    <p><a href="datasubmission.html" target="_blank">Add Image</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                // Load image and set up buttons every time the popup opens
+                marker.on('popupopen', () => {
+                    const imageElement = document.getElementById(`station-image-${sanitizedCallsign}`);
+                    const imageLink = document.getElementById(`image-link-${sanitizedCallsign}`);
+                    const placeholder = document.getElementById(`image-placeholder-${sanitizedCallsign}`);
+
+                    if (imageElement && imageLink && placeholder) {
+                        fetch(`db/${sanitizedCallsign}_thumb-${document.getElementById('bandSelect').value}.jpg`, { method: 'HEAD' })
                             .then(response => {
                                 if (response.ok) {
-                                    // Band-specific image exists
-                                    imageElement.src = bandSpecificThumbUrl;
-                                    imageLink.href = bandSpecificImageUrl;
+                                    imageElement.src = `db/${sanitizedCallsign}_thumb-${document.getElementById('bandSelect').value}.jpg`;
+                                    imageLink.href = `db/${sanitizedCallsign}-${document.getElementById('bandSelect').value}.jpg`;
                                     placeholder.style.display = 'none';
                                 } else {
-                                    // Fall back to generic thumbnail
-                                    return fetch(genericThumbUrl, { method: 'HEAD' })
-                                        .then(genericResponse => {
-                                            if (genericResponse.ok) {
-                                                imageElement.src = genericThumbUrl;
-                                                imageLink.href = genericImageUrl;
-                                                placeholder.style.display = 'none';
-                                            } else {
-                                                // No image available
-                                                imageElement.remove();
-                                                placeholder.style.display = 'block';
-                                            }
-                                        });
+                                    return fetch(`db/${sanitizedCallsign}_thumb.jpg`, { method: 'HEAD' });
+                                }
+                            })
+                            .then(response => {
+                                if (response && response.ok) {
+                                    imageElement.src = `db/${sanitizedCallsign}_thumb.jpg`;
+                                    imageLink.href = `db/${sanitizedCallsign}.jpg`;
+                                    placeholder.style.display = 'none';
+                                } else {
+                                    imageElement.remove();
+                                    placeholder.style.display = 'block';
                                 }
                             })
                             .catch(() => {
-                                // Error fetching band-specific image, try generic
-                                return fetch(genericThumbUrl, { method: 'HEAD' })
-                                    .then(genericResponse => {
-                                        if (genericResponse.ok) {
-                                            imageElement.src = genericThumbUrl;
-                                            imageLink.href = genericImageUrl;
-                                            placeholder.style.display = 'none';
-                                        } else {
-                                            imageElement.remove();
-                                            placeholder.style.display = 'block';
-                                        }
-                                    })
-                                    .catch(() => {
-                                        imageElement.remove();
-                                        placeholder.style.display = 'block';
-                                    });
+                                imageElement.remove();
+                                placeholder.style.display = 'block';
                             });
+                    }
 
-                            const skedButton = document.getElementById(`sked-${sanitizedCallsign}`);
-                            if (skedButton) {
-                                skedButton.addEventListener('click', () => {
-                                    const locator = skedButton.getAttribute('data-locator');
-                                    document.getElementById('dx').value = locator;
-
-                                    // Trigger input event so all calculations run
-                                    const inputEvent = new Event('input', { bubbles: true });
-                                    document.getElementById('dx').dispatchEvent(inputEvent);
-
-                                    // CRITICAL: Refresh the currently open popup (this station's)
-                                    // This forces windowsHTML to be recalculated with current QTH
-                                    if (marker.getPopup() && marker.getPopup().isOpen()) {
-                                        setTimeout(() => {
-                                            // === Load image and attach Sked handler AFTER popup is rendered ===
-                                            function setupPopupContent() {
-                                                const imageElement = document.getElementById(`station-image-${sanitizedCallsign}`);
-                                                const imageLink = document.getElementById(`image-link-${sanitizedCallsign}`);
-                                                const placeholder = document.getElementById(`image-placeholder-${sanitizedCallsign}`);
-
-                                                if (imageElement && imageLink && placeholder) {
-                                                    fetch(bandSpecificThumbUrl, { method: 'HEAD' })
-                                                        .then(response => {
-                                                            if (response.ok) {
-                                                                imageElement.src = bandSpecificThumbUrl;
-                                                                imageLink.href = bandSpecificImageUrl;
-                                                                placeholder.style.display = 'none';
-                                                            } else {
-                                                                return fetch(genericThumbUrl, { method: 'HEAD' })
-                                                                    .then(genericResponse => {
-                                                                        if (genericResponse.ok) {
-                                                                            imageElement.src = genericThumbUrl;
-                                                                            imageLink.href = genericImageUrl;
-                                                                            placeholder.style.display = 'none';
-                                                                        } else {
-                                                                            imageElement.remove();
-                                                                            placeholder.style.display = 'block';
-                                                                        }
-                                                                    });
-                                                            }
-                                                        })
-                                                        .catch(() => {
-                                                            return fetch(genericThumbUrl, { method: 'HEAD' })
-                                                                .then(genericResponse => {
-                                                                    if (genericResponse.ok) {
-                                                                        imageElement.src = genericThumbUrl;
-                                                                        imageLink.href = genericImageUrl;
-                                                                        placeholder.style.display = 'none';
-                                                                    } else {
-                                                                        imageElement.remove();
-                                                                        placeholder.style.display = 'block';
-                                                                    }
-                                                                })
-                                                                .catch(() => {
-                                                                    imageElement.remove();
-                                                                    placeholder.style.display = 'block';
-                                                                });
-                                                        });
-                                                }
-
-                                                // === Sked button: refresh popup (which will re-run setupPopupContent) ===
-                                                const skedButton = document.getElementById(`sked-${sanitizedCallsign}`);
-                                                if (skedButton) {
-                                                    skedButton.onclick = null; // Prevent duplicate handlers
-                                                    skedButton.addEventListener('click', () => {
-                                                        const locator = skedButton.getAttribute('data-locator');
-                                                        document.getElementById('dx').value = locator;
-
-                                                        const inputEvent = new Event('input', { bubbles: true });
-                                                        document.getElementById('dx').dispatchEvent(inputEvent);
-
-                                                        // Refresh popup → triggers new content + image load
-                                                        if (marker.getPopup() && marker.getPopup().isOpen()) {
-                                                            setTimeout(() => marker.openPopup(), 150);
-                                                        }
-                                                    });
-                                                }
-
-                                                // Other buttons (email, qrz)
-                                                const emailButton = document.getElementById(`email-${sanitizedCallsign}`);
-                                                if (emailButton) emailButton.addEventListener('click', () => {});
-
-                                                const qrzButton = document.getElementById(`qrz-${sanitizedCallsign}`);
-                                                if (qrzButton) qrzButton.addEventListener('click', () => {});
-                                            }
-
-                                            // Run once now
-                                            setupPopupContent();
-
-                                            // Also run after any future popup refresh (e.g. date change)
-                                            marker.off('popupopen', setupPopupContent);
-                                            marker.on('popupopen', setupPopupContent);
-                                        }, 100);
-                                    }
-                                });
-                            }
-
-                        const emailButton = document.getElementById(`email-${sanitizedCallsign}`);
-                        if (emailButton) {
-                            emailButton.addEventListener('click', () => {
-                            });
-                        }
-
-                        const qrzButton = document.getElementById(`qrz-${sanitizedCallsign}`);
-                        if (qrzButton) {
-                            qrzButton.addEventListener('click', () => {
-                            });
-                        }
-                    }, 100);
+                    // Sked button: fill DX field (no need to manually refresh popup anymore)
+                    const skedButton = document.getElementById(`sked-${sanitizedCallsign}`);
+                    if (skedButton) {
+                        skedButton.onclick = null; // prevent duplicates
+                        skedButton.addEventListener('click', () => {
+                            document.getElementById('dx').value = locator.toUpperCase();
+                            document.getElementById('dx').dispatchEvent(new Event('input', { bubbles: true }));
+                            // Popup will auto-refresh next time it's opened because content is now dynamic
+                        });
+                    }
                 });
             });
         }
