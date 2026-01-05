@@ -2649,40 +2649,6 @@
                 const genericImageUrl = `db/${sanitizedCallsign}.jpg`;
                 const genericThumbUrl = `db/${sanitizedCallsign}_thumb.jpg`;
 
-                // === NEW: Compute common windows if QTH is valid ===
-                let windowsHTML = '';
-                const currentQTH = document.getElementById('qth').value.trim().toUpperCase();
-                const dateStr = document.getElementById('date').value;
-
-                if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(currentQTH) && /^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-                    const windows = getCommonWindows(currentQTH, locator.toUpperCase(), dateStr);
-
-                    if (windows.length > 0) {
-                        const moonIcon = `<svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:middle;"><path fill="currentColor" d="M12 2a9.93 9.93 0 0 0-7.06 2.94A10 10 0 1 0 22 12c0-.34-.02-.67-.05-1a8 8 0 0 1-9.95-9z"/></svg>`;
-
-                        const baseDate = new Date(`${dateStr}T00:00:00Z`);
-                        const baseDay = baseDate.getUTCDate();
-
-                        function suffixFor(dateObj) {
-                            const d = dateObj.getUTCDate();
-                            if (d === baseDay) return "";
-                            return d > baseDay ? "(+1)" : "(-1)";
-                        }
-
-                        windowsHTML = '<div style="margin-top:10px;"><strong>Common Moon Windows</strong><br>';
-                        windows.forEach((w, i) => {
-                            const start = formatTimeUTC(w.start);
-                            const end = formatTimeUTC(w.end);
-                            const startSuffix = suffixFor(w.start);
-                            const endSuffix = suffixFor(w.end);
-                            windowsHTML += `<div>${moonIcon} Window ${i+1}: ${start}${startSuffix} – ${end}${endSuffix}</div>`;
-                        });
-                        windowsHTML += '<div style="font-size:11px; color:#666; margin-top:4px; font-style:italic;">with your QTH</div></div>';
-                    } else {
-                        windowsHTML = '<div style="margin-top:10px; color:#666;"><em>No common window today with your QTH</em></div>';
-                    }
-                }
-
                 const infoContent = `
                     <div>
                         <div style="font-weight:bold; font-size: 16px;">${callsignDisplay}</div>
@@ -2694,8 +2660,7 @@
                         <div>Antenna: ${antenna}</div>
                         <div>Power: ${power}</div>
                         <div>Website: <a href="${website}" target="_blank">${displayWebsite}</a></div>
-                        ${windowsHTML}
-                        <div id="image-container-${sanitizedCallsign}" style="margin-top:10px;">
+                        <div id="image-container-${sanitizedCallsign}">
                             Station Picture (clickable):
                             <a id="image-link-${sanitizedCallsign}" href="${bandSpecificImageUrl}" target="_blank">
                                 <img id="station-image-${sanitizedCallsign}" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA" alt="${callsign} station"/>
@@ -3303,12 +3268,7 @@
             updateChart(hourIndex, false);
             setTimeout(updateQthPopup, 0);  // Update after computations
             setTimeout(updateDxPopup,  0);   // ← added
-            // Refresh any open station popups so they show updated windows for new date
-            map.eachLayer(layer => {
-                if (layer instanceof L.Marker && layer.getPopup && layer.getPopup().isOpen()) {
-                    layer.openPopup(); // re-renders the popup with fresh content
-                }
-            });
+        });
 
                                                 window.onload = () => {
                                                     // Initialize map first (includes async fetch of stations)
