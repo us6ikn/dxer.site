@@ -2760,25 +2760,17 @@
 
                     // Sked button: fill DX field
                     // Sked button: fill DX field AND refresh popup immediately
-                    // Sked button: fill DX field AND update popup content instantly (no flash)
                     const skedBtn = document.getElementById(`sked-${sanitizedCallsign}`);
                     if (skedBtn) {
                         skedBtn.onclick = null; // prevent duplicates
                         skedBtn.addEventListener('click', () => {
-                            // Fill DX field and trigger all calculations
+                            // Fill DX field and trigger calculations
                             document.getElementById('dx').value = locator.toUpperCase();
                             document.getElementById('dx').dispatchEvent(new Event('input', { bubbles: true }));
 
-                            // If popup is open, update its content immediately without closing
+                            // Immediately refresh the open popup with new content (including windows)
                             if (marker.isPopupOpen()) {
-                                const popup = marker.getPopup();
-                                if (popup) {
-                                    // Re-generate fresh content using the bound dynamic function
-                                    const newContent = marker.getPopup().options._content || marker._popup._content;
-                                    // Force re-render by setting content again
-                                    popup.setContent(marker.bindPopup()._content);
-                                    popup.update(); // Ensures layout is refreshed
-                                }
+                                marker.openPopup(); // This re-renders the dynamic content instantly
                             }
                         });
                     }
