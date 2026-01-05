@@ -2701,14 +2701,10 @@
 
                     return `
                         <div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                                <div>
-                                    <div style="font-weight:bold; font-size: 16px;">${callsignDisplay}</div>
-                                    ${nameLine}
-                                </div>
-                                <div class="button-group-infowindow" style="gap: 6px; flex-shrink: 0;">
-                                    ${skedButton}${emailButton}${qrzButton}
-                                </div>
+                            <div style="font-weight:bold; font-size: 16px;">${callsignDisplay}</div>
+                            ${nameLine}
+                            <div class="button-group-infowindow">
+                                ${skedButton}${emailButton}${qrzButton}
                             </div>
                             <div>Locator: ${locator}</div>
                             <div>Antenna: ${antenna}</div>
