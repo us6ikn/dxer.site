@@ -2456,13 +2456,16 @@
                       setTimeout(updateDxPopup, 0);
                   }
 
-          // Update map and moon chart with exact time
-          const exactTime = isRealtime ? new Date() : new Date(`${dateStr}T${Math.floor(index / 12).toString().padStart(2, '0')}:${String((index % 12) * 5).padStart(2, '0')}:00Z`);
-          updateMap(exactTime);
-          updateMoonChart(exactTime);
-          if (dxMarker) updateDxPopup();   // ← This is the missing piece!
-        }
+                  // Update map and moon chart with exact time
+                  const exactTime = isRealtime ? new Date() : new Date(`${dateStr}T${Math.floor(index / 12).toString().padStart(2, '0')}:${String((index % 12) * 5).padStart(2, '0')}:00Z`);
 
+                  updateMap(exactTime);
+                  updateMoonChart(exactTime);
+
+                  // Now update both popups (QTH popup will refresh live if open)
+                  updateQthPopup();
+                  if (dxMarker) updateDxPopup();
+                  
         function startRealTimeUpdates() {
             if (isRealTimeMode) {
                 console.log('startRealTimeUpdates: Starting real-time updates'); // Debug log
