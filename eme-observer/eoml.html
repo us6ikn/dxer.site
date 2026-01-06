@@ -3694,25 +3694,34 @@
 
                                                                                     const moonInfo = getMoonPhaseInfo(exactTime);
 
-                                                                                    // === NEW: Topocentric distance and path loss ===
                                                                                     let topoDist = null;
                                                                                     let extraLoss = null;
-                                                                                    const minDist = 356352.93; // perigee distance used elsewhere
+                                                                                    const minDist = 356352.93;
 
                                                                                     if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
                                                                                         try {
                                                                                             const { lat, lon } = qthToLatLon(locator);
-                                                                                            const observer = new Astronomy.Observer(lat, lon, 0);
+                                                                                            const observer = new Astronomy.Observer(lat, lon, 0);  // height 0 m is fine for this
                                                                                             const time = Astronomy.MakeTime(exactTime);
-                                                                                            const moonVec = Astronomy.GeoVector(Astronomy.Body.Moon, time, true); // ← FIXED: true for aberration
-                                                                                            topoDist = moonVec.Length() / 1000; // km
-                                                                                            if (topoDist != null && topoDist > 0) {
+
+                                                                                            // Geocentric Moon vector (apparent, with aberration)
+                                                                                            const geoMoon = Astronomy.GeoVector(Astronomy.Body.Moon, time, true);
+
+                                                                                            // Vector from Earth center to observer (with aberration)
+                                                                                            const obsVec = Astronomy.ObserverVector(time, observer, true);
+
+                                                                                            // Topocentric vector: observer → Moon
+                                                                                            const topoVecX = geoMoon.x - obsVec.x;
+                                                                                            const topoVecY = geoMoon.y - obsVec.y;
+                                                                                            const topoVecZ = geoMoon.z - obsVec.z;
+
+                                                                                            topoDist = Math.sqrt(topoVecX*topoVecX + topoVecY*topoVecY + topoVecZ*topoVecZ) * Astronomy.KM_PER_AU;
+
+                                                                                            if (topoDist > 0) {
                                                                                                 extraLoss = 40 * Math.log10(topoDist / minDist);
                                                                                             }
                                                                                         } catch (e) {
                                                                                             console.warn("Error calculating topocentric distance:", e);
-                                                                                            topoDist = null;
-                                                                                            extraLoss = null;
                                                                                         }
                                                                                     }
 
