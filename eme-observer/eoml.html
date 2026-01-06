@@ -3722,7 +3722,7 @@
                                                                                             topoDist = Math.sqrt(topoVecX*topoVecX + topoVecY*topoVecY + topoVecZ*topoVecZ) * Astronomy.KM_PER_AU;
 
                                                                                             if (topoDist > 0) {
-                                                                                                extraLoss = 40 * Math.log10(topoDist / minDist);
+                                                                                                extraLoss = Math.max(0, 40 * Math.log10(topoDist / minDist));
                                                                                             }
                                                                                         } catch (e) {
                                                                                             console.warn("Error calculating topocentric distance:", e);
