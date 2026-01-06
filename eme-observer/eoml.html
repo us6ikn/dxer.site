@@ -3645,41 +3645,41 @@
                                                     const illum = Astronomy.Illumination(Astronomy.Body.Moon, astroTime);
                                                     const lib   = Astronomy.Libration(astroTime);
 
-                                                    // Illumination percentage (0% new → 100% full)
+                                                    // Illumination percentage
                                                     const illuminationPct = (illum.phase_fraction * 100).toFixed(1);
 
-                                                    // Phase angle in degrees (~180° new, ~90° quarter, ~0° full)
+                                                    // Phase angle (Sun–Moon–Earth): ~180 new → ~0 full
                                                     const phaseAngle = illum.phase_angle.toFixed(1);
 
-                                                    // Normalized orbital phase:
-                                                    // 0.00 = New, 0.25 = First Quarter, 0.50 = Full, 0.75 = Last Quarter
-                                                    const phaseValue = illum.phase.toFixed(3);
+                                                    // TRUE orbital phase angle from New Moon (0–360°)
+                                                    const moonPhaseDeg = Astronomy.MoonPhase(astroTime);
+
+                                                    // Normalized orbital phase (0–1)
+                                                    const phaseValue = (moonPhaseDeg / 360).toFixed(3);
 
                                                     // -------- CORRECT PHASE NAME LOGIC --------
-                                                    const phase = illum.phase;
-                                                    const eps = 0.03; // tolerance window for named phases
-
+                                                    const eps = 12; // degrees tolerance (~1 day)
                                                     let phaseName;
 
-                                                    if (phase < eps || phase > 1 - eps) {
+                                                    if (moonPhaseDeg < eps || moonPhaseDeg > 360 - eps) {
                                                         phaseName = "New Moon";
                                                     }
-                                                    else if (Math.abs(phase - 0.25) < eps) {
+                                                    else if (Math.abs(moonPhaseDeg - 90) < eps) {
                                                         phaseName = "First Quarter";
                                                     }
-                                                    else if (Math.abs(phase - 0.50) < eps) {
+                                                    else if (Math.abs(moonPhaseDeg - 180) < eps) {
                                                         phaseName = "Full Moon";
                                                     }
-                                                    else if (Math.abs(phase - 0.75) < eps) {
+                                                    else if (Math.abs(moonPhaseDeg - 270) < eps) {
                                                         phaseName = "Last Quarter";
                                                     }
-                                                    else if (phase < 0.25) {
+                                                    else if (moonPhaseDeg < 90) {
                                                         phaseName = "Waxing Crescent";
                                                     }
-                                                    else if (phase < 0.50) {
+                                                    else if (moonPhaseDeg < 180) {
                                                         phaseName = "Waxing Gibbous";
                                                     }
-                                                    else if (phase < 0.75) {
+                                                    else if (moonPhaseDeg < 270) {
                                                         phaseName = "Waning Gibbous";
                                                     }
                                                     else {
@@ -3687,23 +3687,22 @@
                                                     }
                                                     // -----------------------------------------
 
-                                                    // Apparent angular diameter in degrees (topocentric)
-                                                    const moonRadiusKm = 1737.4; // Mean lunar radius
+                                                    // Apparent angular diameter (degrees)
+                                                    const moonRadiusKm = 1737.4;
                                                     const distKm = lib.dist_km;
 
                                                     const angularDiameterDeg =
                                                         (2 * Math.atan(moonRadiusKm / distKm)) * (180 / Math.PI);
 
-                                                    const angularDiameterDegrees = angularDiameterDeg.toFixed(3);
-
                                                     return {
-                                                        angularDiameter: angularDiameterDegrees, // degrees
-                                                        illumination: illuminationPct,           // percent
-                                                        phaseValue: phaseValue,                  // orbital phase (0–1)
+                                                        angularDiameter: angularDiameterDeg.toFixed(3),
+                                                        illumination: illuminationPct,
+                                                        phaseValue: phaseValue,
                                                         phaseName: phaseName,
-                                                        phaseAngle: phaseAngle                   // degrees
+                                                        phaseAngle: phaseAngle
                                                     };
                                                 }
+
 
                                                 
                                                                                 function updateQthPopup() {
