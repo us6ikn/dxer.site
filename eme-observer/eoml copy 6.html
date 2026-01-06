@@ -2917,47 +2917,6 @@
             function formatTimeUTC(date) {
                 return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}z`;
             }
-            
-            function getMoonPhaseInfo(currentTime) {
-                const astroTime = Astronomy.MakeTime(currentTime);
-                const illum = Astronomy.Illumination(Astronomy.Body.Moon, astroTime);
-
-                // illum.phase_fraction = illumination % (0 to 1 → 0% to 100%)
-                const illuminationPct = (illum.phase_fraction * 100).toFixed(1);
-
-                // illum.phase_angle = phase angle in degrees (0° = New, 180° = Full)
-                const phaseAngle = illum.phase_angle.toFixed(1);
-
-                // illum.phase_fraction is also the normalized phase (0 to 1)
-                const phaseValue = illum.phase_fraction.toFixed(2);
-
-                // Simple phase name based on phase_fraction
-                let phaseName;
-                if (illum.phase_fraction < 0.02) phaseName = "New Moon";
-                else if (illum.phase_fraction < 0.23) phaseName = "Waxing Crescent";
-                else if (illum.phase_fraction < 0.27) phaseName = "First Quarter";
-                else if (illum.phase_fraction < 0.48) phaseName = "Waxing Gibbous";
-                else if (illum.phase_fraction < 0.52) phaseName = "Full Moon";
-                else if (illum.phase_fraction < 0.73) phaseName = "Waning Gibbous";
-                else if (illum.phase_fraction < 0.77) phaseName = "Last Quarter";
-                else if (illum.phase_fraction < 0.98) phaseName = "Waning Crescent";
-                else phaseName = "New Moon";
-
-                // Angular diameter: use Moon equatorial radius and distance from libration
-                const lib = Astronomy.Libration(astroTime);
-                const moonRadiusKm = 1737.4; // Mean equatorial radius of the Moon
-                const distKm = lib.dist_km;
-                const angularDiameterDeg = (2 * Math.atan(moonRadiusKm / distKm)) * (180 / Math.PI);
-                const angularDiameterArcmin = (angularDiameterDeg * 60).toFixed(2);
-
-                return {
-                    angularDiameter: angularDiameterArcmin,
-                    illumination: illuminationPct,
-                    phaseValue: phaseValue,
-                    phaseName: phaseName,
-                    phaseAngle: phaseAngle
-                };
-            }
 
             const targetDateStr = dateStr.slice(0, 10);
 
@@ -3688,15 +3647,15 @@
                                                     return;
                                                 }
 
-                                                // Use the exact current time (same as used for charts/map)
-                                                const isRealtime = document.getElementById('realTimeButton').classList.contains('active');
-                                                const exactTime = isRealtime ? new Date() : new Date(`${dateStr}T${Math.floor(hourIndex / 12).toString().padStart(2, '0')}:${String((hourIndex % 12) * 5).padStart(2, '0')}:00Z`);
-
-                                                const moonInfo = getMoonPhaseInfo(exactTime);
-
                                                 const moonIcon = `
                                                   <svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:middle;">
                                                     <path fill="currentColor" d="M12 2a9.93 9.93 0 0 0-7.06 2.94A10 10 0 1 0 22 12c0-.34-.02-.67-.05-1a8 8 0 0 1-9.95-9z"/>
+                                                  </svg>
+                                                `;
+
+                                                const sunIcon = `
+                                                  <svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:middle;">
+                                                    <path fill="currentColor" d="M12 4a1 1 0 0 1 1-1h0a1 1 0 1 1-2 0 1 1 0 0 1 1-1zm0 18a1 1 0 0 1 1 1h0a1 1 0 1 1-2 0 1 1 0 0 1 1-1zM4 11a1 1 0 0 1 1-1h0a1 1 0 1 1 0 2 1 1 0 0 1-1-1zm16 0a1 1 0 0 1 1-1h0a1 1 0 1 1 0 2 1 1 0 0 1-1-1zM5.64 5.64a1 1 0 0 1 1.41 0h0a1 1 0 1 1-1.41-1.41 1 1 0 0 1 0 1.41zm12.02 12.02a1 1 0 0 1 1.41 0h0a1 1 0 1 1-1.41 1.41 1 1 0 0 1 0-1.41zM5.64 18.36a1 1 0 0 1 1.41 0h0a1 1 0 1 1-1.41 1.41 1 1 0 0 1 0-1.41zm12.02-12.02a1 1 0 0 1 1.41 0h0a1 1 0 1 1-1.41-1.41 1 1 0 0 1 0 1.41zM12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/>
                                                   </svg>
                                                 `;
 
@@ -3704,12 +3663,7 @@
                                                   My Locator: ${locator}<br>
                                                   <div style="height:4px"></div>
                                                   ${info.dayOfWeek} ${info.formattedDate}<br>
-                                                  <div style="height:8px"></div>
-                                                  <strong>Moon Data ${moonIcon}</strong><br>
-                                                  Phase: ${moonInfo.phaseName} (${moonInfo.phaseValue})<br>
-                                                  Illumination: ${moonInfo.illumination}%<br>
-                                                  Phase angle: ${moonInfo.phaseAngle}°<br>
-                                                  Apparent diameter: ${moonInfo.angularDiameter}'<br>
+                                                  <div style="height:4px"></div>
                                                 `;
 
                                                 qthMarker.bindPopup(popupContent);
