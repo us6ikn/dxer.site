@@ -3703,6 +3703,37 @@
                                                     };
                                                 }
 
+                                                         function getMoonPhaseSVG(illuminationPct, size = 14) {
+                                                             // illuminationPct: 0 to 100
+                                                             const k = illuminationPct / 100;  // 0 to 1
+                                                             const radius = size / 2;
+                                                             const cx = radius;
+                                                             const cy = radius;
+
+                                                             let dOffset = 0;
+                                                             let sweepFlag = 1;  // for waxing
+                                                             let largeArcFlag = 0;
+
+                                                             if (k <= 0.5) {
+                                                                 // Waxing: shadow on the right
+                                                                 dOffset = 2 * radius * (1 - 2 * k);
+                                                                 sweepFlag = 1;
+                                                             } else {
+                                                                 // Waning: shadow on the left (flip direction)
+                                                                 dOffset = 2 * radius * (2 * k - 1);
+                                                                 sweepFlag = 0;
+                                                             }
+
+                                                             const shadowCx = cx + dOffset;
+
+                                                             return `
+                                                         <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+                                                           <!-- Full moon (light part) -->
+                                                           <circle cx="${cx}" cy="${cy}" r="${radius}" fill="#fff" />
+                                                           <!-- Shadow circle -->
+                                                           <circle cx="${shadowCx}" cy="${cy}" r="${radius}" fill="#000" />
+                                                         </svg>`;
+                                                         }
 
                                                 
                                                                                 function updateQthPopup() {
@@ -3760,6 +3791,7 @@
                                                                                       </svg>
                                                                                     `;
 
+                                                                                    const moonIcon = getMoonPhaseSVG(moonInfo.illumination, 14);  // size 14 to match current
                                                                                     const popupContent = `
                                                                                       My Locator: ${locator}<br>
                                                                                       <div style="height:4px"></div>
