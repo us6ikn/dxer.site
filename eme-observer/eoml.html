@@ -3660,20 +3660,20 @@
                                                     else if (illum.phase_fraction < 0.98) phaseName = "Waning Crescent";
                                                     else phaseName = "New Moon";
 
-                                                    // Angular diameter: use Moon equatorial radius and distance from libration
+                                                    // Angular diameter in degrees (for easy comparison with antenna beamwidth)
                                                     const lib = Astronomy.Libration(astroTime);
                                                     const moonRadiusKm = 1737.4; // Mean equatorial radius of the Moon
                                                     const distKm = lib.dist_km;
                                                     const angularDiameterDeg = (2 * Math.atan(moonRadiusKm / distKm)) * (180 / Math.PI);
-                                                    const angularDiameterArcmin = (angularDiameterDeg * 60).toFixed(2);
+                                                    const angularDiameterDegrees = angularDiameterDeg.toFixed(3); // e.g. 0.532°
 
-                                                    return {
-                                                        angularDiameter: angularDiameterArcmin,
-                                                        illumination: illuminationPct,
-                                                        phaseValue: phaseValue,
-                                                        phaseName: phaseName,
-                                                        phaseAngle: phaseAngle
-                                                    };
+                                                                                return {
+                                                                                    angularDiameter: angularDiameterDegrees,
+                                                                                    illumination: illuminationPct,
+                                                                                    phaseValue: phaseValue,
+                                                                                    phaseName: phaseName,
+                                                                                    phaseAngle: phaseAngle
+                                                                                };
                                                 }
                                                 
                                             function updateQthPopup() {
@@ -3709,7 +3709,7 @@
                                                   Phase: ${moonInfo.phaseName} (${moonInfo.phaseValue})<br>
                                                   Illumination: ${moonInfo.illumination}%<br>
                                                   Phase angle: ${moonInfo.phaseAngle}°<br>
-                                                  Apparent diameter: ${moonInfo.angularDiameter}'<br>
+                                                  Apparent diameter: ${moonInfo.angularDiameter}°<br>
                                                 `;
 
                                                 qthMarker.bindPopup(popupContent);
