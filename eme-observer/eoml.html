@@ -2917,47 +2917,6 @@
             function formatTimeUTC(date) {
                 return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}z`;
             }
-            
-            function getMoonPhaseInfo(currentTime) {
-                const astroTime = Astronomy.MakeTime(currentTime);
-                const illum = Astronomy.Illumination(Astronomy.Body.Moon, astroTime);
-
-                // illum.phase_fraction = illumination % (0 to 1 → 0% to 100%)
-                const illuminationPct = (illum.phase_fraction * 100).toFixed(1);
-
-                // illum.phase_angle = phase angle in degrees (0° = New, 180° = Full)
-                const phaseAngle = illum.phase_angle.toFixed(1);
-
-                // illum.phase_fraction is also the normalized phase (0 to 1)
-                const phaseValue = illum.phase_fraction.toFixed(2);
-
-                // Simple phase name based on phase_fraction
-                let phaseName;
-                if (illum.phase_fraction < 0.02) phaseName = "New Moon";
-                else if (illum.phase_fraction < 0.23) phaseName = "Waxing Crescent";
-                else if (illum.phase_fraction < 0.27) phaseName = "First Quarter";
-                else if (illum.phase_fraction < 0.48) phaseName = "Waxing Gibbous";
-                else if (illum.phase_fraction < 0.52) phaseName = "Full Moon";
-                else if (illum.phase_fraction < 0.73) phaseName = "Waning Gibbous";
-                else if (illum.phase_fraction < 0.77) phaseName = "Last Quarter";
-                else if (illum.phase_fraction < 0.98) phaseName = "Waning Crescent";
-                else phaseName = "New Moon";
-
-                // Angular diameter: use Moon equatorial radius and distance from libration
-                const lib = Astronomy.Libration(astroTime);
-                const moonRadiusKm = 1737.4; // Mean equatorial radius of the Moon
-                const distKm = lib.dist_km;
-                const angularDiameterDeg = (2 * Math.atan(moonRadiusKm / distKm)) * (180 / Math.PI);
-                const angularDiameterArcmin = (angularDiameterDeg * 60).toFixed(2);
-
-                return {
-                    angularDiameter: angularDiameterArcmin,
-                    illumination: illuminationPct,
-                    phaseValue: phaseValue,
-                    phaseName: phaseName,
-                    phaseAngle: phaseAngle
-                };
-            }
 
             const targetDateStr = dateStr.slice(0, 10);
 
@@ -3676,6 +3635,47 @@
         return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}z`;
     }
 
+                                                function getMoonPhaseInfo(currentTime) {
+                                                    const astroTime = Astronomy.MakeTime(currentTime);
+                                                    const illum = Astronomy.Illumination(Astronomy.Body.Moon, astroTime);
+
+                                                    // illum.phase_fraction = illumination % (0 to 1 → 0% to 100%)
+                                                    const illuminationPct = (illum.phase_fraction * 100).toFixed(1);
+
+                                                    // illum.phase_angle = phase angle in degrees (0° = New, 180° = Full)
+                                                    const phaseAngle = illum.phase_angle.toFixed(1);
+
+                                                    // illum.phase_fraction is also the normalized phase (0 to 1)
+                                                    const phaseValue = illum.phase_fraction.toFixed(2);
+
+                                                    // Simple phase name based on phase_fraction
+                                                    let phaseName;
+                                                    if (illum.phase_fraction < 0.02) phaseName = "New Moon";
+                                                    else if (illum.phase_fraction < 0.23) phaseName = "Waxing Crescent";
+                                                    else if (illum.phase_fraction < 0.27) phaseName = "First Quarter";
+                                                    else if (illum.phase_fraction < 0.48) phaseName = "Waxing Gibbous";
+                                                    else if (illum.phase_fraction < 0.52) phaseName = "Full Moon";
+                                                    else if (illum.phase_fraction < 0.73) phaseName = "Waning Gibbous";
+                                                    else if (illum.phase_fraction < 0.77) phaseName = "Last Quarter";
+                                                    else if (illum.phase_fraction < 0.98) phaseName = "Waning Crescent";
+                                                    else phaseName = "New Moon";
+
+                                                    // Angular diameter: use Moon equatorial radius and distance from libration
+                                                    const lib = Astronomy.Libration(astroTime);
+                                                    const moonRadiusKm = 1737.4; // Mean equatorial radius of the Moon
+                                                    const distKm = lib.dist_km;
+                                                    const angularDiameterDeg = (2 * Math.atan(moonRadiusKm / distKm)) * (180 / Math.PI);
+                                                    const angularDiameterArcmin = (angularDiameterDeg * 60).toFixed(2);
+
+                                                    return {
+                                                        angularDiameter: angularDiameterArcmin,
+                                                        illumination: illuminationPct,
+                                                        phaseValue: phaseValue,
+                                                        phaseName: phaseName,
+                                                        phaseAngle: phaseAngle
+                                                    };
+                                                }
+                                                
                                             function updateQthPopup() {
                                                 if (!qthMarker) return;
                                                 
