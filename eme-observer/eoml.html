@@ -3704,13 +3704,15 @@
                                                                                             const { lat, lon } = qthToLatLon(locator);
                                                                                             const observer = new Astronomy.Observer(lat, lon, 0);
                                                                                             const time = Astronomy.MakeTime(exactTime);
-                                                                                            const moonVec = Astronomy.GeoVector(Astronomy.Body.Moon, time, false); // false = aberration off (consistent with libration)
+                                                                                            const moonVec = Astronomy.GeoVector(Astronomy.Body.Moon, time, true); // ← FIXED: true for aberration
                                                                                             topoDist = moonVec.Length() / 1000; // km
-                                                                                            if (topoDist != null) {
+                                                                                            if (topoDist != null && topoDist > 0) {
                                                                                                 extraLoss = 40 * Math.log10(topoDist / minDist);
                                                                                             }
                                                                                         } catch (e) {
                                                                                             console.warn("Error calculating topocentric distance:", e);
+                                                                                            topoDist = null;
+                                                                                            extraLoss = null;
                                                                                         }
                                                                                     }
 
