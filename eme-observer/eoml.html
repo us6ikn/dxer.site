@@ -3641,56 +3641,70 @@
 
                                                 function getMoonPhaseInfo(currentTime) {
                                                     const astroTime = Astronomy.MakeTime(currentTime);
+
                                                     const illum = Astronomy.Illumination(Astronomy.Body.Moon, astroTime);
-                                                    const lib = Astronomy.Libration(astroTime);
+                                                    const lib   = Astronomy.Libration(astroTime);
 
                                                     // Illumination percentage (0% new → 100% full)
                                                     const illuminationPct = (illum.phase_fraction * 100).toFixed(1);
 
-                                                    // Phase angle in degrees (~0° at new moon, ~180° at full moon)
+                                                    // Phase angle in degrees (~180° new, ~90° quarter, ~0° full)
                                                     const phaseAngle = illum.phase_angle.toFixed(1);
 
-                                                    // Normalized phase value: 0.00 at new, 1.00 at full (matches phase_fraction)
-                                                    const phaseValue = illum.phase_fraction.toFixed(2);
+                                                    // Normalized orbital phase:
+                                                    // 0.00 = New, 0.25 = First Quarter, 0.50 = Full, 0.75 = Last Quarter
+                                                    const phaseValue = illum.phase.toFixed(3);
 
-                                                    // Accurate phase name based on illumination fraction
+                                                    // -------- CORRECT PHASE NAME LOGIC --------
+                                                    const phase = illum.phase;
+                                                    const eps = 0.03; // tolerance window for named phases
+
                                                     let phaseName;
-                                                    const frac = illum.phase_fraction;
-                                                    if (frac <= 0.02 || frac >= 0.98) {
-                                                        phaseName = "New Moon";
-                                                    } else if (frac < 0.23) {
-                                                        phaseName = "Waxing Crescent";
-                                                    } else if (frac < 0.27) {
-                                                        phaseName = "First Quarter";
-                                                    } else if (frac < 0.48) {
-                                                        phaseName = "Waxing Gibbous";
-                                                    } else if (frac < 0.52) {
-                                                        phaseName = "Full Moon";
-                                                    } else if (frac < 0.73) {
-                                                        phaseName = "Waning Gibbous";
-                                                    } else if (frac < 0.77) {
-                                                        phaseName = "Last Quarter";
-                                                    } else if (frac < 0.98) {
-                                                        phaseName = "Waning Crescent";
-                                                    } else {
-                                                        phaseName = "New Moon"; // Fallback for exactly 1.00
-                                                    }
 
-                                                    // Apparent angular diameter in degrees
-                                                    // Uses exact topocentric distance from Libration (in km)
+                                                    if (phase < eps || phase > 1 - eps) {
+                                                        phaseName = "New Moon";
+                                                    }
+                                                    else if (Math.abs(phase - 0.25) < eps) {
+                                                        phaseName = "First Quarter";
+                                                    }
+                                                    else if (Math.abs(phase - 0.50) < eps) {
+                                                        phaseName = "Full Moon";
+                                                    }
+                                                    else if (Math.abs(phase - 0.75) < eps) {
+                                                        phaseName = "Last Quarter";
+                                                    }
+                                                    else if (phase < 0.25) {
+                                                        phaseName = "Waxing Crescent";
+                                                    }
+                                                    else if (phase < 0.50) {
+                                                        phaseName = "Waxing Gibbous";
+                                                    }
+                                                    else if (phase < 0.75) {
+                                                        phaseName = "Waning Gibbous";
+                                                    }
+                                                    else {
+                                                        phaseName = "Waning Crescent";
+                                                    }
+                                                    // -----------------------------------------
+
+                                                    // Apparent angular diameter in degrees (topocentric)
                                                     const moonRadiusKm = 1737.4; // Mean lunar radius
                                                     const distKm = lib.dist_km;
-                                                    const angularDiameterDeg = (2 * Math.atan(moonRadiusKm / distKm)) * (180 / Math.PI);
-                                                    const angularDiameterDegrees = angularDiameterDeg.toFixed(3); // e.g., "0.548"
+
+                                                    const angularDiameterDeg =
+                                                        (2 * Math.atan(moonRadiusKm / distKm)) * (180 / Math.PI);
+
+                                                    const angularDiameterDegrees = angularDiameterDeg.toFixed(3);
 
                                                     return {
-                                                        angularDiameter: angularDiameterDegrees,
-                                                        illumination: illuminationPct,
-                                                        phaseValue: phaseValue,       // e.g., "1.00" at full, "0.00" at new
+                                                        angularDiameter: angularDiameterDegrees, // degrees
+                                                        illumination: illuminationPct,           // percent
+                                                        phaseValue: phaseValue,                  // orbital phase (0–1)
                                                         phaseName: phaseName,
-                                                        phaseAngle: phaseAngle        // e.g., "179.8" near full
+                                                        phaseAngle: phaseAngle                   // degrees
                                                     };
                                                 }
+
                                                 
                                                                                 function updateQthPopup() {
                                                                                     if (!qthMarker) return;
