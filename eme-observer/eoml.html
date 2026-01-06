@@ -3747,7 +3747,13 @@
                                                                                       Extra Loss: ${extraLoss != null ? extraLoss.toFixed(2) + ' dB' : 'N/A'}<br>
                                                                                     `;
 
-                                                                                    qthMarker.bindPopup(popupContent);
+                                                                                    // If popup is currently open, update its content directly
+                                                                                    if (qthMarker.getPopup() && qthMarker.isPopupOpen()) {
+                                                                                        qthMarker.getPopup().setContent(popupContent);
+                                                                                    } else {
+                                                                                        qthMarker.bindPopup(popupContent);
+                                                                                    }
+
                                                                                 }
                                             
                                             function updateDxPopup() {
