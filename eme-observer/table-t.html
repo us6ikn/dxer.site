@@ -402,7 +402,11 @@
                 <button onclick="window.location.href='/eme-observer/'">Map View</button>
                 <button onclick="window.location.href='statistics.html'">Statistics</button>
                 <button onclick="window.location.href='datasubmission.html'">Add Station</button>
-                <button onclick="window.location.href='/'">🏠</button>
+                <button onclick="window.location.href='/'" style="display:flex; align-items:center; justify-content:center; width:40px; padding:0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 3l9 9h-3v9h-12v-9h-3l9-9z"/>
+                    </svg>
+                </button>
                 <button onclick="window.location.href='user-guide.html'">?</button>
             </div>
         </div>
@@ -429,7 +433,6 @@
                     Show only active
                 </label>
             </div>
-            <a href="https://www.pa0ply.nl/eme-directory/" class="pa0ply-link" target="_blank">(see also PA0PLY EME Directory)</a>
         </div>
         <div id="loading-message" class="loading-message">Loading data...</div>
         <div id="error-message" class="error-message">Failed to load data for this band. Please try another band or check your connection.</div>
