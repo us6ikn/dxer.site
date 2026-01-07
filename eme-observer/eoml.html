@@ -956,6 +956,7 @@
                 <select id="bandSelect" class="control-select">
                     <option value="222MHz">222MHz</option>
                     <option value="432MHz">432MHz</option>
+                    <option value="902MHz">902MHz</option>
                     <option value="1296MHz">1296MHz</option>
                     <option value="2320MHz">2320MHz</option>
                     <option value="3400MHz">3400MHz</option>
@@ -1111,6 +1112,7 @@
         const bandConfig = {
             '222MHz': { frequency: 0.222e9, display: '222 MHz', jsonFile: 'stn_222MHz.json' },
             '432MHz': { frequency: 0.432e9, display: '432 MHz', jsonFile: 'stn_432MHz.json' },
+            '902MHz': { frequency: 0.902e9, display: '902 MHz', jsonFile: 'stn_902MHz.json' },
             '1296MHz': { frequency: 1.296e9, display: '1296 MHz', jsonFile: 'stn_1296MHz.json' },
             '2320MHz': { frequency: 2.320e9, display: '2320 MHz', jsonFile: 'stn_2320MHz.json' },
             '3400MHz': { frequency: 3.400e9, display: '3400 MHz', jsonFile: 'stn_3400MHz.json' },
@@ -1668,7 +1670,7 @@
 
             // Determine the selected band and whether to show M-SgrA-related data
             const band = document.getElementById('bandSelect').value;
-            const showSgrASep = ['432MHz', '222MHz'].includes(band);
+            const showSgrASep = ['432MHz', '222MHz', '902MHz'].includes(band);
 
             // Find intervals where sunSep < 10 degrees with hourly precision
             const annotations = {
