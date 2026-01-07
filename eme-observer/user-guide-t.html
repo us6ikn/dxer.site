@@ -13,7 +13,7 @@
     <title>EME Observer – User Guide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         
-        <meta name="description" content="Learn how to use the EME Observer tool to plan Moonbounce QSOs on all bands from 432MHz and above. This user guide covers features like moon tracking, Dpol, elevation charts, and station tables." />
+        <meta name="description" content="Learn how to use the EME Observer tool to plan Moonbounce QSOs on all bands from 144MHz and above. This user guide covers features like moon tracking, Dpol, elevation charts, and station tables." />
         <meta name="keywords" content="EME, Moonbounce, User Guide, Ham Radio, moon ephemeris, Polarization Offset, Signal Loss, Amateur Radio Tools" />
         <meta name="author" content="SA5IKN" />
         <meta name="robots" content="index, follow" />
@@ -362,7 +362,6 @@
           </ul>
         </li>
         <li><a href="#mobile-experience">Mobile experience</a></li>
-        <li><a href="#other-bands">Use on Bands Below 432 MHz</a></li>
         <li><a href="#libration">A Note on Libration Rate and Doppler Spread</a></li>
         <li><a href="#dpol">A note on Spatial Polarisation Offset (Dpol)</a></li>
         <li><a href="#support">Support EME Observer</a></li>
@@ -375,7 +374,7 @@
       <h2>About EME Observer</h2>
       <p>
         <strong>EME Observer</strong> is a web application that provides an interactive map of Earth-Moon-Earth (EME) stations and enables one-click sked planning and real-time tracking of moon footprint and conditions. It delivers high-resolution lunar ephemeris data and displays key signal-path characteristics, including additional path loss, libration rate, Doppler spread, and polarization offset, together with station profiles and statistical summaries.
-        EME Observer currently supports all EME bands from 432&nbsp;MHz to 76GHz. Support for the 222 MHz band, which is primarily allocated to radio amateurs in ITU Region 2, has recently been added. Planning is also available for 144&nbsp;MHz and 50&nbsp;MHz, but station profiles are not currently included for these bands.
+        EME Observer supports all EME bands from 144&nbsp;MHz to 76GHz. Note that station profiles are currently not available for 144MHz.
       </p>
 
       <figure style="margin-top: 10px; text-align: center;">
@@ -397,7 +396,7 @@
      <p><strong>Key features include:</strong></p>
      <ul>
        <li>Station locations with details such as transmit power, antennas, QRZ.com links, personal websites, email addresses, and station images (where available)</li>
-       <li>One-click EME planner for all bands, 432&nbsp;MHz and above, featuring visualizations of common Moon windows and signal-path characteristics - supports both Manual and Realtime tracking modes (1-minute tracking steps)</li>
+       <li>One-click EME planner for all bands, 144&nbsp;MHz and above, featuring visualizations of common Moon windows and signal-path characteristics - supports both Manual and Realtime tracking modes (1-minute tracking steps)</li>
        <li>Moon footprint, sublunar point, CQ Zones and QTH Locators overlay</li>
        <li>Moon distance, declination, and additional path loss</li>
        <li>Moon azimuth, elevation, topocentric libration rate, and Doppler spread on selected EME band for both your and the DX locations</li>
@@ -429,7 +428,7 @@
       
       <h3 id="station-data">Station Data</h3>
       <p>
-        Station data is contributed by the community. The 432&nbsp;MHz and above database builds upon the excellent and dedicated work of Jan PA0PLY, who maintains a comprehensive list of active EME stations. The databases for 222&nbsp;MHz and 902&nbsp;MHz, bands that are almost entirely specific to ITU Region&nbsp;2, are maintained by Martin PJ4MM.
+        Station data is contributed by the community. The 432&nbsp;MHz and above database builds upon the excellent and dedicated work of Jan PA0PLY, who maintains a comprehensive list of active EME stations. The databases for 222&nbsp;MHz and 902&nbsp;MHz, bands that are almost entirely specific to ITU Region&nbsp;2, are maintained by Martin PJ4MM. Currently there is no station database for 144MHz and if you would like to create and maintain one for the EME community, let us know.
         <br><br>
         To add or update a station operating on 432&nbsp;MHz and above, please submit your information through the <a href="https://www.pa0ply.nl/eme-directory/" target="_blank" rel="noopener">PA0PLY EME Directory</a>. To add or update a station operating on 222&nbsp;MHz or 902&nbsp;MHz, send the data to <a href="https://www.qrz.com/db/PJ4MM" target="_blank" rel="noopener">Martin PJ4MM</a>. Only include stations that have transmit (TX) capability and have completed at least one EME QSO on the band for which data is being submitted.
         <br><br>
@@ -536,7 +535,7 @@
       </p>
       <ul>
           <li><strong>Time &amp; Date Controls</strong> — set the UTC date and time for planning or tracking</li>
-          <li><strong>Band Selector</strong> — choose the operating band: 432&nbsp;MHz, 1296&nbsp;MHz, 2320&nbsp;MHz, 3400&nbsp;MHz, 5760&nbsp;MHz, 10&nbsp;GHz, 24&nbsp;GHz, 47&nbsp;GHz, or 76&nbsp;GHz</li>
+          <li><strong>Band Selector</strong> — choose the operating band: 144&nbsp;MHz, 222&nbsp;MHz, 432&nbsp;MHz, 902&nbsp;MHz, 1296&nbsp;MHz, 2320&nbsp;MHz, 3400&nbsp;MHz, 5760&nbsp;MHz, 10&nbsp;GHz, 24&nbsp;GHz, 47&nbsp;GHz, or 76&nbsp;GHz</li>
           <li><strong>Mode Selector</strong> — toggle between <em>Manual (Planning)</em> mode and <em>Realtime Tracking</em> mode using the “Track” button</li>
           <li><strong>QTH Locator Fields</strong> — enter your station grid and the DX station grid</li>
           <li><strong>View Buttons</strong> — switch to <em>Table View</em> to browse station records or <em>Statistics View</em> to analyze station and DXCC data</li>
@@ -1049,21 +1048,6 @@
     </div>
 
   </section>
-    <section>
-        <h2 id="other-bands">Use on Bands Below 432 MHz</h2>
-
-        <p>
-          Although <strong>EME Observer</strong> is primarily designed for planning EME QSOs on bands from 432&nbsp;MHz and above, many of its tools and metrics are also useful for lower EME bands, such as 144&nbsp;MHz and 50&nbsp;MHz.
-          These include the Moon footprint, Earth–Moon distance, additional path loss, lunar declination, elevation and azimuth charts, moonrise and moonset times, and polarization offset.
-          For convenience, when planning QSOs on lower bands, you may select 432&nbsp;MHz in the band selector to enable the display of Moon–Sagittarius A separation, with markers denoting times when high sky temperature can degrade the system performance.
-        </p>
-
-        <p>
-          The effects of lunar libration are frequency-dependent, varying both qualitatively and quantitatively with the operating band.
-          On lower bands, this appears as Doppler fading, while on higher bands it manifests as Doppler spreading.
-        </p>
-
-    </section>
     
     <section>
       <h2 id="libration">A Note on Libration Rate and Doppler Spread</h2>

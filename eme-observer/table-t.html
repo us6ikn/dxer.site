@@ -427,6 +427,7 @@
         <div class="controls">
             <div class="filter-group">
                 <select id="bandSelect" class="band-select">
+                    <option value="144MHz">144MHz</option>
                     <option value="222MHz">222MHz</option>
                     <option value="432MHz">432MHz</option>
                     <option value="902MHz">902MHz</option>
@@ -477,6 +478,7 @@
         let table = null;
 
         const bandConfig = {
+            '144MHz': { label: '144MHz', jsonFile: 'stn_144MHz.json' },
             '222MHz': { label: '222MHz', jsonFile: 'stn_222MHz.json' },
             '432MHz': { label: '432MHz', jsonFile: 'stn_432MHz.json' },
             '902MHz': { label: '902MHz', jsonFile: 'stn_902MHz.json' },
