@@ -921,44 +921,6 @@
                                                                             height: 18px;
                                                                         }
                                                                     }
-                                                                        /* 144 MHz notice – bottom-right corner */
-                                                                        .vhf-notice {
-                                                                            position: fixed;
-                                                                            bottom: 20px;
-                                                                            right: 20px;
-                                                                            background-color: rgba(255, 255, 255, 0.95);
-                                                                            color: #333;
-                                                                            padding: 12px 16px;
-                                                                            border-radius: 8px;
-                                                                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-                                                                            font-size: 13px;
-                                                                            font-weight: 500;
-                                                                            max-width: 360px;
-                                                                            line-height: 1.4;
-                                                                            z-index: 1000;               /* above map and controls */
-                                                                            border-left: 4px solid #ff832b;  /* orange accent to draw attention */
-                                                                            opacity: 0;
-                                                                            visibility: hidden;
-                                                                            transition: opacity 0.4s ease, visibility 0.4s ease;
-                                                                            pointer-events: none;        /* doesn't block map interaction */
-                                                                        }
-
-                                                                        .vhf-notice.visible {
-                                                                            opacity: 1;
-                                                                            visibility: visible;
-                                                                        }
-
-                                                                        /* Mobile adjustment – a bit higher and narrower */
-                                                                        @media (max-width: 600px) {
-                                                                            .vhf-notice {
-                                                                                bottom: 15px;
-                                                                                right: 10px;
-                                                                                left: 10px;
-                                                                                max-width: none;
-                                                                                font-size: 12px;
-                                                                                padding: 10px 14px;
-                                                                            }
-                                                                        }
                                                                 </style>
                                                                 
 </head>
@@ -2932,24 +2894,6 @@
                                                   updateBand(band);
                                                 });
                                                 
-                                                // Show/hide the 144 MHz notice when band changes
-                                                document.getElementById('bandSelect').addEventListener('change', function() {
-                                                    const notice = document.getElementById('vhfNotice');
-                                                    if (this.value === '144MHz') {
-                                                        notice.classList.add('visible');
-                                                    } else {
-                                                        notice.classList.remove('visible');
-                                                    }
-                                                });
-
-                                                // Run once on page load in case the saved band is 144MHz
-                                                window.addEventListener('load', () => {
-                                                    const currentBand = document.getElementById('bandSelect').value;
-                                                    if (currentBand === '144MHz') {
-                                                        document.getElementById('vhfNotice').classList.add('visible');
-                                                    }
-                                                });
-                                                
         function parseCoordinates(coordinates) {
             const [latStr, lngStr] = coordinates.split(',');
             return {
@@ -3952,10 +3896,6 @@
                                                 }
 
 </script>
-<div id="vhfNotice" class="vhf-notice">
-    <strong>Note:</strong> The QSO planner functions normally on 144 MHz,
-    but the station database is currently unavailable for this band.
-</div>
 <!-- Ko-Fi -->
 <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
 <script src="/kofi.js"></script></body>
