@@ -202,13 +202,6 @@
       margin: -2px;
     }
 
-    .ghz-label {
-      font-size: 0.9rem;
-      font-weight: bold;
-      color: #2c3e50;
-      margin-top: 2px;
-    }
-
     .controls {
       display: flex;
       justify-content: center;
@@ -284,8 +277,7 @@
         font-size: 1.3rem;
       }
 
-      .creator-label,
-      .ghz-label {
+      .creator-label {
         font-size: 0.75rem;
       }
 
@@ -339,7 +331,6 @@
       <div class="app-meta">
         <div class="creator-label">by SA5IKN</div>
         <div class="app-name">EME Observer</div>
-        <div id="ghz-label" class="ghz-label">432MHz-76GHz</div>
       </div>
       <div class="button-container">
         <button onclick="window.location.href='/eme-observer/'">Map View</button>
@@ -404,234 +395,245 @@
   </div>
 
   <script>
-    const FILE_URL_BASE = ''; // Set this to the base URL if needed
+      const FILE_URL_BASE = ''; // Set this to the base URL if needed
 
-    const bandConfig = {
-        '222MHz': { label: '222MHz', jsonFile: 'stn_222MHz.json' },
-      '432MHz': { label: '432MHz', jsonFile: 'stn_432MHz.json' },
-      '902MHz': { label: '902MHz', jsonFile: 'stn_902MHz.json' },
-      '1296MHz': { label: '1296MHz', jsonFile: 'stn_1296MHz.json' },
-      '2320MHz': { label: '2320MHz', jsonFile: 'stn_2320MHz.json' },
-      '3400MHz': { label: '3400MHz', jsonFile: 'stn_3400MHz.json' },
-      '5760MHz': { label: '5760MHz', jsonFile: 'stn_5760MHz.json' },
-      '10GHz': { label: '10GHz', jsonFile: 'stn_10GHz.json' },
-      '24GHz': { label: '24GHz', jsonFile: 'stn_24GHz.json' },
-      '47GHz': { label: '47GHz', jsonFile: 'stn_47GHz.json' },
-      '76GHz': { label: '76GHz', jsonFile: 'stn_76GHz.json' }
-    };
+      const bandConfig = {
+          '222MHz': { label: '222MHz', jsonFile: 'stn_222MHz.json' },
+          '432MHz': { label: '432MHz', jsonFile: 'stn_432MHz.json' },
+          '902MHz': { label: '902MHz', jsonFile: 'stn_902MHz.json' },
+          '1296MHz': { label: '1296MHz', jsonFile: 'stn_1296MHz.json' },
+          '2320MHz': { label: '2320MHz', jsonFile: 'stn_2320MHz.json' },
+          '3400MHz': { label: '3400MHz', jsonFile: 'stn_3400MHz.json' },
+          '5760MHz': { label: '5760MHz', jsonFile: 'stn_5760MHz.json' },
+          '10GHz': { label: '10GHz', jsonFile: 'stn_10GHz.json' },
+          '24GHz': { label: '24GHz', jsonFile: 'stn_24GHz.json' },
+          '47GHz': { label: '47GHz', jsonFile: 'stn_47GHz.json' },
+          '76GHz': { label: '76GHz', jsonFile: 'stn_76GHz.json' }
+      };
 
-    let antennaChart = null;
-    let powerChart = null;
-    let countryChart = null;
+      let antennaChart = null;
+      let powerChart = null;
+      let countryChart = null;
 
-    function parseHistogramData(text) {
-      const lines = text.trim().split('\n').slice(1); // Skip header
-      const labels = [];
-      const counts = [];
-      const percentages = [];
-      for (const line of lines) {
-        const parts = line.trim().split(/\t+/);
-        if (parts.length >= 3) {
-          const label = parts[0];
-          const count = parseInt(parts[1], 10);
-          const percentage = parts[2];
-          if (count > 0) { // Only include bins where count > 0
-            labels.push(label);
-            counts.push(count);
-            percentages.push(percentage);
-          }
-        }
-      }
-      return { labels, counts, percentages };
-    }
-
-    function plotChart(canvasId, labels, counts, percentages, title, xAxisTitle) {
-      const ctx = document.getElementById(canvasId).getContext('2d');
-      return new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: title,
-            data: counts,
-            backgroundColor: 'rgba(75, 192, 192, 0.6)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: function(tooltipItem) {
-                  const index = tooltipItem.dataIndex;
-                  const count = counts[index];
-                  const percentage = percentages[index];
-                  return `Count: ${count} | Percentage: ${percentage}`;
-                }
-              }
-            }
-          },
-          scales: {
-            x: {
-              title: { display: true, text: xAxisTitle },
-              ticks: {
-                font: {
-                  size: window.innerWidth < 768 ? 10 : 14
-                }
-              }
-            },
-            y: {
-              title: { display: true, text: 'Number of Stations' },
-              beginAtZero: true,
-              ticks: {
-                font: {
-                  size: window.innerWidth < 768 ? 10 : 14
-                }
-              }
-            }
-          }
-        }
-      });
-    }
-
-    async function loadCountryData(band) {
-      try {
-        const response = await fetch(FILE_URL_BASE + bandConfig[band].jsonFile);
-        const combined = await response.json();
-
-        const countryCounts = {};
-        for (const station of combined) {
-          const dxcc = station.DXCC || "Unknown";
-          countryCounts[dxcc] = (countryCounts[dxcc] || 0) + 1;
-        }
-
-        const labels = Object.keys(countryCounts);
-        const data = Object.values(countryCounts);
-        const prefix = (band === '10GHz') ? 'Activated' : 'Active';
-        document.getElementById('dxccTotal').textContent = `${prefix} DXCC: ${labels.length}`;
-
-        // Update note visibility and text
-        const dxccNote = document.getElementById('dxccNote');
-        if (band !== '10GHz') {
-          dxccNote.textContent = 'These numbers do not represent the number of DXCC historically active and are based on the database of stations known to be currently active.';
-          dxccNote.style.display = 'block';
-        } else {
-          dxccNote.style.display = 'none';
-        }
-
-        const backgroundColors = labels.map((_, i) => `hsl(${i * 360 / labels.length}, 70%, 60%)`);
-
-        const ctx = document.getElementById('countryChart').getContext('2d');
-        countryChart = new Chart(ctx, {
-          type: 'doughnut',
-          data: {
-            labels: labels,
-            datasets: [{
-              data: data,
-              backgroundColor: backgroundColors,
-              borderColor: '#fff',
-              borderWidth: 1
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: function (context) {
-                    const value = context.raw;
-                    const label = context.label;
-                    return `${label}: ${value} stations`;
+      function parseHistogramData(text) {
+          const lines = text.trim().split('\n').slice(1); // Skip header
+          const labels = [];
+          const counts = [];
+          const percentages = [];
+          for (const line of lines) {
+              const parts = line.trim().split(/\t+/);
+              if (parts.length >= 3) {
+                  const label = parts[0];
+                  const count = parseInt(parts[1], 10);
+                  const percentage = parts[2];
+                  if (count > 0) {
+                      labels.push(label);
+                      counts.push(count);
+                      percentages.push(percentage);
                   }
-                }
               }
-            }
           }
-        });
-
-        const customLegendHTML = labels.map((label, i) => {
-          const color = backgroundColors[i];
-          const count = data[i];
-          return `<div style="break-inside: avoid; margin-bottom: 6px;">
-                    <span style="display:inline-block; width:12px; height:12px; background-color:${color}; margin-right:6px; border-radius:2px;"></span>
-                    ${label} (${count})
-                  </div>`;
-        }).join('');
-
-        document.getElementById('customLegendContainer').innerHTML = customLegendHTML;
-      } catch (err) {
-        console.error('Error loading DXCC pie chart:', err);
+          return { labels, counts, percentages };
       }
-    }
 
-    async function loadAndPlot(fileUrl, canvasId, title, xAxisTitle) {
-      try {
-        const response = await fetch(fileUrl);
-        const text = await response.text();
-        const data = parseHistogramData(text);
-        if (canvasId === 'antennaChart') {
-          if (antennaChart) antennaChart.destroy();
-          antennaChart = plotChart(canvasId, data.labels, data.counts, data.percentages, title, xAxisTitle);
-        } else if (canvasId === 'powerChart') {
-          if (powerChart) powerChart.destroy();
-          powerChart = plotChart(canvasId, data.labels, data.counts, data.percentages, title, xAxisTitle);
-        }
-      } catch (err) {
-        console.error(`Error loading ${fileUrl}:`, err);
+      function plotChart(canvasId, labels, counts, percentages, title, xAxisTitle) {
+          const ctx = document.getElementById(canvasId).getContext('2d');
+          return new Chart(ctx, {
+              type: 'bar',
+              data: {
+                  labels: labels,
+                  datasets: [{
+                      label: title,
+                      data: counts,
+                      backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                      borderColor: 'rgba(75, 192, 192, 1)',
+                      borderWidth: 1
+                  }]
+              },
+              options: {
+                  responsive: true,
+                  plugins: {
+                      legend: { display: false },
+                      tooltip: {
+                          callbacks: {
+                              label: function(tooltipItem) {
+                                  const index = tooltipItem.dataIndex;
+                                  const count = counts[index];
+                                  const percentage = percentages[index];
+                                  return `Count: ${count} | Percentage: ${percentage}`;
+                              }
+                          }
+                      }
+                  },
+                  scales: {
+                      x: {
+                          title: { display: true, text: xAxisTitle },
+                          ticks: { font: { size: window.innerWidth < 768 ? 10 : 14 } }
+                      },
+                      y: {
+                          title: { display: true, text: 'Number of Stations' },
+                          beginAtZero: true,
+                          ticks: { font: { size: window.innerWidth < 768 ? 10 : 14 } }
+                      }
+                  }
+              }
+          });
       }
-    }
 
-    async function loadStatsForBand(band) {
-      const antennaFile = (band === '10GHz') ? FILE_URL_BASE + 'h_a_10GHz.txt' : FILE_URL_BASE + 'h_a_' + band + '.txt';
-      const powerFile = (band === '10GHz') ? FILE_URL_BASE + 'h_p_10GHz.txt' : FILE_URL_BASE + 'h_p_' + band + '.txt';
+      async function loadCountryData(band) {
+          try {
+              const response = await fetch(FILE_URL_BASE + bandConfig[band].jsonFile);
+              const combined = await response.json();
 
-      await loadAndPlot(antennaFile, 'antennaChart', 'Antenna Count', 'Antenna diameter (m)');
-      await loadAndPlot(powerFile, 'powerChart', 'Power Count', 'Power (W)');
-      if (countryChart) {
-        countryChart.destroy();
-        countryChart = null;
-        document.getElementById('customLegendContainer').innerHTML = '';
-        document.getElementById('dxccTotal').textContent = '';
+              const countryCounts = {};
+              for (const station of combined) {
+                  const dxcc = station.DXCC || "Unknown";
+                  countryCounts[dxcc] = (countryCounts[dxcc] || 0) + 1;
+              }
+
+              const labels = Object.keys(countryCounts);
+              const data = Object.values(countryCounts);
+              const prefix = (band === '10GHz') ? 'Activated' : 'Active';
+              document.getElementById('dxccTotal').textContent = `${prefix} DXCC: ${labels.length}`;
+
+              const dxccNote = document.getElementById('dxccNote');
+              if (band !== '10GHz') {
+                  dxccNote.textContent = 'These numbers do not represent the number of DXCC historically active and are based on the database of stations known to be currently active.';
+                  dxccNote.style.display = 'block';
+              } else {
+                  dxccNote.style.display = 'none';
+              }
+
+              const backgroundColors = labels.map((_, i) => `hsl(${i * 360 / labels.length}, 70%, 60%)`);
+
+              const ctx = document.getElementById('countryChart').getContext('2d');
+              if (countryChart) countryChart.destroy();
+              countryChart = new Chart(ctx, {
+                  type: 'doughnut',
+                  data: {
+                      labels: labels,
+                      datasets: [{
+                          data: data,
+                          backgroundColor: backgroundColors,
+                          borderColor: '#fff',
+                          borderWidth: 1
+                      }]
+                  },
+                  options: {
+                      responsive: true,
+                      plugins: {
+                          legend: { display: false },
+                          tooltip: {
+                              callbacks: {
+                                  label: function (context) {
+                                      const value = context.raw;
+                                      const label = context.label;
+                                      return `${label}: ${value} stations`;
+                                  }
+                              }
+                          }
+                      }
+                  }
+              });
+
+              const customLegendHTML = labels.map((label, i) => {
+                  const color = backgroundColors[i];
+                  const count = data[i];
+                  return `<div style="break-inside: avoid; margin-bottom: 6px;">
+                            <span style="display:inline-block; width:12px; height:12px; background-color:${color}; margin-right:6px; border-radius:2px;"></span>
+                            ${label} (${count})
+                          </div>`;
+              }).join('');
+
+              document.getElementById('customLegendContainer').innerHTML = customLegendHTML;
+          } catch (err) {
+              console.error('Error loading DXCC pie chart:', err);
+          }
       }
-      await loadCountryData(band);
-    }
 
-    function updateUI(band) {
-      const statsContent = document.getElementById('statsContent');
-      const statsMessage = document.getElementById('statsMessage');
-      const tableTitle = document.getElementById('table-title');
-      // Removed ghzLabel update
-
-      // Update title
-      tableTitle.textContent = `${bandConfig[band].label} EME Stations Statistics`;
-
-      const notReadyBands = ['222MHz', '432MHz', '76GHz'];
-      if (notReadyBands.includes(band)) {
-        statsContent.style.display = 'none';
-        statsMessage.style.display = 'block';
-        statsMessage.textContent = 'Statistics are not ready yet for this band.';
-      } else {
-        statsContent.style.display = 'block';
-        statsMessage.style.display = 'none';
-        loadStatsForBand(band);
+      async function loadAndPlot(fileUrl, canvasId, title, xAxisTitle) {
+          try {
+              const response = await fetch(fileUrl);
+              const text = await response.text();
+              const data = parseHistogramData(text);
+              if (canvasId === 'antennaChart') {
+                  if (antennaChart) antennaChart.destroy();
+                  antennaChart = plotChart(canvasId, data.labels, data.counts, data.percentages, title, xAxisTitle);
+              } else if (canvasId === 'powerChart') {
+                  if (powerChart) powerChart.destroy();
+                  powerChart = plotChart(canvasId, data.labels, data.counts, data.percentages, title, xAxisTitle);
+              }
+          } catch (err) {
+              console.error(`Error loading ${fileUrl}:`, err);
+          }
       }
-    }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      // Initialize band selector
-      const bandSelect = document.getElementById('bandSelect');
-      bandSelect.addEventListener('change', (event) => {
-        const band = event.target.value;
-        updateUI(band);
+      async function loadStatsForBand(band) {
+          const antennaFile = (band === '10GHz') ? FILE_URL_BASE + 'h_a_10GHz.txt' : FILE_URL_BASE + 'h_a_' + band + '.txt';
+          const powerFile = (band === '10GHz') ? FILE_URL_BASE + 'h_p_10GHz.txt' : FILE_URL_BASE + 'h_p_' + band + '.txt';
+
+          await loadAndPlot(antennaFile, 'antennaChart', 'Antenna Count', 'Antenna diameter (m)');
+          await loadAndPlot(powerFile, 'powerChart', 'Power Count', 'Power (W)');
+          await loadCountryData(band);
+      }
+
+      function updateUI(band) {
+          document.getElementById('table-title').textContent = `${bandConfig[band].label} EME Stations Statistics`;
+
+          const notReadyBands = ['222MHz', '432MHz', '76GHz'];
+          if (notReadyBands.includes(band)) {
+              document.getElementById('statsContent').style.display = 'none';
+              document.getElementById('statsMessage').style.display = 'block';
+              document.getElementById('statsMessage').textContent = 'Statistics are not ready yet for this band.';
+          } else {
+              document.getElementById('statsContent').style.display = 'block';
+              document.getElementById('statsMessage').style.display = 'none';
+              loadStatsForBand(band);
+          }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+          const bandSelect = document.getElementById('bandSelect');
+
+          // Function to apply the saved or updated band
+          function applyLastBand() {
+              const savedBand = localStorage.getItem('emeObserverLastBand');
+              const validBands = Object.keys(bandConfig);
+
+              if (savedBand && validBands.includes(savedBand)) {
+                  bandSelect.value = savedBand;
+                  updateUI(savedBand);
+              } else {
+                  // Fallback to 10GHz if nothing saved
+                  bandSelect.value = '10GHz';
+                  updateUI('10GHz');
+              }
+          }
+
+          // 1. Initial load: use last saved band
+          applyLastBand();
+
+          // 2. Real-time sync: react when band changes in another tab
+          window.addEventListener('storage', (event) => {
+              if (event.key === 'emeObserverLastBand' && event.newValue) {
+                  const newBand = event.newValue;
+                  const validBands = Object.keys(bandConfig);
+                  if (validBands.includes(newBand) && newBand !== bandSelect.value) {
+                      bandSelect.value = newBand;
+                      updateUI(newBand);
+                  }
+              }
+          });
+
+          // 3. Manual change on this page
+          bandSelect.addEventListener('change', (event) => {
+              const band = event.target.value;
+              updateUI(band);
+
+              // Save selection for other pages
+              localStorage.setItem('emeObserverLastBand', band);
+          });
       });
-
-      // Initial load for 10GHz
-      updateUI('10GHz');
-    });
   </script>
   <!-- Ko-Fi -->
   <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
