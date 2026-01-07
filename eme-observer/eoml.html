@@ -954,6 +954,7 @@
             <div class="button-band-group combined-nav">
                 <button id="realTimeButton" class="auto-track-button">Track</button>
                 <select id="bandSelect" class="control-select">
+                    <option value="144MHz">144MHz</option>
                     <option value="222MHz">222MHz</option>
                     <option value="432MHz">432MHz</option>
                     <option value="902MHz">902MHz</option>
@@ -1110,6 +1111,7 @@
         
         // Define band frequencies and display names
         const bandConfig = {
+            '144MHz': { frequency: 0.144e9, display: '144 MHz', jsonFile: 'stn_144MHz.json' },
             '222MHz': { frequency: 0.222e9, display: '222 MHz', jsonFile: 'stn_222MHz.json' },
             '432MHz': { frequency: 0.432e9, display: '432 MHz', jsonFile: 'stn_432MHz.json' },
             '902MHz': { frequency: 0.902e9, display: '902 MHz', jsonFile: 'stn_902MHz.json' },
@@ -1670,7 +1672,7 @@
 
             // Determine the selected band and whether to show M-SgrA-related data
             const band = document.getElementById('bandSelect').value;
-            const showSgrASep = ['432MHz', '222MHz', '902MHz'].includes(band);
+            const showSgrASep = ['432MHz', '222MHz', '902MHz', '144MHz'].includes(band);
 
             // Find intervals where sunSep < 10 degrees with hourly precision
             const annotations = {
