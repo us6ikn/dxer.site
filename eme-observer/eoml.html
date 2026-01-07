@@ -921,6 +921,22 @@
                                                                             height: 18px;
                                                                         }
                                                                     }
+                                                                        .notice-close {
+                                                                            background: transparent;
+                                                                            border: none;
+                                                                            color: #555;
+                                                                            font-size: 18px;
+                                                                            font-weight: bold;
+                                                                            cursor: pointer;
+                                                                            margin-left: auto;
+                                                                            padding: 0 6px;
+                                                                            line-height: 1;
+                                                                            transition: color 0.2s ease;
+                                                                        }
+
+                                                                        .notice-close:hover {
+                                                                            color: #000;
+                                                                        }
                                                                 </style>
                                                                 
 </head>
@@ -1069,6 +1085,15 @@
                 <canvas id="moonDistanceChart"></canvas>
             </div>
         </div>
+    </div>
+    <div class="notice-banner" id="noticeBanner">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="warning-icon">
+            <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+        </svg>
+        <div class="notice-text">
+            <strong>Note:</strong> QSO planning for 144MHz functions normally, however the database of 144MHz stations is not available.
+        </div>
+        <button class="notice-close" onclick="document.getElementById('noticeBanner').classList.add('hide')">&times;</button>
     </div>
     <button id="showControlsPanel" style="display: none;">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
@@ -2886,12 +2911,17 @@
         });
         
                                                 document.getElementById('bandSelect').addEventListener('change', () => {
-                                                  const band = document.getElementById('bandSelect').value;
-                                                  
-                                                  // Save to localStorage
-                                                  localStorage.setItem('emeObserverLastBand', band);
-                                                  
-                                                  updateBand(band);
+                                                    const band = document.getElementById('bandSelect').value;
+                                                    localStorage.setItem('emeObserverLastBand', band);
+                                                    updateBand(band);
+
+                                                    // Show/hide 144MHz notice
+                                                    const noticeBanner = document.getElementById('noticeBanner');
+                                                    if (band === '144MHz') {
+                                                        noticeBanner.classList.remove('hide');
+                                                    } else {
+                                                        noticeBanner.classList.add('hide');
+                                                    }
                                                 });
                                                 
         function parseCoordinates(coordinates) {
@@ -3346,6 +3376,15 @@
                                                     // === CRITICAL FIX: Restore QTH only AFTER stations are loaded ===
                                                     const currentBand = bandSelect.value;
                                                     const jsonFile = bandConfig[currentBand].jsonFile;
+                                                    
+                                                    // After band is loaded/restored
+                                                    const initialBand = document.getElementById('bandSelect').value;
+                                                    const noticeBanner = document.getElementById('noticeBanner');
+                                                    if (initialBand === '144MHz') {
+                                                        noticeBanner.classList.remove('hide');
+                                                    } else {
+                                                        noticeBanner.classList.add('hide');
+                                                    }
 
                                                     fetch(jsonFile)
                                                         .then(response => {
