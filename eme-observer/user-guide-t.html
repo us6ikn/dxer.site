@@ -715,8 +715,30 @@
       </figure>
       
       <p>
-        When a valid 6-character QTH locator is entered in the <em>My Locator</em> field, a marker indicating your station’s location is displayed on the map. Entering a valid locator in the <em>DX Locator</em> field adds a second marker identifying the DX station’s location.
+        When a valid 6-character QTH locator is entered in the <em>My Locator</em> field, a marker showing your station’s location is displayed on the map.
+        Clicking this marker opens a tooltip containing general lunar data and topocentric (station-specific) moon data, including:
       </p>
+      <ul>
+        <li>
+          <strong>Moon phase</strong> — the named lunar phase (e.g., New Moon, First Quarter, Full Moon), along with the corresponding phase value
+        </li>
+        <li>
+          <strong>Lunar disk illumination</strong> — the percentage of the Moon’s visible disk that is illuminated
+        </li>
+        <li>
+          <strong>Phase angle</strong> — the Sun–Moon–Earth phase angle in degrees
+        </li>
+        <li>
+          <strong>Moon apparent diameter</strong> — the Moon’s apparent angular diameter as seen from Earth, in degrees
+        </li>
+        <li>
+          <strong>Topocentric distance</strong> — the distance between the observer’s station location and the Moon, accounting for the observer’s position on Earth
+        </li>
+        <li>
+          <strong>Extra loss due to topocentric distance from the Moon</strong> — additional two-way free-space path loss, in dB, relative to the minimum possible distance between the Moon and the observer on Earth.
+        </li>
+      </ul>
+
       
       <figure style="margin-top: 10px; text-align: center;">
         <a href="images/my-locator-marker.jpg" target="_blank" rel="noopener">
@@ -733,6 +755,10 @@
             My Locator marker popup with moon data displayed.
         </figcaption>
       </figure>
+      
+      <p>
+        Entering a valid 6-character QTH locator in the <em>DX Locator</em> field adds a second marker identifying the DX station’s location.
+      </p>
       
       <figure style="margin-top: 10px; text-align: center;">
         <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px;">
@@ -816,10 +842,6 @@
         Up to three common moon windows may occur within a 24-hour period, depending on the date. All times are given in UTC. Because a moon window may cross midnight, the notation <strong>(-1)</strong> and <strong>(+1)</strong> is used to indicate that the time corresponds to the previous or next UTC day, respectively.
       </p>
 
-      <p>
-        Note that if the <em>Sked</em> button is used to select the DX station, the DX location marker may be hidden beneath the DX station information window. Close the information window to reveal the DX location marker.
-      </p>
-
       <h4 id="station-map">Station Map and Station Profiles</h4>
       <figure style="margin-top: 10px; text-align: center;">
         <a href="images/station-profile.jpg" target="_blank" rel="noopener">
@@ -858,7 +880,12 @@
         </li>
       </ul>
       <p>
-        Clicking a marker opens an info window with the station profile. This includes the callsign, operator name, and QTH locator, along with a green <strong>Sked</strong> button for one-click sked planning. Where available, you will also see details such as antenna size, transmit power, website link, station photo, and a dedicated <strong>QRZ</strong> button for direct access to the operator’s QRZ.com page. The blue <strong>Email</strong> button opens your default email client with the station’s address pre-filled, making it easy to arrange a sked.
+        Clicking a marker opens an information window displaying the station profile. This includes the callsign, operator name, and QTH locator, along with a green <strong>Sked</strong> button for one-click sked planning. When the <strong>Sked</strong> button is pressed, information about the common moon windows between <em>My Locator</em> and the DX station’s locator for the selected date is displayed. Where available, additional details may be shown, such as antenna size, transmit power, a website link, a station photo, and a dedicated <strong>QRZ</strong> button providing direct access to the operator’s QRZ.com page. The blue <strong>Email</strong> button opens your default email client with the station’s address pre-filled, making it easy to arrange a sked.
+      </p>
+
+      <p>
+        When the <strong>Sked</strong> button is pressed, several outcomes are possible depending on the availability of common moon windows. If no common moon window exists for the selected date, the message <strong>No common moon window today</strong> is displayed.
+        Up to three common moon windows may occur within a 24-hour period, depending on the date. All times are given in UTC. Because a moon window may cross midnight, the notation <strong>(-1)</strong> and <strong>(+1)</strong> is used to indicate times that fall on the previous or next UTC day, respectively.
       </p>
 
       <h4 id="autotracking">Realtime Tracking Mode</h4>
