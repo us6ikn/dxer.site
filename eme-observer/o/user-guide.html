@@ -13,7 +13,7 @@
     <title>EME Observer – User Guide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         
-        <meta name="description" content="Learn how to use the EME Observer tool to plan Moonbounce QSOs on all bands from 144MHz and above. This user guide covers features like moon tracking, Dpol, elevation charts, and station tables." />
+        <meta name="description" content="Learn how to use the EME Observer tool to plan Moonbounce QSOs on all bands from 432MHz and above. This user guide covers features like moon tracking, Dpol, elevation charts, and station tables." />
         <meta name="keywords" content="EME, Moonbounce, User Guide, Ham Radio, moon ephemeris, Polarization Offset, Signal Loss, Amateur Radio Tools" />
         <meta name="author" content="SA5IKN" />
         <meta name="robots" content="index, follow" />
@@ -318,17 +318,8 @@
         <button onclick="location.href='/eme-observer/'">Map View</button>
         <button onclick="location.href='table.html'">Table View</button>
         <button onclick="window.location.href='statistics.html'">Statistics</button>
-        <button onclick="window.location.href='datasubmission.html'"
-                    style="display:flex; align-items:center; justify-content:center; width:40px; padding:0;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                </svg>
-            </button>
-        <button onclick="window.location.href='/'" style="display:flex; align-items:center; justify-content:center; width:40px; padding:0;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 3l9 9h-3v9h-12v-9h-3l9-9z"/>
-            </svg>
-        </button>
+        <button onclick="location.href='datasubmission.html'">Add/Edit</button>
+        <button onclick="location.href='/'">🏠</button>
       </div>
     </div>
   </div>
@@ -362,6 +353,7 @@
           </ul>
         </li>
         <li><a href="#mobile-experience">Mobile experience</a></li>
+        <li><a href="#other-bands">Use on Bands Below 432 MHz</a></li>
         <li><a href="#libration">A Note on Libration Rate and Doppler Spread</a></li>
         <li><a href="#dpol">A note on Spatial Polarisation Offset (Dpol)</a></li>
         <li><a href="#support">Support EME Observer</a></li>
@@ -374,7 +366,7 @@
       <h2>About EME Observer</h2>
       <p>
         <strong>EME Observer</strong> is a web application that provides an interactive map of Earth-Moon-Earth (EME) stations and enables one-click sked planning and real-time tracking of moon footprint and conditions. It delivers high-resolution lunar ephemeris data and displays key signal-path characteristics, including additional path loss, libration rate, Doppler spread, and polarization offset, together with station profiles and statistical summaries.
-        EME Observer supports all EME bands from 144&nbsp;MHz to 76GHz. Note that station profiles are currently not available for 144MHz.
+        EME Observer currently supports all EME bands from 432&nbsp;MHz to 76GHz. Support for the 222 MHz band, which is primarily allocated to radio amateurs in ITU Region 2, has recently been added. Planning is also available for 144&nbsp;MHz and 50&nbsp;MHz, but station profiles are not currently included for these bands.
       </p>
 
       <figure style="margin-top: 10px; text-align: center;">
@@ -396,7 +388,7 @@
      <p><strong>Key features include:</strong></p>
      <ul>
        <li>Station locations with details such as transmit power, antennas, QRZ.com links, personal websites, email addresses, and station images (where available)</li>
-       <li>One-click EME planner for all bands, 144&nbsp;MHz and above, featuring visualizations of common Moon windows and signal-path characteristics - supports both Manual and Realtime tracking modes (1-minute tracking steps)</li>
+       <li>One-click EME planner for all bands, 432&nbsp;MHz and above, featuring visualizations of common Moon windows and signal-path characteristics - supports both Manual and Realtime tracking modes (1-minute tracking steps)</li>
        <li>Moon footprint, sublunar point, CQ Zones and QTH Locators overlay</li>
        <li>Moon distance, declination, and additional path loss</li>
        <li>Moon azimuth, elevation, topocentric libration rate, and Doppler spread on selected EME band for both your and the DX locations</li>
@@ -428,13 +420,12 @@
       
       <h3 id="station-data">Station Data</h3>
       <p>
-        Station data is contributed by the community. The 432&nbsp;MHz and above database builds upon the excellent and dedicated work of Jan PA0PLY, who maintains a comprehensive list of active EME stations. The databases for 222&nbsp;MHz and 902&nbsp;MHz, bands that are almost entirely specific to ITU Region&nbsp;2, are maintained by Martin PJ4MM. Currently there is no station database for 144MHz and if you would like to create and maintain one for the EME community, let us know.
+        Station data is contributed by the community. EME Observer's 432MHz and Above database builds upon the excellent and dedicated work of Jan PA0PLY, who maintains a comprehensive list of active EME stations. The database for 222MHz is maintained by Martin PJ4MM.
         <br><br>
-        To add or update a station operating on 432&nbsp;MHz and above, please submit your information through the <a href="https://www.pa0ply.nl/eme-directory/" target="_blank" rel="noopener">PA0PLY EME Directory</a>. To add or update a station operating on 222&nbsp;MHz or 902&nbsp;MHz, send the data to <a href="https://www.qrz.com/db/PJ4MM" target="_blank" rel="noopener">Martin PJ4MM</a>. Only include stations that have transmit (TX) capability and have completed at least one EME QSO on the band for which data is being submitted.
+        To add or update a station operating at 432MHz and Above, please submit your information through the <a href="https://www.pa0ply.nl/eme-directory/" target="_blank" rel="noopener">PA0PLY EME Directory</a>. To add a station operating at 222MHz send the data to <a href="https://www.qrz.com/db/PJ4MM" target="_blank" rel="noopener">Martin PJ4MM</a>. Only include stations that have transmit (TX) capability and have completed at least one EME QSO on the band for which you are submitting data.
         <br><br>
-        To include a station image in the EME Observer station profiles, please send the image to <a href="https://www.qrz.com/db/SA5IKN" target="_blank" rel="noopener">Max SA5IKN</a>. Please specify the band for which the image is intended. Each band may use a dedicated image, or the same image may be applied across all bands.
+        To include a station image in the EME Observer station profiles, please send the image to Max SA5IKN, using the email address listed on <a href="https://www.qrz.com/db/SA5IKN" target="_blank" rel="noopener">his QRZ.com profile</a>. Please specify which band the picture is intended for. Each band can use a dedicated image, or the same image can be applied across all bands.
       </p>
-
 
     </section>
 
@@ -535,7 +526,7 @@
       </p>
       <ul>
           <li><strong>Time &amp; Date Controls</strong> — set the UTC date and time for planning or tracking</li>
-          <li><strong>Band Selector</strong> — choose the operating band: 144&nbsp;MHz, 222&nbsp;MHz, 432&nbsp;MHz, 902&nbsp;MHz, 1296&nbsp;MHz, 2320&nbsp;MHz, 3400&nbsp;MHz, 5760&nbsp;MHz, 10&nbsp;GHz, 24&nbsp;GHz, 47&nbsp;GHz, or 76&nbsp;GHz</li>
+          <li><strong>Band Selector</strong> — choose the operating band: 432&nbsp;MHz, 1296&nbsp;MHz, 2320&nbsp;MHz, 3400&nbsp;MHz, 5760&nbsp;MHz, 10&nbsp;GHz, 24&nbsp;GHz, 47&nbsp;GHz, or 76&nbsp;GHz</li>
           <li><strong>Mode Selector</strong> — toggle between <em>Manual (Planning)</em> mode and <em>Realtime Tracking</em> mode using the “Track” button</li>
           <li><strong>QTH Locator Fields</strong> — enter your station grid and the DX station grid</li>
           <li><strong>View Buttons</strong> — switch to <em>Table View</em> to browse station records or <em>Statistics View</em> to analyze station and DXCC data</li>
@@ -714,49 +705,7 @@
       </figure>
       
       <p>
-        When a valid 6-character QTH locator is entered in the <em>My Locator</em> field, a marker showing your station’s location is displayed on the map.
-        Clicking this marker opens a tooltip containing general lunar data and topocentric (station-specific) moon data, including:
-      </p>
-      <ul>
-        <li>
-          <strong>Moon phase</strong> — the named lunar phase (e.g., New Moon, First Quarter, Full Moon), along with the corresponding phase value
-        </li>
-        <li>
-          <strong>Lunar disk illumination</strong> — the percentage of the Moon’s visible disk that is illuminated
-        </li>
-        <li>
-          <strong>Phase angle</strong> — the Sun–Moon–Earth phase angle in degrees
-        </li>
-        <li>
-          <strong>Moon apparent diameter</strong> — the Moon’s apparent angular diameter as seen from Earth, in degrees
-        </li>
-        <li>
-          <strong>Topocentric distance</strong> — the distance between the observer’s station location and the Moon, accounting for the observer’s position on Earth
-        </li>
-        <li>
-          <strong>Extra loss due to topocentric distance from the Moon</strong> — additional two-way free-space path loss, in dB, relative to the minimum possible distance between the Moon and the observer on Earth.
-        </li>
-      </ul>
-
-      
-      <figure style="margin-top: 10px; text-align: center;">
-        <a href="images/my-locator-marker.jpg" target="_blank" rel="noopener">
-          <img
-            src="images/my-locator-marker.jpg"
-            alt="My Locator marker popup with moon data displayed"
-            loading="lazy"
-            width="800"
-            height="450"
-            style="max-width: 100%; height: auto; border-radius: 8px;"
-          />
-        </a>
-        <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
-            My Locator marker popup with moon data displayed.
-        </figcaption>
-      </figure>
-      
-      <p>
-        Entering a valid 6-character QTH locator in the <em>DX Locator</em> field adds a second marker identifying the DX station’s location.
+        When a valid 6-character QTH locator is entered in the <em>My Locator</em> field, a marker indicating your station’s location is displayed on the map. Entering a valid locator in the <em>DX Locator</em> field adds a second marker identifying the DX station’s location.
       </p>
       
       <figure style="margin-top: 10px; text-align: center;">
@@ -841,6 +790,10 @@
         Up to three common moon windows may occur within a 24-hour period, depending on the date. All times are given in UTC. Because a moon window may cross midnight, the notation <strong>(-1)</strong> and <strong>(+1)</strong> is used to indicate that the time corresponds to the previous or next UTC day, respectively.
       </p>
 
+      <p>
+        Note that if the <em>Sked</em> button is used to select the DX station, the DX location marker may be hidden beneath the DX station information window. Close the information window to reveal the DX location marker.
+      </p>
+
       <h4 id="station-map">Station Map and Station Profiles</h4>
       <figure style="margin-top: 10px; text-align: center;">
         <a href="images/station-profile.jpg" target="_blank" rel="noopener">
@@ -879,12 +832,7 @@
         </li>
       </ul>
       <p>
-        Clicking a marker opens an information window displaying the station profile. This includes the callsign, operator name, and QTH locator, along with a green <strong>Sked</strong> button for one-click sked planning. When the <strong>Sked</strong> button is pressed, information about the common moon windows between <em>My Locator</em> and the DX station’s locator for the selected date is displayed. Where available, additional details may be shown, such as antenna size, transmit power, a website link, a station photo, and a dedicated <strong>QRZ</strong> button providing direct access to the operator’s QRZ.com page. The blue <strong>Email</strong> button opens your default email client with the station’s address pre-filled, making it easy to arrange a sked.
-      </p>
-
-      <p>
-        When the <strong>Sked</strong> button is pressed, several outcomes are possible depending on the availability of common moon windows. If no common moon window exists for the selected date, the message <strong>No common moon window today</strong> is displayed.
-        Up to three common moon windows may occur within a 24-hour period, depending on the date. All times are given in UTC. Because a moon window may cross midnight, the notation <strong>(-1)</strong> and <strong>(+1)</strong> is used to indicate times that fall on the previous or next UTC day, respectively.
+        Clicking a marker opens an info window with the station profile. This includes the callsign, operator name, and QTH locator, along with a green <strong>Sked</strong> button for one-click sked planning. Where available, you will also see details such as antenna size, transmit power, website link, station photo, and a dedicated <strong>QRZ</strong> button for direct access to the operator’s QRZ.com page. The blue <strong>Email</strong> button opens your default email client with the station’s address pre-filled, making it easy to arrange a sked.
       </p>
 
       <h4 id="autotracking">Realtime Tracking Mode</h4>
@@ -976,7 +924,7 @@
 
       <p>
         The <strong>Statistics View</strong> can be accessed from the Control Panel.
-        This mode displays dynamic charts illustrating the distribution of stations by antenna size (dish diameter or number of Yagi elements combined across all booms in the antenna system), transmit power, and DXCC entity. These statistics are automatically refreshed whenever station data is added or updated. Select band via the band selector.
+        This mode displays dynamic charts illustrating the distribution of stations by antenna size, transmit power, and DXCC entity. These statistics are automatically refreshed whenever station data is added or updated. Select band via the band selector.
       </p>
 
       
@@ -1048,6 +996,21 @@
     </div>
 
   </section>
+    <section>
+        <h2 id="other-bands">Use on Bands Below 432 MHz</h2>
+
+        <p>
+          Although <strong>EME Observer</strong> is primarily designed for planning EME QSOs on bands from 432&nbsp;MHz and above, many of its tools and metrics are also useful for lower EME bands, such as 144&nbsp;MHz and 50&nbsp;MHz.
+          These include the Moon footprint, Earth–Moon distance, additional path loss, lunar declination, elevation and azimuth charts, moonrise and moonset times, and polarization offset.
+          For convenience, when planning QSOs on lower bands, you may select 432&nbsp;MHz in the band selector to enable the display of Moon–Sagittarius A separation, with markers denoting times when high sky temperature can degrade the system performance.
+        </p>
+
+        <p>
+          The effects of lunar libration are frequency-dependent, varying both qualitatively and quantitatively with the operating band.
+          On lower bands, this appears as Doppler fading, while on higher bands it manifests as Doppler spreading.
+        </p>
+
+    </section>
     
     <section>
       <h2 id="libration">A Note on Libration Rate and Doppler Spread</h2>
