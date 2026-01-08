@@ -589,7 +589,7 @@
           powerChart = await loadAndPlot(powerFile, 'powerChart', 'Power Count', 'Power (W)', powerChart);
 
           // Try to load yagi
-          yagiChart = await loadAndPlot(yagiFile, 'yagiChart', 'Yagi Elements Count', 'Number of Elements', yagiChart);
+          yagiChart = await loadAndPlot(yagiFile, 'yagiChart', 'Yagi Elements Count', 'Number of Elements (combined across all booms)', yagiChart);
 
           if (yagiChart) {
               document.getElementById('yagiSection').style.display = 'block';
