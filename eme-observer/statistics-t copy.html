@@ -378,15 +378,8 @@
     </div>
     <div id="statsMessage" class="stats-message" style="display: none;"></div>
     <div id="statsContent">
-      <div id="antennaSection">
-        <h2>Dish Size</h2>
-        <canvas id="antennaChart"></canvas>
-      </div>
-
-      <div id="yagiSection" style="display: none;">
-        <h2>Number of Yagi Elements</h2>
-        <canvas id="yagiChart"></canvas>
-      </div>
+      <h2>Dish Size</h2>
+      <canvas id="antennaChart"></canvas>
 
       <h2>Power</h2>
       <canvas id="powerChart"></canvas>
@@ -421,7 +414,6 @@
       };
 
       let antennaChart = null;
-      let yagiChart = null;
       let powerChart = null;
       let countryChart = null;
 
@@ -561,42 +553,29 @@
           }
       }
 
-      async function loadAndPlot(fileUrl, canvasId, title, xAxisTitle, chartVar) {
+      async function loadAndPlot(fileUrl, canvasId, title, xAxisTitle) {
           try {
               const response = await fetch(fileUrl);
-              if (!response.ok) throw new Error('Not found');
               const text = await response.text();
               const data = parseHistogramData(text);
-              const ctx = document.getElementById(canvasId).getContext('2d');
-              if (chartVar) chartVar.destroy();
-              chartVar = plotChart(canvasId, data.labels, data.counts, data.percentages, title, xAxisTitle);
-              return chartVar;
+              if (canvasId === 'antennaChart') {
+                  if (antennaChart) antennaChart.destroy();
+                  antennaChart = plotChart(canvasId, data.labels, data.counts, data.percentages, title, xAxisTitle);
+              } else if (canvasId === 'powerChart') {
+                  if (powerChart) powerChart.destroy();
+                  powerChart = plotChart(canvasId, data.labels, data.counts, data.percentages, title, xAxisTitle);
+              }
           } catch (err) {
               console.error(`Error loading ${fileUrl}:`, err);
-              return null;
           }
       }
 
       async function loadStatsForBand(band) {
-          const bandFile = (band === '10GHz') ? '10GHz' : band.replace('MHz', 'MHz'); // already correct
-          const antennaFile = FILE_URL_BASE + 'h_a_' + bandFile + '.txt';
-          const powerFile = FILE_URL_BASE + 'h_p_' + bandFile + '.txt';
-          const yagiFile = FILE_URL_BASE + 'y_e_d_' + bandFile + '.txt';
+          const antennaFile = (band === '10GHz') ? FILE_URL_BASE + 'h_a_10GHz.txt' : FILE_URL_BASE + 'h_a_' + band + '.txt';
+          const powerFile = (band === '10GHz') ? FILE_URL_BASE + 'h_p_10GHz.txt' : FILE_URL_BASE + 'h_p_' + band + '.txt';
 
-          // Always load dish and power
-          antennaChart = await loadAndPlot(antennaFile, 'antennaChart', 'Dish Size Count', 'Dish diameter (m)', antennaChart);
-
-          powerChart = await loadAndPlot(powerFile, 'powerChart', 'Power Count', 'Power (W)', powerChart);
-
-          // Try to load yagi
-          yagiChart = await loadAndPlot(yagiFile, 'yagiChart', 'Yagi Elements Count', 'Number of Elements', yagiChart);
-
-          if (yagiChart) {
-              document.getElementById('yagiSection').style.display = 'block';
-          } else {
-              document.getElementById('yagiSection').style.display = 'none';
-          }
-
+          await loadAndPlot(antennaFile, 'antennaChart', 'Antenna Count', 'Antenna diameter (m)');
+          await loadAndPlot(powerFile, 'powerChart', 'Power Count', 'Power (W)');
           await loadCountryData(band);
       }
 
