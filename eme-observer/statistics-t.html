@@ -582,7 +582,7 @@
       function updateUI(band) {
           document.getElementById('table-title').textContent = `${bandConfig[band].label} EME Stations Statistics`;
 
-          const notReadyBands = ['144MHz', '222MHz', '432MHz', '76GHz'];
+          const notReadyBands = ['144MHz', '432MHz', '76GHz'];
           if (notReadyBands.includes(band)) {
               document.getElementById('statsContent').style.display = 'none';
               document.getElementById('statsMessage').style.display = 'block';
