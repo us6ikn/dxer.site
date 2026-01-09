@@ -928,65 +928,43 @@
                                                                             right: 40px;
                                                                             background-color: rgba(255, 255, 255, 0.95);
                                                                             color: #333;
-                                                                            padding: 12px 16px;
+                                                                            padding: 12px 44px 12px 16px;      /* extra right padding for × button */
                                                                             border-radius: 8px;
                                                                             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
                                                                             font-size: 13px;
                                                                             font-weight: 500;
                                                                             max-width: 360px;
                                                                             line-height: 1.4;
-                                                                            z-index: 1000;               /* above map and controls */
-                                                                            border-left: 4px solid #ff832b;  /* orange accent to draw attention */
+                                                                            z-index: 1000;                      /* above map and controls */
+                                                                            border-left: 4px solid #ff832b;     /* orange accent */
+                                                                            
                                                                             opacity: 0;
                                                                             visibility: hidden;
                                                                             transition: opacity 0.4s ease, visibility 0.4s ease;
-                                                                            pointer-events: none;        /* doesn't block map interaction */
+                                                                            
+                                                                            pointer-events: none;               /* prevent blocking map by default */
+                                                                            user-select: none;                  /* avoid accidental text selection */
                                                                         }
 
+                                                                        /* When visible */
                                                                         .vhf-notice.visible {
                                                                             opacity: 1;
                                                                             visibility: visible;
                                                                         }
 
-                                                                        /* Mobile adjustment – a bit higher and narrower */
-                                                                        @media (max-width: 600px) {
-                                                                            .vhf-notice {
-                                                                                bottom: 15px;
-                                                                                right: 10px;
-                                                                                left: 10px;
-                                                                                max-width: none;
-                                                                                font-size: 12px;
-                                                                                padding: 10px 14px;
-                                                                            }
-                                                                        }
-                                                                        .vhf-notice {
-                                                                            pointer-events: none;           /* ← lets clicks pass through to map underneath */
-                                                                            user-select: none;              /* prevents text selection annoyance */
-                                                                        }
-
+                                                                        /* Make link, text and close button interactive */
                                                                         .vhf-notice a,
                                                                         .vhf-notice p,
-                                                                        .vhf-notice strong {
-                                                                            pointer-events: auto;           /* ← only the link and text become clickable */
-                                                                            position: relative;             /* helps stacking context */
-                                                                            z-index: 1;                     /* ensures link is above the transparent layer */
-                                                                        }
-                                                                        .vhf-notice {
-                                                                            position: relative;           /* important for absolute positioning of button */
-                                                                            padding: 12px 40px 12px 16px; /* make space on the right for × button */
-                                                                            pointer-events: none;
-                                                                        }
-
-                                                                        .vhf-notice a,
-                                                                        .vhf-notice p,
-                                                                        .vhf-notice strong {
+                                                                        .vhf-notice strong,
+                                                                        .close-notice {
                                                                             pointer-events: auto;
                                                                         }
 
+                                                                        /* Close button */
                                                                         .close-notice {
                                                                             position: absolute;
                                                                             top: 8px;
-                                                                            right: 10px;
+                                                                            right: 12px;
                                                                             background: none;
                                                                             border: none;
                                                                             font-size: 22px;
@@ -995,7 +973,6 @@
                                                                             cursor: pointer;
                                                                             padding: 0 6px;
                                                                             line-height: 1;
-                                                                            pointer-events: auto;
                                                                             z-index: 2;
                                                                         }
 
@@ -1005,6 +982,26 @@
 
                                                                         .close-notice:active {
                                                                             transform: scale(0.95);
+                                                                        }
+
+                                                                        /* ────────────────────────────────────────────────
+                                                                           Mobile adjustments
+                                                                        ───────────────────────────────────────────────── */
+                                                                        @media (max-width: 600px) {
+                                                                            .vhf-notice {
+                                                                                bottom: 16px;
+                                                                                right: 12px;
+                                                                                left: 12px;
+                                                                                max-width: none;
+                                                                                font-size: 12px;
+                                                                                padding: 12px 44px 12px 14px;     /* still room for × */
+                                                                                border-radius: 6px;
+                                                                            }
+
+                                                                            .close-notice {
+                                                                                right: 10px;
+                                                                                font-size: 20px;
+                                                                            }
                                                                         }
                                                                 </style>
                                                                 
@@ -4000,6 +3997,17 @@
                                                         });
                                                 }
 
+</script>
+<script>
+    // Close VHF notice when user clicks × (only for current page session)
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('close-notice')) {
+            const notice = document.getElementById('vhfNotice');
+            if (notice) {
+                notice.classList.remove('visible');
+            }
+        }
+    });
 </script>
 <div id="vhfNotice" class="vhf-notice">
     <button class="close-notice" aria-label="Close notice">×</button>
