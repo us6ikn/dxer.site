@@ -428,65 +428,11 @@
       
       <h3 id="station-data">Station Data</h3>
       <p>
-        Station data is contributed by the community. The 432&nbsp;MHz and above database builds upon the excellent and dedicated work of Jan PA0PLY, who maintains a comprehensive list of active EME stations. The databases for 222&nbsp;MHz and 902&nbsp;MHz, bands that are almost entirely specific to ITU Region&nbsp;2, are maintained by Martin PJ4MM.
-        </p>
-        <p>
-            For stations operating on <strong>432&nbsp;MHz and higher bands</strong> (except 902&nbsp;MHz),
-            submit station details to the EME Directory maintained by Jan
-            <strong>
-                <a href="#"
-                   class="email-link"
-                   data-email="ln.ylp0ap@ofni">
-                   PA0PLY – click to email
-                </a>
-            </strong>:
-            <a href="https://www.pa0ply.nl/eme-directory/" target="_blank">
-                https://www.pa0ply.nl/eme-directory/
-            </a>
-        </p>
-        <p>
-            For stations operating on <strong>222&nbsp;MHz</strong> and <strong>902&nbsp;MHz</strong>,
-            send station updates to Martin
-            <strong>
-                <a href="#"
-                   class="email-link"
-                   data-email="ln.mm4jp@nitr am">
-                   PJ4MM – click to email
-                </a>
-            </strong>
-            -
-            <a href="https://www.qrz.com/db/PJ4MM" target="_blank">QRZ.com profile</a>.
-        </p>
-        <p>
-            For stations operating on <strong>144&nbsp;MHz</strong>,
-            send station updates to Erwin
-            <strong>
-                <a href="#"
-                   class="email-link"
-                   data-email="gro.xobliam@revresboeme">
-                   DK5EW – click to email
-                </a>
-            </strong>
-            -
-            <a href="https://www.qrz.com/db/DK5EW" target="_blank">QRZ.com profile</a>.
-            We gratefully acknowledge the support of
-            <a href="https://www.mmmonvhf.de/" target="_blank">MMMonVHF</a>
-            for providing the initial 144MHz database.
-        </p>
-        
-        <p>
-        Only include stations that have transmit (TX) capability and have completed at least one EME QSO on the band for which data is being submitted.
+        Station data is contributed by the community. The 432&nbsp;MHz and above database builds upon the excellent and dedicated work of Jan PA0PLY, who maintains a comprehensive list of active EME stations. The databases for 222&nbsp;MHz and 902&nbsp;MHz, bands that are almost entirely specific to ITU Region&nbsp;2, are maintained by Martin PJ4MM. Currently there is no station database for 144MHz and if you would like to create and maintain one for the EME community, let us know.
         <br><br>
-        Send station pictures to Max
-        <strong>
-            <a href="#"
-               class="email-link"
-               data-email="moc.oohay@ykysnemor.sykam">
-               SA5IKN – click to email
-            </a>
-        </strong>
-        -
-        <a href="https://www.qrz.com/db/SA5IKN" target="_blank">QRZ.com profile</a>. Please specify the band for which the image is intended. Each band may use a dedicated image, or the same image may be applied across all bands.
+        To add or update a station operating on 432&nbsp;MHz and above, please submit your information through the <a href="https://www.pa0ply.nl/eme-directory/" target="_blank" rel="noopener">PA0PLY EME Directory</a>. To add or update a station operating on 222&nbsp;MHz or 902&nbsp;MHz, send the data to <a href="https://www.qrz.com/db/PJ4MM" target="_blank" rel="noopener">Martin PJ4MM</a>. Only include stations that have transmit (TX) capability and have completed at least one EME QSO on the band for which data is being submitted.
+        <br><br>
+        To include a station image in the EME Observer station profiles, please send the image to <a href="https://www.qrz.com/db/SA5IKN" target="_blank" rel="noopener">Max SA5IKN</a>. Please specify the band for which the image is intended. Each band may use a dedicated image, or the same image may be applied across all bands.
       </p>
 
 
@@ -1197,7 +1143,7 @@
       <h2>Licenses and Credits</h2>
       <p>
         <strong>EME Observer</strong><br>
-        © 2025-2026 Max Romensky (SA5IKN). All rights reserved.<br>
+        © 2025 Max Romensky (SA5IKN). All rights reserved.<br>
       </p>
 
       <p>This application incorporates the following third-party components:</p>
@@ -1257,25 +1203,6 @@
     btn.onclick = function () {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
-  </script>
-  <script>
-  (function () {
-    function reverseString(str) {
-      return str.split('').reverse().join('');
-    }
-
-    document.querySelectorAll('.email-link').forEach(link => {
-      link.addEventListener('click', function (e) {
-        e.preventDefault();
-
-        const reversed = this.dataset.email;
-        if (!reversed) return;
-
-        const email = reverseString(reversed);
-        window.location.href = 'mailto:' + email;
-      });
-    });
-  })();
   </script>
   <!-- Ko-Fi -->
   <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
