@@ -971,6 +971,41 @@
                                                                             position: relative;             /* helps stacking context */
                                                                             z-index: 1;                     /* ensures link is above the transparent layer */
                                                                         }
+                                                                        .vhf-notice {
+                                                                            position: relative;           /* important for absolute positioning of button */
+                                                                            padding: 12px 40px 12px 16px; /* make space on the right for × button */
+                                                                            pointer-events: none;
+                                                                        }
+
+                                                                        .vhf-notice a,
+                                                                        .vhf-notice p,
+                                                                        .vhf-notice strong {
+                                                                            pointer-events: auto;
+                                                                        }
+
+                                                                        .close-notice {
+                                                                            position: absolute;
+                                                                            top: 8px;
+                                                                            right: 10px;
+                                                                            background: none;
+                                                                            border: none;
+                                                                            font-size: 22px;
+                                                                            font-weight: bold;
+                                                                            color: #666;
+                                                                            cursor: pointer;
+                                                                            padding: 0 6px;
+                                                                            line-height: 1;
+                                                                            pointer-events: auto;
+                                                                            z-index: 2;
+                                                                        }
+
+                                                                        .close-notice:hover {
+                                                                            color: #000;
+                                                                        }
+
+                                                                        .close-notice:active {
+                                                                            transform: scale(0.95);
+                                                                        }
                                                                 </style>
                                                                 
 </head>
@@ -3967,7 +4002,9 @@
 
 </script>
 <div id="vhfNotice" class="vhf-notice">
-    <p><strong>Note:</strong> The database for 144 MHz is still in the early stages of development. Please <a href="https://dxer.site/eme-observer/datasubmission.html" target="_blank" rel="noopener">submit your corrections and additions</a>.</p>
+    <button class="close-notice" aria-label="Close notice">×</button>
+    <p><strong>Note:</strong> The database for 144 MHz is still in the early stages of development. Please
+       <a href="https://dxer.site/eme-observer/datasubmission.html" target="_blank" rel="noopener">submit your corrections and additions</a>.</p>
 </div>
 <!-- Ko-Fi -->
 <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
