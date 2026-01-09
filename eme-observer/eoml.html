@@ -959,6 +959,18 @@
                                                                                 padding: 10px 14px;
                                                                             }
                                                                         }
+                                                                        .vhf-notice {
+                                                                            pointer-events: none;           /* ← lets clicks pass through to map underneath */
+                                                                            user-select: none;              /* prevents text selection annoyance */
+                                                                        }
+
+                                                                        .vhf-notice a,
+                                                                        .vhf-notice p,
+                                                                        .vhf-notice strong {
+                                                                            pointer-events: auto;           /* ← only the link and text become clickable */
+                                                                            position: relative;             /* helps stacking context */
+                                                                            z-index: 1;                     /* ensures link is above the transparent layer */
+                                                                        }
                                                                 </style>
                                                                 
 </head>
