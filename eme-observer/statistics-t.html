@@ -583,10 +583,35 @@
           const powerFile = FILE_URL_BASE + 'h_p_' + bandFile + '.txt';
           const yagiFile = FILE_URL_BASE + 'y_e_d_' + bandFile + '.txt';
 
-          // Always load dish and power
-          antennaChart = await loadAndPlot(antennaFile, 'antennaChart', 'Dish Size Count', 'Dish diameter (m)', antennaChart);
+          const antennaSection = document.getElementById('antennaSection');
 
-          powerChart = await loadAndPlot(powerFile, 'powerChart', 'Power Count', 'Power (W)', powerChart);
+          // Hide dish stats on 144 MHz
+          if (band === '144MHz') {
+              antennaSection.style.display = 'none';
+              if (antennaChart) {
+                  antennaChart.destroy();
+                  antennaChart = null;
+              }
+          } else {
+              antennaSection.style.display = 'block';
+              antennaChart = await loadAndPlot(
+                  antennaFile,
+                  'antennaChart',
+                  'Dish Size Count',
+                  'Dish diameter (m)',
+                  antennaChart
+              );
+          }
+
+          // Power is always shown
+          powerChart = await loadAndPlot(
+              powerFile,
+              'powerChart',
+              'Power Count',
+              'Power (W)',
+              powerChart
+          );
+
 
           // Try to load yagi
           yagiChart = await loadAndPlot(yagiFile, 'yagiChart', 'Yagi Elements Count', 'Number of Elements (combined across all booms)', yagiChart);
