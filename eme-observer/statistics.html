@@ -583,10 +583,35 @@
           const powerFile = FILE_URL_BASE + 'h_p_' + bandFile + '.txt';
           const yagiFile = FILE_URL_BASE + 'y_e_d_' + bandFile + '.txt';
 
-          // Always load dish and power
-          antennaChart = await loadAndPlot(antennaFile, 'antennaChart', 'Dish Size Count', 'Dish diameter (m)', antennaChart);
+          const antennaSection = document.getElementById('antennaSection');
 
-          powerChart = await loadAndPlot(powerFile, 'powerChart', 'Power Count', 'Power (W)', powerChart);
+          // Hide dish stats on 144 MHz
+          if (band === '144MHz') {
+              antennaSection.style.display = 'none';
+              if (antennaChart) {
+                  antennaChart.destroy();
+                  antennaChart = null;
+              }
+          } else {
+              antennaSection.style.display = 'block';
+              antennaChart = await loadAndPlot(
+                  antennaFile,
+                  'antennaChart',
+                  'Dish Size Count',
+                  'Dish diameter (m)',
+                  antennaChart
+              );
+          }
+
+          // Power is always shown
+          powerChart = await loadAndPlot(
+              powerFile,
+              'powerChart',
+              'Power Count',
+              'Power (W)',
+              powerChart
+          );
+
 
           // Try to load yagi
           yagiChart = await loadAndPlot(yagiFile, 'yagiChart', 'Yagi Elements Count', 'Number of Elements (combined across all booms)', yagiChart);
@@ -603,7 +628,7 @@
       function updateUI(band) {
           document.getElementById('table-title').textContent = `${bandConfig[band].label} EME Stations Statistics`;
 
-          const notReadyBands = ['144MHz', '76GHz'];
+          const notReadyBands = ['76GHz'];
           if (notReadyBands.includes(band)) {
               document.getElementById('statsContent').style.display = 'none';
               document.getElementById('statsMessage').style.display = 'block';
