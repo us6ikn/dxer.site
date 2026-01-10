@@ -475,37 +475,41 @@
           }, false);
             
             // Super-safe shared DX loader
-            // Super-safe shared DX loader - wait until DOM elements exist
+            // Super-safe shared DX loader - wait until everything is loaded
             function loadSharedDX() {
-                // Wait a tiny bit for DOM to be fully parsed
                 setTimeout(() => {
                     const sharedDX = sessionStorage.getItem('emeTempDX');
-                    console.log('[Noise Mapper] Checking shared DX on load:', sharedDX); // always log this
+                    console.log('[Noise Mapper] Checking shared DX on load:', sharedDX);
 
                     if (sharedDX && /^[A-R]{2}[0-9]{2}[A-X]{2}$/i.test(sharedDX)) {
                         const upper = sharedDX.toUpperCase();
 
-                        // Now safe: elements exist
                         const dxInput = document.getElementById('dxGridInput');
                         if (dxInput) {
                             dxInput.value = upper;
                             dxInput.style.borderColor = '#fff';
 
-                            // Use current date or today
-                            const dateVal = document.getElementById('datePicker')?.value || new Date().toISOString().split('T')[0];
-                            window.addTrajectories(dateVal); // call the global function
+                            // Wait one more tick for functions to be defined
+                            setTimeout(() => {
+                                const dateVal = document.getElementById('datePicker')?.value || new Date().toISOString().split('T')[0];
+                                if (typeof window.addTrajectories === 'function') {
+                                    window.addTrajectories(dateVal);
+                                    console.log('[Noise Mapper] Loaded and updated with shared DX:', upper);
+                                } else {
+                                    console.warn('[Noise Mapper] addTrajectories not ready yet');
+                                }
+                            }, 100); // small delay to ensure functions exist
 
-                            console.log('[Noise Mapper] Loaded shared DX:', upper);
                         } else {
-                            console.warn('[Noise Mapper] dxGridInput element not found yet');
+                            console.warn('[Noise Mapper] dxGridInput not found');
                         }
                     } else {
                         console.log('[Noise Mapper] No valid shared DX found on load');
                     }
-                }, 0); // 0ms timeout = next event loop tick, enough for DOM to settle
+                }, 0);
             }
 
-            // Run immediately or wait for DOMContentLoaded
+            // Run now or on DOMContentLoaded
             if (document.readyState !== 'loading') {
                 loadSharedDX();
             } else {
