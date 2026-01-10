@@ -1306,7 +1306,7 @@
           }
 
           function addTrajectories(selectedDate) {
-            const grid = gridInput.value;
+            const grid = gridInput.value || 'JO89tt';
             const dxGrid = dxGridInput.value;
             const coords = maidenheadToLatLon(grid);
             let dxCoords = null;
@@ -1320,27 +1320,11 @@
             }
 
             if (!coords) {
-                    if (grid) {
-                        gridInput.style.borderColor = 'red';
-                    }
-                    // Add graceful handling: e.g., clear trajectories and show message
-                    moonTrajectoryGroup.clear();
-                    sunTrajectoryGroup.clear();
-                    if (moonMarker) scene.remove(moonMarker);
-                    if (sunMarker) scene.remove(sunMarker);
-                    moonMarker = null;
-                    sunMarker = null;
-                    moonPositions = [];
-                    dxMoonPositions = [];
-                    sunPositions = [];
-                    commonMoonWindow = [];
-                    currentTimeIndex = 0;
-                    demoStatus.textContent = 'Enter your locator to see trajectories';
-                    demoStatus.style.color = 'yellow';
-                    demoStatus.style.display = 'block';
-                    updateTimeSlider();
-                    return; // Exit early without calculating
-                }
+              gridInput.style.borderColor = 'red';
+              gridInput.value = 'JO89tt';
+              localStorage.setItem('skyObserverGrid', 'JO89tt');
+              return addTrajectories(selectedDate);
+            }
 
             const lat = coords.lat;
             const lon = coords.lon;
@@ -1644,6 +1628,9 @@
           if (storedGrid && isValidGrid(storedGrid)) {
             gridInput.value = storedGrid;
             gridInput.style.borderColor = '#fff';
+          } else {
+            gridInput.value = 'JO89tt';
+            localStorage.setItem('skyObserverGrid', 'JO89tt');
           }
 
           const storedCsv = localStorage.getItem('skyObserverCsv');
