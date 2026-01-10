@@ -1173,6 +1173,8 @@
                 localStorage.setItem('skyObserverGrid', grid);
                 const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
                 addTrajectories(dateVal);  // Always rebuild trajectories
+                updateTrackButtonState();  // Add this: Refresh the Track button state after updating trajectories
+                demoStatus.style.display = 'none';  // Add this: Hide the status message once a valid locator is entered
                 if (isRealTime) {
                     updateTracking();  // Then update real-time positions
                 }
@@ -1306,7 +1308,7 @@
           }
 
           function addTrajectories(selectedDate) {
-            const grid = gridInput.value || 'JO89tt';
+            const grid = gridInput.value;
             const dxGrid = dxGridInput.value;
             const coords = maidenheadToLatLon(grid);
             let dxCoords = null;
@@ -1320,11 +1322,27 @@
             }
 
             if (!coords) {
-              gridInput.style.borderColor = 'red';
-              gridInput.value = 'JO89tt';
-              localStorage.setItem('skyObserverGrid', 'JO89tt');
-              return addTrajectories(selectedDate);
-            }
+                    if (grid) {
+                        gridInput.style.borderColor = 'red';
+                    }
+                    // Add graceful handling: e.g., clear trajectories and show message
+                    moonTrajectoryGroup.clear();
+                    sunTrajectoryGroup.clear();
+                    if (moonMarker) scene.remove(moonMarker);
+                    if (sunMarker) scene.remove(sunMarker);
+                    moonMarker = null;
+                    sunMarker = null;
+                    moonPositions = [];
+                    dxMoonPositions = [];
+                    sunPositions = [];
+                    commonMoonWindow = [];
+                    currentTimeIndex = 0;
+                    demoStatus.textContent = 'Enter your locator to see trajectories';
+                    demoStatus.style.color = 'yellow';
+                    demoStatus.style.display = 'block';
+                    updateTimeSlider();
+                    return; // Exit early without calculating
+                }
 
             const lat = coords.lat;
             const lon = coords.lon;
@@ -1628,9 +1646,6 @@
           if (storedGrid && isValidGrid(storedGrid)) {
             gridInput.value = storedGrid;
             gridInput.style.borderColor = '#fff';
-          } else {
-            gridInput.value = 'JO89tt';
-            localStorage.setItem('skyObserverGrid', 'JO89tt');
           }
 
           const storedCsv = localStorage.getItem('skyObserverCsv');
