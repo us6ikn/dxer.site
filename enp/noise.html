@@ -1178,21 +1178,6 @@
                 }
             });
 
-            dxGridInput.addEventListener('input', () => {
-                const dxGrid = dxGridInput.value;
-                if (dxGrid && isValidGrid(dxGrid)) {
-                    dxGridInput.style.borderColor = '#fff';
-                } else if (dxGrid) {
-                    dxGridInput.style.borderColor = 'red';
-                } else {
-                    dxGridInput.style.borderColor = '#fff';
-                }
-                const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
-                addTrajectories(dateVal);  // Always rebuild trajectories
-                if (isRealTime) {
-                    updateTracking();  // Then update real-time positions
-                }
-            });
 
           function maidenheadToLatLon(locator) {
             if (!locator || locator.length < 4) return null;
@@ -1821,11 +1806,11 @@
           addTrajectories();
           updateTrackButtonState();
           
-          // Combined DX input handler: validation + update trajectories + save to sessionStorage
+          // Single combined DX input handler: validation + update + save
           dxGridInput.addEventListener('input', () => {
               const locator = dxGridInput.value.trim().toUpperCase();
-              
-              // Your original validation & UI logic
+
+              // Validation & visual feedback (your original logic)
               if (locator && isValidGrid(locator)) {
                   dxGridInput.style.borderColor = '#fff';
               } else if (locator) {
@@ -1834,20 +1819,40 @@
                   dxGridInput.style.borderColor = '#fff';
               }
 
-              // Always rebuild (your original behavior)
+              // Always trigger trajectory rebuild & real-time update
               const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
               addTrajectories(dateVal);
               if (isRealTime) {
                   updateTracking();
               }
 
-              // NEW: Save to sessionStorage if valid
+              // Save to sessionStorage for sharing with main map
               if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
                   sessionStorage.setItem('emeTempDX', locator);
+                  console.log('[Noise Mapper] Saved DX:', locator); // debug
               } else {
                   sessionStorage.removeItem('emeTempDX');
+                  console.log('[Noise Mapper] Cleared DX (invalid/empty)'); // debug
               }
           });
+            // Load shared DX when page opens
+            document.addEventListener('DOMContentLoaded', () => {
+                const sharedDX = sessionStorage.getItem('emeTempDX');
+                if (sharedDX && /^[A-R]{2}[0-9]{2}[A-X]{2}$/i.test(sharedDX)) {
+                    const upper = sharedDX.toUpperCase();
+                    dxGridInput.value = upper;
+                    dxGridInput.style.borderColor = '#fff';
+
+                    // Force full update with the loaded value
+                    const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
+                    addTrajectories(dateVal);
+                    if (isRealTime) {
+                        updateTracking();
+                    }
+
+                    console.log('[Noise Mapper] Loaded shared DX:', upper); // debug
+                }
+            });
         </script>
     </body>
 </html>
