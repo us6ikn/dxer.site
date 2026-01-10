@@ -625,8 +625,7 @@
 
           function getCurrentPositions() {
             const now = new Date();
-            const grid = gridInput.value.trim().toUpperCase();
-            if (!grid || !isValidGrid(grid)) return null;
+            const grid = gridInput.value || 'JO89tt';
             const coords = maidenheadToLatLon(grid);
             if (!coords) return null;
             const observer = new Astronomy.Observer(coords.lat, coords.lon, 0);
@@ -1307,42 +1306,41 @@
           }
 
           function addTrajectories(selectedDate) {
-              let grid = gridInput.value.trim().toUpperCase();
+            const grid = gridInput.value;
+            const dxGrid = dxGridInput.value;
+            const coords = maidenheadToLatLon(grid);
+            let dxCoords = null;
+            if (dxGrid && isValidGrid(dxGrid)) {
+              dxCoords = maidenheadToLatLon(dxGrid);
+              dxGridInput.style.borderColor = '#fff';
+            } else if (dxGrid) {
+              dxGridInput.style.borderColor = 'red';
+            } else {
+              dxGridInput.style.borderColor = '#fff';
+            }
 
-              if (!grid || !isValidGrid(grid)) {
-                // Invalid or empty → clear all location-dependent stuff
-                gridInput.style.borderColor = grid ? 'red' : '#fff';
-
-                moonTrajectoryGroup.clear();
-                sunTrajectoryGroup.clear();
-                if (moonMarker) { scene.remove(moonMarker); moonMarker = null; }
-                if (sunMarker) { scene.remove(sunMarker); sunMarker = null; }
-
-                moonPositions = [];
-                dxMoonPositions = [];
-                sunPositions = [];
-                commonMoonWindow = [];
-                currentTimeIndex = 0;
-
-                updateTimeSlider();
-                updateTimeDisplay();
-                drawColorBar();
-
-                demoStatus.textContent = grid ? 'Invalid locator' : 'Enter your locator to show moon/sun trajectories';
-                demoStatus.style.color = 'orange';
-                demoStatus.style.display = 'block';
-
-                if (!grid) localStorage.removeItem('skyObserverGrid');
-
-                return;
-              }
-
-              // Valid grid → save it and continue
-              gridInput.style.borderColor = '#fff';
-              localStorage.setItem('skyObserverGrid', grid);
-
-              const coords = maidenheadToLatLon(grid);
-              // (the rest of the function stays unchanged)
+            if (!coords) {
+                    if (grid) {
+                        gridInput.style.borderColor = 'red';
+                    }
+                    // Add graceful handling: e.g., clear trajectories and show message
+                    moonTrajectoryGroup.clear();
+                    sunTrajectoryGroup.clear();
+                    if (moonMarker) scene.remove(moonMarker);
+                    if (sunMarker) scene.remove(sunMarker);
+                    moonMarker = null;
+                    sunMarker = null;
+                    moonPositions = [];
+                    dxMoonPositions = [];
+                    sunPositions = [];
+                    commonMoonWindow = [];
+                    currentTimeIndex = 0;
+                    demoStatus.textContent = 'Enter your locator to see trajectories';
+                    demoStatus.style.color = 'yellow';
+                    demoStatus.style.display = 'block';
+                    updateTimeSlider();
+                    return; // Exit early without calculating
+                }
 
             const lat = coords.lat;
             const lon = coords.lon;
@@ -1642,13 +1640,11 @@
             });
           }
 
-            const storedGrid = localStorage.getItem('skyObserverGrid');
-            if (storedGrid && isValidGrid(storedGrid)) {
-              gridInput.value = storedGrid;
-              gridInput.style.borderColor = '#fff';
-            } else {
-              gridInput.value = '';  // Leave it completely open/blank
-            }
+          const storedGrid = localStorage.getItem('skyObserverGrid');
+          if (storedGrid && isValidGrid(storedGrid)) {
+            gridInput.value = storedGrid;
+            gridInput.style.borderColor = '#fff';
+          }
 
           const storedCsv = localStorage.getItem('skyObserverCsv');
           if (storedCsv) {
