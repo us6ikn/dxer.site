@@ -510,7 +510,11 @@
           const colorBarContainer = document.getElementById('colorBarContainer');
           const trackButton = document.getElementById('trackButton');
 
-          const renderer = new THREE.WebGLRenderer({ antialias: true });
+          const renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: true                // ← this is the key!
+          });
+            renderer.setClearColor(0x000000, 0);   // black with 0 opacity = fully transparent
           renderer.setSize(window.innerWidth, window.innerHeight);
           document.body.appendChild(renderer.domElement);
 
