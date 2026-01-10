@@ -1162,16 +1162,21 @@
           }
 
             gridInput.addEventListener('input', () => {
-              const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
-              addTrajectories(dateVal);
-
-              if (isRealTime) {
-                if (isValidGrid(gridInput.value.trim().toUpperCase())) {
-                  updateTracking();
-                } else {
-                  stopTracking();
+                const grid = gridInput.value;
+                if (!isValidGrid(grid)) {
+                    gridInput.style.borderColor = 'red';
+                    if (isRealTime) {
+                        stopTracking();
+                    }
+                    return;
                 }
-              }
+                gridInput.style.borderColor = '#fff';
+                localStorage.setItem('skyObserverGrid', grid);
+                const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
+                addTrajectories(dateVal);  // Always rebuild trajectories
+                if (isRealTime) {
+                    updateTracking();  // Then update real-time positions
+                }
             });
 
             dxGridInput.addEventListener('input', () => {
