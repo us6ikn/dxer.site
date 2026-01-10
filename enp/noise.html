@@ -508,6 +508,24 @@
                     }
                 }, 0);
             }
+            
+            window.addEventListener('storage', (event) => {
+                if (event.key === 'emeTempDX' && event.newValue) {
+                    // Re-run your load logic
+                    const upper = event.newValue.toUpperCase();
+                    const dxInput = document.getElementById('dxGridInput');
+                    if (dxInput) {
+                        dxInput.value = upper;
+                        dxInput.style.borderColor = '#fff';
+                        
+                        const dateVal = document.getElementById('datePicker')?.value || new Date().toISOString().split('T')[0];
+                        if (typeof window.addTrajectories === 'function') {
+                            window.addTrajectories(dateVal);
+                        }
+                        console.log('[Noise Mapper] Synced DX from other tab:', upper);
+                    }
+                }
+            });
 
             // Run now or on DOMContentLoaded
             if (document.readyState !== 'loading') {

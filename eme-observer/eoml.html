@@ -2838,6 +2838,12 @@
 
                             // NEW: Save to sessionStorage so other pages see it immediately
                             sessionStorage.setItem('emeTempDX', locatorUpper);
+                            // Broadcast to other tabs
+                            window.dispatchEvent(new StorageEvent('storage', {
+                                key: 'emeTempDX',
+                                newValue: locatorUpper,
+                                url: window.location.href
+                            }));
 
                             // Refresh popup if open
                             if (marker.isPopupOpen()) {
@@ -4024,7 +4030,13 @@
                                                              const locator = document.getElementById('dx').value.trim().toUpperCase();
                                                              
                                                              if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-                                                                 sessionStorage.setItem('emeTempDX', locator);
+                                                                 sessionStorage.setItem('emeTempDX', locatorUpper);
+                                                                 // Broadcast to other tabs
+                                                                 window.dispatchEvent(new StorageEvent('storage', {
+                                                                     key: 'emeTempDX',
+                                                                     newValue: locatorUpper,
+                                                                     url: window.location.href
+                                                                 }));
                                                              } else {
                                                                  sessionStorage.removeItem('emeTempDX'); // clean up if invalid/empty
                                                              }
