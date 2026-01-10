@@ -625,7 +625,8 @@
 
           function getCurrentPositions() {
             const now = new Date();
-            const grid = gridInput.value || 'JO89tt';
+            const grid = gridInput.value.trim().toUpperCase();
+            if (!grid || !isValidGrid(grid)) return null;
             const coords = maidenheadToLatLon(grid);
             if (!coords) return null;
             const observer = new Astronomy.Observer(coords.lat, coords.lon, 0);
@@ -1161,21 +1162,16 @@
           }
 
             gridInput.addEventListener('input', () => {
-                const grid = gridInput.value;
-                if (!isValidGrid(grid)) {
-                    gridInput.style.borderColor = 'red';
-                    if (isRealTime) {
-                        stopTracking();
-                    }
-                    return;
+              const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
+              addTrajectories(dateVal);
+
+              if (isRealTime) {
+                if (isValidGrid(gridInput.value.trim().toUpperCase())) {
+                  updateTracking();
+                } else {
+                  stopTracking();
                 }
-                gridInput.style.borderColor = '#fff';
-                localStorage.setItem('skyObserverGrid', grid);
-                const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
-                addTrajectories(dateVal);  // Always rebuild trajectories
-                if (isRealTime) {
-                    updateTracking();  // Then update real-time positions
-                }
+              }
             });
 
             dxGridInput.addEventListener('input', () => {
@@ -1306,25 +1302,42 @@
           }
 
           function addTrajectories(selectedDate) {
-            const grid = gridInput.value || 'JO89tt';
-            const dxGrid = dxGridInput.value;
-            const coords = maidenheadToLatLon(grid);
-            let dxCoords = null;
-            if (dxGrid && isValidGrid(dxGrid)) {
-              dxCoords = maidenheadToLatLon(dxGrid);
-              dxGridInput.style.borderColor = '#fff';
-            } else if (dxGrid) {
-              dxGridInput.style.borderColor = 'red';
-            } else {
-              dxGridInput.style.borderColor = '#fff';
-            }
+              let grid = gridInput.value.trim().toUpperCase();
 
-            if (!coords) {
-              gridInput.style.borderColor = 'red';
-              gridInput.value = 'JO89tt';
-              localStorage.setItem('skyObserverGrid', 'JO89tt');
-              return addTrajectories(selectedDate);
-            }
+              if (!grid || !isValidGrid(grid)) {
+                // Invalid or empty → clear all location-dependent stuff
+                gridInput.style.borderColor = grid ? 'red' : '#fff';
+
+                moonTrajectoryGroup.clear();
+                sunTrajectoryGroup.clear();
+                if (moonMarker) { scene.remove(moonMarker); moonMarker = null; }
+                if (sunMarker) { scene.remove(sunMarker); sunMarker = null; }
+
+                moonPositions = [];
+                dxMoonPositions = [];
+                sunPositions = [];
+                commonMoonWindow = [];
+                currentTimeIndex = 0;
+
+                updateTimeSlider();
+                updateTimeDisplay();
+                drawColorBar();
+
+                demoStatus.textContent = grid ? 'Invalid locator' : 'Enter your locator to show moon/sun trajectories';
+                demoStatus.style.color = 'orange';
+                demoStatus.style.display = 'block';
+
+                if (!grid) localStorage.removeItem('skyObserverGrid');
+
+                return;
+              }
+
+              // Valid grid → save it and continue
+              gridInput.style.borderColor = '#fff';
+              localStorage.setItem('skyObserverGrid', grid);
+
+              const coords = maidenheadToLatLon(grid);
+              // (the rest of the function stays unchanged)
 
             const lat = coords.lat;
             const lon = coords.lon;
@@ -1624,14 +1637,13 @@
             });
           }
 
-          const storedGrid = localStorage.getItem('skyObserverGrid');
-          if (storedGrid && isValidGrid(storedGrid)) {
-            gridInput.value = storedGrid;
-            gridInput.style.borderColor = '#fff';
-          } else {
-            gridInput.value = 'JO89tt';
-            localStorage.setItem('skyObserverGrid', 'JO89tt');
-          }
+            const storedGrid = localStorage.getItem('skyObserverGrid');
+            if (storedGrid && isValidGrid(storedGrid)) {
+              gridInput.value = storedGrid;
+              gridInput.style.borderColor = '#fff';
+            } else {
+              gridInput.value = '';  // Leave it completely open/blank
+            }
 
           const storedCsv = localStorage.getItem('skyObserverCsv');
           if (storedCsv) {
