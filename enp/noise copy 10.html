@@ -1820,30 +1820,6 @@
           datePicker.value = `${year}-${month}-${day}`;
           addTrajectories();
           updateTrackButtonState();
-          
-          // 1. On page load: try to load DX locator from sessionStorage (shared with main map)
-          window.addEventListener('load', () => {
-              const sharedDX = sessionStorage.getItem('emeTempDX');
-              if (sharedDX && /^[A-R]{2}[0-9]{2}[A-X]{2}$/i.test(sharedDX)) {
-                  dxGridInput.value = sharedDX.toUpperCase();
-                  
-                  // Optional but recommended: trigger any updates that depend on DX
-                  // (in your case — rebuild trajectories and update display)
-                  const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
-                  addTrajectories(dateVal);
-              }
-          });
-
-          // 2. Whenever user types/changes DX locator → save it to sessionStorage
-          dxGridInput.addEventListener('input', () => {
-              const locator = dxGridInput.value.trim().toUpperCase();
-              
-              if (/^[A-R]{2}[0-9]{2}[A-X]{2}$/.test(locator)) {
-                  sessionStorage.setItem('emeTempDX', locator);
-              } else {
-                  sessionStorage.removeItem('emeTempDX'); // clean up if invalid
-              }
-          });
         </script>
     </body>
 </html>
