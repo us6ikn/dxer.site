@@ -1160,39 +1160,41 @@
             return regex.test(locator);
           }
 
-            gridInput.addEventListener('input', () => {
-                const grid = gridInput.value;
-                if (!isValidGrid(grid)) {
-                    gridInput.style.borderColor = 'red';
-                    if (isRealTime) {
-                        stopTracking();
-                    }
-                    return;
-                }
-                gridInput.style.borderColor = '#fff';
-                localStorage.setItem('skyObserverGrid', grid);
-                const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
-                addTrajectories(dateVal);  // Always rebuild trajectories
-                if (isRealTime) {
-                    updateTracking();  // Then update real-time positions
-                }
-            });
+          gridInput.addEventListener('input', () => {
+            const grid = gridInput.value;
+            if (!isValidGrid(grid)) {
+              gridInput.style.borderColor = 'red';
+              if (isRealTime) {
+                stopTracking();
+              }
+              return;
+            }
+            gridInput.style.borderColor = '#fff';
+            localStorage.setItem('skyObserverGrid', grid);
+            if (isRealTime) {
+              updateTracking();
+            } else {
+              const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
+              addTrajectories(dateVal);
+            }
+          });
 
-            dxGridInput.addEventListener('input', () => {
-                const dxGrid = dxGridInput.value;
-                if (dxGrid && isValidGrid(dxGrid)) {
-                    dxGridInput.style.borderColor = '#fff';
-                } else if (dxGrid) {
-                    dxGridInput.style.borderColor = 'red';
-                } else {
-                    dxGridInput.style.borderColor = '#fff';
-                }
-                const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
-                addTrajectories(dateVal);  // Always rebuild trajectories
-                if (isRealTime) {
-                    updateTracking();  // Then update real-time positions
-                }
-            });
+          dxGridInput.addEventListener('input', () => {
+            const dxGrid = dxGridInput.value;
+            if (dxGrid && isValidGrid(dxGrid)) {
+              dxGridInput.style.borderColor = '#fff';
+            } else if (dxGrid) {
+              dxGridInput.style.borderColor = 'red';
+            } else {
+              dxGridInput.style.borderColor = '#fff';
+            }
+            if (isRealTime) {
+              updateTracking();
+            } else {
+              const dateVal = datePicker.value || new Date().toISOString().split('T')[0];
+              addTrajectories(dateVal);
+            }
+          });
 
           function maidenheadToLatLon(locator) {
             if (!locator || locator.length < 4) return null;
@@ -1306,6 +1308,7 @@
           }
 
           function addTrajectories(selectedDate) {
+            if (isRealTime) return;
             const grid = gridInput.value || 'JO89tt';
             const dxGrid = dxGridInput.value;
             const coords = maidenheadToLatLon(grid);
