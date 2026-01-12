@@ -781,7 +781,7 @@
 
   <script>
     // Load the shared header with cache-busting
-    fetch('header.html?v=1')  // ← bump this number (1 → 2 → 3 etc.)
+    fetch('header.html?v=2')  // ← bump this number (1 → 2 → 3 etc.)
       .then(response => {
         if (!response.ok) throw new Error('Header not found');
         return response.text();
