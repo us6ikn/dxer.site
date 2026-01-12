@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7YST3WTEH3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-7YST3WTEH3');
+    </script>
+    <meta charset="UTF-8" />
+    <title>EME Noise Mapper – User Guide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        
+        <meta name="description" content="Learn how to use the EME Noise Mapper tool to plan Moonbounce QSOs on all bands from 432MHz and above. This user guide covers features like moon tracking, Dpol, elevation charts, and station tables." />
+        <meta name="keywords" content="EME, Moonbounce, User Guide, Ham Radio, moon ephemeris, Polarization Offset, Signal Loss, Amateur Radio Tools" />
+        <meta name="author" content="SA5IKN" />
+        <meta name="robots" content="index, follow" />
+        
+        <!-- Open Graph -->
+        <meta property="og:title" content="EME Noise Mapper – User Guide" />
+        <meta property="og:type" content="article" />
+        <meta property="og:description" content="Step-by-step user guide for EME Noise Mapper. Learn to use the moon tracking map, signal loss charts, and DX tools for Moonbounce on all bands." />
+        <meta property="og:image" content="/social/eme-observer.jpg" />
+        <meta property="og:url" content="https://dxer.site/eme-observer/user-guide.html" />
+        
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="EME Noise Mapper – How to Use the Tool" />
+        <meta name="twitter:description" content="Tutorial and guide for using EME Noise Mapper for amateur radio Moonbounce planning." />
+        <meta name="twitter:image" content="/social/eme-observer.jpg" />
+        
+        <!-- Canonical URL -->
+        <link rel="canonical" href="https://dxer.site/eme-observer/user-guide.html" />
+        
+        <!-- Favicon & Icons -->
+        <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png" />
+        <link rel="manifest" href="/assets/site.webmanifest" />
+        <link rel="shortcut icon" href="/assets/favicon.ico" />
+        
+        <!-- Optional Structured Data -->
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "TechArticle",
+                "name": "EME Noise Mapper – User Guide",
+                "url": "https://dxer.site/eme-observer/user-guide.html",
+                "description": "Step-by-step instructions for using the EME Noise Mapper tool for planning Moonbounce QSOs. Learn about moon tracking, Dpol, signal loss, station maps and sked planning.",
+                "author": {
+                    "@type": "Person",
+                    "name": "SA5IKN"
+                },
+                "inLanguage": "en",
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "dxer.site"
+                }
+            }
+        </script>
+        
+        <style>
+            html, body {
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+            
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f9;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                flex-direction: column;
+                min-height: 100vh;
+                overflow-x: hidden;
+            }
+            
+            .top-bar {
+                width: 100%;
+                background-color: #ffffff;
+                padding: 20px 0;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            }
+            
+            .top-content {
+                max-width: 800px;
+                padding: 0 10px;
+                margin: 0 auto;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            
+            .app-meta {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                text-align: right;
+                margin-bottom: 15px;
+                line-height: 1.1;
+            }
+            
+            .creator-label {
+                font-size: 0.9rem;
+                color: #555;
+                font-style: italic;
+                margin-bottom: -4px;
+            }
+            
+            .app-name {
+                font-size: 1.8rem;
+                font-weight: 600;
+                color: #2c3e50;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: -2px;
+            }
+            
+            .button-container {
+                display: flex;
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-top: 10px;
+            }
+            
+            .button-container button {
+                background-color: #0056b3;
+                color: white;
+                border: none;
+                padding: 10px 24px;
+                font-size: 15px;
+                cursor: pointer;
+                border-radius: 6px;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                transition: background-color 0.3s ease;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            
+            .button-container button:hover {
+                background-color: #00408a;
+            }
+            
+            .container {
+                width: 100%;
+                max-width: 800px;
+                margin: 20px auto;
+                background-color: #fff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+            }
+            img {
+                display: block;
+                max-width: 100%;
+                height: auto;
+            }
+            
+            
+            h1, h2, h3 {
+                text-align: left;
+                color: #333;
+                margin-top: 30px;
+            }
+            
+            h1 {
+                text-align: center;
+            }
+            
+            nav ul {
+                list-style: none;
+                padding-left: 0;
+                line-height: 1.8;
+            }
+            
+            nav ul a {
+                text-decoration: none;
+                color: #0056b3;
+            }
+            
+            nav ul a:hover {
+                text-decoration: underline;
+            }
+            
+            section p {
+                color: #333;
+                line-height: 1.6;
+            }
+            
+            @media (max-width: 768px) {
+                .button-container button {
+                    width: 140px;
+                    font-size: 14px;
+                }
+                
+                .app-name {
+                    font-size: 1.3rem;
+                }
+                
+                .creator-label {
+                    font-size: 0.75rem;
+                }
+                
+                .app-meta {
+                    align-items: flex-end;
+                    text-align: right;
+                    margin-bottom: 12px;
+                }
+                
+                .container {
+                    width: 100%;
+                    padding: 10px;
+                }
+                
+                h1, h2, h3 {
+                    font-size: 1.2em;
+                }
+            }
+            
+            @media (max-width: 600px) {
+                .button-container {
+                    flex-wrap: nowrap;
+                    overflow-x: auto;
+                    gap: 8px;
+                    justify-content: flex-start;
+                }
+                
+                .button-container button {
+                    flex-shrink: 0;
+                    padding: 6px 12px;
+                    font-size: 12px;
+                    width: auto;
+                    white-space: nowrap;
+                }
+            }
+            
+            #backToTop {
+                position: fixed;
+                bottom: 30px;
+                right: 30px;
+                z-index: 100;
+                width: 48px;
+                height: 48px;
+                font-size: 20px;
+                line-height: 48px; /* vertically center the text */
+                text-align: center;
+                border: none;
+                outline: none;
+                background-color: #0056b3;
+                color: white;
+                cursor: pointer;
+                border-radius: 50%;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                display: none;
+                padding: 0; /* Remove padding to avoid distortion */
+                transition: background-color 0.3s ease;
+            }
+            
+            #backToTop:hover {
+                background-color: #00408a;
+            }
+            .button-container {
+                box-sizing: border-box;
+            }
+            *, *::before, *::after {
+                box-sizing: border-box;
+            }
+            
+        </style>
+        
+        <style>
+          #support {
+            background-color: #eaf0fb;
+            border-left: 4px solid #0056b3;
+            margin: 20px auto;
+          }
+
+          #support h2 {
+            color: #0056b3;
+            text-align: center;
+          }
+
+          #support ul {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #333;
+            margin-left: 20px;
+          }
+
+          #support ul li {
+            margin-bottom: 4px;
+          }
+
+          #support p {
+            color: #333;
+            line-height: 1.6;
+          }
+            .workflow {
+              display: flex;
+              flex-wrap: wrap;
+              justify-content: center;
+              align-items: stretch;
+              gap: 12px;
+              margin: 20px 0;
+            }
+
+            .step {
+              background: #fafafa;
+              border: 1px solid #d0d0d0;
+              padding: 12px 16px;
+              border-radius: 6px;
+              min-width: 180px;
+              text-align: center;
+              font-size: 0.95rem;
+            }
+
+            .step strong {
+              display: block;
+              margin-bottom: 4px;
+            }
+
+            .arrow {
+              display: flex;
+              align-items: center;
+              font-size: 20px;
+              color: #888;
+            }
+
+            @media (max-width: 700px) {
+              .workflow {
+                flex-direction: column;
+                align-items: center;
+              }
+              .arrow {
+                transform: rotate(90deg);
+              }
+            }
+        </style>
+
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="top-content">
+      <div class="app-meta">
+        <div class="creator-label">by SA5IKN</div>
+        <div class="app-name">EME Noise Mapper</div>
+      </div>
+      <div class="button-container">
+          <button onclick="location.href='index.html'">EME Noise Mapper</button>
+        <button onclick="location.href='/eme-observer/'">EME Observer</button>
+        <button onclick="window.location.href='/'" style="display:flex; align-items:center; justify-content:center; width:40px; padding:0;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 3l9 9h-3v9h-12v-9h-3l9-9z"/>
+            </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guide Content -->
+  <div class="container">
+    <h1>User Guide</h1>
+
+    <!-- Table of Contents -->
+    <nav>
+      <ul>
+        <li><a href="#about">About EME Noise Mapper</a></li>
+        <li><a href="#quickstart">Quick Start</a>
+          <ul style="padding-left: 1em;">
+              <li><a href="#workflow">Workflow Overview</a></li>
+            <li><a href="#initial-load">Initial Load</a></li>
+            <li><a href="#operation">Operation</a></li>
+            <li><a href="#autotracking">Realtime Tracking Mode</a></li>
+            <li><a href="#integration-eme-observer">Use with EME Observer</a></li>
+          </ul>
+        </li>
+        <li><a href="#mobile-experience">Mobile experience</a></li>
+        <li><a href="#support">Support EME Noise Mapper</a></li>
+      </ul>
+    </nav>
+
+    <!-- Sections -->
+    <div itemprop="articleBody">
+        <section id="about">
+            <h2>About EME Noise Mapper</h2>
+
+            <p>
+            Most EME stations operate with some degree of obstruction around their antennas during at least part of each Moon pass. Only a few are fortunate enough to have a completely clear horizon from moonrise to moonset. For the rest, nearby houses, trees, fences, or other antennas limit usable Moon paths. Some more adventurous EME stations operate from constrained locations such as balconies, patios, driveways, or other small urban spaces. Under these conditions, knowing when the Moon is accessible and when the noise floor is lowest becomes critical to making successful contacts and operating efficiently.
+            </p>
+
+            <p>
+            <strong>EME Noise Mapper</strong> is a web application for visualising the radio noise environment around an EME antenna site in three dimensions and helping identify periods when obstructions are minimal. It supports both manual planning and real-time operation. EME Noise Mapper overlays the trajectories of the Moon and Sun onto the sky noise map and provides integrated visual guides to help identify common Moon windows with minimal noise contribution from the antenna’s surroundings.
+            </p>
+
+
+            <p>
+            EME Noise Mapper works equally well on desktop computers, tablets, and mobile devices, making it convenient for both detailed station planning and quick checks while on the move.
+            </p>
+
+            <p>
+            Note that EME Noise Mapper does NOT perform noise scans or control EME antennas. It uses sky noise maps generated by other software and imported in CSV format. The application automatically preserves user data between sessions (stored locally), so there is no need to load a new file each time the app is accessed.
+            </p>
+
+
+
+          <figure style="margin-top: 10px; text-align: center;">
+            <a href="images/eme-noise-mapper-001.jpg" target="_blank" rel="noopener">
+              <img
+                src="images/eme-noise-mapper-001.jpg"
+                alt="EME Noise Mapper main interface"
+                loading="lazy"
+                width="800"
+                height="450"
+                style="max-width: 100%; height: auto; border-radius: 8px;"
+              />
+            </a>
+            <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+              EME Noise Mapper – Main Interface
+            </figcaption>
+          </figure>
+
+          <h3>Prerequisites and Requirements</h3>
+
+          <p>
+          <strong style="color: red;">Important:</strong> EME Noise Mapper does not perform noise scans. It requires a CSV file containing a sky noise map generated by external software of your choice. One example of such software is
+          <a href="http://moonbounce.dk/hamradio/skyscanner" target="_blank" rel="noopener">
+          SkyScanner by OZ9AAR</a>.
+          </p>
+
+          <p>
+          The CSV file may use either comma (<code>,</code>) or semicolon (<code>;</code>) as the field separator. The file must contain at least the following columns:
+          </p>
+
+          <ul>
+            <li><strong>Azimuth</strong></li>
+            <li><strong>Elevation</strong></li>
+            <li><strong>Noise</strong></li>
+          </ul>
+
+          <p>
+          Additional columns may be present in the file but are ignored by the application.
+          </p>
+
+
+          <h3>Key Features</h3>
+          <ul>
+            <li>
+              <strong>Interactive 3D noise map:</strong> Visualises the sky noise environment as seen from the EME antenna using a 3D dome representation. Users can zoom, pan, rotate, and switch between an external view and an antenna-centred view from inside the dome.
+            </li>
+            <li>
+              <strong>Moon and Sun trajectories:</strong> Displays the three-dimensional paths of the Moon and Sun (if enabled) across the sky noise map.
+            </li>
+            <li>
+              <strong>EME planning tools:</strong> Enter the QTH locator of a DX station to highlight sections of the trajectory that correspond to common Moon windows using distinct colours.
+            </li>
+            <li>
+              <strong>Real-time tracking mode:</strong> Continuously updates the positions of the Moon and Sun on the noise map.
+            </li>
+            <li>
+              <strong>Moon, Sun, and noise data:</strong> Displays key parameters including Moon azimuth and elevation at both the local and DX station, as well as the interpolated background noise level.
+            </li>
+          </ul>
+        </section>
+
+    <section id="quickstart">
+      <h2>Quick Start</h2>
+      
+      <h3 id="workflow">Workflow Overview</h3>
+      <p>
+      To get started follow these steps:
+      </p>
+      <div class="workflow">
+        <div class="step">
+          <strong>1. Perform Sky Noise Scan</strong>
+          Use external software (e.g.
+          <a href="http://moonbounce.dk/hamradio/skyscanner" target="_blank" rel="noopener">
+            SkyScanner
+          </a>)
+
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="step">
+          <strong>2. Export CSV File</strong>
+          Save the sky noise map as CSV
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="step">
+          <strong>3. Import into EME Noise Mapper</strong>
+          Load the CSV file into the application
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="step">
+          <strong>4. Enter Your QTH Locator</strong>
+          Set your station location
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="step">
+          <strong>5. Plan and Monitor Operation</strong>
+          Enter DX locator, adjust date/time, or enable real-time tracking
+        </div>
+      </div>
+      
+      <h3 id="initial-load">Initial Load</h3>
+
+      <figure style="margin-top: 10px; text-align: center;">
+        <a href="images/initial-load.jpg" target="_blank" rel="noopener">
+          <img
+            src="images/initial-load.jpg"
+            alt="EME Noise Mapper – Initial load screen"
+            loading="lazy"
+            width="800"
+            height="450"
+            style="max-width: 100%; height: auto; border-radius: 8px;"
+          />
+        </a>
+        <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+          EME Noise Mapper – Initial load screen
+        </figcaption>
+      </figure>
+
+      <p>
+      Upon initial load, EME Noise Mapper displays a simulated noise dome for demonstration purposes only. A red message is shown stating:
+      <em>"This is a DEMO! Load your CSV file and enter your locator."</em>
+      The displayed map does not represent real noise data.
+      </p>
+
+      <p>
+      To begin using the application, enter your 6-character QTH locator and import your sky noise map by clicking <strong>Choose File</strong> and selecting your CSV file. If a locator has been entered but no noise map has yet been loaded, the message changes to:
+      <em>"This is a DEMO! Load your CSV file." When the CSV file has been sucessfully loaded you will see a message "CSV Loaded".</em>
+      </p>
+
+      
+      <h3 id="operation">Operation</h3>
+      
+      <figure style="margin-top: 10px; text-align: center;">
+        <div style="
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 16px;
+        ">
+          <!-- Subfigure 1 -->
+          <div style="flex: 1 1 250px; max-width: 350px;">
+            <a href="images/eme-noise-mapper-001.jpg" target="_blank" rel="noopener">
+              <img
+                src="images/eme-noise-mapper-001.jpg"
+                alt="oise map with moon and sun trajectories and common moon window shown as green part of the trajectory"
+                loading="lazy"
+                width="350"
+                height="200"
+                style="max-width: 100%; height: auto; border-radius: 8px;"
+              />
+            </a>
+            <figcaption style="margin-top: 4px; font-size: 0.9em; color: #555;">
+              Noise map with moon and sun trajectories and common moon window shown as green part of the trajectory
+            </figcaption>
+          </div>
+
+          <!-- Subfigure 2 -->
+          <div style="flex: 1 1 250px; max-width: 350px;">
+            <a href="images/partial-scan.jpg" target="_blank" rel="noopener">
+              <img
+                src="images/partial-scan.jpg"
+                alt="Noise map of a sector of interest with the portion of the moon trajectory denoting common moon window in green"
+                loading="lazy"
+                width="350"
+                height="200"
+                style="max-width: 100%; height: auto; border-radius: 8px;"
+              />
+            </a>
+            <figcaption style="margin-top: 4px; font-size: 0.9em; color: #555;">
+              Noise map of a sector of interest with the portion of the moon trajectory denoting common moon window in green
+            </figcaption>
+          </div>
+
+          <!-- Subfigure 3 -->
+          <div style="flex: 1 1 250px; max-width: 350px;">
+            <a href="images/antenna-centered-view.jpg" target="_blank" rel="noopener">
+              <img
+                src="images/antenna-centered-view.jpg"
+                alt="Antenna-centered (inside the dome) view of a noise map of a sector of interest"
+                loading="lazy"
+                width="350"
+                height="200"
+                style="max-width: 100%; height: auto; border-radius: 8px;"
+              />
+            </a>
+            <figcaption style="margin-top: 4px; font-size: 0.9em; color: #555;">
+              Antenna-centered (inside the dome) view of a noise map of a sector of interest
+            </figcaption>
+          </div>
+          
+        </div>
+      </figure>
+
+      <p>
+      Once both a valid <strong>My Locator</strong> and <strong>DX Locator</strong> have been entered, EME Noise Mapper displays the Moon trajectory and the current Moon position for the selected date. The segment of the trajectory corresponding to the common Moon window between the two stations is highlighted in green.
+      </p>
+
+      <h4>Date and Time Control</h4>
+      <p>
+      Use the date picker or the navigation arrows to change the selected day. The time slider at the bottom of the screen allows you to adjust the time of day and observe how the Moon position and noise level change accordingly.
+      </p>
+
+      <h4>Moon and Sun Display</h4>
+      <p>
+      If the <strong>Show Sun</strong> option is enabled, the Sun trajectory and current Sun position are displayed alongside the Moon. This helps identify periods when solar noise may affect operation.
+      </p>
+
+      <h4>Noise Level Visualisation</h4>
+      <p>
+      A colour scale legend for noise levels is displayed in the bottom-right corner of the screen. An indicator arrow shows the current interpolated background noise level at the Moon’s position.
+      </p>
+
+      <h4>Real-Time Information Panel</h4>
+      <p>
+      The information panel in the top-right corner displays key operational parameters, including:
+      </p>
+      <ul>
+        <li>Moon azimuth and elevation at your station</li>
+        <li>Moon azimuth and elevation at the DX station</li>
+        <li>Sun azimuth and elevation at your station (when enabled)</li>
+        <li>Interpolated noise level at the Moon’s position</li>
+      </ul>
+
+      
+      
+
+      <h3 id="autotracking">Realtime Tracking Mode</h3>
+
+      <figure style="margin-top: 10px; text-align: center;">
+        <a href="images/realtime-tracking.jpg" target="_blank" rel="noopener">
+          <img
+            src="images/realtime-tracking.jpg"
+            alt="Realtime Tracking Mode in EME Noise Mapper"
+            loading="lazy"
+            width="800"
+            height="450"
+            style="max-width: 100%; height: auto; border-radius: 8px;"
+          />
+        </a>
+        <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+            Realtime Tracking Mode in EME Noise Mapper
+        </figcaption>
+      </figure>
+
+      <p>
+      EME Noise Mapper includes a real-time tracking mode. Click the <strong>Track</strong> button to enable continuous updates of the Moon’s position and all associated metrics, including the interpolated noise level.
+      </p>
+
+      <p>
+      The <strong>Track</strong> button is only available when at least one tracked object is above the horizon. If the Moon is below the horizon, the button will be disabled. However, if the <strong>Show Sun</strong> option is enabled and the Sun is above the horizon, real-time tracking can still be activated even when the Moon is below the horizon.
+      </p>
+
+
+      <h3 id="integration-eme-observer">Use with EME Observer</h3>
+
+      <figure style="margin-top: 10px; text-align: center;">
+        <a href="images/eme-noise-mapper_alongside_eme-observer.jpg" target="_blank" rel="noopener">
+          <img
+            src="images/eme-noise-mapper_alongside_eme-observer.jpg"
+            alt="EME Noise Mapper alongside EME Observer"
+            loading="lazy"
+            width="800"
+            height="450"
+            style="max-width: 100%; height: auto; border-radius: 8px;"
+          />
+        </a>
+        <figcaption style="margin-top: 6px; font-size: 0.95em; color: #555;">
+          EME Noise Mapper alongside EME Observer
+        </figcaption>
+      </figure>
+
+      <p>
+      EME Noise Mapper is especially convenient to use alongside
+      <a href="https://dxer.site/eme-observer/" target="_blank" rel="noopener"><strong>EME Observer</strong></a>,
+      a modern interactive EME planner and station map. Used together, the two tools complement each other by combining EME conditions analysis and scheduling insight from EME Observer with site-specific noise and obstruction analysis from EME Noise Mapper. Modern browsers support split-screen or side-by-side viewing, making it easy to use both web applications simultaneously.
+      </p>
+
+    </section>
+    
+    <section id="mobile-experience">
+        <h2>Mobile experience</h2>
+        <p>
+          <strong>EME Noise Mapper</strong> features a responsive design optimized for mobile devices, presenting all essential data in a compact, touch-friendly layout. The screenshots below show the interface as displayed on an iPhone Pro.
+        </p>
+
+    <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 30px;">
+        
+      <figure style="flex: 1; min-width: 100px; max-width: 23%; text-align: center;">
+        <a href="images/mobile-001.jpg" target="_blank" rel="noopener">
+          <img src="images/mobile-001.jpg" alt="Map view on mobile" style="width: 100%; height: auto; border-radius: 8px;" loading="lazy" />
+        </a>
+        <figcaption style="font-size: 0.85em; color: #555; margin-top: 6px;"></figcaption>
+      </figure>
+      
+      <figure style="flex: 1; min-width: 100px; max-width: 23%; text-align: center;">
+        <a href="images/mobile-002.jpg" target="_blank" rel="noopener">
+          <img src="images/mobile-002.jpg" alt="Moon data mobile view" style="width: 100%; height: auto; border-radius: 8px;" loading="lazy" />
+        </a>
+        <figcaption style="font-size: 0.85em; color: #555; margin-top: 6px;"></figcaption>
+      </figure>
+      
+      <figure style="flex: 1; min-width: 100px; max-width: 23%; text-align: center;">
+        <a href="images/mobile-003.jpg" target="_blank" rel="noopener">
+          <img src="images/mobile-003.jpg" alt="Sked chart on mobile" style="width: 100%; height: auto; border-radius: 8px;" loading="lazy" />
+        </a>
+        <figcaption style="font-size: 0.85em; color: #555; margin-top: 6px;"></figcaption>
+      </figure>
+
+      <figure style="flex: 1; min-width: 100px; max-width: 23%; text-align: center;">
+        <a href="images/mobile-004.jpg" target="_blank" rel="noopener">
+          <img src="images/mobile-004.jpg" alt="Moon Footprint and QTH Locators" style="width: 100%; height: auto; border-radius: 8px;" loading="lazy" />
+        </a>
+        <figcaption style="font-size: 0.85em; color: #555; margin-top: 6px;"></figcaption>
+      </figure>
+      
+    </div>
+
+  </section>
+    
+    <h3>Privacy and Data Storage</h3>
+
+    <p>
+    EME Noise Mapper respects your privacy and does not collect, transmit, or store any personal data on external servers.
+    </p>
+
+    <p>
+    The application uses your browser’s <strong>local storage</strong> solely to support essential functionality. Specifically, it stores:
+    </p>
+
+    <ul>
+      <li>Your entered <strong>station locator (My Locator)</strong></li>
+      <li>The most recently loaded <strong>sky noise map (CSV file)</strong></li>
+    </ul>
+
+    <p>
+    This data is stored <strong>only on your own device</strong> and is used to make it easier to resume work when you reopen the application. Without a loaded noise map, the application cannot function, which makes this storage necessary for normal operation.
+    </p>
+
+    <p>
+    EME Noise Mapper does <strong>not</strong> use cookies, does <strong>not</strong> perform any tracking, and does <strong>not</strong> transmit any data off your device. All processing happens locally in your browser.
+    </p>
+
+    
+    <section id="support">
+      <div class="container">
+        <h2>Support EME Noise Mapper</h2>
+        <p>
+          If you enjoy using EME Noise Mapper and want to help cover website costs, you can contribute in one of these ways:
+        </p>
+        <ul>
+          <li>
+            <strong>PayPal (Friends & Family):</strong> Send your contribution directly to SA5IKN's email:
+            <a href="https://qrz.com/db/sa5ikn">shown on QRZ.com</a>.
+            Using Friends & Family avoids fees, so your full support goes to the project.
+          </li>
+          <li>
+            <strong>Ko-fi:</strong> Support via Ko-fi quickly and easily:
+            <div id="kofi-widget">
+              <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+              <script type='text/javascript'>
+                kofiwidget2.init('Support me on Ko-fi', '#72a4f2', 'F2F8K2YK7');
+                kofiwidget2.draw();
+              </script>
+            </div>
+          </li>
+        </ul>
+
+        <p>Every contribution, big or small, helps keep EME Observer online and available for the community. Thank you for your support!</p>
+      </div>
+    </section>
+    
+    <section id="licenses">
+      <h2>Licenses and Credits</h2>
+      <p>
+        <strong>EME Noise Mapper</strong><br>
+        © 2025-2026 Max Romensky (SA5IKN). All rights reserved.<br>
+      </p>
+
+      <p>This application incorporates the following third-party components:</p>
+
+      <ul>
+          <li>
+            NASA JPL DE421 Ephemeris - Public domain data provided by NASA’s Jet Propulsion Laboratory.
+          </li>
+          <li>
+            Skyfield © 2014-2025 Brandon Rhodes and contributors - Licensed under the
+            <a href="MIT-license.txt" target="_blank" rel="noopener">MIT License</a>.
+          </li>
+        <li>
+          Astronomy Engine © 2019-2025 Don Cross - Licensed under the
+          <a href="MIT-license.txt" target="_blank" rel="noopener">MIT License</a>.
+        </li>
+      </ul>
+      </p>
+    </section>
+
+
+    
+  </div>
+  </div>
+  <button id="backToTop" title="Back to top">↑</button>
+  <script>
+    const btn = document.getElementById("backToTop");
+
+    // Show button when scrolling down
+    window.onscroll = function () {
+      if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
+        btn.style.display = "block";
+      } else {
+        btn.style.display = "none";
+      }
+    };
+
+    // Scroll to top when clicked
+    btn.onclick = function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+  </script>
+  <!-- Ko-Fi -->
+  <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+  <script src="kofi.js"></script>
+</body>
+</html>
