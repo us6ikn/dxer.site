@@ -42,8 +42,6 @@
         darkMode: 'media',
       }
     </script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
     <script type="text/javascript" src="https://platform-api.sharethis.com/js/sharethis.js" defer></script>
 
     <style>
@@ -99,23 +97,23 @@
           <div class="flex items-center gap-3">
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Filter posts:</span>
             <div class="flex flex-wrap gap-2">
-              <button @click="filterPosts('ALL')" role="button" tabindex="0"
+              <button onclick="filterPosts('ALL')" role="button" tabindex="0"
                 class="text-xs sm:text-sm px-3 py-1.5 bg-blue-100 dark:bg-blue-900/40 hover:bg-blue-200 dark:hover:bg-blue-800 focus:bg-blue-300 dark:focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full transition-all">
                 ALL
               </button>
-              <button @click="filterPosts('LEO')" role="button" tabindex="0"
+              <button onclick="filterPosts('LEO')" role="button" tabindex="0"
                 class="text-xs sm:text-sm px-3 py-1.5 bg-blue-100 dark:bg-blue-900/40 hover:bg-blue-200 dark:hover:bg-blue-800 focus:bg-blue-300 dark:focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full transition-all">
                 LEO SATS
               </button>
-              <button @click="filterPosts('GREENCUBE')" role="button" tabindex="0"
+              <button onclick="filterPosts('GREENCUBE')" role="button" tabindex="0"
                 class="text-xs sm:text-sm px-3 py-1.5 bg-blue-100 dark:bg-blue-900/40 hover:bg-blue-200 dark:hover:bg-blue-800 focus:bg-blue-300 dark:focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full transition-all">
                 GREENCUBE
               </button>
-              <button @click="filterPosts('QO100')" role="button" tabindex="0"
+              <button onclick="filterPosts('QO100')" role="button" tabindex="0"
                 class="text-xs sm:text-sm px-3 py-1.5 bg-blue-100 dark:bg-blue-900/40 hover:bg-blue-200 dark:hover:bg-blue-800 focus:bg-blue-300 dark:focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full transition-all">
                 QO-100
               </button>
-              <button @click="filterPosts('EME')" role="button" tabindex="0"
+              <button onclick="filterPosts('EME')" role="button" tabindex="0"
                 class="text-xs sm:text-sm px-3 py-1.5 bg-blue-100 dark:bg-blue-900/40 hover:bg-blue-200 dark:hover:bg-blue-800 focus:bg-blue-300 dark:focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full transition-all">
                 EME
               </button>
