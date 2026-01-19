@@ -197,9 +197,17 @@
       © All rights reserved. SA5IKN M0SKN US6IKN EI6KC, <span id="copyright-year"></span>
     </footer>
 
-    <!-- Scroll to Top -->
+    <!-- Scroll to Top Button -->
     <button id="scrollTopBtn" title="Go to top"
-      class="hidden fixed bottom-8 right-8 z-50 bg-blue-600 text-white rounded-full p-4 shadow-lg hover:bg-blue-700 transition duration-300">
+      class="fixed bottom-6 right-6 z-50
+             bg-gray-800/60 dark:bg-gray-200/60
+             text-white dark:text-black
+             rounded-full p-2.5
+             backdrop-blur
+             shadow-sm
+             hover:bg-gray-800/80 dark:hover:bg-gray-200/80
+             transition-all duration-300
+             opacity-0 pointer-events-none">
       ↑
     </button>
 
@@ -225,12 +233,20 @@
         document.getElementById('copyright-year').textContent = new Date().getFullYear();
       });
 
-      // Scroll to top
-      const scrollTopBtn = document.getElementById("scrollTopBtn");
-      window.onscroll = () => {
-        scrollTopBtn.classList.toggle("hidden", document.documentElement.scrollTop <= 300);
-      };
-      scrollTopBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Scroll to top
+        const scrollTopBtn = document.getElementById("scrollTopBtn");
+
+        window.addEventListener("scroll", () => {
+          if (window.scrollY > 300) {
+            scrollTopBtn.classList.remove("opacity-0", "pointer-events-none");
+          } else {
+            scrollTopBtn.classList.add("opacity-0", "pointer-events-none");
+          }
+        });
+
+        scrollTopBtn.addEventListener("click", () => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
     </script>
 </body>
 </html>
