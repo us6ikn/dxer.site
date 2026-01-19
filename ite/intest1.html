@@ -194,14 +194,15 @@
 
     <!-- Scroll to Top Button -->
     <button id="scrollTopBtn" title="Go to top"
-      class="hidden fixed bottom-6 right-6 z-50
+      class="fixed bottom-6 right-6 z-50
              bg-gray-800/60 dark:bg-gray-200/60
              text-white dark:text-black
              rounded-full p-2.5
              backdrop-blur
              shadow-sm
              hover:bg-gray-800/80 dark:hover:bg-gray-200/80
-             transition-all duration-300 opacity-0">
+             transition-all duration-300
+             opacity-0 pointer-events-none">
       ↑
     </button>
 
@@ -318,19 +319,19 @@
 
       // Scroll to top
       const scrollTopBtn = document.getElementById("scrollTopBtn");
-      window.onscroll = function() {
-        if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
-          scrollTopBtn.classList.remove("hidden");
-          scrollTopBtn.classList.remove("opacity-0");
+
+      window.addEventListener("scroll", () => {
+        if (window.scrollY > 400) {
+          scrollTopBtn.classList.remove("opacity-0", "pointer-events-none");
         } else {
-          scrollTopBtn.classList.add("opacity-0");
-          setTimeout(() => scrollTopBtn.classList.add("hidden"), 200);
+          scrollTopBtn.classList.add("opacity-0", "pointer-events-none");
         }
-      };
+      });
 
       scrollTopBtn.addEventListener("click", () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: "smooth" });
       });
+
     </script>
 </body>
 </html>
