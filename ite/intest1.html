@@ -124,23 +124,24 @@
 
             <!-- Grid/List buttons -->
             <div class="flex gap-2 self-end sm:self-center">
-              <button
-                @click="view = 'grid'"
-                :class="view === 'grid' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'"
-                class="px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm rounded-lg font-medium transition-all duration-200"
-                style="touch-action: manipulation;"
-                aria-label="Grid view">
-                Grid
-              </button>
+                <button
+                  @click="view = 'grid'"
+                  @touchend.prevent="view = 'grid'"
+                  :class="view === 'grid' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'"
+                  class="px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm rounded-lg font-medium transition-all duration-200"
+                  aria-label="Grid view">
+                  Grid
+                </button>
 
-              <button
-                @click="view = 'list'"
-                :class="view === 'list' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'"
-                class="px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm rounded-lg font-medium transition-all duration-200"
-                style="touch-action: manipulation;"
-                aria-label="List view">
-                List
-              </button>
+                <button
+                  @click="view = 'list'"
+                  @touchend.prevent="view = 'list'"
+                  :class="view === 'list' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'"
+                  class="px-2 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm rounded-lg font-medium transition-all duration-200"
+                  aria-label="List view">
+                  List
+                </button>
+
             </div>
           </div>
 
