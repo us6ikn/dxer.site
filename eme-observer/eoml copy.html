@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-7YST3WTEH3"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-7YST3WTEH3');
+        </script>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
             <title id="pageTitle">EME Observer - EME Station Map & EME QSO Planner</title>
@@ -1776,7 +1783,6 @@
                     annotations[`sunSep${sunSepInterval.start}`] = {
                         type: 'box',
                         xScaleID: 'x',
-                        yScaleID: 'y2',
                         xMin: sunSepInterval.start / 24, // Map to daily scale
                         xMax: (sunSepInterval.end + 1) / 24,
                         yMin: -30, // Span full declination range
@@ -1816,7 +1822,6 @@
                 annotations[`sunSep${sunSepInterval.start}`] = {
                     type: 'box',
                     xScaleID: 'x',
-                    yScaleID: 'y2',
                     xMin: sunSepInterval.start / 24,
                     xMax: (sunSepInterval.end + 1) / 24,
                     yMin: -30,
@@ -2259,9 +2264,12 @@
               });
             } else {
               chart.data.labels = labels;
-              chart.data.datasets[0].data = qthRates;
-              chart.data.datasets[1].data = qthElevs;
-              chart.data.datasets[2].data = qthDopps;
+
+              chart.data.datasets[0].data = qthRates;                    // libration
+              chart.data.datasets[1].data = qthElevs;                    // elevation
+              chart.data.datasets[2].data = qthDayData.azimuths || Array(288).fill(null);
+              chart.data.datasets[3].data = qthDopps;
+
               chart.options.plugins.annotation.annotations = qthAnnotation;
               chart.options.plugins.annotation.annotations.timeMarker.value = index;
               chart.options.scales.y3.max = maxDoppler;
@@ -2446,9 +2454,12 @@
               });
             } else {
               dxChart.data.labels = labels;
-              dxChart.data.datasets[0].data = dxRates;
-              dxChart.data.datasets[1].data = dxElevs;
-              dxChart.data.datasets[2].data = dxDopps;
+
+              dxChart.data.datasets[0].data = dxRates;                    // libration
+              dxChart.data.datasets[1].data = dxElevs;                    // elevation
+              dxChart.data.datasets[2].data = dxDayData.azimuths || Array(288).fill(null);  // hidden azimuth
+              dxChart.data.datasets[3].data = dxDopps;                    // DOPPLER – correct index 3
+
               dxChart.options.plugins.annotation.annotations = dxAnnotation;
               dxChart.options.plugins.annotation.annotations.timeMarker.value = index;
               dxChart.options.scales.y3.max = maxDoppler;
