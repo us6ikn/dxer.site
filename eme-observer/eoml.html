@@ -3565,15 +3565,9 @@
                                                         });
                                                 });
             
-                                                document.addEventListener('visibilitychange', () => {
-                                                    if (document.visibilityState === 'hidden') {
-                                                        stopRealTimeUpdates();
-                                                    }
-                                                });
-
-                                                window.addEventListener('pagehide', () => {
-                                                    stopRealTimeUpdates();
-                                                });
+        window.addEventListener('unload', () => {
+          stopRealTimeUpdates();
+        });
 
         const qthInputElem = document.getElementById("qth");
         const dxInputElem = document.getElementById("dx");
