@@ -1799,6 +1799,7 @@
                     annotations[`sgrASep${sgrASepInterval.start}`] = {
                         type: 'box',
                         xScaleID: 'x',
+                        yScaleID: 'y2',
                         xMin: sgrASepInterval.start / 24, // Map to daily scale
                         xMax: (sgrASepInterval.end + 1) / 24,
                         yMin: -30, // Span full declination range
@@ -1831,6 +1832,7 @@
                 annotations[`sgrASep${sgrASepInterval.start}`] = {
                     type: 'box',
                     xScaleID: 'x',
+                    yScaleID: 'y2',
                     xMin: sgrASepInterval.start / 24,
                     xMax: (sgrASepInterval.end + 1) / 24,
                     yMin: -30,
