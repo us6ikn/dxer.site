@@ -2454,9 +2454,12 @@
               });
             } else {
               dxChart.data.labels = labels;
-              dxChart.data.datasets[0].data = dxRates;
-              dxChart.data.datasets[1].data = dxElevs;
-              dxChart.data.datasets[2].data = dxDopps;
+
+              dxChart.data.datasets[0].data = dxRates;                    // libration
+              dxChart.data.datasets[1].data = dxElevs;                    // elevation
+              dxChart.data.datasets[2].data = dxDayData.azimuths || Array(288).fill(null);  // hidden azimuth
+              dxChart.data.datasets[3].data = dxDopps;                    // DOPPLER – correct index 3
+
               dxChart.options.plugins.annotation.annotations = dxAnnotation;
               dxChart.options.plugins.annotation.annotations.timeMarker.value = index;
               dxChart.options.scales.y3.max = maxDoppler;
