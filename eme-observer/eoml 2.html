@@ -2264,9 +2264,12 @@
               });
             } else {
               chart.data.labels = labels;
-              chart.data.datasets[0].data = qthRates;
-              chart.data.datasets[1].data = qthElevs;
-              chart.data.datasets[2].data = qthDopps;
+
+              chart.data.datasets[0].data = qthRates;                    // libration
+              chart.data.datasets[1].data = qthElevs;                    // elevation
+              chart.data.datasets[2].data = qthDayData.azimuths || Array(288).fill(null);
+              chart.data.datasets[3].data = qthDopps;
+
               chart.options.plugins.annotation.annotations = qthAnnotation;
               chart.options.plugins.annotation.annotations.timeMarker.value = index;
               chart.options.scales.y3.max = maxDoppler;
