@@ -255,17 +255,58 @@
     <!-- Scripts -->
     <script>
       // Header loading
-      fetch('/header.html?v=2')
+      fetch('/header.html?v=2')  // ← bump this number (1 → 2 → 3 etc.)
         .then(response => {
           if (!response.ok) throw new Error('Header not found');
           return response.text();
         })
         .then(data => {
           document.getElementById('shared-header').innerHTML = data;
+
+          // Re-attach mobile menu toggle
+          const menuToggle = document.getElementById('menu-toggle');
+          const mobileMenu = document.getElementById('mobile-menu');
+          if (menuToggle && mobileMenu) {
+            menuToggle.addEventListener('click', () => {
+              mobileMenu.classList.toggle('hidden');
+            });
+          }
+
+          // Re-attach mobile Tools submenu toggle
+          const mobileToolsBtn = document.getElementById('mobile-tools-btn');
+          const mobileSubmenu = document.getElementById('mobile-tools-submenu');
+          const arrow = document.getElementById('submenu-arrow');
+          if (mobileToolsBtn && mobileSubmenu && arrow) {
+            mobileToolsBtn.addEventListener('click', () => {
+              mobileSubmenu.classList.toggle('hidden');
+              arrow.classList.toggle('rotate-180');
+            });
+          }
+
+          // Prevent right-click on profile image
+          const profileImage = document.querySelector('.profile-image');
+          if (profileImage) {
+            profileImage.addEventListener('contextmenu', e => e.preventDefault());
+          }
+
+          // === ACTIVE PAGE HIGHLIGHTING ===
+          const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+          if (currentPath === '') {
+            // Handle root URL
+            currentPath = 'index.html';
+          }
+
+          document.querySelectorAll('#shared-header a[href]').forEach(link => {
+            const href = link.getAttribute('href');
+            // Match exact filename or full URL if it's external (we only highlight internal pages)
+            if (href && (href === currentPath || href.endsWith('/' + currentPath))) {
+              link.classList.add('text-blue-600', 'font-bold');
+            }
+          });
         })
         .catch(err => {
           console.error('Failed to load header:', err);
-          document.getElementById('shared-header').innerHTML = '<p class="text-red-600 p-4">Menu failed to load.</p>';
+          document.getElementById('shared-header').innerHTML = '<p style="color:red;padding:1rem;">Menu failed to load.</p>';
         });
 
       // Copyright year
