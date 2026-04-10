@@ -41,14 +41,14 @@
       @media screen and (prefers-reduced-data: reduce), print {
         .header-content { display: none !important; }
       }
-      .news-preview-item {
-        transition: background-color 0.2s ease;
+      .news-list-item {
+        transition: color 0.2s ease;
       }
-      .news-preview-item:hover {
-        background-color: #f8fafc;
+      .news-list-item:hover {
+        color: #2563eb;
       }
-      .dark .news-preview-item:hover {
-        background-color: #1f2937;
+      .dark .news-list-item:hover {
+        color: #60a5fa;
       }
     </style>
 </head>
@@ -59,7 +59,7 @@
       <div id="shared-header"></div>
     </header>
 
-    <!-- Latest News - Very Compact Linear Preview -->
+    <!-- Latest News - Simple List Style (very compact) -->
     <section id="latest-news" class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 py-5 px-4 mx-auto max-w-7xl">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-base font-bold text-gray-800 dark:text-gray-200">Latest News</h2>
@@ -68,8 +68,8 @@
         </a>
       </div>
 
-      <div id="news-preview" class="space-y-2">
-        <!-- Populated by JavaScript -->
+      <div id="news-preview" class="space-y-3 text-sm">
+        <!-- Populated by JavaScript as a clean list -->
       </div>
     </section>
 
@@ -119,7 +119,7 @@
             </a>
           </article>
 
-          <!-- Add your remaining post cards here -->
+          <!-- Add your other post cards here -->
 
         </div>
       </div>
@@ -136,7 +136,7 @@
     </button>
 
     <script>
-      // ==================== VERY COMPACT NEWS PREVIEW ====================
+      // ==================== SIMPLE LIST NEWS PREVIEW ====================
       fetch('news.html')
         .then(response => response.text())
         .then(html => {
@@ -153,18 +153,18 @@
             const headline = titleEl ? titleEl.textContent.replace(dateSpan ? dateSpan.textContent : '', '').trim() : 'News';
 
             const div = document.createElement('div');
-            div.className = "news-preview-item flex gap-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3 cursor-pointer";
+            div.className = "news-list-item flex gap-3 cursor-pointer py-1";
 
             div.innerHTML = `
-              <div class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap flex-shrink-0 pt-px">
+              <div class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap flex-shrink-0 pt-0.5">
                 ${dateSpan ? dateSpan.textContent.trim() : ''}
               </div>
-              <div class="flex-1 text-sm leading-tight text-gray-800 dark:text-gray-200 line-clamp-2">
+              <div class="flex-1 leading-snug text-gray-800 dark:text-gray-200">
                 ${headline}
               </div>
             `;
 
-            // Make the whole block clickable → goes to news.html
+            // Click anywhere on the row → go to news page
             div.addEventListener('click', () => {
               window.location.href = 'news.html';
             });
@@ -193,9 +193,7 @@
           const mobileMenu = document.getElementById('mobile-menu');
 
           if (menuToggle && mobileMenu) {
-            menuToggle.addEventListener('click', () => {
-              mobileMenu.classList.toggle('hidden');
-            });
+            menuToggle.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
           }
 
           const mobileToolsBtn = document.getElementById('mobile-tools-btn');
