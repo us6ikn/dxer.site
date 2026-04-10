@@ -41,13 +41,13 @@
       @media screen and (prefers-reduced-data: reduce), print {
         .header-content { display: none !important; }
       }
-      .news-item-compact {
-        transition: all 0.2s ease;
+      .news-preview-item {
+        transition: background-color 0.2s ease;
       }
-      .news-item-compact:hover {
+      .news-preview-item:hover {
         background-color: #f8fafc;
       }
-      .dark .news-item-compact:hover {
+      .dark .news-preview-item:hover {
         background-color: #1f2937;
       }
     </style>
@@ -59,17 +59,17 @@
       <div id="shared-header"></div>
     </header>
 
-    <!-- Latest News - Compact Linear Preview -->
-    <section id="latest-news" class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 py-6 px-4 mx-auto max-w-7xl">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-bold text-gray-800 dark:text-gray-200">Latest News</h2>
-        <a href="news.html" class="text-blue-600 dark:text-blue-400 hover:underline font-medium text-sm flex items-center gap-1">
+    <!-- Latest News - Very Compact Linear Preview -->
+    <section id="latest-news" class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 py-5 px-4 mx-auto max-w-7xl">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-base font-bold text-gray-800 dark:text-gray-200">Latest News</h2>
+        <a href="news.html" class="text-blue-600 dark:text-blue-400 hover:underline font-medium text-sm">
           All news →
         </a>
       </div>
 
-      <div id="news-preview" class="space-y-5">
-        <!-- Populated by JavaScript - compact linear list -->
+      <div id="news-preview" class="space-y-2">
+        <!-- Populated by JavaScript -->
       </div>
     </section>
 
@@ -104,11 +104,12 @@
         <!-- Grid View Only -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-          <!-- Your post cards (add more as needed) -->
+          <!-- Example Post Card -->
           <article data-type="MICROWAVES" class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] group">
             <a href="/posts/working-qo100-without-dish.html" class="block">
               <div class="relative overflow-hidden">
-                <img src="https://dxer.site/img/works/Flatpanel.jpeg" alt="QO-100 flat panel" class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105">
+                <img src="https://dxer.site/img/works/Flatpanel.jpeg" alt="QO-100 flat panel"
+                     class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105">
               </div>
               <div class="p-5">
                 <h3 class="font-semibold text-lg leading-tight mb-2 line-clamp-2">Working QO-100 without a dish: An ultraportable FT8 station</h3>
@@ -118,7 +119,7 @@
             </a>
           </article>
 
-          <!-- Repeat similar blocks for other posts... -->
+          <!-- Add your remaining post cards here -->
 
         </div>
       </div>
@@ -135,7 +136,7 @@
     </button>
 
     <script>
-      // ==================== COMPACT LINEAR NEWS PREVIEW ====================
+      // ==================== VERY COMPACT NEWS PREVIEW ====================
       fetch('news.html')
         .then(response => response.text())
         .then(html => {
@@ -152,28 +153,30 @@
             const headline = titleEl ? titleEl.textContent.replace(dateSpan ? dateSpan.textContent : '', '').trim() : 'News';
 
             const div = document.createElement('div');
-            div.className = "news-item-compact flex flex-col sm:flex-row sm:items-start gap-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4";
+            div.className = "news-preview-item flex gap-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3 cursor-pointer";
 
             div.innerHTML = `
-              <div class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap pt-0.5">
+              <div class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap flex-shrink-0 pt-px">
                 ${dateSpan ? dateSpan.textContent.trim() : ''}
               </div>
-              <div class="flex-1">
-                <h3 class="font-medium leading-tight text-gray-800 dark:text-gray-200">${headline}</h3>
+              <div class="flex-1 text-sm leading-tight text-gray-800 dark:text-gray-200 line-clamp-2">
+                ${headline}
               </div>
-              <a href="news.html" class="text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline whitespace-nowrap self-start sm:self-center">
-                Read more →
-              </a>
             `;
+
+            // Make the whole block clickable → goes to news.html
+            div.addEventListener('click', () => {
+              window.location.href = 'news.html';
+            });
 
             container.appendChild(div);
           });
         })
         .catch(() => {
-          document.getElementById('news-preview').innerHTML = `<p class="text-gray-500 dark:text-gray-400 text-sm">Could not load news.</p>`;
+          document.getElementById('news-preview').innerHTML = `<p class="text-gray-500 dark:text-gray-400 text-sm py-2">Could not load news.</p>`;
         });
 
-      // Filter function
+      // Filter function for posts
       function filterPosts(type) {
         document.querySelectorAll('[data-type]').forEach(el => {
           el.classList.toggle('hidden', type !== 'ALL' && el.dataset.type !== type);
@@ -186,7 +189,6 @@
         .then(data => {
           document.getElementById('shared-header').innerHTML = data;
 
-          // Hamburger menu toggle (restored)
           const menuToggle = document.getElementById('menu-toggle');
           const mobileMenu = document.getElementById('mobile-menu');
 
@@ -196,7 +198,6 @@
             });
           }
 
-          // Mobile Tools submenu (if present in your header.html)
           const mobileToolsBtn = document.getElementById('mobile-tools-btn');
           const mobileSubmenu = document.getElementById('mobile-tools-submenu');
           const arrow = document.getElementById('submenu-arrow');
