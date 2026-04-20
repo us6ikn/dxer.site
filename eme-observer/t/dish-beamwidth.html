@@ -16,7 +16,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       margin: 15px;
       background: #f1f5f9;
-      line-height: 1.5;
+      line-height: 1.6;
       font-size: 15px;
     }
 
@@ -155,13 +155,45 @@
     }
 
     #plot { width: 100%; }
+
+    /* New Explanation Pane */
+    .explanation {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+      padding: 24px;
+      margin-top: 25px;
+      border: 1px solid #e2e8f0;
+      line-height: 1.65;
+    }
+
+    .explanation h3 {
+      margin: 0 0 16px 0;
+      color: var(--text);
+      font-size: 1.25rem;
+    }
+
+    .explanation p {
+      margin: 12px 0;
+      color: #334155;
+    }
+
+    .formula {
+      background: #f8fafc;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 1.05rem;
+      border-left: 4px solid var(--primary);
+      margin: 12px 0;
+    }
   </style>
 </head>
 
 <body>
 
 <h2>Dish Antenna Beamwidth Calculator</h2>
-<p class="subtitle"><small>Approximate formula: HPBW ≈ 70 × (λ / D) degrees</small></p>
+<p class="subtitle">Calculate half-power and other beamwidth levels for parabolic dish antennas</p>
 
 <div class="controls">
   <h3>Antenna Diameters (meters)</h3>
@@ -171,9 +203,9 @@
   <div class="curves-section">
     <h3>Beamwidth Level Curves</h3>
     <div class="checkbox-group">
-      <label><input type="checkbox" value="3" checked> 3 dB</label>
+      <label><input type="checkbox" value="3" checked> 3 dB (Half-Power Beamwidth)</label>
       <label><input type="checkbox" value="1"> 1 dB</label>
-      <label><input type="checkbox" value="0.5" checked> 0.5 dB</label>
+      <label><input type="checkbox" value="0.5"> 0.5 dB</label>
       <label><input type="checkbox" value="0.1"> 0.1 dB</label>
     </div>
   </div>
@@ -182,6 +214,33 @@
 </div>
 
 <div id="plot"></div>
+
+<!-- New Explanation Pane -->
+<div class="explanation">
+  <h3>Explanation & Formulas</h3>
+  
+  <p><strong>Approximate formula for Half-Power Beamwidth (HPBW):</strong></p>
+  <div class="formula">HPBW (3 dB) ≈ 70 × (λ / D) degrees</div>
+  <p>where <strong>λ</strong> is wavelength and <strong>D</strong> is dish diameter (same units). This is a practical rule of thumb for typical parabolic dishes with ~60% efficiency.</p>
+
+  <h4 style="margin-top: 24px;">1 dB, 0.5 dB, and 0.1 dB Beamwidths</h4>
+  <p>Near the boresight (main beam center), the radiation pattern of a parabolic dish can be approximated as parabolic in shape. This leads to the scaling formula:</p>
+  
+  <div class="formula">
+    Beamwidth at X dB ≈ HPBW<sub>3dB</sub> × √(X / 3)
+  </div>
+  
+  <p><strong>Examples:</strong></p>
+  <ul style="margin: 8px 0 0 20px; padding: 0;">
+    <li>1 dB beamwidth ≈ HPBW × √(1/3) ≈ HPBW × 0.577</li>
+    <li>0.5 dB beamwidth ≈ HPBW × √(0.5/3) ≈ HPBW × 0.408</li>
+    <li>0.1 dB beamwidth ≈ HPBW × √(0.1/3) ≈ HPBW × 0.183</li>
+  </ul>
+  
+  <p style="margin-top: 18px; font-size: 0.95rem; color: #64748b;">
+    This approximation is widely used in EME and satellite communications and is quite accurate for small dB values (&lt; 3 dB). It becomes less precise at higher drop levels (&gt; 6–10 dB) because real patterns include illumination taper and diffraction effects.
+  </p>
+</div>
 
 <script>
 const c = 299792458;
@@ -352,7 +411,6 @@ function updatePlot() {
     layer: "above"
   }];
 
-  // Clean, reliable practical limit label
   const limitAnnotations = [{
     x: 0.85,
     y: 0.79,
@@ -432,9 +490,8 @@ function updatePlot() {
   Plotly.newPlot("plot", traces, layout, config);
 }
 
-// Initialize
+// Initialize with only one 3m antenna and only 3dB checked
 addAntenna(3.0);
-addAntenna(0.9);
 updatePlot();
 
 // Refresh on resize
