@@ -10,7 +10,6 @@
     :root {
       --primary: #2563eb;
       --text: #1f2937;
-      --light-bg: #f8fafc;
     }
 
     body {
@@ -386,9 +385,20 @@ function updatePlot() {
   const layout = {
     title: "Parabolic Antenna Beamwidth vs Frequency (Log-Log)",
     autosize: true,
+    showlegend: true,
+    legend: {
+      x: isMobile ? 0.98 : 1.02,
+      y: isMobile ? 0.98 : 1.0,
+      xanchor: isMobile ? 'right' : 'left',
+      yanchor: 'top',
+      bgcolor: 'rgba(255,255,255,0.85)',
+      bordercolor: '#e2e8f0',
+      borderwidth: 1,
+      font: { size: isMobile ? 11 : 13 }
+    },
     margin: {
-      l: isMobile ? 45 : 70,   // smaller left margin on mobile
-      r: 35,
+      l: isMobile ? 48 : 70,
+      r: isMobile ? 15 : 40,     // much smaller right margin on mobile
       t: 55,
       b: 65
     },
@@ -437,7 +447,7 @@ addAntenna(3.0);
 addAntenna(0.9);
 updatePlot();
 
-// Refresh on resize (helps with orientation changes)
+// Refresh on resize
 window.addEventListener('resize', () => {
   if (document.getElementById('plot').data) updatePlot();
 });
