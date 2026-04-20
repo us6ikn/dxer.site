@@ -154,21 +154,7 @@
       box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
     }
 
-    #plot {
-      width: 100%;
-    }
-
-    @media (min-width: 768px) {
-      body { margin: 25px; }
-      .controls { padding: 24px; }
-      .update-btn { width: auto; }
-    }
-
-    @media (max-width: 480px) {
-      body { font-size: 14.5px; }
-      h2 { font-size: 1.45rem; }
-      .diameter-item input { font-size: 1rem; }
-    }
+    #plot { width: 100%; }
   </style>
 </head>
 
@@ -344,14 +330,15 @@ function updatePlot() {
 
   const emeAnnotations = emeFreqs.map(f => ({
     x: (Math.log10(f) - logStart) / logRange + 0.004,
-    y: 0.96,
+    y: 0.04,
     xref: "paper", yref: "paper",
     text: f.toFixed(3),
     showarrow: false,
     xanchor: "left",
     font: { size: 11, color: "#b91c1c" },
     textangle: -90,
-    opacity: 0.9
+    opacity: 0.9,
+    layer: "below"
   }));
 
   const LIMIT = 35;
@@ -365,21 +352,21 @@ function updatePlot() {
     layer: "above"
   }];
 
+  // Clean, reliable practical limit label
   const limitAnnotations = [{
-    x: 0.92,
-    y: LIMIT * 1.35,
-    xref: "paper", yref: "y",
-    text: "<b>HPBW ≈ 2λ</b><br>(practical limit)",
-    showarrow: true,
-    arrowhead: 2,
-    ax: -30,
-    ay: 40,
-    font: { size: 17, color: "#d97706" },
-    bgcolor: "#fff9c4",
-    bordercolor: "#d97706",
-    borderwidth: 3,
-    borderpad: 8,
-    opacity: 1
+    x: 0.85,
+    y: 0.79,
+    xref: "paper",
+    yref: "paper",
+    text: "HPBW ≈ 2λ (practical limit)",
+    showarrow: false,
+    font: { size: 13, color: "#d97706" },
+    bgcolor: "rgba(254, 252, 232, 0.85)",
+    bordercolor: "transparent",
+    borderwidth: 0,
+    borderpad: 6,
+    opacity: 1,
+    layer: "above"
   }];
 
   const layout = {
@@ -388,12 +375,12 @@ function updatePlot() {
     showlegend: true,
     legend: {
       x: isMobile ? 0.95 : 1.02,
-      y: isMobile ? 0.97 : 1.0,
+      y: isMobile ? 0.98 : 1.0,
       xanchor: isMobile ? 'right' : 'left',
       yanchor: 'top',
-      bgcolor: isMobile ? '#ffffff' : 'rgba(255,255,255,0.85)',   // solid white on mobile
-      bordercolor: '#cbd5e1',
-      borderwidth: isMobile ? 2 : 1,
+      bgcolor: '#ffffff',
+      bordercolor: '#94a3b8',
+      borderwidth: 2,
       font: {
         size: isMobile ? 11.5 : 13,
         color: '#1e2937'
@@ -401,7 +388,7 @@ function updatePlot() {
     },
     margin: {
       l: isMobile ? 48 : 70,
-      r: isMobile ? 22 : 40,      // extra space for legend on mobile
+      r: isMobile ? 32 : 40,
       t: 55,
       b: 65
     },
