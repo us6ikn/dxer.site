@@ -9,223 +9,168 @@
   <style>
     :root {
       --primary: #2563eb;
-      --accent: #1e40af;
       --text: #1f2937;
-      --bg: #f8fafc;
+      --light-bg: #f8fafc;
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, Helvetica, sans-serif;
-      margin: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      margin: 15px;
       background: #f1f5f9;
       line-height: 1.5;
+      font-size: 15px;
     }
 
     h2 {
-      margin: 0 0 8px 0;
+      margin: 0 0 6px 0;
       color: var(--text);
-      font-size: 1.75rem;
+      font-size: 1.55rem;
       font-weight: 700;
     }
 
     .subtitle {
       color: #64748b;
-      font-size: 0.95rem;
-      margin-bottom: 24px;
+      font-size: 0.92rem;
+      margin-bottom: 20px;
     }
 
     .controls {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 24px;
-      margin-bottom: 30px;
-      padding: 0;
-    }
-
-    .panel {
       background: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      padding: 24px;
+      border-radius: 14px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+      padding: 20px;
+      margin-bottom: 25px;
       border: 1px solid #e2e8f0;
     }
 
-    .panel h3 {
-      margin: 0 0 16px 0;
-      font-size: 1.25rem;
+    .controls h3 {
+      margin: 0 0 14px 0;
+      font-size: 1.15rem;
       font-weight: 600;
       color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
 
     .diameter-list {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 10px;
+      margin-bottom: 18px;
     }
 
     .diameter-item {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       background: #f8fafc;
-      padding: 10px 14px;
-      border-radius: 10px;
+      padding: 8px 12px;
+      border-radius: 9px;
       border: 1px solid #e2e8f0;
-      transition: all 0.2s ease;
-    }
-
-    .diameter-item:hover {
-      border-color: #94a3b8;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
     .diameter-item input {
       flex: 1;
-      max-width: 140px;
-      padding: 10px 14px;
-      font-size: 1.1rem;
+      max-width: 130px;
+      padding: 9px 12px;
+      font-size: 1.05rem;
       border: 2px solid #cbd5e1;
-      border-radius: 8px;
-      transition: border 0.2s;
+      border-radius: 7px;
     }
 
     .diameter-item input:focus {
-      outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      outline: none;
     }
 
     .diameter-item button {
       background: #ef4444;
       color: white;
       border: none;
-      border-radius: 8px;
-      padding: 8px 14px;
+      border-radius: 7px;
+      padding: 8px 16px;
       font-size: 0.95rem;
-      font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
     }
 
     .diameter-item button:hover {
       background: #dc2626;
-      transform: scale(1.05);
+    }
+
+    .curves-section {
+      margin-top: 20px;
     }
 
     .checkbox-group {
       display: flex;
       flex-wrap: wrap;
-      gap: 20px 28px;
-      align-items: center;
+      gap: 18px 26px;
     }
 
     .checkbox-group label {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 1.1rem;
-      font-weight: 500;
+      gap: 7px;
+      font-size: 1.02rem;
       color: #334155;
       cursor: pointer;
-      user-select: none;
-      transition: color 0.2s;
     }
 
     .checkbox-group input[type="checkbox"] {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       accent-color: var(--primary);
+    }
+
+    .add-btn {
+      background: #e0f2fe;
+      color: #1e40af;
+      border: 2px solid #bae6fd;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-weight: 600;
       cursor: pointer;
+      margin-top: 8px;
     }
 
-    .checkbox-group label:hover {
-      color: var(--accent);
+    .add-btn:hover {
+      background: #bae6fd;
     }
 
-    .actions {
-      display: flex;
-      justify-content: center;
-      padding: 8px 0;
-    }
-
-    .btn-primary {
-      background: linear-gradient(90deg, var(--primary), var(--accent));
+    .update-btn {
+      background: linear-gradient(90deg, #2563eb, #1e40af);
       color: white;
       border: none;
-      border-radius: 12px;
-      padding: 16px 48px;
-      font-size: 1.25rem;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
-      transition: all 0.3s ease;
-      min-width: 280px;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
-    }
-
-    .btn-secondary {
-      background: #f1f5f9;
-      color: #334155;
-      border: 2px solid #cbd5e1;
       border-radius: 10px;
-      padding: 12px 24px;
-      font-size: 1.05rem;
+      padding: 14px 40px;
+      font-size: 1.1rem;
       font-weight: 600;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s;
+      width: 100%;
+      margin-top: 20px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
     }
 
-    .btn-secondary:hover {
-      background: #e0f2fe;
-      border-color: var(--primary);
-      color: var(--primary);
+    .update-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
     }
 
-    /* Desktop layout */
+    /* Plot improvements */
+    #plot {
+      width: 100%;
+    }
+
+    /* Responsive adjustments */
     @media (min-width: 768px) {
-      .controls {
-        grid-template-columns: 2fr 1fr;
-      }
-      
-      .actions {
-        grid-column: span 2;
-      }
-      
-      .panel {
-        padding: 28px;
-      }
+      body { margin: 25px; }
+      .controls { padding: 24px; }
+      .update-btn { width: auto; }
     }
 
-    /* Extra small mobile tweaks */
     @media (max-width: 480px) {
-      .diameter-item input {
-        font-size: 1rem;
-        padding: 9px 12px;
-      }
-      .btn-primary {
-        min-width: 100%;
-        padding: 14px 32px;
-        font-size: 1.1rem;
-      }
-    }
-
-    .footer-note {
-      text-align: center;
-      color: #64748b;
-      font-size: 0.9rem;
-      margin-top: 12px;
+      body { font-size: 14.5px; }
+      h2 { font-size: 1.45rem; }
+      .diameter-item input { font-size: 1rem; }
     }
   </style>
 </head>
@@ -233,22 +178,14 @@
 <body>
 
 <h2>Dish Antenna Beamwidth Calculator</h2>
-<p class="subtitle"><small>Uses approximate formula HPBW ≈ 70 × (λ / D) degrees</small></p>
+<p class="subtitle"><small>Approximate formula: HPBW ≈ 70 × (λ / D) degrees</small></p>
 
 <div class="controls">
+  <h3>Antenna Diameters (meters)</h3>
+  <div id="diameterInputs" class="diameter-list"></div>
+  <button onclick="addAntenna()" class="add-btn">+ Add Antenna</button>
 
-  <!-- Antenna Diameters Panel -->
-  <div class="panel">
-    <h3>Antenna Diameters <small style="font-weight:400; color:#64748b;">(meters)</small></h3>
-    <div id="diameterInputs" class="diameter-list"></div>
-    <button onclick="addAntenna()" class="btn-secondary">
-      <span style="font-size:1.3rem; line-height:1;">+</span>
-      Add Antenna
-    </button>
-  </div>
-
-  <!-- Beamwidth Level Curves Panel -->
-  <div class="panel">
+  <div class="curves-section">
     <h3>Beamwidth Level Curves</h3>
     <div class="checkbox-group">
       <label><input type="checkbox" value="3" checked> 3 dB</label>
@@ -258,13 +195,7 @@
     </div>
   </div>
 
-  <!-- Action Bar -->
-  <div class="actions">
-    <button onclick="updatePlot()" class="btn-primary">
-      Update Plot
-    </button>
-  </div>
-
+  <button onclick="updatePlot()" class="update-btn">Update Plot</button>
 </div>
 
 <div id="plot"></div>
@@ -419,7 +350,7 @@ function updatePlot() {
     text: f.toFixed(3),
     showarrow: false,
     xanchor: "left",
-    font: { size: 11.5, color: "#b91c1c" },
+    font: { size: 11, color: "#b91c1c" },
     textangle: -90,
     opacity: 0.9
   }));
@@ -444,7 +375,7 @@ function updatePlot() {
     arrowhead: 2,
     ax: -30,
     ay: 40,
-    font: { size: 18, color: "#d97706" },
+    font: { size: 17, color: "#d97706" },
     bgcolor: "#fff9c4",
     bordercolor: "#d97706",
     borderwidth: 3,
@@ -453,7 +384,7 @@ function updatePlot() {
   }];
 
   const layout = {
-    title: "Log-Log Plot of Parabolic Antenna Beamwidth vs Frequency<br><sub>Orange line = practical limit (HPBW ≈ 2λ)</sub>",
+    title: "Parabolic Antenna Beamwidth vs Frequency (Log-Log)",
     xaxis: {
       title: "Frequency (GHz)",
       type: "log",
@@ -480,24 +411,30 @@ function updatePlot() {
     annotations: [...emeAnnotations, ...limitAnnotations],
     hovermode: "closest",
     dragmode: false,
-    height: 720,
-    margin: { t: 80, b: 60, l: 70, r: 40 }
+    height: window.innerWidth < 768 ? 580 : 720,   // better mobile height
+    margin: { t: 65, b: 65, l: 65, r: 35 }
   };
 
   const config = {
     scrollZoom: false,
     displayModeBar: true,
     modeBarButtonsToRemove: ['zoom2d','pan2d','select2d','lasso2d','zoomIn2d','zoomOut2d'],
-    displaylogo: false
+    displaylogo: false,
+    responsive: true
   };
 
   Plotly.newPlot("plot", traces, layout, config);
 }
 
-// Initialize with default antennas
+// Initialize
 addAntenna(3.0);
 addAntenna(0.9);
 updatePlot();
+
+// Optional: auto-refresh plot when window resizes (helps mobile orientation change)
+window.addEventListener('resize', () => {
+  if (document.getElementById('plot').data) updatePlot();
+});
 </script>
 
 </body>
