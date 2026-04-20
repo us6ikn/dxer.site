@@ -387,18 +387,21 @@ function updatePlot() {
     autosize: true,
     showlegend: true,
     legend: {
-      x: isMobile ? 0.98 : 1.02,
-      y: isMobile ? 0.98 : 1.0,
+      x: isMobile ? 0.95 : 1.02,
+      y: isMobile ? 0.97 : 1.0,
       xanchor: isMobile ? 'right' : 'left',
       yanchor: 'top',
-      bgcolor: 'rgba(255,255,255,0.85)',
-      bordercolor: '#e2e8f0',
-      borderwidth: 1,
-      font: { size: isMobile ? 11 : 13 }
+      bgcolor: isMobile ? '#ffffff' : 'rgba(255,255,255,0.85)',   // solid white on mobile
+      bordercolor: '#cbd5e1',
+      borderwidth: isMobile ? 2 : 1,
+      font: {
+        size: isMobile ? 11.5 : 13,
+        color: '#1e2937'
+      }
     },
     margin: {
       l: isMobile ? 48 : 70,
-      r: isMobile ? 15 : 40,     // much smaller right margin on mobile
+      r: isMobile ? 22 : 40,      // extra space for legend on mobile
       t: 55,
       b: 65
     },
