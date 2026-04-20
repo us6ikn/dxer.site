@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Dish Antenna Beamwidth Tool</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; margin: 20px; background: #f8f9fa; }
+    .controls { margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    input { margin: 5px; width: 90px; }
+    button { margin: 5px; padding: 6px 12px; }
+    h2 { margin-top: 0; }
+  </style>
+</head>
+
+<body>
+
+<h2>EME Dish Antenna Beamwidth Calculator</h2>
+
+<div class="controls">
+  <div><strong>Antenna Diameters (meters):</strong></div>
+  <div id="diameterInputs"></div>
+  <button onclick="addAntenna()">Add Antenna</button>
+
+  <br><br>
+
+  <b>Beamwidth Level Curves:</b><br>
+  <label><input type="checkbox" value="3" checked> 3 dB</label>
+  <label><input type="checkbox" value="1"> 1 dB</label>
+  <label><input type="checkbox" value="0.5" checked> 0.5 dB</label>
+  <label><input type="checkbox" value="0.1"> 0.1 dB</label>
+
+  <br><br>
+  <button onclick="updatePlot()" style="font-size:16px;padding:8px 16px;">Update Plot</button>
+</div>
+
+<div id="plot"></div>
+
+<script>
+const c = 299792458;
+const BEAMWIDTH_CONSTANT = 70;
+
+const F_START_GHZ = 0.144;
+const F_END_GHZ = 78;
+
+const logStart = Math.log10(F_START_GHZ);
+const logEnd   = Math.log10(F_END_GHZ);
+const logRange = logEnd - logStart;
+
+const emeFreqs = [0.1441, 0.4321, 1.2961, 2.3041, 3.4561, 5.7601, 10.3681, 24.1921, 47.0881, 76.5];
+
+function generateLogTicks(minVal, maxVal) {
+  const ticks = [];
+  let decade = Math.pow(10, Math.floor(Math.log10(minVal) - 0.01));
+  while (decade <= maxVal * 1.1) {
+    for (let m of [1, 2, 5]) {
+      const t = m * decade;
+      if (t >= minVal * 0.9 && t <= maxVal * 1.1) {
+        if (ticks.length === 0 || t / ticks[ticks.length - 1] >= 1.15) ticks.push(t);
+      }
+    }
+    decade *= 10;
+  }
+  return ticks;
+}
+
+function logSpace(start, end, points) {
+  const arr = [];
+  const ls = Math.log10(start);
+  const le = Math.log10(end);
+  for (let i = 0; i < points; i++) {
+    const t = i / (points - 1);
+    arr.push(Math.pow(10, ls + t * (le - ls)));
+  }
+  return arr;
+}
+
+function hpbw(lambda, D, dbLevel) {
+  const bw3 = BEAMWIDTH_CONSTANT * (lambda / D);
+  if (dbLevel === "3") return bw3;
+  const factor = Math.sqrt(parseFloat(dbLevel) / 3);
+  return bw3 * factor;
+}
+
+function addAntenna(value = 1.0) {
+  const div = document.getElementById("diameterInputs");
+  const wrapper = document.createElement("div");
+  wrapper.style.marginBottom = "5px";
+  const input = document.createElement("input");
+  input.type = "number";
+  input.step = "0.1";
+  input.value = value;
+  input.style.width = "100px";
+  const removeBtn = document.createElement("button");
+  removeBtn.innerText = "Remove";
+  removeBtn.onclick = () => { wrapper.remove(); updatePlot(); };
+  wrapper.appendChild(input);
+  wrapper.appendChild(removeBtn);
+  div.appendChild(wrapper);
+}
+
+function getDiameters() {
+  return Array.from(document.querySelectorAll("#diameterInputs input"))
+    .map(i => parseFloat(i.value))
+    .filter(v => !isNaN(v) && v > 0);
+}
+
+function getSelectedCurves() {
+  return Array.from(document.querySelectorAll("input[type=checkbox]:checked"))
+    .map(cb => cb.value);
+}
+
+function updatePlot() {
+  const freq_hz = logSpace(F_START_GHZ * 1e9, F_END_GHZ * 1e9, 1000);
+  const freq_ghz = freq_hz.map(f => f / 1e9);
+  const lambda = freq_hz.map(f => c / f);
+
+  const diameters = getDiameters();
+  const curves = getSelectedCurves();
+
+  let traces = [];
+
+  diameters.forEach(D => {
+    curves.forEach(curve => {
+      const scaled = lambda.map(lam => hpbw(lam, D, curve));
+
+      traces.push({
+        x: freq_ghz,
+        y: scaled,
+        mode: "lines",
+        name: `${D} m (${curve} dB)`,                    // Legend
+        line: { width: 2.8 },
+        hovertemplate:
+          `<b>${D} m Antenna</b><br>` +
+          `Level: ${curve} dB<br>` +
+          `Frequency: %{x:.4f} GHz<br>` +
+          `Beamwidth: %{y:.3f}°<extra></extra>`
+      });
+
+      // EME markers
+      const emeY = emeFreqs.map(f => {
+        let idx = 0, minDiff = Infinity;
+        for (let i = 0; i < freq_ghz.length; i++) {
+          const diff = Math.abs(freq_ghz[i] - f);
+          if (diff < minDiff) { minDiff = diff; idx = i; }
+        }
+        return scaled[idx];
+      });
+
+      traces.push({
+        x: emeFreqs,
+        y: emeY,
+        mode: "markers",
+        marker: { size: 7.5, color: "#b91c1c", symbol: "circle", line: {color: "white", width: 1.8} },
+        showlegend: false,
+        hovertemplate:
+          `EME Frequency: %{x:.4f} GHz<br>` +
+          `Beamwidth: %{y:.3f}°<br>` +
+          `(${D} m @ ${curve} dB)<extra></extra>`
+      });
+    });
+  });
+
+  let allY = traces.flatMap(t => t.y || []);
+  const yMin = allY.length ? Math.max(0.001, Math.min(...allY)) : 0.01;
+  const yMax = allY.length ? Math.max(1, Math.max(...allY) * 1.25) : 100;
+  const yLogMin = Math.log10(yMin * 0.8);
+  const yLogMax = Math.log10(yMax * 1.25);
+
+  const xTicks = generateLogTicks(F_START_GHZ, F_END_GHZ);
+
+  const emeShapes = emeFreqs.map(f => ({
+    type: "line", xref: "paper", yref: "paper",
+    x0: (Math.log10(f) - logStart) / logRange,
+    x1: (Math.log10(f) - logStart) / logRange,
+    y0: 0, y1: 1,
+    line: { color: "rgba(220, 20, 60, 0.55)", width: 1.5, dash: "dot" },
+    layer: "below"
+  }));
+
+  const emeAnnotations = emeFreqs.map(f => ({
+    x: (Math.log10(f) - logStart) / logRange + 0.004,
+    y: 0.96,
+    xref: "paper", yref: "paper",
+    text: f.toFixed(3),
+    showarrow: false,
+    xanchor: "left",
+    font: { size: 11.5, color: "#b91c1c" },
+    textangle: -90,
+    opacity: 0.9
+  }));
+
+  const LIMIT = 35;
+
+  const limitShapes = [{
+    type: "line",
+    xref: "paper", yref: "y",
+    x0: 0, x1: 1,
+    y0: LIMIT, y1: LIMIT,
+    line: { color: "#d97706", width: 4, dash: "dash" },
+    layer: "above"
+  }];
+
+  const limitAnnotations = [{
+    x: 0.92,
+    y: LIMIT * 1.35,
+    xref: "paper", yref: "y",
+    text: "<b>HPBW ≈ 2λ</b><br>(practical limit)",
+    showarrow: true,
+    arrowhead: 2,
+    ax: -30,
+    ay: 40,
+    font: { size: 18, color: "#d97706" },
+    bgcolor: "#fff9c4",
+    bordercolor: "#d97706",
+    borderwidth: 3,
+    borderpad: 8,
+    opacity: 1
+  }];
+
+  const layout = {
+    title: "Log-Log Plot of Parabolic Antenna Beamwidth vs Frequency<br><sub>Orange line = practical limit (HPBW ≈ 2λ)</sub>",
+    xaxis: {
+      title: "Frequency (GHz)",
+      type: "log",
+      range: [logStart, logEnd],
+      fixedrange: true,
+      tickmode: "array",
+      tickvals: xTicks,
+      ticktext: xTicks.map(v => v >= 10 ? v.toFixed(0) : v.toFixed(v < 1 ? 3 : 2)),
+      gridcolor: "#ddd",
+      minor: { showgrid: true }
+    },
+    yaxis: {
+      title: "Beamwidth (degrees)",
+      type: "log",
+      range: [yLogMin, yLogMax],
+      fixedrange: true,
+      tickmode: "array",
+      tickvals: generateLogTicks(Math.pow(10, yLogMin), Math.pow(10, yLogMax)),
+      ticktext: generateLogTicks(Math.pow(10, yLogMin), Math.pow(10, yLogMax)).map(v => v >= 10 ? v.toFixed(0) : v.toFixed(v < 1 ? 3 : 2)),
+      gridcolor: "#ddd",
+      minor: { showgrid: true }
+    },
+    shapes: [...emeShapes, ...limitShapes],
+    annotations: [...emeAnnotations, ...limitAnnotations],
+    hovermode: "closest",
+    dragmode: false,
+    height: 720
+  };
+
+  const config = {
+    scrollZoom: false,
+    displayModeBar: true,
+    modeBarButtonsToRemove: ['zoom2d','pan2d','select2d','lasso2d','zoomIn2d','zoomOut2d'],
+    displaylogo: false
+  };
+
+  Plotly.newPlot("plot", traces, layout, config);
+}
+
+// Initialize
+addAntenna(3.0);
+addAntenna(0.9);
+updatePlot();
+</script>
+
+</body>
+</html>
