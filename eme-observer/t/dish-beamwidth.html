@@ -155,12 +155,10 @@
       box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
     }
 
-    /* Plot improvements */
     #plot {
       width: 100%;
     }
 
-    /* Responsive adjustments */
     @media (min-width: 768px) {
       body { margin: 25px; }
       .controls { padding: 24px; }
@@ -277,6 +275,8 @@ function getSelectedCurves() {
 }
 
 function updatePlot() {
+  const isMobile = window.innerWidth < 768;
+  
   const freq_hz = logSpace(F_START_GHZ * 1e9, F_END_GHZ * 1e9, 1000);
   const freq_ghz = freq_hz.map(f => f / 1e9);
   const lambda = freq_hz.map(f => c / f);
@@ -385,6 +385,13 @@ function updatePlot() {
 
   const layout = {
     title: "Parabolic Antenna Beamwidth vs Frequency (Log-Log)",
+    autosize: true,
+    margin: {
+      l: isMobile ? 45 : 70,   // smaller left margin on mobile
+      r: 35,
+      t: 55,
+      b: 65
+    },
     xaxis: {
       title: "Frequency (GHz)",
       type: "log",
@@ -411,8 +418,7 @@ function updatePlot() {
     annotations: [...emeAnnotations, ...limitAnnotations],
     hovermode: "closest",
     dragmode: false,
-    height: window.innerWidth < 768 ? 580 : 720,   // better mobile height
-    margin: { t: 65, b: 65, l: 65, r: 35 }
+    height: isMobile ? 560 : 720
   };
 
   const config = {
@@ -431,7 +437,7 @@ addAntenna(3.0);
 addAntenna(0.9);
 updatePlot();
 
-// Optional: auto-refresh plot when window resizes (helps mobile orientation change)
+// Refresh on resize (helps with orientation changes)
 window.addEventListener('resize', () => {
   if (document.getElementById('plot').data) updatePlot();
 });
