@@ -20,8 +20,42 @@
       font-size: 15px;
     }
 
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .home-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      color: var(--primary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .home-btn:hover {
+      background: #f8fafc;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+    }
+
+    .home-btn svg {
+      width: 24px;
+      height: 24px;
+    }
+
     h2 {
-      margin: 0 0 6px 0;
+      margin: 0;
       color: var(--text);
       font-size: 1.55rem;
       font-weight: 700;
@@ -156,7 +190,6 @@
 
     #plot { width: 100%; }
 
-    /* New Explanation Pane */
     .explanation {
       background: white;
       border-radius: 14px;
@@ -173,6 +206,12 @@
       font-size: 1.25rem;
     }
 
+    .explanation h4 {
+      margin: 24px 0 12px 0;
+      color: var(--text);
+      font-size: 1.1rem;
+    }
+
     .explanation p {
       margin: 12px 0;
       color: #334155;
@@ -187,318 +226,416 @@
       border-left: 4px solid var(--primary);
       margin: 12px 0;
     }
+
+    .power-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.98rem;
+    }
+
+    .power-table th, .power-table td {
+      border: 1px solid #cbd5e1;
+      padding: 10px 12px;
+      text-align: center;
+    }
+
+    .power-table th {
+      background: #f1f5f9;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .power-table tr:nth-child(even) {
+      background: #f8fafc;
+    }
+
+    /* Copyright Pane */
+    .copyright {
+      margin-top: 40px;
+      padding: 16px 20px;
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      text-align: center;
+      color: #64748b;
+      font-size: 0.88rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
   </style>
 </head>
 
 <body>
 
-<h2>Dish Antenna Beamwidth Calculator</h2>
-<p class="subtitle">Calculate half-power and other beamwidth levels for parabolic dish antennas</p>
+  <!-- Header with Home Button -->
+  <div class="header">
+    <a href="https://dxer.site" class="home-btn" title="Go to dxer.site">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.25"
+              d="M3 9.75L12 3l9 6.75M12 21v-9.75M3 9.75v9.75a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 19.5V9.75" />
+      </svg>
+    </a>
+    <h2>Dish Antenna Beamwidth Calculator</h2>
+  </div>
 
-<div class="controls">
-  <h3>Antenna Diameters (meters)</h3>
-  <div id="diameterInputs" class="diameter-list"></div>
-  <button onclick="addAntenna()" class="add-btn">+ Add Antenna</button>
+  <p class="subtitle">Calculate half-power and other beamwidth levels for parabolic dish antennas</p>
 
-  <div class="curves-section">
-    <h3>Beamwidth Level Curves</h3>
-    <div class="checkbox-group">
-      <label><input type="checkbox" value="3" checked> 3 dB (Half-Power Beamwidth)</label>
-      <label><input type="checkbox" value="1"> 1 dB</label>
-      <label><input type="checkbox" value="0.5"> 0.5 dB</label>
-      <label><input type="checkbox" value="0.1"> 0.1 dB</label>
+  <div class="controls">
+    <h3>Antenna Diameter (meters)</h3>
+    <div id="diameterInputs" class="diameter-list"></div>
+    <button onclick="addAntenna()" class="add-btn">+ Add Antenna</button>
+
+    <div class="curves-section">
+      <h3>Beamwidth Level Curves</h3>
+      <div class="checkbox-group">
+        <label><input type="checkbox" value="3" checked> 3 dB (Half-Power Beamwidth)</label>
+        <label><input type="checkbox" value="1"> 1 dB</label>
+        <label><input type="checkbox" value="0.5"> 0.5 dB</label>
+        <label><input type="checkbox" value="0.1"> 0.1 dB</label>
+      </div>
     </div>
+
+    <button onclick="updatePlot()" class="update-btn">Update Plot</button>
   </div>
 
-  <button onclick="updatePlot()" class="update-btn">Update Plot</button>
-</div>
+  <div id="plot"></div>
 
-<div id="plot"></div>
+  <!-- Explanation Pane -->
+  <div class="explanation">
+    <h3>Explanation & Formulas</h3>
+    
+    <p><strong>Half-Power Beamwidth (HPBW, 3dB) approximation:</strong></p>
+    <div class="formula">HPBW ≈ 70 × (λ / D)</div>
+    <p>where <strong>λ</strong> is the wavelength and <strong>D</strong> is the dish diameter. This approximation is valid for typical parabolic dishes with ~60% efficiency. The efficiency of a real-world antenna is affected by the geometric properties of the reflector and feeding system (dish surface accuracy, illumination, feed blockage, etc).</p>
 
-<!-- New Explanation Pane -->
-<div class="explanation">
-  <h3>Explanation & Formulas</h3>
-  
-  <p><strong>Approximate formula for Half-Power Beamwidth (HPBW):</strong></p>
-  <div class="formula">HPBW (3 dB) ≈ 70 × (λ / D) degrees</div>
-  <p>where <strong>λ</strong> is wavelength and <strong>D</strong> is dish diameter (same units). This is a practical rule of thumb for typical parabolic dishes with ~60% efficiency.</p>
+    <p><strong>Beamwidth at an arbitrary (X) Beamwidth Level:</strong></p>
+    <div class="formula">
+      Beamwidth at X dB ≈ HPBW × √(X / 3)
+    </div>
+    
+    <p style="margin-top: 18px; font-size: 0.95rem; color: #64748b;">
+      where X is the corresponding Beamwidth Level (for instance, 1dB, 0.5dB or 0.1dB)
+    </p>
 
-  <h4 style="margin-top: 24px;">1 dB, 0.5 dB, and 0.1 dB Beamwidths</h4>
-  <p>Near the boresight (main beam center), the radiation pattern of a parabolic dish can be approximated as parabolic in shape. This leads to the scaling formula:</p>
-  
-  <div class="formula">
-    Beamwidth at X dB ≈ HPBW<sub>3dB</sub> × √(X / 3)
+    <h4 style="margin-top: 28px;">Power Loss at Various Beamwidth Levels</h4>
+    
+    <table class="power-table">
+      <thead>
+        <tr>
+          <th>Beamwidth Level</th>
+          <th>Power Remaining</th>
+          <th>Power Lost</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>3 dB</strong> (Half-Power)</td>
+          <td>50%</td>
+          <td>50%</td>
+        </tr>
+        <tr>
+          <td><strong>1 dB</strong></td>
+          <td>≈ 79.4%</td>
+          <td>≈ 20.6%</td>
+        </tr>
+        <tr>
+          <td><strong>0.5 dB</strong></td>
+          <td>≈ 89.1%</td>
+          <td>≈ 10.9%</td>
+        </tr>
+        <tr>
+          <td><strong>0.1 dB</strong></td>
+          <td>≈ 97.7%</td>
+          <td>≈ 2.3%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="font-size: 0.95rem; color: #64748b;">
+    These values are exact by definition of the contours. In practice, remaining well within the 0.5 dB or 0.1 dB beamwidth on lower EME bands, and within 0.05 dB or 0.1 dB on higher EME bands, ensures negligible loss.
+    </p>
+
+    <h4 style="margin-top: 28px;">Practical Limit: Electrically Small Aperture</h4>
+    <p>
+    For a given frequency, an antenna becomes electrically small when the dish diameter <strong>D ≈ 2λ</strong>.
+    In this region, the corresponding beamwidth becomes very large (on the order of ~30–40°).
+    The orange dashed line at <strong>~35°</strong> marks this <strong>practical limit</strong>.
+    </p>
+
+    <p>
+    Above this beamwidth (i.e., for electrically small antennas), diffraction effects dominate, and the antenna loses directivity and gain, behaving more like a weakly directive or quasi-omnidirectional radiator.
+    </p>
+
+    <p>
+    In practice, even approaching this limit is problematic: the feed system becomes strongly coupled to the reflector, blockage effects increase, and the dish no longer forms an efficient aperture.
+    </p>
   </div>
-  
-  <p><strong>Examples:</strong></p>
-  <ul style="margin: 8px 0 0 20px; padding: 0;">
-    <li>1 dB beamwidth ≈ HPBW × √(1/3) ≈ HPBW × 0.577</li>
-    <li>0.5 dB beamwidth ≈ HPBW × √(0.5/3) ≈ HPBW × 0.408</li>
-    <li>0.1 dB beamwidth ≈ HPBW × √(0.1/3) ≈ HPBW × 0.183</li>
-  </ul>
-  
-  <p style="margin-top: 18px; font-size: 0.95rem; color: #64748b;">
-    This approximation is widely used in EME and satellite communications and is quite accurate for small dB values (&lt; 3 dB). It becomes less precise at higher drop levels (&gt; 6–10 dB) because real patterns include illumination taper and diffraction effects.
-  </p>
-</div>
 
-<script>
-const c = 299792458;
-const BEAMWIDTH_CONSTANT = 70;
+  <!-- Copyright Pane -->
+  <div class="copyright">
+    © <span id="currentYear"></span> SA5IKN. All rights reserved.
+  </div>
 
-const F_START_GHZ = 0.144;
-const F_END_GHZ = 78;
+  <script>
+    const c = 299792458;
+    const BEAMWIDTH_CONSTANT = 70;
 
-const logStart = Math.log10(F_START_GHZ);
-const logEnd   = Math.log10(F_END_GHZ);
-const logRange = logEnd - logStart;
+    const F_START_GHZ = 0.144;
+    const F_END_GHZ = 78;
 
-const emeFreqs = [0.1441, 0.4321, 1.2961, 2.3041, 3.4561, 5.7601, 10.3681, 24.1921, 47.0881, 76.5];
+    const logStart = Math.log10(F_START_GHZ);
+    const logEnd   = Math.log10(F_END_GHZ);
+    const logRange = logEnd - logStart;
 
-function generateLogTicks(minVal, maxVal) {
-  const ticks = [];
-  let decade = Math.pow(10, Math.floor(Math.log10(minVal) - 0.01));
-  while (decade <= maxVal * 1.1) {
-    for (let m of [1, 2, 5]) {
-      const t = m * decade;
-      if (t >= minVal * 0.9 && t <= maxVal * 1.1) {
-        if (ticks.length === 0 || t / ticks[ticks.length - 1] >= 1.15) ticks.push(t);
-      }
-    }
-    decade *= 10;
-  }
-  return ticks;
-}
+    const emeFreqs = [0.1441, 0.4321, 1.2961, 2.3041, 3.4561, 5.7601, 10.3681, 24.1921, 47.0881, 76.5];
 
-function logSpace(start, end, points) {
-  const arr = [];
-  const ls = Math.log10(start);
-  const le = Math.log10(end);
-  for (let i = 0; i < points; i++) {
-    const t = i / (points - 1);
-    arr.push(Math.pow(10, ls + t * (le - ls)));
-  }
-  return arr;
-}
-
-function hpbw(lambda, D, dbLevel) {
-  const bw3 = BEAMWIDTH_CONSTANT * (lambda / D);
-  if (dbLevel === "3") return bw3;
-  const factor = Math.sqrt(parseFloat(dbLevel) / 3);
-  return bw3 * factor;
-}
-
-function addAntenna(value = 1.0) {
-  const div = document.getElementById("diameterInputs");
-  const wrapper = document.createElement("div");
-  wrapper.className = "diameter-item";
-  
-  const input = document.createElement("input");
-  input.type = "number";
-  input.step = "0.1";
-  input.value = value;
-  
-  const removeBtn = document.createElement("button");
-  removeBtn.innerHTML = "Remove";
-  removeBtn.onclick = () => { wrapper.remove(); updatePlot(); };
-  
-  wrapper.appendChild(input);
-  wrapper.appendChild(removeBtn);
-  div.appendChild(wrapper);
-}
-
-function getDiameters() {
-  return Array.from(document.querySelectorAll("#diameterInputs input"))
-    .map(i => parseFloat(i.value))
-    .filter(v => !isNaN(v) && v > 0);
-}
-
-function getSelectedCurves() {
-  return Array.from(document.querySelectorAll("input[type=checkbox]:checked"))
-    .map(cb => cb.value);
-}
-
-function updatePlot() {
-  const isMobile = window.innerWidth < 768;
-  
-  const freq_hz = logSpace(F_START_GHZ * 1e9, F_END_GHZ * 1e9, 1000);
-  const freq_ghz = freq_hz.map(f => f / 1e9);
-  const lambda = freq_hz.map(f => c / f);
-
-  const diameters = getDiameters();
-  const curves = getSelectedCurves();
-
-  let traces = [];
-
-  diameters.forEach(D => {
-    curves.forEach(curve => {
-      const scaled = lambda.map(lam => hpbw(lam, D, curve));
-
-      traces.push({
-        x: freq_ghz,
-        y: scaled,
-        mode: "lines",
-        name: `${D} m (${curve} dB)`,
-        line: { width: 2.8 },
-        hovertemplate:
-          `<b>${D} m Antenna</b><br>` +
-          `Level: ${curve} dB<br>` +
-          `Frequency: %{x:.4f} GHz<br>` +
-          `Beamwidth: %{y:.3f}°<extra></extra>`
-      });
-
-      const emeY = emeFreqs.map(f => {
-        let idx = 0, minDiff = Infinity;
-        for (let i = 0; i < freq_ghz.length; i++) {
-          const diff = Math.abs(freq_ghz[i] - f);
-          if (diff < minDiff) { minDiff = diff; idx = i; }
+    function generateLogTicks(minVal, maxVal) {
+      const ticks = [];
+      let decade = Math.pow(10, Math.floor(Math.log10(minVal) - 0.01));
+      while (decade <= maxVal * 1.1) {
+        for (let m of [1, 2, 5]) {
+          const t = m * decade;
+          if (t >= minVal * 0.9 && t <= maxVal * 1.1) {
+            if (ticks.length === 0 || t / ticks[ticks.length - 1] >= 1.15) ticks.push(t);
+          }
         }
-        return scaled[idx];
-      });
-
-      traces.push({
-        x: emeFreqs,
-        y: emeY,
-        mode: "markers",
-        marker: { size: 7.5, color: "#b91c1c", symbol: "circle", line: {color: "white", width: 1.8} },
-        showlegend: false,
-        hovertemplate:
-          `EME Frequency: %{x:.4f} GHz<br>` +
-          `Beamwidth: %{y:.3f}°<br>` +
-          `(${D} m @ ${curve} dB)<extra></extra>`
-      });
-    });
-  });
-
-  let allY = traces.flatMap(t => t.y || []);
-  const yMin = allY.length ? Math.max(0.001, Math.min(...allY)) : 0.01;
-  const yMax = allY.length ? Math.max(1, Math.max(...allY) * 1.25) : 100;
-  const yLogMin = Math.log10(yMin * 0.8);
-  const yLogMax = Math.log10(yMax * 1.25);
-
-  const xTicks = generateLogTicks(F_START_GHZ, F_END_GHZ);
-
-  const emeShapes = emeFreqs.map(f => ({
-    type: "line", xref: "paper", yref: "paper",
-    x0: (Math.log10(f) - logStart) / logRange,
-    x1: (Math.log10(f) - logStart) / logRange,
-    y0: 0, y1: 1,
-    line: { color: "rgba(220, 20, 60, 0.55)", width: 1.5, dash: "dot" },
-    layer: "below"
-  }));
-
-  const emeAnnotations = emeFreqs.map(f => ({
-    x: (Math.log10(f) - logStart) / logRange + 0.004,
-    y: 0.04,
-    xref: "paper", yref: "paper",
-    text: f.toFixed(3),
-    showarrow: false,
-    xanchor: "left",
-    font: { size: 11, color: "#b91c1c" },
-    textangle: -90,
-    opacity: 0.9,
-    layer: "below"
-  }));
-
-  const LIMIT = 35;
-
-  const limitShapes = [{
-    type: "line",
-    xref: "paper", yref: "y",
-    x0: 0, x1: 1,
-    y0: LIMIT, y1: LIMIT,
-    line: { color: "#d97706", width: 4, dash: "dash" },
-    layer: "above"
-  }];
-
-  const limitAnnotations = [{
-    x: 0.85,
-    y: 0.79,
-    xref: "paper",
-    yref: "paper",
-    text: "HPBW ≈ 2λ (practical limit)",
-    showarrow: false,
-    font: { size: 13, color: "#d97706" },
-    bgcolor: "rgba(254, 252, 232, 0.85)",
-    bordercolor: "transparent",
-    borderwidth: 0,
-    borderpad: 6,
-    opacity: 1,
-    layer: "above"
-  }];
-
-  const layout = {
-    title: "Parabolic Antenna Beamwidth vs Frequency (Log-Log)",
-    autosize: true,
-    showlegend: true,
-    legend: {
-      x: isMobile ? 0.95 : 1.02,
-      y: isMobile ? 0.98 : 1.0,
-      xanchor: isMobile ? 'right' : 'left',
-      yanchor: 'top',
-      bgcolor: '#ffffff',
-      bordercolor: '#94a3b8',
-      borderwidth: 2,
-      font: {
-        size: isMobile ? 11.5 : 13,
-        color: '#1e2937'
+        decade *= 10;
       }
-    },
-    margin: {
-      l: isMobile ? 48 : 70,
-      r: isMobile ? 32 : 40,
-      t: 55,
-      b: 65
-    },
-    xaxis: {
-      title: "Frequency (GHz)",
-      type: "log",
-      range: [logStart, logEnd],
-      fixedrange: true,
-      tickmode: "array",
-      tickvals: xTicks,
-      ticktext: xTicks.map(v => v >= 10 ? v.toFixed(0) : v.toFixed(v < 1 ? 3 : 2)),
-      gridcolor: "#ddd",
-      minor: { showgrid: true }
-    },
-    yaxis: {
-      title: "Beamwidth (degrees)",
-      type: "log",
-      range: [yLogMin, yLogMax],
-      fixedrange: true,
-      tickmode: "array",
-      tickvals: generateLogTicks(Math.pow(10, yLogMin), Math.pow(10, yLogMax)),
-      ticktext: generateLogTicks(Math.pow(10, yLogMin), Math.pow(10, yLogMax)).map(v => v >= 10 ? v.toFixed(0) : v.toFixed(v < 1 ? 3 : 2)),
-      gridcolor: "#ddd",
-      minor: { showgrid: true }
-    },
-    shapes: [...emeShapes, ...limitShapes],
-    annotations: [...emeAnnotations, ...limitAnnotations],
-    hovermode: "closest",
-    dragmode: false,
-    height: isMobile ? 560 : 720
-  };
+      return ticks;
+    }
 
-  const config = {
-    scrollZoom: false,
-    displayModeBar: true,
-    modeBarButtonsToRemove: ['zoom2d','pan2d','select2d','lasso2d','zoomIn2d','zoomOut2d'],
-    displaylogo: false,
-    responsive: true
-  };
+    function logSpace(start, end, points) {
+      const arr = [];
+      const ls = Math.log10(start);
+      const le = Math.log10(end);
+      for (let i = 0; i < points; i++) {
+        const t = i / (points - 1);
+        arr.push(Math.pow(10, ls + t * (le - ls)));
+      }
+      return arr;
+    }
 
-  Plotly.newPlot("plot", traces, layout, config);
-}
+    function hpbw(lambda, D, dbLevel) {
+      const bw3 = BEAMWIDTH_CONSTANT * (lambda / D);
+      if (dbLevel === "3") return bw3;
+      const factor = Math.sqrt(parseFloat(dbLevel) / 3);
+      return bw3 * factor;
+    }
 
-// Initialize with only one 3m antenna and only 3dB checked
-addAntenna(3.0);
-updatePlot();
+    function addAntenna(value = 1.0) {
+      const div = document.getElementById("diameterInputs");
+      const wrapper = document.createElement("div");
+      wrapper.className = "diameter-item";
+      
+      const input = document.createElement("input");
+      input.type = "number";
+      input.step = "0.1";
+      input.value = value;
+      
+      const removeBtn = document.createElement("button");
+      removeBtn.innerHTML = "Remove";
+      removeBtn.onclick = () => { wrapper.remove(); updatePlot(); };
+      
+      wrapper.appendChild(input);
+      wrapper.appendChild(removeBtn);
+      div.appendChild(wrapper);
+    }
 
-// Refresh on resize
-window.addEventListener('resize', () => {
-  if (document.getElementById('plot').data) updatePlot();
-});
-</script>
+    function getDiameters() {
+      return Array.from(document.querySelectorAll("#diameterInputs input"))
+        .map(i => parseFloat(i.value))
+        .filter(v => !isNaN(v) && v > 0);
+    }
+
+    function getSelectedCurves() {
+      return Array.from(document.querySelectorAll("input[type=checkbox]:checked"))
+        .map(cb => cb.value);
+    }
+
+    function updatePlot() {
+      const isMobile = window.innerWidth < 768;
+      
+      const freq_hz = logSpace(F_START_GHZ * 1e9, F_END_GHZ * 1e9, 1000);
+      const freq_ghz = freq_hz.map(f => f / 1e9);
+      const lambda = freq_hz.map(f => c / f);
+
+      const diameters = getDiameters();
+      const curves = getSelectedCurves();
+
+      let traces = [];
+
+      diameters.forEach(D => {
+        curves.forEach(curve => {
+          const scaled = lambda.map(lam => hpbw(lam, D, curve));
+
+          traces.push({
+            x: freq_ghz,
+            y: scaled,
+            mode: "lines",
+            name: `${D} m (${curve} dB)`,
+            line: { width: 2.8 },
+            hovertemplate:
+              `<b>${D} m Antenna</b><br>` +
+              `Level: ${curve} dB<br>` +
+              `Frequency: %{x:.4f} GHz<br>` +
+              `Beamwidth: %{y:.3f}°<extra></extra>`
+          });
+
+          const emeY = emeFreqs.map(f => {
+            let idx = 0, minDiff = Infinity;
+            for (let i = 0; i < freq_ghz.length; i++) {
+              const diff = Math.abs(freq_ghz[i] - f);
+              if (diff < minDiff) { minDiff = diff; idx = i; }
+            }
+            return scaled[idx];
+          });
+
+          traces.push({
+            x: emeFreqs,
+            y: emeY,
+            mode: "markers",
+            marker: { size: 7.5, color: "#b91c1c", symbol: "circle", line: {color: "white", width: 1.8} },
+            showlegend: false,
+            hovertemplate:
+              `EME Frequency: %{x:.4f} GHz<br>` +
+              `Beamwidth: %{y:.3f}°<br>` +
+              `(${D} m @ ${curve} dB)<extra></extra>`
+          });
+        });
+      });
+
+      let allY = traces.flatMap(t => t.y || []);
+      const yMin = allY.length ? Math.max(0.001, Math.min(...allY)) : 0.01;
+      const yMax = allY.length ? Math.max(1, Math.max(...allY) * 1.25) : 100;
+      const yLogMin = Math.log10(yMin * 0.8);
+      const yLogMax = Math.log10(yMax * 1.25);
+
+      const xTicks = generateLogTicks(F_START_GHZ, F_END_GHZ);
+
+      const emeShapes = emeFreqs.map(f => ({
+        type: "line", xref: "paper", yref: "paper",
+        x0: (Math.log10(f) - logStart) / logRange,
+        x1: (Math.log10(f) - logStart) / logRange,
+        y0: 0, y1: 1,
+        line: { color: "rgba(220, 20, 60, 0.55)", width: 1.5, dash: "dot" },
+        layer: "below"
+      }));
+
+      const emeAnnotations = emeFreqs.map(f => ({
+        x: (Math.log10(f) - logStart) / logRange + 0.004,
+        y: 0.04,
+        xref: "paper", yref: "paper",
+        text: f.toFixed(3),
+        showarrow: false,
+        xanchor: "left",
+        font: { size: 11, color: "#b91c1c" },
+        textangle: -90,
+        opacity: 0.9,
+        layer: "below"
+      }));
+
+      const LIMIT = 35;
+
+      const limitShapes = [{
+        type: "line",
+        xref: "paper", yref: "y",
+        x0: 0, x1: 1,
+        y0: LIMIT, y1: LIMIT,
+        line: { color: "#d97706", width: 4, dash: "dash" },
+        layer: "above"
+      }];
+
+      const limitAnnotations = [{
+        x: 0.85,
+        y: 0.79,
+        xref: "paper",
+        yref: "paper",
+        text: "",
+        showarrow: false,
+        font: { size: 13, color: "#d97706" },
+        bgcolor: "rgba(254, 252, 232, 0.85)",
+        bordercolor: "transparent",
+        borderwidth: 0,
+        borderpad: 6,
+        opacity: 1,
+        layer: "above"
+      }];
+
+      const layout = {
+        title: "Parabolic Antenna Beamwidth vs Frequency (Log-Log)",
+        autosize: true,
+        showlegend: true,
+        legend: {
+          x: isMobile ? 0.95 : 1.02,
+          y: isMobile ? 0.98 : 1.0,
+          xanchor: isMobile ? 'right' : 'left',
+          yanchor: 'top',
+          bgcolor: '#ffffff',
+          bordercolor: '#94a3b8',
+          borderwidth: 2,
+          font: {
+            size: isMobile ? 11.5 : 13,
+            color: '#1e2937'
+          }
+        },
+        margin: {
+          l: isMobile ? 48 : 70,
+          r: isMobile ? 32 : 40,
+          t: 55,
+          b: 65
+        },
+        xaxis: {
+          title: "Frequency (GHz)",
+          type: "log",
+          range: [logStart, logEnd],
+          fixedrange: true,
+          tickmode: "array",
+          tickvals: xTicks,
+          ticktext: xTicks.map(v => v >= 10 ? v.toFixed(0) : v.toFixed(v < 1 ? 3 : 2)),
+          gridcolor: "#ddd",
+          minor: { showgrid: true }
+        },
+        yaxis: {
+          title: "Beamwidth (degrees)",
+          type: "log",
+          range: [yLogMin, yLogMax],
+          fixedrange: true,
+          tickmode: "array",
+          tickvals: generateLogTicks(Math.pow(10, yLogMin), Math.pow(10, yLogMax)),
+          ticktext: generateLogTicks(Math.pow(10, yLogMin), Math.pow(10, yLogMax)).map(v => v >= 10 ? v.toFixed(0) : v.toFixed(v < 1 ? 3 : 2)),
+          gridcolor: "#ddd",
+          minor: { showgrid: true }
+        },
+        shapes: [...emeShapes, ...limitShapes],
+        annotations: [...emeAnnotations, ...limitAnnotations],
+        hovermode: "closest",
+        dragmode: false,
+        height: isMobile ? 560 : 720
+      };
+
+      const config = {
+        scrollZoom: false,
+        displayModeBar: true,
+        modeBarButtonsToRemove: ['zoom2d','pan2d','select2d','lasso2d','zoomIn2d','zoomOut2d'],
+        displaylogo: false,
+        responsive: true
+      };
+
+      Plotly.newPlot("plot", traces, layout, config);
+    }
+
+    // Initialize with one 3m antenna
+    addAntenna(3.0);
+    updatePlot();
+
+    // Set current year automatically
+    document.getElementById("currentYear").textContent = new Date().getFullYear();
+
+    // Refresh plot on window resize
+    window.addEventListener('resize', () => {
+      if (document.getElementById('plot').data) updatePlot();
+    });
+  </script>
 
 </body>
 </html>
