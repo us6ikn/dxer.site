@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parabolic Antenna Gain Calculator</title>
+  
+  <meta name="description" id="metaDescription" content="Parabolic Antenna Gain Calculator computes dish gain vs frequency for different dish sizes and efficiencies on all EME bands on all EME bands, from 144MHz to 78GHz." />
+  <meta name="keywords" content="Parabolic Antenna, Antenna, Dish Antenna, Parabolic Antenna Calculator, Parabolic antenna gain, EME, Moonbounce, Ham Radio, Amateur Radio" />
+  <meta name="author" content="SA5IKN">
+      <meta name="robots" content="index, follow">
+          <meta property="og:title" id="ogTitle" content="Parabolic Antenna Gain Calculator">
+              <meta property="og:type" content="website">
+                  <meta property="og:description" id="ogDescription" content="Parabolic Antenna Gain Calculator computes dish gain vs frequency for different dish sizes and efficiencies on all EME bands on all EME bands, from 144MHz to 78GHz.">
+                      <meta property="og:image" content="https://dxer.site/parabolic-antenna-gain-calculator/parabolic-antenna-gain-calculator.jpg">
+                          <meta property="og:url" content="https://dxer.site/parabolic-antenna-gain-calculator/">
+                              <meta name="twitter:card" content="summary_large_image">
+                                  <meta name="twitter:title" id="twitterTitle" content="Parabolic Antenna Gain Calculator" />
+                                  <meta name="twitter:description" id="twitterDescription" content="Parabolic Antenna Gain Calculator computes dish gain vs frequency for different dish sizes and efficiencies on all EME bands on all EME bands, from 144MHz to 78GHz." />
+                                  <meta name="twitter:image" content="https://dxer.site/parabolic-antenna-gain-calculator/parabolic-antenna-gain-calculator.jpg" />
+                                  <link rel="canonical" href="https://dxer.site/parabolic-antenna-gain-calculator/" />
+                                  <!-- Favicon and App Icons -->
+                                  <link rel="apple-touch-icon" sizes="180x180" href="https://dxer.site/assets/apple-touch-icon.png">
+                                      <link rel="icon" type="image/png" sizes="32x32" href="https://dxer.site/assets/favicon-32x32.png">
+                                          <link rel="icon" type="image/png" sizes="16x16" href="https://dxer.site/assets/favicon-16x16.png">
+                                              <link rel="manifest" href="https://dxer.site/assets/site.webmanifest">
+                                                  <link rel="shortcut icon" href="https://dxer.site/assets/favicon.ico">
+                                                      <script type="application/ld+json">
+                                                          {
+                                                              "@context": "https://schema.org",
+                                                              "@type": "WebApplication",
+                                                              "name": "Parabolic Antenna Gain Calculator",
+                                                              "url": "https://dxer.site/parabolic-antenna-gain-calculator/",
+                                                              "author": {
+                                                                  "@type": "Person",
+                                                                  "name": "SA5IKN"
+                                                              },
+                                                              "description": "Parabolic Antenna Gain Calculator computes dish gain vs frequency for different dish sizes and efficiencies on all EME bands on all EME bands, from 144MHz to 78GHz.",
+                                                              "applicationCategory": "Science",
+                                                              "operatingSystem": "All",
+                                                              "browserRequirements": "Requires JavaScript",
+                                                              "inLanguage": "en",
+                                                              "applicationSubCategory": "Amateur Radio Application",
+                                                              "offers": {
+                                                                  "@type": "Offer",
+                                                                  "price": "0.00",
+                                                                  "priceCurrency": "USD"
+                                                              }
+                                                          }
+                                                      </script>
+  
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --text: #1f2937;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      margin: 15px;
+      background: #f1f5f9;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .home-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      color: var(--primary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .home-btn:hover {
+      background: #f8fafc;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+    }
+
+    .home-btn svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    h2 {
+      margin: 0;
+      color: var(--text);
+      font-size: 1.55rem;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: #64748b;
+      font-size: 0.92rem;
+      margin-bottom: 20px;
+    }
+
+    .controls, .explanation {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+      padding: 20px;
+      margin-bottom: 25px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .controls h3 {
+      margin: 0 0 14px 0;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .antenna-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .antenna-item {
+      background: #f8fafc;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .field {
+      flex: 1 1 45%;
+      display: flex;
+      flex-direction: column;
+      min-width: 140px;
+    }
+
+    .antenna-item label {
+      margin-bottom: 4px;
+      font-weight: 500;
+      color: #334155;
+      font-size: 0.95rem;
+    }
+
+    .antenna-item input {
+      padding: 10px 12px;
+      font-size: 1.05rem;
+      border: 2px solid #cbd5e1;
+      border-radius: 7px;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    .antenna-item input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      outline: none;
+    }
+
+    .percent-span {
+      margin-top: 4px;
+      color: #64748b;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .antenna-item button {
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 7px;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      margin-top: 24px;
+      align-self: flex-start;
+    }
+
+    .add-btn, .update-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .add-btn {
+      background: #e0f2fe;
+      color: #1e40af;
+      border: 2px solid #bae6fd;
+    }
+
+    .update-btn {
+      background: linear-gradient(90deg, #2563eb, #1e40af);
+      color: white;
+      padding: 14px 40px;
+      font-size: 1.1rem;
+      width: 100%;
+      margin-top: 20px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+
+    .update-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+    }
+
+    #plot { width: 100%; }
+
+    .formula {
+      background: #f8fafc;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 1.05rem;
+      border-left: 4px solid var(--primary);
+      margin: 12px 0;
+    }
+
+    .copyright {
+      margin-top: 40px;
+      padding: 16px 20px;
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      text-align: center;
+      color: #64748b;
+      font-size: 0.88rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Mobile-first responsive improvements */
+    @media (max-width: 640px) {
+      body {
+        margin: 10px;
+        font-size: 14.5px;
+      }
+
+      .controls, .explanation {
+        padding: 16px;
+      }
+
+      .antenna-item {
+        flex-direction: column;
+        padding: 16px;
+        gap: 16px;
+      }
+
+      .field {
+        flex: 1 1 100%;
+        min-width: 100%;
+      }
+
+      .antenna-item button {
+        margin-top: 8px;
+        align-self: flex-end;
+      }
+
+      .antenna-item label {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+    <div class="header">
+      <a href="https://dxer.site" class="home-btn" title="Go to dxer.site">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.25"
+                d="M3 9.75L12 3l9 6.75M12 21v-9.75M3 9.75v9.75a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 19.5V9.75" />
+        </svg>
+      </a>
+      <h2>Parabolic Antenna Gain Calculator</h2>
+    </div>
+
+  <p class="subtitle">
+    Calculates dish gain (dBi) vs frequency for all EME bands
+  </p>
+
+  <p style="margin-top: 8px; margin-bottom: 25px; font-size: 15px; color: #334155;">
+    To calculate dish beamwidth
+    <a href="https://dxer.site/parabolic-antenna-beamwidth-calculator/"
+       target="_blank"
+       style="color: var(--primary); text-decoration: underline; font-weight: 500;">
+      click here
+    </a>
+  </p>
+
+  <div class="controls">
+    <h3>Antenna Diameter & Efficiency</h3>
+    <div id="antennaInputs" class="antenna-list"></div>
+    <button onclick="addAntenna()" class="add-btn">+ Add Antenna</button>
+
+    <button onclick="updatePlot()" class="update-btn">Update Plot</button>
+  </div>
+
+  <div id="plot"></div>
+
+  <!-- Explanation Pane -->
+  <div class="explanation">
+    <h3>Explanation & Formulas</h3>
+    
+    <p><strong>Parabolic Antenna Gain (dBi):</strong></p>
+    <div class="formula">
+      Gain = 10 × log₁₀ [ η × (π × D / λ)² ]
+    </div>
+    <p>where:</p>
+    <ul>
+      <li><strong>η</strong> = aperture efficiency</li>
+      <li><strong>D</strong> = dish diameter (meters)</li>
+      <li><strong>λ</strong> = wavelength</li>
+    </ul>
+
+    <p>This is the theoretical maximum gain for a given physical aperture and efficiency. Real-world gain can be lower due to surface roughness, feed spillover, blockage, etc.</p>
+
+    <h4 style="margin-top: 28px;">Typical Efficiencies</h4>
+    <ul>
+      <li>35% – Poor feed / electrically small dishes</li>
+      <li>50% – Average amateur tropo setup</li>
+      <li>60% – Reasonably well-illuminated dish (common reference)</li>
+      <li>70–75% – High-performance optimized systems (EME, radio astronomy)</li>
+    </ul>
+
+    <p style="font-size: 0.95rem; color: #64748b; margin-top: 20px;">
+      Note: Gain increases with frequency (smaller λ) and with diameter. Efficiency has a strong impact — going from 50% to 70% gives almost +1.5 dB extra gain.
+    </p>
+  </div>
+
+  <div class="copyright">
+    © <span id="currentYear"></span> SA5IKN. All rights reserved.
+  </div>
+
+  <script>
+      const _0x911281=_0x4495;(function(_0x5c777f,_0x1830b9){const _0x147ec5=_0x4495,_0x653815=_0x5c777f();while(!![]){try{const _0x39d3ed=-parseInt(_0x147ec5(0x181))/0x1*(parseInt(_0x147ec5(0x189))/0x2)+-parseInt(_0x147ec5(0x16d))/0x3*(parseInt(_0x147ec5(0x19b))/0x4)+-parseInt(_0x147ec5(0x17e))/0x5+-parseInt(_0x147ec5(0x171))/0x6*(parseInt(_0x147ec5(0x178))/0x7)+parseInt(_0x147ec5(0x170))/0x8+parseInt(_0x147ec5(0x190))/0x9*(-parseInt(_0x147ec5(0x192))/0xa)+parseInt(_0x147ec5(0x18e))/0xb;if(_0x39d3ed===_0x1830b9)break;else _0x653815['push'](_0x653815['shift']());}catch(_0x369926){_0x653815['push'](_0x653815['shift']());}}}(_0x1ecb,0x323c2));function _0x1ecb(){const _0x55e420=['Frequency\x20(GHz)','left','resetScale2d','select2d','EME:\x20%{x:.4f}\x20GHz<br>Gain:\x20%{y:.2f}\x20dBi<br>(','autoScale2d','3073QbCHfv','log10','abs','getFullYear','#b91c1c','data','423150mUrpVu','%<br>Frequency:\x20%{x:.4f}\x20GHz<br>Gain:\x20%{y:.2f}\x20dBi<extra></extra>','below','29159aSymxD','forEach','\x20m\x20Dish</b><br>Efficiency:\x20','Gain\x20(dBi)','dot','addEventListener','zoomOut2d','\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22percent-span\x22>%</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20onclick=\x22this.closest(\x27.antenna-item\x27).remove();\x20updatePlot();\x22>Remove</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20','22JPnANz','currentYear','className','.diameter-input','div','5202890CNxzOT','autoscale2d','9btNzpb','getElementById','867430COaPtJ','lines','right','plot','pow','pan2d','\x20m\x20@\x20','circle','log','2512PLiFXr','<b>','antennaInputs','zoom2d','map','innerHTML','markers','array','zoomIn2d','lasso2d','white','\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22field\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<label>Efficiency:</label>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<input\x20type=\x22number\x22\x20step=\x221\x22\x20min=\x221\x22\x20max=\x2299\x22\x20class=\x22efficiency-input\x22\x20value=\x22','push','center','textContent','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22field\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<label>Diameter\x20(m):</label>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<input\x20type=\x22number\x22\x20step=\x220.1\x22\x20class=\x22diameter-input\x22\x20value=\x22','createElement','top','paper','#ffffff','\x20m\x20(','#ddd','resize','querySelector','#94a3b8','Antenna\x20Gain\x20vs\x20Frequency','appendChild','rgba(220,\x2020,\x2060,\x200.55)','213abVYCv','floor','toFixed','2622952NaWOns','798daXsCz'];_0x1ecb=function(){return _0x55e420;};return _0x1ecb();}const c=0x11de784a,F_START_GHZ=0.144,F_END_GHZ=0x4e,logStart=Math['log10'](F_START_GHZ),logEnd=Math[_0x911281(0x179)](F_END_GHZ),logRange=logEnd-logStart,emeFreqs=[0.1441,0.4321,1.2961,2.3041,3.4561,5.7601,10.3681,24.1921,47.0881,76.5];function _0x4495(_0x58cbdd,_0x18c7b8){_0x58cbdd=_0x58cbdd-0x15d;const _0x1ecbaa=_0x1ecb();let _0x449554=_0x1ecbaa[_0x58cbdd];return _0x449554;}function generateLogTicks(_0x3497f3,_0x562d53){const _0xb8f2bc=_0x911281,_0x1b5f6f=[];let _0x4f240e=Math[_0xb8f2bc(0x196)](0xa,Math[_0xb8f2bc(0x16e)](Math[_0xb8f2bc(0x179)](_0x3497f3)-0.01));while(_0x4f240e<=_0x562d53*1.1){for(let _0x51613d of[0x1,0x2,0x5]){const _0x4a6ebc=_0x51613d*_0x4f240e;if(_0x4a6ebc>=_0x3497f3*0.9&&_0x4a6ebc<=_0x562d53*1.1){if(_0x1b5f6f['length']===0x0||_0x4a6ebc/_0x1b5f6f[_0x1b5f6f['length']-0x1]>=1.15)_0x1b5f6f[_0xb8f2bc(0x15d)](_0x4a6ebc);}}_0x4f240e*=0xa;}return _0x1b5f6f;}function logSpace(_0x3d068e,_0x20b95c,_0x12e6ff){const _0x611ed9=_0x911281,_0x223e15=[],_0x5a807c=Math[_0x611ed9(0x179)](_0x3d068e),_0x2756b8=Math[_0x611ed9(0x179)](_0x20b95c);for(let _0x1e1b03=0x0;_0x1e1b03<_0x12e6ff;_0x1e1b03++){_0x223e15[_0x611ed9(0x15d)](Math[_0x611ed9(0x196)](0xa,_0x5a807c+(_0x2756b8-_0x5a807c)*_0x1e1b03/(_0x12e6ff-0x1)));}return _0x223e15;}function dishGain(_0x53f0fe,_0x1624ee,_0x33c4c8){const _0xe79993=_0x911281,_0x206189=_0x1624ee/0x64;return 0xa*Math[_0xe79993(0x179)](_0x206189*Math['pow'](Math['PI']*_0x53f0fe/_0x33c4c8,0x2));}function addAntenna(_0x244d7c=0x3,_0x2fea8a=0x3c){const _0x1aeb9d=_0x911281,_0x105d5a=document[_0x1aeb9d(0x191)](_0x1aeb9d(0x19d)),_0x5f2dd9=document[_0x1aeb9d(0x161)](_0x1aeb9d(0x18d));_0x5f2dd9[_0x1aeb9d(0x18b)]='antenna-item',_0x5f2dd9[_0x1aeb9d(0x1a0)]=_0x1aeb9d(0x160)+_0x244d7c+_0x1aeb9d(0x1a6)+_0x2fea8a+_0x1aeb9d(0x188),_0x105d5a[_0x1aeb9d(0x16b)](_0x5f2dd9);}function getAntennas(){const _0x181d75=_0x911281,_0x1d5db4=document['querySelectorAll']('.antenna-item'),_0xfb35c8=[];return _0x1d5db4[_0x181d75(0x182)](_0x337546=>{const _0x36450a=_0x181d75,_0x1e4b98=_0x337546[_0x36450a(0x168)](_0x36450a(0x18c)),_0x4ea19c=_0x337546[_0x36450a(0x168)]('.efficiency-input'),_0x15ad8c=parseFloat(_0x1e4b98['value']);let _0x56406c=parseFloat(_0x4ea19c['value']);!isNaN(_0x15ad8c)&&_0x15ad8c>0x0&&!isNaN(_0x56406c)&&_0x56406c>0x0&&_0x56406c<=0x63&&_0xfb35c8[_0x36450a(0x15d)]({'D':_0x15ad8c,'eta':_0x56406c});}),_0xfb35c8;}function updatePlot(){const _0x43a18d=_0x911281,_0x545f2f=window['innerWidth']<0x300,_0x15e88a=logSpace(F_START_GHZ*0x3b9aca00,F_END_GHZ*0x3b9aca00,0x3e8),_0x28594c=_0x15e88a[_0x43a18d(0x19f)](_0xe9d850=>_0xe9d850/0x3b9aca00),_0x3760c0=_0x15e88a[_0x43a18d(0x19f)](_0x6da488=>c/_0x6da488),_0x11f76e=getAntennas();let _0x3bcbe5=[];_0x11f76e[_0x43a18d(0x182)](({D:_0x196604,eta:_0x56ad87})=>{const _0x43d6f5=_0x43a18d,_0x405a88=_0x3760c0[_0x43d6f5(0x19f)](_0x3a3d8f=>dishGain(_0x196604,_0x56ad87,_0x3a3d8f));_0x3bcbe5[_0x43d6f5(0x15d)]({'x':_0x28594c,'y':_0x405a88,'mode':_0x43d6f5(0x193),'name':_0x196604+_0x43d6f5(0x165)+_0x56ad87['toFixed'](0x0)+'%)','line':{'width':2.8},'hovertemplate':_0x43d6f5(0x19c)+_0x196604+_0x43d6f5(0x183)+_0x56ad87[_0x43d6f5(0x16f)](0x0)+_0x43d6f5(0x17f)});const _0x3cfbf5=emeFreqs[_0x43d6f5(0x19f)](_0x4890da=>{const _0x32efd8=_0x43d6f5;let _0x267a8b=0x0,_0x2e42f3=Infinity;for(let _0x36eaef=0x0;_0x36eaef<_0x28594c['length'];_0x36eaef++){const _0x5f2d05=Math[_0x32efd8(0x17a)](_0x28594c[_0x36eaef]-_0x4890da);_0x5f2d05<_0x2e42f3&&(_0x2e42f3=_0x5f2d05,_0x267a8b=_0x36eaef);}return _0x405a88[_0x267a8b];});_0x3bcbe5[_0x43d6f5(0x15d)]({'x':emeFreqs,'y':_0x3cfbf5,'mode':_0x43d6f5(0x1a1),'marker':{'size':7.5,'color':_0x43d6f5(0x17c),'symbol':_0x43d6f5(0x199),'line':{'color':_0x43d6f5(0x1a5),'width':1.8}},'showlegend':![],'hovertemplate':_0x43d6f5(0x176)+_0x196604+_0x43d6f5(0x198)+_0x56ad87[_0x43d6f5(0x16f)](0x0)+'%)<extra></extra>'});});const _0x31a4d4=generateLogTicks(F_START_GHZ,F_END_GHZ),_0x36dfb5=emeFreqs[_0x43a18d(0x19f)](_0x1abb0b=>({'type':'line','xref':'paper','yref':_0x43a18d(0x163),'x0':(Math['log10'](_0x1abb0b)-logStart)/logRange,'x1':(Math['log10'](_0x1abb0b)-logStart)/logRange,'y0':0x0,'y1':0x1,'line':{'color':_0x43a18d(0x16c),'width':1.5,'dash':_0x43a18d(0x185)},'layer':_0x43a18d(0x180)})),_0x4cab17=emeFreqs[_0x43a18d(0x19f)](_0x224a2e=>({'x':(Math['log10'](_0x224a2e)-logStart)/logRange+0.004,'y':0.04,'xref':_0x43a18d(0x163),'yref':_0x43a18d(0x163),'text':_0x224a2e[_0x43a18d(0x16f)](0x3),'showarrow':![],'xanchor':'left','font':{'size':0xb,'color':'#b91c1c'},'textangle':-0x5a,'opacity':0.9,'layer':_0x43a18d(0x180)})),_0x58013c={'title':{'text':_0x545f2f?_0x43a18d(0x16a):'Parabolic\x20Antenna\x20Gain\x20vs\x20Frequency\x20(Log-Log)','font':{'size':_0x545f2f?0xf:0x12},'x':0.5,'xanchor':_0x43a18d(0x15e),'y':0.96,'yanchor':'top','automargin':!![]},'autosize':!![],'showlegend':!![],'legend':{'x':_0x545f2f?0.98:1.02,'y':0x1,'xanchor':_0x545f2f?_0x43a18d(0x194):_0x43a18d(0x173),'yanchor':_0x43a18d(0x162),'bgcolor':_0x43a18d(0x164),'bordercolor':_0x43a18d(0x169),'borderwidth':0x2,'font':{'size':_0x545f2f?10.5:0xc}},'margin':{'l':_0x545f2f?0x30:0x46,'r':0x28,'t':_0x545f2f?0x5f:0x55,'b':0x41},'xaxis':{'title':_0x43a18d(0x172),'type':_0x43a18d(0x19a),'range':[logStart,logEnd],'tickmode':_0x43a18d(0x1a2),'tickvals':_0x31a4d4,'ticktext':_0x31a4d4[_0x43a18d(0x19f)](_0xc6ed91=>_0xc6ed91>=0xa?_0xc6ed91['toFixed'](0x0):_0xc6ed91['toFixed'](_0xc6ed91<0x1?0x3:0x2)),'gridcolor':'#ddd','titlefont':{'size':_0x545f2f?0xd:0xe}},'yaxis':{'title':_0x43a18d(0x184),'gridcolor':_0x43a18d(0x166),'titlefont':{'size':_0x545f2f?0xd:0xe}},'shapes':_0x36dfb5,'annotations':_0x4cab17,'hovermode':'closest','dragmode':![],'height':_0x545f2f?0x244:0x2d0,'font':{'size':_0x545f2f?0xb:0xc}};Plotly['newPlot']('plot',_0x3bcbe5,_0x58013c,{'scrollZoom':![],'displayModeBar':!![],'modeBarButtonsToRemove':[_0x43a18d(0x19e),_0x43a18d(0x197),_0x43a18d(0x175),_0x43a18d(0x1a4),_0x43a18d(0x1a3),_0x43a18d(0x187),_0x43a18d(0x174),_0x43a18d(0x18f),_0x43a18d(0x177)],'displaylogo':![],'responsive':!![]});}addAntenna(0x3,0x3c),updatePlot(),document[_0x911281(0x191)](_0x911281(0x18a))[_0x911281(0x15f)]=new Date()[_0x911281(0x17b)](),window[_0x911281(0x186)](_0x911281(0x167),()=>{const _0x34742b=_0x911281;if(document[_0x34742b(0x191)](_0x34742b(0x195))[_0x34742b(0x17d)])updatePlot();});
+    </script>
+  <!-- 100% privacy-first analytics -->
+  <script async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+</body>
+</html>
