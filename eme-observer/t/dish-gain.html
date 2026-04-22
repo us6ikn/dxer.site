@@ -458,8 +458,9 @@
           },
           x: 0.5,
           xanchor: 'center',
-          y: 0.97,           // moved slightly down
-          yanchor: 'top'
+          y: 0.96,
+          yanchor: 'top',
+          automargin: true   // Let Plotly automatically adjust margin for title
         },
         autosize: true,
         showlegend: true,
@@ -475,8 +476,8 @@
         },
         margin: {
           l: isMobile ? 48 : 70,
-          r: 25,
-          t: isMobile ? 82 : 85,   // increased top margin for mobile
+          r: 40,               // Increased right margin to better accommodate modebar
+          t: isMobile ? 95 : 85, // Significantly increased top margin on mobile
           b: 65
         },
         xaxis: {
@@ -498,7 +499,7 @@
         annotations: emeAnnotations,
         hovermode: "closest",
         dragmode: false,
-        height: isMobile ? 560 : 720,
+        height: isMobile ? 580 : 720,   // Slightly taller on mobile for extra space
         font: {
           size: isMobile ? 11 : 12
         }
