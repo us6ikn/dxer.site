@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parabolic Antenna Beamwidth Calculator</title>
+  
+  <meta name="description" id="metaDescription" content="Parabolic Antenna Beamwidth Calculator computes half-power and other beamwidth levels for parabolic dish antennas on all EME bands, from 144MHz to 78GHz." />
+  <meta name="keywords" content="Parabolic Antenna, Antenna, Dish Antenna, Parabolic Antenna Calculator, EME, Moonbounce, Ham Radio, Amateur Radio" />
+  <meta name="author" content="SA5IKN">
+      <meta name="robots" content="index, follow">
+          <meta property="og:title" id="ogTitle" content="Parabolic Antenna Beamwidth Calculator">
+              <meta property="og:type" content="website">
+                  <meta property="og:description" id="ogDescription" content="Parabolic Antenna Beamwidth Calculator computes half-power and other beamwidth levels for parabolic dish antennas on all EME bands, from 144MHz to 78GHz.">
+                      <meta property="og:image" content="https://dxer.site/parabolic-antenna-beamwidth-calculator/parabolic-antenna-beamwidth-calculator.jpg">
+                          <meta property="og:url" content="https://dxer.site/parabolic-antenna-beamwidth-calculator/">
+                              <meta name="twitter:card" content="summary_large_image">
+                                  <meta name="twitter:title" id="twitterTitle" content="Parabolic Antenna Beamwidth Calculator" />
+                                  <meta name="twitter:description" id="twitterDescription" content="Parabolic Antenna Beamwidth Calculator computes half-power and other beamwidth levels for parabolic dish antennas on all EME bands, from 144MHz to 78GHz." />
+                                  <meta name="twitter:image" content="https://dxer.site/parabolic-antenna-beamwidth-calculator/parabolic-antenna-beamwidth-calculator.jpg" />
+                                  <link rel="canonical" href="https://dxer.site/parabolic-antenna-beamwidth-calculator/" />
+                                  <!-- Favicon and App Icons -->
+                                  <link rel="apple-touch-icon" sizes="180x180" href="https://dxer.site/assets/apple-touch-icon.png">
+                                      <link rel="icon" type="image/png" sizes="32x32" href="https://dxer.site/assets/favicon-32x32.png">
+                                          <link rel="icon" type="image/png" sizes="16x16" href="https://dxer.site/assets/favicon-16x16.png">
+                                              <link rel="manifest" href="https://dxer.site/assets/site.webmanifest">
+                                                  <link rel="shortcut icon" href="https://dxer.site/assets/favicon.ico">
+                                                      <script type="application/ld+json">
+                                                          {
+                                                              "@context": "https://schema.org",
+                                                              "@type": "WebApplication",
+                                                              "name": "Parabolic Antenna Beamwidth Calculator",
+                                                              "url": "https://dxer.site/parabolic-antenna-beamwidth-calculator/",
+                                                              "author": {
+                                                                  "@type": "Person",
+                                                                  "name": "SA5IKN"
+                                                              },
+                                                              "description": "Parabolic Antenna Beamwidth Calculator computes half-power and other beamwidth levels for parabolic dish antennas on all EME bands, from 144MHz to 78GHz.",
+                                                              "applicationCategory": "Science",
+                                                              "operatingSystem": "All",
+                                                              "browserRequirements": "Requires JavaScript",
+                                                              "inLanguage": "en",
+                                                              "applicationSubCategory": "Amateur Radio Application",
+                                                              "offers": {
+                                                                  "@type": "Offer",
+                                                                  "price": "0.00",
+                                                                  "priceCurrency": "USD"
+                                                              }
+                                                          }
+                                                      </script>
+  
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --text: #1f2937;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      margin: 15px;
+      background: #f1f5f9;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .home-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      color: var(--primary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .home-btn:hover {
+      background: #f8fafc;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+    }
+
+    .home-btn svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    h2 {
+      margin: 0;
+      color: var(--text);
+      font-size: 1.55rem;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: #64748b;
+      font-size: 0.92rem;
+      margin-bottom: 20px;
+    }
+
+    .controls {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+      padding: 20px;
+      margin-bottom: 25px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .controls h3 {
+      margin: 0 0 14px 0;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .diameter-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .diameter-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f8fafc;
+      padding: 8px 12px;
+      border-radius: 9px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .diameter-item input {
+      flex: 1;
+      max-width: 130px;
+      padding: 9px 12px;
+      font-size: 1.05rem;
+      border: 2px solid #cbd5e1;
+      border-radius: 7px;
+    }
+
+    .diameter-item input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      outline: none;
+    }
+
+    .diameter-item button {
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 7px;
+      padding: 8px 16px;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    .diameter-item button:hover {
+      background: #dc2626;
+    }
+
+    .curves-section {
+      margin-top: 20px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px 26px;
+    }
+
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 1.02rem;
+      color: #334155;
+      cursor: pointer;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--primary);
+    }
+
+    .add-btn {
+      background: #e0f2fe;
+      color: #1e40af;
+      border: 2px solid #bae6fd;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .add-btn:hover {
+      background: #bae6fd;
+    }
+
+    .update-btn {
+      background: linear-gradient(90deg, #2563eb, #1e40af);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 40px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+
+    .update-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+    }
+
+    #plot { width: 100%; }
+
+    .explanation {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+      padding: 24px;
+      margin-top: 25px;
+      border: 1px solid #e2e8f0;
+      line-height: 1.65;
+    }
+
+    .explanation h3 {
+      margin: 0 0 16px 0;
+      color: var(--text);
+      font-size: 1.25rem;
+    }
+
+    .explanation h4 {
+      margin: 24px 0 12px 0;
+      color: var(--text);
+      font-size: 1.1rem;
+    }
+
+    .explanation p {
+      margin: 12px 0;
+      color: #334155;
+    }
+
+    .formula {
+      background: #f8fafc;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 1.05rem;
+      border-left: 4px solid var(--primary);
+      margin: 12px 0;
+    }
+
+    .power-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.98rem;
+    }
+
+    .power-table th, .power-table td {
+      border: 1px solid #cbd5e1;
+      padding: 10px 12px;
+      text-align: center;
+    }
+
+    .power-table th {
+      background: #f1f5f9;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .power-table tr:nth-child(even) {
+      background: #f8fafc;
+    }
+
+    /* Copyright Pane */
+    .copyright {
+      margin-top: 40px;
+      padding: 16px 20px;
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      text-align: center;
+      color: #64748b;
+      font-size: 0.88rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header with Home Button -->
+  <div class="header">
+    <a href="https://dxer.site" class="home-btn" title="Go to dxer.site">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.25"
+              d="M3 9.75L12 3l9 6.75M12 21v-9.75M3 9.75v9.75a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 19.5V9.75" />
+      </svg>
+    </a>
+    <h2>Parabolic Antenna Beamwidth Calculator</h2>
+  </div>
+
+  <p class="subtitle">Calculates half-power and other beamwidth levels for parabolic antennas on all EME bands</p>
+  
+  <p style="margin-top: 8px; margin-bottom: 25px; font-size: 15px; color: #334155;">
+    To calculate dish gain
+    <a href="https://dxer.site/parabolic-dish-gain-calculator/"
+       target="_blank"
+       style="color: var(--primary); text-decoration: underline; font-weight: 500;">
+      click here
+    </a>
+  </p>
+
+  <div class="controls">
+    <h3>Antenna Diameter (meters)</h3>
+    <div id="diameterInputs" class="diameter-list"></div>
+    <button onclick="addAntenna()" class="add-btn">+ Add Antenna</button>
+
+    <div class="curves-section">
+      <h3>Beamwidth Level Curves</h3>
+      <div class="checkbox-group">
+        <label><input type="checkbox" value="3" checked> 3 dB (Half-Power Beamwidth)</label>
+        <label><input type="checkbox" value="1"> 1 dB</label>
+        <label><input type="checkbox" value="0.5"> 0.5 dB</label>
+        <label><input type="checkbox" value="0.1"> 0.1 dB</label>
+      </div>
+    </div>
+
+    <button onclick="updatePlot()" class="update-btn">Update Plot</button>
+  </div>
+
+  <div id="plot"></div>
+
+  <!-- Explanation Pane -->
+  <div class="explanation">
+    <h3>Explanation & Formulas</h3>
+    
+    <p><strong>Half-Power Beamwidth (HPBW, 3dB) approximation:</strong></p>
+    <div class="formula">HPBW ≈ 70 × (λ / D)</div>
+    <p>where <strong>λ</strong> is the wavelength and <strong>D</strong> is the dish diameter. This approximation is valid for typical parabolic dishes with ~60% efficiency.</p>
+
+    <p><strong>Beamwidth at an arbitrary (X) Beamwidth Level:</strong></p>
+    <div class="formula">
+      Beamwidth at X dB ≈ HPBW × √(X / 3)
+    </div>
+    
+    <p style="margin-top: 18px; font-size: 0.95rem; color: #64748b;">
+      where X is the corresponding Beamwidth Level (for instance, 1dB, 0.5dB or 0.1dB)
+    </p>
+
+    <h4 style="margin-top: 28px;">Power Loss at Various Beamwidth Levels</h4>
+    
+    <table class="power-table">
+      <thead>
+        <tr>
+          <th>Beamwidth Level</th>
+          <th>Power Remaining</th>
+          <th>Power Lost</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>3 dB</strong> (Half-Power)</td>
+          <td>50%</td>
+          <td>50%</td>
+        </tr>
+        <tr>
+          <td><strong>1 dB</strong></td>
+          <td>≈ 79.4%</td>
+          <td>≈ 20.6%</td>
+        </tr>
+        <tr>
+          <td><strong>0.5 dB</strong></td>
+          <td>≈ 89.1%</td>
+          <td>≈ 10.9%</td>
+        </tr>
+        <tr>
+          <td><strong>0.1 dB</strong></td>
+          <td>≈ 97.7%</td>
+          <td>≈ 2.3%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="font-size: 0.95rem; color: #64748b;">
+    These values are exact by definition of the contours. In practice, remaining well within the 0.5 dB or 0.1 dB beamwidth on lower EME bands, and within 0.05 dB or 0.1 dB on higher EME bands, ensures negligible loss.
+    </p>
+
+    <h4 style="margin-top: 28px;">Practical Limit: Electrically Small Aperture</h4>
+    <p>
+    For a given frequency, an antenna becomes electrically small when <strong>D ≈ 2λ</strong>.
+    In this region, the corresponding beamwidth becomes very large (on the order of ~30–40°).
+    The orange dashed line at <strong>~35°</strong> marks this <strong>practical limit</strong>.
+    </p>
+  </div>
+
+  <!-- Copyright Pane -->
+  <div class="copyright">
+    © <span id="currentYear"></span> SA5IKN. All rights reserved.
+  </div>
+
+  <script>
+      const _0x1b2319=_0x14ed;(function(_0x39e76f,_0x4d0988){const _0x208557=_0x14ed,_0x5bc8f4=_0x39e76f();while(!![]){try{const _0x3e4eec=-parseInt(_0x208557(0x19e))/0x1*(-parseInt(_0x208557(0x193))/0x2)+-parseInt(_0x208557(0x18d))/0x3+parseInt(_0x208557(0x19c))/0x4+-parseInt(_0x208557(0x17b))/0x5+-parseInt(_0x208557(0x156))/0x6+parseInt(_0x208557(0x199))/0x7+-parseInt(_0x208557(0x171))/0x8;if(_0x3e4eec===_0x4d0988)break;else _0x5bc8f4['push'](_0x5bc8f4['shift']());}catch(_0x21882e){_0x5bc8f4['push'](_0x5bc8f4['shift']());}}}(_0x53b4,0x21626));const c=0x11de784a,BEAMWIDTH_CONSTANT=0x46,F_START_GHZ=0.144,F_END_GHZ=0x4e,logStart=Math[_0x1b2319(0x166)](F_START_GHZ),logEnd=Math[_0x1b2319(0x166)](F_END_GHZ),logRange=logEnd-logStart,emeFreqs=[0.1441,0.4321,1.2961,2.3041,3.4561,5.7601,10.3681,24.1921,47.0881,76.5];function generateLogTicks(_0x1b3320,_0x54d3e9){const _0x2b7723=_0x1b2319,_0x15668d=[];let _0x3bad35=Math[_0x2b7723(0x172)](0xa,Math['floor'](Math[_0x2b7723(0x166)](_0x1b3320)-0.01));while(_0x3bad35<=_0x54d3e9*1.1){for(let _0x276d01 of[0x1,0x2,0x5]){const _0x25c719=_0x276d01*_0x3bad35;if(_0x25c719>=_0x1b3320*0.9&&_0x25c719<=_0x54d3e9*1.1){if(_0x15668d[_0x2b7723(0x19d)]===0x0||_0x25c719/_0x15668d[_0x15668d[_0x2b7723(0x19d)]-0x1]>=1.15)_0x15668d['push'](_0x25c719);}}_0x3bad35*=0xa;}return _0x15668d;}function _0x53b4(){const _0x233654=['paper','lines','white','688680zLrcub','pow','push','sqrt','createElement','closest','right','above','filter','input[type=checkbox]:checked','749105OkMpXL','#diameterInputs\x20input','onclick','appendChild','transparent','dash','EME\x20Frequency:\x20%{x:.4f}\x20GHz<br>','plot','markers','#d97706','type','innerWidth','getElementById','resize','input','value','Beamwidth\x20vs\x20Frequency','\x20m\x20Antenna</b><br>','695793SqZonS','max','rgba(254,\x20252,\x20232,\x200.85)','button','\x20dB)','\x20m\x20(','542QzLQIf','Frequency:\x20%{x:.4f}\x20GHz<br>','Level:\x20','\x20dB<br>','number','center','1785210AZRvsy','diameter-item','Parabolic\x20Antenna\x20Beamwidth\x20vs\x20Frequency\x20(Log-Log)','1053464kYnbok','length','649XBMHOX','#ddd','querySelectorAll','#ffffff','pan2d','className','array','remove','538176KsOmke','dot','log','below','min','zoomOut2d','#b91c1c','Frequency\x20(GHz)','newPlot','top','diameterInputs','Beamwidth:\x20%{y:.3f}°<extra></extra>','getFullYear','rgba(220,\x2020,\x2060,\x200.55)','from','abs','log10','step','textContent','left','Remove','toFixed','map','line'];_0x53b4=function(){return _0x233654;};return _0x53b4();}function logSpace(_0x11ffa0,_0x126ea3,_0x178669){const _0x45ac04=_0x1b2319,_0x53e712=[],_0x10518f=Math[_0x45ac04(0x166)](_0x11ffa0),_0x286d5d=Math['log10'](_0x126ea3);for(let _0x42b64d=0x0;_0x42b64d<_0x178669;_0x42b64d++){const _0xc947c9=_0x42b64d/(_0x178669-0x1);_0x53e712[_0x45ac04(0x173)](Math['pow'](0xa,_0x10518f+_0xc947c9*(_0x286d5d-_0x10518f)));}return _0x53e712;}function hpbw(_0x3afe50,_0x56e040,_0x55dc5d){const _0x251afb=_0x1b2319,_0x44013c=BEAMWIDTH_CONSTANT*(_0x3afe50/_0x56e040);if(_0x55dc5d==='3')return _0x44013c;const _0x45fdb7=Math[_0x251afb(0x174)](parseFloat(_0x55dc5d)/0x3);return _0x44013c*_0x45fdb7;}function addAntenna(_0x25b5d9=0x1){const _0x12215d=_0x1b2319,_0x27cb5d=document['getElementById'](_0x12215d(0x160)),_0x138692=document[_0x12215d(0x175)]('div');_0x138692[_0x12215d(0x153)]=_0x12215d(0x19a);const _0x144fb6=document['createElement'](_0x12215d(0x189));_0x144fb6[_0x12215d(0x185)]=_0x12215d(0x197),_0x144fb6[_0x12215d(0x167)]='0.1',_0x144fb6[_0x12215d(0x18a)]=_0x25b5d9;const _0x11d2fa=document['createElement'](_0x12215d(0x190));_0x11d2fa['innerHTML']=_0x12215d(0x16a),_0x11d2fa[_0x12215d(0x17d)]=()=>{const _0x50b135=_0x12215d;_0x138692[_0x50b135(0x155)](),updatePlot();},_0x138692[_0x12215d(0x17e)](_0x144fb6),_0x138692[_0x12215d(0x17e)](_0x11d2fa),_0x27cb5d['appendChild'](_0x138692);}function getDiameters(){const _0x16baca=_0x1b2319;return Array['from'](document[_0x16baca(0x1a0)](_0x16baca(0x17c)))[_0x16baca(0x16c)](_0x1d291e=>parseFloat(_0x1d291e['value']))[_0x16baca(0x179)](_0x47be31=>!isNaN(_0x47be31)&&_0x47be31>0x0);}function getSelectedCurves(){const _0x41ca71=_0x1b2319;return Array[_0x41ca71(0x164)](document[_0x41ca71(0x1a0)](_0x41ca71(0x17a)))[_0x41ca71(0x16c)](_0x14bef8=>_0x14bef8['value']);}function updatePlot(){const _0x46e117=_0x1b2319,_0xa7f8b4=window[_0x46e117(0x186)]<0x300,_0x52a7da=logSpace(F_START_GHZ*0x3b9aca00,F_END_GHZ*0x3b9aca00,0x3e8),_0x83e12b=_0x52a7da['map'](_0xee5187=>_0xee5187/0x3b9aca00),_0x4ffb8c=_0x52a7da[_0x46e117(0x16c)](_0x39d68f=>c/_0x39d68f),_0xfa9e80=getDiameters(),_0x453748=getSelectedCurves();let _0x20f217=[];_0xfa9e80['forEach'](_0x6db853=>{_0x453748['forEach'](_0x38950f=>{const _0x10ec12=_0x14ed,_0x16392f=_0x4ffb8c['map'](_0x552fe0=>hpbw(_0x552fe0,_0x6db853,_0x38950f));_0x20f217[_0x10ec12(0x173)]({'x':_0x83e12b,'y':_0x16392f,'mode':_0x10ec12(0x16f),'name':_0x6db853+_0x10ec12(0x192)+_0x38950f+_0x10ec12(0x191),'line':{'width':2.8},'hovertemplate':'<b>'+_0x6db853+_0x10ec12(0x18c)+(_0x10ec12(0x195)+_0x38950f+_0x10ec12(0x196))+_0x10ec12(0x194)+_0x10ec12(0x161)});const _0xbde7e=emeFreqs[_0x10ec12(0x16c)](_0x455fd8=>{const _0x246b99=_0x10ec12;let _0x3c961b=0x0,_0x49261c=Infinity;for(let _0x4e0f65=0x0;_0x4e0f65<_0x83e12b[_0x246b99(0x19d)];_0x4e0f65++){const _0x461808=Math[_0x246b99(0x165)](_0x83e12b[_0x4e0f65]-_0x455fd8);_0x461808<_0x49261c&&(_0x49261c=_0x461808,_0x3c961b=_0x4e0f65);}return _0x16392f[_0x3c961b];});_0x20f217['push']({'x':emeFreqs,'y':_0xbde7e,'mode':_0x10ec12(0x183),'marker':{'size':7.5,'color':_0x10ec12(0x15c),'symbol':'circle','line':{'color':_0x10ec12(0x170),'width':1.8}},'showlegend':![],'hovertemplate':_0x10ec12(0x181)+'Beamwidth:\x20%{y:.3f}°<br>'+('('+_0x6db853+'\x20m\x20@\x20'+_0x38950f+'\x20dB)<extra></extra>')});});});let _0x286206=_0x20f217['flatMap'](_0x9f1aa0=>_0x9f1aa0['y']||[]);const _0x5c19b1=_0x286206[_0x46e117(0x19d)]?Math[_0x46e117(0x18e)](0.001,Math[_0x46e117(0x15a)](..._0x286206)):0.01,_0x2b17f8=_0x286206['length']?Math['max'](0x1,Math['max'](..._0x286206)*1.25):0x64,_0x2be254=Math[_0x46e117(0x166)](_0x5c19b1*0.8),_0x1c74b0=Math[_0x46e117(0x166)](_0x2b17f8*1.25),_0x19c57e=generateLogTicks(F_START_GHZ,F_END_GHZ),_0x1c2cf9=emeFreqs[_0x46e117(0x16c)](_0xf44b12=>({'type':_0x46e117(0x16d),'xref':_0x46e117(0x16e),'yref':'paper','x0':(Math[_0x46e117(0x166)](_0xf44b12)-logStart)/logRange,'x1':(Math[_0x46e117(0x166)](_0xf44b12)-logStart)/logRange,'y0':0x0,'y1':0x1,'line':{'color':_0x46e117(0x163),'width':1.5,'dash':_0x46e117(0x157)},'layer':_0x46e117(0x159)})),_0x2d28cd=emeFreqs[_0x46e117(0x16c)](_0x3e638f=>({'x':(Math[_0x46e117(0x166)](_0x3e638f)-logStart)/logRange+0.004,'y':0.04,'xref':_0x46e117(0x16e),'yref':_0x46e117(0x16e),'text':_0x3e638f['toFixed'](0x3),'showarrow':![],'xanchor':'left','font':{'size':0xb,'color':_0x46e117(0x15c)},'textangle':-0x5a,'opacity':0.9,'layer':_0x46e117(0x159)})),_0x1b827b=0x23,_0x5a849a=[{'type':_0x46e117(0x16d),'xref':_0x46e117(0x16e),'yref':'y','x0':0x0,'x1':0x1,'y0':_0x1b827b,'y1':_0x1b827b,'line':{'color':_0x46e117(0x184),'width':0x4,'dash':_0x46e117(0x180)},'layer':_0x46e117(0x178)}],_0xf9508f=[{'x':0.85,'y':0.79,'xref':'paper','yref':_0x46e117(0x16e),'text':'','showarrow':![],'font':{'size':0xd,'color':_0x46e117(0x184)},'bgcolor':_0x46e117(0x18f),'bordercolor':_0x46e117(0x17f),'borderwidth':0x0,'borderpad':0x6,'opacity':0x1,'layer':_0x46e117(0x178)}],_0x2d0621={'title':{'text':_0xa7f8b4?_0x46e117(0x18b):_0x46e117(0x19b),'font':{'size':_0xa7f8b4?0xf:0x12},'x':0.5,'xanchor':_0x46e117(0x198),'y':0.96,'yanchor':_0x46e117(0x15f),'automargin':!![]},'autosize':!![],'showlegend':!![],'legend':{'x':_0xa7f8b4?0.95:1.02,'y':_0xa7f8b4?0.98:0x1,'xanchor':_0xa7f8b4?_0x46e117(0x177):_0x46e117(0x169),'yanchor':_0x46e117(0x15f),'bgcolor':_0x46e117(0x1a1),'bordercolor':'#94a3b8','borderwidth':0x2,'font':{'size':_0xa7f8b4?11.5:0xd,'color':'#1e2937'}},'margin':{'l':_0xa7f8b4?0x30:0x46,'r':_0xa7f8b4?0x20:0x28,'t':_0xa7f8b4?0x5f:0x37,'b':0x41},'xaxis':{'title':_0x46e117(0x15d),'type':_0x46e117(0x158),'range':[logStart,logEnd],'fixedrange':!![],'tickmode':'array','tickvals':_0x19c57e,'ticktext':_0x19c57e[_0x46e117(0x16c)](_0xf38380=>_0xf38380>=0xa?_0xf38380[_0x46e117(0x16b)](0x0):_0xf38380[_0x46e117(0x16b)](_0xf38380<0x1?0x3:0x2)),'gridcolor':_0x46e117(0x19f),'minor':{'showgrid':!![]},'titlefont':{'size':_0xa7f8b4?0xd:0xe}},'yaxis':{'title':'Beamwidth\x20(degrees)','type':_0x46e117(0x158),'range':[_0x2be254,_0x1c74b0],'fixedrange':!![],'tickmode':_0x46e117(0x154),'tickvals':generateLogTicks(Math['pow'](0xa,_0x2be254),Math['pow'](0xa,_0x1c74b0)),'ticktext':generateLogTicks(Math[_0x46e117(0x172)](0xa,_0x2be254),Math[_0x46e117(0x172)](0xa,_0x1c74b0))[_0x46e117(0x16c)](_0x3d7f0c=>_0x3d7f0c>=0xa?_0x3d7f0c[_0x46e117(0x16b)](0x0):_0x3d7f0c['toFixed'](_0x3d7f0c<0x1?0x3:0x2)),'gridcolor':_0x46e117(0x19f),'minor':{'showgrid':!![]},'titlefont':{'size':_0xa7f8b4?0xd:0xe}},'shapes':[..._0x1c2cf9,..._0x5a849a],'annotations':[..._0x2d28cd,..._0xf9508f],'hovermode':_0x46e117(0x176),'dragmode':![],'height':_0xa7f8b4?0x230:0x2d0,'font':{'size':_0xa7f8b4?0xb:0xc}},_0x2a4ac6={'scrollZoom':![],'displayModeBar':!![],'modeBarButtonsToRemove':['zoom2d',_0x46e117(0x1a2),'select2d','lasso2d','zoomIn2d',_0x46e117(0x15b)],'displaylogo':![],'responsive':!![]};Plotly[_0x46e117(0x15e)](_0x46e117(0x182),_0x20f217,_0x2d0621,_0x2a4ac6);}function _0x14ed(_0x1ef6a7,_0x3a4b85){_0x1ef6a7=_0x1ef6a7-0x153;const _0x53b4af=_0x53b4();let _0x14ed24=_0x53b4af[_0x1ef6a7];return _0x14ed24;}addAntenna(0x3),updatePlot(),document[_0x1b2319(0x187)]('currentYear')[_0x1b2319(0x168)]=new Date()[_0x1b2319(0x162)](),window['addEventListener'](_0x1b2319(0x188),()=>{const _0x4c7d40=_0x1b2319;if(document[_0x4c7d40(0x187)]('plot')['data'])updatePlot();});
+  </script>
+  <!-- 100% privacy-first analytics -->
+  <script async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+</body>
+</html>
