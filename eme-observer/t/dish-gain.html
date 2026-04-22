@@ -27,28 +27,39 @@
       margin-bottom: 8px;
     }
 
-    .home-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 42px;
-      height: 42px;
-      background: white;
-      border: 2px solid #e2e8f0;
-      border-radius: 10px;
-      color: var(--primary);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
+      .home-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        color: var(--primary);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+      }
 
-    .home-btn:hover {
-      background: #f8fafc;
-      border-color: var(--primary);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
-    }
+      .home-btn:hover {
+        background: #f8fafc;
+        border-color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+      }
 
-    h2 { margin: 0; color: var(--text); font-size: 1.55rem; font-weight: 700; }
+      .home-btn svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      h2 {
+        margin: 0;
+        color: var(--text);
+        font-size: 1.55rem;
+        font-weight: 700;
+      }
 
     .subtitle {
       color: #64748b;
@@ -178,14 +189,15 @@
 
 <body>
 
-  <div class="header">
-    <a href="https://dxer.site" class="home-btn" title="Go to dxer.site">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.25" d="M3 9.75L12 3l9 6.75M12 21v-9.75M3 9.75v9.75a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 19.5V9.75" />
-      </svg>
-    </a>
-    <h2>Dish Antenna Gain Calculator</h2>
-  </div>
+    <div class="header">
+      <a href="https://dxer.site" class="home-btn" title="Go to dxer.site">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.25"
+                d="M3 9.75L12 3l9 6.75M12 21v-9.75M3 9.75v9.75a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 19.5V9.75" />
+        </svg>
+      </a>
+      <h2>Dish Antenna Gain Calculator</h2>
+    </div>
 
   <p class="subtitle">Calculate parabolic dish gain (dBi) vs frequency for different diameters and efficiencies</p>
 
