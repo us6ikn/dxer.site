@@ -451,32 +451,32 @@
       const layout = {
         title: {
           text: isMobile
-            ? "Parabolic Antenna Gain vs Frequency"
+            ? "Antenna Gain vs Frequency"
             : "Parabolic Antenna Gain vs Frequency (Log-Log)",
           font: {
-            size: isMobile ? 16 : 18
+            size: isMobile ? 15 : 18
           },
           x: 0.5,
           xanchor: 'center',
-          y: 0.98,
+          y: 0.97,           // moved slightly down
           yanchor: 'top'
         },
         autosize: true,
         showlegend: true,
         legend: {
-          x: isMobile ? 0.95 : 1.02,
+          x: isMobile ? 0.98 : 1.02,
           y: 1.0,
           xanchor: isMobile ? 'right' : 'left',
           yanchor: 'top',
           bgcolor: '#ffffff',
           bordercolor: '#94a3b8',
           borderwidth: 2,
-          font: { size: isMobile ? 11 : 12 }
+          font: { size: isMobile ? 10.5 : 12 }
         },
         margin: {
-          l: isMobile ? 50 : 70,
-          r: 30,
-          t: isMobile ? 70 : 80,
+          l: isMobile ? 48 : 70,
+          r: 25,
+          t: isMobile ? 82 : 85,   // increased top margin for mobile
           b: 65
         },
         xaxis: {
