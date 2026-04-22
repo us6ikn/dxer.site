@@ -246,11 +246,11 @@
                 d="M3 9.75L12 3l9 6.75M12 21v-9.75M3 9.75v9.75a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 19.5V9.75" />
         </svg>
       </a>
-      <h2>Dish Antenna Gain Calculator</h2>
+      <h2>Parabolic Antenna Gain Calculator</h2>
     </div>
 
   <p class="subtitle">
-    Calculate parabolic dish gain (dBi) vs frequency for different diameters and efficiencies
+    Calculates dish gain (dBi) vs frequency for all EME bands
   </p>
 
   <p style="margin-top: 8px; margin-bottom: 25px; font-size: 15px; color: #334155;">
@@ -276,9 +276,9 @@
   <div class="explanation">
     <h3>Explanation & Formulas</h3>
     
-    <p><strong>Parabolic Dish Gain (dBi):</strong></p>
+    <p><strong>Parabolic Antenna Gain (dBi):</strong></p>
     <div class="formula">
-      Gain (dBi) = 10 × log₁₀ [ η × (π × D / λ)² ]
+      Gain = 10 × log₁₀ [ η × (π × D / λ)² ]
     </div>
     <p>where:</p>
     <ul>
@@ -287,18 +287,18 @@
       <li><strong>λ</strong> = wavelength</li>
     </ul>
 
-    <p>This is the theoretical maximum gain for a given physical aperture and efficiency. Real-world gain can be slightly lower due to surface roughness, feed spillover, blockage, etc.</p>
+    <p>This is the theoretical maximum gain for a given physical aperture and efficiency. Real-world gain can be lower due to surface roughness, feed spillover, blockage, etc.</p>
 
     <h4 style="margin-top: 28px;">Typical Efficiencies</h4>
     <ul>
-      <li>35% – Poor feed / small dishes</li>
-      <li>50% – Average amateur setup</li>
-      <li>60% – Good illuminated dish (common reference)</li>
-      <li>70–75% – High-performance optimized systems (high-end EME, radio astronomy)</li>
+      <li>35% – Poor feed / electrically small dishes</li>
+      <li>50% – Average amateur tropo setup</li>
+      <li>60% – Reasonably well-illuminated dish (common reference)</li>
+      <li>70–75% – High-performance optimized systems (EME, radio astronomy)</li>
     </ul>
 
     <p style="font-size: 0.95rem; color: #64748b; margin-top: 20px;">
-      Note: Gain increases with frequency (smaller λ) and with larger diameter. Efficiency has a strong impact — going from 50% to 70% gives almost +1.5 dB extra gain.
+      Note: Gain increases with frequency (smaller λ) and with diameter. Efficiency has a strong impact — going from 50% to 70% gives almost +1.5 dB extra gain.
     </p>
   </div>
 
