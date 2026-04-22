@@ -92,8 +92,9 @@
 
     .antenna-item {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
-      gap: 12px;
+      gap: 8px 12px;
       background: #f8fafc;
       padding: 12px 14px;
       border-radius: 10px;
@@ -105,6 +106,7 @@
       font-weight: 500;
       color: #334155;
       min-width: 85px;
+      flex-shrink: 0;
     }
 
     .antenna-item input {
@@ -112,6 +114,7 @@
       font-size: 1.05rem;
       border: 2px solid #cbd5e1;
       border-radius: 7px;
+      box-sizing: border-box;
     }
 
     .antenna-item input:focus {
@@ -120,8 +123,24 @@
       outline: none;
     }
 
-    .diameter-input { flex: 1; max-width: 140px; }
-    .efficiency-input { max-width: 100px; }
+    .diameter-input {
+      flex: 1;
+      min-width: 120px;
+      max-width: 160px;
+    }
+    
+    .efficiency-input {
+      flex: 1;
+      min-width: 90px;
+      max-width: 110px;
+    }
+
+    .percent-span {
+      margin-left: 4px;
+      color:#64748b;
+      font-weight:500;
+      white-space: nowrap;
+    }
 
     .antenna-item button {
       background: #ef4444;
@@ -131,6 +150,7 @@
       padding: 9px 14px;
       font-size: 0.95rem;
       cursor: pointer;
+      margin-left: auto;
     }
 
     .add-btn, .update-btn {
@@ -184,6 +204,41 @@
         font-size: 0.88rem;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
       }
+
+    /* Mobile-specific improvements */
+    @media (max-width: 480px) {
+      body {
+        margin: 10px;
+        font-size: 14.5px;
+      }
+      
+      .controls, .explanation {
+        padding: 16px;
+      }
+      
+      .antenna-item {
+        padding: 14px 12px;
+        gap: 10px;
+      }
+      
+      .antenna-item label {
+        min-width: 70px;
+        font-size: 0.95rem;
+      }
+      
+      .diameter-input {
+        min-width: 110px;
+      }
+      
+      .efficiency-input {
+        min-width: 85px;
+      }
+      
+      .antenna-item button {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+      }
+    }
   </style>
 </head>
 
@@ -297,7 +352,7 @@
         
         <label>Efficiency:</label>
         <input type="number" step="1" min="1" max="99" class="efficiency-input" value="${efficiencyPercent}">
-        <span style="margin-left: 4px; color:#64748b; font-weight:500;">%</span>
+        <span class="percent-span">%</span>
         
         <button onclick="this.closest('.antenna-item').remove(); updatePlot();">Remove</button>
       `;
