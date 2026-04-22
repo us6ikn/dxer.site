@@ -458,9 +458,13 @@
           },
           x: 0.5,
           xanchor: 'center',
-          y: 0.96,
+          y: 0.98,
           yanchor: 'top',
-          automargin: true   // Let Plotly automatically adjust margin for title
+          automargin: true,
+          pad: {
+            t: 0,   // minimal padding above title
+            b: 8    // small padding below title (between title and plot area)
+          }
         },
         autosize: true,
         showlegend: true,
@@ -476,8 +480,8 @@
         },
         margin: {
           l: isMobile ? 48 : 70,
-          r: 40,               // Increased right margin to better accommodate modebar
-          t: isMobile ? 95 : 85, // Significantly increased top margin on mobile
+          r: 40,
+          t: isMobile ? 68 : 85,   // reduced top margin on mobile
           b: 65
         },
         xaxis: {
@@ -499,7 +503,7 @@
         annotations: emeAnnotations,
         hovermode: "closest",
         dragmode: false,
-        height: isMobile ? 580 : 720,   // Slightly taller on mobile for extra space
+        height: isMobile ? 570 : 720,
         font: {
           size: isMobile ? 11 : 12
         }
